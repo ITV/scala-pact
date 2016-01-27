@@ -1,0 +1,44 @@
+# Scala
+target
+project/target
+.lib
+*.log
+*.jar
+*.pid
+.sbt-local
+sbt
+
+# Misc
+.DS_Store
+/log
+*.html
+
+# IDE
+.idea
+.idea_modules
+
+# Ruby
+*.gem
+*.rbc
+.bundle
+.config
+coverage
+InstalledFiles
+lib/bundler/man
+pkg
+rdoc
+spec/reports
+test/tmp
+test/version_tmp
+tmp
+vendor
+bin
+media/ads/*.*
+results.xml
+
+# Vim
+*.swp
+tags
+
+# stub media file archive
+test-video-assets*

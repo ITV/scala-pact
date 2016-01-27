@@ -1,0 +1,6 @@
+source 'https://rubygems.org'
+gem 'rake'
+
+# pact
+gem 'pact-provider-proxy', require: false
+
