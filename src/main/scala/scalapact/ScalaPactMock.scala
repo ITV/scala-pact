@@ -52,16 +52,24 @@ object ScalaPactMock {
     val responseProvider = new SimpleHttpResponseProvider()
 
     pactDescription.interactions.foreach { i =>
-      val method = i.request.method match {
-        case ScalaPactMethods.GET => Method.GET
-        case ScalaPactMethods.POST => Method.POST
-        case ScalaPactMethods.PUT => Method.PUT
-        case ScalaPactMethods.DELETE => Method.DELETE
+
+      val findContentType: Map[String, String] => String = headers => headers.find(h => h._1.toLowerCase == "content-type").map(_._2).getOrElse("text/plain")
+      val requestContentType = findContentType(i.request.headers)
+      val responseContentType = findContentType(i.response.headers)
+
+      i.request.method match {
+        case ScalaPactMethods.GET =>
+          responseProvider.expect(Method.GET, i.request.path).respondWith(i.response.status, responseContentType, i.response.body)
+
+        case ScalaPactMethods.POST =>
+          responseProvider.expect(Method.POST, i.request.path, requestContentType, i.request.body).respondWith(i.response.status, responseContentType, i.response.body)
+
+        case ScalaPactMethods.PUT =>
+          responseProvider.expect(Method.PUT, i.request.path, requestContentType, i.request.body).respondWith(i.response.status, responseContentType, i.response.body)
+
+        case ScalaPactMethods.DELETE =>
+          responseProvider.expect(Method.DELETE, i.request.path, requestContentType, i.request.body).respondWith(i.response.status, responseContentType, i.response.body)
       }
-
-      val contentType = i.response.headers.find(h => h._1.toLowerCase == "content-type").map(_._2).getOrElse("text/plain")
-
-      responseProvider.expect(method, i.request.path).respondWith(i.response.status, contentType, i.response.body)
     }
 
     val server = new MockHttpServer(port, responseProvider)

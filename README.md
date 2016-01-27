@@ -11,3 +11,6 @@ Library for generating Consumer Driven Contract files following the PACT standar
 - publish lib
 - build test suite to run pact spec tests
 - improve error reporting
+
+## Known issues
+- Each tests runs all the accumulated tests
