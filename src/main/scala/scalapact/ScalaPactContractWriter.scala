@@ -44,11 +44,12 @@ object ScalaPactContractWriter {
         consumer = PactActor(pactDescription.consumer),
         interactions = pactDescription.interactions.map { i =>
 
-          val body =
-            if(i.response.headers.exists(p => p._1.toLowerCase == "content-type" && p._2.contains("json"))) //TODO: A more robust check?
-              jsonStringToAnyRef(i.response.body)
-            else
-              Option(i.response.body)
+          val formatBody: Map[String, String] => String => Option[AnyRef] = headers => body =>
+            if(headers.exists(p => p._1.toLowerCase == "content-type" && p._2.contains("json"))) jsonStringToAnyRef(body)
+            else body
+
+          val requestBody = formatBody(i.request.headers)(i.request.body)
+          val responseBody = formatBody(i.response.headers)(i.response.body)
 
           Interaction(
             providerState = i.given,
@@ -56,12 +57,13 @@ object ScalaPactContractWriter {
             request = InteractionRequest(
               method = i.request.method.method,
               path = i.request.path,
-              headers = i.request.headers
+              headers = i.request.headers,
+              body = requestBody
             ),
             response = InteractionResponse(
               status = i.response.status,
               headers = i.response.headers,
-              body = body
+              body = responseBody
             )
           )
         }
@@ -81,5 +83,5 @@ object ScalaPactContractWriter {
 case class Pact(provider: PactActor, consumer: PactActor, interactions: List[Interaction])
 case class PactActor(name: String)
 case class Interaction(providerState: Option[String], description: String, request: InteractionRequest, response: InteractionResponse)
-case class InteractionRequest(method: Option[String], path: Option[String], headers: Option[Map[String, String]])
+case class InteractionRequest(method: Option[String], path: Option[String], headers: Option[Map[String, String]], body: Option[AnyRef])
 case class InteractionResponse(status: Option[Int], headers: Option[Map[String, String]], body: Option[AnyRef])
