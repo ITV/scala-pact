@@ -1,10 +1,10 @@
-package scalapact.pactspec
+package com.itv.scalapact.pactspec
 
 import org.scalatest.{FunSpec, Matchers}
 
 import scalaj.http.Http
-import scalapact._
-import scalapact.pactspec.util.PactSpecLoader
+import com.itv.scalapact._
+import com.itv.scalapact.pactspec.util.PactSpecLoader
 
 class ResponseStatusSpec extends FunSpec with Matchers {
 

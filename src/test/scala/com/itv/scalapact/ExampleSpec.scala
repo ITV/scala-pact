@@ -1,4 +1,4 @@
-package scalapact
+package com.itv.scalapact
 
 import org.json4s.DefaultFormats
 import org.json4s.native.JsonParser._

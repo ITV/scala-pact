@@ -1,4 +1,4 @@
-package scalapact
+package com.itv.scalapact
 
 import java.io.{PrintWriter, File}
 

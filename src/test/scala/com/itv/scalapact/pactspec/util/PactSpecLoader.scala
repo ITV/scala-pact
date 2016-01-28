@@ -1,4 +1,4 @@
-package scalapact.pactspec.util
+package com.itv.scalapact.pactspec.util
 
 import org.json4s.DefaultFormats
 import org.json4s.native.JsonParser._

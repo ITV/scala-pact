@@ -1,6 +1,6 @@
-package scalapact
+package com.itv.scalapact
 
-import scalapact.ScalaPactMethods.ScalaPactMethod
+import com.itv.scalapact.ScalaPactMethods.ScalaPactMethod
 
 object PactBuilder {
   def consumer(name: String): DescribesParticalPact = DescribesParticalPact(name)
