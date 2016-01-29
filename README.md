@@ -66,7 +66,6 @@ The pact integration test library itself depends on two Scala/Java libraries.
 - Publish lib to repo
 - Improve error reporting
 - Go back to immutability and add a key to pacts to generate multiple files, also then need to improve test script
-- Normalise consumer & provider names before using them as the file name
 - Improve builder so that case class public vars are not visible during build
 
 ## Known issues
