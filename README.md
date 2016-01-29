@@ -17,7 +17,7 @@ There is an implementation of the pact integration test suite that is theoretica
 
 In practice we had found there were issues with Pact-JVM integration test solution for Scala (via Specs2). There was a choice between investing time to help fix Pact-JVM or writing a replacement library. As Pact-JVM is a general purpose library across the JVM, working on it was an unknown quantity and it was deemed worth prototyping a replacement. ScalaPact is the result.
 
-## Setup
+## ScalaPact setup
 ScalaPact is not a published library yet. For the time being, we recommend that you checkout the project and do a local SBT publish in order to use it as a dependency. Alternatively you can compile the JAR and place it manually in the unmanaged lib folder of your project.
 
 If you decide to do a local publish, you will then need to add the dependency to your build.sbt file like this:
@@ -28,8 +28,32 @@ libraryDependencies ++= Seq(
 )
 ```
 
+## Other tools you will need to install
+
+### Ruby
+You will need ruby. I can only apologise.
+
+### Pack Mock Service
+ScalaPact allows you to generate JSON Pact contract files.
+
+Once you have a contract file you will probably want to be able to run a stub version of your provider to test against. [Pact Mock Service](https://github.com/bethesque/pact-mock_service/) is a Ruby tool that allows you to run an http service that provides a mock based on your pact file, and is administered via HTTP requests. Installation instructions can be found on the projects [github page](https://github.com/bethesque/pact-mock_service/).
+
+### Pact Provider Proxy
+If you're a provider and you need to verify a Pact contract against your service you'll need a verifier. There is a Ruby Pact verifier but it is bound to Ruby projects and expects to be run from within a Ruby test suite. Fortunately there is a gem call Pact Provider Proxy that... proxies provider pact requests to the verifier.
+
+There is an instance of Pact Provider Proxy in this project in the pact verifier subfolder that you can install using Ruby's `bundle install`.
+
 ## Basic usage examples
-Coming soon. The API is still being worked on!
+There is an example test spec that can be found [here](https://github.com/ITV/ScalaPact/blob/master/src/test/scala/com/itv/scalapact/ExampleSpec.scala). The hope is that this will be a living example spec.
+
+## Scala project library dependencies
+The pact integration test library itself depends on two Scala/Java libraries.
+
+### Json4s
+[Json4s](https://github.com/json4s/json4s) is used to create the JSON that is written to the Pact contract files.
+
+### Mock Http Server
+[Mock Http Server](https://github.com/kristofa/mock-http-server) is used to supply the mocks that ScalaPact run the integration tests against.
 
 ## Documentation TODO's
 - How to use
@@ -46,5 +70,5 @@ Coming soon. The API is still being worked on!
 - Improve builder so that case class public vars are not visible during build
 
 ## Known issues
-- Each tests runs all the accumulated tests
-- Only supported header is content-type
+- Each tests runs all the accumulated tests, will go with the return of immutable structures
+- Only supported header is content-type, this is down to the simple usage of the mock.
