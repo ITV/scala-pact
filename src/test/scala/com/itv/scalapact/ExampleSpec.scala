@@ -12,7 +12,7 @@ class ExampleSpec extends FunSpec with Matchers with BeforeAndAfterAll {
 
   private implicit val formats = DefaultFormats
 
-  private val pact = PactBuilder.consumer("consumer").hasPactWith("provider")
+  private val pact = PactBuilder.consumer("My Consumer").hasPactWith("Their Provider Service")
 
   override def afterAll() = {
     pact.writePactContracts()
