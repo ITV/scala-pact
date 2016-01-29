@@ -27,7 +27,7 @@ class ResponseStatusSpec extends FunSpec with Matchers {
 
         val endPoint = "/test-" + index
 
-        PactBuilder
+        PactBuilder("run status spec tests", Option(ScalaPactOptions(writePactFiles = false)))
           .consumer("consumer-response-status")
           .hasPactWith("provider-response-status")
           .withInteraction(

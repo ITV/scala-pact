@@ -65,9 +65,9 @@ The pact integration test library itself depends on two Scala/Java libraries.
 ## Development TODO's
 - Publish lib to repo
 - Improve error reporting
-- Go back to immutability and add a key to pacts to generate multiple files, also then need to improve test script
+- Improve test script to discover and use multiple pact files
 - Improve builder so that case class public vars are not visible during build
+- Work on the builders api experience
 
 ## Known issues
-- Each tests runs all the accumulated tests, will go with the return of immutable structures
 - Only supported header is content-type, this is down to the simple usage of the mock.

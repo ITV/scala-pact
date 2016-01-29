@@ -3,20 +3,14 @@ package com.itv.scalapact
 import org.json4s.DefaultFormats
 import org.json4s.native.JsonParser._
 import org.json4s.native.Serialization._
-import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
+import org.scalatest.{FunSpec, Matchers}
 
 import scala.xml.XML
 import scalaj.http.{Http, HttpRequest}
 
-class ExampleSpec extends FunSpec with Matchers with BeforeAndAfterAll {
+class ExampleSpec extends FunSpec with Matchers {
 
   private implicit val formats = DefaultFormats
-
-  private val pact = PactBuilder.consumer("My Consumer").hasPactWith("Their Provider Service")
-
-  override def afterAll() = {
-    pact.writePactContracts()
-  }
 
   describe("Example CDC Integration tests") {
 
@@ -24,7 +18,9 @@ class ExampleSpec extends FunSpec with Matchers with BeforeAndAfterAll {
 
       val endPoint = "/hello"
 
-      pact
+      PactBuilder(pactContext = "Simple get example")
+        .consumer("My Consumer")
+        .hasPactWith("Their Provider Service")
         .withInteraction(
           PactInteraction(
             description = "Fetch a greeting",
@@ -52,7 +48,9 @@ class ExampleSpec extends FunSpec with Matchers with BeforeAndAfterAll {
 
       val endPoint = "/json"
 
-      pact
+      PactBuilder(pactContext = "Get json example")
+        .consumer("My Consumer")
+        .hasPactWith("Their Provider Service")
         .withInteraction(
           PactInteraction(
             description = "Request for some json",
@@ -95,7 +93,9 @@ class ExampleSpec extends FunSpec with Matchers with BeforeAndAfterAll {
 
       val headers = Map("Content-Type" -> "application/json")
 
-      pact
+      PactBuilder(pactContext = "POST JSON receive XML example")
+        .consumer("My Consumer")
+        .hasPactWith("Their Provider Service")
         .withInteraction(
           PactInteraction(
             description = "Request for some json",

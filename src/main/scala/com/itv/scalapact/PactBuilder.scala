@@ -2,34 +2,23 @@ package com.itv.scalapact
 
 import com.itv.scalapact.ScalaPactMethods.ScalaPactMethod
 
-object PactBuilder {
-  def consumer(name: String): DescribesParticalPact = DescribesParticalPact(name)
+case class PactBuilder(pactContext: String, options: Option[ScalaPactOptions] = Option(ScalaPactOptions(writePactFiles = true))) {
+  def consumer(name: String): DescribesParticalPact = DescribesParticalPact(pactContext, name, options)
 }
 
-case class DescribesParticalPact(consumer: String) {
-  def hasPactWith(provider: String): DescribesPactBetween = DescribesPactBetween(consumer, provider)
+case class ScalaPactOptions(writePactFiles: Boolean = true)
+
+case class DescribesParticalPact(pactContext: String, consumer: String, options: Option[ScalaPactOptions]) {
+  def hasPactWith(provider: String): DescribesPactBetween = DescribesPactBetween(pactContext, consumer, provider, Nil, options)
 }
 
-case class DescribesPactBetween(consumer: String, provider: String) {
+case class DescribesPactBetween(pactContext: String, consumer: String, provider: String, interactions: List[PactInteraction], options: Option[ScalaPactOptions]) {
 
-  private var _interactions: List[PactInteraction] = Nil
+  def withInteraction(interaction: PactInteraction): DescribesPactBetween =
+    this.copy(interactions = interactions ++ List(interaction))
 
-  def interactions = _interactions
-
-  def withInteraction(interaction: PactInteraction): DescribesPactBetween = {
-    _interactions = _interactions ++ List(interaction)
-    this
-  }
-
-  def withConsumerTest(test: ScalaPactMockConfig => Unit): DescribesPactBetween = {
+  def withConsumerTest(test: ScalaPactMockConfig => Unit): Unit =
     ScalaPactMock.runConsumerIntegrationTest(this)(test)
-    this
-  }
-
-  def writePactContracts(): DescribesPactBetween = {
-    ScalaPactContractWriter.writePactContracts(this)
-    this
-  }
 }
 
 case class PactInteraction(description: String, given: Option[String], request: PactRequest, response: PactResponse)

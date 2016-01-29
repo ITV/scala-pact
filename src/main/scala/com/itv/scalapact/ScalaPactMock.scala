@@ -8,6 +8,11 @@ import com.github.kristofa.test.http.{Method, MockHttpServer, SimpleHttpResponse
 object ScalaPactMock {
 
   private def configuredTestRunner(pactDescription: DescribesPactBetween)(config: ScalaPactMockConfig)(test: => ScalaPactMockConfig => Unit) = {
+
+    if(pactDescription.options.isDefined && pactDescription.options.get.writePactFiles) {
+      ScalaPactContractWriter.writePactContracts(pactDescription)
+    }
+
     test(config)
 
     ()
