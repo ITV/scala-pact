@@ -65,7 +65,6 @@ The pact integration test library itself depends on two Scala/Java libraries.
 ## Development TODO's
 - Publish lib to repo
 - Improve error reporting
-- Improve test script to discover and use multiple pact files
 - Improve builder so that case class public vars are not visible during build
 - Work on the builders api experience
 
