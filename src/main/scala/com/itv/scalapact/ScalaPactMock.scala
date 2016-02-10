@@ -5,12 +5,13 @@ import java.net.ServerSocket
 
 import com.github.kristofa.test.http.{Method, MockHttpServer, SimpleHttpResponseProvider}
 import com.typesafe.scalalogging.LazyLogging
+import com.itv.scalapact.ScalaPactForger._
 
 object ScalaPactMock extends LazyLogging {
 
-  private def configuredTestRunner(pactDescription: DescribesPactBetween)(config: ScalaPactMockConfig)(test: => ScalaPactMockConfig => Unit) = {
+  private def configuredTestRunner(pactDescription: ScalaPactDescriptionFinal)(config: ScalaPactMockConfig)(test: => ScalaPactMockConfig => Unit) = {
 
-    if(pactDescription.options.isDefined && pactDescription.options.get.writePactFiles) {
+    if(pactDescription.options.writePactFiles) {
       ScalaPactContractWriter.writePactContracts(pactDescription)
     }
 
@@ -50,7 +51,7 @@ object ScalaPactMock extends LazyLogging {
     else port
   }
 
-  def runConsumerIntegrationTest(pactDescription: DescribesPactBetween)(test: ScalaPactMockConfig => Unit): Unit = {
+  def runConsumerIntegrationTest(pactDescription: ScalaPactDescriptionFinal)(test: ScalaPactMockConfig => Unit): Unit = {
     val protocol = "http"
     val host = "localhost"
     val port = findFreePort()
@@ -59,9 +60,12 @@ object ScalaPactMock extends LazyLogging {
 
     pactDescription.interactions.foreach { i =>
 
-      val findContentType: Map[String, String] => String = headers => headers.find(h => h._1.toLowerCase == "content-type").map(_._2).getOrElse("text/plain")
-      val requestContentType = findContentType(i.request.headers)
-      val responseContentType = findContentType(i.response.headers)
+      //TODO: just tons of nasty gets in here...
+      if(i.request.isEmpty || i.response.isEmpty) throw new ScalaPactIncomplete("All pacts must include an expected request and a promised response")
+      else {
+        val findContentType: Map[String, String] => String = headers => headers.find(h => h._1.toLowerCase == "content-type").map(_._2).getOrElse("text/plain")
+        val requestContentType = findContentType(i.request.get.headers)
+        val responseContentType = findContentType(i.response.get.headers)
 
       logger.info(">------------------------------------")
       logger.info("> Adding ScalaPact mock expectation:")
@@ -70,18 +74,19 @@ object ScalaPactMock extends LazyLogging {
       logger.info("> > ScalaPact mock will respond with:\n" + i.response)
       logger.info("> > Found Content-Type to use in response: " + responseContentType)
 
-      i.request.method match {
-        case ScalaPactMethods.GET =>
-          responseProvider.expect(Method.GET, i.request.path).respondWith(i.response.status, responseContentType, i.response.body)
+        i.request.get.method match {
+          case GET =>
+            responseProvider.expect(Method.GET, i.request.get.path).respondWith(i.response.get.status, responseContentType, i.response.get.body.get)
 
-        case ScalaPactMethods.POST =>
-          responseProvider.expect(Method.POST, i.request.path, requestContentType, i.request.body).respondWith(i.response.status, responseContentType, i.response.body)
+          case POST =>
+            responseProvider.expect(Method.POST, i.request.get.path, requestContentType, i.request.get.body.get).respondWith(i.response.get.status, responseContentType, i.response.get.body.get)
 
-        case ScalaPactMethods.PUT =>
-          responseProvider.expect(Method.PUT, i.request.path, requestContentType, i.request.body).respondWith(i.response.status, responseContentType, i.response.body)
+          case PUT =>
+            responseProvider.expect(Method.PUT, i.request.get.path, requestContentType, i.request.get.body.get).respondWith(i.response.get.status, responseContentType, i.response.get.body.get)
 
-        case ScalaPactMethods.DELETE =>
-          responseProvider.expect(Method.DELETE, i.request.path, requestContentType, i.request.body).respondWith(i.response.status, responseContentType, i.response.body)
+          case DELETE =>
+            responseProvider.expect(Method.DELETE, i.request.get.path, requestContentType, i.request.get.body.get).respondWith(i.response.get.status, responseContentType, i.response.get.body.get)
+        }
       }
     }
 
@@ -101,3 +106,4 @@ object ScalaPactMock extends LazyLogging {
 }
 
 case class ScalaPactMockConfig(baseUrl: String)
+class ScalaPactIncomplete(message: String) extends Exception(message)

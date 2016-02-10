@@ -1,12 +1,16 @@
 package com.itv.scalapact
 
-import com.itv.scalapact.ScalaPactMethods.ScalaPactMethod
+//import com.itv.scalapact.ScalaPactMethods.ScalaPactMethod
 
+/*
 case class PactBuilder(pactContext: String, options: Option[ScalaPactOptions] = Option(ScalaPactOptions(writePactFiles = true))) {
   def consumer(name: String): DescribesParticalPact = DescribesParticalPact(pactContext, name, options)
 }
 
-case class ScalaPactOptions(writePactFiles: Boolean = true)
+object ScalaPactOptions {
+  val DefaultOptions = ScalaPactOptions(writePactFiles = true)
+}
+case class ScalaPactOptions(writePactFiles: Boolean)
 
 case class DescribesParticalPact(pactContext: String, consumer: String, options: Option[ScalaPactOptions]) {
   def hasPactWith(provider: String): DescribesPactBetween = DescribesPactBetween(pactContext, consumer, provider, Nil, options)
@@ -55,4 +59,4 @@ object ScalaPactMethods {
   case object DELETE extends ScalaPactMethod { val method = "DELETE" }
 }
 
-
+*/

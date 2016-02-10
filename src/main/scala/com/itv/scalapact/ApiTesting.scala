@@ -10,12 +10,20 @@ object ApiTesting {
       .between("me")
       .and("him")
       .describing("an api call")
-      .runConsumerTest()
+        .addInteraction(
+          interaction
+            .description("")
+            .uponReceiving("/")
+            .willRespondWith(200)
+        )
+        .addInteraction(
+          interaction
+            .description("")
+            .uponReceiving(GET, "/fish")
+            .willRespondWith(404, "dumbass")
+        )
+      .runConsumerTest(config => 1 == 1)
 
   }
-
-
-
-
 
 }
