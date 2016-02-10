@@ -1,5 +1,51 @@
 package com.itv.scalapact
 
+object ScalaPactForger {
+
+  object forgePact {
+    def between(consumer: String): ScalaPartialPact = new ScalaPartialPact(consumer)
+
+    private class ScalaPartialPact(consumer: String) {
+      def and(provider: String): ScalaPartialPactWith = new ScalaPartialPactWith(consumer, provider)
+    }
+
+    private class ScalaPartialPactWith(consumer: String, provider: String) {
+      def describing(scenario: String): ScalaPactDescription = new ScalaPactDescription(scenario, consumer, provider, Nil)
+    }
+
+    private class ScalaPactDescription(context: String, consumer: String, provider: String, interactions: List[ScalaPactInteraction]) {
+      def addInteraction(interaction: ScalaPactInteraction): ScalaPactDescription = new ScalaPactDescription(context, consumer, provider, interactions ++ List(interaction))
+
+      //TODO: Pass in all of the above to the runConsumerTest method
+      def runConsumerTest(): Unit = ()
+    }
+  }
+
+  object interaction {
+    def description(message: String): ScalaPactInteraction = new ScalaPactInteraction(message, None, None, None)
+  }
+
+  private class ScalaPactInteraction(description: String, providerState: Option[String], request: Option[ScalaPactRequest], response: Option[ScalaPactResponse]) {
+    def given(state: String): ScalaPactInteraction = new ScalaPactInteraction(description, Option(state), None, None)
+    def uponReceiving(method: String, path: String, headers: Map[String, String], body: Option[String]): ScalaPactInteraction = new ScalaPactInteraction(
+      description,
+      providerState,
+      Option(ScalaPactRequest(method, path, headers, body)),
+      response
+    )
+    def willRespondWith(status: Int, headers: Map[String, String], body: Option[String]): ScalaPactInteraction = new ScalaPactInteraction(
+      description,
+      providerState,
+      request,
+      Option(ScalaPactResponse(status, headers, body))
+    )
+  }
+
+  private case class ScalaPactRequest(method: String, path: String, headers: Map[String, String], body: Option[String])
+  private case class ScalaPactResponse(status: Int, headers: Map[String, String], body: Option[String])
+
+}
+
 
 
 object ScalaPactBuilder {
