@@ -4,8 +4,9 @@ import java.io.IOException
 import java.net.ServerSocket
 
 import com.github.kristofa.test.http.{Method, MockHttpServer, SimpleHttpResponseProvider}
+import com.typesafe.scalalogging.LazyLogging
 
-object ScalaPactMock {
+object ScalaPactMock extends LazyLogging {
 
   private def configuredTestRunner(pactDescription: DescribesPactBetween)(config: ScalaPactMockConfig)(test: => ScalaPactMockConfig => Unit) = {
 
@@ -62,6 +63,13 @@ object ScalaPactMock {
       val requestContentType = findContentType(i.request.headers)
       val responseContentType = findContentType(i.response.headers)
 
+      logger.info(">------------------------------------")
+      logger.info("> Adding ScalaPact mock expectation:")
+      logger.info("> > ScalaPact mock expecting:\n" + i.request)
+      logger.info("> > Derived Content-Type for expected request: " + requestContentType)
+      logger.info("> > ScalaPact mock will respond with:\n" + i.response)
+      logger.info("> > Found Content-Type to use in response: " + responseContentType)
+
       i.request.method match {
         case ScalaPactMethods.GET =>
           responseProvider.expect(Method.GET, i.request.path).respondWith(i.response.status, responseContentType, i.response.body)
@@ -80,6 +88,10 @@ object ScalaPactMock {
     val server = new MockHttpServer(port, responseProvider)
 
     server.start()
+
+    val baseUrl = protocol + "://" + host + ":" + port
+
+    logger.info("> ScalaPact mock running at: " + baseUrl)
 
     configuredTestRunner(pactDescription)(ScalaPactMockConfig(protocol + "://" + host + ":" + port))(test)
 
