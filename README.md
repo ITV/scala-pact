@@ -66,8 +66,6 @@ The Pact integration test library itself depends on two Scala/Java libraries.
 ## Development TODO's
 - Publish lib to repo
 - Improve error reporting
-- Improve builder so that case class public vars are not visible during build
-- Work on the builders api experience
 
 ## Known issues
 - Only supported header is content-type, this is down to the simple usage of the mock.

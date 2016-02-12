@@ -60,12 +60,9 @@ object ScalaPactMock extends LazyLogging {
 
     pactDescription.interactions.foreach { i =>
 
-      //TODO: just tons of nasty gets in here...
-      if(i.request.isEmpty || i.response.isEmpty) throw new ScalaPactIncomplete("All pacts must include an expected request and a promised response")
-      else {
-        val findContentType: Map[String, String] => String = headers => headers.find(h => h._1.toLowerCase == "content-type").map(_._2).getOrElse("text/plain")
-        val requestContentType = findContentType(i.request.get.headers)
-        val responseContentType = findContentType(i.response.get.headers)
+      val findContentType: Map[String, String] => String = headers => headers.find(h => h._1.toLowerCase == "content-type").map(_._2).getOrElse("text/plain")
+      val requestContentType = findContentType(i.request.headers)
+      val responseContentType = findContentType(i.response.headers)
 
       logger.info(">------------------------------------")
       logger.info("> Adding ScalaPact mock expectation:")
@@ -74,19 +71,18 @@ object ScalaPactMock extends LazyLogging {
       logger.info("> > ScalaPact mock will respond with:\n" + i.response)
       logger.info("> > Found Content-Type to use in response: " + responseContentType)
 
-        i.request.get.method match {
-          case GET =>
-            responseProvider.expect(Method.GET, i.request.get.path).respondWith(i.response.get.status, responseContentType, i.response.get.body.get)
+      i.request.method match {
+        case GET =>
+          responseProvider.expect(Method.GET, i.request.path).respondWith(i.response.status, responseContentType, i.response.body.getOrElse(""))
 
-          case POST =>
-            responseProvider.expect(Method.POST, i.request.get.path, requestContentType, i.request.get.body.get).respondWith(i.response.get.status, responseContentType, i.response.get.body.get)
+        case POST =>
+          responseProvider.expect(Method.POST, i.request.path, requestContentType, i.request.body.get).respondWith(i.response.status, responseContentType, i.response.body.getOrElse(""))
 
-          case PUT =>
-            responseProvider.expect(Method.PUT, i.request.get.path, requestContentType, i.request.get.body.get).respondWith(i.response.get.status, responseContentType, i.response.get.body.get)
+        case PUT =>
+          responseProvider.expect(Method.PUT, i.request.path, requestContentType, i.request.body.get).respondWith(i.response.status, responseContentType, i.response.body.getOrElse(""))
 
-          case DELETE =>
-            responseProvider.expect(Method.DELETE, i.request.get.path, requestContentType, i.request.get.body.get).respondWith(i.response.get.status, responseContentType, i.response.get.body.get)
-        }
+        case DELETE =>
+          responseProvider.expect(Method.DELETE, i.request.path, requestContentType, i.request.body.get).respondWith(i.response.status, responseContentType, i.response.body.getOrElse(""))
       }
     }
 
@@ -106,4 +102,3 @@ object ScalaPactMock extends LazyLogging {
 }
 
 case class ScalaPactMockConfig(baseUrl: String)
-class ScalaPactIncomplete(message: String) extends Exception(message)

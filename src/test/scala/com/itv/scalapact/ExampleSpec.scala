@@ -8,6 +8,8 @@ import org.scalatest.{FunSpec, Matchers}
 import scala.xml.XML
 import scalaj.http.{Http, HttpRequest}
 
+import ScalaPactForger._
+
 class ExampleSpec extends FunSpec with Matchers {
 
   private implicit val formats = DefaultFormats
@@ -18,26 +20,23 @@ class ExampleSpec extends FunSpec with Matchers {
 
       val endPoint = "/hello"
 
-      PactBuilder(pactContext = "Simple get example")
-        .consumer("My Consumer")
-        .hasPactWith("Their Provider Service")
-        .withInteraction(
-          PactInteraction(
-            description = "Fetch a greeting",
-            given = None,
-            uponReceivingRequest
-              .path(endPoint),
-            willRespondWith
-              .status(200)
-              .body("Hello there!")
-          )
+      forgePact
+        .between("My Consumer")
+        .and("Their Provider Service")
+        .describing("a simple get example")
+        .addInteraction(
+          interaction
+            .description("Fetch a greeting")
+            .uponReceiving(endPoint)
+            .willRespondWith(200, "Hello there!")
         )
-        .withConsumerTest { scalaPactMockConfig =>
+        .runConsumerTest { mockConfig =>
 
-          val result = SimpleClient.doGetRequest(scalaPactMockConfig.baseUrl, endPoint, Map())
+          val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint, Map())
 
           result.status should equal(200)
           result.body should equal("Hello there!")
+
         }
 
     }
@@ -48,24 +47,19 @@ class ExampleSpec extends FunSpec with Matchers {
 
       val endPoint = "/json"
 
-      PactBuilder(pactContext = "Get json example")
-        .consumer("My Consumer")
-        .hasPactWith("Their Provider Service")
-        .withInteraction(
-          PactInteraction(
-            description = "Request for some json",
-            given = None,
-            uponReceivingRequest
-              .path(endPoint),
-            willRespondWith
-              .status(200)
-              .headers(Map("Content-Type" -> "application/json"))
-              .body(write(data))
-          )
+      forgePact
+        .between("My Consumer")
+        .and("Their Provider Service")
+        .describing("Get json example")
+        .addInteraction(
+          interaction
+            .description("Request for some json")
+            .uponReceiving(endPoint)
+            .willRespondWith(200, Map("Content-Type" -> "application/json"), Option(write(data)))
         )
-        .withConsumerTest { scalaPactMockConfig =>
+        .runConsumerTest { mockConfig =>
 
-          val result = SimpleClient.doGetRequest(scalaPactMockConfig.baseUrl, endPoint, Map())
+          val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint, Map())
 
           withClue("Status mismatch") {
             result.status should equal(200)
@@ -93,27 +87,19 @@ class ExampleSpec extends FunSpec with Matchers {
 
       val headers = Map("Content-Type" -> "application/json")
 
-      PactBuilder(pactContext = "POST JSON receive XML example")
-        .consumer("My Consumer")
-        .hasPactWith("Their Provider Service")
-        .withInteraction(
-          PactInteraction(
-            description = "Request for some json",
-            given = None,
-            uponReceivingRequest
-              .path(endPoint)
-              .method(ScalaPactMethods.POST)
-              .headers(headers)
-              .body(write(requestData)),
-            willRespondWith
-              .status(400)
-              .headers(Map("Content-Type" -> "text/xml"))
-              .body(responseXml.toString())
-          )
+      forgePact
+        .between("My Consumer")
+        .and("Their Provider Service")
+        .describing("POST JSON receive XML example")
+        .addInteraction(
+          interaction
+            .description("JSON Request for XML")
+            .uponReceiving(POST, endPoint, headers, Option(write(requestData)))
+            .willRespondWith(400, Map("Content-Type" -> "text/xml"), Option(responseXml.toString()))
         )
-        .withConsumerTest { scalaPactMockConfig =>
+        .runConsumerTest { mockConfig =>
 
-          val result = SimpleClient.doPostRequest(scalaPactMockConfig.baseUrl, endPoint, headers, write(requestData))
+          val result = SimpleClient.doPostRequest(mockConfig.baseUrl, endPoint, headers, write(requestData))
 
           withClue("Status mismatch") {
             result.status should equal(400)
@@ -130,6 +116,7 @@ class ExampleSpec extends FunSpec with Matchers {
         }
 
     }
+
 
   }
 

@@ -2,6 +2,7 @@ package com.itv.scalapact
 
 import java.io.{PrintWriter, File}
 
+import com.itv.scalapact.ScalaPactForger.ScalaPactDescriptionFinal
 import org.json4s.DefaultFormats
 import org.json4s.native.Serialization._
 import org.json4s.native.JsonParser._
@@ -15,7 +16,7 @@ object ScalaPactContractWriter {
   private val simplifyName: String => String = name =>
     "[^a-zA-Z0-9-]".r.replaceAllIn(name.replace(" ", "-"), "")
 
-  val writePactContracts: DescribesPactBetween => Unit = pactDescription => {
+  val writePactContracts: ScalaPactDescriptionFinal => Unit = pactDescription => {
     val dirPath = "target/pacts"
     val dirFile = new File(dirPath)
 
@@ -23,7 +24,7 @@ object ScalaPactContractWriter {
       dirFile.mkdir()
     }
 
-    val relativePath = dirPath + "/" + simplifyName(pactDescription.consumer) + "-" + simplifyName(pactDescription.provider) + "-" + simplifyName(pactDescription.pactContext) + ".json"
+    val relativePath = dirPath + "/" + simplifyName(pactDescription.consumer) + "-" + simplifyName(pactDescription.provider) + "-" + simplifyName(pactDescription.context) + ".json"
     val file = new File(relativePath)
 
     if (file.exists()) {
@@ -40,22 +41,24 @@ object ScalaPactContractWriter {
     ()
   }
 
-  private def producePactJson(pactDescription: DescribesPactBetween): String =
+  private def producePactJson(pactDescription: ScalaPactDescriptionFinal): String =
     writePretty(
       Pact(
         provider = PactActor(pactDescription.provider),
         consumer = PactActor(pactDescription.consumer),
         interactions = pactDescription.interactions.map { i =>
 
-          val formatBody: Map[String, String] => String => Option[AnyRef] = headers => body =>
-            if(headers.exists(p => p._1.toLowerCase == "content-type" && p._2.contains("json"))) jsonStringToAnyRef(body)
-            else body
+          val formatBody: Map[String, String] => Option[String] => Option[AnyRef] = headers => maybeBody =>
+            maybeBody.map { body =>
+              if (headers.exists(p => p._1.toLowerCase == "content-type" && p._2.contains("json"))) jsonStringToAnyRef(body)
+              else body
+            }
 
           val requestBody = formatBody(i.request.headers)(i.request.body)
           val responseBody = formatBody(i.response.headers)(i.response.body)
 
           Interaction(
-            providerState = i.given,
+            providerState = i.providerState,
             description = i.description,
             request = InteractionRequest(
               method = i.request.method.method,

@@ -7,18 +7,23 @@ object ScalaPactForger {
   object forgePact {
     def between(consumer: String): ScalaPartialPact = new ScalaPartialPact(consumer)
 
-    private class ScalaPartialPact(consumer: String) {
+    class ScalaPartialPact(consumer: String) {
       def and(provider: String): ScalaPartialPactWith = new ScalaPartialPactWith(consumer, provider)
     }
 
-    private class ScalaPartialPactWith(consumer: String, provider: String) {
+    class ScalaPartialPactWith(consumer: String, provider: String) {
       def describing(scenario: String): ScalaPactDescription = new ScalaPactDescription(scenario, consumer, provider, Nil)
     }
 
-    private class ScalaPactDescription(context: String, consumer: String, provider: String, interactions: List[ScalaPactInteraction]) {
+    class ScalaPactDescription(context: String, consumer: String, provider: String, interactions: List[ScalaPactInteraction]) {
+
+      /**
+        * Adds interactions to the Pact. Interactions should be created using the helper object 'interaction'
+        * @param interaction [ScalaPactInteraction] definition
+        * @return [ScalaPactDescription] to allow the builder to continue
+        */
       def addInteraction(interaction: ScalaPactInteraction): ScalaPactDescription = new ScalaPactDescription(context, consumer, provider, interactions ++ List(interaction))
 
-      //TODO: Pass in all of the above to the runConsumerTest method
       def runConsumerTest(test: ScalaPactMockConfig => Unit)(implicit options: ScalaPactOptions): Unit = {
         ScalaPactMock.runConsumerIntegrationTest(
           ScalaPactDescriptionFinal(
@@ -30,15 +35,16 @@ object ScalaPactForger {
           )
         )(test)
       }
+
     }
   }
 
   object interaction {
-    def description(message: String): ScalaPactInteraction = new ScalaPactInteraction(message, None, None, None)
+    def description(message: String): ScalaPactInteraction = new ScalaPactInteraction(message, None, ScalaPactRequest.default, ScalaPactResponse.default)
   }
 
-  private class ScalaPactInteraction(description: String, providerState: Option[String], request: Option[ScalaPactRequest], response: Option[ScalaPactResponse]) {
-    def given(state: String): ScalaPactInteraction = new ScalaPactInteraction(description, Option(state), None, None)
+  class ScalaPactInteraction(description: String, providerState: Option[String], request: ScalaPactRequest, response: ScalaPactResponse) {
+    def given(state: String): ScalaPactInteraction = new ScalaPactInteraction(description, Option(state), request, response)
 
 
     def uponReceiving(path: String): ScalaPactInteraction = uponReceiving(GET, path, Map.empty, None)
@@ -46,7 +52,7 @@ object ScalaPactForger {
     def uponReceiving(method: ScalaPactMethod, path: String, headers: Map[String, String], body: Option[String]): ScalaPactInteraction = new ScalaPactInteraction(
       description,
       providerState,
-      Option(ScalaPactRequest(method, path, headers, body)),
+      ScalaPactRequest(method, path, headers, body),
       response
     )
 
@@ -56,16 +62,23 @@ object ScalaPactForger {
       description,
       providerState,
       request,
-      Option(ScalaPactResponse(status, headers, body))
+      ScalaPactResponse(status, headers, body)
     )
 
     def finalise: ScalaPactInteractionFinal = ScalaPactInteractionFinal(description, providerState, request, response)
   }
 
   case class ScalaPactDescriptionFinal(context: String, consumer: String, provider: String, interactions: List[ScalaPactInteractionFinal], options: ScalaPactOptions)
-  case class ScalaPactInteractionFinal(description: String, providerState: Option[String], request: Option[ScalaPactRequest], response: Option[ScalaPactResponse])
+  case class ScalaPactInteractionFinal(description: String, providerState: Option[String], request: ScalaPactRequest, response: ScalaPactResponse)
 
+  object ScalaPactRequest {
+    val default = ScalaPactRequest(GET, "/", Map.empty, None)
+  }
   case class ScalaPactRequest(method: ScalaPactMethod, path: String, headers: Map[String, String], body: Option[String])
+
+  object ScalaPactResponse {
+    val default = ScalaPactResponse(200, Map.empty, None)
+  }
   case class ScalaPactResponse(status: Int, headers: Map[String, String], body: Option[String])
 
   object ScalaPactOptions {

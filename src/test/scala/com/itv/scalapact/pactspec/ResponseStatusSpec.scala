@@ -6,6 +6,8 @@ import scalaj.http.Http
 import com.itv.scalapact._
 import com.itv.scalapact.pactspec.util.PactSpecLoader
 
+import ScalaPactForger._
+
 class ResponseStatusSpec extends FunSpec with Matchers {
 
   private val fetchSpec: String => StatusSpec = path =>
@@ -27,28 +29,26 @@ class ResponseStatusSpec extends FunSpec with Matchers {
 
         val endPoint = "/test-" + index
 
-        PactBuilder("run status spec tests", Option(ScalaPactOptions(writePactFiles = false)))
-          .consumer("consumer-response-status")
-          .hasPactWith("provider-response-status")
-          .withInteraction(
-            PactInteraction(
-              description = spec.comment,
-              given = None,
-              uponReceivingRequest
-                .path(endPoint),
-              willRespondWith
-                .status(spec.actual.status)
-            )
+        forgePact
+          .between("consumer-response-status")
+          .and("provider-response-status")
+          .describing("running status spec tests")
+          .addInteraction(
+            interaction
+              .description(spec.comment)
+              .uponReceiving(endPoint)
+              .willRespondWith(spec.actual.status)
           )
-          .withConsumerTest { scalaPactMockConfig =>
+          .runConsumerTest { mockConfig =>
 
             withClue(spec.comment + "\n") {
-              val r = Http(scalaPactMockConfig.baseUrl + endPoint).asString
+              val r = Http(mockConfig.baseUrl + endPoint).asString
 
               (r.code == spec.expected.status) should equal(spec.`match`)
             }
 
           }
+
       }
 
     }
