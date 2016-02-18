@@ -32,7 +32,32 @@ class ExampleSpec extends FunSpec with Matchers {
         )
         .runConsumerTest { mockConfig =>
 
-          val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint, Map())
+          val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint, Map.empty)
+
+          result.status should equal(200)
+          result.body should equal("Hello there!")
+
+        }
+
+    }
+
+    it("Should be able to create a contract for a simple GET with arbitrary headers") {
+
+      val endPoint = "/hello"
+
+      forgePact
+        .between("My Consumer")
+        .and("Their Provider Service")
+        .describing("a simple get example")
+        .addInteraction(
+          interaction
+            .description("Fetch a greeting")
+            .uponReceiving(GET, endPoint, Map("fishy" -> "chips"), None)
+            .willRespondWith(200, "Hello there!")
+        )
+        .runConsumerTest { mockConfig =>
+
+          val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint, Map("fishy" -> "chips"))
 
           result.status should equal(200)
           result.body should equal("Hello there!")
@@ -117,7 +142,6 @@ class ExampleSpec extends FunSpec with Matchers {
 
     }
 
-
   }
 
 }
@@ -149,10 +173,10 @@ object SimpleClient {
     try {
       val response = request.asString
 
-      if(!response.is2xx) {
-        println("Request: \n" +  request)
-        println("Response: \n" + response)
-      }
+//      if(!response.is2xx) {
+//        println("Request: \n" +  request)
+//        println("Response: \n" + response)
+//      }
 
       SimpleResponse(response.code, response.headers, response.body)
     } catch {

@@ -3,9 +3,12 @@ package com.itv.scalapact
 import java.io.IOException
 import java.net.ServerSocket
 
-import com.github.kristofa.test.http.{Method, MockHttpServer, SimpleHttpResponseProvider}
-import com.typesafe.scalalogging.LazyLogging
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.{MappingBuilder, WireMock}
+import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import com.itv.scalapact.ScalaPactForger._
+import com.typesafe.scalalogging.LazyLogging
 
 object ScalaPactMock extends LazyLogging {
 
@@ -56,7 +59,11 @@ object ScalaPactMock extends LazyLogging {
     val host = "localhost"
     val port = findFreePort()
 
-    val responseProvider = new SimpleHttpResponseProvider()
+    val wireMockServer = new WireMockServer(wireMockConfig().port(port))
+
+    wireMockServer.start()
+
+    WireMock.configureFor(host, port)
 
     pactDescription.interactions.foreach { i =>
 
@@ -73,22 +80,35 @@ object ScalaPactMock extends LazyLogging {
 
       i.request.method match {
         case GET =>
-          responseProvider.expect(Method.GET, i.request.path).respondWith(i.response.status, responseContentType, i.response.body.getOrElse(""))
+          injectStub(
+            mappingBuilder = get(urlEqualTo(i.request.path)),
+            request = i.request,
+            response = i.response
+          )
 
         case POST =>
-          responseProvider.expect(Method.POST, i.request.path, requestContentType, i.request.body.get).respondWith(i.response.status, responseContentType, i.response.body.getOrElse(""))
+          injectStub(
+            mappingBuilder = post(urlEqualTo(i.request.path)),
+            request = i.request,
+            response = i.response
+          )
 
         case PUT =>
-          responseProvider.expect(Method.PUT, i.request.path, requestContentType, i.request.body.get).respondWith(i.response.status, responseContentType, i.response.body.getOrElse(""))
+          injectStub(
+            mappingBuilder = put(urlEqualTo(i.request.path)),
+            request = i.request,
+            response = i.response
+          )
 
         case DELETE =>
-          responseProvider.expect(Method.DELETE, i.request.path, requestContentType, i.request.body.get).respondWith(i.response.status, responseContentType, i.response.body.getOrElse(""))
+          injectStub(
+            mappingBuilder = delete(urlEqualTo(i.request.path)),
+            request = i.request,
+            response = i.response
+          )
+
       }
     }
-
-    val server = new MockHttpServer(port, responseProvider)
-
-    server.start()
 
     val baseUrl = protocol + "://" + host + ":" + port
 
@@ -96,7 +116,33 @@ object ScalaPactMock extends LazyLogging {
 
     configuredTestRunner(pactDescription)(ScalaPactMockConfig(protocol + "://" + host + ":" + port))(test)
 
-    server.stop()
+    wireMockServer.stop()
+  }
+
+  def injectStub(mappingBuilder: MappingBuilder, request: ScalaPactRequest, response: ScalaPactResponse): Unit = {
+
+    request.headers.foreach { h =>
+      mappingBuilder.withHeader(h._1, equalTo(h._2))
+    }
+
+    request.body.map { b =>
+      mappingBuilder.withRequestBody(equalTo(b))
+    }
+
+    stubFor(
+      mappingBuilder.willReturn {
+        val mockResponse = aResponse()
+          .withStatus(response.status)
+
+        response.body.map { b =>
+          mockResponse.withBody(b)
+        }
+
+        response.headers.foreach(h => mockResponse.withHeader(h._1, h._2))
+
+        mockResponse
+      }
+    )
   }
 
 }
