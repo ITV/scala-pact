@@ -81,6 +81,7 @@ object ScalaPactMock extends LazyLogging {
       i.request.method match {
         case GET =>
           injectStub(
+            wireMockServer = wireMockServer,
             mappingBuilder = get(urlEqualTo(i.request.path)),
             request = i.request,
             response = i.response
@@ -88,6 +89,7 @@ object ScalaPactMock extends LazyLogging {
 
         case POST =>
           injectStub(
+            wireMockServer = wireMockServer,
             mappingBuilder = post(urlEqualTo(i.request.path)),
             request = i.request,
             response = i.response
@@ -95,6 +97,7 @@ object ScalaPactMock extends LazyLogging {
 
         case PUT =>
           injectStub(
+            wireMockServer = wireMockServer,
             mappingBuilder = put(urlEqualTo(i.request.path)),
             request = i.request,
             response = i.response
@@ -102,6 +105,7 @@ object ScalaPactMock extends LazyLogging {
 
         case DELETE =>
           injectStub(
+            wireMockServer = wireMockServer,
             mappingBuilder = delete(urlEqualTo(i.request.path)),
             request = i.request,
             response = i.response
@@ -119,7 +123,7 @@ object ScalaPactMock extends LazyLogging {
     wireMockServer.stop()
   }
 
-  def injectStub(mappingBuilder: MappingBuilder, request: ScalaPactRequest, response: ScalaPactResponse): Unit = {
+  def injectStub(wireMockServer: WireMockServer, mappingBuilder: MappingBuilder, request: ScalaPactRequest, response: ScalaPactResponse): Unit = {
 
     request.headers.foreach { h =>
       mappingBuilder.withHeader(h._1, equalTo(h._2))
@@ -129,7 +133,7 @@ object ScalaPactMock extends LazyLogging {
       mappingBuilder.withRequestBody(equalTo(b))
     }
 
-    stubFor(
+    wireMockServer.stubFor(
       mappingBuilder.willReturn {
         val mockResponse = aResponse()
           .withStatus(response.status)

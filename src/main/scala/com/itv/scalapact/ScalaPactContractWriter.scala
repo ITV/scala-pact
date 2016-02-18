@@ -24,7 +24,7 @@ object ScalaPactContractWriter {
       dirFile.mkdir()
     }
 
-    val relativePath = dirPath + "/" + simplifyName(pactDescription.consumer) + "-" + simplifyName(pactDescription.provider) + "-" + simplifyName(pactDescription.context) + ".json"
+    val relativePath = dirPath + "/" + simplifyName(pactDescription.consumer) + "_" + simplifyName(pactDescription.provider) + "_" + simplifyName(pactDescription.context) + ".json"
     val file = new File(relativePath)
 
     if (file.exists()) {

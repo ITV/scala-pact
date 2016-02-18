@@ -48,16 +48,16 @@ class ExampleSpec extends FunSpec with Matchers {
       forgePact
         .between("My Consumer")
         .and("Their Provider Service")
-        .describing("a simple get example")
+        .describing("a simple get example with a header")
         .addInteraction(
           interaction
             .description("Fetch a greeting")
-            .uponReceiving(GET, endPoint, Map("fishy" -> "chips"), None)
+            .uponReceiving(GET, endPoint, Map("fish" -> "chips"), None)
             .willRespondWith(200, "Hello there!")
         )
         .runConsumerTest { mockConfig =>
 
-          val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint, Map("fishy" -> "chips"))
+          val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint, Map("fish" -> "chips"))
 
           result.status should equal(200)
           result.body should equal("Hello there!")
