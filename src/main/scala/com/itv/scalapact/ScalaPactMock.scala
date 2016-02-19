@@ -140,6 +140,9 @@ object ScalaPactMock extends LazyLogging {
 
         response.body.map { b =>
           mockResponse.withBody(b)
+
+          if (!response.headers.contains("Content-Length"))
+            mockResponse.withHeader("Content-Length", b.length.toString)
         }
 
         response.headers.foreach(h => mockResponse.withHeader(h._1, h._2))
