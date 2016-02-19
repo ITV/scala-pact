@@ -53,8 +53,8 @@ The Pact integration test library itself depends on two Scala/Java libraries.
 ### Json4s
 [Json4s](https://github.com/json4s/json4s) is used to create the JSON that is written to the Pact contract files.
 
-### Mock Http Server
-[Mock Http Server](https://github.com/kristofa/mock-http-server) is used to supply the mocks that ScalaPact run the integration tests against.
+### WireMock
+[WireMock](http://wiremock.org/) is used to supply the mocks that ScalaPact runs the integration tests against.
 
 ## Documentation TODO's
 - How to use
