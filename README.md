@@ -60,6 +60,7 @@ The Pact integration test library itself depends on two Scala/Java libraries.
 - How to use
 - Examples
 - Links to other pact resources
+- Add a section on Pact Broker
 - Describe running a stub service with pack-mock-service
 - Describe using Pact proxy provider to verify
 - Update all README.md files
