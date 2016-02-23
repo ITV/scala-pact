@@ -60,9 +60,31 @@ The Pact integration test library itself depends on two Scala/Java libraries.
 - How to use
 - Examples
 - Links to other pact resources
-- Running a stub service
-- Pact proxy provider to verify
+- Describe running a stub service with pack-mock-service
+- Describe using Pact proxy provider to verify
+- Update all README.md files
+  - Legal hygiene checks, make sure there's nothing offensive
+  - Public consumption, is it easy to understand what you have to do to use ScalaPact?
+  - Fullest description should be in the parent README, sub projects should reference the parent but otherwise provide lean quickstart information and examples. This is the area the existing pact tools are worst at so lets get it right!
 
-## Development TODO's
+## Short term development TODO's
+- Rename repo: ScalaPact -> scalapact
 - Publish lib to repo
-- Improve error reporting
+- Improve error reporting?
+- Create tmp pact files with sha1 suffix not description text (now that we have the pact plugin there's no need for them to be human readable and risk duplicates) THEN see if the description is used anywhere else and remove if not. e.g.
+  - from: my-consumer_my-provider_in-some-context
+  - to: my-consumer_my-provider_akshbdk3as43hdb1ak
+
+## Mid term development TODO's
+- Remove Json4s in favor of Argonaut
+  - Must figure out how to write untyped objects - request / response bodies are not Strings in pact files they are json objects (when the body is json) - curse the original ruby devs with their dynamic typing and heterogeneous objects! :-)
+- Move common functionality into a library project shared between the scalatest and plugin projects
+  - only challenge might be that scalatest *is* 2.11 and the plugin *has to be* 2.10 compatible, but since the functions are probably vanilla scala with Argonnaut (which is 2.10 compatible) it might be fine to make the lib a 2.10 jar.
+
+## Longer term development TODO's
+- Add task to plugin to run a verifier
+  - Initially could use ruby verifier
+  - Later write our own, the hard part will be validating against the official spec files
+- Add task to plugin to run a stub
+  - Initially could use ruby stubber
+  - Later write our own, the hard part will be validating against the official spec files
