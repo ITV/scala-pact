@@ -1,5 +1,5 @@
 
-name := "ScalaPact"
+name := "scalapact-scalatest"
 
 organization := "com.itv"
 

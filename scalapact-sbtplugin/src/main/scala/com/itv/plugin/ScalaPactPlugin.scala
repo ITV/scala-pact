@@ -1,47 +1,100 @@
 package com.itv.plugin
 
 import java.io.PrintWriter
-import org.json4s.DefaultFormats
-import org.json4s.native.JsonParser._
-import org.json4s.native.Serialization._
+
+import argonaut.Argonaut._
+import argonaut.{CodecJson, PrettyParams}
+import com.itv.plugin.PactImplicits._
 import sbt.Keys._
 import sbt._
+
 import scala.io.Source
+import scala.language.implicitConversions
 
 object ScalaPactPlugin extends Plugin {
 
   override lazy val settings = Seq(commands += myCommand)
 
-  private implicit val formats = DefaultFormats
-
   lazy val myCommand =
-    Command.command("hello") { (state: State) =>
-      println("Hi!")
-      val files = new sbt.File("target/pacts").listFiles()
-      println("Files: " + files.length)
-      // load files as json strings
-      // parse json into Pact case classes
-      // merge Interactions from Pacts
-      val pact = files.map { file =>
-      val source = Source.fromFile(file)
-        try {
-          val string = source.mkString
-          println("String: \n" + string)
-          parse(string).extract[Pact]
-        } finally source.close
-      }.foldLeft(Pact(PactActor(""), PactActor(""), List.empty))((ret, pact) => ret.copy(interactions = ret.interactions ++ pact.interactions, provider = pact.provider, consumer = pact.consumer))
+    Command.command("pact") { (state: State) =>
 
-      ScalaPactContractWriter.writePactContracts(pact)
+      println("*************************************")
+      println("** ScalaPact: Running tests        **")
+      println("*************************************")
 
-      // write single json file
-      // delete input files
-      state
+      println("> ScalaPact running: clean + test commands first")
+
+      val cleanState = Command.process("clean", state)
+      val testedState = Command.process("test", cleanState)
+
+      println("*************************************")
+      println("** ScalaPact: Squashing Pact Files **")
+      println("*************************************")
+
+      val pactDir = new java.io.File("target/pacts")
+
+      if (pactDir.exists && pactDir.isDirectory) {
+        val files = pactDir.listFiles().toList.filter(f => f.getName.endsWith(".json"))
+
+        println("> " + files.length + " files found that could be Pact contracts")
+        println(files.map("> - " + _.getName).mkString("\n"))
+
+        val groupedFileList: List[(String, List[File])] = files.groupBy { f =>
+          f.getName.split("_").take(2).mkString("_")
+        }.toList
+
+        val errorCount = groupedFileList.map { g =>
+          squashPactFiles(g._1, g._2)
+        }.sum
+
+        println("> " + groupedFileList.length + " pacts found:")
+        println(groupedFileList.map(g => "> - " + g._1.replace("_", " -> ") + "\n").mkString)
+        println("> " + errorCount + " errors")
+
+      } else {
+        println("No Pact files found in 'target/pacts'. Make sure you have Pact CDC tests and have run 'sbt test'.")
+      }
+
+      testedState
     }
+
+  def squashPactFiles(name: String, files: List[File]): Int = {
+    //Yuk!
+    var errorCount = 0
+
+    val pact = {
+      files.map { file =>
+        val fileContents = try {
+          val contents = Option(Source.fromFile(file).getLines().mkString)
+
+          file.delete()
+
+          contents
+        } catch {
+          case e: Throwable =>
+            println("Problem reading Pact file at path: " + file.getCanonicalPath)
+            errorCount = errorCount + 1
+            None
+        }
+        fileContents.flatMap(_.decodeOption[Pact])
+      }
+        .collect { case Some(s) => s }
+        .foldLeft(Pact(PactActor(""), PactActor(""), List.empty)) { (combinedPact, pact) =>
+          combinedPact.copy(
+            interactions = combinedPact.interactions ++ pact.interactions,
+            provider = pact.provider,
+            consumer = pact.consumer
+          )
+        }
+    }
+
+    ScalaPactContractWriter.writePactContracts(pact)
+
+    errorCount
+  }
 }
 
 object ScalaPactContractWriter {
-
-  private implicit val formats = DefaultFormats
 
   private val simplifyName: String => String = name =>
     "[^a-zA-Z0-9-]".r.replaceAllIn(name.replace(" ", "-"), "")
@@ -71,7 +124,7 @@ object ScalaPactContractWriter {
     ()
   }
 
-  private def producePactJson(pact: Pact): String = writePretty(pact)
+  private def producePactJson(pact: Pact): String = pact.asJson.pretty(PrettyParams.spaces2.copy(dropNullKeys = true))
 
   implicit private val intToBoolean: Int => Boolean = v => v > 0
   implicit private val stringToBoolean: String => Boolean = v => v != ""
@@ -81,12 +134,34 @@ object ScalaPactContractWriter {
 
 }
 
+object PactImplicits {
+  implicit lazy val PactCodecJson: CodecJson[Pact] = casecodec3(Pact.apply, Pact.unapply)(
+    "provider", "consumer", "interactions"
+  )
+
+  implicit lazy val PactActorCodecJson: CodecJson[PactActor] = casecodec1(PactActor.apply, PactActor.unapply)(
+    "name"
+  )
+
+  implicit lazy val InteractionCodecJson: CodecJson[Interaction] = casecodec4(Interaction.apply, Interaction.unapply)(
+    "providerState", "description", "request", "response"
+  )
+
+  implicit lazy val InteractionRequestCodecJson: CodecJson[InteractionRequest] = casecodec4(InteractionRequest.apply, InteractionRequest.unapply)(
+    "method", "path", "headers", "body"
+  )
+
+  implicit lazy val InteractionResponseCodecJson: CodecJson[InteractionResponse] = casecodec3(InteractionResponse.apply, InteractionResponse.unapply)(
+    "status", "headers", "body"
+  )
+}
+
 case class Pact(provider: PactActor, consumer: PactActor, interactions: List[Interaction])
 
 case class PactActor(name: String)
 
 case class Interaction(providerState: Option[String], description: String, request: InteractionRequest, response: InteractionResponse)
 
-case class InteractionRequest(method: Option[String], path: Option[String], headers: Option[Map[String, String]], body: Option[AnyRef])
+case class InteractionRequest(method: Option[String], path: Option[String], headers: Option[Map[String, String]], body: Option[String])
 
-case class InteractionResponse(status: Option[Int], headers: Option[Map[String, String]], body: Option[AnyRef])
+case class InteractionResponse(status: Option[Int], headers: Option[Map[String, String]], body: Option[String])
