@@ -76,7 +76,11 @@ object ScalaPactPlugin extends Plugin {
             errorCount = errorCount + 1
             None
         }
-        fileContents.flatMap(_.decodeOption[Pact])
+        fileContents.flatMap { t =>
+          val option = t.decodeOption[Pact]
+          if (option.isEmpty) errorCount += 1
+          option
+        }
       }
         .collect { case Some(s) => s }
         .foldLeft(Pact(PactActor(""), PactActor(""), List.empty)) { (combinedPact, pact) =>
