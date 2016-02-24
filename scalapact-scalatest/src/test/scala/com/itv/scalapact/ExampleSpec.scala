@@ -43,7 +43,7 @@ class ExampleSpec extends FunSpec with Matchers {
 
     it("Should be able to create a contract for a simple GET with arbitrary headers") {
 
-      val endPoint = "/hello"
+      val endPoint = "/hello2"
 
       forgePact
         .between("My Consumer")
