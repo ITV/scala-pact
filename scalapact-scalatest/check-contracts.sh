@@ -8,7 +8,7 @@ BASE_URL="http://localhost:$PORT"
 
 # Step 1
 # Generate the pact files for the consumer and provider projects
-sbt clean update test
+sbt clean update pact
 
 # Step 2
 # Start stub service with pact contracts
@@ -16,7 +16,7 @@ pact-mock-service start --port=$PORT &
 
 sleep 1 # Give it a chance...
 
-echo "Clear exisiting interactions"
+echo "Clear existing interactions"
 
 curl -X DELETE -H "X-Pact-Mock-Service: true" localhost:1234/interactions
 
