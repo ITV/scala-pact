@@ -59,6 +59,7 @@ The Pact integration test library itself depends on two Scala/Java libraries.
 ## Documentation TODO's
 - How to use
 - Examples
+- Add note about "gem install bundler"
 - Links to other pact resources
 - Add a section on Pact Broker
 - Describe running a stub service with pack-mock-service
