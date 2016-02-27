@@ -47,6 +47,57 @@ There is an instance of Pact Provider Proxy in this project in the Pact verifier
 ## Basic usage examples
 There is an example test spec that can be found [here](https://github.com/ITV/ScalaPact/blob/master/src/test/scala/com/itv/scalapact/ExampleSpec.scala). The hope is that this will be a living example spec.
 
+## Considerations
+1. Mock servers can only understand one endpoint being in one state. Mostly that isn't a problem, if you want to create a pact describing the look up of documents that result in a 200 or a 404 you simply look up two different documents. Where you have something like a `/status` endpoint that could come back in different states that you care about, you would have to be a bit creative, or not describe that behaviour in a pact contract!
+- ScalaTest runs in parallel so even clearing the state between tests could, and probably would, result in errors.
+
+## Pact tests VS Integration tests
+Technically, we you write a Pact test you are creating an integration test in that:
+1. You write some client code to make the call to your provider;
+2. You then write a test using a mock that expects a request and gives a response to a real http call;
+3. You check the results are what you expected.
+
+The *purpose* of Pact and Integration tests is different though. A Pact test is there to describe the agreed contract between one service and another from the perspective of the consumer. An integration test can describe the relationship but not in a way that you can share with your provider for verification. Additionally Integration tests are good for testing failure cases where Pact tests are not.
+
+Consider these two statements:
+1. Pact tests define *what* the agreement between a consumer and a provider is
+2. Integration tests check *how* that agreement is implemented on the consumer side
+
+For instance:
+
+You should use Pact tests for describing the agreement:
+1. Requesting data in a specific format from a provider;
+1. Describing content negotiation;
+1. How a provider would respond if it couldn't find the data you wanted.
+
+You could then build on that with integration tests for...
+1. Checking what happens if the provider simply isn't there;
+1. Network failures;
+1. Timeouts;
+1. Missing end points;
+1. Badly formed responses.
+
+## Pact specification compliance level
+Currently ScalaPact is not 100% comliant with the official Pact specification. We plan to be but the library is still under active development. The roadmap to Pact compliance will be something like:
+1. Test all tools against the official specification test cases;
+1. Implement provider states;
+1. Consolidate our process with the official implementors guide.
+
+At the moment we do some level of validation by running our pact contracts against the other Pact tools on the market in an attempt to catch any glaring problems.
+
+### Why aren't we Pact compliant?
+There is already more that one CDC implementation but this one is closest to Pact, and at this time relies on some of their tooling.
+
+That said, Pact was created for a company to meet it's needs and ScalaPact has been created in the same vein. We have a problem that the official Pact tools don't quite solve, and we're building ScalaPact to meet our requirements.
+
+Currently, it is our intention to conform to Pact as closely as possible rather than splinter into another implementation.
+
+## Acknowledgments
+ScalaPact is not an original idea, we're standing on the shoulders and borrowing heavily from the work of the following groups and people:
+1. [DiUS](https://github.com/DiUS)
+1. [Pact Foundation](https://github.com/pact-foundation)
+1. [Thoughtworks / Ian Robinson / Martin Fowler](http://martinfowler.com/articles/consumerDrivenContracts.html)
+
 ## Scala project library dependencies
 The Pact integration test library itself depends on two Scala/Java libraries.
 
