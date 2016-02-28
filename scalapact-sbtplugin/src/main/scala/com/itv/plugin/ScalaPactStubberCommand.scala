@@ -104,8 +104,8 @@ object LocalFileLoader {
     }
   }
 
-  private val addToPactManager: List[Pact] => Unit = pacts => {
-    // TODO: What Pact manager?!?
+  private val addToInteractionManager: List[Pact] => Unit = pacts => {
+    // TODO:
 
     ()
   }
@@ -117,7 +117,7 @@ object LocalFileLoader {
     // the model?
     config.localPactPath match {
       case Some(path) =>
-        (recursiveJsonLoad andThen deserialiseIntoPact andThen addToPactManager) (new File(path))
+        (recursiveJsonLoad andThen deserialiseIntoPact andThen addToInteractionManager) (new File(path))
 
       case None => ()
     }
@@ -127,8 +127,26 @@ object LocalFileLoader {
 
 }
 
+object InteractionManager {
+
+  private var interactions = List.empty[Interaction]
+  
+  //TODO:
+  //def findMatchingInteraction(...) = ???
+
+  def getInteractions: List[Interaction] = interactions
+
+  def addInteraction(interaction: Interaction): Unit = interactions = interaction :: interactions
+
+  def addInteractions(interactions: List[Interaction]): Unit = interactions.foreach(addInteraction)
+
+  def clearInteractions(): Unit = interactions = List.empty[Interaction]
+
+}
+
 // TODO: Clearly nonesense...
 case class Pact(id: String)
+case class Interaction(id: String)
 
 case class Arguments(host: String, port: Int, localPactPath: Option[String])
 
