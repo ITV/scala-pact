@@ -8,10 +8,12 @@ import scala.io.Source
 import scala.language.implicitConversions
 import scalaz.PLensFamily
 
-object ScalaPactCommand {
+object ScalaPactTestCommand {
 
-  lazy val pactCommand =
-    Command.command("pact") { (state: State) =>
+  lazy val pactCommandHyphen: Command = Command.command("pact-test")(pactTestAndCompile)
+  lazy val pactCommandCamel: Command = Command.command("pactTest")(pactTestAndCompile)
+
+  private lazy val pactTestAndCompile: State => State = state => {
 
       println("*************************************")
       println("** ScalaPact: Running tests        **")
@@ -53,7 +55,7 @@ object ScalaPactCommand {
       testedState
     }
 
-  def squashPactFiles(name: String, files: List[File]): Int = {
+  private def squashPactFiles(name: String, files: List[File]): Int = {
     //Yuk!
     var errorCount = 0
 
