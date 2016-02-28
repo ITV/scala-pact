@@ -6,7 +6,11 @@ import scala.language.implicitConversions
 
 object ScalaPactPlugin extends Plugin {
   override lazy val settings = Seq(
-    commands += ScalaPactTestCommand.pactCommandHyphen,
-    commands += ScalaPactTestCommand.pactCommandCamel
+    commands += ScalaPactTestCommand.pactTestCommandHyphen,
+    commands += ScalaPactTestCommand.pactTestCommandCamel,
+    commands += ScalaPactVerifyCommand.pactVerifyCommandHyphen,
+    commands += ScalaPactVerifyCommand.pactVerifyCommandCamel,
+    commands += ScalaPactStubberCommand.pactStubberCommandHyphen,
+    commands += ScalaPactStubberCommand.pactStubberCommandCamel
   )
 }

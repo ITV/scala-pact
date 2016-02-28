@@ -10,10 +10,10 @@ import scalaz.PLensFamily
 
 object ScalaPactTestCommand {
 
-  lazy val pactCommandHyphen: Command = Command.command("pact-test")(pactTestAndCompile)
-  lazy val pactCommandCamel: Command = Command.command("pactTest")(pactTestAndCompile)
+  lazy val pactTestCommandHyphen: Command = Command.command("pact-test")(pactTest)
+  lazy val pactTestCommandCamel: Command = Command.command("pactTest")(pactTest)
 
-  private lazy val pactTestAndCompile: State => State = state => {
+  private lazy val pactTest: State => State = state => {
 
       println("*************************************")
       println("** ScalaPact: Running tests        **")
