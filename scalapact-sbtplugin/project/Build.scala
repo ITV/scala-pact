@@ -13,11 +13,11 @@ object Build extends sbt.Build with BuildExtra {
     scalaVersion in Global := "2.10.6",
     scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
     libraryDependencies ++= Seq(
-      "io.argonaut" %% "argonaut" % "6.1",
-      "org.slf4j" % "slf4j-simple" % "1.6.4",
-      "org.http4s" %% "http4s-blaze-server" % "0.12.1",
-      "org.http4s" %% "http4s-dsl"          % "0.12.1",
-      "org.http4s" %% "http4s-argonaut"     % "0.12.1"
+      "io.argonaut" %% "argonaut" % "6.1" withSources() withJavadoc(),
+      "org.slf4j" % "slf4j-simple" % "1.6.4" withSources() withJavadoc(),
+      "org.http4s" %% "http4s-blaze-server" % "0.12.1" withSources() withJavadoc(),
+      "org.http4s" %% "http4s-dsl"          % "0.12.1" withSources() withJavadoc(),
+      "org.http4s" %% "http4s-argonaut"     % "0.12.1" withSources() withJavadoc()
     )
   )
 }
