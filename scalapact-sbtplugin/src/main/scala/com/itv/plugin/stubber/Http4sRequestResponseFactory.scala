@@ -1,4 +1,4 @@
-package com.itv.plugin
+package com.itv.plugin.stubber
 
 import java.nio.charset.StandardCharsets
 
