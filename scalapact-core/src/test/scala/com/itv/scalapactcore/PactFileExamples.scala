@@ -2,8 +2,6 @@ package com.itv.scalapactcore
 
 object PactFileExamples {
 
-  val simpleBody = """{"fish":["cod", "haddock", "flying"]}"""
-
   val simple = Pact(
     consumer = PactActor("consumer"),
     provider = PactActor("provider"),
@@ -20,45 +18,41 @@ object PactFileExamples {
         response = InteractionResponse(
           status = Option(200),
           headers = Option(Map("Content-Type" -> "application/json")),
-          body = Option(simpleBody)
+          body = Option("""{"fish":["cod", "haddock", "flying"]}""")
         )
       )
     )
   )
 
   val simpleAsString =
-    """
-      |{
-      |  "consumer":"consumer",
-      |  "provider":"provider",
-      |  "interactions":[
+    s"""{
+      |  "provider" : {
+      |    "name" : "provider"
+      |  },
+      |  "consumer" : {
+      |    "name" : "consumer"
+      |  },
+      |  "interactions" : [
       |    {
-      |      "providerState":"a simple state",
-      |      "description":"a simple request",
-      |      "request": {
-      |        "method":"GET",
-      |        "path":"/fetch-json",
-      |        "headers": {
-      |          "Content-Type":"text/plain"
+      |      "providerState" : "a simple state",
+      |      "description" : "a simple request",
+      |      "request" : {
+      |        "method" : "GET",
+      |        "path" : "/fetch-json",
+      |        "headers" : {
+      |          "Content-Type" : "text/plain"
       |        },
-      |        "body":"fish"
+      |        "body" : "fish"
       |      },
-      |      "response": {
-      |        "status":200,
-      |        "headers": {
-      |          "Content-Type":"application/json"
+      |      "response" : {
+      |        "status" : 200,
+      |        "headers" : {
+      |          "Content-Type" : "application/json"
       |        },
-      |        "body": {
-      |          "fish": [
-      |            "cod",
-      |            "haddock",
-      |            "flying"
-      |          ]
-      |        }
+      |        "body" : "{\\\"fish\\\":[\\\"cod\\", \\\"haddock\\\", \\\"flying\\\"]}"
       |      }
       |    }
       |  ]
-      |}
-    """.stripMargin
+      |}""".stripMargin
 
 }
