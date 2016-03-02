@@ -2,6 +2,9 @@ package com.itv.scalapact.plugin.stubber
 
 import com.itv.scalapactcore.Interaction
 
+import argonaut._
+import Argonaut._
+
 import scalaz._
 import Scalaz._
 
@@ -19,7 +22,7 @@ trait InteractionManager {
       matchMethods(i.request.method)(request.method) &&
         matchHeaders(i.request.headers)(request.headers) &&
         matchPaths(i.request.path)(request.path) &&
-        matchBodies(i.request.body)(request.body)
+        matchBodies(request.headers)(i.request.body)(request.body)
     }
   }
 
@@ -51,14 +54,31 @@ object InteractionMatchers {
   val matchPaths: Option[String] => Option[String] => Boolean = expected => received =>
     generalMatcher(expected, received, (e: String, r: String) => toPathStructure(e) == toPathStructure(r))
 
-  val matchBodies: Option[String] => Option[String] => Boolean = expected => received =>
-    generalMatcher(expected, received, (e: String, r: String) => e == r)
+  val matchBodies: Option[Map[String, String]] => Option[String] => Option[String] => Boolean = receivedHeaders => expected => received => {
+    receivedHeaders match {
+      case Some(hs) if hs.exists(p => p._1.toLowerCase == "content-type" && p._2.contains("json")) =>
+        generalMatcher(expected, received, (e: String, r: String) => e.parse === r.parse) //TODO: Known issue, lists must be in the same order.
 
-  private def generalMatcher[A](expected: Option[A], received: Option[A], predictate: (A, A) => Boolean): Boolean =
-    (expected |@| received) { predictate } match {
-      case Some(s) => s
-      case None => true
+      case Some(hs) if hs.exists(p => p._1.toLowerCase == "content-type" && p._2.contains("xml")) =>
+        generalMatcher(expected, received, (e: String, r: String) => e == r) //TODO: How shall we test equality of XML?
+
+      case _ =>
+        generalMatcher(expected, received, (e: String, r: String) => e == r)
     }
+  }
+
+  private def generalMatcher[A](expected: Option[A], received: Option[A], predictate: (A, A) => Boolean): Boolean = {
+    if(expected.isEmpty && received.isEmpty) true
+    else if(expected.isEmpty || received.isEmpty) false
+    else {
+      (expected |@| received) {
+        predictate
+      } match {
+        case Some(s) => s
+        case None => true
+      }
+    }
+  }
 
   private lazy val toPathStructure: String => PathStructure = fullPath => {
     if(fullPath.isEmpty) PathStructure("", Map.empty[String, String])

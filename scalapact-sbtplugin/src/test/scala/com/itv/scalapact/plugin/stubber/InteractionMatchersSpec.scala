@@ -3,6 +3,12 @@ package com.itv.scalapact.plugin.stubber
 import org.scalatest.{Matchers, FunSpec}
 import scala.language.implicitConversions
 
+import argonaut._
+import Argonaut._
+
+import scalaz._
+import Scalaz._
+
 class InteractionMatchersSpec extends FunSpec with Matchers {
 
 
@@ -74,6 +80,129 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
       matchPaths(expected)("/foo/bar/hello?hobby=skiing&name=joey&id=abc123&job=dentist") shouldEqual true
       matchPaths(expected)("/foo/bar/hello?hobby=skiing") shouldEqual false
       matchPaths("/foo/bar/hello")("/foo/bar/hello?hobby=skiing") shouldEqual false
+
+    }
+
+  }
+
+  describe("Matching bodies") {
+
+    it("should be able to match plain text bodies") {
+
+      val expected = "hello there!"
+
+      matchBodies(Map.empty[String, String])(expected)(expected) shouldEqual true
+      matchBodies(Map.empty[String, String])(expected)("Yo ho!") shouldEqual false
+
+    }
+
+    it("should be able to match json bodies") {
+
+      val expected =
+        """
+          |{
+          |  "id":1234,
+          |  "name":"joe",
+          |  "hobbies": [
+          |    "skiing",
+          |    "fishing", "golf"
+          |  ]
+          |}
+        """.stripMargin
+
+      val received =
+        """
+          |{
+          |  "id":1234,
+          |  "name":"joe",
+          |  "hobbies": [
+          |    "skiing",
+          |    "fishing","golf"
+          |  ]
+          |}
+        """.stripMargin
+
+      val received2 =
+        """
+          |{
+          |  "id":1234,
+          |  "hobbies": [
+          |    "skiing",
+          |    "fishing",
+          |    "golf"
+          |  ],
+          |  "name":"joe"
+          |}
+        """.stripMargin
+
+      val received3 =
+        """
+          |{
+          |  "id":1234,
+          |  "hobbies": [
+          |    "fishing",
+          |    "skiing",
+          |    "golf"
+          |  ],
+          |  "name":"joe"
+          |}
+        """.stripMargin
+
+      val expected2 =
+        """
+          |{
+          |  "id":1234,
+          |  "hobbies": [
+          |   {
+          |     "type":"fish"
+          |   },
+          |   {
+          |     "type":"mammal"
+          |   }
+          |  ],
+          |  "name":"joe"
+          |}
+        """.stripMargin
+
+      val received4 =
+        """
+          |{
+          |  "id":1234,
+          |  "hobbies": [
+          |   {
+          |     "type":"mammal"
+          |   },
+          |   {
+          |     "type":"fish"
+          |   }
+          |  ],
+          |  "name":"joe"
+          |}
+        """.stripMargin
+
+      withClue("Same json no hal") {
+        matchBodies(Option(Map("Content-Type" -> "application/json")))(expected)(expected) shouldEqual true
+      }
+
+      withClue("Same json + hal") {
+        matchBodies(Option(Map("Content-Type" -> "application/json+hal")))(expected)(expected) shouldEqual true
+      }
+
+      withClue("Expected compared to received") {
+        matchBodies(Option(Map("Content-Type" -> "application/json")))(expected)(received) shouldEqual true
+      }
+
+      withClue("Expected compared to a received object with the fields in a different order") {
+        matchBodies(Option(Map("Content-Type" -> "application/json")))(expected)(received2) shouldEqual true
+      }
+
+      withClue("Expected compared to a received object with the array in a different order") {
+        matchBodies(Option(Map("Content-Type" -> "application/json")))(expected)(received3) shouldEqual false
+      }
+
+      withClue("Expected compared to a received object with the object array in a different order") {
+        matchBodies(Option(Map("Content-Type" -> "application/json")))(expected2)(received4) shouldEqual false
+      }
 
     }
 
