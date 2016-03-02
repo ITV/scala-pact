@@ -7,7 +7,7 @@ import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.util.CaseInsensitiveString
 import sbt._
 
-import scalaz.\/-
+import scalaz.{-\/, \/-}
 
 object ScalaPactStubberCommand {
   lazy val pactStubberCommandHyphen: Command = Command.args("pact-stubber", "<options>")(pactStubber)
@@ -134,10 +134,26 @@ object LocalFileLoader {
 
 object InteractionManager {
 
+  import HeaderImplicitConversions._
+
   private var interactions = List.empty[Interaction]
-  
-  //TODO:
-  //def findMatchingInteraction(...) = ???
+
+  def findMatchingInteraction(request: Request): Option[Interaction] = {
+
+    val method = Option(request.method.name.toUpperCase)
+    val headers: Option[Map[String, String]] = Option(request.headers)
+    val path = Option(request.pathInfo) //TODO: Not good enough!
+    val body = request.bodyAsText.runLast.run
+
+    println("Trying to match: " + method + ", " + path + ", " + headers + ", " + body + ", ")
+
+    interactions.find{ i =>
+      i.request.method == method &&
+        i.request.headers.toSet.subsetOf(headers.toSet) &&
+        i.request.path == path &&
+        i.request.body == body
+    }
+  }
 
   def getInteractions: List[Interaction] = interactions
 
@@ -160,17 +176,40 @@ object PactStubService {
   val service = HttpService {
 
     case req @ GET -> Root / path =>
-      if(isAdminCall(req)) Ok(InteractionManager.getInteractions.mkString("\n"))
-      else Ok("GET " + req.pathInfo)
+      matchRequestWithResponse(req)
 
     case req @ PUT -> Root / path =>
-      Ok("PUT " + req.pathInfo + " isAdmin: " + isAdminCall(req))
+      matchRequestWithResponse(req)
 
     case req @ POST -> Root / path =>
-      Ok("POST " + req.pathInfo + " isAdmin: " + isAdminCall(req))
+      matchRequestWithResponse(req)
 
     case req @ DELETE -> Root / path =>
-      Ok("DELETE " + req.pathInfo + " isAdmin: " + isAdminCall(req))
+      matchRequestWithResponse(req)
 
+  }
+
+  def matchRequestWithResponse(req: Request): scalaz.concurrent.Task[Response] = {
+    if(isAdminCall(req)) Ok(InteractionManager.getInteractions.mkString("\n"))
+    else {
+      val interaction = InteractionManager.findMatchingInteraction(req)
+
+      if(interaction.isEmpty) NotFound("No interaction found for request: " + req.method.name.toUpperCase + " " + req.pathInfo)
+      else {
+
+        val i = interaction.get
+
+        Status.fromInt(i.response.status.getOrElse(200)) match {
+          case \/-(code) =>
+            Http4sRequestResponseFactory.buildResponse(
+              status = code,
+              headers = i.response.headers.getOrElse(Map.empty),
+              body = i.response.body
+            )
+
+          case -\/(l) => InternalServerError(l.sanitized)
+        }
+      }
+    }
   }
 }
