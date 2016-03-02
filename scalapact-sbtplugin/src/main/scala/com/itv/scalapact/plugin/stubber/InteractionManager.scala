@@ -18,10 +18,13 @@ trait InteractionManager {
   private var interactions = List.empty[Interaction]
 
   def findMatchingInteraction(request: RequestDetails): Option[Interaction] = {
+
+    println(">> Trying to match: " + request)
+
     interactions.find{ i =>
-      matchMethods(i.request.method)(request.method) &&
+      matchMethods(i.request.method.orElse(Option("GET")))(request.method) &&
         matchHeaders(i.request.headers)(request.headers) &&
-        matchPaths(i.request.path)(request.path) &&
+        matchPaths(i.request.path.orElse(Option("/")))(request.path) &&
         matchBodies(request.headers)(i.request.body)(request.body)
     }
   }
@@ -69,7 +72,6 @@ object InteractionMatchers {
 
   private def generalMatcher[A](expected: Option[A], received: Option[A], predictate: (A, A) => Boolean): Boolean = {
     if(expected.isEmpty && received.isEmpty) true
-    else if(expected.isEmpty || received.isEmpty) false
     else {
       (expected |@| received) {
         predictate

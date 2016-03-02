@@ -68,6 +68,55 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
 
     }
 
+    it("should be able to handle a more complex case") {
+
+      val expected = None
+      val received = Option(
+          Map(
+            "Upgrade-Insecure-Requests" -> "1",
+            "Connection" -> "keep-alive",
+            "Accept" -> "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Cache-Control" -> "max-age=0",
+            "Accept-Language" -> "en-US,en;q=0.8",
+            "Accept-Encoding" -> "gzip",
+            "deflate" -> "",
+            "sdch" -> "",
+            "User-Agent" -> "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36",
+            "Host" -> "localhost:1234"
+          )
+        )
+
+      matchHeaders(expected)(received) shouldEqual true
+
+    }
+
+    it("should be able to handle a more complex case where it needs to match") {
+
+      val expected = Option(
+        Map(
+          "Accept" -> "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+          "Host" -> "localhost:1234"
+        )
+      )
+      val received = Option(
+        Map(
+          "Upgrade-Insecure-Requests" -> "1",
+          "Connection" -> "keep-alive",
+          "Accept" -> "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+          "Cache-Control" -> "max-age=0",
+          "Accept-Language" -> "en-US,en;q=0.8",
+          "Accept-Encoding" -> "gzip",
+          "deflate" -> "",
+          "sdch" -> "",
+          "User-Agent" -> "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36",
+          "Host" -> "localhost:1234"
+        )
+      )
+
+      matchHeaders(expected)(received) shouldEqual true
+
+    }
+
   }
 
   describe("Matching paths") {

@@ -1,9 +1,13 @@
 package com.itv.scalapact.plugin.stubber
 
+import argonaut.PrettyParams
+import com.itv.scalapactcore.{ScalaPactWriter, PactActor, Pact}
 import org.http4s.dsl.{->, /, Root, _}
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.util.CaseInsensitiveString
 import org.http4s.{HttpService, Request, Response, Status}
+
+import com.itv.scalapactcore.PactImplicits._
 
 import scalaz.{-\/, \/-}
 
@@ -39,7 +43,11 @@ object PactStubService {
   }
 
   private def matchRequestWithResponse(req: Request): scalaz.concurrent.Task[Response] = {
-    if(isAdminCall(req)) Ok(InteractionManager.getInteractions.mkString("\n")) //TODO: Different admin calls should do different things...
+    if(isAdminCall(req)) {
+      //TODO: Different admin calls should do different things...
+      val output = ScalaPactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), InteractionManager.getInteractions))
+      Ok(output)
+    }
     else {
 
       import HeaderImplicitConversions._

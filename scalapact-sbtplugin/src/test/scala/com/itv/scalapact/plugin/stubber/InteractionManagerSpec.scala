@@ -45,6 +45,53 @@ class InteractionManagerSpec extends FunSpec with Matchers {
       matched.isDefined shouldEqual true
       matched.get.response.status shouldEqual Some(200)
     }
+
+    it("should be able to match a less simple get request") {
+      val interactionManager = new InteractionManager {}
+
+      val requestDetails = RequestDetails(
+        method = "GET",
+        headers = Option(
+          Map(
+            "Upgrade-Insecure-Requests" -> "1",
+            "Connection" -> "keep-alive",
+            "Accept" -> "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Cache-Control" -> "max-age=0",
+            "Accept-Language" -> "en-US,en;q=0.8",
+            "Accept-Encoding" -> "gzip",
+            "deflate" -> "",
+            "sdch" -> "",
+            "User-Agent" -> "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36",
+            "Host" -> "localhost:1234"
+          )
+        ),
+        path = "/foo",
+        body = None
+      )
+
+      val interaction = Interaction(
+        providerState = None,
+        description = "",
+        request = InteractionRequest(
+          method = "GET",
+          path = "/foo",
+          headers = None,
+          body = None
+        ),
+        response = InteractionResponse(
+          status = 200,
+          headers = None,
+          body = None
+        )
+      )
+
+      interactionManager.addInteraction(interaction)
+
+      val matched = interactionManager.findMatchingInteraction(requestDetails)
+
+      matched.isDefined shouldEqual true
+      matched.get.response.status shouldEqual Some(200)
+    }
   }
 
   describe("The interaction manager's matching of get requests with headers") {
