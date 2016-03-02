@@ -1,17 +1,13 @@
 package com.itv.scalapact
 
-import java.io.{PrintWriter, File}
+import java.io.{File, PrintWriter}
 
 import com.itv.scalapact.ScalaPactForger.ScalaPactDescriptionFinal
-import org.json4s.DefaultFormats
-import org.json4s.native.Serialization._
-import org.json4s.native.JsonParser._
+import com.itv.scalapactcore._
 
 import scala.language.implicitConversions
 
 object ScalaPactContractWriter {
-
-  private implicit val formats = DefaultFormats
 
   private val simplifyName: String => String = name =>
     "[^a-zA-Z0-9-]".r.replaceAllIn(name.replace(" ", "-"), "")
@@ -42,21 +38,11 @@ object ScalaPactContractWriter {
   }
 
   private def producePactJson(pactDescription: ScalaPactDescriptionFinal): String =
-    writePretty(
+    ScalaPactWriter.pactToJsonString(
       Pact(
         provider = PactActor(pactDescription.provider),
         consumer = PactActor(pactDescription.consumer),
         interactions = pactDescription.interactions.map { i =>
-
-          val formatBody: Map[String, String] => Option[String] => Option[AnyRef] = headers => maybeBody =>
-            maybeBody.map { body =>
-              if (headers.exists(p => p._1.toLowerCase == "content-type" && p._2.contains("json"))) jsonStringToAnyRef(body)
-              else body
-            }
-
-          val requestBody = formatBody(i.request.headers)(i.request.body)
-          val responseBody = formatBody(i.response.headers)(i.response.body)
-
           Interaction(
             providerState = i.providerState,
             description = i.description,
@@ -64,19 +50,17 @@ object ScalaPactContractWriter {
               method = i.request.method.method,
               path = i.request.path,
               headers = i.request.headers,
-              body = requestBody
+              body = i.request.body
             ),
             response = InteractionResponse(
               status = i.response.status,
               headers = i.response.headers,
-              body = responseBody
+              body = i.response.body
             )
           )
         }
       )
     )
-
-  private def jsonStringToAnyRef(maybeJsonString: Option[String]): Option[AnyRef] = maybeJsonString.map(parse)
 
   implicit private val intToBoolean: Int => Boolean = v => v > 0
   implicit private val stringToBoolean: String => Boolean = v => v != ""
@@ -85,9 +69,3 @@ object ScalaPactContractWriter {
   implicit private def valueToOptional[A](value: A)(implicit p: A => Boolean): Option[A] = if(p(value)) Option(value) else None
 
 }
-
-case class Pact(provider: PactActor, consumer: PactActor, interactions: List[Interaction])
-case class PactActor(name: String)
-case class Interaction(providerState: Option[String], description: String, request: InteractionRequest, response: InteractionResponse)
-case class InteractionRequest(method: Option[String], path: Option[String], headers: Option[Map[String, String]], body: Option[AnyRef])
-case class InteractionResponse(status: Option[Int], headers: Option[Map[String, String]], body: Option[AnyRef])

@@ -2,9 +2,11 @@ name := "scalapact-core"
 
 organization := "com.itv"
 
-version := "0.0.1"
+version := "0.1.2-SNAPSHOT"
 
 scalaVersion := "2.11.7"
+
+crossScalaVersions := Seq("2.10.6", "2.11.7")
 
 libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "2.2.1" % "test",

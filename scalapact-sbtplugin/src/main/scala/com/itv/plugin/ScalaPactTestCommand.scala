@@ -1,12 +1,12 @@
 package com.itv.plugin
 
-import argonaut.Argonaut._
-import argonaut.{Argonaut, Json}
 import java.io.PrintWriter
+
+import com.itv.scalapactcore.{ScalaPactReader, ScalaPactWriter}
 import sbt._
+
 import scala.io.Source
 import scala.language.implicitConversions
-import scalaz.PLensFamily
 
 object ScalaPactTestCommand {
 
@@ -59,7 +59,7 @@ object ScalaPactTestCommand {
     //Yuk!
     var errorCount = 0
 
-    val pact = {
+    val pactList = {
       files.map { file =>
         val fileContents = try {
           val contents = Option(Source.fromFile(file).getLines().mkString)
@@ -74,7 +74,7 @@ object ScalaPactTestCommand {
             None
         }
         fileContents.flatMap { t =>
-          val option = t.parseOption
+          val option = ScalaPactReader.jsonStringToPact(t).toOption
           if (option.isEmpty) errorCount += 1
           option
         }
@@ -82,29 +82,18 @@ object ScalaPactTestCommand {
         .collect { case Some(s) => s }
     }
 
-    if (pact.nonEmpty) {
-      val head = pact.head
-      val combined = pact.tail.foldLeft(head) { (acc, json) =>
-        interactionsExtractor.mod(arrayCombiner(interactionsExtractor.get(json)), acc)
+    if (pactList.nonEmpty) {
+      val head = pactList.head
+      val combined = pactList.tail.foldLeft(head) { (accumulatedPact, nextPact) =>
+        accumulatedPact.copy(interactions = accumulatedPact.interactions ++ nextPact.interactions)
       }
 
-      ScalaPactContractWriter.writePactContracts(providerExtractor.get(head).getOrElse(""))(consumerExtractor.get(head).getOrElse(""))(combined.spaces2)
+      ScalaPactContractWriter.writePactContracts(combined.provider.name)(combined.consumer.name)(ScalaPactWriter.pactToJsonString(combined))
     }
 
     errorCount
   }
 
-  type NameExtractorReturnType = PLensFamily[Json, Json, Argonaut.JsonString, Argonaut.JsonString]
-  val interactionsExtractor = jObjectPL >=> jsonObjectPL("interactions") >=> jArrayPL
-
-  val arrayCombiner: Option[Argonaut.JsonArray] => Argonaut.JsonArray => Argonaut.JsonArray =
-    option => array => option.map(a => array ++ a).getOrElse(array) // TODO increment errorCount when None?
-
-  val nameExtractor: String => NameExtractorReturnType =
-    field => jObjectPL >=> jsonObjectPL(field) >=> jObjectPL >=> jsonObjectPL("name") >=> jStringPL
-
-  val providerExtractor = nameExtractor("provider")
-  val consumerExtractor = nameExtractor("consumer")
 }
 
 object ScalaPactContractWriter {
