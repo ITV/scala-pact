@@ -19,7 +19,7 @@ trait InteractionManager {
       matchMethods(i.request.method)(request.method) &&
         matchHeaders(i.request.headers)(request.headers) &&
         matchPaths(i.request.path)(request.path) &&
-        i.request.body == request.body
+        matchBodies(i.request.body)(request.body)
     }
   }
 
@@ -50,6 +50,9 @@ object InteractionMatchers {
 
   val matchPaths: Option[String] => Option[String] => Boolean = expected => received =>
     generalMatcher(expected, received, (e: String, r: String) => toPathStructure(e) == toPathStructure(r))
+
+  val matchBodies: Option[String] => Option[String] => Boolean = expected => received =>
+    generalMatcher(expected, received, (e: String, r: String) => e == r)
 
   private def generalMatcher[A](expected: Option[A], received: Option[A], predictate: (A, A) => Boolean): Boolean =
     (expected |@| received) { predictate } match {
