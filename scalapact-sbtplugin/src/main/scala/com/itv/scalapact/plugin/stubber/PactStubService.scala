@@ -39,7 +39,7 @@ object PactStubService {
   }
 
   private def matchRequestWithResponse(req: Request): scalaz.concurrent.Task[Response] = {
-    if(isAdminCall(req)) Ok(InteractionManager.getInteractions.mkString("\n")) //TODO:
+    if(isAdminCall(req)) Ok(InteractionManager.getInteractions.mkString("\n")) //TODO: Different admin calls should do different things...
     else {
 
       import HeaderImplicitConversions._
