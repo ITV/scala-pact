@@ -1,8 +1,8 @@
-package com.itv.plugin
+package com.itv.scalapact.plugin
 
-import com.itv.plugin.stubber.ScalaPactStubberCommand
-import com.itv.plugin.tester.ScalaPactTestCommand
-import com.itv.plugin.verifier.ScalaPactVerifyCommand
+import com.itv.scalapact.plugin.stubber.ScalaPactStubberCommand
+import com.itv.scalapact.plugin.tester.ScalaPactTestCommand
+import com.itv.scalapact.plugin.verifier.ScalaPactVerifyCommand
 import sbt.Keys._
 import sbt._
 

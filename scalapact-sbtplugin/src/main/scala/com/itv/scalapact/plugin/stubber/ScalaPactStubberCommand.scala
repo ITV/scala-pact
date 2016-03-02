@@ -1,4 +1,4 @@
-package com.itv.plugin.stubber
+package com.itv.scalapact.plugin.stubber
 
 import sbt._
 

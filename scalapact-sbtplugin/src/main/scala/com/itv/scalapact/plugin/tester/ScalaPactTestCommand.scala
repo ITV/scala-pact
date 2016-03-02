@@ -1,4 +1,4 @@
-package com.itv.plugin.tester
+package com.itv.scalapact.plugin.tester
 
 import java.io.PrintWriter
 

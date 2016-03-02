@@ -1,4 +1,4 @@
-package com.itv.plugin.verifier
+package com.itv.scalapact.plugin.verifier
 
 import sbt._
 

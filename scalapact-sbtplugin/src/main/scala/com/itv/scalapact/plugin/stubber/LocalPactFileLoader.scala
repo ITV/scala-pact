@@ -1,9 +1,8 @@
-package com.itv.plugin.stubber
+package com.itv.scalapact.plugin.stubber
 
 import java.io.File
 
 import com.itv.scalapactcore.{Pact, ScalaPactReader}
-import sbt._
 
 import scalaz.\/-
 

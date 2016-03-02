@@ -1,21 +1,8 @@
-package com.itv.plugin.stubber
+package com.itv.scalapact.plugin.stubber
 
 object StubArguments {
   lazy val parseArguments: Seq[String] => Arguments = args =>
-    (pair andThen buildConfigMap)(args.toList)
-
-  private lazy val pair: List[String] => Map[String, String] = list => {
-    @annotation.tailrec
-    def rec[A](l: List[A], acc: List[Map[A, A]]): List[Map[A, A]] = {
-      l match {
-        case Nil => acc
-        case x :: Nil => acc
-        case x :: xs => rec(l.drop(2), Map(x -> xs.head) :: acc)
-      }
-    }
-
-    rec(list, Nil).foldLeft(Map[String, String]())(_ ++ _)
-  }
+    (Convertors.pair andThen buildConfigMap)(args.toList)
 
   private lazy val buildConfigMap: Map[String, String] => Arguments = argMap =>
     Arguments(
@@ -30,6 +17,23 @@ object StubArguments {
     } catch {
       case e: Throwable => None
     }
+}
+
+object Convertors {
+
+  lazy val pair: List[String] => Map[String, String] = list => {
+    @annotation.tailrec
+    def rec[A](l: List[A], acc: List[Map[A, A]]): List[Map[A, A]] = {
+      l match {
+        case Nil => acc
+        case x :: Nil => acc
+        case x :: xs => rec(l.drop(2), Map(x -> xs.head) :: acc)
+      }
+    }
+
+    rec(list, Nil).foldLeft(Map[String, String]())(_ ++ _)
+  }
+
 }
 
 case class Arguments(host: String, port: Int, localPactPath: Option[String])

@@ -1,12 +1,11 @@
-package com.itv.plugin.stubber
+package com.itv.scalapact.plugin.stubber
 
 import org.http4s.dsl.{->, /, Root, _}
 import org.http4s.server.blaze.BlazeBuilder
-import org.http4s.{HttpService, Request, Response, Status}
 import org.http4s.util.CaseInsensitiveString
+import org.http4s.{HttpService, Request, Response, Status}
 
 import scalaz.{-\/, \/-}
-
 
 object PactStubService {
 
@@ -42,7 +41,17 @@ object PactStubService {
   private def matchRequestWithResponse(req: Request): scalaz.concurrent.Task[Response] = {
     if(isAdminCall(req)) Ok(InteractionManager.getInteractions.mkString("\n")) //TODO:
     else {
-      val interaction = InteractionManager.findMatchingInteraction(req)
+
+      import HeaderImplicitConversions._
+
+      val rd = RequestDetails(
+        method = Option(req.method.name.toUpperCase),
+        headers = Option(req.headers),
+        path = Option(req.pathInfo),
+        body = req.bodyAsText.runLast.run
+      )
+
+      val interaction = InteractionManager.findMatchingInteraction(rd)
 
       if(interaction.isEmpty) NotFound("No interaction found for request: " + req.method.name.toUpperCase + " " + req.pathInfo)
       else {
