@@ -10,40 +10,13 @@ object InteractionManager extends InteractionManager
 //Use trait for testing or you'll have race conditions!
 trait InteractionManager {
 
+  import InteractionMatchers._
+
   private var interactions = List.empty[Interaction]
-
-  private val matchHeaders: Option[Map[String, String]] => Option[Map[String, String]] => Boolean = expected => received =>
-    (expected |@| received) { (e, r) => e.toSet.subsetOf(r.toSet) } match {
-      case Some(s) => s
-      case None => true
-    }
-
-  private val toPathStructure: String => PathStructure = fullPath => {
-    if(fullPath.isEmpty) PathStructure("", Map.empty[String, String])
-    else {
-      fullPath.split('?').toList match {
-        case Nil => PathStructure("", Map.empty[String, String]) //should never happen
-        case x :: Nil => PathStructure(x, Map.empty[String, String])
-        case x :: xs =>
-
-          val params: Map[String, String] = Convertors.pair(xs.mkString.split('&').toList.flatMap(p => p.split('=').toList))
-
-          PathStructure(x, params)
-      }
-    }
-  }
-
-  private val matchPaths: Option[String] => Option[String] => Boolean = expected => received =>
-    (expected |@| received) { (e, r) =>
-      toPathStructure(e) == toPathStructure(r)
-    } match {
-      case Some(s) => s
-      case None => true
-    }
 
   def findMatchingInteraction(request: RequestDetails): Option[Interaction] = {
     interactions.find{ i =>
-      i.request.method == request.method &&
+      matchMethods(i.request.method)(request.method) &&
         matchHeaders(i.request.headers)(request.headers) &&
         matchPaths(i.request.path)(request.path) &&
         i.request.body == request.body
@@ -63,3 +36,39 @@ trait InteractionManager {
 case class PathStructure(path: String, params: Map[String, String])
 
 case class RequestDetails(method: Option[String], headers: Option[Map[String, String]], path: Option[String], body: Option[String])
+
+object InteractionMatchers {
+
+  val matchStatusCodes: Option[Int] => Option[Int] => Boolean = expected => received =>
+    generalMatcher(expected, received, (e: Int, r: Int) => e == r)
+
+  val matchMethods: Option[String] => Option[String] => Boolean = expected => received =>
+    generalMatcher(expected, received, (e: String, r: String) => e == r)
+
+  val matchHeaders: Option[Map[String, String]] => Option[Map[String, String]] => Boolean = expected => received =>
+    generalMatcher(expected, received, (e: Map[String, String], r: Map[String, String]) => e.toSet.subsetOf(r.toSet))
+
+  val matchPaths: Option[String] => Option[String] => Boolean = expected => received =>
+    generalMatcher(expected, received, (e: String, r: String) => toPathStructure(e) == toPathStructure(r))
+
+  private def generalMatcher[A](expected: Option[A], received: Option[A], predictate: (A, A) => Boolean): Boolean =
+    (expected |@| received) { predictate } match {
+      case Some(s) => s
+      case None => true
+    }
+
+  private lazy val toPathStructure: String => PathStructure = fullPath => {
+    if(fullPath.isEmpty) PathStructure("", Map.empty[String, String])
+    else {
+      fullPath.split('?').toList match {
+        case Nil => PathStructure("", Map.empty[String, String]) //should never happen
+        case x :: Nil => PathStructure(x, Map.empty[String, String])
+        case x :: xs =>
+
+          val params: Map[String, String] = Convertors.pair(xs.mkString.split('&').toList.flatMap(p => p.split('=').toList))
+
+          PathStructure(x, params)
+      }
+    }
+  }
+}
