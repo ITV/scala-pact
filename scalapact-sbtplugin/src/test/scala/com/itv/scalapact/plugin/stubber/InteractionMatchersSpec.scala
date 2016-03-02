@@ -145,6 +145,28 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
 
     }
 
+    it("should be able to handle missing bodies and no expectation of bodies") {
+
+      val expected = "hello there!"
+
+      withClue("None expected, none received") {
+        matchBodies(Map.empty[String, String])(None)(None) shouldEqual true
+      }
+
+      withClue("Some expected, none received") {
+        matchBodies(Map.empty[String, String])(Some("hello"))(None) shouldEqual false
+      }
+
+      // Forgiving about what we receive
+      withClue("None expected, some received") {
+        matchBodies(Map.empty[String, String])(None)(Some("hello")) shouldEqual true
+      }
+      withClue("Some expected, some received") {
+        matchBodies(Map.empty[String, String])(Some("hello"))(Some("hello")) shouldEqual true
+      }
+
+    }
+
     it("should be able to match json bodies") {
 
       val expected =

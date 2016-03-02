@@ -71,15 +71,23 @@ object InteractionMatchers {
   }
 
   private def generalMatcher[A](expected: Option[A], received: Option[A], predictate: (A, A) => Boolean): Boolean = {
-    if(expected.isEmpty && received.isEmpty) true
-    else {
-      (expected |@| received) {
-        predictate
-      } match {
-        case Some(s) => s
-        case None => true
-      }
+    (expected, received) match {
+      case (None, None) => true
+      case (None, Some(r)) => true
+      case (Some(e), None) => false
+      case (Some(e), Some(r)) => predictate(e, r)
     }
+
+//    if(expected.isEmpty && received.isEmpty) true
+//    else {
+//      if(expected.isEmpty && received.isDefined)
+//      (expected |@| received) {
+//        predictate
+//      } match {
+//        case Some(s) => s
+//        case None => true
+//      }
+//    }
   }
 
   private lazy val toPathStructure: String => PathStructure = fullPath => {
