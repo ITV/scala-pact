@@ -1,19 +1,24 @@
 package com.itv.plugin
 
+import com.itv.scalapactcore.{Interaction, Pact, ScalaPactReader}
 import org.http4s._
 import org.http4s.dsl._
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.util.CaseInsensitiveString
 import sbt._
 
+import scalaz.\/-
+
 object ScalaPactStubberCommand {
   lazy val pactStubberCommandHyphen: Command = Command.args("pact-stubber", "<options>")(pactStubber)
   lazy val pactStubberCommandCamel: Command = Command.args("pactStubber", "<options>")(pactStubber)
 
   private lazy val pactStubber: (State, Seq[String]) => State = (state, args) => {
+    val pactTestedState = Command.process("pact-test", state)
+
     (StubArguments.parseArguments andThen LocalFileLoader.loadPactFiles andThen startServer)(args)
 
-    state
+    pactTestedState
   }
 
   private lazy val startServer: Arguments => Unit = config => {
@@ -61,7 +66,7 @@ object StubArguments {
 
 object LocalFileLoader {
 
-  private val recursiveJsonLoad: File => List[String] = path => {
+  private val recursiveJsonLoad: File => List[String] = file => {
     @annotation.tailrec
     def rec(files: List[File], acc: List[String]): List[String] = {
       files match {
@@ -73,20 +78,20 @@ object LocalFileLoader {
           Nil
 
         case x :: xs if x.isDirectory =>
-          rec(x.listFiles().toList.filter(_.getName.endsWith(".json")) ++ files, acc)
+          rec(x.listFiles().toList ++ xs, acc)
 
-        case x :: xs if x.isFile =>
+        case x :: xs if x.isFile && x.getName.endsWith(".json") =>
           println("Loading pact file: " + x.getName)
-          rec(files, scala.io.Source.fromURL(x.toURI.toURL).getLines().mkString("\n") :: acc)
+          rec(xs, scala.io.Source.fromURL(x.toURI.toURL).getLines().mkString("\n") :: acc)
 
         case _ =>
-          println("Aborting, problem reading the pact files at location: " + path.getCanonicalPath)
+          println("Aborting, problem reading the pact files at location: " + file.getCanonicalPath)
           Nil
       }
     }
 
     try {
-      rec(List(path).filter(_.getName.endsWith(".json")), Nil)
+      rec(List(file), Nil)
     } catch {
       case e: SecurityException =>
         println("Did not have permission to access the provided path, message:\n" + e.getMessage)
@@ -99,15 +104,15 @@ object LocalFileLoader {
 
   private val deserialiseIntoPact: List[String] => List[Pact] = pactJsonStrings => {
     pactJsonStrings.map { json =>
-      //TODO: More nonsense
-      Pact("fish")
-    }
+      ScalaPactReader.jsonStringToPact(json)
+    }.collect { case \/-(p) => p }
   }
 
   private val addToInteractionManager: List[Pact] => Unit = pacts => {
-    // TODO:
-
-    ()
+    pacts.foreach { p =>
+      println(">Adding interactions:\n> - " + p.interactions.mkString("\n> - "))
+      InteractionManager.addInteractions(p.interactions)
+    }
   }
 
   lazy val loadPactFiles: Arguments => Arguments = config => {
@@ -115,7 +120,7 @@ object LocalFileLoader {
     // mutably so that they can be updated. The only way around this, I think,
     // would be to start new servers on update? Or some sort of foldp to update
     // the model?
-    config.localPactPath match {
+    config.localPactPath.orElse(Option("target/pacts")) match {
       case Some(path) =>
         (recursiveJsonLoad andThen deserialiseIntoPact andThen addToInteractionManager) (new File(path))
 
@@ -144,10 +149,6 @@ object InteractionManager {
 
 }
 
-// TODO: Clearly nonesense...
-case class Pact(id: String)
-case class Interaction(id: String)
-
 case class Arguments(host: String, port: Int, localPactPath: Option[String])
 
 object PactStubService {
@@ -159,8 +160,8 @@ object PactStubService {
   val service = HttpService {
 
     case req @ GET -> Root / path =>
-
-      Ok("GET " + req.pathInfo + " isAdmin: " + isAdminCall(req))
+      if(isAdminCall(req)) Ok(InteractionManager.getInteractions.mkString("\n"))
+      else Ok("GET " + req.pathInfo)
 
     case req @ PUT -> Root / path =>
       Ok("PUT " + req.pathInfo + " isAdmin: " + isAdminCall(req))
