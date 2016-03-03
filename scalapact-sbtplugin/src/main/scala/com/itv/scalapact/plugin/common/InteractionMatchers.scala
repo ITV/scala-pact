@@ -13,7 +13,7 @@ object InteractionMatchers {
     interactions.find { ir =>
       matchMethods(ir.request.method.orElse(Option("GET")))(received.method) &&
         matchHeaders(ir.request.headers)(received.headers) &&
-        matchPaths(ir.request.path.orElse(Option("/")))(received.path) &&
+        matchPaths(ir.request.path.orElse(Option("/")))(ir.request.query)(received.path)(received.query) &&
         matchBodies(received.headers)(ir.request.body)(received.body)
     } match {
       case Some(matching) => matching.right
@@ -60,8 +60,17 @@ object InteractionMatchers {
     generalMatcher(expected, received, predicate)
   }
 
-  lazy val matchPaths: Option[String] => Option[String] => Boolean = expected => received =>
-    generalMatcher(expected, received, (e: String, r: String) => toPathStructure(e) == toPathStructure(r))
+  lazy val matchPaths: Option[String] => Option[String] => Option[String] => Option[String] => Boolean = expectedPath => expectedQuery => receivedPath => receivedQuery => {
+    val expected = constructPath(expectedPath)(expectedQuery)
+    val received = constructPath(receivedPath)(receivedQuery)
+
+    generalMatcher(expected, received, (e: String, r: String) => {
+      val ex = toPathStructure(e)
+      val re = toPathStructure(r)
+
+      ex.path == re.path && equalListsOfTuples(ex.params, re.params)
+    })
+  }
 
   lazy val matchBodies: Option[Map[String, String]] => Option[String] => Option[String] => Boolean = receivedHeaders => expected => received =>
     receivedHeaders match {
@@ -83,19 +92,44 @@ object InteractionMatchers {
       case (Some(e), Some(r)) => predictate(e, r)
     }
 
+  private lazy val constructPath: Option[String] => Option[String] => Option[String] = path => query => Option {
+    path.getOrElse("").split('?').toList ++ List(query.getOrElse("")) match {
+      case Nil => "/"
+      case x :: xs => List(x, xs.filter(!_.isEmpty).mkString("&")).mkString("?")
+    }
+  }
+
   private lazy val toPathStructure: String => PathStructure = fullPath =>
-    if(fullPath.isEmpty) PathStructure("", Map.empty[String, String])
+    if(fullPath.isEmpty) PathStructure("", Nil)
     else {
       fullPath.split('?').toList match {
-        case Nil => PathStructure("", Map.empty[String, String]) //should never happen
-        case x :: Nil => PathStructure(x, Map.empty[String, String])
+        case Nil => PathStructure("", Nil) //should never happen
+        case x :: Nil => PathStructure(x, Nil)
         case x :: xs =>
 
-          val params: Map[String, String] = Helpers.pair(xs.mkString.split('&').toList.flatMap(p => p.split('=').toList))
+          val params: List[(String, String)] = Helpers.pairTuples(xs.mkString.split('&').toList.flatMap(p => p.split('=').toList))
 
           PathStructure(x, params)
       }
     }
+
+  private def equalListsOfTuples(listA: List[(String, String)], listB: List[(String, String)]): Boolean = {
+    @annotation.tailrec
+    def rec(remaining: List[((String, String), Int)], compare: List[((String, String), Int)], equalSoFar: Boolean): Boolean = {
+      if(!equalSoFar) false
+      else {
+        remaining match {
+          case Nil => true
+          case x :: xs =>
+            rec(xs, compare, compare.exists(p => p._1._1 == x._1._1 && p._1._2 == x._1._2 && p._2 == x._2))
+        }
+      }
+    }
+
+    listA.groupBy(_._1)
+      .map(p => rec(p._2.zipWithIndex, listB.groupBy(_._1).getOrElse(p._1, Nil).zipWithIndex, equalSoFar = true))
+      .forall(_ == true)
+  }
 }
 
-case class PathStructure(path: String, params: Map[String, String])
+case class PathStructure(path: String, params: List[(String, String)])

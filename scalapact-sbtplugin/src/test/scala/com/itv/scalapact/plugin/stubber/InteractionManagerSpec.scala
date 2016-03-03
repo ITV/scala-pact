@@ -18,6 +18,7 @@ class InteractionManagerSpec extends FunSpec with Matchers {
       val requestDetails = InteractionRequest(
         method = "GET",
         headers = None,
+        query = None,
         path = "/foo",
         body = None
       )
@@ -28,6 +29,7 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         request = InteractionRequest(
           method = "GET",
           path = "/foo",
+          query = None,
           headers = None,
           body = None
         ),
@@ -66,6 +68,7 @@ class InteractionManagerSpec extends FunSpec with Matchers {
           )
         ),
         path = "/foo",
+        query = None,
         body = None
       )
 
@@ -75,6 +78,7 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         request = InteractionRequest(
           method = "GET",
           path = "/foo",
+          query = None,
           headers = None,
           body = None
         ),
@@ -103,12 +107,14 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         method = "GET",
         headers = Map("fish" -> "chips"),
         path = "/foo",
+        query = None,
         body = None
       )
       val requestDetails2 = InteractionRequest(
         method = "GET",
         headers = Map("fish" -> "peas"),
         path = "/foo",
+        query = None,
         body = None
       )
 
@@ -118,6 +124,7 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         request = InteractionRequest(
           method = "GET",
           path = "/foo",
+          query = None,
           headers = Map("fish" -> "chips"),
           body = None
         ),
@@ -145,6 +152,7 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         method = "GET",
         headers = Map("Content-Type" -> "text/plain; charset=uft-8", "Content-Length" -> "0", "Accept" -> "application/json"),
         path = "/foo",
+        query = None,
         body = None
       )
 
@@ -154,6 +162,7 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         request = InteractionRequest(
           method = "GET",
           path = "/foo",
+          query = None,
           headers = Map("Accept" -> "application/json"),
           body = None
         ),
@@ -182,6 +191,7 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         method = "GET",
         headers = None,
         path = "/foo/bar/hello",
+        query = None,
         body = None
       )
 
@@ -189,6 +199,7 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         method = "GET",
         headers = None,
         path = "/foo/bar/hello/",
+        query = None,
         body = None
       )
 
@@ -198,6 +209,7 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         request = InteractionRequest(
           method = "GET",
           path = "/foo/bar/hello",
+          query = None,
           headers = None,
           body = None
         ),
@@ -225,6 +237,7 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         method = "GET",
         headers = None,
         path = "/foo/bar/hello?id=1234&name=joe",
+        query = None,
         body = None
       )
 
@@ -232,12 +245,31 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         method = "GET",
         headers = None,
         path = "/foo/bar/hello?name=joe&id=1234",
+        query = None,
         body = None
       )
+
+      val goodRequestDetails3 = InteractionRequest(
+        method = "GET",
+        headers = None,
+        path = "/foo/bar/hello?name=joe",
+        query = Option("id=1234"),
+        body = None
+      )
+
+      val goodRequestDetails4 = InteractionRequest(
+        method = "GET",
+        headers = None,
+        path = "/foo/bar/hello",
+        query = Option("name=joe&id=1234"),
+        body = None
+      )
+
       val badRequestDetails1 = InteractionRequest(
         method = "GET",
         headers = None,
         path = "/foo/bar/hello?name=joe&id=1234&occupation=troubleMaker",
+        query = None,
         body = None
       )
 
@@ -247,6 +279,7 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         request = InteractionRequest(
           method = "GET",
           path = "/foo/bar/hello?id=1234&name=joe",
+          query = None,
           headers = None,
           body = None
         ),
@@ -259,9 +292,25 @@ class InteractionManagerSpec extends FunSpec with Matchers {
 
       interactionManager.addInteraction(interaction)
 
-      interactionManager.findMatchingInteraction(goodRequestDetails1).toOption.isDefined shouldEqual true
-      interactionManager.findMatchingInteraction(goodRequestDetails2).toOption.isDefined shouldEqual true
-      interactionManager.findMatchingInteraction(badRequestDetails1).toOption.isDefined shouldEqual false
+      withClue("goodRequestDetails1") {
+        interactionManager.findMatchingInteraction(goodRequestDetails1).toOption.isDefined shouldEqual true
+      }
+
+      withClue("goodRequestDetails2") {
+        interactionManager.findMatchingInteraction(goodRequestDetails2).toOption.isDefined shouldEqual true
+      }
+
+      withClue("goodRequestDetails3") {
+        interactionManager.findMatchingInteraction(goodRequestDetails3).toOption.isDefined shouldEqual true
+      }
+
+      withClue("goodRequestDetails4") {
+        interactionManager.findMatchingInteraction(goodRequestDetails4).toOption.isDefined shouldEqual true
+      }
+
+      withClue("badRequestDetails1") {
+        interactionManager.findMatchingInteraction(badRequestDetails1).toOption.isDefined shouldEqual false
+      }
 
     }
 

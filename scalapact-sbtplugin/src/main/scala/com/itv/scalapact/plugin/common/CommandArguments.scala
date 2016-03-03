@@ -34,6 +34,19 @@ object Helpers {
     rec(list, Nil).foldLeft(Map[String, String]())(_ ++ _)
   }
 
+  val pairTuples: List[String] => List[(String, String)] = list => {
+    @annotation.tailrec
+    def rec[A](l: List[A], acc: List[(A, A)]): List[(A, A)] = {
+      l match {
+        case Nil => acc
+        case x :: Nil => acc
+        case x :: xs => rec(l.drop(2), (x, xs.head) :: acc)
+      }
+    }
+
+    rec(list, Nil).foldLeft(List[(String, String)]())((a, b) => b :: a)
+  }
+
   val safeStringToInt: String => Option[Int] = s =>
     try {
       Option(s.toInt)

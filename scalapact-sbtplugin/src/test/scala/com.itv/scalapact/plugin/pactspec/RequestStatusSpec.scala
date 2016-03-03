@@ -39,7 +39,6 @@ class RequestStatusSpec extends FunSpec with Matchers {
     }
 
     it("should check the request query specs") {
-      pending
       testSpecs(
         List(
           fetchSpec("/request/query/different order.json"),

@@ -42,10 +42,10 @@ object Verifier {
 
     try {
       InteractionRequest.unapply(interactionRequest) match {
-        case Some((Some(method), Some(path), _, _)) =>
+        case Some((Some(method), Some(path), params, _, _)) =>
 
           httpResponseToInteractionResponse {
-            val basicRequest = Http(baseUrl + path)
+            val basicRequest = Http(baseUrl + path + params.map(s => "?" + s).getOrElse(""))
 
             val withData =
               if (interactionRequest.body.isDefined) basicRequest.postData(interactionRequest.body.get)
