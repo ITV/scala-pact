@@ -125,7 +125,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
       matchPaths(expected)(None)("/foo/bar/hello?hobby=skiing&name=joey&id=abc123&job=dentist")(None) shouldEqual true
       matchPaths(expected)(None)("/foo/bar/hello?hobby=skiing&name=joey")("id=abc123&job=dentist") shouldEqual true
       matchPaths(expected)(None)("/foo/bar/hello?hobby=skiing")(None) shouldEqual false
-      matchPaths("/foo/bar/hello")(None)("/foo/bar/hello?hobby=skiing")(None) shouldEqual false
+      matchPaths("/foo/bar/hello")(None)("/foo/bar/hello?hobby=skiing")(None) shouldEqual true // forgiving in what you receive...
 
     }
 

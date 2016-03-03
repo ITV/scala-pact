@@ -309,7 +309,8 @@ class InteractionManagerSpec extends FunSpec with Matchers {
       }
 
       withClue("badRequestDetails1") {
-        interactionManager.findMatchingInteraction(badRequestDetails1).toOption.isDefined shouldEqual false
+        //Forgiving in what you receive...
+        interactionManager.findMatchingInteraction(badRequestDetails1).toOption.isDefined shouldEqual true
       }
 
     }
