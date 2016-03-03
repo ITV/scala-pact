@@ -37,18 +37,25 @@ object ScalaPactContractWriter {
     ()
   }
 
-  private def producePactJson(pactDescription: ScalaPactDescriptionFinal): String =
+  private def producePactJson(pactDescription: ScalaPactDescriptionFinal): String = {
     ScalaPactWriter.pactToJsonString(
       Pact(
         provider = PactActor(pactDescription.provider),
         consumer = PactActor(pactDescription.consumer),
         interactions = pactDescription.interactions.map { i =>
+
+          val pathAndQuery: (String, String) = i.request.path.split('?').toList ++ List(i.request.query.getOrElse("")) match {
+            case Nil => ("/", "")
+            case x :: xs => (x, xs.filter(!_.isEmpty).mkString("&"))
+          }
+
           Interaction(
             providerState = i.providerState,
             description = i.description,
             request = InteractionRequest(
               method = i.request.method.method,
-              path = i.request.path,
+              path = pathAndQuery._1,
+              query = pathAndQuery._2,
               headers = i.request.headers,
               body = i.request.body
             ),
@@ -61,6 +68,7 @@ object ScalaPactContractWriter {
         }
       )
     )
+  }
 
   implicit private val intToBoolean: Int => Boolean = v => v > 0
   implicit private val stringToBoolean: String => Boolean = v => v != ""

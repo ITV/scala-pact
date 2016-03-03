@@ -71,18 +71,25 @@ object ScalaPactMock extends LazyLogging {
       val requestContentType = findContentType(i.request.headers)
       val responseContentType = findContentType(i.response.headers)
 
+      val constructedPath = i.request.path.split('?').toList ++ List(i.request.query.getOrElse("")) match {
+        case Nil => "/"
+        case x :: xs => List(x, xs.filter(!_.isEmpty).mkString("&")).mkString("?")
+      }
+
       logger.info(">------------------------------------")
       logger.info("> Adding ScalaPact mock expectation:")
       logger.info("> > ScalaPact mock expecting:\n" + i.request)
       logger.info("> > Derived Content-Type for expected request: " + requestContentType)
       logger.info("> > ScalaPact mock will respond with:\n" + i.response)
       logger.info("> > Found Content-Type to use in response: " + responseContentType)
+      logger.info("> > Constructed path: " + constructedPath)
+
 
       i.request.method match {
         case GET =>
           injectStub(
             wireMockServer = wireMockServer,
-            mappingBuilder = get(urlEqualTo(i.request.path)),
+            mappingBuilder = get(urlEqualTo(constructedPath)),
             request = i.request,
             response = i.response
           )
@@ -90,7 +97,7 @@ object ScalaPactMock extends LazyLogging {
         case POST =>
           injectStub(
             wireMockServer = wireMockServer,
-            mappingBuilder = post(urlEqualTo(i.request.path)),
+            mappingBuilder = post(urlEqualTo(constructedPath)),
             request = i.request,
             response = i.response
           )
@@ -98,7 +105,7 @@ object ScalaPactMock extends LazyLogging {
         case PUT =>
           injectStub(
             wireMockServer = wireMockServer,
-            mappingBuilder = put(urlEqualTo(i.request.path)),
+            mappingBuilder = put(urlEqualTo(constructedPath)),
             request = i.request,
             response = i.response
           )
@@ -106,7 +113,7 @@ object ScalaPactMock extends LazyLogging {
         case DELETE =>
           injectStub(
             wireMockServer = wireMockServer,
-            mappingBuilder = delete(urlEqualTo(i.request.path)),
+            mappingBuilder = delete(urlEqualTo(constructedPath)),
             request = i.request,
             response = i.response
           )

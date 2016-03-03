@@ -47,12 +47,13 @@ object ScalaPactForger {
     def given(state: String): ScalaPactInteraction = new ScalaPactInteraction(description, Option(state), request, response)
 
 
-    def uponReceiving(path: String): ScalaPactInteraction = uponReceiving(GET, path, Map.empty, None)
-    def uponReceiving(method: ScalaPactMethod, path: String): ScalaPactInteraction = uponReceiving(method, path, Map.empty, None)
-    def uponReceiving(method: ScalaPactMethod, path: String, headers: Map[String, String], body: Option[String]): ScalaPactInteraction = new ScalaPactInteraction(
+    def uponReceiving(path: String): ScalaPactInteraction = uponReceiving(GET, path, None, Map.empty, None)
+    def uponReceiving(method: ScalaPactMethod, path: String): ScalaPactInteraction = uponReceiving(method, path, None, Map.empty, None)
+    def uponReceiving(method: ScalaPactMethod, path: String, query: Option[String]): ScalaPactInteraction = uponReceiving(method, path, query, Map.empty, None)
+    def uponReceiving(method: ScalaPactMethod, path: String, query: Option[String], headers: Map[String, String], body: Option[String]): ScalaPactInteraction = new ScalaPactInteraction(
       description,
       providerState,
-      ScalaPactRequest(method, path, headers, body),
+      ScalaPactRequest(method, path, query, headers, body),
       response
     )
 
@@ -72,9 +73,9 @@ object ScalaPactForger {
   case class ScalaPactInteractionFinal(description: String, providerState: Option[String], request: ScalaPactRequest, response: ScalaPactResponse)
 
   object ScalaPactRequest {
-    val default = ScalaPactRequest(GET, "/", Map.empty, None)
+    val default = ScalaPactRequest(GET, "/", None, Map.empty, None)
   }
-  case class ScalaPactRequest(method: ScalaPactMethod, path: String, headers: Map[String, String], body: Option[String])
+  case class ScalaPactRequest(method: ScalaPactMethod, path: String, query: Option[String], headers: Map[String, String], body: Option[String])
 
   object ScalaPactResponse {
     val default = ScalaPactResponse(200, Map.empty, None)

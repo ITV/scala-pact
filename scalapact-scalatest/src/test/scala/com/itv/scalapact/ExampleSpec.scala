@@ -16,23 +16,48 @@ class ExampleSpec extends FunSpec with Matchers {
 
   describe("Example CDC Integration tests") {
 
-    it("Should be able to create a contract for a simple GET") {
+//    it("Should be able to create a contract for a simple GET") {
+//
+//      val endPoint = "/hello"
+//
+//      forgePact
+//        .between("My Consumer")
+//        .and("Their Provider Service")
+//        .describing("a simple get example")
+//        .addInteraction(
+//          interaction
+//            .description("Fetch a greeting")
+//            .uponReceiving(endPoint)
+//            .willRespondWith(200, "Hello there!")
+//        )
+//        .runConsumerTest { mockConfig =>
+//
+//          val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint, Map.empty)
+//
+//          result.status should equal(200)
+//          result.body should equal("Hello there!")
+//
+//        }
+//
+//    }
 
-      val endPoint = "/hello"
+    it("Should be able to create a contract for a GET request with query params") {
+
+      val endPoint = "/hello?location=london"
 
       forgePact
         .between("My Consumer")
         .and("Their Provider Service")
-        .describing("a simple get example")
+        .describing("a get example with query parameters")
         .addInteraction(
           interaction
             .description("Fetch a greeting")
-            .uponReceiving(endPoint)
+            .uponReceiving(GET, endPoint, Option("id=1&name=joe"))
             .willRespondWith(200, "Hello there!")
         )
         .runConsumerTest { mockConfig =>
 
-          val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint, Map.empty)
+          val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint + "&id=1&name=joe", Map.empty)
 
           result.status should equal(200)
           result.body should equal("Hello there!")
@@ -40,107 +65,107 @@ class ExampleSpec extends FunSpec with Matchers {
         }
 
     }
-
-    it("Should be able to create a contract for a simple GET with arbitrary headers") {
-
-      val endPoint = "/hello2"
-
-      forgePact
-        .between("My Consumer")
-        .and("Their Provider Service")
-        .describing("a simple get example with a header")
-        .addInteraction(
-          interaction
-            .description("Fetch a greeting")
-            .uponReceiving(GET, endPoint, Map("fish" -> "chips"), None)
-            .willRespondWith(200, "Hello there!")
-        )
-        .runConsumerTest { mockConfig =>
-
-          val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint, Map("fish" -> "chips"))
-
-          result.status should equal(200)
-          result.body should equal("Hello there!")
-
-        }
-
-    }
-
-    it("Should be able to create a contract for a GET request for JSON data") {
-
-      val data = Person("Joe", 25, "London", List("Fishing", "Karate"))
-
-      val endPoint = "/json"
-
-      forgePact
-        .between("My Consumer")
-        .and("Their Provider Service")
-        .describing("Get json example")
-        .addInteraction(
-          interaction
-            .description("Request for some json")
-            .uponReceiving(endPoint)
-            .willRespondWith(200, Map("Content-Type" -> "application/json"), Option(write(data)))
-        )
-        .runConsumerTest { mockConfig =>
-
-          val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint, Map())
-
-          withClue("Status mismatch") {
-            result.status should equal(200)
-          }
-
-          withClue("Headers did not match") {
-            result.headers.exists(h => h._1 == "Content-Type" && h._2 == "application/json")
-          }
-
-          withClue("Body did not match") {
-            (parse(result.body).extract[Person] == data) should equal(true)
-          }
-
-        }
-
-    }
-
-    it("Should be able to create a contract for posting json and getting an xml response") {
-
-      val requestData = Person("Joe", 25, "London", List("Fishing", "Karate"))
-
-      val responseXml = <a><b>Error in your json</b></a>
-
-      val endPoint = "/post-json"
-
-      val headers = Map("Content-Type" -> "application/json")
-
-      forgePact
-        .between("My Consumer")
-        .and("Their Provider Service")
-        .describing("POST JSON receive XML example")
-        .addInteraction(
-          interaction
-            .description("JSON Request for XML")
-            .uponReceiving(POST, endPoint, headers, Option(write(requestData)))
-            .willRespondWith(400, Map("Content-Type" -> "text/xml"), Option(responseXml.toString()))
-        )
-        .runConsumerTest { mockConfig =>
-
-          val result = SimpleClient.doPostRequest(mockConfig.baseUrl, endPoint, headers, write(requestData))
-
-          withClue("Status mismatch") {
-            result.status should equal(400)
-          }
-
-          withClue("Headers did not match") {
-            result.headers.exists(h => h._1 == "Content-Type" && h._2 == "text/xml")
-          }
-
-          withClue("Response body xml did not match") {
-            XML.loadString(result.body) should equal(responseXml)
-          }
-
-        }
-
-    }
+//
+//    it("Should be able to create a contract for a simple GET with arbitrary headers") {
+//
+//      val endPoint = "/hello2"
+//
+//      forgePact
+//        .between("My Consumer")
+//        .and("Their Provider Service")
+//        .describing("a simple get example with a header")
+//        .addInteraction(
+//          interaction
+//            .description("Fetch a greeting")
+//            .uponReceiving(GET, endPoint, None, Map("fish" -> "chips"), None)
+//            .willRespondWith(200, "Hello there!")
+//        )
+//        .runConsumerTest { mockConfig =>
+//
+//          val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint, Map("fish" -> "chips"))
+//
+//          result.status should equal(200)
+//          result.body should equal("Hello there!")
+//
+//        }
+//
+//    }
+//
+//    it("Should be able to create a contract for a GET request for JSON data") {
+//
+//      val data = Person("Joe", 25, "London", List("Fishing", "Karate"))
+//
+//      val endPoint = "/json"
+//
+//      forgePact
+//        .between("My Consumer")
+//        .and("Their Provider Service")
+//        .describing("Get json example")
+//        .addInteraction(
+//          interaction
+//            .description("Request for some json")
+//            .uponReceiving(endPoint)
+//            .willRespondWith(200, Map("Content-Type" -> "application/json"), Option(write(data)))
+//        )
+//        .runConsumerTest { mockConfig =>
+//
+//          val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint, Map())
+//
+//          withClue("Status mismatch") {
+//            result.status should equal(200)
+//          }
+//
+//          withClue("Headers did not match") {
+//            result.headers.exists(h => h._1 == "Content-Type" && h._2 == "application/json")
+//          }
+//
+//          withClue("Body did not match") {
+//            (parse(result.body).extract[Person] == data) should equal(true)
+//          }
+//
+//        }
+//
+//    }
+//
+//    it("Should be able to create a contract for posting json and getting an xml response") {
+//
+//      val requestData = Person("Joe", 25, "London", List("Fishing", "Karate"))
+//
+//      val responseXml = <a><b>Error in your json</b></a>
+//
+//      val endPoint = "/post-json"
+//
+//      val headers = Map("Content-Type" -> "application/json")
+//
+//      forgePact
+//        .between("My Consumer")
+//        .and("Their Provider Service")
+//        .describing("POST JSON receive XML example")
+//        .addInteraction(
+//          interaction
+//            .description("JSON Request for XML")
+//            .uponReceiving(POST, endPoint, None, headers, Option(write(requestData)))
+//            .willRespondWith(400, Map("Content-Type" -> "text/xml"), Option(responseXml.toString()))
+//        )
+//        .runConsumerTest { mockConfig =>
+//
+//          val result = SimpleClient.doPostRequest(mockConfig.baseUrl, endPoint, headers, write(requestData))
+//
+//          withClue("Status mismatch") {
+//            result.status should equal(400)
+//          }
+//
+//          withClue("Headers did not match") {
+//            result.headers.exists(h => h._1 == "Content-Type" && h._2 == "text/xml")
+//          }
+//
+//          withClue("Response body xml did not match") {
+//            XML.loadString(result.body) should equal(responseXml)
+//          }
+//
+//        }
+//
+//    }
 
   }
 
