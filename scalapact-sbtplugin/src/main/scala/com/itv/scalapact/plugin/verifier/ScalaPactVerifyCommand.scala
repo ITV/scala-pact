@@ -4,6 +4,8 @@ import com.itv.scalapact.plugin.common.CommandArguments._
 import com.itv.scalapact.plugin.common.LocalPactFileLoader._
 import sbt._
 
+import Verifier._
+
 object ScalaPactVerifyCommand {
 
   lazy val pactVerifyCommandHyphen: Command = Command.args("pact-verify", "<options>")(pactVerify)
@@ -13,12 +15,7 @@ object ScalaPactVerifyCommand {
 
     println("Placeholder for ScalaPact verification command")
 
-    // Replay all requests against a baseUrl
-
-    // Match each response against the expected response
-
-    // Report
-    (parseArguments andThen loadPactFiles("pacts"))(args)// andThen verify
+    (parseArguments andThen loadPactFiles("pacts") andThen verify)(args)
 
     state
   }

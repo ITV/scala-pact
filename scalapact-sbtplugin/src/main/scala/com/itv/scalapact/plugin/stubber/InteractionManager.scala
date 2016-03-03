@@ -1,7 +1,7 @@
 package com.itv.scalapact.plugin.stubber
 
-import com.itv.scalapact.plugin.common.InteractionMatchers
-import com.itv.scalapactcore.{InteractionRequest, Interaction}
+import com.itv.scalapact.plugin.common.{Arguments, ConfigAndPacts, InteractionMatchers}
+import com.itv.scalapactcore.{Pact, InteractionRequest, Interaction}
 
 import scalaz.\/
 
@@ -24,6 +24,15 @@ trait InteractionManager {
   def addInteractions(interactions: List[Interaction]): Unit = interactions.foreach(addInteraction)
 
   def clearInteractions(): Unit = interactions = List.empty[Interaction]
+
+  lazy val addToInteractionManager: ConfigAndPacts => Arguments = configAndPacts => {
+    configAndPacts.pacts.foreach { p =>
+      println(">Adding interactions:\n> - " + p.interactions.mkString("\n> - "))
+      addInteractions(p.interactions)
+    }
+
+    configAndPacts.arguments
+  }
 
 }
 

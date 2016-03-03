@@ -31,7 +31,11 @@ object PactImplicits {
 case class Pact(provider: PactActor, consumer: PactActor, interactions: List[Interaction])
 case class PactActor(name: String)
 case class Interaction(providerState: Option[String], description: String, request: InteractionRequest, response: InteractionResponse)
-case class InteractionRequest(method: Option[String], path: Option[String], headers: Option[Map[String, String]], body: Option[String])
+case class InteractionRequest(method: Option[String], path: Option[String], headers: Option[Map[String, String]], body: Option[String]) {
+  def unapply: Option[(Option[String], Option[String], Option[Map[String, String]], Option[String])] = Some {
+    (method, path, headers, body)
+  }
+}
 case class InteractionResponse(status: Option[Int], headers: Option[Map[String, String]], body: Option[String])
 
 object ScalaPactReader {

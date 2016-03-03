@@ -6,6 +6,7 @@ import sbt._
 import CommandArguments._
 import LocalPactFileLoader._
 import PactStubService._
+import InteractionManager._
 
 object ScalaPactStubberCommand {
 
@@ -15,7 +16,7 @@ object ScalaPactStubberCommand {
   private lazy val pactStubber: (State, Seq[String]) => State = (state, args) => {
     val pactTestedState = Command.process("pact-test", state)
 
-    (parseArguments andThen loadPactFiles("target/pacts") andThen startServer)(args)
+    (parseArguments andThen loadPactFiles("target/pacts") andThen addToInteractionManager andThen startServer)(args)
 
     pactTestedState
   }

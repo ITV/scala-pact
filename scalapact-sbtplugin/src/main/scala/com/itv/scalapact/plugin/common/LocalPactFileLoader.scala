@@ -51,26 +51,21 @@ object LocalPactFileLoader {
     }.collect { case \/-(p) => p }
   }
 
-  private val addToInteractionManager: List[Pact] => Unit = pacts => {
-    pacts.foreach { p =>
-      println(">Adding interactions:\n> - " + p.interactions.mkString("\n> - "))
-      InteractionManager.addInteractions(p.interactions)
-    }
-  }
-
-  lazy val loadPactFiles: String => Arguments => Arguments = defaultLocation => config => {
+  lazy val loadPactFiles: String => Arguments => ConfigAndPacts = defaultLocation => config => {
     // Side effecting, might as well be since the pacts are held statefully /
     // mutably so that they can be updated. The only way around this, I think,
     // would be to start new servers on update? Or some sort of foldp to update
     // the model?
-    config.localPactPath.orElse(Option(defaultLocation)) match {
+    val pacts = config.localPactPath.orElse(Option(defaultLocation)) match {
       case Some(path) =>
-        (recursiveJsonLoad andThen deserializeIntoPact andThen addToInteractionManager) (new File(path))
+        (recursiveJsonLoad andThen deserializeIntoPact) (new File(path))
 
-      case None => ()
+      case None => Nil
     }
 
-    config
+    ConfigAndPacts(config, pacts)
   }
 
 }
+
+case class ConfigAndPacts(arguments: Arguments, pacts: List[Pact])

@@ -19,7 +19,8 @@ object Build extends sbt.Build with BuildExtra {
       "org.http4s" %% "http4s-dsl"          % "0.12.1" withSources() withJavadoc(),
       "org.http4s" %% "http4s-argonaut"     % "0.12.1" withSources() withJavadoc(),
       "com.itv" % "scalapact-core_2.10" % "0.1.2-SNAPSHOT",
-      "org.scalatest" %% "scalatest" % "2.2.6" % "test"
+      "org.scalatest" %% "scalatest" % "2.2.6" % "test",
+      "org.scalaj" %% "scalaj-http" % "2.2.1"
     )
   )
 }
