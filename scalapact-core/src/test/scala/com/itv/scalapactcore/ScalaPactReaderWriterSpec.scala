@@ -9,8 +9,6 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
     it("should be able to read Pact files"){
       val pactEither = ScalaPactReader.jsonStringToPact(PactFileExamples.simpleAsString)
 
-      println(pactEither)
-
       pactEither.toOption.get shouldEqual PactFileExamples.simple
     }
 
