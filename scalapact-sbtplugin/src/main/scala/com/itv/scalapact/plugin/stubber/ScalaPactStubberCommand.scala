@@ -14,6 +14,11 @@ object ScalaPactStubberCommand {
   lazy val pactStubberCommandCamel: Command = Command.args("pactStubber", "<options>")(pactStubber)
 
   private lazy val pactStubber: (State, Seq[String]) => State = (state, args) => {
+
+    println("*************************************")
+    println("** ScalaPact: Running Stubber      **")
+    println("*************************************")
+
     val pactTestedState = Command.process("pact-test", state)
 
     (parseArguments andThen loadPactFiles("target/pacts") andThen addToInteractionManager andThen startServer)(args)

@@ -13,7 +13,9 @@ object ScalaPactVerifyCommand {
 
   private lazy val pactVerify: (State, Seq[String]) => State = (state, args) => {
 
-    println("Placeholder for ScalaPact verification command")
+    println("*************************************")
+    println("** ScalaPact: Running Verifier     **")
+    println("*************************************")
 
     (parseArguments andThen loadPactFiles("pacts") andThen verify)(args)
 

@@ -6,7 +6,8 @@ import com.itv.scalapactcore.{Interaction, Pact, InteractionResponse, Interactio
 import com.itv.scalapact.plugin.common.InteractionMatchers._
 
 import scalaj.http.{HttpResponse, Http}
-import scalaz.{-\/, \/-, \/}
+import scalaz._
+import Scalaz._
 
 object Verifier {
 
@@ -16,7 +17,7 @@ object Verifier {
       PactVerifyResult(
         pact = pact,
         results = pact.interactions.map { interaction =>
-          (doRequest(configAndPacts.arguments) andThen matchResponse(List(interaction)))(interaction.request)
+          (doRequest(configAndPacts.arguments) andThen attemptMatch(List(interaction)))(interaction.request)
         }
       )
     }
@@ -32,7 +33,10 @@ object Verifier {
     ()
   }
 
-  lazy val doRequest: Arguments => InteractionRequest => InteractionResponse = arguments => interactionRequest => {
+  private lazy val attemptMatch: List[Interaction] => \/[String, InteractionResponse] => \/[String, Interaction] = interactions => requestResult =>
+    requestResult.flatMap(matchResponse(interactions))
+
+  private lazy val doRequest: Arguments => InteractionRequest => \/[String, InteractionResponse] = arguments => interactionRequest => {
     val baseUrl = "http://" + arguments.host + ":" + arguments.port
 
     try {
@@ -54,18 +58,14 @@ object Verifier {
               withHeaders.method(method)
 
             withMethod.asString
-          }
+          }.right
 
-        case _ => InteractionResponse(None, None, None)
+        case _ => ("Invalid request was missing either method or path: " + interactionRequest).left
 
       }
     } catch {
       case e: Throwable =>
-        println("!!!!!!!!")
-        println("Error making request " + interactionRequest)
-        println("!!!!!!!!")
-        // I'm ok with just blowing up here at the moment...
-        throw e
+        e.getMessage.left
     }
   }
 
