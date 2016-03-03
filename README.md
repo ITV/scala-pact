@@ -134,6 +134,3 @@ The Pact integration test library itself depends on two Scala/Java libraries.
 - Write tests to run matcher code against official pact spec tests
 
 ## Longer term development TODO's
-- Add task to plugin to run a verifier
-  - Initially could use ruby verifier
-  - Later write our own, the hard part will be validating against the official spec files
