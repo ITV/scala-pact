@@ -7,6 +7,7 @@ import CommandArguments._
 import LocalPactFileLoader._
 import PactStubService._
 import InteractionManager._
+import com.itv.scalapact.plugin.common.Rainbow._
 
 object ScalaPactStubberCommand {
 
@@ -15,9 +16,9 @@ object ScalaPactStubberCommand {
 
   private lazy val pactStubber: (State, Seq[String]) => State = (state, args) => {
 
-    println("*************************************")
-    println("** ScalaPact: Running Stubber      **")
-    println("*************************************")
+    println("*************************************".white.bold)
+    println("** ScalaPact: Running Stubber      **".white.bold)
+    println("*************************************".white.bold)
 
     val pactTestedState = Command.process("pact-test", state)
 

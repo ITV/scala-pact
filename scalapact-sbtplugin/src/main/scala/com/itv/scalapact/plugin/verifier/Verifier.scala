@@ -8,6 +8,7 @@ import com.itv.scalapact.plugin.common.InteractionMatchers._
 import scalaj.http.{HttpResponse, Http}
 import scalaz._
 import Scalaz._
+import com.itv.scalapact.plugin.common.Rainbow._
 
 object Verifier {
 
@@ -23,10 +24,10 @@ object Verifier {
     }
 
     pactVerifyResults.foreach { result =>
-      println("Results for pact between " + result.pact.consumer + " and " + result.pact.provider)
+      println(("Results for pact between " + result.pact.consumer + " and " + result.pact.provider).white.bold)
       result.results.foreach {
-        case \/-(r) => println(" - [  OK  ] " + r.description)
-        case -\/(l) => println(" - [FAILED] " + l)
+        case \/-(r) => println((" - [  OK  ] " + r.description).green)
+        case -\/(l) => println((" - [FAILED] " + l).red)
       }
     }
 

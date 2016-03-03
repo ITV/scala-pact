@@ -1,16 +1,22 @@
 package com.itv.scalapact.plugin.common
+import com.itv.scalapact.plugin.common.Rainbow._
 
 object CommandArguments {
 
   val parseArguments: Seq[String] => Arguments = args =>
     (Helpers.pair andThen convertToArguments)(args.toList)
 
-  private lazy val convertToArguments: Map[String, String] => Arguments = argMap =>
-    Arguments(
+  private lazy val convertToArguments: Map[String, String] => Arguments = argMap => {
+    val args = Arguments(
       host = argMap.getOrElse("--host", "localhost"),
       port = argMap.get("--port").flatMap(Helpers.safeStringToInt).getOrElse(1234),
       localPactPath = argMap.get("--source")
     )
+
+    println(s"Starting up with host '${args.host}', port '${args.port}', and source path '${args.localPactPath.getOrElse("<default>")}'".white.bold)
+
+    args
+  }
 }
 
 object Helpers {

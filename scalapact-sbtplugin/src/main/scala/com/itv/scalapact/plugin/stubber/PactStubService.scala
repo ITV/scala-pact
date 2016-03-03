@@ -6,13 +6,14 @@ import org.http4s.dsl.{->, /, Root, _}
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.util.CaseInsensitiveString
 import org.http4s.{HttpService, Request, Response, Status}
+import com.itv.scalapact.plugin.common.Rainbow._
 
 import scalaz.{-\/, \/-}
 
 object PactStubService {
 
   lazy val startServer: Arguments => Unit = config => {
-    println("Starting ScalaPact Stubber on: http://" + config.host + ":" + config.port)
+    println(("Starting ScalaPact Stubber on: http://" + config.host + ":" + config.port).white.bold)
 
     BlazeBuilder.bindHttp(config.port, config.host)
       .mountService(PactStubService.service, "/")

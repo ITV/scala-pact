@@ -1,7 +1,8 @@
 package com.itv.scalapact.plugin.stubber
 
+import com.itv.scalapact.plugin.common.Rainbow._
 import com.itv.scalapact.plugin.common.{Arguments, ConfigAndPacts, InteractionMatchers}
-import com.itv.scalapactcore.{Pact, InteractionRequest, Interaction}
+import com.itv.scalapactcore.{Interaction, InteractionRequest}
 
 import scalaz.\/
 
@@ -27,7 +28,7 @@ trait InteractionManager {
 
   lazy val addToInteractionManager: ConfigAndPacts => Arguments = configAndPacts => {
     configAndPacts.pacts.foreach { p =>
-      println(">Adding interactions:\n> - " + p.interactions.mkString("\n> - "))
+      println(("> Adding interactions:\n> - " + p.interactions.mkString("\n> - ")).blue)
       addInteractions(p.interactions)
     }
 
@@ -35,5 +36,3 @@ trait InteractionManager {
   }
 
 }
-
-//case class RequestDetails(method: Option[String], headers: Option[Map[String, String]], path: Option[String], body: Option[String])

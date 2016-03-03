@@ -2,10 +2,10 @@ package com.itv.scalapact.plugin.common
 
 import java.io.File
 
-import com.itv.scalapact.plugin.stubber.InteractionManager
 import com.itv.scalapactcore.{Pact, ScalaPactReader}
 
 import scalaz.\/-
+import com.itv.scalapact.plugin.common.Rainbow._
 
 object LocalPactFileLoader {
 
@@ -17,18 +17,18 @@ object LocalPactFileLoader {
           acc
 
         case x :: xs if !x.exists() =>
-          println("Supplied pact path does not exist! Aborting file load.")
+          println("Supplied pact path does not exist! Aborting file load.".red)
           Nil
 
         case x :: xs if x.isDirectory =>
           rec(x.listFiles().toList ++ xs, acc)
 
         case x :: xs if x.isFile && x.getName.endsWith(".json") =>
-          println("Loading pact file: " + x.getName)
+          println(("Loading pact file: " + x.getName).bold)
           rec(xs, scala.io.Source.fromURL(x.toURI.toURL).getLines().mkString("\n") :: acc)
 
         case _ =>
-          println("Aborting, problem reading the pact files at location: " + file.getCanonicalPath)
+          println(("Aborting, problem reading the pact files at location: " + file.getCanonicalPath).red)
           Nil
       }
     }
@@ -37,10 +37,10 @@ object LocalPactFileLoader {
       rec(List(file), Nil)
     } catch {
       case e: SecurityException =>
-        println("Did not have permission to access the provided path, message:\n" + e.getMessage)
+        println(("Did not have permission to access the provided path, message:\n" + e.getMessage).red)
         Nil
       case e: Throwable =>
-        println("Problem reading from supplied path, message:\n" + e.getMessage)
+        println(("Problem reading from supplied path, message:\n" + e.getMessage).red)
         Nil
     }
   }
@@ -56,6 +56,9 @@ object LocalPactFileLoader {
     // mutably so that they can be updated. The only way around this, I think,
     // would be to start new servers on update? Or some sort of foldp to update
     // the model?
+
+    println(("Looking for pact files in: " + config.localPactPath.orElse(Option(defaultLocation)).getOrElse("")).white.bold)
+
     val pacts = config.localPactPath.orElse(Option(defaultLocation)) match {
       case Some(path) =>
         (recursiveJsonLoad andThen deserializeIntoPact) (new File(path))
