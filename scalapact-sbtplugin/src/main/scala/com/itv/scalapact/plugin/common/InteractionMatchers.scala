@@ -34,10 +34,31 @@ object InteractionMatchers {
     generalMatcher(expected, received, (e: Int, r: Int) => e == r)
 
   lazy val matchMethods: Option[String] => Option[String] => Boolean = expected => received =>
-    generalMatcher(expected, received, (e: String, r: String) => e == r)
+    generalMatcher(expected, received, (e: String, r: String) => e.toUpperCase == r.toUpperCase)
 
-  lazy val matchHeaders: Option[Map[String, String]] => Option[Map[String, String]] => Boolean = expected => received =>
-    generalMatcher(expected, received, (e: Map[String, String], r: Map[String, String]) => e.toSet.subsetOf(r.toSet))
+  lazy val matchHeaders: Option[Map[String, String]] => Option[Map[String, String]] => Boolean = expected => received => {
+
+    val legalCharSeparators = List('(',')','<','>','@',',',';',':','\\','"','/','[',']','?','=','{','}')
+
+    val correctSeparators: Char => String => String = separator => input =>
+      input.split(separator).toList.map(_.trim).mkString(separator.toString)
+
+    @annotation.tailrec
+    def trimAllSeparators(separators: List[Char], input: String): String = {
+      separators match {
+        case Nil => input
+        case x :: xs => trimAllSeparators(xs, correctSeparators(x)(input))
+      }
+    }
+
+    val predicate = (e: Map[String, String], r: Map[String, String]) => {
+      e.map(p => (p._1.toLowerCase, trimAllSeparators(legalCharSeparators, p._2)))
+        .toSet
+        .subsetOf(r.map(p => (p._1.toLowerCase, trimAllSeparators(legalCharSeparators, p._2))).toSet)
+    }
+
+    generalMatcher(expected, received, predicate)
+  }
 
   lazy val matchPaths: Option[String] => Option[String] => Boolean = expected => received =>
     generalMatcher(expected, received, (e: String, r: String) => toPathStructure(e) == toPathStructure(r))
