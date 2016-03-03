@@ -73,7 +73,7 @@ object ScalaPactMock extends LazyLogging {
 
       val constructedPath = i.request.path.split('?').toList ++ List(i.request.query.getOrElse("")) match {
         case Nil => "/"
-        case x :: xs => List(x, xs.filter(!_.isEmpty).mkString("&")).mkString("?")
+        case x :: xs => List(x, xs.filter(!_.isEmpty).mkString("&")).filterNot(_.isEmpty).mkString("?")
       }
 
       logger.info(">------------------------------------")
