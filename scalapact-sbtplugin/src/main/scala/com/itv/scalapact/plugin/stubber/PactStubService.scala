@@ -1,7 +1,7 @@
 package com.itv.scalapact.plugin.stubber
 
 import com.itv.scalapact.plugin.common.Arguments
-import com.itv.scalapactcore.{InteractionRequest, Pact, PactActor, ScalaPactWriter}
+import com.itv.scalapactcore._
 import org.http4s.dsl.{->, /, Root, _}
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.util.CaseInsensitiveString
@@ -43,9 +43,31 @@ object PactStubService {
 
   private def matchRequestWithResponse(req: Request): scalaz.concurrent.Task[Response] = {
     if(isAdminCall(req)) {
-      //TODO: Different admin calls should do different things...
-      val output = ScalaPactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), InteractionManager.getInteractions))
-      Ok(output)
+
+      req.method.name.toUpperCase match {
+        case m if m == "GET" =>
+          val output = ScalaPactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), InteractionManager.getInteractions))
+          Ok(output)
+
+        case m if m == "POST" || m == "PUT" =>
+          ScalaPactReader.jsonStringToPact(req.bodyAsText.runLast.run.getOrElse("")) match {
+            case \/-(r) =>
+              InteractionManager.addInteractions(r.interactions)
+
+              val output = ScalaPactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), InteractionManager.getInteractions))
+              Ok(output)
+
+            case -\/(l) =>
+              InternalServerError(l)
+          }
+
+        case m if m == "DELETE" =>
+          InteractionManager.clearInteractions()
+
+          val output = ScalaPactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), InteractionManager.getInteractions))
+          Ok(output)
+      }
+
     }
     else {
 
