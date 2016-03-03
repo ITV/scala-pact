@@ -1,7 +1,8 @@
-package com.itv.scalapact.plugin.stubber
+package com.itv.scalapact.plugin.common
 
 import java.io.File
 
+import com.itv.scalapact.plugin.stubber.InteractionManager
 import com.itv.scalapactcore.{Pact, ScalaPactReader}
 
 import scalaz.\/-
@@ -44,7 +45,7 @@ object LocalPactFileLoader {
     }
   }
 
-  private val deserialiseIntoPact: List[String] => List[Pact] = pactJsonStrings => {
+  private val deserializeIntoPact: List[String] => List[Pact] = pactJsonStrings => {
     pactJsonStrings.map { json =>
       ScalaPactReader.jsonStringToPact(json)
     }.collect { case \/-(p) => p }
@@ -57,14 +58,14 @@ object LocalPactFileLoader {
     }
   }
 
-  lazy val loadPactFiles: Arguments => Arguments = config => {
+  lazy val loadPactFiles: String => Arguments => Arguments = defaultLocation => config => {
     // Side effecting, might as well be since the pacts are held statefully /
     // mutably so that they can be updated. The only way around this, I think,
     // would be to start new servers on update? Or some sort of foldp to update
     // the model?
-    config.localPactPath.orElse(Option("target/pacts")) match {
+    config.localPactPath.orElse(Option(defaultLocation)) match {
       case Some(path) =>
-        (recursiveJsonLoad andThen deserialiseIntoPact andThen addToInteractionManager) (new File(path))
+        (recursiveJsonLoad andThen deserializeIntoPact andThen addToInteractionManager) (new File(path))
 
       case None => ()
     }

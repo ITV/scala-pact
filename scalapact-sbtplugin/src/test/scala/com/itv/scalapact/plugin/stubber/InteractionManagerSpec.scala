@@ -15,7 +15,7 @@ class InteractionManagerSpec extends FunSpec with Matchers {
     it("should be able to match a simple get request") {
       val interactionManager = new InteractionManager {}
 
-      val requestDetails = RequestDetails(
+      val requestDetails = InteractionRequest(
         method = "GET",
         headers = None,
         path = "/foo",
@@ -40,7 +40,7 @@ class InteractionManagerSpec extends FunSpec with Matchers {
 
       interactionManager.addInteraction(interaction)
 
-      val matched = interactionManager.findMatchingInteraction(requestDetails)
+      val matched = interactionManager.findMatchingInteraction(requestDetails).toOption
 
       matched.isDefined shouldEqual true
       matched.get.response.status shouldEqual Some(200)
@@ -49,7 +49,7 @@ class InteractionManagerSpec extends FunSpec with Matchers {
     it("should be able to match a less simple get request") {
       val interactionManager = new InteractionManager {}
 
-      val requestDetails = RequestDetails(
+      val requestDetails = InteractionRequest(
         method = "GET",
         headers = Option(
           Map(
@@ -87,7 +87,7 @@ class InteractionManagerSpec extends FunSpec with Matchers {
 
       interactionManager.addInteraction(interaction)
 
-      val matched = interactionManager.findMatchingInteraction(requestDetails)
+      val matched = interactionManager.findMatchingInteraction(requestDetails).toOption
 
       matched.isDefined shouldEqual true
       matched.get.response.status shouldEqual Some(200)
@@ -99,13 +99,13 @@ class InteractionManagerSpec extends FunSpec with Matchers {
     it("should be able to match a get request with a header") {
       val interactionManager = new InteractionManager {}
 
-      val requestDetails1 = RequestDetails(
+      val requestDetails1 = InteractionRequest(
         method = "GET",
         headers = Map("fish" -> "chips"),
         path = "/foo",
         body = None
       )
-      val requestDetails2 = RequestDetails(
+      val requestDetails2 = InteractionRequest(
         method = "GET",
         headers = Map("fish" -> "peas"),
         path = "/foo",
@@ -130,20 +130,18 @@ class InteractionManagerSpec extends FunSpec with Matchers {
 
       interactionManager.addInteraction(interaction)
 
-      val matched1 = interactionManager.findMatchingInteraction(requestDetails1)
+      val matched1 = interactionManager.findMatchingInteraction(requestDetails1).toOption
 
       matched1.isDefined shouldEqual true
       matched1.get.response.status shouldEqual Some(200)
 
-      val matched2 = interactionManager.findMatchingInteraction(requestDetails2)
-
-      matched2.isEmpty shouldEqual true
+      interactionManager.findMatchingInteraction(requestDetails2).toOption.isEmpty shouldEqual true
     }
 
     it("should be able to match a get request with lots of headers") {
       val interactionManager = new InteractionManager {}
 
-      val requestDetails = RequestDetails(
+      val requestDetails = InteractionRequest(
         method = "GET",
         headers = Map("Content-Type" -> "text/plain; charset=uft-8", "Content-Length" -> "0", "Accept" -> "application/json"),
         path = "/foo",
@@ -168,7 +166,7 @@ class InteractionManagerSpec extends FunSpec with Matchers {
 
       interactionManager.addInteraction(interaction)
 
-      val matched = interactionManager.findMatchingInteraction(requestDetails)
+      val matched = interactionManager.findMatchingInteraction(requestDetails).toOption
 
       matched.isDefined shouldEqual true
       matched.get.response.status shouldEqual Some(200)
@@ -180,14 +178,14 @@ class InteractionManagerSpec extends FunSpec with Matchers {
     it("should be able to match a get request with a longer path") {
       val interactionManager = new InteractionManager {}
 
-      val goodRequestDetails = RequestDetails(
+      val goodRequestDetails = InteractionRequest(
         method = "GET",
         headers = None,
         path = "/foo/bar/hello",
         body = None
       )
 
-      val badRequestDetails = RequestDetails(
+      val badRequestDetails = InteractionRequest(
         method = "GET",
         headers = None,
         path = "/foo/bar/hello/",
@@ -212,31 +210,31 @@ class InteractionManagerSpec extends FunSpec with Matchers {
 
       interactionManager.addInteraction(interaction)
 
-      val matched = interactionManager.findMatchingInteraction(goodRequestDetails)
+      val matched = interactionManager.findMatchingInteraction(goodRequestDetails).toOption
 
       matched.isDefined shouldEqual true
       matched.get.response.status shouldEqual Some(200)
 
-      interactionManager.findMatchingInteraction(badRequestDetails).isEmpty shouldEqual true
+      interactionManager.findMatchingInteraction(badRequestDetails).toOption.isEmpty shouldEqual true
     }
 
     it("should be able to match a get request with parameters") {
       val interactionManager = new InteractionManager {}
 
-      val goodRequestDetails1 = RequestDetails(
+      val goodRequestDetails1 = InteractionRequest(
         method = "GET",
         headers = None,
         path = "/foo/bar/hello?id=1234&name=joe",
         body = None
       )
 
-      val goodRequestDetails2 = RequestDetails(
+      val goodRequestDetails2 = InteractionRequest(
         method = "GET",
         headers = None,
         path = "/foo/bar/hello?name=joe&id=1234",
         body = None
       )
-      val badRequestDetails1 = RequestDetails(
+      val badRequestDetails1 = InteractionRequest(
         method = "GET",
         headers = None,
         path = "/foo/bar/hello?name=joe&id=1234&occupation=troubleMaker",
@@ -261,9 +259,9 @@ class InteractionManagerSpec extends FunSpec with Matchers {
 
       interactionManager.addInteraction(interaction)
 
-      interactionManager.findMatchingInteraction(goodRequestDetails1).isDefined shouldEqual true
-      interactionManager.findMatchingInteraction(goodRequestDetails2).isDefined shouldEqual true
-      interactionManager.findMatchingInteraction(badRequestDetails1).isDefined shouldEqual false
+      interactionManager.findMatchingInteraction(goodRequestDetails1).toOption.isDefined shouldEqual true
+      interactionManager.findMatchingInteraction(goodRequestDetails2).toOption.isDefined shouldEqual true
+      interactionManager.findMatchingInteraction(badRequestDetails1).toOption.isDefined shouldEqual false
 
     }
 

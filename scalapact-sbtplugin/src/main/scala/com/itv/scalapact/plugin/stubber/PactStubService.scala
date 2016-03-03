@@ -1,13 +1,11 @@
 package com.itv.scalapact.plugin.stubber
 
-import argonaut.PrettyParams
-import com.itv.scalapactcore.{ScalaPactWriter, PactActor, Pact}
+import com.itv.scalapact.plugin.common.Arguments
+import com.itv.scalapactcore.{InteractionRequest, Pact, PactActor, ScalaPactWriter}
 import org.http4s.dsl.{->, /, Root, _}
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.util.CaseInsensitiveString
 import org.http4s.{HttpService, Request, Response, Status}
-
-import com.itv.scalapactcore.PactImplicits._
 
 import scalaz.{-\/, \/-}
 
@@ -52,31 +50,30 @@ object PactStubService {
 
       import HeaderImplicitConversions._
 
-      val rd = RequestDetails(
-        method = Option(req.method.name.toUpperCase),
-        headers = Option(req.headers),
-        path = Option(req.pathInfo),
-        body = req.bodyAsText.runLast.run
-      )
+      InteractionManager.findMatchingInteraction(
+        InteractionRequest(
+          method = Option(req.method.name.toUpperCase),
+          headers = Option(req.headers),
+          path = Option(req.pathInfo),
+          body = req.bodyAsText.runLast.run
+        )
+      ) match {
+        case \/-(ir) =>
+          Status.fromInt(ir.response.status.getOrElse(200)) match {
+            case \/-(code) =>
+              Http4sRequestResponseFactory.buildResponse(
+                status = code,
+                headers = ir.response.headers.getOrElse(Map.empty),
+                body = ir.response.body
+              )
 
-      val interaction = InteractionManager.findMatchingInteraction(rd)
+            case -\/(l) => InternalServerError(l.sanitized)
+          }
 
-      if(interaction.isEmpty) NotFound("No interaction found for request: " + req.method.name.toUpperCase + " " + req.pathInfo)
-      else {
-
-        val i = interaction.get
-
-        Status.fromInt(i.response.status.getOrElse(200)) match {
-          case \/-(code) =>
-            Http4sRequestResponseFactory.buildResponse(
-              status = code,
-              headers = i.response.headers.getOrElse(Map.empty),
-              body = i.response.body
-            )
-
-          case -\/(l) => InternalServerError(l.sanitized)
-        }
+        case -\/(message) =>
+          NotFound(message)
       }
+
     }
   }
 }

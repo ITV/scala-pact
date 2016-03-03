@@ -1,13 +1,9 @@
 package com.itv.scalapact.plugin.stubber
 
-import org.scalatest.{Matchers, FunSpec}
+import com.itv.scalapact.plugin.common.InteractionMatchers
+import org.scalatest.{FunSpec, Matchers}
+
 import scala.language.implicitConversions
-
-import argonaut._
-import Argonaut._
-
-import scalaz._
-import Scalaz._
 
 class InteractionMatchersSpec extends FunSpec with Matchers {
 

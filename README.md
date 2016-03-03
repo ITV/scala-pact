@@ -81,12 +81,13 @@ You could then build on that with integration tests for...
 Currently ScalaPact is not 100% comliant with the official Pact specification. We plan to be but the library is still under active development. The roadmap to Pact compliance will be something like:
 1. Test all tools against the official specification test cases;
 1. Implement provider states;
-1. Consolidate our process with the official implementors guide.
+1. Consolidate our process with the official implementors guide;
+1. Implement the Json body special case.
 
 At the moment we do some level of validation by running our pact contracts against the other Pact tools on the market in an attempt to catch any glaring problems.
 
 ### Why aren't we Pact compliant?
-There is already more that one CDC implementation but this one is closest to Pact, and at this time relies on some of their tooling.
+There is already more than one CDC implementation but this one is closest to Pact, and at this time relies on some of their tooling.
 
 That said, Pact was created for a company to meet it's needs and ScalaPact has been created in the same vein. We have a problem that the official Pact tools don't quite solve, and we're building ScalaPact to meet our requirements.
 
@@ -129,15 +130,10 @@ The Pact integration test library itself depends on two Scala/Java libraries.
   - to: my-consumer_my-provider_akshbdk3as43hdb1ak
 
 ## Mid term development TODO's
-- Remove Json4s in favor of Argonaut
-  - Must figure out how to write untyped objects - request / response bodies are not Strings in pact files they are json objects (when the body is json) - curse the original ruby devs with their dynamic typing and heterogeneous objects! :-)
-- Move common functionality into a library project shared between the scalatest and plugin projects
-  - only challenge might be that scalatest *is* 2.11 and the plugin *has to be* 2.10 compatible, but since the functions are probably vanilla scala with Argonnaut (which is 2.10 compatible) it might be fine to make the lib a 2.10 jar.
+- Implement the JSON body special case
+- Write tests to run matcher code against official pact spec tests
 
 ## Longer term development TODO's
 - Add task to plugin to run a verifier
   - Initially could use ruby verifier
-  - Later write our own, the hard part will be validating against the official spec files
-- Add task to plugin to run a stub
-  - Initially could use ruby stubber
   - Later write our own, the hard part will be validating against the official spec files
