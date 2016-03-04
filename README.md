@@ -39,7 +39,7 @@ addSbtPlugin("com.itv.plugins" % "scalapact-plugin" % "0.1.2-SNAPSHOT")
 
 ## Basic usage examples
 ### ScalaTest Pact Forger API
-There is an example test spec that can be found [here](https://github.com/ITV/ScalaPact/blob/master/src/test/scala/com/itv/scalapact/ExampleSpec.scala). The hope is that this will be a living example spec.
+There is an example test spec that can be found [here](https://github.com/ITV/scalapact/blob/master/scalapact-scalatest/src/test/scala/com/itv/scalapact/ExampleSpec.scala). The hope is that this will be a living example spec.
 
 ### SBT Plugin Commands
 
