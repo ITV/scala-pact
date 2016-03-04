@@ -11,7 +11,7 @@ import scalaz._
 
 object Verifier {
 
-  lazy val verify: ConfigAndPacts => Unit = configAndPacts => {
+  lazy val verify: List[ProviderState] => ConfigAndPacts => Unit = providerStates => configAndPacts => {
 
     val startTime = System.currentTimeMillis().toDouble
 
@@ -19,7 +19,10 @@ object Verifier {
       PactVerifyResult(
         pact = pact,
         results = pact.interactions.map { interaction =>
-          (doRequest(configAndPacts.arguments) andThen attemptMatch(List(interaction)))(interaction.request)
+
+          val maybeProviderState = interaction.providerState.flatMap(p => providerStates.find(j => j.key == p))
+
+          (doRequest(configAndPacts.arguments)(maybeProviderState) andThen attemptMatch(List(interaction)))(interaction.request)
         }
       )
     }
@@ -56,8 +59,23 @@ object Verifier {
   private lazy val attemptMatch: List[Interaction] => \/[String, InteractionResponse] => \/[String, Interaction] = interactions => requestResult =>
     requestResult.flatMap(matchResponse(interactions))
 
-  private lazy val doRequest: Arguments => InteractionRequest => \/[String, InteractionResponse] = arguments => interactionRequest => {
+  private lazy val doRequest: Arguments => Option[ProviderState] => InteractionRequest => \/[String, InteractionResponse] = arguments => maybeProviderState => interactionRequest => {
     val baseUrl = "http://" + arguments.host + ":" + arguments.port
+
+    try {
+      if(maybeProviderState.isDefined) {
+        val success = maybeProviderState.get.f(maybeProviderState.get.key)
+
+        if(!success) throw new ProviderStateFailure(maybeProviderState.get.key)
+      }
+    } catch {
+      case e: Throwable =>
+        if(maybeProviderState.isDefined) {
+          println(s"Error executing unknown provider state function with key: ${maybeProviderState.get.key}".red)
+        } else {
+          println("Error executing unknown provider state function!".red)
+        }
+    }
 
     try {
       InteractionRequest.unapply(interactionRequest) match {
@@ -99,3 +117,5 @@ object Verifier {
 }
 
 case class PactVerifyResult(pact: Pact, results: List[\/[String, Interaction]])
+
+class ProviderStateFailure(key: String) extends Exception()

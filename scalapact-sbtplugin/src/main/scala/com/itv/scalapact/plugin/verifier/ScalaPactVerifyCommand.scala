@@ -6,6 +6,8 @@ import com.itv.scalapact.plugin.common.LocalPactFileLoader._
 import com.itv.scalapact.plugin.common.Rainbow._
 import sbt._
 
+import scala.language.implicitConversions
+
 import Verifier._
 
 object ScalaPactVerifyCommand {
@@ -13,20 +15,21 @@ object ScalaPactVerifyCommand {
   lazy val pactVerifyCommandHyphen: Command = Command.args("pact-verify", "<options>")(pactVerify)
   lazy val pactVerifyCommandCamel: Command = Command.args("pactVerify", "<options>")(pactVerify)
 
+  implicit def pStateConversion(ps: Seq[(String, String => Boolean)]): List[ProviderState] =
+    ps.toList.map(p => ProviderState(p._1, p._2))
+
   private lazy val pactVerify: (State, Seq[String]) => State = (state, args) => {
 
     println("*************************************".white.bold)
     println("** ScalaPact: Running Verifier     **".white.bold)
     println("*************************************".white.bold)
 
-    val providerStates = Project.extract(state).get(ScalaPactPlugin.providerStates)
+    val providerStates: List[ProviderState] = Project.extract(state).get(ScalaPactPlugin.providerStates)
 
-    providerStates.find(p => p._1 == "runMe").map { found =>
-      found._2(found._1)
-    }
-
-    (parseArguments andThen loadPactFiles("pacts") andThen verify) (args)
+    (parseArguments andThen loadPactFiles("pacts") andThen verify(providerStates)) (args)
 
     state
   }
 }
+
+case class ProviderState(key: String, f: String => Boolean)
