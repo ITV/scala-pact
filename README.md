@@ -15,6 +15,12 @@ Of particular note is [Beth Skurrie](https://github.com/bethesque), a lot of the
 ## Setup guide
 The ScalaPact projects are not published libraries (yet). For the time being, we recommend that you checkout the project and build using `sbt publish-local` in order to use it as a dependency. Alternatively you can compile the JAR and place it manually in the unmanaged lib folder of your project.
 
+### Core
+The core is used by both the scalatest library and the sbt plugin and at the moment you will need to build it locally using:
+
+`sbt "+ publish-local"`
+
+
 ### ScalaTest Library
 Add the dependency to your build.sbt file like this:
 
