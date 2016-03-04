@@ -13,7 +13,7 @@ ScalaPact is not an original idea, this project would never have happened withou
 Of particular note is [Beth Skurrie](https://github.com/bethesque), a lot of the design choices and ideas in ScalaPact are direct copies of the ones in her projects. If you're looking for a Ruby implementation, look no further!
 
 ## Setup guide
-The ScalaPact projects are not published libraries (yet). For the time being, we recommend that you checkout the project and build using `sbt publish-local` in order to use it as a dependency. Alternatively you can compile the JAR and place it manually in the unmanaged lib folder of your project.
+The ScalaPact projects are not published libraries (yet). For the time being, we recommend that you checkout the project and build using `sbt publish-local` from within each sub project (in order: scalapact-core, scalapact-sbtplugin, scalapact-scalatest) in order to use it as a dependency. Alternatively you can compile the JAR and place it manually in the unmanaged lib folder of your project.
 
 ### Core
 The core is used by both the scalatest library and the sbt plugin and at the moment you will need to build it locally using:
