@@ -5,8 +5,11 @@ ScalaPact is intended for Scala developers who are looking for a better way to m
 
 ## Acknowledgments
 ScalaPact is not an original idea, this project would never have happened without those who came before us:
+
 1. [DiUS](https://github.com/DiUS)
+
 1. [Pact Foundation](https://github.com/pact-foundation)
+
 1. [Thoughtworks / Ian Robinson / Martin Fowler](http://martinfowler.com/articles/consumerDrivenContracts.html)
 
 Of particular note is [Beth Skurrie](https://github.com/bethesque), a lot of the design choices and ideas in ScalaPact are direct copies of the ones in her projects. If you're looking for a Ruby implementation, look no further!
