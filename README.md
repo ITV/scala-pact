@@ -7,9 +7,7 @@ ScalaPact is intended for Scala developers who are looking for a better way to m
 ScalaPact is not an original idea, this project would never have happened without those who came before us:
 
 1. [DiUS](https://github.com/DiUS)
-
 1. [Pact Foundation](https://github.com/pact-foundation)
-
 1. [Thoughtworks / Ian Robinson / Martin Fowler](http://martinfowler.com/articles/consumerDrivenContracts.html)
 
 Of particular note is [Beth Skurrie](https://github.com/bethesque), a lot of the design choices and ideas in ScalaPact are direct copies of the ones in her projects. If you're looking for a Ruby implementation, look no further!
@@ -45,6 +43,7 @@ You can run the Pact test cases just be running `sbt test` as normal. Because of
 Usually it is desirable to condense the Pact files into one file per consumer / provider pair that contains all of the possible interactions.
 
 Entering `sbt pact-test` will:
+
 1. Run clean to remove any lingering pact files
 1. Run the tests as normal to generate the Pact files
 1. Squash the Pact files into one per consumer / provider pair
@@ -85,11 +84,13 @@ You can also run the verifier using a combination of the following command line 
 *Note that files in the source folder are recursively loaded.*
 
 ### Other considerations
+
 1. Mock servers can only understand an endpoint being in one state. Mostly that isn't a problem, if you want to create a pact describing the look up of documents that result in a 200 or a 404 you simply look up two different documents. Where you have something like a `/status` endpoint that could come back in different states that you care about, you would have to be a bit creative, or not describe that behaviour in a pact contract.
 1. ScalaTest runs in parallel by default so even clearing the state of the stubber between tests could, and probably would, result in errors if you were using Http administration.
 
 ## Pact tests VS Integration tests
 Technically, we you write a Pact test you are creating an integration test in that:
+
 1. You write some client code to make the call to your provider;
 2. You then write a test using a mock that expects a request and gives a response to a real http call;
 3. You check the results are what you expected.
@@ -103,11 +104,13 @@ Consider these two statements:
 For instance:
 
 You should use Pact tests for describing the agreement:
+
 1. Requesting data in a specific format from a provider
 1. Describing content negotiation
 1. How a provider would respond if it couldn't find the data you wanted
 
 You could then build on that with integration tests for...
+
 1. Checking what happens if the provider simply isn't there
 1. Network failures
 1. Timeouts
@@ -116,6 +119,7 @@ You could then build on that with integration tests for...
 
 ## Pact specification compliance level
 Currently ScalaPact is not 100% compliant with the official Pact specification. We plan to be but the library is still under active development. The roadmap to Pact compliance will be something like:
+
 1. Complete testing all tools against the official specification test cases, known missing areas are regex header matching and body matching.
 1. Implement provider states
 1. Implement the Json body special case
@@ -166,12 +170,14 @@ The Pact integration test library itself depends on a range of Scala/Java librar
 [Scalaj-Http](https://github.com/scalaj/scalaj-http) is used for quick synchronous http calls.
 
 ## Documentation roadmap
+
 - How to use
 - Update all README.md files
   - Legal hygiene checks, make sure there's nothing offensive
   - Public consumption, is it easy to understand what you have to do to use ScalaPact?
 
 ## Short term development roadmap
+
 - Export verifier results to JUnit.
 - Rename repo: ScalaPact -> scalapact
 - Add LICENCE.md
@@ -183,6 +189,7 @@ The Pact integration test library itself depends on a range of Scala/Java librar
   - to: my-consumer_my-provider_akshbdk3as43hdb1ak
 
 ## Mid term development roadmap
+
 - Implement the JSON body special case
 - Implement better body matching / diffing for:
   - text
@@ -191,5 +198,6 @@ The Pact integration test library itself depends on a range of Scala/Java librar
 - Implement header regex matching
 
 ## Longer term development roadmap
+
 - Implement provider states
 - Comply with Pact implementor guidelines
