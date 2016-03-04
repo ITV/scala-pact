@@ -180,7 +180,6 @@ The Pact integration test library itself depends on a range of Scala/Java librar
 
 ## Short term development roadmap
 
-- Export verifier results to JUnit.
 - Add LICENCE.md
 - Add CONTRIBUTING.md
 - Publish lib to repo
