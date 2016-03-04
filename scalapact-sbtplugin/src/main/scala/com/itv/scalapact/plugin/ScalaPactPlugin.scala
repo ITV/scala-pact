@@ -9,6 +9,13 @@ import sbt._
 import scala.language.implicitConversions
 
 object ScalaPactPlugin extends Plugin {
+
+  val providerStates = SettingKey[Seq[(String, String => Boolean)]]("provider-states", "A list of provider state setup functions")
+
+  private val providerStatesSettings = Seq(
+    providerStates := Seq(("default", (key: String) => true))
+  )
+
   override lazy val settings = Seq(
     commands += ScalaPactTestCommand.pactTestCommandHyphen,
     commands += ScalaPactTestCommand.pactTestCommandCamel,
@@ -16,5 +23,5 @@ object ScalaPactPlugin extends Plugin {
     commands += ScalaPactVerifyCommand.pactVerifyCommandCamel,
     commands += ScalaPactStubberCommand.pactStubberCommandHyphen,
     commands += ScalaPactStubberCommand.pactStubberCommandCamel
-  )
+  ) ++ providerStatesSettings
 }

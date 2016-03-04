@@ -1,5 +1,6 @@
 package com.itv.scalapact.plugin.verifier
 
+import com.itv.scalapact.plugin.ScalaPactPlugin
 import com.itv.scalapact.plugin.common.CommandArguments._
 import com.itv.scalapact.plugin.common.LocalPactFileLoader._
 import com.itv.scalapact.plugin.common.Rainbow._
@@ -18,7 +19,13 @@ object ScalaPactVerifyCommand {
     println("** ScalaPact: Running Verifier     **".white.bold)
     println("*************************************".white.bold)
 
-    (parseArguments andThen loadPactFiles("pacts") andThen verify)(args)
+    val providerStates = Project.extract(state).get(ScalaPactPlugin.providerStates)
+
+    providerStates.find(p => p._1 == "runMe").map { found =>
+      found._2(found._1)
+    }
+
+    (parseArguments andThen loadPactFiles("pacts") andThen verify) (args)
 
     state
   }
