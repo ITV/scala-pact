@@ -7,7 +7,6 @@ import scala.language.implicitConversions
 
 class InteractionMatchersSpec extends FunSpec with Matchers {
 
-
   implicit def toOption[A](thing: A): Option[A] = Option(thing)
 
   import InteractionMatchers._

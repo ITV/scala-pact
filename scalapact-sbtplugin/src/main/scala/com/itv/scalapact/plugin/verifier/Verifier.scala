@@ -1,18 +1,19 @@
 package com.itv.scalapact.plugin.verifier
 
-import com.itv.scalapact.plugin.common.{Arguments, ConfigAndPacts}
-import com.itv.scalapactcore.{Interaction, Pact, InteractionResponse, InteractionRequest}
-
 import com.itv.scalapact.plugin.common.InteractionMatchers._
-
-import scalaj.http.{HttpResponse, Http}
-import scalaz._
-import Scalaz._
 import com.itv.scalapact.plugin.common.Rainbow._
+import com.itv.scalapact.plugin.common.{Arguments, ConfigAndPacts}
+import com.itv.scalapactcore.{Interaction, InteractionRequest, InteractionResponse, Pact}
+
+import scalaj.http.{Http, HttpResponse}
+import scalaz.Scalaz._
+import scalaz._
 
 object Verifier {
 
   lazy val verify: ConfigAndPacts => Unit = configAndPacts => {
+
+    val startTime = System.currentTimeMillis().toDouble
 
     val pactVerifyResults = configAndPacts.pacts.map { pact =>
       PactVerifyResult(
@@ -22,6 +23,24 @@ object Verifier {
         }
       )
     }
+
+    val endTime = System.currentTimeMillis().toDouble
+    val testCount = pactVerifyResults.flatMap(_.results).length
+    val failureCount = pactVerifyResults.flatMap(_.results).count(_.isLeft)
+
+//    pactVerifyResults.foreach { result =>
+//      val content = JUnitXmlBuilder.xml(
+//        name = result.pact.consumer.name + " -> " + result.pact.provider.name,
+//        tests = testCount,
+//        failures = failureCount,
+//        time = endTime - startTime / 1000,
+//        testCases = result.results.collect {
+//          case \/-(r) => JUnitXmlBuilder.testCasePass(r.description)
+//          case -\/(l) => JUnitXmlBuilder.testCaseFail("Failure", l)
+//        }
+//      )
+//      JUnitWriter.writePactVerifyResults(result.pact.consumer.name)(result.pact.provider.name)(content.toString)
+//    }
 
     pactVerifyResults.foreach { result =>
       println(("Results for pact between " + result.pact.consumer + " and " + result.pact.provider).white.bold)
