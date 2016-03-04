@@ -190,9 +190,6 @@ The Pact integration test library itself depends on a range of Scala/Java librar
 - Add CONTRIBUTING.md
 - Publish lib to repo
 - Improve error reporting?
-- Create tmp pact files with sha1 suffix not description text (now that we have the pact plugin there's no need for them to be human readable and risk duplicates) THEN see if the description is used anywhere else and remove if not. e.g.
-  - from: my-consumer_my-provider_in-some-context
-  - to: my-consumer_my-provider_akshbdk3as43hdb1ak
 
 ## Mid term development roadmap
 

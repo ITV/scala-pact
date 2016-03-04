@@ -1,6 +1,7 @@
 package com.itv.scalapact
 
 import java.io.{File, PrintWriter}
+import java.nio.charset.StandardCharsets
 
 import com.itv.scalapact.ScalaPactForger.ScalaPactDescriptionFinal
 import com.itv.scalapactcore._
@@ -20,7 +21,12 @@ object ScalaPactContractWriter {
       dirFile.mkdir()
     }
 
-    val relativePath = dirPath + "/" + simplifyName(pactDescription.consumer) + "_" + simplifyName(pactDescription.provider) + "_" + simplifyName(pactDescription.context) + ".json"
+    val sha1 = java.security.MessageDigest.getInstance("SHA-1")
+      .digest(simplifyName(pactDescription.context).getBytes(StandardCharsets.UTF_8))
+      .map("%02x".format(_))
+      .mkString
+
+    val relativePath = dirPath + "/" + simplifyName(pactDescription.consumer) + "_" + simplifyName(pactDescription.provider) + "_" + sha1 + ".json"
     val file = new File(relativePath)
 
     if (file.exists()) {
