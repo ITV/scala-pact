@@ -26,7 +26,7 @@ Add the dependency to your build.sbt file like this:
 
 ```
 libraryDependencies ++= Seq(
-  "com.itv" %% "scalapact" % "0.1.2-SNAPSHOT" % "test"
+  "com.itv" %% "scalapact-scalatest" % "0.1.2-SNAPSHOT" % "test"
 )
 ```
 
