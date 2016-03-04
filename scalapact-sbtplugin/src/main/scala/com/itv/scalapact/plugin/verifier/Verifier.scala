@@ -28,19 +28,19 @@ object Verifier {
     val testCount = pactVerifyResults.flatMap(_.results).length
     val failureCount = pactVerifyResults.flatMap(_.results).count(_.isLeft)
 
-//    pactVerifyResults.foreach { result =>
-//      val content = JUnitXmlBuilder.xml(
-//        name = result.pact.consumer.name + " -> " + result.pact.provider.name,
-//        tests = testCount,
-//        failures = failureCount,
-//        time = endTime - startTime / 1000,
-//        testCases = result.results.collect {
-//          case \/-(r) => JUnitXmlBuilder.testCasePass(r.description)
-//          case -\/(l) => JUnitXmlBuilder.testCaseFail("Failure", l)
-//        }
-//      )
-//      JUnitWriter.writePactVerifyResults(result.pact.consumer.name)(result.pact.provider.name)(content.toString)
-//    }
+    pactVerifyResults.foreach { result =>
+      val content = JUnitXmlBuilder.xml(
+        name = result.pact.consumer.name + " - " + result.pact.provider.name,
+        tests = testCount,
+        failures = failureCount,
+        time = endTime - startTime / 1000,
+        testCases = result.results.collect {
+          case \/-(r) => JUnitXmlBuilder.testCasePass(r.description)
+          case -\/(l) => JUnitXmlBuilder.testCaseFail("Failure", l)
+        }
+      )
+      JUnitWriter.writePactVerifyResults(result.pact.consumer.name)(result.pact.provider.name)(content.toString)
+    }
 
     pactVerifyResults.foreach { result =>
       println(("Results for pact between " + result.pact.consumer + " and " + result.pact.provider).white.bold)

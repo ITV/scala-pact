@@ -76,6 +76,8 @@ The verifier is quite a simple idea. Load a Pact file, make all the requests and
 
 The ScalaPact verifier can be run be entering `sbt pact-verify`.
 
+The verifier will write out JUnit results to the `target/test-reports` directory in order to fail builds.
+
 #### Command line options
 You can also run the verifier using a combination of the following command line options, below are the defaults:
 
