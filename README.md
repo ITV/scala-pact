@@ -176,6 +176,13 @@ The providerStates settings object is a `Seq[(String, String => Boolean)]` where
 
 The intention is to create helper objects in the future for running common tasks like executing shell scripts but at the moment the functions are pure Scala and it's up to you how you use them.
 
+## Pact file delivery via Pact Broker
+During a build process you will need some mechanism for delivering the Pact files your consumer tests generate to your provider ready for verification.
+
+You can do this any way you like, they are just json files after all, but we are currently exploring [pact-broker](https://github.com/bethesque/pact_broker). Pact broker is a Ruby service that allows you to post and look up versioned Pact files.
+
+*An opinionated note on versioning:* Focus on versioning your API's not your Pact files! It can be handy to have versions of Pact files around but you should not being pushing a breaking API changes and communicating them to your provider with versioned Pact files. A breaking API change is a new API version. Theoretically your provider should always be able to ask for the latest Pact files for each API version and have confidence that they are correct.
+
 ## Pact tests VS Integration tests
 Technically, we you write a Pact test you are creating an integration test in that:
 
