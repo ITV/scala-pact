@@ -51,7 +51,7 @@ class ExampleSpec extends FunSpec with Matchers {
         .describing("a get example with query parameters")
         .addInteraction(
           interaction
-            .description("Fetch a greeting")
+            .description("Fetch another greeting")
             .uponReceiving(GET, endPoint, Option("id=1&name=joe"))
             .willRespondWith(200, "Hello there!")
         )
@@ -76,7 +76,7 @@ class ExampleSpec extends FunSpec with Matchers {
         .describing("a simple get example with a header")
         .addInteraction(
           interaction
-            .description("Fetch a greeting")
+            .description("Fetch yet another greeting")
             .uponReceiving(GET, endPoint, None, Map("fish" -> "chips"), None)
             .willRespondWith(200, "Hello there!")
         )
@@ -162,6 +162,32 @@ class ExampleSpec extends FunSpec with Matchers {
           withClue("Response body xml did not match") {
             XML.loadString(result.body) should equal(responseXml)
           }
+
+        }
+
+    }
+
+    it("Should be able to declare the state the provider must be in before verification") {
+
+      val endPoint = "/provider-state?id=1234"
+
+      forgePact
+        .between("My Consumer")
+        .and("Their Provider Service")
+        .describing("Fetching a specific ID")
+        .addInteraction(
+          interaction
+            .description("Fetching a specific ID")
+            .given("Resource with ID 1234 exists")
+            .uponReceiving(endPoint)
+            .willRespondWith(200, "ID: 1234 Exists")
+        )
+        .runConsumerTest { mockConfig =>
+
+          val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint, Map.empty)
+
+          result.status should equal(200)
+          result.body should equal("ID: 1234 Exists")
 
         }
 

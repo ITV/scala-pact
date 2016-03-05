@@ -64,7 +64,15 @@ object Verifier {
 
     try {
       if(maybeProviderState.isDefined) {
+        println("--------------------".yellow.bold)
+        println(s"Attempting to run provider state: ${maybeProviderState.get.key}".yellow.bold)
+
         val success = maybeProviderState.get.f(maybeProviderState.get.key)
+
+
+        if(success) println(s"Provider state ran successfully".yellow.bold)
+        else println(s"Provider state run failed".red.bold)
+        println("--------------------".yellow.bold)
 
         if(!success) throw new ProviderStateFailure(maybeProviderState.get.key)
       }
