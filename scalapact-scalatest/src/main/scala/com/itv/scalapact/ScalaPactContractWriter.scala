@@ -7,6 +7,7 @@ import com.itv.scalapact.ScalaPactForger.ScalaPactDescriptionFinal
 import com.itv.scalapactcore._
 
 import scala.language.implicitConversions
+import scala.util.Random
 
 object ScalaPactContractWriter {
 
@@ -21,8 +22,10 @@ object ScalaPactContractWriter {
       dirFile.mkdir()
     }
 
+    val string = simplifyName(pactDescription.consumer + pactDescription.provider + pactDescription.interactions.map(_.description).mkString + System.currentTimeMillis())
+
     val sha1 = java.security.MessageDigest.getInstance("SHA-1")
-      .digest(simplifyName(pactDescription.context).getBytes(StandardCharsets.UTF_8))
+      .digest(string.getBytes(StandardCharsets.UTF_8))
       .map("%02x".format(_))
       .mkString
 

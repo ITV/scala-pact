@@ -23,10 +23,9 @@ class ExampleSpec extends FunSpec with Matchers {
       forgePact
         .between("My Consumer")
         .and("Their Provider Service")
-        .describing("a simple get example")
         .addInteraction(
           interaction
-            .description("Fetch a greeting")
+            .description("a simple get example")
             .uponReceiving(endPoint)
             .willRespondWith(200, "Hello there!")
         )
@@ -48,10 +47,9 @@ class ExampleSpec extends FunSpec with Matchers {
       forgePact
         .between("My Consumer")
         .and("Their Provider Service")
-        .describing("a get example with query parameters")
         .addInteraction(
           interaction
-            .description("Fetch another greeting")
+            .description("a get example with query parameters")
             .uponReceiving(GET, endPoint, Option("id=1&name=joe"))
             .willRespondWith(200, "Hello there!")
         )
@@ -73,10 +71,9 @@ class ExampleSpec extends FunSpec with Matchers {
       forgePact
         .between("My Consumer")
         .and("Their Provider Service")
-        .describing("a simple get example with a header")
         .addInteraction(
           interaction
-            .description("Fetch yet another greeting")
+            .description("a simple get example with a header")
             .uponReceiving(GET, endPoint, None, Map("fish" -> "chips"), None)
             .willRespondWith(200, "Hello there!")
         )
@@ -100,7 +97,6 @@ class ExampleSpec extends FunSpec with Matchers {
       forgePact
         .between("My Consumer")
         .and("Their Provider Service")
-        .describing("Get json example")
         .addInteraction(
           interaction
             .description("Request for some json")
@@ -140,10 +136,9 @@ class ExampleSpec extends FunSpec with Matchers {
       forgePact
         .between("My Consumer")
         .and("Their Provider Service")
-        .describing("POST JSON receive XML example")
         .addInteraction(
           interaction
-            .description("JSON Request for XML")
+            .description("POST JSON receive XML example")
             .uponReceiving(POST, endPoint, None, headers, Option(write(requestData)))
             .willRespondWith(400, Map("Content-Type" -> "text/xml"), Option(responseXml.toString()))
         )
@@ -174,7 +169,6 @@ class ExampleSpec extends FunSpec with Matchers {
       forgePact
         .between("My Consumer")
         .and("Their Provider Service")
-        .describing("Fetching a specific ID")
         .addInteraction(
           interaction
             .description("Fetching a specific ID")

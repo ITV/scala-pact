@@ -8,26 +8,21 @@ object ScalaPactForger {
     def between(consumer: String): ScalaPartialPact = new ScalaPartialPact(consumer)
 
     class ScalaPartialPact(consumer: String) {
-      def and(provider: String): ScalaPartialPactWith = new ScalaPartialPactWith(consumer, provider)
+      def and(provider: String): ScalaPactDescription = new ScalaPactDescription(consumer, provider, Nil)
     }
 
-    class ScalaPartialPactWith(consumer: String, provider: String) {
-      def describing(scenario: String): ScalaPactDescription = new ScalaPactDescription(scenario, consumer, provider, Nil)
-    }
-
-    class ScalaPactDescription(context: String, consumer: String, provider: String, interactions: List[ScalaPactInteraction]) {
+    class ScalaPactDescription(consumer: String, provider: String, interactions: List[ScalaPactInteraction]) {
 
       /**
         * Adds interactions to the Pact. Interactions should be created using the helper object 'interaction'
         * @param interaction [ScalaPactInteraction] definition
         * @return [ScalaPactDescription] to allow the builder to continue
         */
-      def addInteraction(interaction: ScalaPactInteraction): ScalaPactDescription = new ScalaPactDescription(context, consumer, provider, interactions ++ List(interaction))
+      def addInteraction(interaction: ScalaPactInteraction): ScalaPactDescription = new ScalaPactDescription(consumer, provider, interactions ++ List(interaction))
 
       def runConsumerTest(test: ScalaPactMockConfig => Unit)(implicit options: ScalaPactOptions): Unit = {
         ScalaPactMock.runConsumerIntegrationTest(
           ScalaPactDescriptionFinal(
-            context,
             consumer,
             provider,
             interactions.map(i => i.finalise),
@@ -69,7 +64,7 @@ object ScalaPactForger {
     def finalise: ScalaPactInteractionFinal = ScalaPactInteractionFinal(description, providerState, request, response)
   }
 
-  case class ScalaPactDescriptionFinal(context: String, consumer: String, provider: String, interactions: List[ScalaPactInteractionFinal], options: ScalaPactOptions)
+  case class ScalaPactDescriptionFinal(consumer: String, provider: String, interactions: List[ScalaPactInteractionFinal], options: ScalaPactOptions)
   case class ScalaPactInteractionFinal(description: String, providerState: Option[String], request: ScalaPactRequest, response: ScalaPactResponse)
 
   object ScalaPactRequest {
