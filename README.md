@@ -184,7 +184,7 @@ You can do this any way you like, they are just json files after all, but we are
 *An opinionated note on versioning:* Focus on versioning your API's not your Pact files! It can be handy to have versions of Pact files around but you should not being pushing a breaking API changes and communicating them to your provider with versioned Pact files. A breaking API change is a new API version. Theoretically your provider should always be able to ask for the latest Pact files for each API version and have confidence that they are correct.
 
 ## Pact tests VS Integration tests
-Technically, we you write a Pact test you are creating an integration test in that:
+Technically, when you write a Pact test you are creating an integration test, in that:
 
 1. You write some client code to make the call to your provider;
 2. You then write a test using a mock that expects a request and gives a response to a real http call;
