@@ -1,6 +1,5 @@
-package com.itv.scalapact.plugin.stubber
+package com.itv.scalapact.plugin.common
 
-import com.itv.scalapact.plugin.common.InteractionMatchers
 import org.scalatest.{FunSpec, Matchers}
 
 import scala.language.implicitConversions
