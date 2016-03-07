@@ -50,7 +50,7 @@ object ScalaPactTestCommand {
         println("> " + errorCount + " errors")
 
       } else {
-        println("No Pact files found in 'target/pacts'. Make sure you have Pact CDC tests and have run 'sbt test' or 'abt pact-test'.".red)
+        println("No Pact files found in 'target/pacts'. Make sure you have Pact CDC tests and have run 'sbt test' or 'sbt pact-test'.".red)
       }
 
       testedState
