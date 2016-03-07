@@ -13,13 +13,9 @@ ScalaPact is not an original idea, this project would never have happened withou
 Of particular note is [Beth Skurrie](https://github.com/bethesque), a lot of the design choices and ideas in ScalaPact are direct copies of the ones in her projects. If you're looking for a Ruby implementation, look no further!
 
 ## Setup guide
-The ScalaPact projects are not published libraries (yet). For the time being, we recommend that you checkout the project and build using `sbt publish-local` from within each sub project (in order: scalapact-core, scalapact-sbtplugin, scalapact-scalatest) in order to use it as a dependency. Alternatively you can compile the JAR and place it manually in the unmanaged lib folder of your project.
 
-### Core
-The core is used by both the scalatest library and the sbt plugin and at the moment you will need to build it locally using:
-
-`sbt "+ publish-local"`
-
+### Quick publish!
+The ScalaPact projects are not published libraries (yet). For the time being, we recommend that you checkout the project and build run `bash publish-local.sh` from the root directory. This will ensure you have all the necessary libraries in place.
 
 ### ScalaTest Library
 Add the dependency to your build.sbt file like this:
@@ -36,6 +32,13 @@ Add the plugin to your `project/plugins.sbt` file like this:
 ```
 addSbtPlugin("com.itv.plugins" % "scalapact-plugin" % "0.1.2-SNAPSHOT")
 ```
+
+### Core
+*Please ignore if you've run the publish local script above.*
+
+The core is used by both the scalatest library and the sbt plugin and at the moment you will need to build it locally using:
+
+`sbt "+ publish-local"`
 
 ## Basic usage examples
 ### ScalaTest Pact Forger API
