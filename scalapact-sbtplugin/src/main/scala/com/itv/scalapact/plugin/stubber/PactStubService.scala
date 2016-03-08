@@ -3,9 +3,10 @@ package com.itv.scalapact.plugin.stubber
 import com.itv.scalapact.plugin.common.Arguments
 import com.itv.scalapactcore._
 import org.http4s.dsl.{->, /, Root, _}
+import org.http4s.server.HttpService
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.util.CaseInsensitiveString
-import org.http4s.{HttpService, Request, Response, Status}
+import org.http4s.{Request, Response, Status}
 import com.itv.scalapact.plugin.common.Rainbow._
 
 import scalaz.{-\/, \/-}

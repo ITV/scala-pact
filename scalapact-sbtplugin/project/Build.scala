@@ -15,9 +15,9 @@ object Build extends sbt.Build with BuildExtra {
     libraryDependencies ++= Seq(
       "io.argonaut" %% "argonaut" % "6.1" withSources() withJavadoc(),
       "org.slf4j" % "slf4j-simple" % "1.6.4" withSources() withJavadoc(),
-      "org.http4s" %% "http4s-blaze-server" % "0.12.0" withSources() withJavadoc(),
-      "org.http4s" %% "http4s-dsl"          % "0.12.0" withSources() withJavadoc(),
-      "org.http4s" %% "http4s-argonaut"     % "0.12.0" withSources() withJavadoc(),
+      "org.http4s" %% "http4s-blaze-server" % "0.11.3" withSources() withJavadoc(),
+      "org.http4s" %% "http4s-dsl"          % "0.11.3" withSources() withJavadoc(),
+      "org.http4s" %% "http4s-argonaut"     % "0.11.3" withSources() withJavadoc(),
       "com.itv" % "scalapact-core_2.10" % "0.1.2-SNAPSHOT",
       "org.scalatest" %% "scalatest" % "2.2.6" % "test",
       "org.scalaj" %% "scalaj-http" % "2.2.1"
