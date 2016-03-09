@@ -14,3 +14,5 @@ libraryDependencies ++= Seq(
   "io.argonaut" %% "argonaut" % "6.1" withSources() withJavadoc()
 )
 
+
+publishTo := Some("Artifactory Realm" at "https://itvrepos.artifactoryonline.com/itvrepos/cps-libs")

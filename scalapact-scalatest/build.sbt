@@ -16,3 +16,5 @@ libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % "1.0.3",
   "com.itv" % "scalapact-core_2.11" % "0.1.2-SNAPSHOT"
 )
+
+publishTo := Some("Artifactory Realm" at "https://itvrepos.artifactoryonline.com/itvrepos/cps-libs")
