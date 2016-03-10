@@ -14,9 +14,6 @@ Of particular note is [Beth Skurrie](https://github.com/bethesque) - a lot of th
 
 ## Setup Guide
 
-### Quick Publish
-The ScalaPact libraries are not published yet. For the time being, we recommend that you checkout the project and build run `bash publish-local.sh` from the root directory. This will ensure you have all the necessary libraries in place.
-
 ### ScalaTest Library
 Add the dependency to your `build.sbt` file like this:
 
@@ -26,6 +23,12 @@ libraryDependencies ++= Seq(
 )
 ```
 
+You will also need to add a resolver to your `build.sbt` file like this:
+
+```
+resolvers += "Artifactory" at "https://itvrepos.artifactoryonline.com/itvrepos/oasvc-ivy/
+```
+
 ### SBT Plugin
 Add the plugin to your `project/plugins.sbt` file like this:
 
@@ -33,12 +36,11 @@ Add the plugin to your `project/plugins.sbt` file like this:
 addSbtPlugin("com.itv.plugins" % "scalapact-plugin" % "0.1.2-SNAPSHOT")
 ```
 
-### Core
-*Please ignore if you've run the publish local script above.*
+You will also need to add a resolver to your `build.sbt` file like this:
 
-The core is used by both the scalatest library and the SBT plugin and at the moment you will need to build it locally using:
-
-`sbt "+ publish-local"`
+```
+resolvers += "Artifactory" at "https://itvrepos.artifactoryonline.com/itvrepos/oasvc-ivy/
+```
 
 ## Basic Usage Examples
 ### ScalaTest Pact Forger API
