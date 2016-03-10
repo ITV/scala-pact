@@ -19,7 +19,7 @@ Add the dependency to your `build.sbt` file like this:
 
 ```
 libraryDependencies ++= Seq(
-  "com.itv" %% "scalapact-scalatest" % "0.1.2-SNAPSHOT" % "test"
+  "com.itv" %% "scalapact-scalatest" % "0.1.3" % "test"
 )
 ```
 
@@ -33,7 +33,7 @@ resolvers += "Artifactory" at "https://itvrepos.artifactoryonline.com/itvrepos/o
 Add the plugin to your `project/plugins.sbt` file like this:
 
 ```
-addSbtPlugin("com.itv.plugins" % "scalapact-plugin" % "0.1.2-SNAPSHOT")
+addSbtPlugin("com.itv.plugins" % "scalapact-plugin" % "0.1.3")
 ```
 
 You will also need to add a resolver to your `build.sbt` file like this:
