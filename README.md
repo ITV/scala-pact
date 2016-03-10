@@ -4,21 +4,21 @@ A library for generating Consumer Driven Contract files in Scala projects follow
 ScalaPact is intended for Scala developers who are looking for a better way to manage the HTTP contracts between their services.
 
 ## Acknowledgments
-ScalaPact is not an original idea, this project would never have happened without those who came before us:
+ScalaPact is not an original idea - this project would never have happened without those who came before us:
 
 1. [DiUS](https://github.com/DiUS)
 1. [Pact Foundation](https://github.com/pact-foundation)
 1. [Thoughtworks / Ian Robinson / Martin Fowler](http://martinfowler.com/articles/consumerDrivenContracts.html)
 
-Of particular note is [Beth Skurrie](https://github.com/bethesque), a lot of the design choices and ideas in ScalaPact are direct copies of the ones in her projects. If you're looking for a Ruby implementation, look no further!
+Of particular note is [Beth Skurrie](https://github.com/bethesque) - a lot of the design choices and ideas in ScalaPact are direct copies of the ones in her projects. If you're looking for a Ruby implementation, look no further!
 
-## Setup guide
+## Setup Guide
 
-### Quick publish!
-The ScalaPact projects are not published libraries (yet). For the time being, we recommend that you checkout the project and build run `bash publish-local.sh` from the root directory. This will ensure you have all the necessary libraries in place.
+### Quick Publish
+The ScalaPact libraries are not published yet. For the time being, we recommend that you checkout the project and build run `bash publish-local.sh` from the root directory. This will ensure you have all the necessary libraries in place.
 
 ### ScalaTest Library
-Add the dependency to your build.sbt file like this:
+Add the dependency to your `build.sbt` file like this:
 
 ```
 libraryDependencies ++= Seq(
@@ -36,18 +36,18 @@ addSbtPlugin("com.itv.plugins" % "scalapact-plugin" % "0.1.2-SNAPSHOT")
 ### Core
 *Please ignore if you've run the publish local script above.*
 
-The core is used by both the scalatest library and the sbt plugin and at the moment you will need to build it locally using:
+The core is used by both the scalatest library and the SBT plugin and at the moment you will need to build it locally using:
 
 `sbt "+ publish-local"`
 
-## Basic usage examples
+## Basic Usage Examples
 ### ScalaTest Pact Forger API
 There is an example test spec that can be found [here](https://github.com/ITV/scalapact/blob/master/scalapact-scalatest/src/test/scala/com/itv/scalapact/ExampleSpec.scala). The hope is that this will be a living example spec.
 
 ### SBT Plugin Commands
 
 ### pact-test
-You can run the Pact test cases just be running `sbt test` as normal. Because of the way the library has been written, running the tests will generate a series of Pact json files, one for each interaction.
+You can run the Pact test cases just be running `sbt test` as normal. Because of the way the library has been written, running the tests will generate a series of Pact JSON files, one for each interaction.
 
 Usually it is desirable to condense the Pact files into one file per consumer / provider pair that contains all of the possible interactions.
 
@@ -62,47 +62,46 @@ In order to test your service in isolation, you'll need to be able to stub out y
 
 Running `sbt pact-stubber` will re-run your Pact tests and then use the generated Pact files to create a running stub service. The stub will accept requests and deliver the responses you defined in your test cases giving you predictable, maintainable behaviour.
 
-#### Command line options
 You can also run the stubber using a combination of the following command line options, below are the defaults:
 
 `sbt "pact-stubber --host localhost --port 1234 --source target/pacts"`
 
 *Note that files in the source folder are recursively loaded.*
 
-#### Http administration
-If you prefer, you can use the stubber dynamically by adding and removing pacts using http. All calls must be made with a special header:
+#### HTTP Administration
+If you prefer, you can use the stubber dynamically by adding and removing pacts using HTTP. All calls must be made with a special header:
 
 `X-Pact-Admin=true`
 
 - `GET /interactions` returns a list of all currently loaded interactions
-- `POST | PUT /interactions` accepts a Pact json string and adds all the interactions to the pool it matches against
+- `POST | PUT /interactions` accepts a Pact JSON string and adds all the interactions to the pool it matches against
 - `DELETE /interactions` Clears all the current interactions so you can start again
 
 ### pact-verify
-Once the consumer has defined the contract as CDC tests and exported them to Pact files, he'll deliver them to his provider. The provider then exercises their own API using the Pact files via a verifier.
+Once the consumer has defined the contract as CDC tests and exported them to Pact files, they'll deliver them to their provider. The provider then exercises their own API using the Pact files via a verifier.
 
-The verifier is quite a simple idea. Load a Pact file, make all the requests and compare all the responses to the expected ones.
+The verifier is quite a simple idea: load a Pact file, make all the requests and compare all the responses to the expected ones.
 
-The ScalaPact verifier can be run be entering `sbt pact-verify`.
+The ScalaPact verifier can be run by entering `sbt pact-verify`.
 
 The verifier will write out JUnit results to the `target/test-reports` directory in order to fail builds.
 
-#### Command line options
-You can also run the verifier using a combination of the following command line options, below are the defaults:
+#### Command Line Options
+You can also run the verifier using a combination of the following command line options. Below are the defaults:
 
 `sbt "pact-verify --host localhost --port 1234 --source pacts"`
 
 *Note that files in the source folder are recursively loaded.*
 
-### Other considerations
+### Other Considerations
 
-1. Mock servers can only understand an endpoint being in one state. Mostly that isn't a problem, if you want to create a pact describing the look up of documents that result in a 200 or a 404 you simply look up two different documents. Where you have something like a `/status` endpoint that could come back in different states that you care about, you would have to be a bit creative, or not describe that behaviour in a pact contract.
-1. ScalaTest runs in parallel by default so even clearing the state of the stubber between tests could, and probably would, result in errors if you were using Http administration.
+1. Mock servers can only understand an endpoint being in one state. Mostly that isn't a problem - if you want to create a Pact describing the look up of documents that result in a 200 or a 404 you simply look up two different documents. Where you have something like a `/status` endpoint that could come back in different states that you care about, you would have to be a bit creative, or not describe that behaviour in a pact contract.
+1. ScalaTest runs in parallel by default so even clearing the state of the stubber between tests could, and probably would, result in errors if you were using HTTP administration.
 
 ## Provider States
 ScalaPact currently offers limited support for provider states.
 
-Sometimes, you need to warn your provider that a contract relies on the providing system being in a particular state. For example: Your contract describes requesting a document resource via a GET request with the document's id as a query parameter. If you send the pact contract to your provider, but that document id doesn't exist on their system, then verification will fail through no-ones fault.
+Sometimes, you need to warn your provider that a contract relies on the providing system being in a particular state. For example, your contract describes requesting a document resource via a GET request with the document's id as a query parameter. If you send the Pact contract to your provider, but that document id doesn't exist on their system, then verification will fail through no-ones fault.
 
 To warn the provider about such requirements, we use provider states. In the tests these are simply strings in the `given()` method as below:
 
@@ -179,18 +178,18 @@ The providerStates settings object is a `Seq[(String, String => Boolean)]` where
 
 The intention is to create helper objects in the future for running common tasks like executing shell scripts but at the moment the functions are pure Scala and it's up to you how you use them.
 
-## Pact file delivery via Pact Broker
+## Pact File Distribution via Pact Broker
 During a build process you will need some mechanism for delivering the Pact files your consumer tests generate to your provider ready for verification.
 
-You can do this any way you like, they are just json files after all, but we are currently exploring [pact-broker](https://github.com/bethesque/pact_broker). Pact broker is a Ruby service that allows you to post and look up versioned Pact files.
+You can do this any way you like, they are just JSON files after all, but we are currently exploring [pact-broker](https://github.com/bethesque/pact_broker). Pact Broker is a Ruby service that allows you to post and look up versioned Pact files.
 
-*An opinionated note on versioning:* Focus on versioning your API's not your Pact files! It can be handy to have versions of Pact files around but you should not being pushing a breaking API changes and communicating them to your provider with versioned Pact files. A breaking API change is a new API version. Theoretically your provider should always be able to ask for the latest Pact files for each API version and have confidence that they are correct.
+*An opinionated note on versioning:* Focus on versioning your API's not your Pact files! It can be handy to have versions of Pact files around but you should not be pushing a breaking API changes and communicating them to your provider with versioned Pact files. A breaking API change is a new API version. Theoretically your provider should always be able to ask for the latest Pact files for each API version and have confidence that they are correct.
 
-## Pact tests VS Integration tests
+## Pact Tests vs Integration Tests
 Technically, when you write a Pact test you are creating an integration test, in that:
 
 1. You write some client code to make the call to your provider;
-2. You then write a test using a mock that expects a request and gives a response to a real http call;
+2. You then write a test using a mock that expects a request and gives a response to a real HTTP call;
 3. You check the results are what you expected.
 
 The *purpose* of Pact and Integration tests is different though. A Pact test is there to describe the agreed contract between one service and another from the perspective of the consumer. An integration test can describe the relationship but not in a way that you can share with your provider for verification. Additionally Integration tests are good for testing failure cases where Pact tests are not.
@@ -199,15 +198,13 @@ Consider these two statements:
 1. Pact tests define *what* the agreement between a consumer and a provider is
 2. Integration tests check *how* that agreement is implemented on the consumer side
 
-For instance:
-
-You should use Pact tests for describing the agreement:
+For instance, you should use Pact tests for describing the agreement:
 
 1. Requesting data in a specific format from a provider
 1. Describing content negotiation
 1. How a provider would respond if it couldn't find the data you wanted
 
-You could then build on that with integration tests for...
+You could then build on that with integration tests:
 
 1. Checking what happens if the provider simply isn't there
 1. Network failures
@@ -215,14 +212,14 @@ You could then build on that with integration tests for...
 1. Missing end points
 1. Badly formed responses
 
-## Pact specification compliance level
+## Pact Specification Compliance Level
 Currently ScalaPact is not 100% compliant with the official Pact specification. We plan to be but the library is still under active development. The roadmap to Pact compliance will be something like:
 
 1. Complete testing all tools against the official specification test cases, known missing areas are regex header matching and body matching.
-1. Implement the Json body special case
-1. Consolidate our processes with the official implementors guide
+1. Implement the JSON body special case
+1. Consolidate our processes with the official implementor's guide
 
-### Why aren't we Pact compliant?
+### Why Aren't We Pact Compliant?
 There is already more than one CDC implementation and ScalaPact is most closely aligned to Pact.
 
 Pact was created for a company to meet it's needs and ScalaPact has been created in the same vein, in as much as we have requirements that the official Pact tools don't quite meet.
@@ -248,7 +245,7 @@ The other uses of the Pact files, verification and stubbing are largely standalo
 
 There is an implementation of the Pact integration test suite that is theoretically compatible with Scala and [Specs2](https://etorreborre.github.io/specs2/) called [Pact-JVM](https://github.com/DiUS/pact-jvm). Pact-JVM also supports other JVM languages like Java and Groovy. In practice we had some difficulties with the Scala Pact-JVM implementation for our particular use case, hence the creation of this project.
 
-## Scala project library dependencies
+## Scala Project Library Dependencies
 The Pact integration test library itself depends on a range of Scala/Java libraries.
 
 ### Http4s
@@ -264,23 +261,23 @@ The Pact integration test library itself depends on a range of Scala/Java librar
 [ScalaTest](http://www.scalatest.org/) is both our test suite of choice and the target for the ScalaPact implementation.
 
 ### Scalaj-Http
-[Scalaj-Http](https://github.com/scalaj/scalaj-http) is used for quick synchronous http calls.
+[Scalaj-Http](https://github.com/scalaj/scalaj-http) is used for quick synchronous HTTP calls.
 
-## Documentation roadmap
+## Documentation Roadmap
 
 - How to use
 - Update all README.md files
   - Legal hygiene checks, make sure there's nothing offensive
   - Public consumption, is it easy to understand what you have to do to use ScalaPact?
 
-## Short term development roadmap
+## Short Term Development Roadmap
 
 - Add LICENCE.md
 - Add CONTRIBUTING.md
 - Publish lib to repo
 - Improve error reporting?
 
-## Mid term development roadmap
+## Mid Term Development Roadmap
 
 - Implement the JSON body special case
 - Implement better body matching / diffing for:
@@ -289,7 +286,7 @@ The Pact integration test library itself depends on a range of Scala/Java librar
   - JSON (related to the special case problem)
 - Implement header regex matching
 
-## Longer term development roadmap
+## Longer Term Development Roadmap
 
 - Add provider state helpers e.g. Shell script runner and a Scala script runner?
 - Comply with Pact implementor guidelines
