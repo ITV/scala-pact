@@ -26,7 +26,7 @@ libraryDependencies ++= Seq(
 You will also need to add a resolver to your `build.sbt` file like this:
 
 ```
-resolvers += "Artifactory" at "https://itvrepos.artifactoryonline.com/itvrepos/oasvc-ivy/
+resolvers += "Artifactory" at "https://itvrepos.artifactoryonline.com/itvrepos/oasvc-ivy/"
 ```
 
 ### SBT Plugin
