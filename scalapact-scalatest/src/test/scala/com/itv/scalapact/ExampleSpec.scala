@@ -74,7 +74,7 @@ class ExampleSpec extends FunSpec with Matchers {
         .addInteraction(
           interaction
             .description("a simple get example with a header")
-            .uponReceiving(GET, endPoint, None, Map("fish" -> "chips"), None)
+            .uponReceiving(GET, endPoint, None, Map("fish" -> "chips"), None, None)
             .willRespondWith(200, "Hello there!")
         )
         .runConsumerTest { mockConfig =>
@@ -139,7 +139,7 @@ class ExampleSpec extends FunSpec with Matchers {
         .addInteraction(
           interaction
             .description("POST JSON receive XML example")
-            .uponReceiving(POST, endPoint, None, headers, Option(write(requestData)))
+            .uponReceiving(POST, endPoint, None, headers, Option(write(requestData)), None)
             .willRespondWith(400, Map("Content-Type" -> "text/xml"), Option(responseXml.toString()))
         )
         .runConsumerTest { mockConfig =>
@@ -182,6 +182,30 @@ class ExampleSpec extends FunSpec with Matchers {
 
           result.status should equal(200)
           result.body should equal("ID: 1234 Exists")
+
+        }
+
+    }
+
+    it("Should be able to create a contract for a GET with header matchers") {
+
+      val endPoint = "/header-match"
+
+      forgePact
+        .between("My Consumer")
+        .and("Their Provider Service")
+        .addInteraction(
+          interaction
+            .description("a simple get example with a header matcher")
+            .uponReceiving(GET, endPoint, None, Map("fish" -> "chips"), None, Option(List(ScalaPactMatchingRuleRegex("$.header.fish", "\\w+"))))
+            .willRespondWith(200, "Hello there!")
+        )
+        .runConsumerTest { mockConfig =>
+
+          val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint, Map("fish" -> "peas"))
+
+          result.status should equal(200)
+          result.body should equal("Hello there!")
 
         }
 

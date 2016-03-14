@@ -3,7 +3,7 @@ package com.itv.scalapact
 import java.io.{File, PrintWriter}
 import java.nio.charset.StandardCharsets
 
-import com.itv.scalapact.ScalaPactForger.ScalaPactDescriptionFinal
+import com.itv.scalapact.ScalaPactForger.{ScalaPactMatchingRuleRegex, ScalaPactMatchingRuleType, ScalaPactMatchingRule, ScalaPactDescriptionFinal}
 import com.itv.scalapactcore._
 
 import scala.language.implicitConversions
@@ -66,7 +66,8 @@ object ScalaPactContractWriter {
               path = pathAndQuery._1,
               query = pathAndQuery._2,
               headers = i.request.headers,
-              body = i.request.body
+              body = i.request.body,
+              matchingRules = i.request.matchingRules
             ),
             response = InteractionResponse(
               status = i.response.status,
@@ -78,6 +79,17 @@ object ScalaPactContractWriter {
       )
     )
   }
+
+  implicit private def convertMatchingRules(rules: Option[List[ScalaPactMatchingRule]]): Option[Map[String, MatchingRule]] =
+    rules.map { rs =>
+      rs.map {
+        case ScalaPactMatchingRuleType(key) =>
+          Map(key -> MatchingRule("type", None))
+
+        case ScalaPactMatchingRuleRegex(key, regex) =>
+          Map(key -> MatchingRule("regex", regex))
+      }.foldLeft(Map.empty[String, MatchingRule])(_ ++ _)
+    }
 
   implicit private val intToBoolean: Int => Boolean = v => v > 0
   implicit private val stringToBoolean: String => Boolean = v => v != ""
