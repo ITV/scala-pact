@@ -21,12 +21,9 @@ Add the dependency to your `build.sbt` file like this:
 libraryDependencies ++= Seq(
   "com.itv" %% "scalapact-scalatest" % "0.1.3" % "test"
 )
-```
 
-You will also need to add a resolver to your `build.sbt` file like this:
-
-```
 resolvers += "Artifactory" at "https://itvrepos.artifactoryonline.com/itvrepos/oasvc-ivy/"
+
 ```
 
 ### SBT Plugin
@@ -34,12 +31,10 @@ Add the plugin to your `project/plugins.sbt` file like this:
 
 ```
 addSbtPlugin("com.itv.plugins" % "scalapact-plugin" % "0.1.3")
-```
 
-You will also need to add a resolver to your `build.sbt` file like this:
+resolvers += "Artifactory" at "https://itvrepos.artifactoryonline.com/itvrepos/oasvc-ivy/"
 
-```
-resolvers += "Artifactory" at "https://itvrepos.artifactoryonline.com/itvrepos/oasvc-ivy/
+
 ```
 
 ## Basic Usage Examples
