@@ -60,7 +60,13 @@ object PactFileExamples {
           path = Option("/fetch-json"),
           query = Option("fish=chips"),
           headers = Option(Map("Content-Type" -> "text/plain")),
-          body = Option("""fish""")
+          body = Option("""fish"""),
+          matchingRules = Option(
+            Map(
+              "$.headers.Accept" -> MatchingRule(`match` = "regex", regex = Option("\\w+")),
+              "$.headers.Content-Length" -> MatchingRule(`match` = "type", regex = None)
+            )
+          )
         ),
         response = InteractionResponse(
           status = Option(200),
@@ -102,6 +108,15 @@ object PactFileExamples {
                          |        "method" : "GET",
                          |        "body" : "fish",
                          |        "path" : "/fetch-json",
+                         |        "matchingRules" : {
+                         |          "$.headers.Accept" : {
+                         |            "match" : "regex",
+                         |            "regex" : "\\w+"
+                         |          },
+                         |          "$.headers.Content-Length" : {
+                         |            "match" : "type"
+                         |          }
+                         |        },
                          |        "query" : "fish=chips",
                          |        "headers" : {
                          |          "Content-Type" : "text/plain"
