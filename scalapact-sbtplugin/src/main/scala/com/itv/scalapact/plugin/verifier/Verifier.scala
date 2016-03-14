@@ -129,7 +129,7 @@ object Verifier {
 
     try {
       InteractionRequest.unapply(interactionRequest) match {
-        case Some((Some(method), Some(path), params, _, _)) =>
+        case Some((Some(method), Some(path), params, _, _, _)) =>
 
           httpResponseToInteractionResponse {
             val basicRequest = Http(baseUrl + path + params.map(s => "?" + s).getOrElse(""))

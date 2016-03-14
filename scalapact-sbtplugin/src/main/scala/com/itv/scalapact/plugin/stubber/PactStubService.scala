@@ -79,7 +79,8 @@ object PactStubService {
           headers = Option(req.headers),
           query = if(req.params.isEmpty) None else Option(req.params.toList.map(p => p._1 + "=" + p._2).mkString("&")),
           path = Option(req.pathInfo),
-          body = req.bodyAsText.runLast.run
+          body = req.bodyAsText.runLast.run,
+          matchingRules = None
         )
       ) match {
         case \/-(ir) =>
