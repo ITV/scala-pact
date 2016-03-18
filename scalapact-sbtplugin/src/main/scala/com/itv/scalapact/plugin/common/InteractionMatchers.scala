@@ -2,7 +2,7 @@ package com.itv.scalapact.plugin.common
 
 import argonaut._
 import Argonaut._
-import com.itv.scalapactcore.{Interaction, InteractionResponse, InteractionRequest}
+import com.itv.scalapactcore.{Interaction, InteractionRequest, InteractionResponse, MatchingRule}
 
 import scalaz._
 import Scalaz._
@@ -12,7 +12,7 @@ object InteractionMatchers {
   lazy val matchRequest: List[Interaction] => InteractionRequest => \/[String, Interaction] = interactions => received =>
     interactions.find { ir =>
       matchMethods(ir.request.method.orElse(Option("GET")))(received.method) &&
-        matchHeaders(ir.request.headers)(received.headers) &&
+        matchHeaders(ir.request.matchingRules)(ir.request.headers)(received.headers) &&
         matchPaths(ir.request.path.orElse(Option("/")))(ir.request.query)(received.path)(received.query) &&
         matchBodies(received.headers)(ir.request.body)(received.body)
     } match {
@@ -23,7 +23,7 @@ object InteractionMatchers {
   lazy val matchResponse: List[Interaction] => InteractionResponse => \/[String, Interaction] = interactions => received =>
     interactions.find{ ir =>
       matchStatusCodes(ir.response.status)(received.status) &&
-        matchHeaders(ir.response.headers)(received.headers) &&
+        matchHeaders(ir.request.matchingRules)(ir.response.headers)(received.headers) &&
         matchBodies(received.headers)(ir.response.body)(received.body)
     } match {
       case Some(matching) => matching.right
@@ -36,7 +36,7 @@ object InteractionMatchers {
   lazy val matchMethods: Option[String] => Option[String] => Boolean = expected => received =>
     generalMatcher(expected, received, (e: String, r: String) => e.toUpperCase == r.toUpperCase)
 
-  lazy val matchHeaders: Option[Map[String, String]] => Option[Map[String, String]] => Boolean = expected => received => {
+  lazy val matchHeaders: Option[Map[String, MatchingRule]] => Option[Map[String, String]] => Option[Map[String, String]] => Boolean = matchingRules => expected => received => {
 
     val legalCharSeparators = List('(',')','<','>','@',',',';',':','\\','"','/','[',']','?','=','{','}')
 
@@ -51,13 +51,36 @@ object InteractionMatchers {
       }
     }
 
-    val predicate = (e: Map[String, String], r: Map[String, String]) => {
-      e.map(p => (p._1.toLowerCase, trimAllSeparators(legalCharSeparators, p._2)))
+    val predicate = (matchingRules: Option[Map[String, MatchingRule]]) => (e: Map[String, String], r: Map[String, String]) => {
+
+      def standardise(input: (String, String)): (String, String) = {
+        (input._1.toLowerCase, trimAllSeparators(legalCharSeparators, input._2))
+      }
+
+      val withRules = matchingRules.map { mr =>
+        e.filterKeys(key => mr.exists(p => p._1 == key))
+      }.getOrElse(Map.empty[String, String])
+
+      val withRuleMatchResult: Boolean = withRules.map { header =>
+        matchingRules
+          .flatMap { rules => rules.find(p => p._1 == header._1) }
+            .flatMap { rule =>
+              rule._2.regex.flatMap { regex =>
+                r.get(header._1).map(rec => rec.matches(regex))
+              }
+            }.getOrElse(true)
+      }.forall(_ == true)
+
+      val noRules = e.filterKeys(k => !withRules.contains(k))
+
+      val noRuleMatchResult: Boolean = noRules.map(p => standardise(p))
         .toSet
-        .subsetOf(r.map(p => (p._1.toLowerCase, trimAllSeparators(legalCharSeparators, p._2))).toSet)
+        .subsetOf(r.map(p => standardise(p)).toSet)
+
+      noRuleMatchResult && withRuleMatchResult
     }
 
-    generalMatcher(expected, received, predicate)
+    generalMatcher(expected, received, predicate(matchingRules))
   }
 
   lazy val matchPaths: Option[String] => Option[String] => Option[String] => Option[String] => Boolean = expectedPath => expectedQuery => receivedPath => receivedQuery => {

@@ -1,5 +1,6 @@
 package com.itv.scalapact.plugin.common
 
+import com.itv.scalapactcore.MatchingRule
 import org.scalatest.{FunSpec, Matchers}
 
 import scala.language.implicitConversions
@@ -40,7 +41,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
       val expected = Map("fish" -> "chips")
       val received = Map("fish" -> "chips")
 
-      matchHeaders(expected)(received) shouldEqual true
+      matchHeaders(None)(expected)(received) shouldEqual true
 
     }
 
@@ -49,7 +50,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
       val expected = Map("fish" -> "chips")
       val received = Map("fish" -> "peas")
 
-      matchHeaders(expected)(received) shouldEqual false
+      matchHeaders(None)(expected)(received) shouldEqual false
 
     }
 
@@ -58,7 +59,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
       val expected = Map("fish" -> "chips", "mammal" -> "bear")
       val received = Map("fish" -> "chips", "mammal" -> "bear", "rock" -> "sandstone", "metal" -> "steel")
 
-      matchHeaders(expected)(received) shouldEqual true
+      matchHeaders(None)(expected)(received) shouldEqual true
 
     }
 
@@ -80,7 +81,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
           )
         )
 
-      matchHeaders(expected)(received) shouldEqual true
+      matchHeaders(None)(expected)(received) shouldEqual true
 
     }
 
@@ -107,7 +108,24 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         )
       )
 
-      matchHeaders(expected)(received) shouldEqual true
+      matchHeaders(None)(expected)(received) shouldEqual true
+
+    }
+
+    it("should be able to use regex to match headers") {
+
+      val expected = Option(
+        Map(
+          "fish" -> "chips"
+        )
+      )
+      val received = Option(
+        Map(
+          "fish" -> "peas"
+        )
+      )
+
+      matchHeaders(Option(Map("fish" -> MatchingRule("regex", "\\w+"))))(expected)(received) shouldEqual true
 
     }
 

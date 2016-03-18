@@ -20,7 +20,8 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         headers = None,
         query = None,
         path = "/foo",
-        body = None
+        body = None,
+        matchingRules = None
       )
 
       val interaction = Interaction(
@@ -31,7 +32,8 @@ class InteractionManagerSpec extends FunSpec with Matchers {
           path = "/foo",
           query = None,
           headers = None,
-          body = None
+          body = None,
+          matchingRules = None
         ),
         response = InteractionResponse(
           status = 200,
@@ -69,7 +71,8 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         ),
         path = "/foo",
         query = None,
-        body = None
+        body = None,
+        matchingRules = None
       )
 
       val interaction = Interaction(
@@ -80,7 +83,8 @@ class InteractionManagerSpec extends FunSpec with Matchers {
           path = "/foo",
           query = None,
           headers = None,
-          body = None
+          body = None,
+          matchingRules = None
         ),
         response = InteractionResponse(
           status = 200,
@@ -108,14 +112,16 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         headers = Map("fish" -> "chips"),
         path = "/foo",
         query = None,
-        body = None
+        body = None,
+        matchingRules = None
       )
       val requestDetails2 = InteractionRequest(
         method = "GET",
         headers = Map("fish" -> "peas"),
         path = "/foo",
         query = None,
-        body = None
+        body = None,
+        matchingRules = None
       )
 
       val interaction = Interaction(
@@ -126,7 +132,8 @@ class InteractionManagerSpec extends FunSpec with Matchers {
           path = "/foo",
           query = None,
           headers = Map("fish" -> "chips"),
-          body = None
+          body = None,
+          matchingRules = None
         ),
         response = InteractionResponse(
           status = 200,
@@ -153,7 +160,8 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         headers = Map("Content-Type" -> "text/plain; charset=uft-8", "Content-Length" -> "0", "Accept" -> "application/json"),
         path = "/foo",
         query = None,
-        body = None
+        body = None,
+        matchingRules = None
       )
 
       val interaction = Interaction(
@@ -164,7 +172,8 @@ class InteractionManagerSpec extends FunSpec with Matchers {
           path = "/foo",
           query = None,
           headers = Map("Accept" -> "application/json"),
-          body = None
+          body = None,
+          matchingRules = None
         ),
         response = InteractionResponse(
           status = 200,
@@ -192,7 +201,8 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         headers = None,
         path = "/foo/bar/hello",
         query = None,
-        body = None
+        body = None,
+        matchingRules = None
       )
 
       val badRequestDetails = InteractionRequest(
@@ -200,7 +210,8 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         headers = None,
         path = "/foo/bar/hello/",
         query = None,
-        body = None
+        body = None,
+        matchingRules = None
       )
 
       val interaction = Interaction(
@@ -211,7 +222,8 @@ class InteractionManagerSpec extends FunSpec with Matchers {
           path = "/foo/bar/hello",
           query = None,
           headers = None,
-          body = None
+          body = None,
+          matchingRules = None
         ),
         response = InteractionResponse(
           status = 200,
@@ -238,7 +250,8 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         headers = None,
         path = "/foo/bar/hello?id=1234&name=joe",
         query = None,
-        body = None
+        body = None,
+        matchingRules = None
       )
 
       val goodRequestDetails2 = InteractionRequest(
@@ -246,7 +259,8 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         headers = None,
         path = "/foo/bar/hello?name=joe&id=1234",
         query = None,
-        body = None
+        body = None,
+        matchingRules = None
       )
 
       val goodRequestDetails3 = InteractionRequest(
@@ -254,7 +268,8 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         headers = None,
         path = "/foo/bar/hello?name=joe",
         query = Option("id=1234"),
-        body = None
+        body = None,
+        matchingRules = None
       )
 
       val goodRequestDetails4 = InteractionRequest(
@@ -262,7 +277,8 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         headers = None,
         path = "/foo/bar/hello",
         query = Option("name=joe&id=1234"),
-        body = None
+        body = None,
+        matchingRules = None
       )
 
       val badRequestDetails1 = InteractionRequest(
@@ -270,7 +286,8 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         headers = None,
         path = "/foo/bar/hello?name=joe&id=1234&occupation=troubleMaker",
         query = None,
-        body = None
+        body = None,
+        matchingRules = None
       )
 
       val interaction = Interaction(
@@ -281,7 +298,8 @@ class InteractionManagerSpec extends FunSpec with Matchers {
           path = "/foo/bar/hello?id=1234&name=joe",
           query = None,
           headers = None,
-          body = None
+          body = None,
+          matchingRules = None
         ),
         response = InteractionResponse(
           status = 200,
