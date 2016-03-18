@@ -133,6 +133,7 @@ object ScalaPactMock extends LazyLogging {
   def injectStub(wireMockServer: WireMockServer, mappingBuilder: MappingBuilder, request: ScalaPactRequest, response: ScalaPactResponse): Unit = {
 
     request.headers.foreach { h =>
+      // TODO: If the header has a matchingRule, change matching strategy
       mappingBuilder.withHeader(h._1, equalTo(h._2))
     }
 
