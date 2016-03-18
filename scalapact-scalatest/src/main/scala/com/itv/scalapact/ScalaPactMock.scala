@@ -130,11 +130,26 @@ object ScalaPactMock extends LazyLogging {
     wireMockServer.stop()
   }
 
+  private val extractMatchRuleKey: String => String => Option[String] = prefix => key =>
+    if(key.startsWith(prefix)) Option(key.substring(prefix.length)) else None
+
+  private val headerKey: String => Option[String] = key => extractMatchRuleKey("$.header.")(key)
+  private val bodyKey: String => Option[String] = key => extractMatchRuleKey("$.header.")(key)
+
   def injectStub(wireMockServer: WireMockServer, mappingBuilder: MappingBuilder, request: ScalaPactRequest, response: ScalaPactResponse): Unit = {
 
     request.headers.foreach { h =>
-      // TODO: If the header has a matchingRule, change matching strategy
-      mappingBuilder.withHeader(h._1, equalTo(h._2))
+      request.matchingRules.getOrElse(Nil).find(p => headerKey(p.key).contains(h._1)) match {
+          case r @ Some(ScalaPactMatchingRuleRegex(key, regex))  =>
+            mappingBuilder.withHeader(h._1, matching(regex))
+
+          case t @ Some(ScalaPactMatchingRuleType(key))  =>
+            // Type matching rules are for body matchers, headers are always strings.
+            mappingBuilder.withHeader(h._1, equalTo(h._2))
+
+          case None =>
+            mappingBuilder.withHeader(h._1, equalTo(h._2))
+      }
     }
 
     request.body.map { b =>

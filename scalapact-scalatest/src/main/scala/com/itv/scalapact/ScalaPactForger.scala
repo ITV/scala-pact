@@ -72,7 +72,9 @@ object ScalaPactForger {
   }
   case class ScalaPactRequest(method: ScalaPactMethod, path: String, query: Option[String], headers: Map[String, String], body: Option[String], matchingRules: Option[List[ScalaPactMatchingRule]])
 
-  sealed trait ScalaPactMatchingRule
+  sealed trait ScalaPactMatchingRule {
+    val key: String
+  }
   case class ScalaPactMatchingRuleRegex(key: String, regex: String) extends ScalaPactMatchingRule
   case class ScalaPactMatchingRuleType(key: String) extends ScalaPactMatchingRule
 
