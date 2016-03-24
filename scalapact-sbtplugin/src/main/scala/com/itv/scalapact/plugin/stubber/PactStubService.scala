@@ -13,9 +13,9 @@ import scalaz.{-\/, \/-}
 object PactStubService {
 
   lazy val startServer: Arguments => Unit = config => {
-    println(("Starting ScalaPact Stubber on: http://" + config.host + ":" + config.port).white.bold)
+    println(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort).white.bold)
 
-    BlazeBuilder.bindHttp(config.port, config.host)
+    BlazeBuilder.bindHttp(config.givePort, config.giveHost)
       .mountService(PactStubService.service, "/")
       .run
       .awaitShutdown()

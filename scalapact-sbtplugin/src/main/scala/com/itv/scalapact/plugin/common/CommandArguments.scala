@@ -8,12 +8,12 @@ object CommandArguments {
 
   private lazy val convertToArguments: Map[String, String] => Arguments = argMap => {
     val args = Arguments(
-      host = argMap.getOrElse("--host", "localhost"),
-      port = argMap.get("--port").flatMap(Helpers.safeStringToInt).getOrElse(1234),
+      host = argMap.get("--host"),
+      port = argMap.get("--port").flatMap(Helpers.safeStringToInt),
       localPactPath = argMap.get("--source")
     )
 
-    println(s"Starting up with host '${args.host}', port '${args.port}', and source path '${args.localPactPath.getOrElse("<default>")}'".white.bold)
+    println(s"Starting up with host '${args.giveHost}', port '${args.givePort}', and source path '${args.localPactPath.getOrElse("'Not set'")}'".white.bold)
 
     args
   }
@@ -56,4 +56,7 @@ object Helpers {
 
 }
 
-case class Arguments(host: String, port: Int, localPactPath: Option[String])
+case class Arguments(host: Option[String], port: Option[Int], localPactPath: Option[String]) {
+  val giveHost = host.getOrElse("localhost")
+  val givePort = port.getOrElse(1234)
+}
