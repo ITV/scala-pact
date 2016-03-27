@@ -2,7 +2,6 @@ package com.itv.scalapact.plugin.verifier
 
 import com.itv.scalapact.plugin.ScalaPactPlugin
 import com.itv.scalapact.plugin.common.CommandArguments._
-import com.itv.scalapact.plugin.common.LocalPactFileLoader._
 import com.itv.scalapact.plugin.common.Rainbow._
 import sbt._
 
@@ -25,8 +24,10 @@ object ScalaPactVerifyCommand {
     println("*************************************".white.bold)
 
     val providerStates: List[ProviderState] = Project.extract(state).get(ScalaPactPlugin.providerStates)
+    val pactBrokerAddress: String = Project.extract(state).get(ScalaPactPlugin.pactBrokerAddress)
+    val projectVersion: String = Project.extract(state).get(Keys.version)
 
-    (parseArguments andThen loadPactFiles("pacts") andThen verify(providerStates)) (args)
+    (parseArguments andThen verify(providerStates)(projectVersion)(pactBrokerAddress)) (args)
 
     state
   }

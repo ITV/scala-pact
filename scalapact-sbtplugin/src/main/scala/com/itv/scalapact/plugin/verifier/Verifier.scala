@@ -2,7 +2,7 @@ package com.itv.scalapact.plugin.verifier
 
 import com.itv.scalapact.plugin.common.InteractionMatchers._
 import com.itv.scalapact.plugin.common.Rainbow._
-import com.itv.scalapact.plugin.common.{Arguments, ConfigAndPacts}
+import com.itv.scalapact.plugin.common.{Arguments, LocalPactFileLoader, PactBrokerAddressValidation}
 import com.itv.scalapactcore.{Interaction, InteractionRequest, InteractionResponse, Pact}
 
 import scalaj.http.{Http, HttpResponse}
@@ -11,20 +11,36 @@ import scalaz._
 
 object Verifier {
 
-  lazy val verify: List[ProviderState] => ConfigAndPacts => Unit = providerStates => configAndPacts => {
+  lazy val verify: List[ProviderState] => String => String => Arguments => Unit = providerStates => projectVersion => pactBrokerAddress => arguments => {
 
-    println(s"Verifying against '${configAndPacts.arguments.giveHost}', port '${configAndPacts.arguments.givePort}', and source path '${configAndPacts.arguments.localPactPath.getOrElse("'Not set'")}'".white.bold)
+    val pacts: List[Pact] = if(arguments.localPactPath.isDefined) {
+      println(s"Attempting to use local pact files at: '${arguments.localPactPath.get}'".white.bold)
+      LocalPactFileLoader.loadPactFiles("pacts")(arguments).pacts
+    } else {
+      println(s"Attempting to fetch pact from pact broker at".white.bold)
+      PactBrokerAddressValidation.checkPactBrokerAddress(pactBrokerAddress) match {
+        case -\/(l) =>
+          println(l.red)
+          Nil
+
+        case \/-(r) =>
+          //TODO: Need to know consumer and provider...
+          ???
+      }
+    }
+
+    println(s"Verifying against '${arguments.giveHost}', port '${arguments.givePort}'".white.bold)
 
     val startTime = System.currentTimeMillis().toDouble
 
-    val pactVerifyResults = configAndPacts.pacts.map { pact =>
+    val pactVerifyResults = pacts.map { pact =>
       PactVerifyResult(
         pact = pact,
         results = pact.interactions.map { interaction =>
 
           val maybeProviderState = interaction.providerState.flatMap(p => providerStates.find(j => j.key == p))
 
-          (doRequest(configAndPacts.arguments)(maybeProviderState) andThen attemptMatch(List(interaction)))(interaction.request)
+          (doRequest(arguments)(maybeProviderState) andThen attemptMatch(List(interaction)))(interaction.request)
         }
       )
     }
