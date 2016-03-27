@@ -23,8 +23,6 @@ object ScalaPactPublishCommand {
 
     val pactTestedState = Command.process("pact-test", state)
 
-
-
     val pactBrokerAddress: String = Project.extract(pactTestedState).get(ScalaPactPlugin.pactBrokerAddress)
     val projectVersion: String = Project.extract(pactTestedState).get(Keys.version)
 

@@ -13,6 +13,8 @@ object Verifier {
 
   lazy val verify: List[ProviderState] => ConfigAndPacts => Unit = providerStates => configAndPacts => {
 
+    println(s"Verifying against '${configAndPacts.arguments.giveHost}', port '${configAndPacts.arguments.givePort}', and source path '${configAndPacts.arguments.localPactPath.getOrElse("'Not set'")}'".white.bold)
+
     val startTime = System.currentTimeMillis().toDouble
 
     val pactVerifyResults = configAndPacts.pacts.map { pact =>

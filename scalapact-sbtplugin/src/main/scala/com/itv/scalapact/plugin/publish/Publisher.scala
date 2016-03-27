@@ -13,27 +13,34 @@ object Publisher {
 
   lazy val publishToBroker: String => String => ConfigAndPacts => Unit = pactBrokerAddress => projectVersion => configAndPacts => {
 
-    val brokerAddress =
-      (configAndPacts.arguments.host, configAndPacts.arguments.port) match {
-        case (Some(h), None) if h.startsWith("http://") => h
-        case (Some(h), None) if h.contains(":") => "http://" + h
-        case (Some(h), Some(p)) => "http://" + h + ":" + p
-        case (None, None) => pactBrokerAddress
-      }
+    val urlMatch = "^(http)(s?)(://)([A-Za-z0-9-\\./]+)([A-Za-z0-9]$)"
 
-    configAndPacts.pacts.foreach { pact =>
+    pactBrokerAddress match {
+      case a: String if a.isEmpty =>
+        println("Pact broker address not set, you need to add the following line to you SBT file: ".red)
+        println("pactBrokerAddress := \"http://pactbroker.myserver.com\"".red)
 
-      //TODO: Snapshot version number handling?
+      case a: String if !a.startsWith("http") =>
+        println("Pact broker address does not appear to be valid, should start with 'http(s)' protocol.".red)
 
-      val address = brokerAddress + "/pacts/provider/" + urlEncode(pact.provider.name) + "/consumer/" + urlEncode(pact.consumer.name) + "/version/" + projectVersion
+      case a: String if !a.matches(urlMatch) =>
+        println("Pact broker address does not appear to be valid, should be of form: http://my.broker-address.com".red)
 
-      println(s"Publishing to: $address".yellow)
+      case _ =>
+        configAndPacts.pacts.foreach { pact =>
 
-      Http(address).method("PUT").postData(ScalaPactWriter.pactToJsonString(pact)).asString match {
-        case r: HttpResponse[String] if r.is2xx => println("Success".green)
-        case r: HttpResponse[String] => println(s"Failed: ${r.body}".red)
-      }
+          //TODO: Snapshot version number handling? Find out if it works or not.
 
+          val address = pactBrokerAddress + "/pacts/provider/" + urlEncode(pact.provider.name) + "/consumer/" + urlEncode(pact.consumer.name) + "/version/" + projectVersion
+
+          println(s"Publishing to: $address".yellow)
+
+          Http(address).method("PUT").postData(ScalaPactWriter.pactToJsonString(pact)).asString match {
+            case r: HttpResponse[String] if r.is2xx => println("Success".green)
+            case r: HttpResponse[String] => println(s"Failed: ${r.body}".red)
+          }
+
+        }
     }
 
     Unit
