@@ -23,14 +23,19 @@ object ScalaPactVerifyCommand {
     println("** ScalaPact: Running Verifier     **".white.bold)
     println("*************************************".white.bold)
 
-    val providerStates: List[ProviderState] = Project.extract(state).get(ScalaPactPlugin.providerStates)
-    val pactBrokerAddress: String = Project.extract(state).get(ScalaPactPlugin.pactBrokerAddress)
-    val projectVersion: String = Project.extract(state).get(Keys.version)
+    val pactVerifySettings = PactVerifySettings(
+      providerStates = Project.extract(state).get(ScalaPactPlugin.providerStates),
+      pactBrokerAddress = Project.extract(state).get(ScalaPactPlugin.pactBrokerAddress),
+      projectVersion = Project.extract(state).get(Keys.version),
+      providerName = Project.extract(state).get(ScalaPactPlugin.providerName),
+      consumerNames = Project.extract(state).get(ScalaPactPlugin.consumerNames).toList
+    )
 
-    (parseArguments andThen verify(providerStates)(projectVersion)(pactBrokerAddress)) (args)
+    (parseArguments andThen verify(pactVerifySettings)) (args)
 
     state
   }
 }
 
 case class ProviderState(key: String, f: String => Boolean)
+case class PactVerifySettings(providerStates: List[ProviderState], pactBrokerAddress: String, projectVersion: String, providerName: String, consumerNames: List[String])

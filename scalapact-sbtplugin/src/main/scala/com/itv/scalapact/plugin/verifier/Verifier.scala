@@ -1,9 +1,12 @@
 package com.itv.scalapact.plugin.verifier
 
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+
 import com.itv.scalapact.plugin.common.InteractionMatchers._
 import com.itv.scalapact.plugin.common.Rainbow._
 import com.itv.scalapact.plugin.common.{Arguments, LocalPactFileLoader, PactBrokerAddressValidation}
-import com.itv.scalapactcore.{Interaction, InteractionRequest, InteractionResponse, Pact}
+import com.itv.scalapactcore._
 
 import scalaj.http.{Http, HttpResponse}
 import scalaz.Scalaz._
@@ -11,21 +14,42 @@ import scalaz._
 
 object Verifier {
 
-  lazy val verify: List[ProviderState] => String => String => Arguments => Unit = providerStates => projectVersion => pactBrokerAddress => arguments => {
+  lazy val verify: PactVerifySettings => Arguments => Unit = pactVerifySettings => arguments => {
+
+    val urlEncode: String => String = str => URLEncoder.encode(str, StandardCharsets.UTF_8.toString)
 
     val pacts: List[Pact] = if(arguments.localPactPath.isDefined) {
       println(s"Attempting to use local pact files at: '${arguments.localPactPath.get}'".white.bold)
       LocalPactFileLoader.loadPactFiles("pacts")(arguments).pacts
     } else {
       println(s"Attempting to fetch pact from pact broker at".white.bold)
-      PactBrokerAddressValidation.checkPactBrokerAddress(pactBrokerAddress) match {
+      PactBrokerAddressValidation.checkPactBrokerAddress(pactVerifySettings.pactBrokerAddress) match {
         case -\/(l) =>
           println(l.red)
           Nil
 
         case \/-(r) =>
-          //TODO: Need to know consumer and provider...
-          ???
+          pactVerifySettings.consumerNames.map { consumer =>
+
+            val address = pactVerifySettings.pactBrokerAddress + "/pacts/provider/" + urlEncode(pactVerifySettings.providerName) + "/consumer/" + urlEncode(consumer) + "/latest"
+
+            Http(address).asString match {
+              case r: HttpResponse[String] if r.is2xx =>
+                val pact = ScalaPactReader.jsonStringToPact(r.body).toOption
+
+                if(pact.isEmpty) {
+                  println("Could not convert good response to Pact:\n" + r.body)
+                  pact
+                } else pact
+
+              case _ =>
+                println(s"Failed to load consumer pact from: $address".red)
+                None
+            }
+
+          }.collect {
+            case Some(s) => s
+          }
       }
     }
 
@@ -38,7 +62,7 @@ object Verifier {
         pact = pact,
         results = pact.interactions.map { interaction =>
 
-          val maybeProviderState = interaction.providerState.flatMap(p => providerStates.find(j => j.key == p))
+          val maybeProviderState = interaction.providerState.flatMap(p => pactVerifySettings.providerStates.find(j => j.key == p))
 
           (doRequest(arguments)(maybeProviderState) andThen attemptMatch(List(interaction)))(interaction.request)
         }

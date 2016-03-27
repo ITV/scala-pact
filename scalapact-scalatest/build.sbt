@@ -26,5 +26,3 @@ publishTo := {
 }
 
 resolvers += "Artifactory" at "https://itvrepos.artifactoryonline.com/itvrepos/oasvc-ivy/"
-
-pactBrokerAddress := "<nowhere>"

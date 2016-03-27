@@ -13,13 +13,15 @@ object ScalaPactPlugin extends Plugin {
 
   val providerStates = SettingKey[Seq[(String, String => Boolean)]]("provider-states", "A list of provider state setup functions")
   val pactBrokerAddress = SettingKey[String]("pactBrokerAddress", "The base url to publish / pull pact contract files to and from.")
+  val providerName = SettingKey[String]("providerName", "The name of the service to verify")
+  val consumerNames = SettingKey[Seq[String]]("consumerNames", "The names of the services that consume the service to verify")
 
-  private val providerStatesSettings = Seq(
-    providerStates := Seq(("default", (key: String) => true))
-  )
 
-  private val pactBrokerSettings = Seq(
-    pactBrokerAddress := ""
+  private val pactSettings = Seq(
+    providerStates := Seq(("default", (key: String) => true)),
+    pactBrokerAddress := "",
+    providerName := "",
+    consumerNames := Seq.empty[String]
   )
 
   override lazy val settings = Seq(
@@ -31,5 +33,5 @@ object ScalaPactPlugin extends Plugin {
     commands += ScalaPactVerifyCommand.pactVerifyCommandCamel,
     commands += ScalaPactStubberCommand.pactStubberCommandHyphen,
     commands += ScalaPactStubberCommand.pactStubberCommandCamel
-  ) ++ providerStatesSettings ++ pactBrokerSettings
+  ) ++ pactSettings
 }

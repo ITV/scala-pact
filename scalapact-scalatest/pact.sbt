@@ -8,3 +8,7 @@ providerStates := Seq(
     true
   })
 )
+
+pactBrokerAddress := "<nowhere>"
+providerName := "Their Provider Service"
+consumerNames := Seq("My Consumer")
