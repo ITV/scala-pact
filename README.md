@@ -74,6 +74,22 @@ If you prefer, you can use the stubber dynamically by adding and removing pacts 
 - `POST | PUT /interactions` accepts a Pact JSON string and adds all the interactions to the pool it matches against
 - `DELETE /interactions` Clears all the current interactions so you can start again
 
+### pact-publish
+If you plan to use pact testing as part of your CI pipeline you'll probably want to be able to share pact files efficiently between builds. For example a consumer project's build generates a new version of the projects Pact files and they are then used during the providers CI build.
+
+To achieve this we use the Ruby tool called Pact Broker (see below) and the publish command to update the files to it.
+
+#### Command Line Options
+Before we can publish, we have to tell Scala-Pact where it can find a running instance of Pact Broker by adding the following line to either `build.sbt` or `pact.sbt`:
+
+`pactBrokerAddress := "http://my-pact-broker:4321"`
+
+You can then use the publish command to generate and upload your pact files to pact broker:
+
+`sbt pact-publish`
+
+Note that your Pact files will have the same version number as the normal project version defined in your `build.sbt` file, because you versioned that breaking API change - right?
+
 ### pact-verify
 Once the consumer has defined the contract as CDC tests and exported them to Pact files, they'll deliver them to their provider. The provider then exercises their own API using the Pact files via a verifier.
 
@@ -88,7 +104,26 @@ You can also run the verifier using a combination of the following command line 
 
 `sbt "pact-verify --host localhost --port 1234 --source pacts"`
 
-*Note that files in the source folder are recursively loaded.*
+*Note that files in the source folder are recursively loaded. Specifying a local source folder takes precedence over loading remote files from Pact Broker (see below)*
+
+#### Verifying with Pact Broker during a CI build
+If you're using the publish command to send files to Pact Broker, you'll also want to know how to verify against them in the provider project.
+
+To do this, you need to add the following to either your `build.sbt` or `pact.sbt` file:
+
+```
+pactBrokerAddress := "http://my-pact-broker:4321"
+providerName := "The Name Of This Service"
+consumerNames := Seq("Consumer A", "Consumer B")
+```
+
+*Note: The names are **keys** and all have to line up. Downstream services must publish with the same names that you use to retrieve against.*
+
+You then run verify as normal **without** specifying a local folder i.e.:
+
+`sbt "pact-verify --host localhost --port 1234"`
+
+This causes the verifier to try and load it's Pacts from Pact Broker ahead of the normal verification process.
 
 ### Other Considerations
 
@@ -152,7 +187,7 @@ The `given("Resource with ID 1234 exists")` string is actually a key that the pr
 }
 ```
 
-On the provider's side, before verification they can opt to take action on any of these keys by adding a `providerStates.sbt` file to the root of their Scala project. Here is an example of the contents, again taken from the example suite:
+On the provider's side, before verification they can opt to take action on any of these keys by adding a `pact.sbt` file to the root of their Scala project. Here is an example of the contents, again taken from the example suite:
 
 ```
 import com.itv.scalapact.plugin.ScalaPactPlugin._
