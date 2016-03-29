@@ -1,11 +1,8 @@
 package com.itv.scalapact.plugin.verifier
 
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
-
 import com.itv.scalapact.plugin.common.InteractionMatchers._
 import com.itv.scalapact.plugin.common.Rainbow._
-import com.itv.scalapact.plugin.common.{Arguments, LocalPactFileLoader, PactBrokerAddressValidation}
+import com.itv.scalapact.plugin.common.{Arguments, Helpers, LocalPactFileLoader, PactBrokerAddressValidation}
 import com.itv.scalapactcore._
 
 import scalaj.http.{Http, HttpResponse}
@@ -16,24 +13,28 @@ object Verifier {
 
   lazy val verify: PactVerifySettings => Arguments => Unit = pactVerifySettings => arguments => {
 
-    val urlEncode: String => String = str => URLEncoder.encode(str, StandardCharsets.UTF_8.toString)
-
     val pacts: List[Pact] = if(arguments.localPactPath.isDefined) {
       println(s"Attempting to use local pact files at: '${arguments.localPactPath.get}'".white.bold)
       LocalPactFileLoader.loadPactFiles("pacts")(arguments).pacts
     } else {
-      println(s"Attempting to fetch pact from pact broker at".white.bold)
-      PactBrokerAddressValidation.checkPactBrokerAddress(pactVerifySettings.pactBrokerAddress) match {
-        case -\/(l) =>
-          println(l.red)
-          Nil
 
-        case \/-(r) =>
-          pactVerifySettings.consumerNames.map { consumer =>
+      pactVerifySettings.consumerNames.map { consumer =>
+        val details = for {
+          validatedAddress <- PactBrokerAddressValidation.checkPactBrokerAddress(pactVerifySettings.pactBrokerAddress)
+          providerName <- Helpers.urlEncode(pactVerifySettings.providerName)
+          consumerName <- Helpers.urlEncode(consumer)
+        } yield (validatedAddress, providerName, consumerName)
 
-            val address = pactVerifySettings.pactBrokerAddress + "/pacts/provider/" + urlEncode(pactVerifySettings.providerName) + "/consumer/" + urlEncode(consumer) + "/latest"
+        details match {
+          case -\/(l) =>
+            println(l.red)
+            None
 
-            Http(address).asString match {
+          case \/-((b, p, c)) =>
+            val address = b + "/pacts/provider/" + p + "/consumer/" + c + "/latest"
+            println(s"Attempting to fetch pact from pact broker at: $address".white.bold)
+
+            Http(address).header("Accept", "application/json").asString match {
               case r: HttpResponse[String] if r.is2xx =>
                 val pact = ScalaPactReader.jsonStringToPact(r.body).toOption
 
@@ -46,10 +47,9 @@ object Verifier {
                 println(s"Failed to load consumer pact from: $address".red)
                 None
             }
-
-          }.collect {
-            case Some(s) => s
-          }
+        }
+      }.collect {
+        case Some(s) => s
       }
     }
 

@@ -1,10 +1,7 @@
 package com.itv.scalapact.plugin.publish
 
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
-
-import com.itv.scalapact.plugin.common.{ConfigAndPacts, PactBrokerAddressValidation}
 import com.itv.scalapact.plugin.common.Rainbow._
+import com.itv.scalapact.plugin.common.{ConfigAndPacts, Helpers, PactBrokerAddressValidation}
 import com.itv.scalapactcore.ScalaPactWriter
 
 import scalaj.http.{Http, HttpResponse}
@@ -14,29 +11,32 @@ object Publisher {
 
   lazy val publishToBroker: String => String => ConfigAndPacts => Unit = pactBrokerAddress => projectVersion => configAndPacts => {
 
-    PactBrokerAddressValidation.checkPactBrokerAddress(pactBrokerAddress) match {
-      case -\/(l) =>
-        println(l.red)
+    configAndPacts.pacts.foreach { pact =>
+      val details = for {
+        validatedAddress <- PactBrokerAddressValidation.checkPactBrokerAddress(pactBrokerAddress)
+        providerName <- Helpers.urlEncode(pact.provider.name)
+        consumerName <- Helpers.urlEncode(pact.consumer.name)
+      } yield (validatedAddress, providerName, consumerName)
 
-      case \/-(r) =>
-        configAndPacts.pacts.foreach { pact =>
+      details match {
+        case -\/(l) =>
+          println(l.red)
 
-          //TODO: Snapshot version number handling? Find out if it works or not.
-
-          val address = r + "/pacts/provider/" + urlEncode(pact.provider.name) + "/consumer/" + urlEncode(pact.consumer.name) + "/version/" + projectVersion
+        case \/-((b, p, c)) =>
+          //Not sure how I feel about this. Should you be able to publish snapshots? Pact broker will return these with a call to `/latest` ...
+          val address = b + "/pacts/provider/" + p + "/consumer/" + c + "/version/" + projectVersion.replace("-SNAPSHOT", ".x")
 
           println(s"Publishing to: $address".yellow)
 
-          Http(address).method("PUT").postData(ScalaPactWriter.pactToJsonString(pact)).asString match {
+          Http(address).header("Content-Type", "application/json").postData(ScalaPactWriter.pactToJsonString(pact)).method("PUT").asString match {
             case r: HttpResponse[String] if r.is2xx => println("Success".green)
-            case r: HttpResponse[String] => println(s"Failed: ${r.body}".red)
+            case r: HttpResponse[String] =>
+              println(r)
+              println(s"Failed: ${r.code}, ${r.body}".red)
           }
-
-        }
+      }
     }
 
     Unit
   }
-
-  val urlEncode: String => String = str => URLEncoder.encode(str, StandardCharsets.UTF_8.toString)
 }

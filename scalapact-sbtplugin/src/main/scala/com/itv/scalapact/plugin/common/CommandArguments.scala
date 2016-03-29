@@ -1,5 +1,11 @@
 package com.itv.scalapact.plugin.common
 
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+
+import scalaz._
+import Scalaz._
+
 object CommandArguments {
 
   val parseArguments: Seq[String] => Arguments = args =>
@@ -47,6 +53,21 @@ object Helpers {
     } catch {
       case e: Throwable => None
     }
+
+  val urlEncode: String => String \/ String = str => {
+    try {
+      URLEncoder.encode(str, StandardCharsets.UTF_8.toString)
+        .replace("+", "%20")
+        .replace("%21", "!")
+        .replace("%27", "'")
+        .replace("%28", "(")
+        .replace("%29", ")")
+        .replace("%7E", "~").right
+    } catch {
+      case e: Throwable =>
+        s"Failed to url encode: $str".left
+    }
+  }
 
 }
 

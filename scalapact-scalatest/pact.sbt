@@ -9,6 +9,6 @@ providerStates := Seq(
   })
 )
 
-pactBrokerAddress := "<nowhere>"
+pactBrokerAddress := "http://pactbroker.infradev.oasvc.itv.com"
 providerName := "Their Provider Service"
 consumerNames := Seq("My Consumer")
