@@ -41,11 +41,6 @@ case class InteractionResponse(status: Option[Int], headers: Option[Map[String, 
 
 object ScalaPactReader {
 
-  import PactImplicits._
-
-  val jsonStringToPact: String => \/[String, Pact] = json =>
-    json.decodeEither[Pact]
-
   val rubyJsonToPact: String => String \/ Pact = json => {
     val brokenPact: Option[(PactActor, PactActor, List[(Option[Interaction], Option[String], Option[String])])] = for {
       provider <- RubyJsonHelper.extractPactActor("provider")(json)
@@ -74,14 +69,13 @@ object ScalaPactReader {
     }
   }
 
+  val jsonStringToPact: String => String \/ Pact = json => rubyJsonToPact(json)
+
 }
 
 object ScalaPactWriter {
 
   import PactImplicits._
-
-  val pactToJsonString: Pact => String = pact =>
-    pact.asJson.pretty(PrettyParams.spaces2.copy(dropNullKeys = true))
 
   val pactToRubyJsonString: Pact => String = pact => {
 
@@ -126,6 +120,8 @@ object ScalaPactWriter {
 
     json.getOrElse(throw new Exception("Something went really wrong serialising the following pact into json: " + pact)).pretty(PrettyParams.spaces2.copy(dropNullKeys = true))
   }
+
+  val pactToJsonString: Pact => String = pact => pactToRubyJsonString(pact)
 
 }
 

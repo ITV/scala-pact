@@ -7,16 +7,16 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
   describe("Reading and writing a homogeneous Pact files") {
 
     it("should be able to read Pact files") {
-      val pactEither = ScalaPactReader.jsonStringToPact(PactFileExamples.simpleAsString)
+      val pactEither = ScalaPactReader.jsonStringToPact(PactFileExamples.simpleAsRubyString)
 
-      pactEither.toOption.get shouldEqual PactFileExamples.simple
+      pactEither.toOption.get shouldEqual PactFileExamples.simpleRuby
     }
 
     it("should be able to write Pact files") {
 
-      val written = ScalaPactWriter.pactToJsonString(PactFileExamples.simple)
+      val written = ScalaPactWriter.pactToJsonString(PactFileExamples.simpleRuby)
 
-      val expected = PactFileExamples.simpleAsString
+      val expected = PactFileExamples.simpleAsRubyString
 
       written shouldEqual expected
 
@@ -24,14 +24,14 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
 
     it("should be able to eat it's own dog food") {
 
-      val json = ScalaPactWriter.pactToJsonString(PactFileExamples.simple)
+      val json = ScalaPactWriter.pactToJsonString(PactFileExamples.simpleRuby)
 
       val pact = ScalaPactReader.jsonStringToPact(json).toOption.get
 
       val `reJson'd` = ScalaPactWriter.pactToJsonString(pact)
 
-      `reJson'd` shouldEqual PactFileExamples.simpleAsString
-      pact shouldEqual PactFileExamples.simple
+      `reJson'd` shouldEqual PactFileExamples.simpleAsRubyString
+      pact shouldEqual PactFileExamples.simpleRuby
 
     }
 
