@@ -46,21 +46,32 @@ object ScalaPactReader {
   val jsonStringToPact: String => \/[String, Pact] = json =>
     json.decodeEither[Pact]
 
-  def rubyJsonToPact(json: String): String \/ Pact = {
+  val rubyJsonToPact: String => String \/ Pact = json => {
+    val brokenPact: Option[(PactActor, PactActor, List[(Option[Interaction], Option[String], Option[String])])] = for {
+      provider <- RubyJsonHelper.extractPactActor("provider")(json)
+      consumer <- RubyJsonHelper.extractPactActor("consumer")(json)
+      interactions <- RubyJsonHelper.extractInteractions(json)
+    } yield (provider, consumer, interactions)
 
-    // parse to generic json
+    brokenPact.map { bp =>
 
-    // separate pact from body
+      val interactions = bp._3.collect { case (Some(i), r1, r2) =>
+        i.copy(
+          request = i.request.copy(body = r1),
+          response = i.response.copy(body = r2)
+        )
+      }
 
-    // deserialise pact as normal
+      Pact(
+        provider = bp._1,
+        consumer = bp._2,
+        interactions = interactions
+      )
 
-    // decide if body is json
-
-    // if json, re-serialise
-
-    // should have a string either way now, so add back into the Pact class file.
-
-    "rubbish".left
+    } match {
+      case Some(pact) => pact.right
+      case None => s"Could not read pact from json: $json".left
+    }
   }
 
 }
@@ -91,8 +102,10 @@ object RubyJsonHelper {
   val extractInteractions: String => Option[List[(Option[Interaction], Option[String], Option[String])]] = json => {
 
     val interactionsLens = jObjectPL >=> jsonObjectPL("interactions") >=> jArrayPL
-    val requestBodyLens = jObjectPL >=> jsonObjectPL("request") >=> jObjectPL >=> jsonObjectPL("body")
-    val responseBodyLens = jObjectPL >=> jsonObjectPL("response") >=> jObjectPL >=> jsonObjectPL("body")
+    val requestBodyLensString = jObjectPL >=> jsonObjectPL("request") >=> jObjectPL >=> jsonObjectPL("body") >=> jStringPL
+    val responseBodyLensString = jObjectPL >=> jsonObjectPL("response") >=> jObjectPL >=> jsonObjectPL("body") >=> jStringPL
+    val requestBodyLensObject = jObjectPL >=> jsonObjectPL("request") >=> jObjectPL >=> jsonObjectPL("body")
+    val responseBodyLensObject = jObjectPL >=> jsonObjectPL("response") >=> jObjectPL >=> jsonObjectPL("body")
 
     val interactions = json.parseOption.flatMap(j => interactionsLens.get(j))
 
@@ -110,32 +123,12 @@ object RubyJsonHelper {
           cc <- bb.delete
         } yield cc.undo
 
-        (minusResponseBody.flatMap(p => p.toString.decodeOption[Interaction]), requestBodyLens.get(i).map(_.toString), responseBodyLens.get(i).map(_.toString))
+        val requestBody = requestBodyLensString.get(i).orElse(requestBodyLensObject.get(i)).map(_.toString)
+        val responseBody = responseBodyLensString.get(i).orElse(responseBodyLensObject.get(i)).map(_.toString)
+
+        (minusResponseBody.flatMap(p => p.toString.decodeOption[Interaction]), requestBody, responseBody)
       }
     }
-  }
-
-  def go(json: String): Unit = {
-
-    val a = json.parseOption
-
-    println("---------")
-    println(a)
-
-    val providerLens = jObjectPL >=> jsonObjectPL("provider")
-
-    val b = a.flatMap(j => providerLens.get(j))
-
-    println("---------")
-    println(b)
-
-    val interactionsLens = jObjectPL >=> jsonObjectPL("interactions") >=> jArrayPL
-
-    val c = a.flatMap(j => interactionsLens.get(j).map(_.mkString("\n")))
-
-    println("---------")
-    println(c)
-
   }
 
 }

@@ -73,7 +73,7 @@ object PactFileExamples {
         response = InteractionResponse(
           status = Option(200),
           headers = Option(Map("Content-Type" -> "application/json")),
-          body = Option("""{"fish":["cod", "haddock", "flying"]}""")
+          body = Option("""{"fish":["cod","haddock","flying"]}""")
         )
       ),
       Interaction(
@@ -89,7 +89,7 @@ object PactFileExamples {
         response = InteractionResponse(
           status = Option(200),
           headers = Option(Map("Content-Type" -> "application/json")),
-          body = Option("""{"fish":["cod", "haddock"]}""")
+          body = Option("""{"chips":true,"fish":["cod","haddock"]}""")
         )
       )
     )

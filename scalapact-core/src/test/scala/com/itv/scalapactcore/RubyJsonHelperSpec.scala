@@ -20,7 +20,50 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
 
     it("should be able to extract a list of interactions paired with their bodies") {
 
-      RubyJsonHelper.extractInteractions(PactFileExamples.simpleAsRubyString) shouldEqual Some(Nil)
+      val interaction1 = Interaction(
+        providerState = Option("a simple state"),
+        description = "a simple request",
+        request = InteractionRequest(
+          method = Option("GET"),
+          path = Option("/fetch-json"),
+          query = Option("fish=chips"),
+          headers = Option(Map("Content-Type" -> "text/plain")),
+          body = None
+        ),
+        response = InteractionResponse(
+          status = Option(200),
+          headers = Option(Map("Content-Type" -> "application/json")),
+          body = None
+        )
+      )
+      val interaction1RequestBody = Option("""fish""")
+      val interaction1ResponseBody = Option("""{"fish":["cod","haddock","flying"]}""")
+
+      val interaction2 = Interaction(
+        providerState = Option("a simple state 2"),
+        description = "a simple request 2",
+        request = InteractionRequest(
+          method = Option("GET"),
+          path = Option("/fetch-json2"),
+          query = None,
+          headers = Option(Map("Content-Type" -> "text/plain")),
+          body = None
+        ),
+        response = InteractionResponse(
+          status = Option(200),
+          headers = Option(Map("Content-Type" -> "application/json")),
+          body = None
+        )
+      )
+      val interaction2RequestBody = Option("""fish""")
+      val interaction2ResponseBody = Option("""{"chips":true,"fish":["cod","haddock"]}""")
+
+      val list = List(
+        (Some(interaction1), interaction1RequestBody, interaction1ResponseBody),
+        (Some(interaction2), interaction2RequestBody, interaction2ResponseBody)
+      )
+
+      RubyJsonHelper.extractInteractions(PactFileExamples.simpleAsRubyString) shouldEqual Some(list)
 
     }
 
