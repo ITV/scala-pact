@@ -51,6 +51,35 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
 
     }
 
+    it("should be able to eat it's own dog food with no body") {
+
+      val json = ScalaPactWriter.pactToJsonString(PactFileExamples.verySimple)
+
+      val pact = ScalaPactReader.jsonStringToPact(json).toOption.get
+
+      val `reJson'd` = ScalaPactWriter.pactToJsonString(pact)
+
+      `reJson'd` shouldEqual PactFileExamples.verySimpleAsString
+      pact shouldEqual PactFileExamples.verySimple
+
+    }
+
+    it("should be able to read ruby format json with no body") {
+      val pactEither = ScalaPactReader.rubyJsonToPact(PactFileExamples.verySimpleAsString)
+
+      pactEither.toOption.get shouldEqual PactFileExamples.verySimple
+    }
+
+    it("should be able to write a pact file in ruby format with no body") {
+
+      val written = ScalaPactWriter.pactToRubyJsonString(PactFileExamples.verySimple)
+
+      val expected = PactFileExamples.verySimpleAsString
+
+      written shouldEqual expected
+
+    }
+
   }
 
 }

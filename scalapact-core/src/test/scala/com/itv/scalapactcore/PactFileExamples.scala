@@ -2,6 +2,52 @@ package com.itv.scalapactcore
 
 object PactFileExamples {
 
+  val verySimple = Pact(
+    consumer = PactActor("consumer"),
+    provider = PactActor("provider"),
+    interactions = List(
+      Interaction(
+        providerState = None,
+        description = "a simple request",
+        request = InteractionRequest(
+          method = Option("GET"),
+          path = Option("/"),
+          query = None,
+          headers = None,
+          body = None
+        ),
+        response = InteractionResponse(
+          status = Option(200),
+          headers = None,
+          body = Option("""Hello""")
+        )
+      )
+    )
+  )
+
+  val verySimpleAsString =
+    """{
+      |  "provider" : {
+      |    "name" : "provider"
+      |  },
+      |  "consumer" : {
+      |    "name" : "consumer"
+      |  },
+      |  "interactions" : [
+      |    {
+      |      "description" : "a simple request",
+      |      "request" : {
+      |        "method" : "GET",
+      |        "path" : "/"
+      |      },
+      |      "response" : {
+      |        "status" : 200,
+      |        "body" : "Hello"
+      |      }
+      |    }
+      |  ]
+      |}""".stripMargin
+
   val simpleRuby = Pact(
     consumer = PactActor("consumer"),
     provider = PactActor("provider"),
