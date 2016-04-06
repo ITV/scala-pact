@@ -94,19 +94,29 @@ object ScalaPactWriter {
         response = i.response.copy(body = None)
       ).asJson
 
-      val withRequestBody = for {
-        rb <- maybeRequestBody
-        aa <- bodilessInteraction.cursor.downField("request")
-        bb <- aa.downField("body")
-        cc <- bb.set(rb).some
-      } yield cc.undo
+      val withRequestBody = {
+        for {
+          rb <- maybeRequestBody
+          aa <- bodilessInteraction.cursor.downField("request")
+          bb <- aa.downField("body")
+          cc <- bb.set(rb).some
+        } yield cc.undo
+      } match {
+        case ok @ Some(s) => ok
+        case None => Option(bodilessInteraction) // There wasn't a body, but there was still an interaction.
+      }
 
-      val withResponseBody = for {
-        rb <- maybeResponseBody
-        aa <- withRequestBody.flatMap(_.cursor.downField("response"))
-        bb <- aa.downField("body")
-        cc <- bb.set(rb).some
-      } yield cc.undo
+      val withResponseBody = {
+        for {
+          rb <- maybeResponseBody
+          aa <- withRequestBody.flatMap(_.cursor.downField("response"))
+          bb <- aa.downField("body")
+          cc <- bb.set(rb).some
+        } yield cc.undo
+      } match {
+        case ok @ Some(s) => ok
+        case None => withRequestBody // There wasn't a body, but there was still an interaction.
+      }
 
       withResponseBody
     }.collect { case Some(s) => s }
@@ -151,17 +161,27 @@ object RubyJsonHelper {
 
     interactions.map { is =>
       is.map { i =>
-        val minusRequestBody = for {
-          aa <- i.cursor.downField("request")
-          bb <- aa.downField("body")
-          cc <- bb.delete
-        } yield cc.undo
+        val minusRequestBody = {
+          for {
+            aa <- i.cursor.downField("request")
+            bb <- aa.downField("body")
+            cc <- bb.delete
+          } yield cc.undo
+        } match {
+          case ok @ Some(s) => ok
+          case None => Option(i) // There wasn't a body, but there was still an interaction.
+        }
 
-        val minusResponseBody = for {
-          aa <- minusRequestBody.flatMap(ii => ii.cursor.downField("response"))
-          bb <- aa.downField("body")
-          cc <- bb.delete
-        } yield cc.undo
+        val minusResponseBody = {
+          for {
+            aa <- minusRequestBody.flatMap(ii => ii.cursor.downField("response"))
+            bb <- aa.downField("body")
+            cc <- bb.delete
+          } yield cc.undo
+        } match {
+          case ok @ Some(s) => ok
+          case None => minusRequestBody // There wasn't a body, but there was still an interaction.
+        }
 
         val requestBody = requestBodyLensString.get(i).orElse(requestBodyLensObject.get(i)).map(_.toString)
         val responseBody = responseBodyLensString.get(i).orElse(responseBodyLensObject.get(i)).map(_.toString)

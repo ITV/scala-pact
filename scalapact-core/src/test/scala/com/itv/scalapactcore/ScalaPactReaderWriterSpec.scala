@@ -77,7 +77,6 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
       val expected = PactFileExamples.verySimpleAsString
 
       written shouldEqual expected
-
     }
 
   }
