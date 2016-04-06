@@ -88,6 +88,33 @@ object RubyJsonHelper {
 
   }
 
+  val extractInteractions: String => Option[List[(Option[Interaction], Option[String], Option[String])]] = json => {
+
+    val interactionsLens = jObjectPL >=> jsonObjectPL("interactions") >=> jArrayPL
+    val requestBodyLens = jObjectPL >=> jsonObjectPL("request") >=> jObjectPL >=> jsonObjectPL("body")
+    val responseBodyLens = jObjectPL >=> jsonObjectPL("response") >=> jObjectPL >=> jsonObjectPL("body")
+
+    val interactions = json.parseOption.flatMap(j => interactionsLens.get(j))
+
+    interactions.map { is =>
+      is.map { i =>
+        val minusRequestBody = for {
+          aa <- i.cursor.downField("request")
+          bb <- aa.downField("body")
+          cc <- bb.delete
+        } yield cc.undo
+
+        val minusResponseBody = for {
+          aa <- minusRequestBody.flatMap(ii => ii.cursor.downField("response"))
+          bb <- aa.downField("body")
+          cc <- bb.delete
+        } yield cc.undo
+
+        (minusResponseBody.flatMap(p => p.toString.decodeOption[Interaction]), requestBodyLens.get(i).map(_.toString), responseBodyLens.get(i).map(_.toString))
+      }
+    }
+  }
+
   def go(json: String): Unit = {
 
     val a = json.parseOption
@@ -104,7 +131,7 @@ object RubyJsonHelper {
 
     val interactionsLens = jObjectPL >=> jsonObjectPL("interactions") >=> jArrayPL
 
-    val c = a.flatMap(j => interactionsLens.get(j).map(_.toList.mkString("\n")))
+    val c = a.flatMap(j => interactionsLens.get(j).map(_.mkString("\n")))
 
     println("---------")
     println(c)

@@ -18,6 +18,12 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
 
     }
 
+    it("should be able to extract a list of interactions paired with their bodies") {
+
+      RubyJsonHelper.extractInteractions(PactFileExamples.simpleAsRubyString) shouldEqual Some(Nil)
+
+    }
+
   }
 
 }
