@@ -297,7 +297,7 @@ The Pact integration test library itself depends on a range of Scala/Java librar
 
 ## Documentation Roadmap
 
-- How to use
+- Break up main README.md, possibly use wiki?
 - Update all README.md files
   - Legal hygiene checks, make sure there's nothing offensive
   - Public consumption, is it easy to understand what you have to do to use ScalaPact?
@@ -307,11 +307,9 @@ The Pact integration test library itself depends on a range of Scala/Java librar
 - Add LICENCE.md
 - Add CONTRIBUTING.md
 - Publish lib to repo
-- Improve error reporting?
 
 ## Mid Term Development Roadmap
 
-- Implement the JSON body special case
 - Implement better body matching / diffing for:
   - text
   - XML
