@@ -56,5 +56,67 @@ object PactFileExamples {
               |  ]
               |}""".stripMargin
 
+  val simpleAsRubyString = """{
+                         |  "provider" : {
+                         |    "name" : "provider"
+                         |  },
+                         |  "consumer" : {
+                         |    "name" : "consumer"
+                         |  },
+                         |  "interactions" : [
+                         |    {
+                         |      "providerState" : "a simple state",
+                         |      "description" : "a simple request",
+                         |      "request" : {
+                         |        "method" : "GET",
+                         |        "body" : "fish",
+                         |        "path" : "/fetch-json",
+                         |        "query" : "fish=chips",
+                         |        "headers" : {
+                         |          "Content-Type" : "text/plain"
+                         |        }
+                         |      },
+                         |      "response" : {
+                         |        "status" : 200,
+                         |        "headers" : {
+                         |          "Content-Type" : "application/json"
+                         |        },
+                         |        "body" : {
+                         |          "fish" : [
+                         |            "cod",
+                         |            "haddock",
+                         |            "flying"
+                         |          ]
+                         |        }
+                         |      }
+                         |    },
+                         |    {
+                         |      "providerState" : "a simple state 2",
+                         |      "description" : "a simple request 2",
+                         |      "request" : {
+                         |        "method" : "GET",
+                         |        "body" : "fish",
+                         |        "path" : "/fetch-json2",
+                         |        "headers" : {
+                         |          "Content-Type" : "text/plain"
+                         |        }
+                         |      },
+                         |      "response" : {
+                         |        "status" : 200,
+                         |        "headers" : {
+                         |          "Content-Type" : "application/json"
+                         |        },
+                         |        "body" : {
+                         |          "chips" : true,
+                         |          "fish" : [
+                         |            "cod",
+                         |            "haddock"
+                         |          ]
+                         |        }
+                         |      }
+                         |    }
+                         |  ]
+                         |}""".stripMargin
+
 
 }

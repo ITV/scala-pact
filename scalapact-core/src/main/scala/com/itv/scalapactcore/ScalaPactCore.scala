@@ -3,7 +3,8 @@ package com.itv.scalapactcore
 import argonaut._
 import Argonaut._
 
-import scalaz.\/
+import scalaz._
+import Scalaz._
 
 
 object PactImplicits {
@@ -45,6 +46,23 @@ object ScalaPactReader {
   val jsonStringToPact: String => \/[String, Pact] = json =>
     json.decodeEither[Pact]
 
+  def rubyJsonToPact(json: String): String \/ Pact = {
+
+    // parse to generic json
+
+    // separate pact from body
+
+    // deserialise pact as normal
+
+    // decide if body is json
+
+    // if json, re-serialise
+
+    // should have a string either way now, so add back into the Pact class file.
+
+    "rubbish".left
+  }
+
 }
 
 object ScalaPactWriter {
@@ -53,6 +71,45 @@ object ScalaPactWriter {
 
   val pactToJsonString: Pact => String = pact =>
     pact.asJson.pretty(PrettyParams.spaces2.copy(dropNullKeys = true))
+
+}
+
+object RubyJsonHelper {
+
+  import PactImplicits._
+
+  val extractPactActor: String => String => Option[PactActor] = field => json => {
+
+    val providerLens = jObjectPL >=> jsonObjectPL(field)
+
+    val b = json.parseOption.flatMap(j => providerLens.get(j))
+
+    b.flatMap(p => p.toString.decodeOption[PactActor])
+
+  }
+
+  def go(json: String): Unit = {
+
+    val a = json.parseOption
+
+    println("---------")
+    println(a)
+
+    val providerLens = jObjectPL >=> jsonObjectPL("provider")
+
+    val b = a.flatMap(j => providerLens.get(j))
+
+    println("---------")
+    println(b)
+
+    val interactionsLens = jObjectPL >=> jsonObjectPL("interactions") >=> jArrayPL
+
+    val c = a.flatMap(j => interactionsLens.get(j).map(_.toList.mkString("\n")))
+
+    println("---------")
+    println(c)
+
+  }
 
 }
 
