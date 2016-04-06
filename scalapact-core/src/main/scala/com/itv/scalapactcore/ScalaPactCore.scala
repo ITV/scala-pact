@@ -83,6 +83,50 @@ object ScalaPactWriter {
   val pactToJsonString: Pact => String = pact =>
     pact.asJson.pretty(PrettyParams.spaces2.copy(dropNullKeys = true))
 
+  val pactToRubyJsonString: Pact => String = pact => {
+
+    val interactions: JsonArray = pact.interactions.map { i =>
+
+      val maybeRequestBody = i.request.body.flatMap { rb =>
+        rb.parseOption.orElse(Option(jString(rb)))
+      }
+
+      val maybeResponseBody = i.response.body.flatMap { rb =>
+        rb.parseOption.orElse(Option(jString(rb)))
+      }
+
+      val bodilessInteraction = i.copy(
+        request = i.request.copy(body = None),
+        response = i.response.copy(body = None)
+      ).asJson
+
+      val withRequestBody = for {
+        rb <- maybeRequestBody
+        aa <- bodilessInteraction.cursor.downField("request")
+        bb <- aa.downField("body")
+        cc <- bb.set(rb).some
+      } yield cc.undo
+
+      val withResponseBody = for {
+        rb <- maybeResponseBody
+        aa <- withRequestBody.flatMap(_.cursor.downField("response"))
+        bb <- aa.downField("body")
+        cc <- bb.set(rb).some
+      } yield cc.undo
+
+      withResponseBody
+    }.collect { case Some(s) => s }
+
+    val pactNoInteractionsAsJson = pact.copy(interactions = Nil).asJson
+
+    val json = for {
+      aa <- pactNoInteractionsAsJson.cursor.downField("interactions")
+      bb <- aa.withFocus(_.withArray(p => interactions)).some
+    } yield bb.undo
+
+    json.getOrElse(throw new Exception("Something went really wrong serialising the following pact into json: " + pact)).pretty(PrettyParams.spaces2.copy(dropNullKeys = true))
+  }
+
 }
 
 object RubyJsonHelper {

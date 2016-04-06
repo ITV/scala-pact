@@ -41,6 +41,16 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
       pactEither.toOption.get shouldEqual PactFileExamples.simpleRuby
     }
 
+    it("should be able to write a pact file in ruby format") {
+
+      val written = ScalaPactWriter.pactToRubyJsonString(PactFileExamples.simpleRuby)
+
+      val expected = PactFileExamples.simpleAsRubyString
+
+      written shouldEqual expected
+
+    }
+
   }
 
 }
