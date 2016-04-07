@@ -19,7 +19,7 @@ Add the dependency to your `build.sbt` file like this:
 
 ```
 libraryDependencies ++= Seq(
-  "com.itv" %% "scalapact-scalatest" % "0.1.3" % "test"
+  "com.itv" %% "scalapact-scalatest" % "0.1.5" % "test"
 )
 
 resolvers += "Artifactory" at "https://itvrepos.artifactoryonline.com/itvrepos/oasvc-ivy/"
@@ -30,7 +30,7 @@ resolvers += "Artifactory" at "https://itvrepos.artifactoryonline.com/itvrepos/o
 Add the plugin to your `project/plugins.sbt` file like this:
 
 ```
-addSbtPlugin("com.itv.plugins" % "scalapact-plugin" % "0.1.3")
+addSbtPlugin("com.itv.plugins" % "scalapact-plugin" % "0.1.5")
 
 resolvers += "Artifactory" at "https://itvrepos.artifactoryonline.com/itvrepos/oasvc-ivy/"
 
@@ -44,7 +44,9 @@ There is an example test spec that can be found [here](https://github.com/ITV/sc
 ### SBT Plugin Commands
 
 ### pact-test
-You can run the Pact test cases just be running `sbt test` as normal. Because of the way the library has been written, running the tests will generate a series of Pact JSON files, one for each interaction.
+You can run the Pact test cases just by executing `sbt test` as normal. Because of the way the library has been written, running the tests will generate a series of Pact JSON files, one for each interaction.
+
+The generated Pact files will be output to your target directory under `<project root>/target/pacts`.
 
 Usually it is desirable to condense the Pact files into one file per consumer / provider pair that contains all of the possible interactions.
 
