@@ -48,7 +48,7 @@ object PactFileExamples {
       |  ]
       |}""".stripMargin
 
-  val simpleRuby = Pact(
+  val simple = Pact(
     consumer = PactActor("consumer"),
     provider = PactActor("provider"),
     interactions = List(
@@ -87,7 +87,7 @@ object PactFileExamples {
     )
   )
 
-  val simpleAsRubyString = """{
+  val simpleAsString = """{
                          |  "provider" : {
                          |    "name" : "provider"
                          |  },
@@ -148,6 +148,5 @@ object PactFileExamples {
                          |    }
                          |  ]
                          |}""".stripMargin
-
 
 }

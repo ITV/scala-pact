@@ -41,20 +41,21 @@ case class InteractionResponse(status: Option[Int], headers: Option[Map[String, 
 
 object ScalaPactReader {
 
-  val rubyJsonToPact: String => String \/ Pact = json => {
+  val jsonStringToPact: String => String \/ Pact = json => {
     val brokenPact: Option[(PactActor, PactActor, List[(Option[Interaction], Option[String], Option[String])])] = for {
-      provider <- RubyJsonHelper.extractPactActor("provider")(json)
-      consumer <- RubyJsonHelper.extractPactActor("consumer")(json)
-      interactions <- RubyJsonHelper.extractInteractions(json)
+      provider <- JsonBodySpecialCaseHelper.extractPactActor("provider")(json)
+      consumer <- JsonBodySpecialCaseHelper.extractPactActor("consumer")(json)
+      interactions <- JsonBodySpecialCaseHelper.extractInteractions(json)
     } yield (provider, consumer, interactions)
 
     brokenPact.map { bp =>
 
-      val interactions = bp._3.collect { case (Some(i), r1, r2) =>
-        i.copy(
-          request = i.request.copy(body = r1),
-          response = i.response.copy(body = r2)
-        )
+      val interactions = bp._3.collect {
+        case (Some(i), r1, r2) =>
+          i.copy(
+            request = i.request.copy(body = r1),
+            response = i.response.copy(body = r2)
+          )
       }
 
       Pact(
@@ -69,15 +70,13 @@ object ScalaPactReader {
     }
   }
 
-  val jsonStringToPact: String => String \/ Pact = json => rubyJsonToPact(json)
-
 }
 
 object ScalaPactWriter {
 
   import PactImplicits._
 
-  val pactToRubyJsonString: Pact => String = pact => {
+  val pactToJsonString: Pact => String = pact => {
 
     val interactions: JsonArray = pact.interactions.map { i =>
 
@@ -96,11 +95,11 @@ object ScalaPactWriter {
 
       val withRequestBody = {
         for {
-          rb <- maybeRequestBody
-          aa <- bodilessInteraction.cursor.downField("request")
-          bb <- aa.downField("body")
-          cc <- bb.set(rb).some
-        } yield cc.undo
+          requestBody <- maybeRequestBody
+          requestField <- bodilessInteraction.cursor.downField("request")
+          bodyField <- requestField.downField("body")
+          updated <- bodyField.set(requestBody).some
+        } yield updated.undo
       } match {
         case ok @ Some(s) => ok
         case None => Option(bodilessInteraction) // There wasn't a body, but there was still an interaction.
@@ -108,11 +107,11 @@ object ScalaPactWriter {
 
       val withResponseBody = {
         for {
-          rb <- maybeResponseBody
-          aa <- withRequestBody.flatMap(_.cursor.downField("response"))
-          bb <- aa.downField("body")
-          cc <- bb.set(rb).some
-        } yield cc.undo
+          responseBody <- maybeResponseBody
+          responseField <- withRequestBody.flatMap(_.cursor.downField("response"))
+          bodyField <- responseField.downField("body")
+          updated <- bodyField.set(responseBody).some
+        } yield updated.undo
       } match {
         case ok @ Some(s) => ok
         case None => withRequestBody // There wasn't a body, but there was still an interaction.
@@ -124,29 +123,29 @@ object ScalaPactWriter {
     val pactNoInteractionsAsJson = pact.copy(interactions = Nil).asJson
 
     val json = for {
-      aa <- pactNoInteractionsAsJson.cursor.downField("interactions")
-      bb <- aa.withFocus(_.withArray(p => interactions)).some
-    } yield bb.undo
+      interactionsField <- pactNoInteractionsAsJson.cursor.downField("interactions")
+      updated <- interactionsField.withFocus(_.withArray(p => interactions)).some
+    } yield updated.undo
 
-    json.getOrElse(throw new Exception("Something went really wrong serialising the following pact into json: " + pact)).pretty(PrettyParams.spaces2.copy(dropNullKeys = true))
+    // I don't believe you can ever see this exception.
+    json
+      .getOrElse(throw new Exception("Something went really wrong serialising the following pact into json: " + pact))
+      .pretty(PrettyParams.spaces2.copy(dropNullKeys = true))
   }
-
-  val pactToJsonString: Pact => String = pact => pactToRubyJsonString(pact)
 
 }
 
-object RubyJsonHelper {
+object JsonBodySpecialCaseHelper {
 
   import PactImplicits._
 
   val extractPactActor: String => String => Option[PactActor] = field => json => {
-
     val providerLens = jObjectPL >=> jsonObjectPL(field)
 
-    val b = json.parseOption.flatMap(j => providerLens.get(j))
-
-    b.flatMap(p => p.toString.decodeOption[PactActor])
-
+    json
+      .parseOption
+      .flatMap(j => providerLens.get(j))
+      .flatMap(p => p.toString.decodeOption[PactActor])
   }
 
   val extractInteractions: String => Option[List[(Option[Interaction], Option[String], Option[String])]] = json => {
@@ -163,10 +162,10 @@ object RubyJsonHelper {
       is.map { i =>
         val minusRequestBody = {
           for {
-            aa <- i.cursor.downField("request")
-            bb <- aa.downField("body")
-            cc <- bb.delete
-          } yield cc.undo
+            requestField <- i.cursor.downField("request")
+            bodyField <- requestField.downField("body")
+            updated <- bodyField.delete
+          } yield updated.undo
         } match {
           case ok @ Some(s) => ok
           case None => Option(i) // There wasn't a body, but there was still an interaction.
@@ -174,10 +173,10 @@ object RubyJsonHelper {
 
         val minusResponseBody = {
           for {
-            aa <- minusRequestBody.flatMap(ii => ii.cursor.downField("response"))
-            bb <- aa.downField("body")
-            cc <- bb.delete
-          } yield cc.undo
+            responseField <- minusRequestBody.flatMap(ii => ii.cursor.downField("response"))
+            bodyField <- responseField.downField("body")
+            updated <- bodyField.delete
+          } yield updated.undo
         } match {
           case ok @ Some(s) => ok
           case None => minusRequestBody // There wasn't a body, but there was still an interaction.
