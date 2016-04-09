@@ -104,16 +104,22 @@ object InteractionMatchers {
   }
 
   lazy val matchBodies: Option[Map[String, String]] => Option[String] => Option[String] => Boolean = receivedHeaders => expected => received =>
-    receivedHeaders match {
-      case Some(hs) if hs.exists(p => p._1.toLowerCase == "content-type" && p._2.contains("json")) =>
-        generalMatcher(expected, received, (e: String, r: String) => e.parse === r.parse) //TODO: Known issue, lists must be in the same order.
+    if(expected.isDefined && isJson(expected.get))
+      generalMatcher(expected, received, (e: String, r: String) => e.parse === r.parse) //TODO: Known issue, lists must be in the same order.
+    else {
+      receivedHeaders match {
+        case Some(hs) if hs.exists(p => p._1.toLowerCase == "content-type" && p._2.contains("json")) =>
+          generalMatcher(expected, received, (e: String, r: String) => e.parse === r.parse) //TODO: Known issue, lists must be in the same order.
 
-      case Some(hs) if hs.exists(p => p._1.toLowerCase == "content-type" && p._2.contains("xml")) =>
-        generalMatcher(expected, received, (e: String, r: String) => e == r) //TODO: How shall we test equality of XML?
+        case Some(hs) if hs.exists(p => p._1.toLowerCase == "content-type" && p._2.contains("xml")) =>
+          generalMatcher(expected, received, (e: String, r: String) => e == r) //TODO: How shall we test equality of XML?
 
-      case _ =>
-        generalMatcher(expected, received, (e: String, r: String) => e == r)
+        case _ =>
+          generalMatcher(expected, received, (e: String, r: String) => e == r)
+      }
     }
+
+  private val isJson: String => Boolean = str => str.parseOption.isDefined
 
   private def generalMatcher[A](expected: Option[A], received: Option[A], predictate: (A, A) => Boolean): Boolean =
     (expected, received) match {
