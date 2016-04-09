@@ -72,7 +72,8 @@ object ScalaPactContractWriter {
             response = InteractionResponse(
               status = i.response.status,
               headers = i.response.headers,
-              body = i.response.body
+              body = i.response.body,
+              matchingRules = i.response.matchingRules
             )
           )
         }

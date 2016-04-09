@@ -52,13 +52,14 @@ object ScalaPactForger {
       response
     )
 
-    def willRespondWith(status: Int): ScalaPactInteraction = willRespondWith(status, Map.empty, None)
-    def willRespondWith(status: Int, body: String): ScalaPactInteraction = willRespondWith(status, Map.empty, Option(body))
-    def willRespondWith(status: Int, headers: Map[String, String], body: Option[String]): ScalaPactInteraction = new ScalaPactInteraction(
+    def willRespondWith(status: Int): ScalaPactInteraction = willRespondWith(status, Map.empty, None, None)
+    def willRespondWith(status: Int, body: String): ScalaPactInteraction = willRespondWith(status, Map.empty, Option(body), None)
+    def willRespondWith(status: Int, headers: Map[String, String], body: String): ScalaPactInteraction = willRespondWith(status, headers, Option(body), None)
+    def willRespondWith(status: Int, headers: Map[String, String], body: Option[String], matchingRules: Option[List[ScalaPactMatchingRule]]): ScalaPactInteraction = new ScalaPactInteraction(
       description,
       providerState,
       request,
-      ScalaPactResponse(status, headers, body)
+      ScalaPactResponse(status, headers, body, matchingRules)
     )
 
     def finalise: ScalaPactInteractionFinal = ScalaPactInteractionFinal(description, providerState, request, response)
@@ -79,9 +80,9 @@ object ScalaPactForger {
   case class ScalaPactMatchingRuleType(key: String) extends ScalaPactMatchingRule
 
   object ScalaPactResponse {
-    val default = ScalaPactResponse(200, Map.empty, None)
+    val default = ScalaPactResponse(200, Map.empty, None, None)
   }
-  case class ScalaPactResponse(status: Int, headers: Map[String, String], body: Option[String])
+  case class ScalaPactResponse(status: Int, headers: Map[String, String], body: Option[String], matchingRules: Option[List[ScalaPactMatchingRule]])
 
   object ScalaPactOptions {
     val DefaultOptions = ScalaPactOptions(writePactFiles = true)

@@ -101,7 +101,7 @@ class ExampleSpec extends FunSpec with Matchers {
           interaction
             .description("Request for some json")
             .uponReceiving(endPoint)
-            .willRespondWith(200, Map("Content-Type" -> "application/json"), Option(write(data)))
+            .willRespondWith(200, Map("Content-Type" -> "application/json"), Option(write(data)), None)
         )
         .runConsumerTest { mockConfig =>
 
@@ -140,7 +140,7 @@ class ExampleSpec extends FunSpec with Matchers {
           interaction
             .description("POST JSON receive XML example")
             .uponReceiving(POST, endPoint, None, headers, Option(write(requestData)), None)
-            .willRespondWith(400, Map("Content-Type" -> "text/xml"), Option(responseXml.toString()))
+            .willRespondWith(400, Map("Content-Type" -> "text/xml"), Option(responseXml.toString()), None)
         )
         .runConsumerTest { mockConfig =>
 
@@ -198,7 +198,13 @@ class ExampleSpec extends FunSpec with Matchers {
           interaction
             .description("a simple get example with a header matcher")
             .uponReceiving(GET, endPoint, None, Map("fish" -> "chips"), None, Option(List(ScalaPactMatchingRuleRegex("$.header.fish", "\\w+"))))
-            .willRespondWith(200, "Hello there!")
+            .willRespondWith(
+              200, Map("fish" -> "chips"), Option("Hello there!"), Option(
+                List(
+                  ScalaPactMatchingRuleRegex("$.header.fish", "\\w+")
+                )
+              )
+            )
         )
         .runConsumerTest { mockConfig =>
 
