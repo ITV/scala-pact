@@ -23,7 +23,7 @@ object InteractionMatchers {
   lazy val matchResponse: List[Interaction] => InteractionResponse => \/[String, Interaction] = interactions => received =>
     interactions.find{ ir =>
       matchStatusCodes(ir.response.status)(received.status) &&
-        matchHeaders(ir.request.matchingRules)(ir.response.headers)(received.headers) &&
+        matchHeaders(ir.response.matchingRules)(ir.response.headers)(received.headers) &&
         matchBodies(received.headers)(ir.response.body)(received.body)
     } match {
       case Some(matching) => matching.right

@@ -39,7 +39,6 @@ class ResponseStatusSpec extends FunSpec with Matchers {
     }
 
     it("should check the response header specs with regex") {
-      pending
       testSpecs(
         List(
           fetchSpec("/response/headers/matches with regex.json")

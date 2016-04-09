@@ -84,7 +84,7 @@ class RequestStatusSpec extends FunSpec with Matchers {
   private def testSpecs(specFiles: List[RequestSpec]): Unit = {
     specFiles.foreach { spec =>
 
-      val i = Interaction(None, "", spec.expected, InteractionResponse(None, None, None))
+      val i = Interaction(None, "", spec.expected, InteractionResponse(None, None, None, None))
 
       matchRequest(i :: Nil)(spec.actual) match {
         case \/-(r) =>

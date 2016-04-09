@@ -38,7 +38,8 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         response = InteractionResponse(
           status = 200,
           headers = None,
-          body = None
+          body = None,
+          matchingRules = None
         )
       )
 
@@ -89,7 +90,8 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         response = InteractionResponse(
           status = 200,
           headers = None,
-          body = None
+          body = None,
+          matchingRules = None
         )
       )
 
@@ -138,7 +140,8 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         response = InteractionResponse(
           status = 200,
           headers = None,
-          body = None
+          body = None,
+          matchingRules = None
         )
       )
 
@@ -178,7 +181,8 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         response = InteractionResponse(
           status = 200,
           headers = None,
-          body = None
+          body = None,
+          matchingRules = None
         )
       )
 
@@ -228,7 +232,8 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         response = InteractionResponse(
           status = 200,
           headers = None,
-          body = None
+          body = None,
+          matchingRules = None
         )
       )
 
@@ -304,7 +309,8 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         response = InteractionResponse(
           status = 200,
           headers = None,
-          body = None
+          body = None,
+          matchingRules = None
         )
       )
 

@@ -161,7 +161,8 @@ object Verifier {
     InteractionResponse(
       status = Option(response.code),
       headers = if(response.headers.isEmpty) None else Option(response.headers.map(p => p._1 -> p._2.mkString)),
-      body = if(response.body.isEmpty) None else Option(response.body)
+      body = if(response.body.isEmpty) None else Option(response.body),
+      matchingRules = None
     )
 
 }
