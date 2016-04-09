@@ -113,7 +113,6 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
     }
 
     it("should be able to use regex to match headers") {
-
       val expected = Option(
         Map(
           "fish" -> "chips"
@@ -125,8 +124,24 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         )
       )
 
-      matchHeaders(Option(Map("fish" -> MatchingRule("regex", "\\w+"))))(expected)(received) shouldEqual true
+      matchHeaders(Option(Map("$.headers.fish" -> MatchingRule("regex", "\\w+"))))(expected)(received) shouldEqual true
+    }
 
+    it("should be able to use regex to match some headers out of sequence") {
+      val expected = Option(
+        Map(
+          "sauce" -> "ketchup",
+          "fish" -> "chips"
+        )
+      )
+      val received = Option(
+        Map(
+          "fish" -> "peas",
+          "sauce" -> "ketchup"
+        )
+      )
+
+      matchHeaders(Option(Map("$.headers.fish" -> MatchingRule("regex", "\\w+"))))(expected)(received) shouldEqual true
     }
 
   }
@@ -159,8 +174,6 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
     }
 
     it("should be able to handle missing bodies and no expectation of bodies") {
-
-      val expected = "hello there!"
 
       withClue("None expected, none received") {
         matchBodies(Map.empty[String, String])(None)(None) shouldEqual true

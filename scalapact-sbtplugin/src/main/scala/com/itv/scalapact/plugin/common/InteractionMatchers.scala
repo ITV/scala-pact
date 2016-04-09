@@ -53,16 +53,24 @@ object InteractionMatchers {
 
     val predicate = (matchingRules: Option[Map[String, MatchingRule]]) => (e: Map[String, String], r: Map[String, String]) => {
 
+      val strippedMatchingRules = matchingRules.map { mmr =>
+        mmr
+          .filter(_._1.startsWith("$.headers."))
+          .map(mr => (mr._1.substring("$.headers.".length).toLowerCase, mr._2))
+      }
+
       def standardise(input: (String, String)): (String, String) = {
         (input._1.toLowerCase, trimAllSeparators(legalCharSeparators, input._2))
       }
 
-      val withRules = matchingRules.map { mr =>
-        e.filterKeys(key => mr.exists(p => p._1 == key))
-      }.getOrElse(Map.empty[String, String])
+      val withRules = strippedMatchingRules
+        .map { mr =>
+          e.map(p => standardise(p)).filterKeys(key => mr.exists(p => p._1 == key))
+        }
+        .getOrElse(Map.empty[String, String])
 
       val withRuleMatchResult: Boolean = withRules.map { header =>
-        matchingRules
+        strippedMatchingRules
           .flatMap { rules => rules.find(p => p._1 == header._1) }
             .flatMap { rule =>
               rule._2.regex.flatMap { regex =>
@@ -71,7 +79,7 @@ object InteractionMatchers {
             }.getOrElse(true)
       }.forall(_ == true)
 
-      val noRules = e.filterKeys(k => !withRules.contains(k))
+      val noRules = e.map(p => standardise(p)).filterKeys(k => !withRules.contains(k))
 
       val noRuleMatchResult: Boolean = noRules.map(p => standardise(p))
         .toSet
