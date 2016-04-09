@@ -24,8 +24,8 @@ object PactImplicits {
     "method", "path", "query", "headers", "body", "matchingRules"
   )
 
-  implicit lazy val InteractionResponseCodecJson: CodecJson[InteractionResponse] = casecodec3(InteractionResponse.apply, InteractionResponse.unapply)(
-    "status", "headers", "body"
+  implicit lazy val InteractionResponseCodecJson: CodecJson[InteractionResponse] = casecodec4(InteractionResponse.apply, InteractionResponse.unapply)(
+    "status", "headers", "body", "matchingRules"
   )
 
   implicit lazy val MatchingRuleCodecJson: CodecJson[MatchingRule] = casecodec2(MatchingRule.apply, MatchingRule.unapply)(
@@ -41,7 +41,7 @@ case class InteractionRequest(method: Option[String], path: Option[String], quer
     (method, path, query, headers, body)
   }
 }
-case class InteractionResponse(status: Option[Int], headers: Option[Map[String, String]], body: Option[String])
+case class InteractionResponse(status: Option[Int], headers: Option[Map[String, String]], body: Option[String], matchingRules: Option[Map[String, MatchingRule]])
 
 case class MatchingRule(`match`: String, regex: Option[String])
 

@@ -20,7 +20,8 @@ object PactFileExamples {
         response = InteractionResponse(
           status = Option(200),
           headers = None,
-          body = Option("""Hello""")
+          body = Option("""Hello"""),
+          None
         )
       )
     )
@@ -72,7 +73,13 @@ object PactFileExamples {
         response = InteractionResponse(
           status = Option(200),
           headers = Option(Map("Content-Type" -> "application/json")),
-          body = Option("""{"fish":["cod","haddock","flying"]}""")
+          body = Option("""{"fish":["cod","haddock","flying"]}"""),
+          matchingRules = Option(
+            Map(
+              "$.headers.Accept" -> MatchingRule(`match` = "regex", regex = Option("\\w+")),
+              "$.headers.Content-Length" -> MatchingRule(`match` = "type", regex = None)
+            )
+          )
         )
       ),
       Interaction(
@@ -89,7 +96,8 @@ object PactFileExamples {
         response = InteractionResponse(
           status = Option(200),
           headers = Option(Map("Content-Type" -> "application/json")),
-          body = Option("""{"chips":true,"fish":["cod","haddock"]}""")
+          body = Option("""{"chips":true,"fish":["cod","haddock"]}"""),
+          matchingRules = None
         )
       )
     )
@@ -135,6 +143,15 @@ object PactFileExamples {
                          |            "haddock",
                          |            "flying"
                          |          ]
+                         |        },
+                         |        "matchingRules" : {
+                         |          "$.headers.Accept" : {
+                         |            "match" : "regex",
+                         |            "regex" : "\\w+"
+                         |          },
+                         |          "$.headers.Content-Length" : {
+                         |            "match" : "type"
+                         |          }
                          |        }
                          |      }
                          |    },

@@ -39,7 +39,13 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
         response = InteractionResponse(
           status = Option(200),
           headers = Option(Map("Content-Type" -> "application/json")),
-          body = None
+          body = None,
+          matchingRules = Option(
+            Map(
+              "$.headers.Accept" -> MatchingRule(`match` = "regex", regex = Option("\\w+")),
+              "$.headers.Content-Length" -> MatchingRule(`match` = "type", regex = None)
+            )
+          )
         )
       )
       val interaction1RequestBody = Option("""fish""")
@@ -59,7 +65,8 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
         response = InteractionResponse(
           status = Option(200),
           headers = Option(Map("Content-Type" -> "application/json")),
-          body = None
+          body = None,
+          matchingRules = None
         )
       )
       val interaction2RequestBody = Option("""fish""")
