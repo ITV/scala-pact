@@ -29,7 +29,12 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
           query = Option("fish=chips"),
           headers = Option(Map("Content-Type" -> "text/plain")),
           body = None,
-          matchingRules = None
+          matchingRules = Option(
+            Map(
+              "$.headers.Accept" -> MatchingRule(`match` = "regex", regex = Option("\\w+")),
+              "$.headers.Content-Length" -> MatchingRule(`match` = "type", regex = None)
+            )
+          )
         ),
         response = InteractionResponse(
           status = Option(200),
