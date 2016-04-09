@@ -14,7 +14,8 @@ object PactFileExamples {
           path = Option("/"),
           query = None,
           headers = None,
-          body = None
+          body = None,
+          matchingRules = None
         ),
         response = InteractionResponse(
           status = Option(200),
@@ -82,7 +83,8 @@ object PactFileExamples {
           path = Option("/fetch-json2"),
           query = None,
           headers = Option(Map("Content-Type" -> "text/plain")),
-          body = Option("""fish""")
+          body = Option("""fish"""),
+          matchingRules = None
         ),
         response = InteractionResponse(
           status = Option(200),

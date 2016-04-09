@@ -28,7 +28,8 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
           path = Option("/fetch-json"),
           query = Option("fish=chips"),
           headers = Option(Map("Content-Type" -> "text/plain")),
-          body = None
+          body = None,
+          matchingRules = None
         ),
         response = InteractionResponse(
           status = Option(200),
@@ -47,7 +48,8 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
           path = Option("/fetch-json2"),
           query = None,
           headers = Option(Map("Content-Type" -> "text/plain")),
-          body = None
+          body = None,
+          matchingRules = None
         ),
         response = InteractionResponse(
           status = Option(200),
