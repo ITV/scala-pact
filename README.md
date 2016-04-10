@@ -249,16 +249,10 @@ You could then build on that with integration tests:
 ## Pact Specification Compliance Level
 Currently ScalaPact is not 100% compliant with the official Pact specification. We plan to be but the library is still under active development. The roadmap to Pact compliance will be something like:
 
-1. Complete testing all tools against the official specification test cases, known missing areas are regex header matching and body matching.
-1. Implement the JSON body special case
-1. Consolidate our processes with the official implementor's guide
+1. Complete testing all tools against the official specification test cases. The only area of the specification that is believed to be incomplete is around the JSON body matching rules.
+1. Consolidate our processes with the official implementor's guide.
 
-### Why Aren't We Pact Compliant?
-There is already more than one CDC implementation and ScalaPact is most closely aligned to Pact.
-
-Pact was created for a company to meet it's needs and ScalaPact has been created in the same vein, in as much as we have requirements that the official Pact tools don't quite meet.
-
-Currently, it is the intention to conform to Pact as closely as possible rather than splinter into another implementation.
+Our intention is to eventually meet version 2 of the pact specification.
 
 ## Motivation
 [Pact](https://github.com/realestate-com-au/pact) is an implementation of CDC testing ([Consumer Driven Contract testing](http://martinfowler.com/articles/consumerDrivenContracts.html)). There are other implementations like [Pacto](https://github.com/thoughtworks/pacto) and they vary slightly in how they interpret the testing process.
@@ -304,18 +298,16 @@ The Pact integration test library itself depends on a range of Scala/Java librar
   - Legal hygiene checks, make sure there's nothing offensive
   - Public consumption, is it easy to understand what you have to do to use ScalaPact?
 
-## Short Term Development Roadmap
+## Development Roadmap
 
 - Revisit matching rules API / UX
 - Add LICENCE.md
 - Add CONTRIBUTING.md
 - Publish lib to repo
-
-## Mid Term Development Roadmap
-
 - Implement better body matching / diffing for:
   - text
   - XML
+<<<<<<< HEAD
   - JSON (related to the special case problem)
 - Implement header regex matching
 - Standalone stubber jar
@@ -323,5 +315,8 @@ The Pact integration test library itself depends on a range of Scala/Java librar
 
 ## Longer Term Development Roadmap
 
+=======
+  - JSON
+>>>>>>> Updated README.
 - Add provider state helpers e.g. Shell script runner and a Scala script runner?
 - Comply with Pact implementor guidelines
