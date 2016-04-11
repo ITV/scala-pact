@@ -318,6 +318,8 @@ The Pact integration test library itself depends on a range of Scala/Java librar
   - XML
   - JSON (related to the special case problem)
 - Implement header regex matching
+- Standalone stubber jar
+- Standalone verifier jar
 
 ## Longer Term Development Roadmap
 
