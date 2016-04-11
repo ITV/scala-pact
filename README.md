@@ -306,6 +306,7 @@ The Pact integration test library itself depends on a range of Scala/Java librar
 
 ## Short Term Development Roadmap
 
+- REMOVE sbt clean from pact-test command!! Useless in a ci pipeline and if they want to clean they'll be explicit!
 - Add LICENCE.md
 - Add CONTRIBUTING.md
 - Publish lib to repo
