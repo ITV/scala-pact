@@ -300,7 +300,6 @@ The Pact integration test library itself depends on a range of Scala/Java librar
 
 ## Development Roadmap
 
-- Revisit matching rules API / UX
 - Add LICENCE.md
 - Add CONTRIBUTING.md
 - Publish lib to repo
