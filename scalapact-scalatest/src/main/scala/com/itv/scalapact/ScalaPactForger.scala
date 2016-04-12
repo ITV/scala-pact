@@ -1,6 +1,12 @@
 package com.itv.scalapact
 
+import scala.language.implicitConversions
+
 object ScalaPactForger {
+
+  implicit def toOption[A](a: A): Option[A] = Option(a)
+  implicit def rulesToOptionalList(rules: ScalaPactForger.ScalaPactMatchingRules): Option[List[ScalaPactForger.ScalaPactMatchingRule]] =
+    Option(rules.rules)
 
   implicit val options = ScalaPactOptions.DefaultOptions
 
@@ -78,6 +84,18 @@ object ScalaPactForger {
   }
   case class ScalaPactMatchingRuleRegex(key: String, regex: String) extends ScalaPactMatchingRule
   case class ScalaPactMatchingRuleType(key: String) extends ScalaPactMatchingRule
+
+  case class ScalaPactMatchingRules(rules: List[ScalaPactMatchingRule]) {
+    def ~>(newRules: ScalaPactMatchingRules): ScalaPactMatchingRules = ScalaPactMatchingRules(
+      rules = rules ++ newRules.rules
+    )
+  }
+
+  object headerRegexRule {
+    def apply(key: String, regex: String): ScalaPactMatchingRules = ScalaPactMatchingRules(
+      rules = List(ScalaPactMatchingRuleRegex("$.header." + key, regex))
+    )
+  }
 
   object ScalaPactResponse {
     val default = ScalaPactResponse(200, Map.empty, None, None)

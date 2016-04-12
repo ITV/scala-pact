@@ -50,7 +50,7 @@ class ExampleSpec extends FunSpec with Matchers {
         .addInteraction(
           interaction
             .description("a get example with query parameters")
-            .uponReceiving(GET, endPoint, Option("id=1&name=joe"))
+            .uponReceiving(GET, endPoint, "id=1&name=joe")
             .willRespondWith(200, "Hello there!")
         )
         .runConsumerTest { mockConfig =>
@@ -101,7 +101,7 @@ class ExampleSpec extends FunSpec with Matchers {
           interaction
             .description("Request for some json")
             .uponReceiving(endPoint)
-            .willRespondWith(200, Map("Content-Type" -> "application/json"), Option(write(data)), None)
+            .willRespondWith(200, Map("Content-Type" -> "application/json"), write(data), None)
         )
         .runConsumerTest { mockConfig =>
 
@@ -139,8 +139,8 @@ class ExampleSpec extends FunSpec with Matchers {
         .addInteraction(
           interaction
             .description("POST JSON receive XML example")
-            .uponReceiving(POST, endPoint, None, headers, Option(write(requestData)), None)
-            .willRespondWith(400, Map("Content-Type" -> "text/xml"), Option(responseXml.toString()), None)
+            .uponReceiving(POST, endPoint, None, headers, write(requestData), None)
+            .willRespondWith(400, Map("Content-Type" -> "text/xml"), responseXml.toString(), None)
         )
         .runConsumerTest { mockConfig =>
 
@@ -197,18 +197,26 @@ class ExampleSpec extends FunSpec with Matchers {
         .addInteraction(
           interaction
             .description("a simple get example with a header matcher")
-            .uponReceiving(GET, endPoint, None, Map("fish" -> "chips"), None, Option(List(ScalaPactMatchingRuleRegex("$.header.fish", "\\w+"))))
+            .uponReceiving(
+              method = GET,
+              path = endPoint,
+              query = None,
+              headers = Map("fish" -> "chips", "sauce" -> "ketchup"),
+              body = None,
+              matchingRules =
+                headerRegexRule("fish", "\\w+") ~> headerRegexRule("sauce", "\\w+")
+            )
             .willRespondWith(
-              200, Map("fish" -> "chips"), Option("Hello there!"), Option(
-                List(
-                  ScalaPactMatchingRuleRegex("$.header.fish", "\\w+")
-                )
-              )
+              status = 200,
+              headers = Map("fish" -> "chips", "sauce" -> "ketchup"),
+              body = "Hello there!",
+              matchingRules =
+                headerRegexRule("fish", "\\w+") ~> headerRegexRule("sauce", "\\w+")
             )
         )
         .runConsumerTest { mockConfig =>
 
-          val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint, Map("fish" -> "peas"))
+          val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint, Map("fish" -> "peas", "sauce" -> "mayo"))
 
           result.status should equal(200)
           result.body should equal("Hello there!")
