@@ -307,16 +307,11 @@ The Pact integration test library itself depends on a range of Scala/Java librar
 - Implement better body matching / diffing for:
   - text
   - XML
-<<<<<<< HEAD
-  - JSON (related to the special case problem)
-- Implement header regex matching
+  - JSON
 - Standalone stubber jar
 - Standalone verifier jar
 
 ## Longer Term Development Roadmap
 
-=======
-  - JSON
->>>>>>> Updated README.
 - Add provider state helpers e.g. Shell script runner and a Scala script runner?
 - Comply with Pact implementor guidelines
