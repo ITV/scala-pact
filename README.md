@@ -1,5 +1,5 @@
 # ScalaPact
-A library for generating Consumer Driven Contract files in Scala projects following the PACT standard using [ScalaTest](http://www.scalatest.org/). Includes supporting tools the use Pact files to verify and stub services.
+A library for generating Consumer Driven Contract files in Scala projects following the PACT standard using [ScalaTest](http://www.scalatest.org/). Includes supporting tools that use Pact files to verify and stub services.
 
 ScalaPact is intended for Scala developers who are looking for a better way to manage the HTTP contracts between their services.
 
@@ -19,7 +19,7 @@ Add the dependency to your `build.sbt` file like this:
 
 ```
 libraryDependencies ++= Seq(
-  "com.itv" %% "scalapact-scalatest" % "0.1.5" % "test"
+  "com.itv" %% "scalapact-scalatest" % "1.0.0-M1" % "test"
 )
 
 resolvers += "Artifactory" at "https://itvrepos.artifactoryonline.com/itvrepos/oasvc-ivy/"
@@ -30,7 +30,7 @@ resolvers += "Artifactory" at "https://itvrepos.artifactoryonline.com/itvrepos/o
 Add the plugin to your `project/plugins.sbt` file like this:
 
 ```
-addSbtPlugin("com.itv.plugins" % "scalapact-plugin" % "0.1.5")
+addSbtPlugin("com.itv.plugins" % "scalapact-plugin" % "1.0.0-M1")
 
 resolvers += "Artifactory" at "https://itvrepos.artifactoryonline.com/itvrepos/oasvc-ivy/"
 
@@ -260,10 +260,10 @@ Our intention is to eventually meet version 2 of the pact specification.
 Following the Pact interpretation of CDC, the process goes something like this:
 
 1. Write a piece of client code in a service consumer project that knows the details of how to connect to a provider.
-2. Write a real integration test for that client code that hits a mock, but also as a side effect emits a JSON file describing the relationship. This JSON file is your Pact or Contract file. Note that in Pact (not Pacto) it is owned by the consumer.
-3. During development of the consumer, the Pact file can be used to run a lightweight stub service that mimics the expected behavior of the provider. *Note: The provider need not even exist yet and the Pact files can form part of the providers design specification.*
-4. Give the generated Pact file to the team that build the provider, an upstream service you depend on. This Pact file tells the provider team both how you expect their API to behave and *which parts of their API are delivering value to you the consumer*.
-5. The provider then verifies the Pact by running the requests and responses described in the Pact file against their system.
+1. Write a real integration test for that client code that hits a mock, but also as a side effect emits a JSON file describing the relationship. This JSON file is your Pact or Contract file. Note that in Pact (not Pacto) it is owned by the consumer.
+1. During development of the consumer, the Pact file can be used to run a lightweight stub service that mimics the expected behavior of the provider. *Note: The provider need not even exist yet and the Pact files can form part of the providers design specification.*
+1. Give the generated Pact file to the team that build the provider, an upstream service you depend on. This Pact file tells the provider team both how you expect their API to behave and *which parts of their API are delivering value to you the consumer*.
+1. The provider then verifies the Pact by running the requests and responses described in the Pact file against their system.
 
 Most of the original tools for CDC testing have come out of the Ruby community with a few other implementations for other languages here and there.
 
