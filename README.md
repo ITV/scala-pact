@@ -291,26 +291,12 @@ The Pact integration test library itself depends on a range of Scala/Java librar
 ### Scalaj-Http
 [Scalaj-Http](https://github.com/scalaj/scalaj-http) is used for quick synchronous HTTP calls.
 
-## Documentation Roadmap
-
-- Break up main README.md, possibly use wiki?
-- Update all README.md files
-  - Legal hygiene checks, make sure there's nothing offensive
-  - Public consumption, is it easy to understand what you have to do to use ScalaPact?
-
 ## Development Roadmap
 
-- Add LICENCE.md
-- Add CONTRIBUTING.md
-- Publish lib to repo
 - Implement better body matching / diffing for:
   - text
   - XML
   - JSON
+- Comply with Pact implementor guidelines
 - Standalone stubber jar
 - Standalone verifier jar
-
-## Longer Term Development Roadmap
-
-- Add provider state helpers e.g. Shell script runner and a Scala script runner?
-- Comply with Pact implementor guidelines
