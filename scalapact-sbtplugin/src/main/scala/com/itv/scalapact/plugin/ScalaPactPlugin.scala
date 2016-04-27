@@ -15,13 +15,15 @@ object ScalaPactPlugin extends Plugin {
   val pactBrokerAddress = SettingKey[String]("pactBrokerAddress", "The base url to publish / pull pact contract files to and from.")
   val providerName = SettingKey[String]("providerName", "The name of the service to verify")
   val consumerNames = SettingKey[Seq[String]]("consumerNames", "The names of the services that consume the service to verify")
+  val pactContractVersion = SettingKey[String]("pactContractVersion", "The version number the pact contract will be published under. If missing or empty, the project version will be used.")
 
 
   private val pactSettings = Seq(
     providerStates := Seq(("default", (key: String) => true)),
     pactBrokerAddress := "",
     providerName := "",
-    consumerNames := Seq.empty[String]
+    consumerNames := Seq.empty[String],
+    pactContractVersion := ""
   )
 
   override lazy val settings = Seq(

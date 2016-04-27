@@ -12,3 +12,4 @@ providerStates := Seq(
 pactBrokerAddress := "http://pactbroker.infradev.oasvc.itv.com"
 providerName := "Their Provider Service"
 consumerNames := Seq("My Consumer")
+pactContractVersion := "1.0.0"

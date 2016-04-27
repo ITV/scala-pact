@@ -9,7 +9,7 @@ import scalaz.{-\/, \/-}
 
 object Publisher {
 
-  lazy val publishToBroker: String => String => ConfigAndPacts => Unit = pactBrokerAddress => projectVersion => configAndPacts => {
+  lazy val publishToBroker: String => String => ConfigAndPacts => Unit = pactBrokerAddress => versionToPublishAs => configAndPacts => {
 
     configAndPacts.pacts.foreach { pact =>
       val details = for {
@@ -24,7 +24,7 @@ object Publisher {
 
         case \/-((b, p, c)) =>
           //Not sure how I feel about this. Should you be able to publish snapshots? Pact broker will return these with a call to `/latest` ...
-          val address = b + "/pacts/provider/" + p + "/consumer/" + c + "/version/" + projectVersion.replace("-SNAPSHOT", ".x")
+          val address = b + "/pacts/provider/" + p + "/consumer/" + c + "/version/" + versionToPublishAs.replace("-SNAPSHOT", ".x")
 
           println(s"Publishing to: $address".yellow)
 

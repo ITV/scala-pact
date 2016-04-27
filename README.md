@@ -19,7 +19,7 @@ Add the dependency to your `build.sbt` file like this:
 
 ```
 libraryDependencies ++= Seq(
-  "com.itv" %% "scalapact-scalatest" % "1.0.0-M1" % "test"
+  "com.itv" %% "scalapact-scalatest" % "1.0.0-M2" % "test"
 )
 
 resolvers += "Artifactory" at "https://itvrepos.artifactoryonline.com/itvrepos/oasvc-ivy/"
@@ -30,7 +30,7 @@ resolvers += "Artifactory" at "https://itvrepos.artifactoryonline.com/itvrepos/o
 Add the plugin to your `project/plugins.sbt` file like this:
 
 ```
-addSbtPlugin("com.itv.plugins" % "scalapact-plugin" % "1.0.0-M1")
+addSbtPlugin("com.itv.plugins" % "scalapact-plugin" % "1.0.0-M2")
 
 resolvers += "Artifactory" at "https://itvrepos.artifactoryonline.com/itvrepos/oasvc-ivy/"
 
@@ -85,6 +85,12 @@ To achieve this we use the Ruby tool called Pact Broker (see below) and the publ
 Before we can publish, we have to tell Scala-Pact where it can find a running instance of Pact Broker by adding the following line to either `build.sbt` or `pact.sbt`:
 
 `pactBrokerAddress := "http://my-pact-broker:4321"`
+
+You can also specify the version you wish to publish under by adding:
+
+`pactContractVersion := 1.0.0`
+
+If you omit this variable or set it to an empty string, the main project version will be the version used to publish against.
 
 You can then use the publish command to generate and upload your pact files to pact broker:
 

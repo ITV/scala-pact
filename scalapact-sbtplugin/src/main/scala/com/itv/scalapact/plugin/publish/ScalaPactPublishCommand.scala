@@ -25,8 +25,11 @@ object ScalaPactPublishCommand {
 
     val pactBrokerAddress: String = Project.extract(pactTestedState).get(ScalaPactPlugin.pactBrokerAddress)
     val projectVersion: String = Project.extract(pactTestedState).get(Keys.version)
+    val pactContractVersion: String = Project.extract(pactTestedState).get(ScalaPactPlugin.pactContractVersion)
 
-    (parseArguments andThen loadPactFiles("target/pacts") andThen publishToBroker(pactBrokerAddress)(projectVersion)) (args)
+    val versionToPublishAs = if(pactContractVersion.isEmpty) projectVersion else pactContractVersion
+
+    (parseArguments andThen loadPactFiles("target/pacts") andThen publishToBroker(pactBrokerAddress)(versionToPublishAs)) (args)
 
     pactTestedState
   }
