@@ -88,7 +88,7 @@ Before we can publish, we have to tell Scala-Pact where it can find a running in
 
 You can also specify the version you wish to publish under by adding:
 
-`pactContractVersion := 1.0.0`
+`pactContractVersion := "1.0.0"`
 
 If you omit this variable or set it to an empty string, the main project version will be the version used to publish against.
 
