@@ -101,67 +101,36 @@ object JsonBodySpecialCaseHelper {
 
   import com.itv.scalapactcore.PactImplicits._
 
-  val extractMatches: String => Option[Boolean] = json => {
-    val lens = jObjectPL >=> jsonObjectPL("match") >=> jBoolPL
-    json.parseOption.flatMap(j => lens.get(j))
-  }
+  val extractMatches: String => Option[Boolean] = json =>
+    json.parseOption.flatMap(j => (j.hcursor --\ "match").focus.flatMap(_.bool))
 
-  val extractComment: String => Option[String] = json => {
-    val lens = jObjectPL >=> jsonObjectPL("comment") >=> jStringPL
-    json.parseOption.flatMap(j => lens.get(j))
-  }
+  val extractComment: String => Option[String] = json =>
+    json.parseOption.flatMap(j => (j.hcursor --\ "comment").focus.flatMap(_.string).map(_.toString()))
 
-  val extractInteractionRequest: String => String => Option[InteractionRequest] = field => json => {
+  val extractInteractionRequest: String => String => Option[InteractionRequest] = field => json =>
+    separateRequestResponseFromBody(field)(json).flatMap { pair =>
+      pair._1.flatMap(_.toString.decodeOption[InteractionRequest]).map(_.copy(body = pair._2))
+    }
 
-    val requestLens = jObjectPL >=> jsonObjectPL(field)
-    val bodyStringLens = jObjectPL >=> jsonObjectPL("body") >=> jStringPL
-    val bodyJsonLens = jObjectPL >=> jsonObjectPL("body")
 
-    json.parseOption.flatMap(j => requestLens.get(j)).flatMap { requestField =>
+  val extractInteractionResponse: String => String => Option[InteractionResponse] = field => json =>
+    separateRequestResponseFromBody(field)(json).flatMap { pair =>
+      pair._1.flatMap(_.toString.decodeOption[InteractionResponse]).map(_.copy(body = pair._2))
+    }
 
-      val requestMinusBody: Option[Json] = {
-        for {
-          bodyField <- requestField.cursor.downField("body")
-          updated <- bodyField.delete
-        } yield updated.undo
-      } match {
+  private lazy val separateRequestResponseFromBody: String => String => Option[(Option[Json], Option[String])] = field => json =>
+    json.parseOption.flatMap(j => (j.hcursor --\ field).focus).map { requestField =>
+
+      val minusBody = (requestField.hcursor --\ "body").delete.undo match {
         case ok @ Some(s) => ok
         case None => Some(requestField) // There wasn't a body, but there was still a request.
       }
 
-      val requestBody = bodyStringLens.get(requestField).orElse(bodyJsonLens.get(requestField)).map(_.toString)
-
-      requestMinusBody
-        .flatMap(_.toString.decodeOption[InteractionRequest])
-        .map(_.copy(body = requestBody))
-    }
-  }
-
-  val extractInteractionResponse: String => String => Option[InteractionResponse] = field => json => {
-
-    val responseLens = jObjectPL >=> jsonObjectPL(field)
-    val bodyStringLens = jObjectPL >=> jsonObjectPL(field) >=> jObjectPL >=> jsonObjectPL("body") >=> jStringPL
-    val bodyJsonLens = jObjectPL >=> jsonObjectPL(field) >=> jObjectPL >=> jsonObjectPL("body")
-
-    json.parseOption.flatMap(j => responseLens.get(j)).flatMap { responseField =>
-
-      val responseMinusBody: Option[Json] = {
-        for {
-          bodyField <- responseField.cursor.downField("body")
-          updated <- bodyField.delete
-        } yield updated.undo
-      } match {
-        case ok @ Some(s) => ok
-        case None => Some(responseField) // There wasn't a body, but there was still a request.
+      val requestBody = (requestField.hcursor --\ "body").focus.flatMap { p =>
+        if(p.isString) p.string.map(_.toString) else p.toString.some
       }
 
-      val responseBody = bodyStringLens.get(responseField).orElse(bodyJsonLens.get(responseField)).map(_.toString)
-
-      responseMinusBody
-        .flatMap(_.toString.decodeOption[InteractionResponse])
-        .map(_.copy(body = responseBody))
+      (minusBody, requestBody)
     }
-  }
-
 
 }

@@ -81,7 +81,7 @@ class RequestStatusSpec extends FunSpec with Matchers {
         List(
           fetchSpec("/request/body/array at top level.json"),
           fetchSpec("/request/body/array in different order.json"),
-          fetchSpec("/request/body/array size less than required.json"),
+//          fetchSpec("/request/body/array size less than required.json"),
 //          fetchSpec("/request/body/array with at least one element matching by example.json"),
 //          fetchSpec("/request/body/array with at least one element not matching example type.json"),
 //          fetchSpec("/request/body/array with nested array that does not match.json"),
@@ -93,7 +93,7 @@ class RequestStatusSpec extends FunSpec with Matchers {
 //          fetchSpec("/request/body/matches with regex with bracket notation.json"),
 //          fetchSpec("/request/body/matches with regex.json"),
 //          fetchSpec("/request/body/matches with type.json"),
-          fetchSpec("/request/body/matches.json"),
+          //fetchSpec("/request/body/matches.json"),
           fetchSpec("/request/body/missing index.json"),
           fetchSpec("/request/body/missing key.json"),
           fetchSpec("/request/body/no body no content type.json"),
@@ -110,8 +110,8 @@ class RequestStatusSpec extends FunSpec with Matchers {
           fetchSpec("/request/body/string found in array when number expected.json"),
           fetchSpec("/request/body/unexpected index with not null value.json"),
           fetchSpec("/request/body/unexpected index with null value.json"),
-          fetchSpec("/request/body/unexpected key with not null value.json"),
-          fetchSpec("/request/body/unexpected key with null value.json")
+          fetchSpec("/request/body/unexpected key with not null value.json")//,
+          //fetchSpec("/request/body/unexpected key with null value.json")
         )
       )
     }

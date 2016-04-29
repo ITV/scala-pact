@@ -145,51 +145,42 @@ object JsonBodySpecialCaseHelper {
 
   import PactImplicits._
 
-  val extractPactActor: String => String => Option[PactActor] = field => json => {
-    val providerLens = jObjectPL >=> jsonObjectPL(field)
-
+  val extractPactActor: String => String => Option[PactActor] = field => json =>
     json
       .parseOption
-      .flatMap(j => providerLens.get(j))
+      .flatMap { j => (j.hcursor --\ field).focus }
       .flatMap(p => p.toString.decodeOption[PactActor])
-  }
 
   val extractInteractions: String => Option[List[(Option[Interaction], Option[String], Option[String])]] = json => {
 
-    val interactionsLens = jObjectPL >=> jsonObjectPL("interactions") >=> jArrayPL
-    val requestBodyLensString = jObjectPL >=> jsonObjectPL("request") >=> jObjectPL >=> jsonObjectPL("body") >=> jStringPL
-    val responseBodyLensString = jObjectPL >=> jsonObjectPL("response") >=> jObjectPL >=> jsonObjectPL("body") >=> jStringPL
-    val requestBodyLensObject = jObjectPL >=> jsonObjectPL("request") >=> jObjectPL >=> jsonObjectPL("body")
-    val responseBodyLensObject = jObjectPL >=> jsonObjectPL("response") >=> jObjectPL >=> jsonObjectPL("body")
+    val interations =
+      json.parseOption
+        .flatMap { j => (j.hcursor --\ "interactions").focus.flatMap(_.array) }
 
-    val interactions = json.parseOption.flatMap(j => interactionsLens.get(j))
-
-    interactions.map { is =>
+    interations.map { is =>
       is.map { i =>
-        val minusRequestBody = {
-          for {
-            requestField <- i.cursor.downField("request")
-            bodyField <- requestField.downField("body")
-            updated <- bodyField.delete
-          } yield updated.undo
-        } match {
-          case ok @ Some(s) => ok
-          case None => Option(i) // There wasn't a body, but there was still an interaction.
+        val minusRequestBody =
+          (i.hcursor --\ "request" --\ "body").delete.undo match {
+            case ok @ Some(s) => ok
+            case None => Option(i)
+          }
+
+        val minusResponseBody = minusRequestBody.flatMap { ii =>
+          (ii.hcursor --\ "response" --\ "body").delete.undo match {
+            case ok@Some(s) => ok
+            case None => minusRequestBody // There wasn't a body, but there was still an interaction.
+          }
         }
 
-        val minusResponseBody = {
-          for {
-            responseField <- minusRequestBody.flatMap(ii => ii.cursor.downField("response"))
-            bodyField <- responseField.downField("body")
-            updated <- bodyField.delete
-          } yield updated.undo
-        } match {
-          case ok @ Some(s) => ok
-          case None => minusRequestBody // There wasn't a body, but there was still an interaction.
-        }
+        val requestBody = (i.hcursor --\ "request" --\ "body").focus
+          .flatMap { p =>
+            if(p.isString) p.string.map(_.toString) else p.toString.some
+          }
 
-        val requestBody = requestBodyLensString.get(i).orElse(requestBodyLensObject.get(i)).map(_.toString)
-        val responseBody = responseBodyLensString.get(i).orElse(responseBodyLensObject.get(i)).map(_.toString)
+        val responseBody = (i.hcursor --\ "response" --\ "body").focus
+          .flatMap { p =>
+            if(p.isString) p.string.map(_.toString) else p.toString.some
+          }
 
         (minusResponseBody.flatMap(p => p.toString.decodeOption[Interaction]), requestBody, responseBody)
       }

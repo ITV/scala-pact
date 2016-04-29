@@ -104,13 +104,11 @@ object InteractionMatchers {
   }
 
   lazy val matchBodies: Option[Map[String, String]] => Option[String] => Option[String] => Boolean = receivedHeaders => expected => received =>
-    if(expected.isDefined && isJson(expected.get))
-      generalMatcher(expected, received, (e: String, r: String) => e.parse === r.parse) //TODO: Known issue, lists must be in the same order.
-    else {
+    if(expected.isDefined && isJson(expected.get)) {
+      val prettyParams = PrettyParams.spaces2.copy(preserveOrder = true, dropNullKeys = true)
+      generalMatcher(expected, received, (e: String, r: String) => e.parseOption.get.pretty(prettyParams) === r.parseOption.get.pretty(prettyParams)) //TODO: Known issue, lists must be in the same order.
+    } else {
       receivedHeaders match {
-        case Some(hs) if hs.exists(p => p._1.toLowerCase == "content-type" && p._2.contains("json")) =>
-          generalMatcher(expected, received, (e: String, r: String) => e.parse === r.parse) //TODO: Known issue, lists must be in the same order.
-
         case Some(hs) if hs.exists(p => p._1.toLowerCase == "content-type" && p._2.contains("xml")) =>
           generalMatcher(expected, received, (e: String, r: String) => e == r) //TODO: How shall we test equality of XML?
 

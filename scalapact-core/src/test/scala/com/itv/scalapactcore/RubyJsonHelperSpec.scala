@@ -48,7 +48,7 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
           )
         )
       )
-      val interaction1RequestBody = Option("""fish""")
+      val interaction1RequestBody = Option("fish")
       val interaction1ResponseBody = Option("""{"fish":["cod","haddock","flying"]}""")
 
       val interaction2 = Interaction(
@@ -69,7 +69,7 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
           matchingRules = None
         )
       )
-      val interaction2RequestBody = Option("""fish""")
+      val interaction2RequestBody = Option("fish")
       val interaction2ResponseBody = Option("""{"chips":true,"fish":["cod","haddock"]}""")
 
       val list = List(
