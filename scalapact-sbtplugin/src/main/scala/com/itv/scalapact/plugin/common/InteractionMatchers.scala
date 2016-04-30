@@ -7,6 +7,8 @@ import com.itv.scalapactcore.{Interaction, InteractionRequest, InteractionRespon
 import scalaz._
 import Scalaz._
 
+import JsonEquality._
+
 object InteractionMatchers {
 
   lazy val matchRequest: List[Interaction] => InteractionRequest => \/[String, Interaction] = interactions => received =>
@@ -105,8 +107,13 @@ object InteractionMatchers {
 
   lazy val matchBodies: Option[Map[String, String]] => Option[String] => Option[String] => Boolean = receivedHeaders => expected => received =>
     if(expected.isDefined && isJson(expected.get)) {
-      val prettyParams = PrettyParams.spaces2.copy(preserveOrder = true, dropNullKeys = true)
-      generalMatcher(expected, received, (e: String, r: String) => e.parseOption.get.pretty(prettyParams) === r.parseOption.get.pretty(prettyParams)) //TODO: Known issue, lists must be in the same order.
+      val predicate = (e: String, r: String) =>
+        (e.parseOption |@| r.parseOption) { (eo, ro) => eo jEq ro } match {
+          case Some(matches) => matches
+          case None => false
+        }
+
+      generalMatcher(expected, received, predicate)
     } else {
       receivedHeaders match {
         case Some(hs) if hs.exists(p => p._1.toLowerCase == "content-type" && p._2.contains("xml")) =>
