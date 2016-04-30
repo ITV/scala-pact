@@ -52,6 +52,11 @@ class JsonEqualitySpec extends FunSpec with Matchers {
 
       a.parseOption.get jEq b.parseOption.get shouldEqual false
 
+
+      val c = """{"id":"123"}"""
+      val d = """{"id":123}"""
+
+      c.parseOption.get jEq d.parseOption.get shouldEqual false
     }
 
     it("should be able to handle / ignore extra / missing fields") {

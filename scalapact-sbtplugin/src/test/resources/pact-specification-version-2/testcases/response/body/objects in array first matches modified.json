@@ -1,5 +1,5 @@
 {
-  "match": false,
+  "match": true,
   "comment": "Properties match but unexpected element received",
   "expected": {
     "headers": {"Content-Type": "application/json"},

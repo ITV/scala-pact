@@ -1,6 +1,6 @@
 {
-  "match": false,
-  "comment": "Unexpected favourite colour",
+  "match": true,
+  "comment": "Unexpected favourite colour with null value",
   "expected" : {
     "method": "POST",
     "path": "/",
@@ -19,7 +19,7 @@
     "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator":{
-        "favouriteColours": ["red","blue","taupe"]
+        "favouriteColours": ["red","blue", null]
       }
     }
   }

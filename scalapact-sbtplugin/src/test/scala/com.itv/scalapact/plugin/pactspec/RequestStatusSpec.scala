@@ -80,7 +80,7 @@ class RequestStatusSpec extends FunSpec with Matchers {
       testSpecs(
         List(
           fetchSpec("/request/body/array at top level.json"),
-          fetchSpec("/request/body/array in different order.json"),
+          fetchSpec("/request/body/array in different order modified.json"),
 //          fetchSpec("/request/body/array size less than required.json"),
 //          fetchSpec("/request/body/array with at least one element matching by example.json"),
 //          fetchSpec("/request/body/array with at least one element not matching example type.json"),
@@ -108,9 +108,9 @@ class RequestStatusSpec extends FunSpec with Matchers {
           fetchSpec("/request/body/plain text that matches.json"),
           fetchSpec("/request/body/string found at key when number expected.json"),
           fetchSpec("/request/body/string found in array when number expected.json"),
-          fetchSpec("/request/body/unexpected index with not null value.json"),
-          fetchSpec("/request/body/unexpected index with null value.json"),
-          fetchSpec("/request/body/unexpected key with not null value.json")//,
+          fetchSpec("/request/body/unexpected index with not null value modified.json"),
+          fetchSpec("/request/body/unexpected index with null value modified.json"),
+          fetchSpec("/request/body/unexpected key with not null value modified.json")//,
           //fetchSpec("/request/body/unexpected key with null value.json")
         )
       )
