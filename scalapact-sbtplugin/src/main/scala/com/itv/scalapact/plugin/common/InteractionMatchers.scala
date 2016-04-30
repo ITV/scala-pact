@@ -106,25 +106,11 @@ object InteractionMatchers {
   }
 
   lazy val matchBodies: Option[Map[String, String]] => Option[String] => Option[String] => Boolean = receivedHeaders => expected => received =>
-    if(expected.isDefined && isJson(expected.get)) {
-      val predicate = (e: String, r: String) =>
-        (e.parseOption |@| r.parseOption) { (eo, ro) => eo =~ ro } match {
-          case Some(matches) => matches
-          case None => false
-        }
-
-      generalMatcher(expected, received, predicate)
-    } else {
-      receivedHeaders match {
-        case Some(hs) if hs.exists(p => p._1.toLowerCase == "content-type" && p._2.contains("xml")) =>
-          generalMatcher(expected, received, (e: String, r: String) => e == r) //TODO: How shall we test equality of XML?
-
-        case _ =>
-          generalMatcher(expected, received, (e: String, r: String) => e == r)
-      }
-    }
-
-  private val isJson: String => Boolean = str => str.parseOption.isDefined
+    if(expected.map(str => str.parseOption.isDefined).exists(_ == true))
+      generalMatcher(expected, received, (e: String, r: String) => (e.parseOption |@| r.parseOption) { _ =~ _ }.exists(_ == true))
+    else
+      //TODO: Could do XML matches the same way we do JSON matching?
+      generalMatcher(expected, received, (e: String, r: String) => e == r)
 
   private def generalMatcher[A](expected: Option[A], received: Option[A], predictate: (A, A) => Boolean): Boolean =
     (expected, received) match {
