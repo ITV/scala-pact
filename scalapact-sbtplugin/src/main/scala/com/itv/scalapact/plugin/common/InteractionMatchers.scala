@@ -7,7 +7,7 @@ import com.itv.scalapactcore.{Interaction, InteractionRequest, InteractionRespon
 import scalaz._
 import Scalaz._
 
-import JsonEquality._
+import PermissiveJsonEquality._
 
 object InteractionMatchers {
 
@@ -108,7 +108,7 @@ object InteractionMatchers {
   lazy val matchBodies: Option[Map[String, String]] => Option[String] => Option[String] => Boolean = receivedHeaders => expected => received =>
     if(expected.isDefined && isJson(expected.get)) {
       val predicate = (e: String, r: String) =>
-        (e.parseOption |@| r.parseOption) { (eo, ro) => eo jEq ro } match {
+        (e.parseOption |@| r.parseOption) { (eo, ro) => eo =~ ro } match {
           case Some(matches) => matches
           case None => false
         }

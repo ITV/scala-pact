@@ -6,18 +6,25 @@ import argonaut._
 import scalaz._
 import Scalaz._
 
-object JsonEquality {
+object PermissiveJsonEquality {
 
   implicit def toJsonEqualityWrapper(json: Json): JsonEqualityWrapper = JsonEqualityWrapper(json)
 
   case class JsonEqualityWrapper(json: Json) {
-    def jEq(to: Json): Boolean = JsonEqualityHelper.areEqual(json, to)
+    def =~(to: Json): Boolean = PermissiveJsonEqualityHelper.areEqual(json, to)
   }
 
 }
 
-object JsonEqualityHelper {
+object PermissiveJsonEqualityHelper {
 
+  /***
+    * Permissive equality means that the elements and fields defined in the 'expected'
+    * are required to be present in the 'received', however, extra elements on the right
+    * are allowed and ignored. Additionally elements are still considered equal if their
+    * fields or array elements are out of order, as long as they are present since json
+    * doesn't not guarantee element order.
+    */
   def areEqual(expected: Json, received: Json): Boolean = {
     expected match {
       case j: Json if j.isObject && received.isObject =>

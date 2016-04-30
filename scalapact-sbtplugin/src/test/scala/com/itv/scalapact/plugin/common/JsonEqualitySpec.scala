@@ -5,7 +5,7 @@ import org.scalatest.{FunSpec, Matchers}
 import argonaut._
 import Argonaut._
 
-import JsonEquality._
+import PermissiveJsonEquality._
 
 class JsonEqualitySpec extends FunSpec with Matchers {
 
@@ -24,8 +24,8 @@ class JsonEqualitySpec extends FunSpec with Matchers {
         val personB = b.parseOption
         val personC = c.parseOption
 
-        personA.get jEq personB.get shouldEqual true
-        personA.get jEq personC.get shouldEqual false
+        personA.get =~ personB.get shouldEqual true
+        personA.get =~ personC.get shouldEqual false
       }
 
     }
@@ -40,7 +40,7 @@ class JsonEqualitySpec extends FunSpec with Matchers {
         val personA = a.parseOption
         val personB = b.parseOption
 
-        personA.get jEq personB.get shouldEqual true
+        personA.get =~ personB.get shouldEqual true
       }
 
     }
@@ -50,13 +50,13 @@ class JsonEqualitySpec extends FunSpec with Matchers {
       val a = """{"name":"joe","age":23}"""
       val b = """[{"name":"joe","age":23}]"""
 
-      a.parseOption.get jEq b.parseOption.get shouldEqual false
+      a.parseOption.get =~ b.parseOption.get shouldEqual false
 
 
       val c = """{"id":"123"}"""
       val d = """{"id":123}"""
 
-      c.parseOption.get jEq d.parseOption.get shouldEqual false
+      c.parseOption.get =~ d.parseOption.get shouldEqual false
     }
 
     it("should be able to handle / ignore extra / missing fields") {
@@ -67,8 +67,8 @@ class JsonEqualitySpec extends FunSpec with Matchers {
       val personA = a.parseOption
       val personB = b.parseOption
 
-      personA.get jEq personB.get shouldEqual true
-      personB.get jEq personA.get shouldEqual false
+      personA.get =~ personB.get shouldEqual true
+      personB.get =~ personA.get shouldEqual false
     }
 
     it("should be able to handle more complex structures") {
@@ -104,7 +104,7 @@ class JsonEqualitySpec extends FunSpec with Matchers {
         """.stripMargin
 
       withClue("Equal but fields out of order") {
-        a.parseOption.get jEq b.parseOption.get shouldEqual true
+        a.parseOption.get =~ b.parseOption.get shouldEqual true
       }
 
       val c =
@@ -125,8 +125,8 @@ class JsonEqualitySpec extends FunSpec with Matchers {
         """.stripMargin
 
       withClue("Additional / missing data") {
-        a.parseOption.get jEq c.parseOption.get shouldEqual true
-        c.parseOption.get jEq a.parseOption.get shouldEqual false
+        a.parseOption.get =~ c.parseOption.get shouldEqual true
+        c.parseOption.get =~ a.parseOption.get shouldEqual false
       }
 
     }
@@ -146,7 +146,7 @@ class JsonEqualitySpec extends FunSpec with Matchers {
           |}}
         """.stripMargin
 
-      a.parseOption.get jEq b.parseOption.get shouldEqual true
+      a.parseOption.get =~ b.parseOption.get shouldEqual true
     }
 
   }
