@@ -18,7 +18,7 @@ object Build extends sbt.Build with BuildExtra {
       "org.http4s" %% "http4s-blaze-server" % "0.13.2a" withSources() withJavadoc(),
       "org.http4s" %% "http4s-dsl"          % "0.13.2a" withSources() withJavadoc(),
       "org.http4s" %% "http4s-argonaut"     % "0.13.2a" withSources() withJavadoc(),
-      "com.itv" % "scalapact-core_2.10" % "1.0.0-M4-SNAPSHOT",
+      "com.itv" % "scalapact-core_2.10" % "1.0.0-M4",
       "org.scalatest" %% "scalatest" % "2.2.6" % "test",
       "org.scalaj" %% "scalaj-http" % "2.2.1"
     ),
