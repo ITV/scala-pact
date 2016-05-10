@@ -110,7 +110,7 @@ The verifier will write out JUnit results to the `target/test-reports` directory
 #### Command Line Options
 You can also run the verifier using a combination of the following command line options. Below are the defaults:
 
-`sbt "pact-verify --host localhost --port 1234 --source pacts"`
+`sbt "pact-verify --host localhost --protocol http --port 1234 --source pacts"`
 
 *Note that files in the source folder are recursively loaded. Specifying a local source folder takes precedence over loading remote files from Pact Broker (see below)*
 
