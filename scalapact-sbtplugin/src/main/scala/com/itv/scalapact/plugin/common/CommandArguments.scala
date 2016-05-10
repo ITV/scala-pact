@@ -14,6 +14,7 @@ object CommandArguments {
   private lazy val convertToArguments: Map[String, String] => Arguments = argMap =>
     Arguments(
       host = argMap.get("--host"),
+      protocol = argMap.get("--protocol"),
       port = argMap.get("--port").flatMap(Helpers.safeStringToInt),
       localPactPath = argMap.get("--source")
     )
@@ -71,7 +72,8 @@ object Helpers {
 
 }
 
-case class Arguments(host: Option[String], port: Option[Int], localPactPath: Option[String]) {
+case class Arguments(host: Option[String], protocol: Option[String], port: Option[Int], localPactPath: Option[String]) {
   val giveHost = host.getOrElse("localhost")
+  val giveProtocol = protocol.getOrElse("http")
   val givePort = port.getOrElse(1234)
 }

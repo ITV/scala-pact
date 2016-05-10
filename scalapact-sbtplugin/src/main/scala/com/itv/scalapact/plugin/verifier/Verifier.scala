@@ -102,7 +102,7 @@ object Verifier {
     requestResult.flatMap(matchResponse(interactions))
 
   private lazy val doRequest: Arguments => Option[ProviderState] => InteractionRequest => \/[String, InteractionResponse] = arguments => maybeProviderState => interactionRequest => {
-    val baseUrl = "http://" + arguments.giveHost + ":" + arguments.givePort
+    val baseUrl = s"${arguments.giveProtocol}://" + arguments.giveHost + ":" + arguments.givePort
 
     try {
       if(maybeProviderState.isDefined) {
