@@ -3,7 +3,7 @@ package com.itv.scalapact.plugin.publish
 import com.itv.scalapact.plugin.ScalaPactPlugin
 import com.itv.scalapact.plugin.common.CommandArguments
 import com.itv.scalapact.plugin.common.LocalPactFileLoader
-import com.itv.scalapact.plugin.common.Rainbow._
+import com.itv.scalapact.plugin.common.ColourOuput._
 import sbt._
 
 object ScalaPactPublishCommand {

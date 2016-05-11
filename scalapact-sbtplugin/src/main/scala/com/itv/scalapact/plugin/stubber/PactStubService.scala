@@ -6,7 +6,7 @@ import org.http4s.dsl.{->, /, Root, _}
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.util.CaseInsensitiveString
 import org.http4s.{HttpService, Request, Response, Status}
-import com.itv.scalapact.plugin.common.Rainbow._
+import com.itv.scalapact.plugin.common.ColourOuput._
 
 import scalaz.{-\/, \/-}
 

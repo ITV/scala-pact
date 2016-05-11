@@ -7,7 +7,7 @@ import CommandArguments._
 import LocalPactFileLoader._
 import PactStubService._
 import InteractionManager._
-import com.itv.scalapact.plugin.common.Rainbow._
+import com.itv.scalapact.plugin.common.ColourOuput._
 
 object ScalaPactStubberCommand {
 

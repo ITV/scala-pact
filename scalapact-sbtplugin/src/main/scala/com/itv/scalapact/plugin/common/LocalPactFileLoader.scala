@@ -5,7 +5,7 @@ import java.io.File
 import com.itv.scalapactcore.{Pact, ScalaPactReader}
 
 import scalaz.\/-
-import com.itv.scalapact.plugin.common.Rainbow._
+import com.itv.scalapact.plugin.common.ColourOuput._
 
 object LocalPactFileLoader {
 

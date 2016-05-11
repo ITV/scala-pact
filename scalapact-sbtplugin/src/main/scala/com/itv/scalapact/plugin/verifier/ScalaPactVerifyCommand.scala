@@ -2,7 +2,7 @@ package com.itv.scalapact.plugin.verifier
 
 import com.itv.scalapact.plugin.ScalaPactPlugin
 import com.itv.scalapact.plugin.common.CommandArguments._
-import com.itv.scalapact.plugin.common.Rainbow._
+import com.itv.scalapact.plugin.common.ColourOuput._
 import sbt._
 
 import scala.language.implicitConversions

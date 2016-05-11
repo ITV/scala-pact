@@ -1,6 +1,6 @@
 package com.itv.scalapact.plugin.stubber
 
-import com.itv.scalapact.plugin.common.Rainbow._
+import com.itv.scalapact.plugin.common.ColourOuput._
 import com.itv.scalapact.plugin.common.{Arguments, ConfigAndPacts, InteractionMatchers}
 import com.itv.scalapactcore.{Interaction, InteractionRequest}
 

@@ -1,6 +1,6 @@
 package com.itv.scalapact.plugin.publish
 
-import com.itv.scalapact.plugin.common.Rainbow._
+import com.itv.scalapact.plugin.common.ColourOuput._
 import com.itv.scalapact.plugin.common.{ConfigAndPacts, Helpers, PactBrokerAddressValidation}
 import com.itv.scalapactcore.ScalaPactWriter
 

@@ -7,7 +7,7 @@ import sbt._
 
 import scala.io.Source
 import scala.language.implicitConversions
-import com.itv.scalapact.plugin.common.Rainbow._
+import com.itv.scalapact.plugin.common.ColourOuput._
 
 object ScalaPactTestCommand {
 
