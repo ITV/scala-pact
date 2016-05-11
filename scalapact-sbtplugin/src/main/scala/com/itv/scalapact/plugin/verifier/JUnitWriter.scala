@@ -14,7 +14,7 @@ object JUnitWriter {
     val dirFile = new File(dirPath)
 
     if (!dirFile.exists()) {
-      dirFile.mkdir()
+      dirFile.mkdirs()
     }
 
     val relativePath = dirPath + "/" + simplifyName(consumer) + "_" + simplifyName(provider) + ".xml"
