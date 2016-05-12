@@ -125,7 +125,7 @@ providerName := "The Name Of This Service"
 consumerNames := Seq("Consumer A", "Consumer B")
 ```
 
-*Note: The names are **keys** and all have to line up. Downstream services must publish with the same names that you use to retrieve against.*
+Note: The names are **keys** and all have to line up. Downstream services must publish with the same names that you use to retrieve against.
 
 You then run verify as normal **without** specifying a local folder i.e.:
 
