@@ -1,10 +1,9 @@
 package com.itv.scalapact.plugin.stubber
 
-import com.itv.scalapactcore.{InteractionResponse, InteractionRequest, Interaction}
+import com.itv.scalapactcore.{Interaction, InteractionRequest, InteractionResponse, MatchingRule}
 
 import scala.language.implicitConversions
-
-import org.scalatest.{Matchers, FunSpec}
+import org.scalatest.{FunSpec, Matchers}
 
 class InteractionManagerSpec extends FunSpec with Matchers {
 
@@ -190,6 +189,52 @@ class InteractionManagerSpec extends FunSpec with Matchers {
 
       val matched = interactionManager.findMatchingInteraction(requestDetails).toOption
 
+      matched.isDefined shouldEqual true
+      matched.get.response.status shouldEqual Some(200)
+    }
+
+    it("should be able to match a get request with specific custom headers") {
+      val interactionManager = new InteractionManager {}
+
+      val requestDetails2 = InteractionRequest(
+        method = "GET",
+        headers = Map(
+          "Accept" -> "application/vnd.itv.oas.variant.v1+json",
+          "X-Trace-Id" -> "7656163a-eefb-49f8-9fac-b20b33dfb51B"
+        ),
+        path = "/foo",
+        query = None,
+        body = None,
+        matchingRules = None
+      )
+
+      val interaction = Interaction(
+        providerState = None,
+        description = "",
+        request = InteractionRequest(
+          method = "GET",
+          headers = Map(
+            "Accept" -> "application/vnd.itv.oas.variant.v1+json",
+            "X-Trace-Id" -> "7656163a-eefb-49f8-9fac-b20b33dfb51b"
+          ),
+          path = "/foo",
+          query = None,
+          body = None,
+          matchingRules = Map(
+            "$.headers.X-Trace-Id" -> MatchingRule("regex", "^.{0,38}$")
+          )
+        ),
+        response = InteractionResponse(
+          status = 200,
+          headers = None,
+          body = None,
+          matchingRules = None
+        )
+      )
+
+      interactionManager.addInteraction(interaction)
+
+      val matched = interactionManager.findMatchingInteraction(requestDetails2).toOption
       matched.isDefined shouldEqual true
       matched.get.response.status shouldEqual Some(200)
     }

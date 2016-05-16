@@ -127,6 +127,24 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
       matchHeaders(Option(Map("$.headers.fish" -> MatchingRule("regex", "\\w+"))))(expected)(received) shouldEqual true
     }
 
+    it("should be able to use regex to match more realistic custom headers") {
+      val expected = Option(
+        Map(
+          "Accept" -> "application/vnd.itv.oas.variant.v1+json",
+          "X-Trace-Id" -> "7656163a-eefb-49f8-9fac-b20b33dfb51b"
+        )
+      )
+      val received = Option(
+        Map(
+          "Accept" -> "application/vnd.itv.oas.variant.v1+json",
+          "X-Trace-Id" -> "7656163a-eefb-49f8-9fac-b20b33dfb51B" // Changed to captial B
+        )
+      )
+
+      matchHeaders(Option(Map("$.headers.X-Trace-Id" -> MatchingRule("regex", "^.{0,38}$"))))(expected)(received) shouldEqual true
+      matchHeaders(Option(Map("$.headers.X-Trace-Id" -> MatchingRule("regex", "^fish"))))(expected)(received) shouldEqual false
+    }
+
     it("should be able to use regex to match some headers out of sequence") {
       val expected = Option(
         Map(
