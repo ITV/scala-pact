@@ -93,7 +93,7 @@ object ScalaPactForger {
 
   object headerRegexRule {
     def apply(key: String, regex: String): ScalaPactMatchingRules = ScalaPactMatchingRules(
-      rules = List(ScalaPactMatchingRuleRegex("$.header." + key, regex))
+      rules = List(ScalaPactMatchingRuleRegex("$.headers." + key, regex))
     )
   }
 

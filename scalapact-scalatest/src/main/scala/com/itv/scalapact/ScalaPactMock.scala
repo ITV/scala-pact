@@ -133,8 +133,8 @@ object ScalaPactMock extends LazyLogging {
   private val extractMatchRuleKey: String => String => Option[String] = prefix => key =>
     if(key.startsWith(prefix)) Option(key.substring(prefix.length)) else None
 
-  private val headerKey: String => Option[String] = key => extractMatchRuleKey("$.header.")(key)
-  private val bodyKey: String => Option[String] = key => extractMatchRuleKey("$.header.")(key)
+  private val headerKey: String => Option[String] = key => extractMatchRuleKey("$.headers.")(key)
+  private val bodyKey: String => Option[String] = key => extractMatchRuleKey("$.headers.")(key)
 
   def injectStub(wireMockServer: WireMockServer, mappingBuilder: MappingBuilder, request: ScalaPactRequest, response: ScalaPactResponse): Unit = {
 
