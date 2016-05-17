@@ -1,5 +1,7 @@
 package com.itv.scalapact
 
+import scala.language.implicitConversions
+
 import org.json4s.DefaultFormats
 import org.json4s.native.JsonParser._
 import org.json4s.native.Serialization._
@@ -237,6 +239,9 @@ case class Person(name: String, age: Int, location: String, hobbies: List[String
   * example of what that might look like.
   */
 object SimpleClient {
+
+  implicit def convertHeaders(headers: Map[String, IndexedSeq[String]]): Map[String, String] =
+    headers.map { h => (h._1, h._2.headOption.getOrElse("")) }
 
   def doGetRequest(baseUrl: String, endPoint: String, headers: Map[String, String]): SimpleResponse = {
     val request = Http(baseUrl + endPoint).headers(headers)

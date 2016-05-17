@@ -1,13 +1,12 @@
 package com.itv.scalapact.plugin.stubber
 
-import com.itv.scalapact.plugin.common.{LocalPactFileLoader, CommandArguments}
 import sbt._
 
-import CommandArguments._
-import LocalPactFileLoader._
-import PactStubService._
-import InteractionManager._
-import com.itv.scalapact.plugin.common.ColourOuput._
+import com.itv.scalapactcore.common.CommandArguments._
+import com.itv.scalapactcore.common.LocalPactFileLoader._
+import com.itv.scalapactcore.stubber.PactStubService._
+import com.itv.scalapactcore.stubber.InteractionManager._
+import com.itv.scalapactcore.common.ColourOuput._
 
 object ScalaPactStubberCommand {
 

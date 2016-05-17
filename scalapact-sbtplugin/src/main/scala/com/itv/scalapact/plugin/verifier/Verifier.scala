@@ -1,9 +1,9 @@
 package com.itv.scalapact.plugin.verifier
 
-import com.itv.scalapact.plugin.common.InteractionMatchers._
-import com.itv.scalapact.plugin.common.ColourOuput._
-import com.itv.scalapact.plugin.common.{Arguments, Helpers, LocalPactFileLoader, PactBrokerAddressValidation}
 import com.itv.scalapactcore._
+import com.itv.scalapactcore.common.InteractionMatchers._
+import com.itv.scalapactcore.common.ColourOuput._
+import com.itv.scalapactcore.common.{Arguments, Helpers, LocalPactFileLoader, PactBrokerAddressValidation}
 
 import scalaj.http.{Http, HttpResponse}
 import scalaz.Scalaz._
