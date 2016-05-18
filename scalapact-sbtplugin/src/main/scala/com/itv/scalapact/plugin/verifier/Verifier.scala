@@ -11,7 +11,7 @@ import scalaz._
 
 object Verifier {
 
-  lazy val verify: PactVerifySettings => Arguments => Unit = pactVerifySettings => arguments => {
+  lazy val verify: PactVerifySettings => Arguments => Boolean = pactVerifySettings => arguments => {
 
     val pacts: List[Pact] = if(arguments.localPactPath.isDefined) {
       println(s"Attempting to use local pact files at: '${arguments.localPactPath.get}'".white.bold)
@@ -95,7 +95,9 @@ object Verifier {
       }
     }
 
-    ()
+    val foundErrors = pactVerifyResults.flatMap(result => result.results).exists(_.isLeft)
+
+    !foundErrors
   }
 
   private lazy val attemptMatch: List[Interaction] => \/[String, InteractionResponse] => \/[String, Interaction] = interactions => requestResult =>

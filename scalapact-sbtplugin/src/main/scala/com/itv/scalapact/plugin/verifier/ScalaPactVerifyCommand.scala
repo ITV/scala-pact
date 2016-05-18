@@ -31,7 +31,9 @@ object ScalaPactVerifyCommand {
       consumerNames = Project.extract(state).get(ScalaPactPlugin.consumerNames).toList
     )
 
-    (parseArguments andThen verify(pactVerifySettings)) (args)
+    val successfullyVerified = (parseArguments andThen verify(pactVerifySettings)) (args)
+
+    if(successfullyVerified) sys.exit(0) else sys.exit(1)
 
     state
   }
