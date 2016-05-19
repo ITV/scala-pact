@@ -2,11 +2,11 @@ package com.itv.scalapactcore.stubber
 
 import com.itv.scalapactcore._
 import com.itv.scalapactcore.common.Arguments
-import org.http4s.dsl.{->, /, Root, _}
+import com.itv.scalapactcore.common.ColourOuput._
+import org.http4s.dsl._
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.util.CaseInsensitiveString
 import org.http4s.{HttpService, Request, Response, Status}
-import com.itv.scalapactcore.common.ColourOuput._
 
 import scalaz.{-\/, \/-}
 
@@ -26,19 +26,7 @@ object PactStubService {
       request.headers.get(CaseInsensitiveString("X-Pact-Admin")).exists(h => h.value == "true")
 
   private val service = HttpService {
-
-    case req @ GET -> Root / path =>
-      matchRequestWithResponse(req)
-
-    case req @ PUT -> Root / path =>
-      matchRequestWithResponse(req)
-
-    case req @ POST -> Root / path =>
-      matchRequestWithResponse(req)
-
-    case req @ DELETE -> Root / path =>
-      matchRequestWithResponse(req)
-
+    case req => matchRequestWithResponse(req)
   }
 
   private def matchRequestWithResponse(req: Request): scalaz.concurrent.Task[Response] = {
