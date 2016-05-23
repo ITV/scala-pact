@@ -38,7 +38,7 @@ object PactStubService {
           Ok(output)
 
         case m if m == "POST" || m == "PUT" =>
-          ScalaPactReader.jsonStringToPact(req.bodyAsText.runLast.unsafePerformSync.getOrElse("")) match {
+          ScalaPactReader.jsonStringToPact(req.bodyAsText.runLog.map(body => Option(body.foldLeft("")(_ + _))).unsafePerformSync.getOrElse("")) match {
             case \/-(r) =>
               InteractionManager.addInteractions(r.interactions)
 
