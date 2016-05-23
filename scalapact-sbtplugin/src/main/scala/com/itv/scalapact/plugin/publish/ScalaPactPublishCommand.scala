@@ -24,10 +24,18 @@ object ScalaPactPublishCommand {
     val pactBrokerAddress: String = Project.extract(pactTestedState).get(ScalaPactPlugin.pactBrokerAddress)
     val projectVersion: String = Project.extract(pactTestedState).get(Keys.version)
     val pactContractVersion: String = Project.extract(pactTestedState).get(ScalaPactPlugin.pactContractVersion)
+    val allowSnapshotPublish: Boolean = Project.extract(pactTestedState).get(ScalaPactPlugin.allowSnapshotPublish)
 
     val versionToPublishAs = if(pactContractVersion.isEmpty) projectVersion else pactContractVersion
 
-    (parseArguments andThen loadPactFiles("target/pacts") andThen publishToBroker(pactBrokerAddress)(versionToPublishAs)) (args)
+    if(versionToPublishAs.contains("SNAPSHOT") && !allowSnapshotPublish) {
+      println("Snapshot pact file publishing not permitted".red.bold)
+      println("Publishing of pact contracts against snapshot versions is not allowed by default.".yellow)
+      println("Pact broker does not cope well with snapshot contracts.".yellow)
+      println("To enable this feature, add \"allowSnapshotPublish := true\" to your pact.sbt file.".yellow)
+    } else {
+      (parseArguments andThen loadPactFiles("target/pacts") andThen publishToBroker(pactBrokerAddress)(versionToPublishAs)) (args)
+    }
 
     pactTestedState
   }

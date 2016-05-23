@@ -98,6 +98,10 @@ You can then use the publish command to generate and upload your pact files to p
 
 Note that your Pact files will have the same version number as the normal project version defined in your `build.sbt` file, because you versioned that breaking API change - right?
 
+By default, Scala-Pact does not allow you to publish pact files from SNAPSHOT versions of your project (but takes into account the pactContractVersion if set). This is because it can confuse pact brokers understanding of the latest contract. If you wish to enable this behaviour, add the following line to your `pact.sbt` file:
+
+`allowSnapshotPublish := true`
+
 ### pact-verify
 Once the consumer has defined the contract as CDC tests and exported them to Pact files, they'll deliver them to their provider. The provider then exercises their own API using the Pact files via a verifier.
 
