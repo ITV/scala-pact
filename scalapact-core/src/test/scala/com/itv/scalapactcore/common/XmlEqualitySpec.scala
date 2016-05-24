@@ -8,23 +8,29 @@ class XmlEqualitySpec extends FunSpec with Matchers {
 
   describe("testing the equality of xml objects") {
 
-//    it("should find equality of a simple example") {
-//
-//      val expected = <fish><type>cod</type><side/></fish>
-//      val received = <fish><type>cod</type><side/></fish>
-//
-//      expected =~ received shouldEqual true
-//
-//    }
-//
-//    it("should not find equality of a simple unequal example") {
-//
-//      val expected = <fish><type>cod</type><side/></fish>
-//      val received = <fish><type>cod</type><side>chips</side></fish>
-//
-//      expected =~ received shouldEqual false
-//
-//    }
+    it("should find equality of a simple example") {
+
+      val expected = <fish><type>cod</type><side/></fish>
+      val received = <fish><type>cod</type><side/></fish>
+
+      expected =~ received shouldEqual true
+
+    }
+
+    it("should not find equality of a simple unequal example") {
+
+      // Note, the <side> tag *is* equal since the left has less information than the right.
+      val expected = <fish><type>haddock</type><side/></fish>
+      val received = <fish><type>cod</type><side>chips</side></fish>
+
+      expected =~ received shouldEqual false
+
+      val expected2 = <fish><type>cod</type><side>chips</side></fish>
+      val received2 = <fish><type>cod</type><side/></fish>
+
+      expected2 =~ received2 shouldEqual false
+
+    }
 
     it("should find equality when the right contains the left example") {
 
@@ -32,6 +38,16 @@ class XmlEqualitySpec extends FunSpec with Matchers {
       val received = <ns:fish battered="true"><type sustainable="false" oceananic="true">cod</type><side>chips</side><sauce>ketchup</sauce></ns:fish>
 
       expected =~ received shouldEqual true
+
+    }
+
+    it("should not find equality when namespaces do not match") {
+
+      // Note, the <sid> tag *is* equal since the left has less information than the right.
+      val expected = <ns:fish><type>haddock</type><side/></ns:fish>
+      val received = <fish><type>haddock</type><side>chips</side></fish>
+
+      expected =~ received shouldEqual false
 
     }
 

@@ -10,8 +10,8 @@ object PermissiveXmlEquality {
 
   implicit def toJsonEqualityWrapper(json: Elem): XmlEqualityWrapper = XmlEqualityWrapper(json)
 
-  case class XmlEqualityWrapper(json: Elem) {
-    def =~(to: Elem): Boolean = PermissiveXmlEqualityHelper.areEqual(json, to)
+  case class XmlEqualityWrapper(xml: Elem) {
+    def =~(to: Elem): Boolean = PermissiveXmlEqualityHelper.areEqual(xml, to)
   }
 }
 
@@ -25,62 +25,11 @@ object PermissiveXmlEqualityHelper {
     * fields or array elements are out of order, as long as they are present since json
     * doesn't not guarantee element order.
     */
-  def areEqual(expected: Elem, received: Elem): Boolean = {
-
-    println("------")
-    println(expected)
-
-    //println(expected.prefix) //namespace
-    println(expected.isEmpty)
-    println(expected.isAtom)
-    //println(expected.label)
-    println(expected.child)
-    //println(expected.child.length)
-    println(expected.attributes.asAttrMap)
-
-    println(<foo>foo text</foo>.child)
-    println(<foo>foo text</foo>.child.isEmpty)
-    println(<foo/>.isAtom)
-
-//    val prefixEqual = expected.prefix == received.prefix
-//    val labelEqual = expected.label == received.label
-//    val attributesEqual = mapContainsMap(expected.attributes.asAttrMap)(received.attributes.asAttrMap)
-//    val childLengthOk = expected.child.length <= received.child.length
-//
-//    val nodeEqual = prefixEqual && labelEqual && attributesEqual && childLengthOk
-
-    // For each node:
-    // node name is the same
-    // contains all attributes
-    // has at least the same number of child nodes
-    // if no child nodes, should be equal
-
-
-
-//    expected match {
-//      case j: Json if j.isObject && received.isObject =>
-//        compareFields(expected, received, j.objectFieldsOrEmpty)
-//
-//      case j: Json if j.isArray && received.isArray =>
-//
-//        (j.array |@| received.array) { (ja, ra) =>
-//          ja.forall { jo =>
-//            ra.exists(ro => areEqual(jo, ro))
-//          }
-//        } match {
-//          case Some(matches) => matches
-//          case None => false
-//        }
-//
-//      case j: Json =>
-//        expected == received
-//    }
-
+  def areEqual(expected: Elem, received: Elem): Boolean =
     (expected.headOption |@| received.headOption) { (e, r) => compareNodes(e)(r) } match {
       case Some(bool) => bool
       case None => false
     }
-  }
 
   lazy val mapContainsMap: Map[String, String] => Map[String, String] => Boolean = e => r =>
     e.forall { ee =>
@@ -88,33 +37,17 @@ object PermissiveXmlEqualityHelper {
     }
 
   lazy val compareNodes: Node => Node => Boolean = expected => received => {
-    val prefixEqual = expected.prefix == received.prefix
-    val labelEqual = expected.label == received.label
-    val attributesEqual = mapContainsMap(expected.attributes.asAttrMap)(received.attributes.asAttrMap)
-    val childLengthOk = expected.child.length <= received.child.length
+    lazy val prefixEqual = expected.prefix == received.prefix
+    lazy val labelEqual = expected.label == received.label
+    lazy val attributesEqual = mapContainsMap(expected.attributes.asAttrMap)(received.attributes.asAttrMap)
+    lazy val childLengthOk = expected.child.length <= received.child.length
 
-    val childrenEqual =
-      if(expected.isEmpty) {
-        expected.text == received.text
-      } else {
-        println("We have kids!!")
-        false
-      }
+    lazy val childrenEqual =
+      if(expected.child.isEmpty) expected.text == received.text
+      else expected.child.forall { eN => received.child.exists(rN => compareNodes(eN)(rN)) }
 
     prefixEqual && labelEqual && attributesEqual && childLengthOk && childrenEqual
   }
 
-//  private def compareFields(expected: Json, received: Json, expectedFields: List[Json.JsonField]): Boolean = {
-//    if(!expectedFields.forall(f => received.hasField(f))) false
-//    else {
-//      expectedFields.forall { field =>
-//
-//        (expected.field(field) |@| received.field(field)){ areEqual(_, _) } match {
-//          case Some(bool) => bool
-//          case None => false
-//        }
-//      }
-//    }
-//  }
 
 }
