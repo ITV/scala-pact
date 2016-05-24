@@ -12,6 +12,7 @@ class PlainTextEqualitySpec extends FunSpec with Matchers {
       PlainTextEquality.check("fish", " fish")
       PlainTextEquality.check("fish", "fish    ")
       PlainTextEquality.check("fish", "  fish    ")
+      PlainTextEquality.check(" fish", "fish")
 
     }
 
