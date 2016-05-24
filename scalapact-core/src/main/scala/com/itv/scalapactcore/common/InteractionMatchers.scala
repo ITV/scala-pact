@@ -16,7 +16,7 @@ object InteractionMatchers {
       matchMethods(ir.request.method.orElse(Option("GET")))(received.method) &&
         matchHeaders(ir.request.matchingRules)(ir.request.headers)(received.headers) &&
         matchPaths(ir.request.path.orElse(Option("/")))(ir.request.query)(received.path)(received.query) &&
-        matchBodies(received.headers)(ir.request.body)(received.body)
+        matchBodies(ir.request.body)(received.body)
     } match {
       case Some(matching) => matching.right
       case None => ("No matching request for: " + received).left
@@ -26,7 +26,7 @@ object InteractionMatchers {
     interactions.find{ ir =>
       matchStatusCodes(ir.response.status)(received.status) &&
         matchHeaders(ir.response.matchingRules)(ir.response.headers)(received.headers) &&
-        matchBodies(received.headers)(ir.response.body)(received.body)
+        matchBodies(ir.response.body)(received.body)
     } match {
       case Some(matching) => matching.right
       case None => ("No matching response for: " + received).left
@@ -106,7 +106,7 @@ object InteractionMatchers {
     })
   }
 
-  lazy val matchBodies: Option[Map[String, String]] => Option[String] => Option[String] => Boolean = receivedHeaders => expected => received =>
+  lazy val matchBodies: Option[String] => Option[String] => Boolean = expected => received =>
     if(expected.exists(str => str.parseOption.isDefined)) {
       generalMatcher(expected, received, (e: String, r: String) => (e.parseOption |@| r.parseOption) { _ =~ _ }.contains(true))
 //    } else if(false) { //Check for XML?
@@ -116,12 +116,12 @@ object InteractionMatchers {
       generalMatcher(expected, received, (e: String, r: String) => PlainTextEquality.check(e, r))
     }
 
-  private def generalMatcher[A](expected: Option[A], received: Option[A], predictate: (A, A) => Boolean): Boolean =
+  private def generalMatcher[A](expected: Option[A], received: Option[A], predicate: (A, A) => Boolean): Boolean =
     (expected, received) match {
       case (None, None) => true
       case (None, Some(r)) => true
       case (Some(e), None) => false
-      case (Some(e), Some(r)) => predictate(e, r)
+      case (Some(e), Some(r)) => predicate(e, r)
     }
 
   private lazy val constructPath: Option[String] => Option[String] => Option[String] = path => query => Option {

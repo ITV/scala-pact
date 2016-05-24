@@ -186,27 +186,27 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
 
       val expected = "hello there!"
 
-      matchBodies(Map.empty[String, String])(expected)(expected) shouldEqual true
-      matchBodies(Map.empty[String, String])(expected)("Yo ho!") shouldEqual false
+      matchBodies(expected)(expected) shouldEqual true
+      matchBodies(expected)("Yo ho!") shouldEqual false
 
     }
 
     it("should be able to handle missing bodies and no expectation of bodies") {
 
       withClue("None expected, none received") {
-        matchBodies(Map.empty[String, String])(None)(None) shouldEqual true
+        matchBodies(None)(None) shouldEqual true
       }
 
       withClue("Some expected, none received") {
-        matchBodies(Map.empty[String, String])(Some("hello"))(None) shouldEqual false
+        matchBodies(Some("hello"))(None) shouldEqual false
       }
 
       // Forgiving about what we receive
       withClue("None expected, some received") {
-        matchBodies(Map.empty[String, String])(None)(Some("hello")) shouldEqual true
+        matchBodies(None)(Some("hello")) shouldEqual true
       }
       withClue("Some expected, some received") {
-        matchBodies(Map.empty[String, String])(Some("hello"))(Some("hello")) shouldEqual true
+        matchBodies(Some("hello"))(Some("hello")) shouldEqual true
       }
 
     }
@@ -296,15 +296,15 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         """.stripMargin
 
       withClue("Same json no hal") {
-        matchBodies(Option(Map("Content-Type" -> "application/json")))(expected)(expected) shouldEqual true
+        matchBodies(expected)(expected) shouldEqual true
       }
 
       withClue("Same json + hal") {
-        matchBodies(Option(Map("Content-Type" -> "application/json+hal")))(expected)(expected) shouldEqual true
+        matchBodies(expected)(expected) shouldEqual true
       }
 
       withClue("Expected compared to received") {
-        matchBodies(Option(Map("Content-Type" -> "application/json")))(expected)(received) shouldEqual true
+        matchBodies(expected)(received) shouldEqual true
       }
 
       withClue("Expected compared to a received object with the fields in a different order") {
