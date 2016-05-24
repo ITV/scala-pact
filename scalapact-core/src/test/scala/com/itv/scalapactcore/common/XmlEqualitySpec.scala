@@ -28,8 +28,8 @@ class XmlEqualitySpec extends FunSpec with Matchers {
 
     it("should find equality when the right contains the left example") {
 
-      val expected = <fish battered="true"><type sustainable="false">cod</type><side>chips</side></fish>
-      val received = <fish battered="true"><type sustainable="false" oceananic="true">cod</type><side>chips</side><sauce>ketchup</sauce></fish>
+      val expected = <ns:fish battered="true"><type sustainable="false">cod</type><side>chips</side></ns:fish>
+      val received = <ns:fish battered="true"><type sustainable="false" oceananic="true">cod</type><side>chips</side><sauce>ketchup</sauce></ns:fish>
 
       expected =~ received shouldEqual true
 

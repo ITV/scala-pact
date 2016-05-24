@@ -1,7 +1,10 @@
 package com.itv.scalapactcore.common
 
 import scala.language.implicitConversions
-import scala.xml.Elem
+import scala.xml.{Elem, Node}
+
+import scalaz._
+import Scalaz._
 
 object PermissiveXmlEquality {
 
@@ -27,17 +30,24 @@ object PermissiveXmlEqualityHelper {
     println("------")
     println(expected)
 
-    println(expected.namespace)
+    //println(expected.prefix) //namespace
     println(expected.isEmpty)
     println(expected.isAtom)
-    println(expected.label)
+    //println(expected.label)
     println(expected.child)
-    println(expected.child.length)
+    //println(expected.child.length)
     println(expected.attributes.asAttrMap)
 
     println(<foo>foo text</foo>.child)
     println(<foo>foo text</foo>.child.isEmpty)
     println(<foo/>.isAtom)
+
+//    val prefixEqual = expected.prefix == received.prefix
+//    val labelEqual = expected.label == received.label
+//    val attributesEqual = mapContainsMap(expected.attributes.asAttrMap)(received.attributes.asAttrMap)
+//    val childLengthOk = expected.child.length <= received.child.length
+//
+//    val nodeEqual = prefixEqual && labelEqual && attributesEqual && childLengthOk
 
     // For each node:
     // node name is the same
@@ -65,13 +75,34 @@ object PermissiveXmlEqualityHelper {
 //      case j: Json =>
 //        expected == received
 //    }
-    expected == received
+
+    (expected.headOption |@| received.headOption) { (e, r) => compareNodes(e)(r) } match {
+      case Some(bool) => bool
+      case None => false
+    }
   }
 
   lazy val mapContainsMap: Map[String, String] => Map[String, String] => Boolean = e => r =>
     e.forall { ee =>
       r.exists(rr => rr._1 == ee._1 && rr._2 == ee._2)
     }
+
+  lazy val compareNodes: Node => Node => Boolean = expected => received => {
+    val prefixEqual = expected.prefix == received.prefix
+    val labelEqual = expected.label == received.label
+    val attributesEqual = mapContainsMap(expected.attributes.asAttrMap)(received.attributes.asAttrMap)
+    val childLengthOk = expected.child.length <= received.child.length
+
+    val childrenEqual =
+      if(expected.isEmpty) {
+        expected.text == received.text
+      } else {
+        println("We have kids!!")
+        false
+      }
+
+    prefixEqual && labelEqual && attributesEqual && childLengthOk && childrenEqual
+  }
 
 //  private def compareFields(expected: Json, received: Json, expectedFields: List[Json.JsonField]): Boolean = {
 //    if(!expectedFields.forall(f => received.hasField(f))) false
