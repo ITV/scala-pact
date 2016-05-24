@@ -23,6 +23,30 @@ object PermissiveXmlEqualityHelper {
     * doesn't not guarantee element order.
     */
   def areEqual(expected: Elem, received: Elem): Boolean = {
+
+    println("------")
+    println(expected)
+
+    println(expected.namespace)
+    println(expected.isEmpty)
+    println(expected.isAtom)
+    println(expected.label)
+    println(expected.child)
+    println(expected.child.length)
+    println(expected.attributes.asAttrMap)
+
+    println(<foo>foo text</foo>.child)
+    println(<foo>foo text</foo>.child.isEmpty)
+    println(<foo/>.isAtom)
+
+    // For each node:
+    // node name is the same
+    // contains all attributes
+    // has at least the same number of child nodes
+    // if no child nodes, should be equal
+
+
+
 //    expected match {
 //      case j: Json if j.isObject && received.isObject =>
 //        compareFields(expected, received, j.objectFieldsOrEmpty)
@@ -41,8 +65,13 @@ object PermissiveXmlEqualityHelper {
 //      case j: Json =>
 //        expected == received
 //    }
-    true
+    expected == received
   }
+
+  lazy val mapContainsMap: Map[String, String] => Map[String, String] => Boolean = e => r =>
+    e.forall { ee =>
+      r.exists(rr => rr._1 == ee._1 && rr._2 == ee._2)
+    }
 
 //  private def compareFields(expected: Json, received: Json, expectedFields: List[Json.JsonField]): Boolean = {
 //    if(!expectedFields.forall(f => received.hasField(f))) false
