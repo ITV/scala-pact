@@ -108,7 +108,7 @@ object InteractionMatchers {
 
   lazy val matchBodies: Option[String] => Option[String] => Boolean = expected => received =>
     if(expected.exists(str => str.parseOption.isDefined)) {
-      generalMatcher(expected, received, (e: String, r: String) => (e.parseOption |@| r.parseOption) { _ =~ _ }.contains(true))
+      generalMatcher(expected, received, (e: String, r: String) => (e.parseOption |@| r.parseOption) { _ =~ _ }.exists(_ == true)) // Use exists instead of contains for backwards compatibility with 2.10
 //    } else if(false) { //Check for XML?
 //      //TODO: Could do XML matches the same way we do JSON matching?
 //      generalMatcher(expected, received, (e: String, r: String) => PlainTextEquality.check(e, r))
