@@ -300,3 +300,6 @@ The Pact integration test library itself depends on a range of Scala/Java librar
 
 ### Scalaj-Http
 [Scalaj-Http](https://github.com/scalaj/scalaj-http) is used for quick synchronous HTTP calls.
+
+### Scalaz
+[Scalaz](https://github.com/scalaz/scalaz) is the glue that holds it all together.
