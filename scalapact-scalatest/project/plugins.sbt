@@ -1,3 +1,3 @@
-addSbtPlugin("com.itv.plugins" % "scalapact-plugin" % "1.0.0-M10")
+addSbtPlugin("com.itv.plugins" % "scalapact-plugin" % "1.0.0-M11-SNAPSHOT")
 
 resolvers += "Artifactory" at "https://itvrepos.artifactoryonline.com/itvrepos/oasvc-ivy/"
