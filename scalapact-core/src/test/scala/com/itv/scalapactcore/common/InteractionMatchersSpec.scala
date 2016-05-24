@@ -237,64 +237,6 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
           |}
         """.stripMargin
 
-      val received2 =
-        """
-          |{
-          |  "id":1234,
-          |  "hobbies": [
-          |    "skiing",
-          |    "fishing",
-          |    "golf"
-          |  ],
-          |  "name":"joe"
-          |}
-        """.stripMargin
-
-      val received3 =
-        """
-          |{
-          |  "id":1234,
-          |  "hobbies": [
-          |    "fishing",
-          |    "skiing",
-          |    "golf"
-          |  ],
-          |  "name":"joe"
-          |}
-        """.stripMargin
-
-      val expected2 =
-        """
-          |{
-          |  "id":1234,
-          |  "hobbies": [
-          |   {
-          |     "type":"fish"
-          |   },
-          |   {
-          |     "type":"mammal"
-          |   }
-          |  ],
-          |  "name":"joe"
-          |}
-        """.stripMargin
-
-      val received4 =
-        """
-          |{
-          |  "id":1234,
-          |  "hobbies": [
-          |   {
-          |     "type":"mammal"
-          |   },
-          |   {
-          |     "type":"fish"
-          |   }
-          |  ],
-          |  "name":"joe"
-          |}
-        """.stripMargin
-
       withClue("Same json no hal") {
         matchBodies(expected)(expected) shouldEqual true
       }
@@ -307,16 +249,84 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         matchBodies(expected)(received) shouldEqual true
       }
 
-      withClue("Expected compared to a received object with the fields in a different order") {
-        //matchBodies(Option(Map("Content-Type" -> "application/json")))(expected)(received2) shouldEqual true
+    }
+
+    it("should be able to match xml bodies") {
+
+      val expected1 =
+        <fish-supper>
+          <fish>cod</fish>
+          <chips>obviously</chips>
+          <sauce>ketchup</sauce>
+        </fish-supper>
+
+      val received1 =
+        <fish-supper>
+          <fish>cod</fish>
+          <chips>obviously</chips>
+          <sauce>ketchup</sauce>
+        </fish-supper>
+
+      withClue("Same xml") {
+        matchBodies(expected1.toString())(received1.toString()) shouldEqual true
       }
 
-      withClue("Expected compared to a received object with the array in a different order") {
-        //matchBodies(Option(Map("Content-Type" -> "application/json")))(expected)(received3) shouldEqual false
+      val expected2 =
+        <fish-supper>
+          <fish>cod</fish>
+          <chips>obviously</chips>
+          <sauce>ketchup</sauce>
+        </fish-supper>
+
+      val received2 =
+        <fish-supper>
+          <fish>cod</fish>
+          <chips>not too many...</chips>
+          <sauce>ketchup</sauce>
+        </fish-supper>
+
+      withClue("Different xml") {
+        matchBodies(expected2.toString())(received2.toString()) shouldEqual false
       }
 
-      withClue("Expected compared to a received object with the object array in a different order") {
-        //matchBodies(Option(Map("Content-Type" -> "application/json")))(expected2)(received4) shouldEqual false
+      val expected3 =
+        <fish-supper>
+          <fish sustainable="true">cod</fish>
+          <chips>obviously</chips>
+          <sauce>ketchup</sauce>
+        </fish-supper>
+
+      val received3 =
+        <fish-supper>
+          <fish sustainable="true" oceanic="true">cod</fish>
+          <chips>obviously</chips>
+          <sauce>ketchup</sauce>
+          <pickle>beetroot</pickle>
+          <gravy/>
+        </fish-supper>
+
+      withClue("Received xml with additional fields and attributes") {
+        matchBodies(expected3.toString())(received3.toString()) shouldEqual true
+      }
+
+      val expected4 =
+        <fish-supper>
+          <fish sustainable="true" oceanic="true">cod</fish>
+          <chips>obviously</chips>
+          <sauce>ketchup</sauce>
+          <pickle>beetroot</pickle>
+          <gravy/>
+        </fish-supper>
+
+      val received4 =
+        <fish-supper>
+          <fish sustainable="true">cod</fish>
+          <chips>obviously</chips>
+          <sauce>ketchup</sauce>
+        </fish-supper>
+
+      withClue("Received xml with missing fields and attributes") {
+        matchBodies(expected4.toString())(received4.toString()) shouldEqual false
       }
 
     }

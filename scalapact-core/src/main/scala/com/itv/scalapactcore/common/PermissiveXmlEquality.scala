@@ -8,7 +8,7 @@ import Scalaz._
 
 object PermissiveXmlEquality {
 
-  implicit def toJsonEqualityWrapper(json: Elem): XmlEqualityWrapper = XmlEqualityWrapper(json)
+  implicit def toXmlEqualityWrapper(json: Elem): XmlEqualityWrapper = XmlEqualityWrapper(json)
 
   case class XmlEqualityWrapper(xml: Elem) {
     def =~(to: Elem): Boolean = PermissiveXmlEqualityHelper.areEqual(xml, to)

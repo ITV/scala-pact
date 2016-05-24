@@ -7,7 +7,10 @@ import com.itv.scalapactcore.{Interaction, InteractionRequest, InteractionRespon
 import scalaz._
 import Scalaz._
 
+import scala.xml._
+
 import PermissiveJsonEquality._
+import PermissiveXmlEquality._
 
 object InteractionMatchers {
 
@@ -107,13 +110,25 @@ object InteractionMatchers {
   }
 
   lazy val matchBodies: Option[String] => Option[String] => Boolean = expected => received =>
-    if(expected.exists(str => str.parseOption.isDefined)) {
-      generalMatcher(expected, received, (e: String, r: String) => (e.parseOption |@| r.parseOption) { _ =~ _ }.exists(_ == true)) // Use exists instead of contains for backwards compatibility with 2.10
-//    } else if(false) { //Check for XML?
-//      //TODO: Could do XML matches the same way we do JSON matching?
-//      generalMatcher(expected, received, (e: String, r: String) => PlainTextEquality.check(e, r))
-    } else {
-      generalMatcher(expected, received, (e: String, r: String) => PlainTextEquality.check(e, r))
+    expected match {
+      case Some(str) if stringIsJson(str) =>
+        generalMatcher(expected, received, (e: String, r: String) => (e.parseOption |@| r.parseOption) { _ =~ _ }.exists(_ == true)) // Use exists instead of contains for backwards compatibility with 2.10
+
+      case Some(str) if stringIsXml(str) =>
+        generalMatcher(expected, received, (e: String, r: String) => (safeStringToXml(e) |@| safeStringToXml(r)) { _ =~ _ }.exists(_ == true)) // Use exists instead of contains for backwards compatibility with 2.10
+
+      case _ =>
+        generalMatcher(expected, received, (e: String, r: String) => PlainTextEquality.check(e, r))
+    }
+
+  lazy val stringIsJson: String => Boolean = str => str.parseOption.isDefined
+  lazy val stringIsXml: String => Boolean = str => safeStringToXml(str).isDefined
+
+  lazy val safeStringToXml: String => Option[Elem] = str =>
+    try {
+      Option(XML.loadString(str))
+    } catch {
+      case e: Throwable => None
     }
 
   private def generalMatcher[A](expected: Option[A], received: Option[A], predicate: (A, A) => Boolean): Boolean =
