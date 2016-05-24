@@ -64,7 +64,9 @@ object Verifier {
 
           val maybeProviderState = interaction.providerState.flatMap(p => pactVerifySettings.providerStates.find(j => j.key == p))
 
-          (doRequest(arguments)(maybeProviderState) andThen attemptMatch(List(interaction)))(interaction.request)
+          val matchResult = (doRequest(arguments)(maybeProviderState) andThen attemptMatch(List(interaction)))(interaction.request)
+
+          matchResult.leftMap(m => s"No matching response for: '${interaction.description}', message:\n" + m)
         }
       )
     }
