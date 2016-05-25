@@ -19,10 +19,8 @@ Add the dependency to your `build.sbt` file like this:
 
 ```
 libraryDependencies ++= Seq(
-  "com.itv" %% "scalapact-scalatest" % "1.0.0-M8" % "test"
+  "com.itv" %% "scalapact-scalatest" % "1.0.0" % "test"
 )
-
-resolvers += "Artifactory" at "https://itvrepos.artifactoryonline.com/itvrepos/oasvc-ivy/"
 
 ```
 
@@ -30,10 +28,7 @@ resolvers += "Artifactory" at "https://itvrepos.artifactoryonline.com/itvrepos/o
 Add the plugin to your `project/plugins.sbt` file like this:
 
 ```
-addSbtPlugin("com.itv.plugins" % "scalapact-plugin" % "1.0.0-M8")
-
-resolvers += "Artifactory" at "https://itvrepos.artifactoryonline.com/itvrepos/oasvc-ivy/"
-
+addSbtPlugin("com.itv.plugins" % "scalapact-plugin" % "1.0.0")
 
 ```
 
