@@ -9,6 +9,11 @@ import scalaj.http.{Http, HttpResponse}
 import scalaz.Scalaz._
 import scalaz._
 
+import argonaut._
+import Argonaut._
+
+import PactImplicits._
+
 object Verifier {
 
   lazy val verify: PactVerifySettings => Arguments => Boolean = pactVerifySettings => arguments => {
@@ -57,6 +62,16 @@ object Verifier {
 
     val startTime = System.currentTimeMillis().toDouble
 
+
+    val errorMessage: Interaction => String => String = interaction => message =>
+      s"""No matching response for: '${interaction.description}'
+         |Expected:
+         |${interaction.response.asJson.pretty(PrettyParams.spaces2.copy(dropNullKeys = true))}
+         |Actual:
+         |$message
+         |---
+       """.stripMargin
+
     val pactVerifyResults = pacts.map { pact =>
       PactVerifyResult(
         pact = pact,
@@ -66,7 +81,8 @@ object Verifier {
 
           val matchResult = (doRequest(arguments)(maybeProviderState) andThen attemptMatch(List(interaction)))(interaction.request)
 
-          matchResult.leftMap(m => s"No matching response for: '${interaction.description}', message:\n" + m)
+
+          matchResult.leftMap(m => errorMessage(interaction)(m))
         }
       )
     }
