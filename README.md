@@ -14,8 +14,6 @@ Of particular note is [Beth Skurrie](https://github.com/bethesque) - a lot of th
 
 ## Setup Guide
 
-**PLEASE** Do not attempt install via SBT yet, awaiting sonatype approval.
-
 ### ScalaTest Library
 Add the dependency to your `build.sbt` file like this:
 
