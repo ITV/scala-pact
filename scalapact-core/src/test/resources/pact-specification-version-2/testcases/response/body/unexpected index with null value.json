@@ -1,5 +1,5 @@
 {
-  "match": true,
+  "match": false,
   "comment": "Unexpected favourite colour with null value",
   "expected" : {
     "headers": {"Content-Type": "application/json"},
