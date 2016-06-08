@@ -8,7 +8,7 @@ import org.scalatest.{FunSpec, Matchers}
 import scalaz.{-\/, \/-}
 
 
-class RequestStatusSpec extends FunSpec with Matchers {
+class RequestV2Spec extends FunSpec with Matchers {
 
   private val fetchSpec: String => RequestSpec = path =>
     PactSpecLoader.deserializeRequestSpec(PactSpecLoader.fromResource(path)).get
@@ -80,7 +80,7 @@ class RequestStatusSpec extends FunSpec with Matchers {
       testSpecs(
         List(
           fetchSpec("/request/body/array at top level.json"),
-          fetchSpec("/request/body/array in different order modified.json"),
+          fetchSpec("/request/body/array in different order.json"),
 //          fetchSpec("/request/body/array size less than required.json"),
 //          fetchSpec("/request/body/array with at least one element matching by example.json"),
 //          fetchSpec("/request/body/array with at least one element not matching example type.json"),

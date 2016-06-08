@@ -8,7 +8,7 @@ import org.scalatest.{FunSpec, Matchers}
 import scalaz.{-\/, \/-}
 
 
-class ResponseStatusSpec extends FunSpec with Matchers {
+class ResponseV2Spec extends FunSpec with Matchers {
 
   private val fetchSpec: String => ResponseSpec = path =>
     PactSpecLoader.deserializeResponseSpec(PactSpecLoader.fromResource(path)).get
