@@ -23,11 +23,11 @@ object Verifier {
       LocalPactFileLoader.loadPactFiles("pacts")(arguments).pacts
     } else {
 
-      pactVerifySettings.consumerNames.map { consumer =>
+      val latestPacts : List[Pact] = pactVerifySettings.consumerNames.map { consumer =>
         val details = for {
+          consumerName <- Helpers.urlEncode(consumer)
           validatedAddress <- PactBrokerAddressValidation.checkPactBrokerAddress(pactVerifySettings.pactBrokerAddress)
           providerName <- Helpers.urlEncode(pactVerifySettings.providerName)
-          consumerName <- Helpers.urlEncode(consumer)
         } yield (validatedAddress, providerName, consumerName)
 
         details match {
@@ -37,39 +37,47 @@ object Verifier {
 
           case \/-((b, p, c)) =>
             val address = b + "/pacts/provider/" + p + "/consumer/" + c + "/latest"
-            println(s"Attempting to fetch pact from pact broker at: $address".white.bold)
-
-            Http(address).header("Accept", "application/json").asString match {
-              case r: HttpResponse[String] if r.is2xx =>
-                val pact = ScalaPactReader.jsonStringToPact(r.body).toOption
-
-                if(pact.isEmpty) {
-                  println("Could not convert good response to Pact:\n" + r.body)
-                  pact
-                } else pact
-
-              case _ =>
-                println(s"Failed to load consumer pact from: $address".red)
-                None
-            }
+            readPact(address)
         }
       }.collect {
         case Some(s) => s
       }
+
+      val versionedPacts : List[Pact] = pactVerifySettings.versionedConsumerNames.map { consumer =>
+        val (consumerName, consumerVersion) = consumer
+        val details = for {
+          consumerName <- Helpers.urlEncode(consumerName)
+          validatedAddress <- PactBrokerAddressValidation.checkPactBrokerAddress(pactVerifySettings.pactBrokerAddress)
+          providerName <- Helpers.urlEncode(pactVerifySettings.providerName)
+        } yield (validatedAddress, providerName, consumerName, consumerVersion)
+
+        details match {
+          case -\/(l) =>
+            println(l.red)
+            None
+
+          case \/-((b, p, c, v)) =>
+            val address = b + "/pacts/provider/" + p + "/consumer/" + c + "/version/" + v
+            readPact(address)
+        }
+      }.collect {
+        case Some(s) => s
+      }
+
+      latestPacts ++ versionedPacts
     }
 
     println(s"Verifying against '${arguments.giveHost}', port '${arguments.givePort}'".white.bold)
 
     val startTime = System.currentTimeMillis().toDouble
 
-
     val errorMessage: Interaction => String => String = interaction => message =>
       s"""No matching response for: '${interaction.description}'
-         |Expected:
-         |${interaction.response.asJson.pretty(PrettyParams.spaces2.copy(dropNullKeys = true))}
-         |Actual:
-         |$message
-         |---
+          |Expected:
+          |${interaction.response.asJson.pretty(PrettyParams.spaces2.copy(dropNullKeys = true))}
+          |Actual:
+          |$message
+          |---
        """.stripMargin
 
     val pactVerifyResults = pacts.map { pact =>
@@ -174,6 +182,24 @@ object Verifier {
     } catch {
       case e: Throwable =>
         e.getMessage.left
+    }
+  }
+
+  def readPact(address : String) = {
+    println(s"Attempting to fetch pact from pact broker at: $address".white.bold)
+
+    Http(address).header("Accept", "application/json").asString match {
+      case r: HttpResponse[String] if r.is2xx =>
+        val pact = ScalaPactReader.jsonStringToPact(r.body).toOption
+
+        if(pact.isEmpty) {
+          println("Could not convert good response to Pact:\n" + r.body)
+          pact
+        } else pact
+
+      case _ =>
+        println(s"Failed to load consumer pact from: $address".red)
+        None
     }
   }
 
