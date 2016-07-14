@@ -23,33 +23,16 @@ object Verifier {
       LocalPactFileLoader.loadPactFiles("pacts")(arguments).pacts
     } else {
 
-      val latestPacts : List[Pact] = pactVerifySettings.consumerNames.map { consumer =>
+      val versionConsumers =
+        pactVerifySettings.consumerNames.map(c => VersionedConsumer(c, "/latest")) ++
+          pactVerifySettings.versionedConsumerNames.map(vc => vc.copy(version = "/version/" + vc.version))
+
+      val latestPacts : List[Pact] = versionConsumers.map { consumer =>
         val details = for {
-          consumerName <- Helpers.urlEncode(consumer)
+          consumerName <- Helpers.urlEncode(consumer.name)
           validatedAddress <- PactBrokerAddressValidation.checkPactBrokerAddress(pactVerifySettings.pactBrokerAddress)
           providerName <- Helpers.urlEncode(pactVerifySettings.providerName)
-        } yield (validatedAddress, providerName, consumerName)
-
-        details match {
-          case -\/(l) =>
-            println(l.red)
-            None
-
-          case \/-((b, p, c)) =>
-            val address = b + "/pacts/provider/" + p + "/consumer/" + c + "/latest"
-            readPact(address)
-        }
-      }.collect {
-        case Some(s) => s
-      }
-
-      val versionedPacts : List[Pact] = pactVerifySettings.versionedConsumerNames.map { consumer =>
-        val (consumerName, consumerVersion) = consumer
-        val details = for {
-          consumerName <- Helpers.urlEncode(consumerName)
-          validatedAddress <- PactBrokerAddressValidation.checkPactBrokerAddress(pactVerifySettings.pactBrokerAddress)
-          providerName <- Helpers.urlEncode(pactVerifySettings.providerName)
-        } yield (validatedAddress, providerName, consumerName, consumerVersion)
+        } yield (validatedAddress, providerName, consumerName, consumer.version)
 
         details match {
           case -\/(l) =>
@@ -57,14 +40,13 @@ object Verifier {
             None
 
           case \/-((b, p, c, v)) =>
-            val address = b + "/pacts/provider/" + p + "/consumer/" + c + "/version/" + v
-            readPact(address)
+            fetchAndReadPact(b + "/pacts/provider/" + p + "/consumer/" + c + v)
         }
       }.collect {
         case Some(s) => s
       }
 
-      latestPacts ++ versionedPacts
+      latestPacts
     }
 
     println(s"Verifying against '${arguments.giveHost}', port '${arguments.givePort}'".white.bold)
@@ -185,7 +167,7 @@ object Verifier {
     }
   }
 
-  def readPact(address : String) = {
+  def fetchAndReadPact(address: String): Option[Pact] = {
     println(s"Attempting to fetch pact from pact broker at: $address".white.bold)
 
     Http(address).header("Accept", "application/json").asString match {

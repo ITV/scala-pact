@@ -29,7 +29,9 @@ object ScalaPactVerifyCommand {
       projectVersion = Project.extract(state).get(Keys.version),
       providerName = Project.extract(state).get(ScalaPactPlugin.providerName),
       consumerNames = Project.extract(state).get(ScalaPactPlugin.consumerNames).toList,
-      versionedConsumerNames = Project.extract(state).get(ScalaPactPlugin.versionedConsumerNames).toList
+      versionedConsumerNames =
+        Project.extract(state).get(ScalaPactPlugin.versionedConsumerNames).toList
+        .map(t => VersionedConsumer(t._1, t._2))
     )
 
     val successfullyVerified = (parseArguments andThen verify(pactVerifySettings)) (args)
@@ -41,4 +43,5 @@ object ScalaPactVerifyCommand {
 }
 
 case class ProviderState(key: String, f: String => Boolean)
-case class PactVerifySettings(providerStates: List[ProviderState], pactBrokerAddress: String, projectVersion: String, providerName: String, consumerNames: List[String], versionedConsumerNames: List[(String,String)])
+case class VersionedConsumer(name: String, version: String)
+case class PactVerifySettings(providerStates: List[ProviderState], pactBrokerAddress: String, projectVersion: String, providerName: String, consumerNames: List[String], versionedConsumerNames: List[VersionedConsumer])
