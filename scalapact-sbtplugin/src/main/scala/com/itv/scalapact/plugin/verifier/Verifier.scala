@@ -142,10 +142,11 @@ object Verifier {
         case Some((Some(method), Some(path), params, _, _, _)) =>
 
           httpResponseToInteractionResponse {
+            //TODO: Rewrite this stuff to be less iffy...
             val basicRequest = Http(baseUrl + path + params.map(s => "?" + s).getOrElse(""))
 
             val withData =
-              if (interactionRequest.body.isDefined) basicRequest.postData(interactionRequest.body.get)
+              if (interactionRequest.body.isDefined && interactionRequest.body.exists(!_.isEmpty)) basicRequest.postData(interactionRequest.body.get)
               else basicRequest
 
             val withHeaders =
