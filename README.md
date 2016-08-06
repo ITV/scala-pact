@@ -249,6 +249,22 @@ You could then build on that with integration tests:
 1. Missing end points
 1. Badly formed responses
 
+## Help!
+Depending on the kind of help or support you need, there are a few places you can try:
+
+### I have a Scala-Pact feature request or bug to report
+Have a look around our [issues page](https://github.com/ITV/scala-pact/issues) to see if anyone else has raised a similar request. If not, please raise a new issue and we'll try and help.
+
+If you're a developer and you're feeling brave and generous, feel free to submit a pull request and we'll always do our best to accept it. For more information, please read our [contributing](https://github.com/ITV/scala-pact/blob/master/CONTRIBUTING.md) file.
+
+### I'm looking for general information on Pact or CDC
+Good places to start are the official [pact.io](http://www.pact.io) website or this article on [CDC](http://martinfowler.com/articles/consumerDrivenContracts.html).
+
+### I have a question about using Scala-Pact or Pact
+Please direct questions to the official [Pact support google group](https://groups.google.com/forum/#!forum/pact-support). As well as queries, we would love to hear feedback about your experiences with Scala-Pact and Pact generally.
+
+If you're a developer looking to contribute or build a new Pact implementation there's a [group](https://groups.google.com/forum/#!forum/pact-dev) for that too!
+
 ## Pact Specification Compliance Level
 Currently ScalaPact is not 100% compliant with the official Pact specification. We plan to be but the library is still under active development. The roadmap to Pact compliance will be something like:
 
@@ -262,19 +278,19 @@ Our intention is to eventually meet version 2 of the pact specification.
 
 Following the Pact interpretation of CDC, the process goes something like this:
 
-1. Write a piece of client code in a service consumer project that knows the details of how to connect to a provider.
-1. Write a real integration test for that client code that hits a mock, but also as a side effect emits a JSON file describing the relationship. This JSON file is your Pact or Contract file. Note that in Pact (not Pacto) it is owned by the consumer.
+1. Write a piece of client code in a project that consumes a service and knows the details of how to connect to that provider.
+1. Write a real integration test for that client code that hits a mock, but also as a side effect emits a JSON file describing the relationship. This JSON file is your Pact contract file. Note that in Pact (not Pacto) it is owned by the consumer.
 1. During development of the consumer, the Pact file can be used to run a lightweight stub service that mimics the expected behavior of the provider. *Note: The provider need not even exist yet and the Pact files can form part of the providers design specification.*
 1. Give the generated Pact file to the team that build the provider, an upstream service you depend on. This Pact file tells the provider team both how you expect their API to behave and *which parts of their API are delivering value to you the consumer*.
 1. The provider then verifies the Pact by running the requests and responses described in the Pact file against their system.
 
-Most of the original tools for CDC testing have come out of the Ruby community with a few other implementations for other languages here and there.
+Most of the original tools for CDC testing have come out of the Ruby community but a full list of officially supported languages can be found on the [pact.io](http://docs.pact.io/) website.
 
 The crucial point to appreciate is that the client code is written in your native language using your normal test framework, and therefore, your Pact integrations tests must also be written in your native language too!
 
 The other uses of the Pact files, verification and stubbing are largely standalone processes that are language agnostic and so it's quite feasible to use the Ruby implementations if you prefer.
 
-There is an implementation of the Pact integration test suite that is theoretically compatible with Scala and [Specs2](https://etorreborre.github.io/specs2/) called [Pact-JVM](https://github.com/DiUS/pact-jvm). Pact-JVM also supports other JVM languages like Java and Groovy. In practice we had some difficulties with the Scala Pact-JVM implementation for our particular use case, hence the creation of this project.
+There is another implementation of the Pact integration test suite that is compatible with Scala and [Specs2](https://etorreborre.github.io/specs2/) called [Pact-JVM](https://github.com/DiUS/pact-jvm). Pact-JVM also supports other JVM languages like Java and Groovy. Scala-Pact has the same aims and adheres to the same standards but attempts to deliver a more Scala specific experience.
 
 ## Scala Project Library Dependencies
 The Pact integration test library itself depends on a range of Scala/Java libraries.
