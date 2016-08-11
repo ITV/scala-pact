@@ -12,16 +12,18 @@ object Build extends sbt.Build with BuildExtra {
     sbtVersion in Global := "0.13.11",
     scalaVersion in Global := "2.10.6",
     scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
-    libraryDependencies ++= Seq(
-      "io.argonaut" %% "argonaut" % "6.2-M1" withSources() withJavadoc(),
-      "org.slf4j" % "slf4j-simple" % "1.6.4" withSources() withJavadoc(),
-      "org.http4s" %% "http4s-blaze-server" % "0.13.2a" withSources() withJavadoc(),
-      "org.http4s" %% "http4s-dsl"          % "0.13.2a" withSources() withJavadoc(),
-      "org.http4s" %% "http4s-argonaut"     % "0.13.2a" withSources() withJavadoc(),
-      "com.itv" % "scalapact-core_2.10" % "1.0.2-SNAPSHOT",
-      "org.scalatest" %% "scalatest" % "2.2.6" % "test",
-      "org.scalaj" %% "scalaj-http" % "2.2.1"
-    ),
+    libraryDependencies <++= version { scalapactVersion =>
+      Seq(
+        "io.argonaut" %% "argonaut" % "6.2-M1" withSources() withJavadoc(),
+        "org.slf4j" % "slf4j-simple" % "1.6.4" withSources() withJavadoc(),
+        "org.http4s" %% "http4s-blaze-server" % "0.13.2a" withSources() withJavadoc(),
+        "org.http4s" %% "http4s-dsl"          % "0.13.2a" withSources() withJavadoc(),
+        "org.http4s" %% "http4s-argonaut"     % "0.13.2a" withSources() withJavadoc(),
+        "com.itv" %% "scalapact-core" % scalapactVersion,
+        "org.scalatest" %% "scalatest" % "2.2.6" % "test",
+        "org.scalaj" %% "scalaj-http" % "2.2.1"
+      )
+    },
     publishTo := {
       val nexus = "https://oss.sonatype.org/"
       if (isSnapshot.value)
