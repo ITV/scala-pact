@@ -1,8 +1,9 @@
-package com.example
+package com.example.consumer
 
-import scalaj.http.{Http, HttpResponse}
 import org.json4s.DefaultFormats
 import org.json4s.native.JsonParser._
+
+import scalaj.http.{Http, HttpResponse}
 
 object ProviderClient {
 

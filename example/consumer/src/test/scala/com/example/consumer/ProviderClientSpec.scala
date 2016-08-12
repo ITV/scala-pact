@@ -1,9 +1,9 @@
-package com.example
+package com.example.consumer
 
-import org.scalatest.{FunSpec, Matchers}
+import com.itv.scalapact.ScalaPactForger._
 import org.json4s.DefaultFormats
 import org.json4s.native.Serialization._
-import com.itv.scalapact.ScalaPactForger._
+import org.scalatest.{FunSpec, Matchers}
 
 class ProviderClientSpec extends FunSpec with Matchers {
 

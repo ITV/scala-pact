@@ -2,7 +2,15 @@
 
 ##Consumer
 
+sbt pact-test
+
+##Delivering the pact file
+
+
 ##Provider
+
+
+sbt "pact-verify --source delivered_pacts/ --host localhost --port 8080"
 
 ##Pact Broker
 This is example project does not include pact broker.

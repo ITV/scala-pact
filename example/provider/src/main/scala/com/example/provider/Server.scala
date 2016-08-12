@@ -1,10 +1,10 @@
-package com.example
+package com.example.provider
 
 import org.http4s.server.blaze.BlazeBuilder
 
-object BlazeExample extends App {
+object Server extends App {
   BlazeBuilder.bindHttp(8080)
-    .mountService(HelloWorld.service, "/")
+    .mountService(Provider.service, "/")
     .run
     .awaitShutdown()
 }
