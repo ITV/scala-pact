@@ -2,9 +2,12 @@ package com.example.provider
 
 import org.http4s._
 import org.http4s.dsl._
-
-import _root_.argonaut._, Argonaut._
+import _root_.argonaut._
+import Argonaut._
 import org.http4s.argonaut._
+import java.io.File
+
+import scala.io.Source
 
 object Provider {
 
@@ -13,9 +16,19 @@ object Provider {
   val service = HttpService {
     case GET -> Root / "results" =>
       Ok(
-        ResultResponse(3, List("Harry", "Fred", "Bob")).asJson
+        ResultResponse(3, loadPeople).asJson
       )
   }
+
+  def loadPeople: List[String] =
+    Source.fromFile(new File("people.txt").toURI)
+      .getLines
+      .mkString
+      .split(',')
+      .toList
+
+
+
 }
 
 object ResultResponseImplicits {

@@ -1,9 +1,18 @@
+import java.io.PrintWriter
+
 import com.itv.scalapact.plugin.ScalaPactPlugin._
 
 providerStates := Seq(
   ("Results: Bob, Fred, Harry", (key: String) => {
-    // Do some work to ensure the system under test is
-    // in an appropriate state before verification
+
+    val peopleFile = new File("people.txt")
+    peopleFile.createNewFile()
+    peopleFile.setWritable(true)
+
+    val writer = new PrintWriter(peopleFile)
+    writer.print("Bob,Fred,Harry")
+    writer.close()
+
     true
   })
 )
