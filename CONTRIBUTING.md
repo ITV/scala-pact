@@ -15,3 +15,42 @@ Try and be as specific as possible, ideally you should include steps to re-produ
 We will always try to accept code submissions. If you'd like to discuss a change before you make it, please raise an issue and describe the work you're planning to do.
 
 If you would like to improve the project by contributing code, please fork the repo, make your change and submit a pull request.
+
+#### When your PR is accepted, please rebase rather than merge
+Special note to people who have direct access to the main project repo. Please do not use github's magic merge button on your pull requests. Please rebase your work, for example (assuming you're on your branch):
+```
+git fetch -p
+git pull --rebase origin master
+git push origin HEAD:master
+```
+
+This should help us keep a linear history.
+
+#### Testing Scala-Pact
+Before submitting your pull request, you should do your best to check it all works! Here is the current testing procedure (in order):
+
+##### All Projects
+1. Make sure all the projects have a new SNAPSHOT version, that it is the same everywhere, and that they all use each other's new version i.e. Bump the core, bump the plugin and update the plugin to use the new core, bump the test project and update it to use the new core and the new plugin version.
+2. Make sure you don't have that version in your `~/.ivy2/local` or `~/.ivy2/cache` folders.
+
+##### Core Project
+1. Run `sbt clean update compile`
+1. Run `sbt test`
+1. Run `sbt "+ publish-local"` to cross compile and publish to your local cache.
+
+##### Plugin Project
+1. Run `sbt clean update compile`
+1. Run `sbt test`
+1. Run `sbt publish-local` to publish to your local cache.
+
+##### Test Project
+1. Run `sbt clean update compile`
+1. Run `sbt test`
+1. Run `sbt pact-test`
+1. Run `sbt pact-stubber`
+1. In a new terminal (again from the test project directory), run `sbt pact-verify --source target/pacts`
+
+##### Standalone stubber
+No testing required at present.
+
+**If everything is green, you're ready to submit your pull request!**
