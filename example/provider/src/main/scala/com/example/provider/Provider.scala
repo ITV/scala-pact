@@ -26,9 +26,7 @@ object Provider {
       .mkString
       .split(',')
       .toList
-
-
-
+  
 }
 
 object ResultResponseImplicits {
