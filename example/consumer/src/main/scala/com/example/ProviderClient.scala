@@ -19,4 +19,4 @@ object ProviderClient {
 
 }
 
-case class Results(count: Int, result: List[String])
+case class Results(count: Int, results: List[String])
