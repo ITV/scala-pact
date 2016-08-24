@@ -19,7 +19,7 @@ object ScalaPactContractWriter {
     val dirFile = new File(dirPath)
 
     if (!dirFile.exists()) {
-      dirFile.mkdir()
+      dirFile.mkdirs()
     }
 
     val string = simplifyName(pactDescription.consumer + pactDescription.provider + pactDescription.interactions.map(_.description).mkString + System.currentTimeMillis())
