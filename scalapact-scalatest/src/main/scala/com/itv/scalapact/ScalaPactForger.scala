@@ -114,5 +114,6 @@ object ScalaPactForger {
   case object PUT extends ScalaPactMethod { val method = "PUT" }
   case object POST extends ScalaPactMethod { val method = "POST" }
   case object DELETE extends ScalaPactMethod { val method = "DELETE" }
+  case object OPTIONS extends ScalaPactMethod { val method = "OPTIONS" }
 
 }
