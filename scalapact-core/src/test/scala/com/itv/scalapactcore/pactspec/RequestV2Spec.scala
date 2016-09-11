@@ -1,17 +1,10 @@
 package com.itv.scalapactcore.pactspec
 
-import com.itv.scalapactcore.common.InteractionMatchers._
-import com.itv.scalapactcore.pactspec.util.{PactSpecLoader, RequestSpec}
-import com.itv.scalapactcore.{Interaction, InteractionResponse}
-import org.scalatest.{FunSpec, Matchers}
+import com.itv.scalapactcore.pactspec.util.PactSpecTester
 
-import scalaz.{-\/, \/-}
+class RequestV2Spec extends PactSpecTester {
 
-
-class RequestV2Spec extends FunSpec with Matchers {
-
-  private val fetchSpec: String => RequestSpec = path =>
-    PactSpecLoader.deserializeRequestSpec(PactSpecLoader.fromResource(path)).get
+  val pactSpecVersion = "2"
 
   describe("Exercising response V2 Pact Specification match tests") {
 
@@ -114,24 +107,6 @@ class RequestV2Spec extends FunSpec with Matchers {
           //fetchSpec("/request/body/unexpected key with null value.json")  // DO NOT AGREE WITH THIS ONE
         )
       )
-    }
-  }
-
-  private def testSpecs(specFiles: List[RequestSpec]): Unit = {
-    specFiles.foreach { spec =>
-
-      val i = Interaction(None, "", spec.expected, InteractionResponse(None, None, None, None))
-
-      matchRequest(i :: Nil)(spec.actual) match {
-        case \/-(r) =>
-          if (spec.`match`) 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
-          else fail(spec.comment)
-
-        case -\/(l) =>
-          if (spec.`match`) fail(spec.comment)
-          else 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
-      }
-
     }
   }
 

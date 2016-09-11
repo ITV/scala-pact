@@ -12,8 +12,8 @@ object PactSpecLoader {
 
   import com.itv.scalapactcore.PactImplicits._
 
-  def fromResource(path: String): String =
-    Source.fromURL(getClass.getResource("/pact-specification-version-2/testcases" + path)).getLines().mkString("\n")
+  def fromResource(version: String, path: String): String =
+    Source.fromURL(getClass.getResource(s"/pact-specification-version-$version/testcases$path")).getLines().mkString("\n")
 
   implicit lazy val RequestSpecCodecJson: CodecJson[RequestSpec] = casecodec4(RequestSpec.apply, RequestSpec.unapply)(
     "match", "comment", "expected", "actual"
