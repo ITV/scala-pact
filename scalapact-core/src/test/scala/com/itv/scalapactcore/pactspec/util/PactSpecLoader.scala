@@ -101,19 +101,19 @@ object JsonBodySpecialCaseHelper {
 
   import com.itv.scalapactcore.PactImplicits._
 
-  val extractMatches: String => Option[Boolean] = json =>
-    json.parseOption.flatMap(j => (j.hcursor --\ "match").focus.flatMap(_.bool))
+  val extractMatches: String => String \/ Boolean = json =>
+    json.parse.disjunction.map(j => (j.hcursor --\ "match").focus.flatMap(_.bool).contains(true))
 
-  val extractComment: String => Option[String] = json =>
-    json.parseOption.flatMap(j => (j.hcursor --\ "comment").focus.flatMap(_.string).map(_.toString()))
+  val extractComment: String => String \/ String = json =>
+    json.parse.disjunction.map(j => (j.hcursor --\ "comment").focus.flatMap(_.string).map(_.toString()).getOrElse("<missing comment>"))
 
-  val extractInteractionRequest: String => String => Option[InteractionRequest] = field => json =>
+  val extractInteractionRequest: String => String => String \/ InteractionRequest = field => json =>
     separateRequestResponseFromBody(field)(json).flatMap { pair =>
       pair._1.flatMap(_.toString.decodeOption[InteractionRequest]).map(_.copy(body = pair._2))
     }
 
 
-  val extractInteractionResponse: String => String => Option[InteractionResponse] = field => json =>
+  val extractInteractionResponse: String => String => String \/ InteractionResponse = field => json =>
     separateRequestResponseFromBody(field)(json).flatMap { pair =>
       pair._1.flatMap(_.toString.decodeOption[InteractionResponse]).map(_.copy(body = pair._2))
     }
