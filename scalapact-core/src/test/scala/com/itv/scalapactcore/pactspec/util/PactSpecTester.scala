@@ -10,46 +10,86 @@ trait PactSpecTester extends FunSpec with Matchers {
 
   val pactSpecVersion: String
 
-  protected val fetchRequestSpec: String => RequestSpec = path =>
-    PactSpecLoader.deserializeRequestSpec(PactSpecLoader.fromResource(pactSpecVersion, path)).get
+  protected val fetchRequestSpec: String => StrictTestMode => (RequestSpec, StrictTestMode) = path => testMode =>
+    (PactSpecLoader.deserializeRequestSpec(PactSpecLoader.fromResource(pactSpecVersion, path)).get, testMode)
 
-  protected def testRequestSpecs(specFiles: List[RequestSpec]): Unit = {
-    specFiles.foreach { spec =>
+  protected def testRequestSpecs(specFiles: List[(RequestSpec, StrictTestMode)]): Unit = {
+    specFiles.foreach { specAndMode =>
 
+      val spec = specAndMode._1
+      val mode = specAndMode._2
       val i = Interaction(None, "", spec.expected, InteractionResponse(None, None, None, None))
 
-      matchRequest(i :: Nil)(spec.actual) match {
-        case \/-(r) =>
-          if (spec.`match`) 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
-          else fail(spec.comment + ",  actual: " + spec.actual + ",  expected: " + spec.expected)
+      mode match {
+        case NonStrictOnly =>
+          doRequestMatch(spec, i, strictMatching = false)
 
-        case -\/(l) =>
-          if (spec.`match`) fail(spec.comment + ",  actual: " + spec.actual + ",  expected: " + spec.expected)
-          else 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
+        case StrictOnly =>
+          doRequestMatch(spec, i, strictMatching = true)
+
+        case StrictAndNonStrict =>
+          doRequestMatch(spec, i, strictMatching = false)
+          doRequestMatch(spec, i, strictMatching = true)
       }
 
     }
   }
 
-  protected val fetchResponseSpec: String => ResponseSpec = path =>
-    PactSpecLoader.deserializeResponseSpec(PactSpecLoader.fromResource(pactSpecVersion, path)).get
+  private def doRequestMatch(spec: RequestSpec, i: Interaction, strictMatching: Boolean): Unit = {
+    matchRequest(strictMatching)(i :: Nil)(spec.actual) match {
+      case \/-(r) =>
+        if (spec.`match`) 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
+        else fail(spec.comment + ", with strict matching '" + strictMatching + "',  actual: " + spec.actual + ",  expected: " + spec.expected)
 
-  protected def testResponseSpecs(specFiles: List[ResponseSpec]): Unit = {
-    specFiles.foreach { spec =>
+      case -\/(l) =>
+        if (spec.`match`) fail(spec.comment + ", with strict matching '" + strictMatching + "',  actual: " + spec.actual + ",  expected: " + spec.expected)
+        else 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
+    }
+  }
 
+
+
+  protected val fetchResponseSpec: String => StrictTestMode => (ResponseSpec, StrictTestMode) = path => testMode =>
+    (PactSpecLoader.deserializeResponseSpec(PactSpecLoader.fromResource(pactSpecVersion, path)).get, testMode)
+
+  protected def testResponseSpecs(specFiles: List[(ResponseSpec, StrictTestMode)]): Unit = {
+    specFiles.foreach { specAndMode =>
+
+      val spec = specAndMode._1
+      val mode = specAndMode._2
       val i = Interaction(None, "", InteractionRequest(None, None, None, None, None, None), spec.expected)
 
-      matchResponse(i :: Nil)(spec.actual) match {
-        case \/-(r) =>
-          if (spec.`match`) 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
-          else fail(spec.comment + ",  actual: " + spec.actual + ",  expected: " + spec.expected)
+      mode match {
+        case NonStrictOnly =>
+          doResponseMatch(spec, i, strictMatching = false)
 
-        case -\/(l) =>
-          if (spec.`match`) fail(spec.comment + ",  actual: " + spec.actual + ",  expected: " + spec.expected)
-          else 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
+        case StrictOnly =>
+          doResponseMatch(spec, i, strictMatching = true)
+
+        case StrictAndNonStrict =>
+          doResponseMatch(spec, i, strictMatching = false)
+          doResponseMatch(spec, i, strictMatching = true)
       }
 
+    }
+  }
+
+  private def doResponseMatch(spec: ResponseSpec, i: Interaction, strictMatching: Boolean): Unit = {
+    matchResponse(strictMatching)(i :: Nil)(spec.actual) match {
+      case \/-(r) =>
+        if (spec.`match`) 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
+        else fail(spec.comment + ", with strict matching '" + strictMatching + "',  actual: " + spec.actual + ",  expected: " + spec.expected)
+
+      case -\/(l) =>
+        if (spec.`match`) fail(spec.comment + ", with strict matching '" + strictMatching + "',  actual: " + spec.actual + ",  expected: " + spec.expected)
+        else 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
     }
   }
 
 }
+
+sealed trait StrictTestMode
+
+case object NonStrictOnly extends StrictTestMode
+case object StrictOnly extends StrictTestMode
+case object StrictAndNonStrict extends StrictTestMode

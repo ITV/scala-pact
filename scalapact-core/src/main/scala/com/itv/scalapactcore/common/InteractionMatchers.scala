@@ -14,7 +14,7 @@ import PermissiveXmlEquality._
 
 object InteractionMatchers {
 
-  lazy val matchRequest: List[Interaction] => InteractionRequest => \/[String, Interaction] = interactions => received =>
+  lazy val matchRequest: Boolean => List[Interaction] => InteractionRequest => \/[String, Interaction] = strictMatching => interactions => received =>
     interactions.find { ir =>
       matchMethods(ir.request.method.orElse(Option("GET")))(received.method) &&
         matchHeaders(ir.request.matchingRules)(ir.request.headers)(received.headers) &&
@@ -25,7 +25,7 @@ object InteractionMatchers {
       case None => ("No matching request for: " + received).left
     }
 
-  lazy val matchResponse: List[Interaction] => InteractionResponse => \/[String, Interaction] = interactions => received =>
+  lazy val matchResponse: Boolean => List[Interaction] => InteractionResponse => \/[String, Interaction] = strictMatching => interactions => received =>
     interactions.find{ ir =>
       matchStatusCodes(ir.response.status)(received.status) &&
         matchHeaders(ir.response.matchingRules)(ir.response.headers)(received.headers) &&

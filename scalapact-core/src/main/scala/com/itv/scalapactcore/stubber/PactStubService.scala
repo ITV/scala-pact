@@ -69,7 +69,8 @@ object PactStubService {
           path = Option(req.pathInfo),
           body = req.bodyAsText.runLast.unsafePerformSync,
           matchingRules = None
-        )
+        ),
+        strictMatching = false
       ) match {
         case \/-(ir) =>
           Status.fromInt(ir.response.status.getOrElse(200)) match {

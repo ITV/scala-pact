@@ -15,8 +15,8 @@ trait InteractionManager {
 
   private var interactions = List.empty[Interaction]
 
-  def findMatchingInteraction(request: InteractionRequest): \/[String, Interaction] =
-    matchRequest(interactions)(request)
+  def findMatchingInteraction(request: InteractionRequest, strictMatching: Boolean): \/[String, Interaction] =
+    matchRequest(strictMatching)(interactions)(request)
 
   def getInteractions: List[Interaction] = interactions
 
