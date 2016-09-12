@@ -40,8 +40,12 @@ case class InteractionRequest(method: Option[String], path: Option[String], quer
   def unapply: Option[(Option[String], Option[String], Option[String], Option[Map[String, String]], Option[String])] = Some {
     (method, path, query, headers, body)
   }
+
+  def cloneWithMaybeBody(maybeBody: Option[String]): InteractionRequest = this.copy(body = maybeBody)
 }
-case class InteractionResponse(status: Option[Int], headers: Option[Map[String, String]], body: Option[String], matchingRules: Option[Map[String, MatchingRule]])
+case class InteractionResponse(status: Option[Int], headers: Option[Map[String, String]], body: Option[String], matchingRules: Option[Map[String, MatchingRule]]) {
+  def cloneWithMaybeBody(maybeBody: Option[String]): InteractionResponse = this.copy(body = maybeBody)
+}
 
 case class MatchingRule(`match`: String, regex: Option[String])
 
