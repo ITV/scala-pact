@@ -5,10 +5,9 @@ import argonaut.{CodecJson, Json}
 import com.itv.scalapactcore.{InteractionRequest, InteractionResponse, PactImplicits}
 
 import scala.io.Source
+import scala.language.implicitConversions
 import scalaz.Scalaz._
 import scalaz._
-
-import scala.language.implicitConversions
 
 object PactSpecLoader {
 
@@ -22,8 +21,12 @@ object PactSpecLoader {
     "match", "comment", "expected", "actual"
   )
 
-  def fromResource(version: String, path: String): String =
-    Source.fromURL(getClass.getResource(s"/pact-specification-version-$version/testcases$path")).getLines().mkString("\n")
+  def fromResource(version: String, path: String): String = {
+    //println("Loading spec: " + s"/pact-specification-version-$version/testcases$path")
+    Source.fromURL(getClass.getResource(s"/pact-specification-version-$version/testcases$path"))
+      .getLines()
+      .mkString("\n")
+  }
 
   def deserializeRequestSpec(json: String): Option[RequestSpec] =
     SpecReader.jsonStringToRequestSpec(json) match {
@@ -54,15 +57,12 @@ object SpecReader {
   type BrokenPact[I] = (Boolean, String, (I, Option[String]), (I, Option[String]))
 
   def jsonStringToSpec[I]: String => argonaut.DecodeJson[I] => String \/ BrokenPact[I] = json => { implicit decoder =>
-
-    val brokenPact: String \/ BrokenPact[I] = for {
+    for {
       matches <- JsonBodySpecialCaseHelper.extractMatches(json)
       comment <- JsonBodySpecialCaseHelper.extractComment(json)
       expected <- JsonBodySpecialCaseHelper.extractInteractionRequestOrResponse[I]("expected")(json)(decoder)
       actual <- JsonBodySpecialCaseHelper.extractInteractionRequestOrResponse[I]("actual")(json)(decoder)
     } yield (matches, comment, expected, actual)
-
-    brokenPact
   }
 
   val jsonStringToRequestSpec: String => String \/ RequestSpec = json =>
@@ -79,9 +79,11 @@ object JsonBodySpecialCaseHelper {
 
   val extractMatches: String => String \/ Boolean = json =>
     json.parse.disjunction.map(j => (j.hcursor --\ "match").focus.flatMap(_.bool).contains(true))
+      .leftMap(e => "Extracting 'match': " + e)
 
   val extractComment: String => String \/ String = json =>
     json.parse.disjunction.map(j => (j.hcursor --\ "comment").focus.flatMap(_.string).map(_.toString()).getOrElse("<missing comment>"))
+      .leftMap(e => "Extracting 'comment': " + e)
 
   def extractInteractionRequestOrResponse[I]: String => String => argonaut.DecodeJson[I] => String \/ (I, Option[String]) = field => json => { implicit decoder =>
     separateRequestResponseFromBody(field)(json).flatMap(RequestResponseAndBody.unapply) match {
@@ -91,12 +93,17 @@ object JsonBodySpecialCaseHelper {
           .decodeEither[I]
           .disjunction
           .map(i => (i, maybeBody))
+          .leftMap(e => "Extracting 'expected or actual': " + e)
 
       case Some((None, _)) =>
-        s"Could not convert request to Json object: $json".left
+        val msg = s"Could not convert request to Json object: $json".left
+        println(msg)
+        msg
 
       case None =>
-        s"Problem splitting request from body in: $json".left
+        val msg = s"Problem splitting request from body in: $json".left
+        println(msg)
+        msg
     }
   }
 

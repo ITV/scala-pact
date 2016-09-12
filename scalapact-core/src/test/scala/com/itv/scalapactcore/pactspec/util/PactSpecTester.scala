@@ -21,10 +21,10 @@ trait PactSpecTester extends FunSpec with Matchers {
       matchRequest(i :: Nil)(spec.actual) match {
         case \/-(r) =>
           if (spec.`match`) 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
-          else fail(spec.comment)
+          else fail(spec.comment + ",  actual: " + spec.actual + ",  expected: " + spec.expected)
 
         case -\/(l) =>
-          if (spec.`match`) fail(spec.comment)
+          if (spec.`match`) fail(spec.comment + ",  actual: " + spec.actual + ",  expected: " + spec.expected)
           else 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
       }
 
