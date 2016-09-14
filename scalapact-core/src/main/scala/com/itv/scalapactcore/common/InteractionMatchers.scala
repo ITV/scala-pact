@@ -1,14 +1,15 @@
 package com.itv.scalapactcore.common
 
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
+
 import argonaut._
 import Argonaut._
 import com.itv.scalapactcore.{Interaction, InteractionRequest, InteractionResponse, MatchingRule}
 
 import scalaz._
 import Scalaz._
-
 import scala.xml._
-
 import PermissiveJsonEquality._
 import PermissiveXmlEquality._
 
@@ -140,7 +141,7 @@ object InteractionMatchers {
     }
 
   private lazy val constructPath: Option[String] => Option[String] => Option[String] = path => query => Option {
-    path.getOrElse("").split('?').toList ++ List(query.getOrElse("")) match {
+    path.getOrElse("").split('?').toList ++ List(query.map(q => URLDecoder.decode(q, StandardCharsets.UTF_8.name())).getOrElse("")) match {
       case Nil => "/"
       case x :: xs => List(x, xs.filter(!_.isEmpty).mkString("&")).mkString("?")
     }
