@@ -178,6 +178,15 @@ object InteractionMatchers {
   private def generalMatcher[A](expected: Option[A], received: Option[A], predicate: (A, A) => Boolean): Boolean =
     (expected, received) match {
       case (None, None) => true
+
+      case (Some(null), Some(null)) => true
+      case (None, Some(null)) => true
+      case (Some(null), None) => true
+
+      case (Some("null"), Some("null")) => true
+      case (None, Some("null")) => true
+      case (Some("null"), None) => true
+
       case (None, Some(r)) => true
       case (Some(e), None) => false
       case (Some(e), Some(r)) => predicate(e, r)

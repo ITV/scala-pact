@@ -157,6 +157,14 @@ object JsonBodySpecialCaseHelper {
       json.parseOption
         .flatMap { j => (j.hcursor --\ "interactions").focus.flatMap(_.array) }
 
+    val makeOptionalBody: Json => Option[String] = j => j match {
+      case body: Json if body.isString =>
+        j.string.map(_.toString)
+
+      case _ =>
+        j.toString.some
+    }
+
     interations.map { is =>
       is.map { i =>
         val minusRequestBody =
@@ -173,14 +181,10 @@ object JsonBodySpecialCaseHelper {
         }
 
         val requestBody = (i.hcursor --\ "request" --\ "body").focus
-          .flatMap { p =>
-            if(p.isString) p.string.map(_.toString) else p.toString.some
-          }
+          .flatMap { makeOptionalBody }
 
         val responseBody = (i.hcursor --\ "response" --\ "body").focus
-          .flatMap { p =>
-            if(p.isString) p.string.map(_.toString) else p.toString.some
-          }
+          .flatMap { makeOptionalBody }
 
         (minusResponseBody.flatMap(p => p.toString.decodeOption[Interaction]), requestBody, responseBody)
       }
