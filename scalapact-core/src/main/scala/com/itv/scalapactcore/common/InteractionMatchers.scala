@@ -133,7 +133,12 @@ object InteractionMatchers {
     val expected = constructPath(expectedPath)(expectedQuery)
     val received = constructPath(receivedPath)(receivedQuery)
 
-    generalMatcher(expected, received, (e: String, r: String) => e == r)
+    generalMatcher(expected, received, (e: String, r: String) => {
+      val ex = toPathStructure(e)
+      val re = toPathStructure(r)
+
+      ex.path == re.path && ex.params.length == re.params.length && equalListsOfTuples(ex.params, re.params)
+    })
   }
 
   lazy val matchBodies: Option[String] => Option[String] => Boolean = expected => received =>

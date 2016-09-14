@@ -1,6 +1,6 @@
 package com.itv.scalapactcore.pactspec
 
-import com.itv.scalapactcore.pactspec.util.{StrictAndNonStrict, PactSpecTester}
+import com.itv.scalapactcore.pactspec.util.{PactSpecTester, StrictAndNonStrict, StrictOnly}
 
 class RequestV2Spec extends PactSpecTester {
 
@@ -42,7 +42,7 @@ class RequestV2Spec extends PactSpecTester {
           fetchRequestSpec("/request/query/same parameter multiple times in different order.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/query/same parameter multiple times.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/query/trailing ampersand.json")(StrictAndNonStrict),
-          fetchRequestSpec("/request/query/unexpected param.json")(StrictAndNonStrict)
+          fetchRequestSpec("/request/query/unexpected param.json")(StrictOnly)
         )
       )
     }
