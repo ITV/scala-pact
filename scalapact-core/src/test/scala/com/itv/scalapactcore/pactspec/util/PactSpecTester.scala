@@ -61,27 +61,31 @@ trait PactSpecTester extends FunSpec with Matchers {
 
       mode match {
         case NonStrictOnly =>
-          doResponseMatch(spec, i, strictMatching = false)
+          doResponseMatch(spec, i, strictMatching = false, shouldMatch = spec.`match`)
+          doResponseMatch(spec, i, strictMatching = true, shouldMatch = !spec.`match`)
 
         case StrictOnly =>
-          doResponseMatch(spec, i, strictMatching = true)
+          doResponseMatch(spec, i, strictMatching = false, shouldMatch = !spec.`match`)
+          doResponseMatch(spec, i, strictMatching = true, shouldMatch = spec.`match`)
 
         case StrictAndNonStrict =>
-          doResponseMatch(spec, i, strictMatching = false)
-          doResponseMatch(spec, i, strictMatching = true)
+          doResponseMatch(spec, i, strictMatching = false, shouldMatch = spec.`match`)
+          doResponseMatch(spec, i, strictMatching = true, shouldMatch = spec.`match`)
       }
 
     }
   }
 
-  private def doResponseMatch(spec: ResponseSpec, i: Interaction, strictMatching: Boolean): Unit = {
+  private def doResponseMatch(spec: ResponseSpec, i: Interaction, strictMatching: Boolean, shouldMatch: Boolean): Unit = {
     matchResponse(strictMatching)(i :: Nil)(spec.actual) match {
-      case \/-(r) =>
-        if (spec.`match`) 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
+      case \/-(_) =>
+        // Found a match
+        if (shouldMatch) 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
         else fail(spec.comment + ", with strict matching '" + strictMatching + "',  actual: " + spec.actual + ",  expected: " + spec.expected)
 
-      case -\/(l) =>
-        if (spec.`match`) fail(spec.comment + ", with strict matching '" + strictMatching + "',  actual: " + spec.actual + ",  expected: " + spec.expected)
+      case -\/(_) =>
+        // Failed to match
+        if (shouldMatch) fail(spec.comment + ", with strict matching '" + strictMatching + "',  actual: " + spec.actual + ",  expected: " + spec.expected)
         else 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
     }
   }
