@@ -1,6 +1,6 @@
 package com.itv.scalapactcore.pactspec
 
-import com.itv.scalapactcore.pactspec.util.{StrictAndNonStrict, PactSpecTester}
+import com.itv.scalapactcore.pactspec.util.{PactSpecTester, StrictAndNonStrict, StrictOnly}
 
 class ResponseV2Spec extends PactSpecTester {
 
@@ -42,19 +42,19 @@ class ResponseV2Spec extends PactSpecTester {
     it("should check the response body specs") {
       testResponseSpecs(
         List(
-//          fetchSpec("/response/body/additional property with type matcher.json")(StrictAndNonStrict),
-//          fetchSpec("/response/body/array at top level with matchers.json")(StrictAndNonStrict),
+//          fetchResponseSpec("/response/body/additional property with type matcher.json")(StrictAndNonStrict),
+//          fetchResponseSpec("/response/body/array at top level with matchers.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/array at top level.json")(StrictAndNonStrict),
-          //fetchSpec("/response/body/array in different order.json")(StrictAndNonStrict), // DO NOT AGREE WITH THIS ONE
-//          fetchSpec("/response/body/array with regex matcher.json")(StrictAndNonStrict),
-//          fetchSpec("/response/body/array with type matcher mismatch.json")(StrictAndNonStrict),
-//          fetchSpec("/response/body/array with type matcher.json")(StrictAndNonStrict),
+          fetchResponseSpec("/response/body/array in different order.json")(StrictOnly), // DO NOT AGREE WITH THIS ONE
+//          fetchResponseSpec("/response/body/array with regex matcher.json")(StrictAndNonStrict),
+//          fetchResponseSpec("/response/body/array with type matcher mismatch.json")(StrictAndNonStrict),
+//          fetchResponseSpec("/response/body/array with type matcher.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/deeply nested objects.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/different value found at index.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/different value found at key.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/keys out of order match.json")(StrictAndNonStrict),
-//          fetchSpec("/response/body/matches with regex.json")(StrictAndNonStrict),
-//          fetchSpec("/response/body/matches with type.json")(StrictAndNonStrict),
+//          fetchResponseSpec("/response/body/matches with regex.json")(StrictAndNonStrict),
+//          fetchResponseSpec("/response/body/matches with type.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/matches.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/missing body.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/missing index.json")(StrictAndNonStrict),
@@ -66,18 +66,18 @@ class ResponseV2Spec extends PactSpecTester {
           fetchResponseSpec("/response/body/null found in array when not null expected.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/number found at key when string expected.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/number found in array when string expected.json")(StrictAndNonStrict),
-          //fetchSpec("/response/body/objects in array first matches.json")(StrictAndNonStrict),
-//          fetchSpec("/response/body/objects in array no matches.json")(StrictAndNonStrict),
-//          fetchSpec("/response/body/objects in array second matches.json")(StrictAndNonStrict),
-//          fetchSpec("/response/body/objects in array type matching.json")(StrictAndNonStrict),
-//          fetchSpec("/response/body/objects in array with type mismatching.json")(StrictAndNonStrict),
+          fetchResponseSpec("/response/body/objects in array first matches.json")(StrictOnly),
+          fetchResponseSpec("/response/body/objects in array no matches.json")(StrictOnly),
+          fetchResponseSpec("/response/body/objects in array second matches.json")(StrictOnly),
+//          fetchResponseSpec("/response/body/objects in array type matching.json")(StrictAndNonStrict),
+//          fetchResponseSpec("/response/body/objects in array with type mismatching.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/plain text that does not match.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/plain text that matches.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/property name is different case.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/string found at key when number expected.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/string found in array when number expected.json")(StrictAndNonStrict),
-          //fetchSpec("/response/body/unexpected index with not null value modified.json")(StrictAndNonStrict), // DO NOT AGREE WITH THIS ONE
-          //fetchSpec("/response/body/unexpected index with null value modified.json")(StrictAndNonStrict), // DO NOT AGREE WITH THIS ONE
+          fetchResponseSpec("/response/body/unexpected index with not null value.json")(StrictOnly), // DO NOT AGREE WITH THIS ONE
+          fetchResponseSpec("/response/body/unexpected index with null value.json")(StrictOnly), // DO NOT AGREE WITH THIS ONE
           fetchResponseSpec("/response/body/unexpected key with not null value.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/unexpected key with null value.json")(StrictAndNonStrict)
         )

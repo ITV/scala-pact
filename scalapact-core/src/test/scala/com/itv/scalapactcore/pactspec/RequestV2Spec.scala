@@ -73,19 +73,19 @@ class RequestV2Spec extends PactSpecTester {
       testRequestSpecs(
         List(
           fetchRequestSpec("/request/body/array at top level.json")(StrictAndNonStrict),
-          //fetchSpec("/request/body/array in different order.json")(StrictAndNonStrict), // DO NOT AGREE WITH THIS ONE
-//          fetchSpec("/request/body/array size less than required.json")(StrictAndNonStrict),
-//          fetchSpec("/request/body/array with at least one element matching by example.json")(StrictAndNonStrict),
-//          fetchSpec("/request/body/array with at least one element not matching example type.json")(StrictAndNonStrict),
-//          fetchSpec("/request/body/array with nested array that does not match.json")(StrictAndNonStrict),
-//          fetchSpec("/request/body/array with nested array that matches.json")(StrictAndNonStrict),
-//          fetchSpec("/request/body/array with regular expression in element.json")(StrictAndNonStrict),
-//          fetchSpec("/request/body/array with regular expression that does not match in element.json")(StrictAndNonStrict),
+          fetchRequestSpec("/request/body/array in different order.json")(StrictOnly), // DO NOT AGREE WITH THIS ONE
+//          fetchRequestSpec("/request/body/array size less than required.json")(StrictAndNonStrict),
+//          fetchRequestSpec("/request/body/array with at least one element matching by example.json")(StrictAndNonStrict),
+//          fetchRequestSpec("/request/body/array with at least one element not matching example type.json")(StrictAndNonStrict),
+//          fetchRequestSpec("/request/body/array with nested array that does not match.json")(StrictAndNonStrict),
+//          fetchRequestSpec("/request/body/array with nested array that matches.json")(StrictAndNonStrict),
+//          fetchRequestSpec("/request/body/array with regular expression in element.json")(StrictAndNonStrict),
+//          fetchRequestSpec("/request/body/array with regular expression that does not match in element.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/body/different value found at index.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/body/different value found at key.json")(StrictAndNonStrict),
-//          fetchSpec("/request/body/matches with regex with bracket notation.json")(StrictAndNonStrict),
-//          fetchSpec("/request/body/matches with regex.json")(StrictAndNonStrict),
-//          fetchSpec("/request/body/matches with type.json")(StrictAndNonStrict),
+//          fetchRequestSpec("/request/body/matches with regex with bracket notation.json")(StrictAndNonStrict),
+//          fetchRequestSpec("/request/body/matches with regex.json")(StrictAndNonStrict),
+//          fetchRequestSpec("/request/body/matches with type.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/body/matches.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/body/missing index.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/body/missing key.json")(StrictAndNonStrict),
@@ -100,11 +100,11 @@ class RequestV2Spec extends PactSpecTester {
           fetchRequestSpec("/request/body/plain text that does not match.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/body/plain text that matches.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/body/string found at key when number expected.json")(StrictAndNonStrict),
-          fetchRequestSpec("/request/body/string found in array when number expected.json")(StrictAndNonStrict)//,
-          //fetchSpec("/request/body/unexpected index with not null value.json")(StrictAndNonStrict),  // DO NOT AGREE WITH THIS ONE
-          //fetchSpec("/request/body/unexpected index with null value.json")(StrictAndNonStrict),  // DO NOT AGREE WITH THIS ONE
-          //fetchSpec("/request/body/unexpected key with not null value.json")(StrictAndNonStrict),  // DO NOT AGREE WITH THIS ONE
-          //fetchSpec("/request/body/unexpected key with null value.json")  // DO NOT AGREE WITH THIS ONE
+          fetchRequestSpec("/request/body/string found in array when number expected.json")(StrictAndNonStrict),
+          fetchRequestSpec("/request/body/unexpected index with not null value.json")(StrictOnly),  // DO NOT AGREE WITH THIS ONE
+          fetchRequestSpec("/request/body/unexpected index with null value.json")(StrictOnly),  // DO NOT AGREE WITH THIS ONE
+          fetchRequestSpec("/request/body/unexpected key with not null value.json")(StrictOnly),  // DO NOT AGREE WITH THIS ONE
+          fetchRequestSpec("/request/body/unexpected key with null value.json")(StrictOnly)  // DO NOT AGREE WITH THIS ONE
         )
       )
     }
