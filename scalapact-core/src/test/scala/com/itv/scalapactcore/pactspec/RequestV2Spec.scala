@@ -73,7 +73,7 @@ class RequestV2Spec extends PactSpecTester {
       testRequestSpecs(
         List(
           fetchRequestSpec("/request/body/array at top level.json")(StrictAndNonStrict),
-          fetchRequestSpec("/request/body/array in different order.json")(StrictOnly), // DO NOT AGREE WITH THIS ONE
+          fetchRequestSpec("/request/body/array in different order.json")(StrictOnly),
 //          fetchRequestSpec("/request/body/array size less than required.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/array with at least one element matching by example.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/array with at least one element not matching example type.json")(StrictAndNonStrict),
@@ -101,10 +101,10 @@ class RequestV2Spec extends PactSpecTester {
           fetchRequestSpec("/request/body/plain text that matches.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/body/string found at key when number expected.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/body/string found in array when number expected.json")(StrictAndNonStrict),
-          fetchRequestSpec("/request/body/unexpected index with not null value.json")(StrictOnly),  // DO NOT AGREE WITH THIS ONE
-          fetchRequestSpec("/request/body/unexpected index with null value.json")(StrictOnly),  // DO NOT AGREE WITH THIS ONE
-          fetchRequestSpec("/request/body/unexpected key with not null value.json")(StrictOnly),  // DO NOT AGREE WITH THIS ONE
-          fetchRequestSpec("/request/body/unexpected key with null value.json")(StrictOnly)  // DO NOT AGREE WITH THIS ONE
+          fetchRequestSpec("/request/body/unexpected index with not null value.json")(StrictOnly),
+          fetchRequestSpec("/request/body/unexpected index with null value.json")(StrictOnly),
+          fetchRequestSpec("/request/body/unexpected key with not null value.json")(StrictOnly),
+          fetchRequestSpec("/request/body/unexpected key with null value.json")(StrictOnly)
         )
       )
     }
