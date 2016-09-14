@@ -1,6 +1,6 @@
 package com.itv.scalapactcore.pactspec
 
-import com.itv.scalapactcore.pactspec.util.{PactSpecTester, StrictAndNonStrict, StrictOnly}
+import com.itv.scalapactcore.pactspec.util.{NonStrictOnly, PactSpecTester, StrictAndNonStrict, StrictOnly}
 
 class RequestV1_1Spec extends PactSpecTester {
 
@@ -34,7 +34,7 @@ class RequestV1_1Spec extends PactSpecTester {
     it("should check the request query specs") {
       testRequestSpecs(
         List(
-          fetchRequestSpec("/request/query/different order.json")(StrictOnly),
+          fetchRequestSpec("/request/query/different order.json")(NonStrictOnly),
           fetchRequestSpec("/request/query/different params.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/query/matches with equals in the query value.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/query/matches.json")(StrictAndNonStrict),
