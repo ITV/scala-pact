@@ -17,14 +17,23 @@ object InteractionMatchers {
 
   lazy val matchRequest: Boolean => List[Interaction] => InteractionRequest => \/[String, Interaction] = strictMatching => interactions => received =>
     interactions.find { ir =>
-      matchMethods(ir.request.method.orElse(Option("GET")))(received.method) &&
-        matchHeaders(ir.request.matchingRules)(ir.request.headers)(received.headers) &&
-        matchPaths(ir.request.path.orElse(Option("/")))(ir.request.query)(received.path)(received.query) &&
-        matchBodies(ir.request.body)(received.body)
+      if(strictMatching) isStrictMatch(ir)(received) else isNonStrictMatch(ir)(received)
     } match {
       case Some(matching) => matching.right
       case None => ("No matching request for: " + received).left
     }
+  
+  lazy val isStrictMatch: Interaction => InteractionRequest => Boolean = ir => received =>
+    matchMethods(ir.request.method.orElse(Option("GET")))(received.method) &&
+      matchHeaders(ir.request.matchingRules)(ir.request.headers)(received.headers) &&
+      matchPathsStrict(ir.request.path.orElse(Option("/")))(ir.request.query)(received.path)(received.query) &&
+      matchBodies(ir.request.body)(received.body)
+
+  lazy val isNonStrictMatch: Interaction => InteractionRequest => Boolean = ir => received =>
+    matchMethods(ir.request.method.orElse(Option("GET")))(received.method) &&
+      matchHeaders(ir.request.matchingRules)(ir.request.headers)(received.headers) &&
+      matchPaths(ir.request.path.orElse(Option("/")))(ir.request.query)(received.path)(received.query) &&
+      matchBodies(ir.request.body)(received.body)
 
   lazy val matchResponse: Boolean => List[Interaction] => InteractionResponse => \/[String, Interaction] = strictMatching => interactions => received =>
     interactions.find{ ir =>
@@ -108,6 +117,13 @@ object InteractionMatchers {
 
       ex.path == re.path && equalListsOfTuples(ex.params, re.params)
     })
+  }
+
+  lazy val matchPathsStrict: Option[String] => Option[String] => Option[String] => Option[String] => Boolean = expectedPath => expectedQuery => receivedPath => receivedQuery => {
+    val expected = constructPath(expectedPath)(expectedQuery)
+    val received = constructPath(receivedPath)(receivedQuery)
+
+    generalMatcher(expected, received, (e: String, r: String) => e == r)
   }
 
   lazy val matchBodies: Option[String] => Option[String] => Boolean = expected => received =>
