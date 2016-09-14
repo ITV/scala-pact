@@ -12,9 +12,37 @@ object PermissiveXmlEquality {
 
   case class XmlEqualityWrapper(xml: Elem) {
     def =~(to: Elem): Boolean = PermissiveXmlEqualityHelper.areEqual(xml, to)
+    def =<>=(to: Elem): Boolean => Boolean = beSelectivelyPermissive => StrictXmlEqualityHelper.areEqual(beSelectivelyPermissive, xml, to)
   }
 }
 
+object StrictXmlEqualityHelper {
+
+  def areEqual(beSelectivelyPermissive: Boolean, expected: Elem, received: Elem): Boolean =
+    (expected.headOption |@| received.headOption) { (e, r) => compareNodes(beSelectivelyPermissive)(e)(r) } match {
+      case Some(bool) => bool
+      case None => false
+    }
+
+  lazy val mapContainsMap: Map[String, String] => Map[String, String] => Boolean = e => r =>
+    e.forall { ee =>
+      r.exists(rr => rr._1 == ee._1 && rr._2 == ee._2)
+    }
+
+  lazy val compareNodes: Boolean => Node => Node => Boolean = beSelectivelyPermissive => expected => received => {
+    lazy val prefixEqual = expected.prefix == received.prefix
+    lazy val labelEqual = expected.label == received.label
+    lazy val attributesLengthOk = expected.attributes.length == received.attributes.length
+    lazy val attributesEqual = mapContainsMap(expected.attributes.asAttrMap)(received.attributes.asAttrMap)
+    lazy val childLengthOk = expected.child.length == received.child.length
+
+    lazy val childrenEqual =
+      if(expected.child.isEmpty) expected.text == received.text
+      else expected.child.forall { eN => received.child.exists(rN => compareNodes(beSelectivelyPermissive)(eN)(rN)) }
+
+    prefixEqual && labelEqual && attributesLengthOk && attributesEqual && childLengthOk && childrenEqual
+  }
+}
 
 object PermissiveXmlEqualityHelper {
 

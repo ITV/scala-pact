@@ -144,10 +144,10 @@ object InteractionMatchers {
   lazy val matchBodies: Option[String] => Option[String] => Boolean = expected => received =>
     expected match {
       case Some(str) if stringIsJson(str) =>
-        generalMatcher(expected, received, (e: String, r: String) => (e.parseOption |@| r.parseOption) { _ =~ _ }.contains(true)) // Use exists instead of contains for backwards compatibility with 2.10
+        generalMatcher(expected, received, (e: String, r: String) => (e.parseOption |@| r.parseOption) { _ =~ _ }.exists(_ == true)) // Use exists instead of contains for backwards compatibility with 2.10
 
       case Some(str) if stringIsXml(str) =>
-        generalMatcher(expected, received, (e: String, r: String) => (safeStringToXml(e) |@| safeStringToXml(r)) { _ =~ _ }.contains(true)) // Use exists instead of contains for backwards compatibility with 2.10
+        generalMatcher(expected, received, (e: String, r: String) => (safeStringToXml(e) |@| safeStringToXml(r)) { _ =~ _ }.exists(_ == true)) // Use exists instead of contains for backwards compatibility with 2.10
 
       case _ =>
         generalMatcher(expected, received, (e: String, r: String) => PlainTextEquality.check(e, r))
@@ -156,10 +156,10 @@ object InteractionMatchers {
   lazy val matchBodiesStrict: Boolean => Option[String] => Option[String] => Boolean = beSelectivelyPermissive => expected => received =>
     expected match {
       case Some(str) if stringIsJson(str) =>
-        generalMatcher(expected, received, (e: String, r: String) => (e.parseOption |@| r.parseOption) { (a, b) => (a =<>= b)(beSelectivelyPermissive) }.contains(true)) // Use exists instead of contains for backwards compatibility with 2.10
+        generalMatcher(expected, received, (e: String, r: String) => (e.parseOption |@| r.parseOption) { (a, b) => (a =<>= b)(beSelectivelyPermissive) }.exists(_ == true)) // Use exists instead of contains for backwards compatibility with 2.10
 
       case Some(str) if stringIsXml(str) =>
-        generalMatcher(expected, received, (e: String, r: String) => (safeStringToXml(e) |@| safeStringToXml(r)) { _ =~ _ }.contains(true)) // Use exists instead of contains for backwards compatibility with 2.10
+        generalMatcher(expected, received, (e: String, r: String) => (safeStringToXml(e) |@| safeStringToXml(r)) { (a, b) => (a =<>= b)(beSelectivelyPermissive) }.exists(_ == true)) // Use exists instead of contains for backwards compatibility with 2.10
 
       case _ =>
         generalMatcher(expected, received, (e: String, r: String) => PlainTextEquality.check(e, r))
