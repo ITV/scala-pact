@@ -10,84 +10,97 @@ trait PactSpecTester extends FunSpec with Matchers {
 
   val pactSpecVersion: String
 
-  protected val fetchRequestSpec: String => StrictTestMode => (RequestSpec, StrictTestMode) = path => testMode =>
-    (PactSpecLoader.deserializeRequestSpec(PactSpecLoader.fromResource(pactSpecVersion, path)).get, testMode)
+  val fileNameFromPath: String => String = path =>
+    path.split("/").reverse.headOption.getOrElse(path)
 
-  protected def testRequestSpecs(specFiles: List[(RequestSpec, StrictTestMode)]): Unit = {
+  protected val fetchRequestSpec: String => StrictTestMode => (RequestSpec, StrictTestMode, String) = path => testMode =>
+    (PactSpecLoader.deserializeRequestSpec(PactSpecLoader.fromResource(pactSpecVersion, path)).get, testMode, fileNameFromPath(path))
+
+  protected def testRequestSpecs(specFiles: List[(RequestSpec, StrictTestMode, String)]): Unit = {
     specFiles.foreach { specAndMode =>
 
       val spec = specAndMode._1
       val mode = specAndMode._2
+      val path = specAndMode._3
       val i = Interaction(None, "", spec.expected, InteractionResponse(None, None, None, None))
 
       mode match {
         case NonStrictOnly =>
-          doRequestMatch(spec, i, strictMatching = false)
+          doRequestMatch(spec, i, strictMatching = false, shouldMatch = spec.`match`, path)
+          doRequestMatch(spec, i, strictMatching = true, shouldMatch = !spec.`match`, path)
 
         case StrictOnly =>
-          doRequestMatch(spec, i, strictMatching = true)
+          doRequestMatch(spec, i, strictMatching = false, shouldMatch = !spec.`match`, path)
+          doRequestMatch(spec, i, strictMatching = true, shouldMatch = spec.`match`, path)
 
         case StrictAndNonStrict =>
-          doRequestMatch(spec, i, strictMatching = false)
-          doRequestMatch(spec, i, strictMatching = true)
+          doRequestMatch(spec, i, strictMatching = false, shouldMatch = spec.`match`, path)
+          doRequestMatch(spec, i, strictMatching = true, shouldMatch = spec.`match`, path)
       }
 
     }
   }
 
-  private def doRequestMatch(spec: RequestSpec, i: Interaction, strictMatching: Boolean): Unit = {
+  private def doRequestMatch(spec: RequestSpec, i: Interaction, strictMatching: Boolean, shouldMatch: Boolean, path: String): Unit = {
     matchRequest(strictMatching)(i :: Nil)(spec.actual) match {
       case \/-(r) =>
-        if (spec.`match`) 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
-        else fail(spec.comment + ", with strict matching '" + strictMatching + "',  actual: " + spec.actual + ",  expected: " + spec.expected)
+        // Found a match
+        if (shouldMatch) 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
+        else fail(makeErrorString(path, spec.comment, strictMatching, spec.actual.toString, spec.expected.toString))
 
       case -\/(l) =>
-        if (spec.`match`) fail(spec.comment + ", with strict matching '" + strictMatching + "',  actual: " + spec.actual + ",  expected: " + spec.expected)
+        // Failed to match
+        if (shouldMatch) fail(makeErrorString(path, spec.comment, strictMatching, spec.actual.toString, spec.expected.toString))
         else 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
     }
   }
 
 
 
-  protected val fetchResponseSpec: String => StrictTestMode => (ResponseSpec, StrictTestMode) = path => testMode =>
-    (PactSpecLoader.deserializeResponseSpec(PactSpecLoader.fromResource(pactSpecVersion, path)).get, testMode)
+  protected val fetchResponseSpec: String => StrictTestMode => (ResponseSpec, StrictTestMode, String) = path => testMode =>
+    (PactSpecLoader.deserializeResponseSpec(PactSpecLoader.fromResource(pactSpecVersion, path)).get, testMode, fileNameFromPath(path))
 
-  protected def testResponseSpecs(specFiles: List[(ResponseSpec, StrictTestMode)]): Unit = {
+  protected def testResponseSpecs(specFiles: List[(ResponseSpec, StrictTestMode, String)]): Unit = {
     specFiles.foreach { specAndMode =>
 
       val spec = specAndMode._1
       val mode = specAndMode._2
+      val path = specAndMode._3
       val i = Interaction(None, "", InteractionRequest(None, None, None, None, None, None), spec.expected)
 
       mode match {
         case NonStrictOnly =>
-          doResponseMatch(spec, i, strictMatching = false, shouldMatch = spec.`match`)
-          doResponseMatch(spec, i, strictMatching = true, shouldMatch = !spec.`match`)
+          doResponseMatch(spec, i, strictMatching = false, shouldMatch = spec.`match`, path)
+          doResponseMatch(spec, i, strictMatching = true, shouldMatch = !spec.`match`, path)
 
         case StrictOnly =>
-          doResponseMatch(spec, i, strictMatching = false, shouldMatch = !spec.`match`)
-          doResponseMatch(spec, i, strictMatching = true, shouldMatch = spec.`match`)
+          doResponseMatch(spec, i, strictMatching = false, shouldMatch = !spec.`match`, path)
+          doResponseMatch(spec, i, strictMatching = true, shouldMatch = spec.`match`, path)
 
         case StrictAndNonStrict =>
-          doResponseMatch(spec, i, strictMatching = false, shouldMatch = spec.`match`)
-          doResponseMatch(spec, i, strictMatching = true, shouldMatch = spec.`match`)
+          doResponseMatch(spec, i, strictMatching = false, shouldMatch = spec.`match`, path)
+          doResponseMatch(spec, i, strictMatching = true, shouldMatch = spec.`match`, path)
       }
 
     }
   }
 
-  private def doResponseMatch(spec: ResponseSpec, i: Interaction, strictMatching: Boolean, shouldMatch: Boolean): Unit = {
+  private def doResponseMatch(spec: ResponseSpec, i: Interaction, strictMatching: Boolean, shouldMatch: Boolean, path: String): Unit = {
     matchResponse(strictMatching)(i :: Nil)(spec.actual) match {
       case \/-(_) =>
         // Found a match
         if (shouldMatch) 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
-        else fail(spec.comment + ", with strict matching '" + strictMatching + "',  actual: " + spec.actual + ",  expected: " + spec.expected)
+        else fail(makeErrorString(path, spec.comment, strictMatching, spec.actual.toString, spec.expected.toString))
 
       case -\/(_) =>
         // Failed to match
-        if (shouldMatch) fail(spec.comment + ", with strict matching '" + strictMatching + "',  actual: " + spec.actual + ",  expected: " + spec.expected)
+        if (shouldMatch) fail(makeErrorString(path, spec.comment, strictMatching, spec.actual.toString, spec.expected.toString))
         else 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
     }
+  }
+
+  private def makeErrorString(path: String, comment: String, strictMatching: Boolean, actual: String, expected: String): String = {
+    s"[$path] " + comment + "\nStrict matching: '" + strictMatching + "'\nActual: " + actual + "\nExpected: " + expected
   }
 
 }
