@@ -1,6 +1,6 @@
 package com.itv.scalapactcore.pactspec
 
-import com.itv.scalapactcore.pactspec.util.{StrictAndNonStrict, PactSpecTester, StrictOnly}
+import com.itv.scalapactcore.pactspec.util.{NonStrictOnly, PactSpecTester, StrictAndNonStrict, StrictOnly}
 
 class RequestV1Spec extends PactSpecTester {
 
@@ -60,7 +60,7 @@ class RequestV1Spec extends PactSpecTester {
     it("should check the request body specs") {
       testRequestSpecs(
         List(
-          fetchRequestSpec("/request/body/array in different order.json")(StrictAndNonStrict),
+          fetchRequestSpec("/request/body/array in different order.json")(StrictOnly),
           fetchRequestSpec("/request/body/different value found at index.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/body/different value found at key.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/body/matches.json")(StrictAndNonStrict),
@@ -76,10 +76,10 @@ class RequestV1Spec extends PactSpecTester {
           fetchRequestSpec("/request/body/plain text that matches.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/body/string found at key when number expected.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/body/string found in array when number expected.json")(StrictAndNonStrict),
-          fetchRequestSpec("/request/body/unexpected index with not null value.json")(StrictAndNonStrict),
-          fetchRequestSpec("/request/body/unexpected index with null value.json")(StrictAndNonStrict),
-          fetchRequestSpec("/request/body/unexpected key with not null value.json")(StrictAndNonStrict),
-          fetchRequestSpec("/request/body/unexpected key with null value.json")(StrictAndNonStrict)
+          fetchRequestSpec("/request/body/unexpected index with not null value.json")(StrictOnly),
+          fetchRequestSpec("/request/body/unexpected index with null value.json")(StrictOnly),
+          fetchRequestSpec("/request/body/unexpected key with not null value.json")(StrictOnly),
+          fetchRequestSpec("/request/body/unexpected key with null value.json")(StrictOnly)
         )
       )
     }
