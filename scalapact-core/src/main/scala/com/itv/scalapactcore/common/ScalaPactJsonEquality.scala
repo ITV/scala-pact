@@ -12,30 +12,30 @@ object ScalaPactJsonEquality {
 
   case class JsonEqualityWrapper(json: Json) {
     def =~(to: Json): Boolean = PermissiveJsonEqualityHelper.areEqual(json, to)
-    def =<>=(to: Json): Boolean = StrictJsonEqualityHelper.areEqual(json, to)
+    def =<>=(to: Json): Boolean => Boolean = beSelectivelyPermissive => StrictJsonEqualityHelper.areEqual(beSelectivelyPermissive, json, to)
   }
 
 }
 
 object StrictJsonEqualityHelper {
 
-  def areEqual(expected: Json, received: Json): Boolean = {
+  def areEqual(beSelectivelyPermissive: Boolean, expected: Json, received: Json): Boolean = {
     expected match {
       case j: Json if j.isObject && received.isObject =>
-        compareFields(expected, received, j.objectFieldsOrEmpty)
+        compareFields(beSelectivelyPermissive, expected, received, j.objectFieldsOrEmpty)
 
       case j: Json if j.isArray && received.isArray =>
-        compareArrays(j.array, received.array)
+        compareArrays(beSelectivelyPermissive, j.array, received.array)
 
       case j: Json =>
         expected == received
     }
   }
 
-  private def compareArrays(expectedArray: Option[Json.JsonArray], receivedArray: Option[Json.JsonArray]): Boolean = {
+  private def compareArrays(beSelectivelyPermissive: Boolean, expectedArray: Option[Json.JsonArray], receivedArray: Option[Json.JsonArray]): Boolean = {
     (expectedArray |@| receivedArray) { (ja, ra) =>
       if (ja.length == ra.length) {
-        ja.zip(ra).forall(pair => areEqual(pair._1, pair._2))
+        ja.zip(ra).forall(pair => areEqual(beSelectivelyPermissive, pair._1, pair._2))
       } else {
         false
       }
@@ -45,20 +45,30 @@ object StrictJsonEqualityHelper {
     }
   }
 
-  private def compareFields(expected: Json, received: Json, expectedFields: List[Json.JsonField]): Boolean = {
+  private def compareFields(beSelectivelyPermissive: Boolean, expected: Json, received: Json, expectedFields: List[Json.JsonField]): Boolean = {
     if (!expectedFields.forall(f => received.hasField(f))) false
     else {
-      if (expected.objectFieldsOrEmpty.length == received.objectFieldsOrEmpty.length) {
+      if(beSelectivelyPermissive) {
         expectedFields.forall { field =>
-          (expected.field(field) |@| received.field(field)) {
-            areEqual
-          } match {
+
+          (expected.field(field) |@| received.field(field)){ areEqual(beSelectivelyPermissive, _, _) } match {
             case Some(bool) => bool
             case None => false
           }
         }
       } else {
-        false
+        if (expected.objectFieldsOrEmpty.length == received.objectFieldsOrEmpty.length) {
+          expectedFields.forall { field =>
+            (expected.field(field) |@| received.field(field)) {
+              areEqual(beSelectivelyPermissive, _, _)
+            } match {
+              case Some(bool) => bool
+              case None => false
+            }
+          }
+        } else {
+          false
+        }
       }
     }
   }
