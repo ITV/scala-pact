@@ -66,10 +66,10 @@ class RequestV2Spec extends PactSpecTester {
     it("should check the request body specs") {
       testRequestSpecs(
         List(
-//          fetchRequestSpec("/request/body/array at top level xml.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/body/array at top level.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/body/array in different order xml.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/body/array in different order.json")(StrictAndNonStrict),
+          fetchRequestSpec("/request/body/array at top level xml.json")(StrictAndNonStrict),
+          fetchRequestSpec("/request/body/array at top level.json")(StrictAndNonStrict),
+          fetchRequestSpec("/request/body/array in different order xml.json")(StrictOnly),
+          fetchRequestSpec("/request/body/array in different order.json")(StrictOnly),
 //          fetchRequestSpec("/request/body/array size less than required xml.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/array size less than required.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/array with at least one element matching by example xml.json")(StrictAndNonStrict),
@@ -81,13 +81,15 @@ class RequestV2Spec extends PactSpecTester {
 //          fetchRequestSpec("/request/body/array with regular expression in element.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/array with regular expression that does not match in element xml.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/array with regular expression that does not match in element.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/body/different value found at index xml.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/body/different value found at index.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/body/different value found at key xml.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/body/different value found at key.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/body/empty body no content type.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/body/empty body.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/body/empty found at key where not empty expected xml.json")(StrictAndNonStrict),
+
+          fetchRequestSpec("/request/body/different value found at index xml.json")(StrictAndNonStrict),
+          fetchRequestSpec("/request/body/different value found at index.json")(StrictAndNonStrict),
+          fetchRequestSpec("/request/body/different value found at key xml.json")(StrictAndNonStrict),
+          fetchRequestSpec("/request/body/different value found at key.json")(StrictAndNonStrict),
+          fetchRequestSpec("/request/body/empty body no content type.json")(StrictAndNonStrict),
+          fetchRequestSpec("/request/body/empty body.json")(StrictAndNonStrict),
+          fetchRequestSpec("/request/body/empty found at key where not empty expected xml.json")(StrictAndNonStrict),
+
 //          fetchRequestSpec("/request/body/matches with regex with bracket notation xml.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/matches with regex with bracket notation.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/matches with regex xml.json")(StrictAndNonStrict),

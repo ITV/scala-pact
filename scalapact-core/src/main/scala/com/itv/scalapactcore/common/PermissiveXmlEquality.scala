@@ -38,7 +38,9 @@ object StrictXmlEqualityHelper {
 
     lazy val childrenEqual =
       if(expected.child.isEmpty) expected.text == received.text
-      else expected.child.forall { eN => received.child.exists(rN => compareNodes(beSelectivelyPermissive)(eN)(rN)) }
+      else {
+        expected.child.zip(received.child).forall(p => compareNodes(beSelectivelyPermissive)(p._1)(p._2))
+      }
 
     prefixEqual && labelEqual && attributesLengthOk && attributesEqual && childLengthOk && childrenEqual
   }
