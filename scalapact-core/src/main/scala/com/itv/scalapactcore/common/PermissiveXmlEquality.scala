@@ -1,8 +1,9 @@
 package com.itv.scalapactcore.common
 
+import com.itv.scalapactcore.common.InteractionMatchers.MatchingRules
+
 import scala.language.implicitConversions
 import scala.xml.{Elem, Node}
-
 import scalaz._
 import Scalaz._
 
@@ -11,14 +12,14 @@ object PermissiveXmlEquality {
   implicit def toXmlEqualityWrapper(json: Elem): XmlEqualityWrapper = XmlEqualityWrapper(json)
 
   case class XmlEqualityWrapper(xml: Elem) {
-    def =~(to: Elem): Boolean = PermissiveXmlEqualityHelper.areEqual(xml, to)
-    def =<>=(to: Elem): Boolean => Boolean = beSelectivelyPermissive => StrictXmlEqualityHelper.areEqual(beSelectivelyPermissive, xml, to)
+    def =~(to: Elem): MatchingRules => Boolean = matchingRules => PermissiveXmlEqualityHelper.areEqual(matchingRules, xml, to)
+    def =<>=(to: Elem): Boolean => MatchingRules => Boolean = beSelectivelyPermissive => matchingRules => StrictXmlEqualityHelper.areEqual(beSelectivelyPermissive, matchingRules, xml, to)
   }
 }
 
 object StrictXmlEqualityHelper {
 
-  def areEqual(beSelectivelyPermissive: Boolean, expected: Elem, received: Elem): Boolean =
+  def areEqual(beSelectivelyPermissive: Boolean, matchingRules: MatchingRules, expected: Elem, received: Elem): Boolean =
     (expected.headOption |@| received.headOption) { (e, r) => compareNodes(beSelectivelyPermissive)(e)(r) } match {
       case Some(bool) => bool
       case None => false
@@ -55,7 +56,7 @@ object PermissiveXmlEqualityHelper {
     * fields or array elements are out of order, as long as they are present since json
     * doesn't not guarantee element order.
     */
-  def areEqual(expected: Elem, received: Elem): Boolean =
+  def areEqual(matchingRules: MatchingRules, expected: Elem, received: Elem): Boolean =
     (expected.headOption |@| received.headOption) { (e, r) => compareNodes(e)(r) } match {
       case Some(bool) => bool
       case None => false
