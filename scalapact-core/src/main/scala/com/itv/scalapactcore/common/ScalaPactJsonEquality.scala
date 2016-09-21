@@ -50,23 +50,29 @@ object StrictJsonEqualityHelper extends SharedJsonEqualityHelpers {
     }
   }
 
-  private def compareArrays(beSelectivelyPermissive: Boolean, matchingRules: MatchingRules, expectedArray: Option[Json.JsonArray], receivedArray: Option[Json.JsonArray], accumulatedJsonPath: String): Boolean =
-    matchArrayWithRules(matchingRules, expectedArray, receivedArray, accumulatedJsonPath) match {
-      case Some(bool) => bool
-      case None =>
-        (expectedArray |@| receivedArray) { (ja, ra) =>
-          if (ja.length == ra.length) {
-            ja.zip(ra).zipWithIndex.forall { case (pair, i) =>
-              areEqual(beSelectivelyPermissive, matchingRules, pair._1, pair._2, accumulatedJsonPath + s"[$i]")
-            }
-          } else {
-            false
+  private def compareArrays(beSelectivelyPermissive: Boolean, matchingRules: MatchingRules, expectedArray: Option[Json.JsonArray], receivedArray: Option[Json.JsonArray], accumulatedJsonPath: String): Boolean = {
+    def compareElements: Boolean => Boolean = ignoreLength => {
+      (expectedArray |@| receivedArray) { (ja, ra) =>
+        if (ignoreLength || ja.length == ra.length) {
+          ja.zip(ra).zipWithIndex.forall { case (pair, i) =>
+            areEqual(beSelectivelyPermissive, matchingRules, pair._1, pair._2, accumulatedJsonPath + s"[$i]")
           }
-        } match {
-          case Some(matches) => matches
-          case None => false
+        } else {
+          false
         }
+      } match {
+        case Some(matches) => matches
+        case None => false
+      }
     }
+
+    matchArrayWithRules(matchingRules, expectedArray, receivedArray, accumulatedJsonPath) match {
+      case MatchedContinue => compareElements(true)
+      case MatchedFinish => true
+      case MatchFailed => false
+      case NoMatchRequired => compareElements(false)
+    }
+  }
 
   private def compareFields(beSelectivelyPermissive: Boolean, matchingRules: MatchingRules, expected: Json, received: Json, expectedFields: List[Json.JsonField], accumulatedJsonPath: String): Boolean = {
     if (!expectedFields.forall(f => received.hasField(f))) false
@@ -120,19 +126,25 @@ object PermissiveJsonEqualityHelper extends SharedJsonEqualityHelpers {
     }
   }
 
-  private def compareArrays(matchingRules: MatchingRules, expectedArray: Option[Json.JsonArray], receivedArray: Option[Json.JsonArray], accumulatedJsonPath: String): Boolean =
-    matchArrayWithRules(matchingRules, expectedArray, receivedArray, accumulatedJsonPath) match {
-      case Some(bool) => bool
-      case None =>
-        (expectedArray |@| receivedArray) { (ja, ra) =>
-          ja.zipWithIndex.forall { case (jo, i) =>
-            ra.exists(ro => areEqual(matchingRules, jo, ro, accumulatedJsonPath + s"[$i]"))
-          }
-        } match {
-          case Some(matches) => matches
-          case None => false
+  private def compareArrays(matchingRules: MatchingRules, expectedArray: Option[Json.JsonArray], receivedArray: Option[Json.JsonArray], accumulatedJsonPath: String): Boolean = {
+    def compareElements: Boolean = {
+      (expectedArray |@| receivedArray) { (ja, ra) =>
+        ja.zipWithIndex.forall { case (jo, i) =>
+          ra.exists(ro => areEqual(matchingRules, jo, ro, accumulatedJsonPath + s"[$i]"))
         }
+      } match {
+        case Some(matches) => matches
+        case None => false
+      }
     }
+
+    matchArrayWithRules(matchingRules, expectedArray, receivedArray, accumulatedJsonPath) match {
+      case MatchedContinue => compareElements
+      case MatchedFinish => true
+      case MatchFailed => false
+      case NoMatchRequired => compareElements
+    }
+  }
 
 
   private def compareFields(matchingRules: MatchingRules, expected: Json, received: Json, expectedFields: List[Json.JsonField], accumulatedJsonPath: String): Boolean =
@@ -151,7 +163,8 @@ object PermissiveJsonEqualityHelper extends SharedJsonEqualityHelpers {
 sealed trait SharedJsonEqualityHelpers {
 
   protected val findMatchingRule: String => Map[String, MatchingRule] => Option[MatchingRule] = (accumulatedJsonPath: String) => m => m.map(r => (r._1.replace("['", ".").replace("']", ""), r._2)).find { r =>
-    accumulatedJsonPath.length > 0 && r._1.endsWith(accumulatedJsonPath)
+    accumulatedJsonPath.length > 0 &&
+      { r._1.endsWith(accumulatedJsonPath) || WildCardRuleMatching.findMatchingRuleWithWildCards(accumulatedJsonPath)(r._1) }
   }.map(_._2)
 
   protected def compareValues(matchingRules: MatchingRules, expected: Json, received: Json, accumulatedJsonPath: String): Boolean =
@@ -172,13 +185,42 @@ sealed trait SharedJsonEqualityHelpers {
         expected == received
     }
 
-  protected def matchArrayWithRules(matchingRules: MatchingRules, expectedArray: Option[Json.JsonArray], receivedArray: Option[Json.JsonArray], accumulatedJsonPath: String): Option[Boolean] =
+  protected def matchArrayWithRules(matchingRules: MatchingRules, expectedArray: Option[Json.JsonArray], receivedArray: Option[Json.JsonArray], accumulatedJsonPath: String): ArrayMatchingStatus =
     (expectedArray |@| receivedArray) { (ja, ra) =>
       matchingRules >>= findMatchingRule(accumulatedJsonPath) >>= { rule =>
-        rule.min.map { arrayMin =>
-          receivedArray.length >= arrayMin
+        MatchingRule.unapply(rule) map {
+          case (None, None, Some(arrayMin)) =>
+            if(ra.length >= arrayMin) MatchedContinue
+            else MatchFailed
+
+          case (Some(matchType), None, Some(arrayMin)) if matchType == "type" =>
+            //Yay typed languages! We know the types are equal, they're both arrays!
+            if(ra.length >= arrayMin) MatchedContinue
+            else MatchFailed
+
+          case _ =>
+            NoMatchRequired
         }
       }
-    }.flatten
+    }.flatten.getOrElse(NoMatchRequired)
+
+}
+
+sealed trait ArrayMatchingStatus
+
+case object MatchedContinue extends ArrayMatchingStatus
+case object MatchedFinish extends ArrayMatchingStatus
+case object MatchFailed extends ArrayMatchingStatus
+case object NoMatchRequired extends ArrayMatchingStatus
+
+object WildCardRuleMatching {
+
+  val findMatchingRuleWithWildCards: String => String => Boolean = accumulatedJsonPath => rulePath =>
+    accumulatedJsonPath.matches(
+      rulePath
+        .replace("$.body", "")
+        .replace("[*]", "\\[\\d+\\]")
+        .replace(".*", "\\.[A-Za-z0-9-_]+")
+    )
 
 }
