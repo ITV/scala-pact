@@ -70,9 +70,12 @@ class RequestV2Spec extends PactSpecTester {
 //          fetchRequestSpec("/request/body/array at top level.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/array in different order xml.json")(StrictOnly),
 //          fetchRequestSpec("/request/body/array in different order.json")(StrictOnly),
+
           //--- Not implemented
 //          fetchRequestSpec("/request/body/array size less than required xml.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/body/array size less than required.json")(StrictAndNonStrict),
+          //--- Not implemented
+          fetchRequestSpec("/request/body/array size less than required.json")(StrictAndNonStrict)//,
+
 //          fetchRequestSpec("/request/body/array with at least one element matching by example xml.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/array with at least one element matching by example.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/array with at least one element not matching example type.json")(StrictAndNonStrict),
@@ -96,7 +99,7 @@ class RequestV2Spec extends PactSpecTester {
 //          fetchRequestSpec("/request/body/matches with regex with bracket notation xml.json")(StrictAndNonStrict),
 
           //--- Not implemented
-          fetchRequestSpec("/request/body/matches with regex with bracket notation.json")(StrictAndNonStrict)//,
+//          fetchRequestSpec("/request/body/matches with regex with bracket notation.json")(StrictAndNonStrict)//,
 
           //--- Not implemented
 //          fetchRequestSpec("/request/body/matches with regex xml.json")(StrictAndNonStrict),

@@ -27,7 +27,7 @@ object PactFileExamples {
     )
   )
 
-  val verySimpleAsString =
+  val verySimpleAsString: String =
     """{
       |  "provider" : {
       |    "name" : "provider"
@@ -65,8 +65,8 @@ object PactFileExamples {
           body = Option("""fish"""),
           matchingRules = Option(
             Map(
-              "$.headers.Accept" -> MatchingRule(`match` = "regex", regex = Option("\\w+")),
-              "$.headers.Content-Length" -> MatchingRule(`match` = "type", regex = None)
+              "$.headers.Accept" -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
+              "$.headers.Content-Length" -> MatchingRule(`match` = Option("type"), regex = None, min = None)
             )
           )
         ),
@@ -76,8 +76,8 @@ object PactFileExamples {
           body = Option("""{"fish":["cod","haddock","flying"]}"""),
           matchingRules = Option(
             Map(
-              "$.headers.Accept" -> MatchingRule(`match` = "regex", regex = Option("\\w+")),
-              "$.headers.Content-Length" -> MatchingRule(`match` = "type", regex = None)
+              "$.headers.Accept" -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
+              "$.headers.Content-Length" -> MatchingRule(`match` = Option("type"), regex = None, min = None)
             )
           )
         )
@@ -103,7 +103,7 @@ object PactFileExamples {
     )
   )
 
-  val simpleAsString = """{
+  val simpleAsString: String = """{
                          |  "provider" : {
                          |    "name" : "provider"
                          |  },

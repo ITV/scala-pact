@@ -28,8 +28,8 @@ object PactImplicits {
     "status", "headers", "body", "matchingRules"
   )
 
-  implicit lazy val MatchingRuleCodecJson: CodecJson[MatchingRule] = casecodec2(MatchingRule.apply, MatchingRule.unapply)(
-    "match", "regex"
+  implicit lazy val MatchingRuleCodecJson: CodecJson[MatchingRule] = casecodec3(MatchingRule.apply, MatchingRule.unapply)(
+    "match", "regex", "min"
   )
 }
 
@@ -43,7 +43,7 @@ case class InteractionRequest(method: Option[String], path: Option[String], quer
 }
 case class InteractionResponse(status: Option[Int], headers: Option[Map[String, String]], body: Option[String], matchingRules: Option[Map[String, MatchingRule]])
 
-case class MatchingRule(`match`: String, regex: Option[String])
+case class MatchingRule(`match`: Option[String], regex: Option[String], min: Option[Int])
 
 object ScalaPactReader {
 

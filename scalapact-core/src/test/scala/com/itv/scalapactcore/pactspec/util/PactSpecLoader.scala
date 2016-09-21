@@ -78,7 +78,7 @@ object SpecReader {
 object JsonBodySpecialCaseHelper {
 
   val extractMatches: String => String \/ Boolean = json =>
-    json.parse.disjunction.map(j => (j.hcursor --\ "match").focus.flatMap(_.bool).contains(true))
+    json.parse.disjunction.map(j => (j.hcursor --\ "match").focus.flatMap(_.bool).exists(_ == true)) //Uses exists for 2.10 compt
       .leftMap(e => "Extracting 'match': " + e)
 
   val extractComment: String => String \/ String = json =>

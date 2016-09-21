@@ -221,7 +221,7 @@ class InteractionManagerSpec extends FunSpec with Matchers {
           query = None,
           body = None,
           matchingRules = Map(
-            "$.headers.X-Trace-Id" -> MatchingRule("regex", "^.{0,38}$")
+            "$.headers.X-Trace-Id" -> MatchingRule("regex", "^.{0,38}$", min = None)
           )
         ),
         response = InteractionResponse(

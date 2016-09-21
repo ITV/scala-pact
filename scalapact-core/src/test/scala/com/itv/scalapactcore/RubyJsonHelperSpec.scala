@@ -31,8 +31,8 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
           body = None,
           matchingRules = Option(
             Map(
-              "$.headers.Accept" -> MatchingRule(`match` = "regex", regex = Option("\\w+")),
-              "$.headers.Content-Length" -> MatchingRule(`match` = "type", regex = None)
+              "$.headers.Accept" -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
+              "$.headers.Content-Length" -> MatchingRule(`match` = Option("type"), regex = None, min = None)
             )
           )
         ),
@@ -42,8 +42,8 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
           body = None,
           matchingRules = Option(
             Map(
-              "$.headers.Accept" -> MatchingRule(`match` = "regex", regex = Option("\\w+")),
-              "$.headers.Content-Length" -> MatchingRule(`match` = "type", regex = None)
+              "$.headers.Accept" -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
+              "$.headers.Content-Length" -> MatchingRule(`match` = Option("type"), regex = None, min = None)
             )
           )
         )

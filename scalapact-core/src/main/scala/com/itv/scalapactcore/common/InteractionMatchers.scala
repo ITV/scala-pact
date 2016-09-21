@@ -82,7 +82,7 @@ object InteractionMatchers {
 
       val strippedMatchingRules = matchingRules.map { mmr =>
         mmr
-          .filter(_._1.startsWith("$.headers."))
+          .filter(mr => mr._1.startsWith("$.headers.") && mr._2.`match`.exists(_ == "regex")) //Use exists for 2.10 compat
           .map(mr => (mr._1.substring("$.headers.".length).toLowerCase, mr._2))
       }
 

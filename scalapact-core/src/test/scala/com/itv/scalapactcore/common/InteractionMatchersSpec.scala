@@ -125,7 +125,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         )
       )
 
-      matchHeaders(Option(Map("$.headers.fish" -> MatchingRule("regex", "\\w+"))))(expected)(received) shouldEqual true
+      matchHeaders(Option(Map("$.headers.fish" -> MatchingRule("regex", "\\w+", min = None))))(expected)(received) shouldEqual true
     }
 
     it("should be able to use regex to match more realistic custom headers") {
@@ -142,8 +142,8 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         )
       )
 
-      matchHeaders(Option(Map("$.headers.X-Trace-Id" -> MatchingRule("regex", "^.{0,38}$"))))(expected)(received) shouldEqual true
-      matchHeaders(Option(Map("$.headers.X-Trace-Id" -> MatchingRule("regex", "^fish"))))(expected)(received) shouldEqual false
+      matchHeaders(Option(Map("$.headers.X-Trace-Id" -> MatchingRule("regex", "^.{0,38}$", min = None))))(expected)(received) shouldEqual true
+      matchHeaders(Option(Map("$.headers.X-Trace-Id" -> MatchingRule("regex", "^fish", min = None))))(expected)(received) shouldEqual false
     }
 
     it("should be able to use regex to match some headers out of sequence") {
@@ -160,7 +160,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         )
       )
 
-      matchHeaders(Option(Map("$.headers.fish" -> MatchingRule("regex", "\\w+"))))(expected)(received) shouldEqual true
+      matchHeaders(Option(Map("$.headers.fish" -> MatchingRule("regex", "\\w+", min = None))))(expected)(received) shouldEqual true
     }
 
   }
