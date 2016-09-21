@@ -8,6 +8,8 @@ import com.itv.scalapactcore.common.InteractionMatchers.MatchingRules
 import scalaz._
 import Scalaz._
 
+import ColourOuput._
+
 object ScalaPactJsonEquality {
 
   implicit def toJsonEqualityWrapper(json: Json): JsonEqualityWrapper = JsonEqualityWrapper(json)
@@ -33,7 +35,7 @@ object ScalaPactJsonEquality {
 
 }
 
-object StrictJsonEqualityHelper {
+object StrictJsonEqualityHelper extends SharedJsonEqualityHelpers {
 
   def areEqual(beSelectivelyPermissive: Boolean, matchingRules: MatchingRules, expected: Json, received: Json, accumulatedJsonPath: String): Boolean = {
     expected match {
@@ -51,7 +53,9 @@ object StrictJsonEqualityHelper {
   private def compareArrays(beSelectivelyPermissive: Boolean, matchingRules: MatchingRules, expectedArray: Option[Json.JsonArray], receivedArray: Option[Json.JsonArray], accumulatedJsonPath: String): Boolean = {
     (expectedArray |@| receivedArray) { (ja, ra) =>
       if (ja.length == ra.length) {
-        ja.zip(ra).forall(pair => areEqual(beSelectivelyPermissive, matchingRules, pair._1, pair._2, accumulatedJsonPath))
+        ja.zip(ra).zipWithIndex.forall { case (pair, i) =>
+          areEqual(beSelectivelyPermissive, matchingRules, pair._1, pair._2, accumulatedJsonPath + s"[$i]")
+        }
       } else {
         false
       }
@@ -67,7 +71,7 @@ object StrictJsonEqualityHelper {
       if(beSelectivelyPermissive) {
         expectedFields.forall { field =>
 
-          (expected.field(field) |@| received.field(field)){ areEqual(beSelectivelyPermissive, matchingRules, _, _, accumulatedJsonPath) } match {
+          (expected.field(field) |@| received.field(field)){ areEqual(beSelectivelyPermissive, matchingRules, _, _, accumulatedJsonPath + s".${field.toString}") } match {
             case Some(bool) => bool
             case None => false
           }
@@ -76,7 +80,7 @@ object StrictJsonEqualityHelper {
         if (expected.objectFieldsOrEmpty.length == received.objectFieldsOrEmpty.length) {
           expectedFields.forall { field =>
             (expected.field(field) |@| received.field(field)) { (e, r) =>
-              areEqual(beSelectivelyPermissive, matchingRules, e, r, accumulatedJsonPath)
+              areEqual(beSelectivelyPermissive, matchingRules, e, r, accumulatedJsonPath + s".${field.toString}")
             } match {
               case Some(bool) => bool
               case None => false
@@ -89,23 +93,9 @@ object StrictJsonEqualityHelper {
     }
   }
 
-  private def compareValues(matchingRules: MatchingRules, expected: Json, received: Json, accumulatedJsonPath: String): Boolean = {
-
-    val findMatchingRule = (m: Map[String, MatchingRule]) => m.find(r => r._1.endsWith(accumulatedJsonPath)).map(_._2)
-
-    matchingRules >>= findMatchingRule match {
-      case Some(rule) if rule.`match` == "type" =>
-        expected.name == received.name
-
-      case None =>
-        expected == received
-    }
-
-  }
-
 }
 
-object PermissiveJsonEqualityHelper {
+object PermissiveJsonEqualityHelper extends SharedJsonEqualityHelpers {
 
   /***
     * Permissive equality means that the elements and fields defined in the 'expected'
@@ -129,8 +119,8 @@ object PermissiveJsonEqualityHelper {
 
   private def compareArrays(matchingRules: MatchingRules, expectedArray: Option[Json.JsonArray], receivedArray: Option[Json.JsonArray], accumulatedJsonPath: String): Boolean =
     (expectedArray |@| receivedArray) { (ja, ra) =>
-      ja.forall { jo =>
-        ra.exists(ro => areEqual(matchingRules, jo, ro, accumulatedJsonPath))
+      ja.zipWithIndex.forall { case (jo, i) =>
+        ra.exists(ro => areEqual(matchingRules, jo, ro, accumulatedJsonPath + s"[$i]"))
       }
     } match {
       case Some(matches) => matches
@@ -142,7 +132,6 @@ object PermissiveJsonEqualityHelper {
     if(!expectedFields.forall(f => received.hasField(f))) false
     else {
       expectedFields.forall { field =>
-
         (expected.field(field) |@| received.field(field)){ (e, r) => areEqual(matchingRules, e, r, accumulatedJsonPath + s".${field.toString}") } match {
           case Some(bool) => bool
           case None => false
@@ -150,13 +139,26 @@ object PermissiveJsonEqualityHelper {
       }
     }
 
-  private def compareValues(matchingRules: MatchingRules, expected: Json, received: Json, accumulatedJsonPath: String): Boolean = {
+}
 
-    val findMatchingRule = (m: Map[String, MatchingRule]) => m.find(r => r._1.endsWith(accumulatedJsonPath)).map(_._2)
+sealed trait SharedJsonEqualityHelpers {
+
+  protected def compareValues(matchingRules: MatchingRules, expected: Json, received: Json, accumulatedJsonPath: String): Boolean = {
+
+    val findMatchingRule = (m: Map[String, MatchingRule]) => m.find(r => accumulatedJsonPath.length > 0 && r._1.endsWith(accumulatedJsonPath)).map(_._2)
 
     matchingRules >>= findMatchingRule match {
       case Some(rule) if rule.`match` == "type" =>
         expected.name == received.name
+
+      case Some(rule) if received.isString && rule.`match` == "regex" && rule.regex.isDefined =>
+        rule.regex.exists { regexRule =>
+          received.string.exists(_.matches(regexRule))
+        }
+
+      case Some(rule) =>
+        println(("Found unknown rule '" + rule + "' for path '" + accumulatedJsonPath + "' while matching " + expected.toString + " with " + received.toString()).yellow)
+        false
 
       case None =>
         expected == received

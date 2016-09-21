@@ -96,11 +96,11 @@ class RequestV2Spec extends PactSpecTester {
 //          fetchRequestSpec("/request/body/matches with regex with bracket notation xml.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/matches with regex with bracket notation.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/matches with regex xml.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/body/matches with regex.json")(StrictAndNonStrict),
           //--- Not implemented
 
-          fetchRequestSpec("/request/body/matches with type.json")(StrictAndNonStrict)//,
+          fetchRequestSpec("/request/body/matches with regex.json")(StrictAndNonStrict)//,
 
+//          fetchRequestSpec("/request/body/matches with type.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/matches xml.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/matches.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/missing body found when empty expected.json")(StrictAndNonStrict),
