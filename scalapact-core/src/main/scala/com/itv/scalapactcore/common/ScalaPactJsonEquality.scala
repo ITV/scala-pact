@@ -145,7 +145,9 @@ sealed trait SharedJsonEqualityHelpers {
 
   protected def compareValues(matchingRules: MatchingRules, expected: Json, received: Json, accumulatedJsonPath: String): Boolean = {
 
-    val findMatchingRule = (m: Map[String, MatchingRule]) => m.find(r => accumulatedJsonPath.length > 0 && r._1.endsWith(accumulatedJsonPath)).map(_._2)
+    val findMatchingRule = (m: Map[String, MatchingRule]) => m.map(r => (r._1.replace("['", ".").replace("']", ""), r._2)).find { r =>
+      accumulatedJsonPath.length > 0 && r._1.endsWith(accumulatedJsonPath)
+    }.map(_._2)
 
     matchingRules >>= findMatchingRule match {
       case Some(rule) if rule.`match` == "type" =>
