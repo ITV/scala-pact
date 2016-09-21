@@ -5,6 +5,7 @@ import org.scalatest.{FunSpec, Matchers}
 
 import scala.language.implicitConversions
 
+//TODO: Deprecate in favour of Pact Spec tests?
 class InteractionMatchersSpec extends FunSpec with Matchers {
 
   implicit def toOption[A](thing: A): Option[A] = Option(thing)
@@ -186,27 +187,27 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
 
       val expected = "hello there!"
 
-      matchBodies(expected)(expected) shouldEqual true
-      matchBodies(expected)("Yo ho!") shouldEqual false
+      matchBodies(None)(expected)(expected) shouldEqual true
+      matchBodies(None)(expected)("Yo ho!") shouldEqual false
 
     }
 
     it("should be able to handle missing bodies and no expectation of bodies") {
 
       withClue("None expected, none received") {
-        matchBodies(None)(None) shouldEqual true
+        matchBodies(None)(None)(None) shouldEqual true
       }
 
       withClue("Some expected, none received") {
-        matchBodies(Some("hello"))(None) shouldEqual false
+        matchBodies(None)(Some("hello"))(None) shouldEqual false
       }
 
       // Forgiving about what we receive
       withClue("None expected, some received") {
-        matchBodies(None)(Some("hello")) shouldEqual true
+        matchBodies(None)(None)(Some("hello")) shouldEqual true
       }
       withClue("Some expected, some received") {
-        matchBodies(Some("hello"))(Some("hello")) shouldEqual true
+        matchBodies(None)(Some("hello"))(Some("hello")) shouldEqual true
       }
 
     }
@@ -238,15 +239,15 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         """.stripMargin
 
       withClue("Same json no hal") {
-        matchBodies(expected)(expected) shouldEqual true
+        matchBodies(None)(expected)(expected) shouldEqual true
       }
 
       withClue("Same json + hal") {
-        matchBodies(expected)(expected) shouldEqual true
+        matchBodies(None)(expected)(expected) shouldEqual true
       }
 
       withClue("Expected compared to received") {
-        matchBodies(expected)(received) shouldEqual true
+        matchBodies(None)(expected)(received) shouldEqual true
       }
 
     }
@@ -268,7 +269,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         </fish-supper>
 
       withClue("Same xml") {
-        matchBodies(expected1.toString())(received1.toString()) shouldEqual true
+        matchBodies(None)(expected1.toString())(received1.toString()) shouldEqual true
       }
 
       val expected2 =
@@ -286,7 +287,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         </fish-supper>
 
       withClue("Different xml") {
-        matchBodies(expected2.toString())(received2.toString()) shouldEqual false
+        matchBodies(None)(expected2.toString())(received2.toString()) shouldEqual false
       }
 
       val expected3 =
@@ -306,7 +307,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         </fish-supper>
 
       withClue("Received xml with additional fields and attributes") {
-        matchBodies(expected3.toString())(received3.toString()) shouldEqual true
+        matchBodies(None)(expected3.toString())(received3.toString()) shouldEqual true
       }
 
       val expected4 =
@@ -326,7 +327,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         </fish-supper>
 
       withClue("Received xml with missing fields and attributes") {
-        matchBodies(expected4.toString())(received4.toString()) shouldEqual false
+        matchBodies(None)(expected4.toString())(received4.toString()) shouldEqual false
       }
 
     }

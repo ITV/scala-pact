@@ -15,6 +15,8 @@ import scalaz._
 
 object InteractionMatchers {
 
+  type MatchingRules = Option[Map[String, MatchingRule]]
+
   lazy val matchRequest: Boolean => List[Interaction] => InteractionRequest => \/[String, Interaction] = strictMatching => interactions => received =>
     interactions.find { ir =>
       if(strictMatching) isStrictRequestMatch(ir)(received)
@@ -28,13 +30,13 @@ object InteractionMatchers {
     matchMethods(ir.request.method.orElse(Option("GET")))(received.method) &&
       matchHeaders(ir.request.matchingRules)(ir.request.headers)(received.headers) &&
       matchPathsStrict(ir.request.path.orElse(Option("/")))(ir.request.query)(received.path)(received.query) &&
-      matchBodiesStrict(false)(ir.request.body)(received.body)
+      matchBodiesStrict(false)(ir.request.matchingRules)(ir.request.body)(received.body)
 
   lazy val isNonStrictRequestMatch: Interaction => InteractionRequest => Boolean = ir => received =>
     matchMethods(ir.request.method.orElse(Option("GET")))(received.method) &&
       matchHeaders(ir.request.matchingRules)(ir.request.headers)(received.headers) &&
       matchPaths(ir.request.path.orElse(Option("/")))(ir.request.query)(received.path)(received.query) &&
-      matchBodies(ir.request.body)(received.body)
+      matchBodies(ir.request.matchingRules)(ir.request.body)(received.body)
 
   lazy val matchResponse: Boolean => List[Interaction] => InteractionResponse => \/[String, Interaction] = strictMatching => interactions => received =>
     interactions.find{ ir =>
@@ -48,12 +50,12 @@ object InteractionMatchers {
   lazy val isStrictResponseMatch: Interaction => InteractionResponse => Boolean = ir => received =>
     matchStatusCodes(ir.response.status)(received.status) &&
       matchHeaders(ir.response.matchingRules)(ir.response.headers)(received.headers) &&
-      matchBodiesStrict(true)(ir.response.body)(received.body)
+      matchBodiesStrict(true)(ir.request.matchingRules)(ir.response.body)(received.body)
 
   lazy val isNonStrictResponseMatch: Interaction => InteractionResponse => Boolean = ir => received =>
     matchStatusCodes(ir.response.status)(received.status) &&
       matchHeaders(ir.response.matchingRules)(ir.response.headers)(received.headers) &&
-      matchBodies(ir.response.body)(received.body)
+      matchBodies(ir.request.matchingRules)(ir.response.body)(received.body)
 
   lazy val matchStatusCodes: Option[Int] => Option[Int] => Boolean = expected => received =>
     generalMatcher(expected, received, (e: Int, r: Int) => e == r)
@@ -61,7 +63,7 @@ object InteractionMatchers {
   lazy val matchMethods: Option[String] => Option[String] => Boolean = expected => received =>
     generalMatcher(expected, received, (e: String, r: String) => e.toUpperCase == r.toUpperCase)
 
-  lazy val matchHeaders: Option[Map[String, MatchingRule]] => Option[Map[String, String]] => Option[Map[String, String]] => Boolean = matchingRules => expected => received => {
+  lazy val matchHeaders: MatchingRules => Option[Map[String, String]] => Option[Map[String, String]] => Boolean = matchingRules => expected => received => {
 
     val legalCharSeparators = List('(',')','<','>','@',',',';',':','\\','"','/','[',']','?','=','{','}')
 
@@ -141,10 +143,10 @@ object InteractionMatchers {
     })
   }
 
-  lazy val matchBodies: Option[String] => Option[String] => Boolean = expected => received =>
+  lazy val matchBodies: MatchingRules => Option[String] => Option[String] => Boolean = matchingRules => expected => received =>
     expected match {
       case Some(str) if stringIsJson(str) =>
-        generalMatcher(expected, received, (e: String, r: String) => (e.parseOption |@| r.parseOption) { _ =~ _ }.exists(_ == true)) // Use exists instead of contains for backwards compatibility with 2.10
+        generalMatcher(expected, received, (e: String, r: String) => (e.parseOption |@| r.parseOption) { (e, r) => (e =~ r)(matchingRules) }.exists(_ == true)) // Use exists instead of contains for backwards compatibility with 2.10
 
       case Some(str) if stringIsXml(str) =>
         generalMatcher(expected, received, (e: String, r: String) => (safeStringToXml(e) |@| safeStringToXml(r)) { _ =~ _ }.exists(_ == true)) // Use exists instead of contains for backwards compatibility with 2.10
@@ -153,13 +155,13 @@ object InteractionMatchers {
         generalMatcher(expected, received, (e: String, r: String) => PlainTextEquality.check(e, r))
     }
 
-  lazy val matchBodiesStrict: Boolean => Option[String] => Option[String] => Boolean = beSelectivelyPermissive => expected => received =>
+  lazy val matchBodiesStrict: Boolean => MatchingRules => Option[String] => Option[String] => Boolean = beSelectivelyPermissive => matchingRules => expected => received =>
     expected match {
       case Some(str) if stringIsJson(str) =>
-        generalMatcher(expected, received, (e: String, r: String) => (e.parseOption |@| r.parseOption) { (a, b) => (a =<>= b)(beSelectivelyPermissive) }.exists(_ == true)) // Use exists instead of contains for backwards compatibility with 2.10
+        generalMatcher(expected, received, (e: String, r: String) => (e.parseOption |@| r.parseOption) { (e, r) => (e =<>= r)(beSelectivelyPermissive)(matchingRules) }.exists(_ == true)) // Use exists instead of contains for backwards compatibility with 2.10
 
       case Some(str) if stringIsXml(str) =>
-        generalMatcher(expected, received, (e: String, r: String) => (safeStringToXml(e) |@| safeStringToXml(r)) { (a, b) => (a =<>= b)(beSelectivelyPermissive) }.exists(_ == true)) // Use exists instead of contains for backwards compatibility with 2.10
+        generalMatcher(expected, received, (e: String, r: String) => (safeStringToXml(e) |@| safeStringToXml(r)) { (e, r) => (e =<>= r)(beSelectivelyPermissive) }.exists(_ == true)) // Use exists instead of contains for backwards compatibility with 2.10
 
       case _ =>
         generalMatcher(expected, received, (e: String, r: String) => PlainTextEquality.check(e, r))
