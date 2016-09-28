@@ -82,9 +82,9 @@ class RequestV2Spec extends PactSpecTester {
           //--- Not implemented
 
           fetchRequestSpec("/request/body/array with at least one element matching by example.json")(StrictAndNonStrict)//,
+          //fetchRequestSpec("/request/body/array with at least one element not matching example type.json")(StrictAndNonStrict)//,
 
           //--- Not implemented
-//          fetchRequestSpec("/request/body/array with at least one element not matching example type.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/array with nested array that does not match.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/array with nested array that matches.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/array with regular expression in element xml.json")(StrictAndNonStrict),
