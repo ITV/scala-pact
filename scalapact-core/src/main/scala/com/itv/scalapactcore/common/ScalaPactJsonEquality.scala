@@ -291,9 +291,39 @@ object WildCardRuleMatching {
         case Nil =>
           listArrayMatchStatusToSingle(acc)
 
-        case h::Nil if h == "[*]" =>
+        case h::Nil if h == "[*]" && ruleAndContext.rule.`match`.exists(_ == "type") =>
           println("Got 1: " + h)
-          rec(Nil, List(RuleMatchFailure))
+
+          val checkAll = ruleAndContext.rule.`match` match {
+            case Some(r) if r == "type" =>
+                expectedArray.headOption.map {
+                  case x if x.isString => receivedArray.forall(_.isString)
+                  case x if x.isArray => receivedArray.forall(_.isArray)
+                  case x if x.isBool => receivedArray.forall(_.isBool)
+                  case x if x.isNull => receivedArray.forall(_.isNull)
+                  case x if x.isNumber => receivedArray.forall(_.isNumber)
+                  case x if x.isObject => receivedArray.forall(_.isObject)
+                }
+                .map(b => if(b) RuleMatchSuccess else RuleMatchFailure)
+                .getOrElse {
+                  println("Required type check but gave no example to derive type from.".yellow)
+                  RuleMatchFailure
+                }
+
+            case Some(r) if r == "regex" =>
+              val bool = receivedArray.forall { p =>
+                p.isString && p.string.exists(s => s.matches(ruleAndContext.rule.regex.getOrElse(".")))
+              }
+
+              if(bool) RuleMatchSuccess else RuleMatchFailure
+
+            case t =>
+              println(("Unknown test type: " + t).yellow)
+              RuleMatchFailure
+          }
+
+
+          rec(Nil, List(checkAll))
 
         case h::Nil =>
           println("Unexpected next token during matching: " + h)
