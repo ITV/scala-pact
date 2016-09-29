@@ -237,11 +237,7 @@ sealed trait SharedJsonEqualityHelpers {
         case Some(rules) =>
           println("Rules:\n - " + rules.mkString("\n - "))
 
-          rules.map(r => checkRule(accumulatedJsonPath, r, ja, ra)) match {
-            case l: List[ArrayMatchingStatus] if l.contains(RuleMatchFailure) => RuleMatchFailure
-            case l: List[ArrayMatchingStatus] if l.contains(RuleMatchSuccess) => RuleMatchSuccess
-            case _ => NoRuleMatchRequired
-          }
+          WildCardRuleMatching.listArrayMatchStatusToSingle(rules.map(r => checkRule(accumulatedJsonPath, r, ja, ra)))
 
         case None =>
           NoRuleMatchRequired
@@ -261,6 +257,12 @@ case class MatchingRuleContext(path: String, rule: MatchingRule)
 
 object WildCardRuleMatching {
 
+  val listArrayMatchStatusToSingle: List[ArrayMatchingStatus] => ArrayMatchingStatus = {
+    case l: List[ArrayMatchingStatus] if l.contains(RuleMatchFailure) => RuleMatchFailure
+    case l: List[ArrayMatchingStatus] if l.contains(RuleMatchSuccess) => RuleMatchSuccess
+    case _ => NoRuleMatchRequired
+  }
+
   val findMatchingRuleWithWildCards: String => String => Boolean = accumulatedJsonPath => rulePath => {
     val regexMatch = accumulatedJsonPath.matches(
       rulePath
@@ -271,8 +273,6 @@ object WildCardRuleMatching {
 
     val containsPathToArray = rulePath.replace("$.body", "").replaceAll("\\[\\*\\]", "").contains(accumulatedJsonPath.replaceAll("\\[\\d+\\]", ""))
 
-//    println("Wildcard: " + regexMatch + ", " + containsPathToArray)
-
     regexMatch || containsPathToArray
   }
 
@@ -282,12 +282,31 @@ object WildCardRuleMatching {
     println(expectedArray)
     println(receivedArray)
 
-    val updated = ruleAndContext.copy(path = ruleAndContext.path.replace(currentPath, ""))
+    val pathSegments = ruleAndContext.copy(path = ruleAndContext.path.replace(currentPath, "")).path.split('.').toList
 
-    println(updated)
+    println(pathSegments)
 
+    def rec(remainingSegments: List[String], acc: List[ArrayMatchingStatus]): ArrayMatchingStatus = {
+      remainingSegments match {
+        case Nil =>
+          listArrayMatchStatusToSingle(acc)
 
-    RuleMatchFailure
+        case h::Nil if h == "[*]" =>
+          println("Got 1: " + h)
+          rec(Nil, List(RuleMatchFailure))
+
+        case h::Nil =>
+          println("Unexpected next token during matching: " + h)
+          rec(Nil, List(RuleMatchFailure))
+
+        case h::t =>
+          println("Got 3: " + h)
+          rec(t, List(RuleMatchFailure))
+      }
+
+    }
+
+    rec(pathSegments, Nil)
   }
 
 }
