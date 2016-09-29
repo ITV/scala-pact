@@ -1,5 +1,8 @@
 package com.itv.scalapactcore.common
 
+import argonaut._
+import Argonaut._
+import com.itv.scalapactcore.MatchingRule
 import org.scalatest.{FunSpec, Matchers}
 
 class WildCardRuleMatchingSpec extends FunSpec with Matchers {
@@ -51,6 +54,197 @@ class WildCardRuleMatchingSpec extends FunSpec with Matchers {
       WildCardRuleMatching.findMatchingRuleWithWildCards(".animals[0].dogs[2].collies[1]")(rule) shouldEqual false
       WildCardRuleMatching.findMatchingRuleWithWildCards(".animals[0].dogs[2].collies[1].rover")(rule) shouldEqual false
 
+    }
+
+  }
+
+  describe("Matching Json against wildcard rules") {
+
+    it("Should pass in a simple value based case") {
+
+      val ruleAndContext =
+        MatchingRuleContext(
+          path = ".animals[*]",
+          rule = MatchingRule(
+            Option("type"),
+            regex = None,
+            min = None
+          )
+        )
+
+      val expectedArray: Json.JsonArray =
+        """
+          |[
+          |  "Mary"
+          |]
+          |""".stripMargin
+          .parseOption
+          .flatMap(p => p.array)
+          .get
+
+      val receivedArray: Json.JsonArray =
+        """
+          |[
+          |  "Mary","John"
+          |]
+          |""".stripMargin
+          .parseOption
+          .flatMap(p => p.array)
+          .get
+
+      val result = WildCardRuleMatching.arrayRuleMatchWithWildcards(".animals")(ruleAndContext)(expectedArray)(receivedArray)
+
+      result shouldEqual RuleMatchSuccess
+    }
+
+    it("Should pass in a simple case") {
+
+      val ruleAndContext =
+        MatchingRuleContext(
+          path = ".animals[*].*",
+          rule = MatchingRule(
+            Option("type"),
+            regex = None,
+            min = None
+          )
+        )
+
+      val expectedArray: Json.JsonArray =
+        """
+          |[
+          |  {
+          |    "name" : "Mary"
+          |  }
+          |]
+          |""".stripMargin
+          .parseOption
+          .flatMap(p => p.array)
+          .get
+
+      val receivedArray: Json.JsonArray =
+        """
+          |[
+          |  {
+          |    "name" : "Mary"
+          |  },
+          |  {
+          |    "name" : "John"
+          |  }
+          |]
+          |""".stripMargin
+          .parseOption
+          .flatMap(p => p.array)
+          .get
+
+      val result = WildCardRuleMatching.arrayRuleMatchWithWildcards(".animals")(ruleAndContext)(expectedArray)(receivedArray)
+
+      result shouldEqual RuleMatchSuccess
+    }
+
+    it("Should fail in a simple case") {
+
+      val ruleAndContext =
+        MatchingRuleContext(
+          path = ".animals[*].*",
+          rule = MatchingRule(
+            Option("type"),
+            regex = None,
+            min = None
+          )
+        )
+
+      val expectedArray: Json.JsonArray =
+        """
+          |[
+          |  {
+          |    "name" : "Mary"
+          |  }
+          |]
+          |""".stripMargin
+          .parseOption
+          .flatMap(p => p.array)
+          .get
+
+      val receivedArray: Json.JsonArray =
+        """
+          |[
+          |  {
+          |    "name" : "Mary"
+          |  },
+          |  {
+          |    "name" : 1
+          |  }
+          |]
+          |""".stripMargin
+          .parseOption
+          .flatMap(p => p.array)
+          .get
+
+      val result = WildCardRuleMatching.arrayRuleMatchWithWildcards(".animals")(ruleAndContext)(expectedArray)(receivedArray)
+
+      result shouldEqual RuleMatchFailure
+    }
+
+    it("Should succeed in a nested case") {
+
+      val ruleAndContext =
+        MatchingRuleContext(
+          path = ".animals[*].dogs[*].*",
+          rule = MatchingRule(
+            Option("type"),
+            regex = None,
+            min = None
+          )
+        )
+
+      val expectedArray: Json.JsonArray =
+        """
+          |[
+          |  {
+          |    "name" : "Mary",
+          |    "dogs" : [
+          |      {
+          |        "breed" : "collie"
+          |      }
+          |    ]
+          |  }
+          |]
+          |""".stripMargin
+          .parseOption
+          .flatMap(p => p.array)
+          .get
+
+      val receivedArray: Json.JsonArray =
+        """
+          |[
+          |  {
+          |    "name" : "Mary",
+          |    "dogs" : [
+          |      {
+          |        "breed" : "collie"
+          |      }
+          |    ]
+          |  },
+          |  {
+          |    "name" : "John",
+          |    "dogs" : [
+          |      {
+          |        "breed" : "collie"
+          |      },
+          |      {
+          |        "breed" : "GSD"
+          |      }
+          |    ]
+          |  }
+          |]
+          |""".stripMargin
+          .parseOption
+          .flatMap(p => p.array)
+          .get
+
+      val result = WildCardRuleMatching.arrayRuleMatchWithWildcards(".animals")(ruleAndContext)(expectedArray)(receivedArray)
+
+      result shouldEqual RuleMatchSuccess
     }
 
   }

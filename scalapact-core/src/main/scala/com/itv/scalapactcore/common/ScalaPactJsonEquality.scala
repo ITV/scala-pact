@@ -166,8 +166,6 @@ object PermissiveJsonEqualityHelper extends SharedJsonEqualityHelpers {
 
 sealed trait SharedJsonEqualityHelpers {
 
-  case class MatchingRuleContext(path: String, rule: MatchingRule)
-
   protected val findMatchingRules: String => Map[String, MatchingRule] => Option[List[MatchingRuleContext]] = accumulatedJsonPath => m => {
 //    println(accumulatedJsonPath)
 //    println(m)
@@ -213,19 +211,22 @@ sealed trait SharedJsonEqualityHelpers {
             else RuleMatchFailure
 
           case (Some(matchType), None, Some(arrayMin)) if matchType == "type" =>
-            //Yay typed languages! We know the types are equal, they're both arrays!
+            // Yay typed languages! We know the types are equal, they're both arrays!
             if (ra.length >= arrayMin) RuleMatchSuccess
             else RuleMatchFailure
 
           case (Some(matchType), None, None) if matchType == "type" =>
-            //Yay typed languages! We know the types are equal, they're both arrays!
+            // Yay typed languages! We know the types are equal, they're both arrays!
             RuleMatchSuccess
 
           case _ =>
             NoRuleMatchRequired
         }.getOrElse(NoRuleMatchRequired)
+      } else if(ruleAndContext.path.contains("*")) {
+        // We have a rule that isn't a simple match on the path and includes a wildcard.
+        WildCardRuleMatching.arrayRuleMatchWithWildcards(currentPath)(ruleAndContext)(ea)(ra)
       } else {
-        println(currentPath + " : " + ruleAndContext)
+        println(("Unknown rule type: '" + ruleAndContext.rule + "' for path '" + ruleAndContext.path).yellow)
         RuleMatchFailure
       }
     }
@@ -246,28 +247,6 @@ sealed trait SharedJsonEqualityHelpers {
           NoRuleMatchRequired
 
       }
-
-      //      >>= { rules =>
-      //        rules
-      //        rules.map { rule =>
-      //          MatchingRule.unapply(rule) map {
-      //            case (None, None, Some(arrayMin)) =>
-      //              if(ra.length >= arrayMin) RuleMatchSuccess
-      //              else RuleMatchFailure
-      //
-      //            case (Some(matchType), None, Some(arrayMin)) if matchType == "type" =>
-      //              //Yay typed languages! We know the types are equal, they're both arrays!
-      //              if(ra.length >= arrayMin) RuleMatchSuccess
-      //              else RuleMatchFailure
-      //
-      //            case _ =>
-      //              NoRuleMatchRequired
-      //          }.getOrElse(NoRuleMatchRequired)
-      //        }
-
-
-      //      }
-
     }.getOrElse(NoRuleMatchRequired)
   }
 
@@ -277,6 +256,8 @@ sealed trait ArrayMatchingStatus
 case object RuleMatchSuccess extends ArrayMatchingStatus
 case object RuleMatchFailure extends ArrayMatchingStatus
 case object NoRuleMatchRequired extends ArrayMatchingStatus
+
+case class MatchingRuleContext(path: String, rule: MatchingRule)
 
 object WildCardRuleMatching {
 
@@ -293,6 +274,20 @@ object WildCardRuleMatching {
 //    println("Wildcard: " + regexMatch + ", " + containsPathToArray)
 
     regexMatch || containsPathToArray
+  }
+
+  val arrayRuleMatchWithWildcards: String => MatchingRuleContext => Json.JsonArray => Json.JsonArray => ArrayMatchingStatus = currentPath => ruleAndContext => expectedArray => receivedArray => {
+    println("----")
+    println(currentPath + " : " + ruleAndContext)
+    println(expectedArray)
+    println(receivedArray)
+
+    val updated = ruleAndContext.copy(path = ruleAndContext.path.replace(currentPath, ""))
+
+    println(updated)
+
+
+    RuleMatchFailure
   }
 
 }
