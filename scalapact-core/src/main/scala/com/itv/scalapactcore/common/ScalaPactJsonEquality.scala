@@ -293,15 +293,19 @@ object WildCardRuleMatching {
 
         case h::Nil if h == "[*]" && ruleAndContext.rule.`match`.exists(_ == "type") =>
           println("Got 1: " + h)
-          rec(Nil, List(checkAllSimpleValuesInArray(ruleAndContext, expectedArray, receivedArray)))
+          rec(Nil, acc :+ checkAllSimpleValuesInArray(ruleAndContext, expectedArray, receivedArray))
+
+        case h::Nil if h == "*" =>
+          println("Got 2: " + h)
+          rec(Nil, acc :+ RuleMatchFailure)
 
         case h::Nil =>
           println("Unexpected next token during matching: " + h)
-          rec(Nil, List(RuleMatchFailure))
+          rec(Nil, acc :+ RuleMatchFailure)
 
         case h::t =>
           println("Got 3: " + h)
-          rec(t, List(RuleMatchFailure))
+          rec(t, acc :+ RuleMatchFailure)
       }
 
     }
