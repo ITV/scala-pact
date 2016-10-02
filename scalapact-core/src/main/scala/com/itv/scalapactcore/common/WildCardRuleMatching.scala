@@ -4,6 +4,9 @@ import argonaut.Json
 
 import ColourOuput._
 
+import scalaz._
+import Scalaz._
+
 object WildCardRuleMatching {
 
   val listArrayMatchStatusToSingle: List[ArrayMatchingStatus] => ArrayMatchingStatus = {
@@ -26,42 +29,64 @@ object WildCardRuleMatching {
   }
 
   val arrayRuleMatchWithWildcards: String => MatchingRuleContext => Json.JsonArray => Json.JsonArray => ArrayMatchingStatus = currentPath => ruleAndContext => expectedArray => receivedArray => {
-    println("----")
-    println(currentPath + " : " + ruleAndContext)
-    println(expectedArray)
-    println(receivedArray)
+//    println("----")
+//    println(currentPath + " : " + ruleAndContext)
+//    println(expectedArray)
+//    println(receivedArray)
 
     val pathSegments = ruleAndContext.copy(path = ruleAndContext.path.replace(currentPath, "")).path.split('.').toList
 
-    println(pathSegments)
+//    println(pathSegments)
 
     def rec(remainingSegments: List[String], acc: List[ArrayMatchingStatus]): ArrayMatchingStatus = {
       remainingSegments match {
         case Nil =>
           val res = listArrayMatchStatusToSingle(acc)
 
-          println(res)
+//          println(res)
 
           res
 
         case h::Nil if h == "[*]" && ruleAndContext.rule.`match`.exists(_ == "type") =>
-          println("Got 1: " + h)
+//          println("Got 1: " + h)
           rec(Nil, acc :+ checkAllSimpleValuesInArray(ruleAndContext, expectedArray, receivedArray))
 
         case h::Nil if h == "*" =>
-          println("Got 2: " + h)
+//          println("Got 2: " + h)
           rec(Nil, acc :+ RuleMatchFailure)
 
         case h::Nil =>
-          println("Unexpected next token during matching: " + h)
+//          println("Unexpected next token during matching: " + h)
           rec(Nil, acc :+ RuleMatchFailure)
 
         case allArrayElements::allFields::remaining if allArrayElements == "[*]" && allFields == "*" =>
-          println("Got 4: " + allArrayElements + " - " + allFields)
+//          println("Got 4: " + allArrayElements + " - " + allFields)
           rec(remaining, acc :+ checkAllFieldsInAllArrayElements(ruleAndContext, expectedArray, receivedArray))
 
+        case allArrayElements::newArrayToMatch::remaining if allArrayElements == "[*]" && newArrayToMatch.matches("^[A-Za-z0-9-_]+\\[\\*\\]") =>
+//          println("Got 5: " + allArrayElements + " - " + newArrayToMatch)
+
+          val arrayName = newArrayToMatch.replace("[*]", "")
+          val nextRuleAndContext = ruleAndContext.copy(path = newArrayToMatch + "." + remaining.mkString("."))
+          val maybeArrayField = expectedArray.headOption.flatMap(_.objectFields.flatMap(_.find(f => f.toString == arrayName)))
+          val maybeExpectedArray = (expectedArray.headOption |@| maybeArrayField) { (element, field) => element.field(field) }
+          val maybeReceivedArrays = maybeArrayField.map { field =>
+            receivedArray.map { a =>
+              a.field(field)
+            }
+          }.getOrElse(Nil)
+
+          val extractedExpectedArray = maybeExpectedArray.flatten.map(_.arrayOrEmpty).getOrElse(Nil)
+          val allReceivedArrays = maybeReceivedArrays.map(_.map(_.arrayOrEmpty).getOrElse(Nil))
+
+          val res = allReceivedArrays.map { ra =>
+            arrayRuleMatchWithWildcards(arrayName)(nextRuleAndContext)(extractedExpectedArray)(ra)
+          }
+
+          rec(Nil, acc ++ res)
+
         case h::t =>
-          println("Got 3: " + h)
+//          println("Got 3: " + h)
           rec(t, acc :+ RuleMatchFailure)
       }
 
