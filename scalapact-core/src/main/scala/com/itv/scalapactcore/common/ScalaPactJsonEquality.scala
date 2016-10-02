@@ -204,6 +204,7 @@ object SharedJsonEqualityHelpers {
 
     def checkRule(currentPath: String, ruleAndContext: MatchingRuleContext, ea: Json.JsonArray, ra: Json.JsonArray): ArrayMatchingStatus = {
 
+      println(currentPath + " : " + ruleAndContext)
       //TODO: Missing regex...
       if(currentPath == ruleAndContext.path) {
         MatchingRule.unapply(ruleAndContext.rule).map {
