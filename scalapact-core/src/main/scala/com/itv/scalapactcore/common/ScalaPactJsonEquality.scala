@@ -35,7 +35,7 @@ object ScalaPactJsonEquality {
 
 }
 
-object StrictJsonEqualityHelper extends SharedJsonEqualityHelpers {
+object StrictJsonEqualityHelper {
 
   def areEqual(beSelectivelyPermissive: Boolean, matchingRules: MatchingRules, expected: Json, received: Json, accumulatedJsonPath: String): Boolean = {
 
@@ -49,7 +49,7 @@ object StrictJsonEqualityHelper extends SharedJsonEqualityHelpers {
         compareArrays(beSelectivelyPermissive, matchingRules, j.array, received.array, accumulatedJsonPath)
 
       case j: Json =>
-        compareValues(matchingRules, expected, received, accumulatedJsonPath)
+        SharedJsonEqualityHelpers.compareValues(matchingRules, expected, received, accumulatedJsonPath)
     }
   }
 
@@ -69,7 +69,7 @@ object StrictJsonEqualityHelper extends SharedJsonEqualityHelpers {
       }
     }
 
-    matchArrayWithRules(matchingRules, expectedArray, receivedArray, accumulatedJsonPath) match {
+    SharedJsonEqualityHelpers.matchArrayWithRules(matchingRules, expectedArray, receivedArray, accumulatedJsonPath) match {
       case RuleMatchSuccess => true
       case RuleMatchFailure => false
       case NoRuleMatchRequired => compareElements
@@ -106,7 +106,7 @@ object StrictJsonEqualityHelper extends SharedJsonEqualityHelpers {
 
 }
 
-object PermissiveJsonEqualityHelper extends SharedJsonEqualityHelpers {
+object PermissiveJsonEqualityHelper {
 
   /***
     * Permissive equality means that the elements and fields defined in the 'expected'
@@ -127,7 +127,7 @@ object PermissiveJsonEqualityHelper extends SharedJsonEqualityHelpers {
         compareArrays(matchingRules, j.array, received.array, accumulatedJsonPath)
 
       case j: Json =>
-        compareValues(matchingRules, expected, received, accumulatedJsonPath)
+        SharedJsonEqualityHelpers.compareValues(matchingRules, expected, received, accumulatedJsonPath)
     }
   }
 
@@ -143,7 +143,7 @@ object PermissiveJsonEqualityHelper extends SharedJsonEqualityHelpers {
       }
     }
 
-    matchArrayWithRules(matchingRules, expectedArray, receivedArray, accumulatedJsonPath) match {
+    SharedJsonEqualityHelpers.matchArrayWithRules(matchingRules, expectedArray, receivedArray, accumulatedJsonPath) match {
       case RuleMatchSuccess => true
       case RuleMatchFailure => false
       case NoRuleMatchRequired => compareElements
@@ -164,9 +164,9 @@ object PermissiveJsonEqualityHelper extends SharedJsonEqualityHelpers {
 
 }
 
-sealed trait SharedJsonEqualityHelpers {
+object SharedJsonEqualityHelpers {
 
-  protected val findMatchingRules: String => Map[String, MatchingRule] => Option[List[MatchingRuleContext]] = accumulatedJsonPath => m => {
+  val findMatchingRules: String => Map[String, MatchingRule] => Option[List[MatchingRuleContext]] = accumulatedJsonPath => m => {
 //    println(accumulatedJsonPath)
 //    println(m)
     if (accumulatedJsonPath.length > 0) {
@@ -176,7 +176,7 @@ sealed trait SharedJsonEqualityHelpers {
     } else None
   }
 
-  protected def compareValues(matchingRules: MatchingRules, expected: Json, received: Json, accumulatedJsonPath: String): Boolean =
+  def compareValues(matchingRules: MatchingRules, expected: Json, received: Json, accumulatedJsonPath: String): Boolean =
     (matchingRules >>= findMatchingRules(accumulatedJsonPath)).map(_.map(_.rule)) match {
       case Some(rules) if rules.nonEmpty =>
         rules.forall {
@@ -200,10 +200,11 @@ sealed trait SharedJsonEqualityHelpers {
         expected == received
     }
 
-  protected def matchArrayWithRules(matchingRules: MatchingRules, expectedArray: Option[Json.JsonArray], receivedArray: Option[Json.JsonArray], accumulatedJsonPath: String): ArrayMatchingStatus = {
+  def matchArrayWithRules(matchingRules: MatchingRules, expectedArray: Option[Json.JsonArray], receivedArray: Option[Json.JsonArray], accumulatedJsonPath: String): ArrayMatchingStatus = {
 
     def checkRule(currentPath: String, ruleAndContext: MatchingRuleContext, ea: Json.JsonArray, ra: Json.JsonArray): ArrayMatchingStatus = {
 
+      //TODO: Missing regex...
       if(currentPath == ruleAndContext.path) {
         MatchingRule.unapply(ruleAndContext.rule).map {
           case (None, None, Some(arrayMin)) =>
@@ -248,7 +249,7 @@ sealed trait SharedJsonEqualityHelpers {
 
 }
 
-sealed trait ArrayMatchingStatus
+sealed trait ArrayMatchingStatus extends Product with Serializable
 case object RuleMatchSuccess extends ArrayMatchingStatus
 case object RuleMatchFailure extends ArrayMatchingStatus
 case object NoRuleMatchRequired extends ArrayMatchingStatus
