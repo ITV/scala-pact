@@ -79,8 +79,8 @@ object WildCardRuleMatching {
 
           val next = extractSubArrays(newArrayToMatch, ruleAndContext, remaining, expectedArray, receivedArray)
 
-          val res = next.receivedArrays.map { ra =>
-            arrayRuleMatchWithWildcards(next.arrayName)(next.ruleAndContext)(next.expectedArray)(ra)
+          val res = next.received.map(_.arrayOrEmpty).map { ra =>
+            arrayRuleMatchWithWildcards(next.fieldName)(next.ruleAndContext)(next.expected.arrayOrEmpty)(ra)
           }
 
           rec(Nil, acc ++ res)
@@ -105,14 +105,11 @@ object WildCardRuleMatching {
     rec(pathSegments, Nil)
   }
 
-  case class NextArrayToMatch(arrayName: String, ruleAndContext: MatchingRuleContext, expectedArray: Json.JsonArray, receivedArrays: List[Json.JsonArray])
+  case class NextArrayToMatch(fieldName: String, ruleAndContext: MatchingRuleContext, expected: Json, received: List[Json])
 
   def extractSubArrays(arrayNameToExtract: String, ruleAndContext: MatchingRuleContext, remaining: List[String], expectedArray: Json.JsonArray, receivedArray: Json.JsonArray): NextArrayToMatch = {
     val arrayName = arrayNameToExtract.replace("[*]", "")
     val nextRuleAndContext = ruleAndContext.copy(path = (arrayNameToExtract :: remaining).mkString("."))
-    //          println("> " + arrayName)
-    //          println("> " + nextRuleAndContext)
-    //          println("> " + expectedArray.headOption.flatMap(_.objectFields))
 
     val maybeArrayField = expectedArray.headOption.flatMap(_.objectFields.flatMap(_.find(f => f.toString == arrayName)))
     val maybeExpectedArray = (expectedArray.headOption |@| maybeArrayField) { (element, field) => element.field(field) }
@@ -122,40 +119,42 @@ object WildCardRuleMatching {
       }
     }.getOrElse(Nil)
 
-    val extractedExpectedArray = maybeExpectedArray.flatten.map(_.arrayOrEmpty).getOrElse(Nil)
-    val allReceivedArrays = maybeReceivedArrays.map(_.map(_.arrayOrEmpty).getOrElse(Nil))
-    //          println("> ex: " + extractedExpectedArray)
-    //          println("> rc: " + allReceivedArrays)
-    NextArrayToMatch(arrayName, nextRuleAndContext, extractedExpectedArray, allReceivedArrays)
+    val extractedExpectedArray = maybeExpectedArray.flatten.getOrElse(Json.jEmptyObject)
+    val allReceivedArrays = maybeReceivedArrays
+
+    NextArrayToMatch(arrayName, nextRuleAndContext, extractedExpectedArray, allReceivedArrays.map(_.getOrElse(Json.jEmptyObject)))
   }
 
   def checkFieldInAllArrayElements(next: NextArrayToMatch): List[ArrayMatchingStatus] = {
 
     println(next)
 
-    val res = next.receivedArrays.map { ra =>
+    val res = next.received.map { ra =>
       //TODO: Missing regex!!
       MatchingRule.unapply(next.ruleAndContext.rule).map {
         case (None, None, Some(arrayMin)) =>
-          if (ra.length >= arrayMin) RuleMatchSuccess
+          if (ra.isArray && ra.arrayOrEmpty.length >= arrayMin) RuleMatchSuccess
           else RuleMatchFailure
 
         case (Some(matchType), None, Some(arrayMin)) if matchType == "type" =>
-          println("!!!")
-          println(ra.length)
-          println(arrayMin)
-          val foo = if (ra.length >= arrayMin) RuleMatchSuccess
+          if (ra.isArray && ra.arrayOrEmpty.length >= arrayMin) RuleMatchSuccess
           else RuleMatchFailure
-
-          println(foo)
-
-          foo
 
         case (Some(matchType), None, None) if matchType == "type" =>
           RuleMatchSuccess
 
-        case _ =>
+        case (Some(matchType), None, None) if matchType == "regex" =>
+          println("Regex match specified but no rule was supplied".yellow)
+          RuleMatchFailure
+
+        case (Some(matchType), Some(regularExpression), None) if matchType == "regex" =>
+          if(ra.isString && ra.string.exists(_.matches(regularExpression))) RuleMatchSuccess
+          else RuleMatchFailure
+
+        case (None, None, None) =>
+          println("Rule match ignored since no rule was available.".yellow)
           NoRuleMatchRequired
+
       }.getOrElse {
         println("Failed to extract rule, failing.".yellow)
         RuleMatchFailure
