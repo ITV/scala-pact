@@ -50,12 +50,12 @@ object InteractionMatchers {
   lazy val isStrictResponseMatch: Interaction => InteractionResponse => Boolean = ir => received =>
     matchStatusCodes(ir.response.status)(received.status) &&
       matchHeaders(ir.response.matchingRules)(ir.response.headers)(received.headers) &&
-      matchBodiesStrict(true)(ir.request.matchingRules)(ir.response.body)(received.body)
+      matchBodiesStrict(true)(ir.response.matchingRules)(ir.response.body)(received.body)
 
   lazy val isNonStrictResponseMatch: Interaction => InteractionResponse => Boolean = ir => received =>
     matchStatusCodes(ir.response.status)(received.status) &&
       matchHeaders(ir.response.matchingRules)(ir.response.headers)(received.headers) &&
-      matchBodies(ir.request.matchingRules)(ir.response.body)(received.body)
+      matchBodies(ir.response.matchingRules)(ir.response.body)(received.body)
 
   lazy val matchStatusCodes: Option[Int] => Option[Int] => Boolean = expected => received =>
     generalMatcher(expected, received, (e: Int, r: Int) => e == r)
