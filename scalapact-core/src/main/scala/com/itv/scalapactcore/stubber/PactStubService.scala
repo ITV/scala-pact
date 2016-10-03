@@ -14,9 +14,10 @@ object PactStubService {
 
   lazy val startServer: Arguments => Unit = config => {
     println(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort).white.bold)
+    println(("Strict matching mode: " + config.giveStrictMode).white.bold)
 
     BlazeBuilder.bindHttp(config.givePort, config.giveHost)
-      .mountService(PactStubService.service, "/")
+      .mountService(PactStubService.service(config.giveStrictMode), "/")
       .run
       .awaitShutdown()
   }
@@ -25,11 +26,11 @@ object PactStubService {
     request.pathInfo.startsWith("/interactions") &&
       request.headers.get(CaseInsensitiveString("X-Pact-Admin")).exists(h => h.value == "true")
 
-  private val service = HttpService {
-    case req => matchRequestWithResponse(req)
+  private val service: Boolean => HttpService = strictMatching => HttpService {
+    case req => matchRequestWithResponse(strictMatching)(req)
   }
 
-  private def matchRequestWithResponse(req: Request): scalaz.concurrent.Task[Response] = {
+  private def matchRequestWithResponse(strictMatching: Boolean)(req: Request): scalaz.concurrent.Task[Response] = {
     if(isAdminCall(req)) {
 
       req.method.name.toUpperCase match {
@@ -70,7 +71,7 @@ object PactStubService {
           body = req.bodyAsText.runLast.unsafePerformSync,
           matchingRules = None
         ),
-        strictMatching = false
+        strictMatching = strictMatching
       ) match {
         case \/-(ir) =>
           Status.fromInt(ir.response.status.getOrElse(200)) match {

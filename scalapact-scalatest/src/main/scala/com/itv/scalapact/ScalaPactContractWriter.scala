@@ -85,10 +85,10 @@ object ScalaPactContractWriter {
     rules.map { rs =>
       rs.map {
         case ScalaPactMatchingRuleType(key) =>
-          Map(key -> MatchingRule("type", None))
+          Map(key -> MatchingRule("type", None, None))
 
         case ScalaPactMatchingRuleRegex(key, regex) =>
-          Map(key -> MatchingRule("regex", regex))
+          Map(key -> MatchingRule("regex", regex, None))
       }.foldLeft(Map.empty[String, MatchingRule])(_ ++ _)
     }
 

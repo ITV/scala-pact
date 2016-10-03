@@ -69,7 +69,7 @@ object Verifier {
 
           val maybeProviderState = interaction.providerState.flatMap(p => pactVerifySettings.providerStates.find(j => j.key == p))
 
-          val matchResult = (doRequest(arguments)(maybeProviderState) andThen attemptMatch(List(interaction)))(interaction.request)
+          val matchResult = (doRequest(arguments)(maybeProviderState) andThen attemptMatch(arguments.giveStrictMode)(List(interaction)))(interaction.request)
 
 
           matchResult.leftMap(m => errorMessage(interaction)(m))
@@ -108,8 +108,8 @@ object Verifier {
     !foundErrors
   }
 
-  private lazy val attemptMatch: List[Interaction] => \/[String, InteractionResponse] => \/[String, Interaction] = interactions => requestResult =>
-    requestResult.flatMap(matchResponse(interactions))
+  private lazy val attemptMatch: Boolean => List[Interaction] => \/[String, InteractionResponse] => \/[String, Interaction] = strictMatching => interactions => requestResult =>
+    requestResult.flatMap(matchResponse(strictMatching)(interactions))
 
   private lazy val doRequest: Arguments => Option[ProviderState] => InteractionRequest => \/[String, InteractionResponse] = arguments => maybeProviderState => interactionRequest => {
     val baseUrl = s"${arguments.giveProtocol}://" + arguments.giveHost + ":" + arguments.givePort

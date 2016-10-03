@@ -16,7 +16,8 @@ object CommandArguments {
       host = argMap.get("--host"),
       protocol = argMap.get("--protocol"),
       port = argMap.get("--port").flatMap(Helpers.safeStringToInt),
-      localPactPath = argMap.get("--source")
+      localPactPath = argMap.get("--source"),
+      strictMode = argMap.get("--strict").flatMap(Helpers.safeStringToBoolean)
     )
 }
 
@@ -55,6 +56,13 @@ object Helpers {
       case e: Throwable => None
     }
 
+  val safeStringToBoolean: String => Option[Boolean] = s =>
+    try {
+      Option(s.toBoolean)
+    } catch {
+      case e: Throwable => None
+    }
+
   val urlEncode: String => String \/ String = str => {
     try {
       URLEncoder.encode(str, StandardCharsets.UTF_8.toString)
@@ -72,8 +80,9 @@ object Helpers {
 
 }
 
-case class Arguments(host: Option[String], protocol: Option[String], port: Option[Int], localPactPath: Option[String]) {
-  val giveHost = host.getOrElse("localhost")
-  val giveProtocol = protocol.getOrElse("http")
-  val givePort = port.getOrElse(1234)
+case class Arguments(host: Option[String], protocol: Option[String], port: Option[Int], localPactPath: Option[String], strictMode: Option[Boolean]) {
+  val giveHost: String = host.getOrElse("localhost")
+  val giveProtocol: String = protocol.getOrElse("http")
+  val givePort: Int = port.getOrElse(1234)
+  val giveStrictMode: Boolean = strictMode.getOrElse(false)
 }

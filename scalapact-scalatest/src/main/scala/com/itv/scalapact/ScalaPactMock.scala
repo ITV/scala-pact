@@ -125,6 +125,14 @@ object ScalaPactMock extends LazyLogging {
             response = i.response
           )
 
+        case OPTIONS =>
+          injectStub(
+            wireMockServer = wireMockServer,
+            mappingBuilder = WireMock.options(urlEqualTo(constructedPath)),
+            request = i.request,
+            response = i.response
+          )
+
       }
     }
 
