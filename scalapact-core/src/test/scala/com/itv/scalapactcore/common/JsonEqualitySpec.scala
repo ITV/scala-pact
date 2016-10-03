@@ -24,8 +24,8 @@ class JsonEqualitySpec extends FunSpec with Matchers {
         val personB = b.parseOption
         val personC = c.parseOption
 
-        personA.get =~ personB.get shouldEqual true
-        personA.get =~ personC.get shouldEqual false
+        (personA.get =~ personB.get)(None) shouldEqual true
+        (personA.get =~ personC.get)(None) shouldEqual false
       }
 
     }
@@ -40,7 +40,7 @@ class JsonEqualitySpec extends FunSpec with Matchers {
         val personA = a.parseOption
         val personB = b.parseOption
 
-        personA.get =~ personB.get shouldEqual true
+        (personA.get =~ personB.get)(None) shouldEqual true
       }
 
     }
@@ -50,13 +50,13 @@ class JsonEqualitySpec extends FunSpec with Matchers {
       val a = """{"name":"joe","age":23}"""
       val b = """[{"name":"joe","age":23}]"""
 
-      a.parseOption.get =~ b.parseOption.get shouldEqual false
+      (a.parseOption.get =~ b.parseOption.get)(None) shouldEqual false
 
 
       val c = """{"id":"123"}"""
       val d = """{"id":123}"""
 
-      c.parseOption.get =~ d.parseOption.get shouldEqual false
+      (c.parseOption.get =~ d.parseOption.get)(None) shouldEqual false
     }
 
     it("should be able to handle / ignore extra / missing fields") {
@@ -67,8 +67,8 @@ class JsonEqualitySpec extends FunSpec with Matchers {
       val personA = a.parseOption
       val personB = b.parseOption
 
-      personA.get =~ personB.get shouldEqual true
-      personB.get =~ personA.get shouldEqual false
+      (personA.get =~ personB.get)(None) shouldEqual true
+      (personB.get =~ personA.get)(None) shouldEqual false
     }
 
     it("should be able to handle more complex structures") {
@@ -104,7 +104,7 @@ class JsonEqualitySpec extends FunSpec with Matchers {
         """.stripMargin
 
       withClue("Equal but fields out of order") {
-        a.parseOption.get =~ b.parseOption.get shouldEqual true
+        (a.parseOption.get =~ b.parseOption.get)(None) shouldEqual true
       }
 
       val c =
@@ -125,8 +125,8 @@ class JsonEqualitySpec extends FunSpec with Matchers {
         """.stripMargin
 
       withClue("Additional / missing data") {
-        a.parseOption.get =~ c.parseOption.get shouldEqual true
-        c.parseOption.get =~ a.parseOption.get shouldEqual false
+        (a.parseOption.get =~ c.parseOption.get)(None) shouldEqual true
+        (c.parseOption.get =~ a.parseOption.get)(None) shouldEqual false
       }
 
     }
@@ -146,7 +146,7 @@ class JsonEqualitySpec extends FunSpec with Matchers {
           |}}
         """.stripMargin
 
-      a.parseOption.get =~ b.parseOption.get shouldEqual true
+      (a.parseOption.get =~ b.parseOption.get)(None) shouldEqual true
     }
 
   }

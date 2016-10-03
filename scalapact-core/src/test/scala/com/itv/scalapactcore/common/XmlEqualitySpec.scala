@@ -13,7 +13,7 @@ class XmlEqualitySpec extends FunSpec with Matchers {
       val expected = <fish><type>cod</type><side/></fish>
       val received = <fish><type>cod</type><side/></fish>
 
-      expected =~ received shouldEqual true
+      (expected =~ received)(None) shouldEqual true
 
     }
 
@@ -23,12 +23,12 @@ class XmlEqualitySpec extends FunSpec with Matchers {
       val expected = <fish><type>haddock</type><side/></fish>
       val received = <fish><type>cod</type><side>chips</side></fish>
 
-      expected =~ received shouldEqual false
+      (expected =~ received)(None) shouldEqual false
 
       val expected2 = <fish><type>cod</type><side>chips</side></fish>
       val received2 = <fish><type>cod</type><side/></fish>
 
-      expected2 =~ received2 shouldEqual false
+      (expected2 =~ received2)(None) shouldEqual false
 
     }
 
@@ -37,7 +37,7 @@ class XmlEqualitySpec extends FunSpec with Matchers {
       val expected = <ns:fish battered="true"><type sustainable="false">cod</type><side>chips</side></ns:fish>
       val received = <ns:fish battered="true"><type sustainable="false" oceananic="true">cod</type><side>chips</side><sauce>ketchup</sauce></ns:fish>
 
-      expected =~ received shouldEqual true
+      (expected =~ received)(None) shouldEqual true
 
     }
 
@@ -47,7 +47,7 @@ class XmlEqualitySpec extends FunSpec with Matchers {
       val expected = <ns:fish><type>haddock</type><side/></ns:fish>
       val received = <fish><type>haddock</type><side>chips</side></fish>
 
-      expected =~ received shouldEqual false
+      (expected =~ received)(None) shouldEqual false
 
     }
 
