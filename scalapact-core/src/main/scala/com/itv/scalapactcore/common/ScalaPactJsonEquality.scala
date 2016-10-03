@@ -37,10 +37,7 @@ object ScalaPactJsonEquality {
 
 object StrictJsonEqualityHelper {
 
-  def areEqual(beSelectivelyPermissive: Boolean, matchingRules: MatchingRules, expected: Json, received: Json, accumulatedJsonPath: String): Boolean = {
-
-    println(">S:  " + accumulatedJsonPath)
-
+  def areEqual(beSelectivelyPermissive: Boolean, matchingRules: MatchingRules, expected: Json, received: Json, accumulatedJsonPath: String): Boolean =
     expected match {
       case j: Json if j.isObject && received.isObject =>
         compareFields(beSelectivelyPermissive, matchingRules, expected, received, j.objectFieldsOrEmpty, accumulatedJsonPath)
@@ -51,7 +48,6 @@ object StrictJsonEqualityHelper {
       case j: Json =>
         SharedJsonEqualityHelpers.compareValues(matchingRules, expected, received, accumulatedJsonPath)
     }
-  }
 
   private def compareArrays(beSelectivelyPermissive: Boolean, matchingRules: MatchingRules, expectedArray: Option[Json.JsonArray], receivedArray: Option[Json.JsonArray], accumulatedJsonPath: String): Boolean = {
     def compareElements: Boolean = {
@@ -115,10 +111,7 @@ object PermissiveJsonEqualityHelper {
     * fields or array elements are out of order, as long as they are present since json
     * doesn't not guarantee element order.
     */
-  def areEqual(matchingRules: MatchingRules, expected: Json, received: Json, accumulatedJsonPath: String): Boolean = {
-
-    println(">P:  " + accumulatedJsonPath)
-
+  def areEqual(matchingRules: MatchingRules, expected: Json, received: Json, accumulatedJsonPath: String): Boolean =
     expected match {
       case j: Json if j.isObject && received.isObject =>
         compareObjects(matchingRules, expected, received, j.objectFieldsOrEmpty, accumulatedJsonPath)
@@ -129,7 +122,6 @@ object PermissiveJsonEqualityHelper {
       case j: Json =>
         SharedJsonEqualityHelpers.compareValues(matchingRules, expected, received, accumulatedJsonPath)
     }
-  }
 
   private def compareArrays(matchingRules: MatchingRules, expectedArray: Option[Json.JsonArray], receivedArray: Option[Json.JsonArray], accumulatedJsonPath: String): Boolean = {
     def compareElements: Boolean = {
@@ -166,15 +158,12 @@ object PermissiveJsonEqualityHelper {
 
 object SharedJsonEqualityHelpers {
 
-  val findMatchingRules: String => Map[String, MatchingRule] => Option[List[MatchingRuleContext]] = accumulatedJsonPath => m => {
-//    println(accumulatedJsonPath)
-//    println(m)
+  val findMatchingRules: String => Map[String, MatchingRule] => Option[List[MatchingRuleContext]] = accumulatedJsonPath => m =>
     if (accumulatedJsonPath.length > 0) {
       m.map(r => (r._1.replace("['", ".").replace("']", ""), r._2)).filter { r =>
         r._1.endsWith(accumulatedJsonPath) || WildCardRuleMatching.findMatchingRuleWithWildCards(accumulatedJsonPath)(r._1)
       }.map(kvp => MatchingRuleContext(kvp._1.replace("$.body", ""), kvp._2)).toList.some
     } else None
-  }
 
   def compareValues(matchingRules: MatchingRules, expected: Json, received: Json, accumulatedJsonPath: String): Boolean =
     (matchingRules >>= findMatchingRules(accumulatedJsonPath)).map(_.map(_.rule)) match {
@@ -204,8 +193,7 @@ object SharedJsonEqualityHelpers {
 
     def checkRule(currentPath: String, ruleAndContext: MatchingRuleContext, ea: Json.JsonArray, ra: Json.JsonArray): ArrayMatchingStatus = {
 
-      println(currentPath + " : " + ruleAndContext)
-      //TODO: Missing regex...
+      //TODO: Missing regex...?
       if(currentPath == ruleAndContext.path) {
         MatchingRule.unapply(ruleAndContext.rule).map {
           case (None, None, Some(arrayMin)) =>
@@ -227,6 +215,9 @@ object SharedJsonEqualityHelpers {
       } else if(ruleAndContext.path.contains("*")) {
         // We have a rule that isn't a simple match on the path and includes a wildcard.
         WildCardRuleMatching.arrayRuleMatchWithWildcards(currentPath)(ruleAndContext)(ea)(ra)
+      } else if(ruleAndContext.path.startsWith(currentPath + "[")) {
+        // We have a rule that isn't a simple match on the path and may be an array positional match like fish[2]
+        WildCardRuleMatching.arrayRuleMatchWithWildcards(currentPath)(ruleAndContext)(ea)(ra)
       } else {
         println(("Unknown rule type: '" + ruleAndContext.rule + "' for path '" + ruleAndContext.path).yellow)
         RuleMatchFailure
@@ -237,8 +228,6 @@ object SharedJsonEqualityHelpers {
       matchingRules >>= findMatchingRules(accumulatedJsonPath) match {
 
         case Some(rules) =>
-          println("Rules:\n - " + rules.mkString("\n - "))
-
           WildCardRuleMatching.listArrayMatchStatusToSingle(rules.map(r => checkRule(accumulatedJsonPath, r, ja, ra)))
 
         case None =>

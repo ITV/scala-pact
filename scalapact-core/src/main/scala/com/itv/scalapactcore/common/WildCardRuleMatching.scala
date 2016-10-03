@@ -29,80 +29,63 @@ object WildCardRuleMatching {
     regexMatch || containsPathToArray
   }
 
+  val safeStringToInt: String => Option[Int] = str => try { Option(str.toInt) } catch { case e: Throwable => None }
+
   val arrayRuleMatchWithWildcards: String => MatchingRuleContext => Json.JsonArray => Json.JsonArray => ArrayMatchingStatus = currentPath => ruleAndContext => expectedArray => receivedArray => {
-    println("----")
-    println(currentPath + " : " + ruleAndContext)
-    println(expectedArray)
-    println(receivedArray)
 
     val pathSegments = ruleAndContext.copy(path = ruleAndContext.path.replace(currentPath, "")).path.split('.').toList
 
-    println(pathSegments)
-
-    def rec(remainingSegments: List[String], acc: List[ArrayMatchingStatus]): ArrayMatchingStatus = {
+    def rec(remainingSegments: List[String], acc: List[ArrayMatchingStatus], ea: Json.JsonArray, ra: Json.JsonArray): ArrayMatchingStatus = {
       remainingSegments match {
         case Nil =>
-          val res = listArrayMatchStatusToSingle(acc)
+          listArrayMatchStatusToSingle(acc)
 
-          println(res)
-
-          res
-
-        case h::Nil if h == "[*]" && ruleAndContext.rule.`match`.exists(_ == "type") =>
-          println("Got 1: " + h)
-          rec(Nil, acc :+ checkAllSimpleValuesInArray(ruleAndContext, expectedArray, receivedArray))
+        case h::Nil if h == "[*]" =>
+          rec(Nil, acc :+ checkAllSimpleValuesInArray(ruleAndContext, ea, ra), ea, ra)
 
         case h::Nil if h == "*" =>
-          println("Got 2: " + h)
-          rec(Nil, acc :+ RuleMatchFailure)
+          rec(Nil, acc :+ RuleMatchFailure, ea, ra)
 
         case h::Nil if h.matches("^[A-Za-z0-9-_]+") =>
-          println("Got 6: " + h)
-
-          val next = extractSubArrays(h, ruleAndContext, Nil, expectedArray, receivedArray)
+          val next = extractSubArrays(h, ruleAndContext, Nil, ea, ra)
           val res = checkFieldInAllArrayElements(next)
 
-          println("res: " + res)
+          rec(Nil, acc ++ res, ea, ra)
 
-          rec(Nil, acc ++ res)
+        case h::Nil if h.matches("\\[\\d+\\]") =>
+          //Specific element in array, reduce ra to that one element, reset remaining and recurse.
+          """\d+""".r.findFirstIn(h).flatMap(safeStringToInt).map { index =>
+            rec("[*]" :: Nil, acc, ea, List(ra(index)))
+          }.getOrElse(RuleMatchFailure)
 
         case h::Nil =>
-          println("Unexpected next token during matching: " + h)
-          rec(Nil, acc :+ RuleMatchFailure)
+          rec(Nil, acc :+ RuleMatchFailure, ea, ra)
 
         case allArrayElements::allFields::remaining if allArrayElements == "[*]" && allFields == "*" =>
-          println("Got 4: " + allArrayElements + " - " + allFields)
-          rec(remaining, acc :+ checkAllFieldsInAllArrayElements(ruleAndContext, expectedArray, receivedArray))
+          rec(remaining, acc :+ checkAllFieldsInAllArrayElements(ruleAndContext, ea, ra), ea, ra)
 
         case allArrayElements::newArrayToMatch::remaining if allArrayElements == "[*]" && newArrayToMatch.matches("^[A-Za-z0-9-_]+\\[\\*\\]") =>
-          println("Got 5: " + allArrayElements + " - " + newArrayToMatch)
-
-          val next = extractSubArrays(newArrayToMatch, ruleAndContext, remaining, expectedArray, receivedArray)
+          val next = extractSubArrays(newArrayToMatch, ruleAndContext, remaining, ea, ra)
 
           val res = next.received.map(_.arrayOrEmpty).map { ra =>
             arrayRuleMatchWithWildcards(next.fieldName)(next.ruleAndContext)(next.expected.arrayOrEmpty)(ra)
           }
 
-          rec(Nil, acc ++ res)
+          rec(Nil, acc ++ res, ea, ra)
 
         case allArrayElements::oneField::remaining if allArrayElements == "[*]" && oneField.matches("^[A-Za-z0-9-_]+") =>
-          println("Got 7: " + oneField)
-
-          val next = extractSubArrays(oneField, ruleAndContext, Nil, expectedArray, receivedArray)
+          val next = extractSubArrays(oneField, ruleAndContext, Nil, ea, ra)
           val res = checkFieldInAllArrayElements(next)
 
-          println("res: " + res)
-
-          rec(Nil, acc ++ res)
+          rec(Nil, acc ++ res, ea, ra)
 
         case h::t =>
-          println("Got 3: " + h)
-          rec(t, acc :+ RuleMatchFailure)
+          rec(t, acc :+ RuleMatchFailure, ea, ra)
       }
 
     }
 
-    rec(pathSegments, Nil)
+    rec(pathSegments, Nil, expectedArray, receivedArray)
   }
 
   case class NextArrayToMatch(fieldName: String, ruleAndContext: MatchingRuleContext, expected: Json, received: List[Json])
@@ -125,11 +108,8 @@ object WildCardRuleMatching {
     NextArrayToMatch(arrayName, nextRuleAndContext, extractedExpectedArray, allReceivedArrays.map(_.getOrElse(Json.jEmptyObject)))
   }
 
-  def checkFieldInAllArrayElements(next: NextArrayToMatch): List[ArrayMatchingStatus] = {
-
-    println(next)
-
-    val res = next.received.map { ra =>
+  def checkFieldInAllArrayElements(next: NextArrayToMatch): List[ArrayMatchingStatus] =
+    next.received.map { ra =>
       //TODO: Missing regex!!
       MatchingRule.unapply(next.ruleAndContext.rule).map {
         case (None, None, Some(arrayMin)) =>
@@ -160,11 +140,6 @@ object WildCardRuleMatching {
         RuleMatchFailure
       }
     }
-
-    println("res: " + res)
-
-    res
-  }
 
   def checkAllFieldsInAllArrayElements(ruleAndContext: MatchingRuleContext, expectedArray: Json.JsonArray, receivedArray: Json.JsonArray): ArrayMatchingStatus =
     ruleAndContext.rule.`match` match {
@@ -229,7 +204,7 @@ object WildCardRuleMatching {
 
       case Some(r) if r == "regex" =>
         val bool = receivedArray.forall { p =>
-          p.isString && p.string.exists(s => s.matches(ruleAndContext.rule.regex.getOrElse(".")))
+          p.isString && p.string.exists(_.matches(ruleAndContext.rule.regex.getOrElse(".")))
         }
 
         if(bool) RuleMatchSuccess else RuleMatchFailure
