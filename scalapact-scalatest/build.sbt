@@ -3,7 +3,7 @@ name := "scalapact-scalatest"
 
 organization := "com.itv"
 
-version := "1.0.2"
+version := "1.0.3-SNAPSHOT"
 
 scalaVersion := "2.11.7"
 
