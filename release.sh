@@ -5,6 +5,13 @@ set -e
 # Codified release process
 # This will only work with the correct global SBT and GPG setup
 
+print_warning() {
+    echo "An error was detected, this may require manual clean up before reattempting."
+    exit 1
+}
+
+trap print_warning ERR
+
 bash check-versions.sh
 
 echo -e "Have you run the local tests and are you confident in the build? [y/n] \c"
@@ -14,59 +21,24 @@ if [ $CONFIRM != 'y' ]; then
   echo "Maybe you should do that first...(bash local-build-test.sh)"
   exit 1
 else
-  echo "Ok, continuing..."
+  echo "Ok, here we go..."
 fi
 
 echo ""
-echo "Publishing"
-
 echo ">>> Core"
 cd scalapact-core
 sbt +publishSigned
+sbt sonatypeRelease
 cd ..
 
 echo ">>> SBT Plugin"
 cd scalapact-sbtplugin
 sbt publishSigned
+sbt sonatypeRelease
 cd ..
 
 echo ">>> Test Framework"
 cd scalapact-scalatest
 sbt publishSigned
-cd ..
-
-echo ""
-echo "Closing"
-
-echo ">>> Core"
-cd scalapact-core
-sbt sonatypeClose
-cd ..
-
-echo ">>> SBT Plugin"
-cd scalapact-sbtplugin
-sbt sonatypeClose
-cd ..
-
-echo ">>> Test Framework"
-cd scalapact-scalatest
-sbt sonatypeClose
-cd ..
-
-echo ""
-echo "Promoting"
-
-echo ">>> Core"
-cd scalapact-core
-sbt sonatypePromote
-cd ..
-
-echo ">>> SBT Plugin"
-cd scalapact-sbtplugin
-sbt sonatypePromote
-cd ..
-
-echo ">>> Test Framework"
-cd scalapact-scalatest
-sbt sonatypePromote
+sbt sonatypeRelease
 cd ..
