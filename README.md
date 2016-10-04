@@ -12,6 +12,9 @@ ScalaPact is not an original idea - this project would never have happened witho
 
 Of particular note is [Beth Skurrie](https://github.com/bethesque) - a lot of the design choices and ideas in ScalaPact are direct copies of the ones in her projects. If you're looking for a Ruby implementation, look no further!
 
+## Change Log
+Updates and information about changes made between releases can be found in the [change log](https://github.com/ITV/scala-pact/blob/master/CHANGELOG.md). 
+
 ## Setup Guide
 
 ### ScalaTest Library
