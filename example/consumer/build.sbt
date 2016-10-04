@@ -12,7 +12,7 @@ libraryDependencies ++= Seq(
   "org.json4s"     %% "json4s-native"       % "3.3.0",
   "org.scalatest"  %% "scalatest"           % "2.2.1" % "test",
   "org.scalacheck" %% "scalacheck"          % "1.12.1" % "test",
-  "com.itv"        %% "scalapact-scalatest" % "1.0.1" % "test"
+  "com.itv"        %% "scalapact-scalatest" % "1.0.2" % "test"
 )
 
 initialCommands := "import com.example.consumer._"

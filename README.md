@@ -19,7 +19,7 @@ Add the dependency to your `build.sbt` file like this:
 
 ```
 libraryDependencies ++= Seq(
-  "com.itv" %% "scalapact-scalatest" % "1.0.1" % "test"
+  "com.itv" %% "scalapact-scalatest" % "1.0.2" % "test"
 )
 ```
 
@@ -27,7 +27,7 @@ libraryDependencies ++= Seq(
 Add the plugin to your `project/plugins.sbt` file like this:
 
 ```
-addSbtPlugin("com.itv.plugins" % "scalapact-plugin" % "1.0.1")
+addSbtPlugin("com.itv.plugins" % "scalapact-plugin" % "1.0.2")
 ```
 
 ## Basic Usage Examples
