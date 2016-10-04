@@ -10,6 +10,16 @@ echo "*************************************************"
 
 bash check-versions.sh
 
+echo -e "Have you considered clearing out ~/.ivy2/local to ensure old artefacts aren't being picked up? [y/n] \c"
+read CLEAR_LOCAL_CHECK
+
+if [ $CLEAR_LOCAL_CHECK != 'y' ]; then
+  echo "It's worth considering..."
+  exit 1
+else
+  echo "Ok, proceeding..."
+fi
+
 echo ""
 echo ">>> Core"
 cd scalapact-core
