@@ -27,7 +27,12 @@ git push origin HEAD:master
 This should help us keep a linear history.
 
 #### Testing Scala-Pact
-Before submitting your pull request, you should do your best to check it all works! Here is the current testing procedure (in order):
+Before submitting your pull request, you should do your best to check it all works!
+
+The process has been codified into the `local-build-test.sh` shell script in the project root. This script builds, tests, and publishes everything to your local .ivy2 repo. Run from the project root directory using (takes about 5 minutes to complete):
+`bash local-build-test.sh`
+
+Here is the current testing procedure (in order):
 
 ##### All Projects
 1. Make sure all the projects have a new SNAPSHOT version, that it is the same everywhere, and that they all use each other's new version i.e. Bump the core, bump the plugin and update the plugin to use the new core, bump the test project and update it to use the new core and the new plugin version.
