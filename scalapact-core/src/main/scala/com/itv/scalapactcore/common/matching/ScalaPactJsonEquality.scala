@@ -1,14 +1,13 @@
-package com.itv.scalapactcore.common
+package com.itv.scalapactcore.common.matching
 
-import scala.language.implicitConversions
 import argonaut._
 import com.itv.scalapactcore.MatchingRule
-import com.itv.scalapactcore.common.InteractionMatchers.MatchingRules
+import InteractionMatchers.MatchingRules
 
-import scalaz._
-import Scalaz._
-import ColourOuput._
-import com.itv.scalapactcore.common.matching._
+import scala.language.implicitConversions
+import scalaz.Scalaz._
+
+import com.itv.scalapactcore.common.ColourOuput._
 
 object ScalaPactJsonEquality {
 

@@ -5,7 +5,7 @@ import org.scalatest.{FunSpec, Matchers}
 import argonaut._
 import Argonaut._
 
-import ScalaPactJsonEquality._
+import com.itv.scalapactcore.common.matching.ScalaPactJsonEquality._
 
 class JsonEqualitySpec extends FunSpec with Matchers {
 

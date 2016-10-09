@@ -1,7 +1,7 @@
 package com.itv.scalapactcore.stubber
 
 import com.itv.scalapactcore.common.ColourOuput._
-import com.itv.scalapactcore.common.{Arguments, ConfigAndPacts, InteractionMatchers}
+import com.itv.scalapactcore.common.{Arguments, ConfigAndPacts}
 import com.itv.scalapactcore.{Interaction, InteractionRequest}
 
 import scalaz.\/
@@ -11,7 +11,7 @@ object InteractionManager extends InteractionManager
 //Use trait for testing or you'll have race conditions!
 trait InteractionManager {
 
-  import InteractionMatchers._
+  import com.itv.scalapactcore.common.matching.InteractionMatchers._
 
   private var interactions = List.empty[Interaction]
 

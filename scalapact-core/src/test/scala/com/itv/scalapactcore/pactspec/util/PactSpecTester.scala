@@ -1,7 +1,7 @@
 package com.itv.scalapactcore.pactspec.util
 
 import com.itv.scalapactcore.{Interaction, InteractionRequest, InteractionResponse}
-import com.itv.scalapactcore.common.InteractionMatchers._
+import com.itv.scalapactcore.common.matching.InteractionMatchers._
 import org.scalatest.{FunSpec, Matchers}
 
 import scalaz.{-\/, \/-}

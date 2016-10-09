@@ -1,6 +1,6 @@
 package com.itv.scalapactcore.common.matching
 
-import com.itv.scalapactcore.common.InteractionMatchers.MatchingRules
+import InteractionMatchers.MatchingRules
 
 import scala.language.implicitConversions
 import scala.xml.{Elem, Node}
