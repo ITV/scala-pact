@@ -1,11 +1,10 @@
-package com.itv.scalapactcore.common
+package com.itv.scalapactcore.common.matching
 
 import com.itv.scalapactcore.common.InteractionMatchers.MatchingRules
 
 import scala.language.implicitConversions
 import scala.xml.{Elem, Node}
-import scalaz._
-import Scalaz._
+import scalaz.Scalaz._
 
 object PermissiveXmlEquality {
 

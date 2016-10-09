@@ -7,8 +7,8 @@ import com.itv.scalapactcore.common.InteractionMatchers.MatchingRules
 
 import scalaz._
 import Scalaz._
-
 import ColourOuput._
+import com.itv.scalapactcore.common.matching._
 
 object ScalaPactJsonEquality {
 
@@ -228,7 +228,7 @@ object SharedJsonEqualityHelpers {
       matchingRules >>= findMatchingRules(accumulatedJsonPath) match {
 
         case Some(rules) =>
-          WildCardRuleMatching.listArrayMatchStatusToSingle(rules.map(r => checkRule(accumulatedJsonPath, r, ja, ra)))
+          ArrayMatchingStatus.listArrayMatchStatusToSingle(rules.map(r => checkRule(accumulatedJsonPath, r, ja, ra)))
 
         case None =>
           NoRuleMatchRequired
@@ -238,11 +238,3 @@ object SharedJsonEqualityHelpers {
   }
 
 }
-
-sealed trait ArrayMatchingStatus extends Product with Serializable
-case object RuleMatchSuccess extends ArrayMatchingStatus
-case object RuleMatchFailure extends ArrayMatchingStatus
-case object NoRuleMatchRequired extends ArrayMatchingStatus
-
-case class MatchingRuleContext(path: String, rule: MatchingRule)
-

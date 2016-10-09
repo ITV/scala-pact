@@ -1,20 +1,14 @@
-package com.itv.scalapactcore.common
+package com.itv.scalapactcore.common.matching
 
 import argonaut.Json
+import com.itv.scalapactcore.MatchingRule
+import com.itv.scalapactcore.common._
+
+import scalaz.Scalaz._
 
 import ColourOuput._
 
-import scalaz._
-import Scalaz._
-import com.itv.scalapactcore.MatchingRule
-
 object WildCardRuleMatching {
-
-  val listArrayMatchStatusToSingle: List[ArrayMatchingStatus] => ArrayMatchingStatus = {
-    case l: List[ArrayMatchingStatus] if l.contains(RuleMatchFailure) => RuleMatchFailure
-    case l: List[ArrayMatchingStatus] if l.contains(RuleMatchSuccess) => RuleMatchSuccess
-    case _ => NoRuleMatchRequired
-  }
 
   val findMatchingRuleWithWildCards: String => String => Boolean = accumulatedJsonPath => rulePath => {
     val regexMatch = accumulatedJsonPath.matches(
@@ -38,7 +32,7 @@ object WildCardRuleMatching {
     def rec(remainingSegments: List[String], acc: List[ArrayMatchingStatus], ea: Json.JsonArray, ra: Json.JsonArray): ArrayMatchingStatus = {
       remainingSegments match {
         case Nil =>
-          listArrayMatchStatusToSingle(acc)
+          ArrayMatchingStatus.listArrayMatchStatusToSingle(acc)
 
         case h::Nil if h == "[*]" =>
           rec(Nil, acc :+ checkAllSimpleValuesInArray(ruleAndContext, ea, ra), ea, ra)

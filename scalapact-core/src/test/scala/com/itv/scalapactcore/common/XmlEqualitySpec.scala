@@ -1,8 +1,8 @@
 package com.itv.scalapactcore.common
 
 import org.scalatest.{FunSpec, Matchers}
-
-import PermissiveXmlEquality._
+import com.itv.scalapactcore.common.matching.PermissiveXmlEquality._
+import com.itv.scalapactcore.common.matching.PermissiveXmlEqualityHelper
 
 class XmlEqualitySpec extends FunSpec with Matchers {
 

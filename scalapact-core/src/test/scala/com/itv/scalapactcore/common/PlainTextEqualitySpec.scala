@@ -1,5 +1,6 @@
 package com.itv.scalapactcore.common
 
+import com.itv.scalapactcore.common.matching.PlainTextEquality
 import org.scalatest.{FunSpec, Matchers}
 
 class PlainTextEqualitySpec extends FunSpec with Matchers {

@@ -3,6 +3,7 @@ package com.itv.scalapactcore.common
 import argonaut._
 import Argonaut._
 import com.itv.scalapactcore.MatchingRule
+import com.itv.scalapactcore.common.matching.{MatchingRuleContext, RuleMatchFailure, RuleMatchSuccess, WildCardRuleMatching}
 import org.scalatest.{FunSpec, Matchers}
 
 class WildCardRuleMatchingSpec extends FunSpec with Matchers {
