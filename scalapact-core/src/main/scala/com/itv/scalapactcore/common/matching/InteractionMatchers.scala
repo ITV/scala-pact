@@ -33,13 +33,13 @@ object InteractionMatchers {
   lazy val isStrictRequestMatch: Interaction => InteractionRequest => Boolean = ir => received =>
     matchMethods(ir.request.method.orElse(Option("GET")))(received.method) &&
       matchHeaders(ir.request.matchingRules)(ir.request.headers)(received.headers) &&
-      matchPathsStrict(ir.request.path.orElse(Option("/")))(ir.request.query)(received.path)(received.query) &&
+      matchPathsStrict(PathAndQuery(ir.request.path.orElse(Option("/")), ir.request.query))(PathAndQuery(received.path, received.query)) &&
       matchBodiesStrict(false)(ir.request.matchingRules)(ir.request.body)(received.body)
 
   lazy val isNonStrictRequestMatch: Interaction => InteractionRequest => Boolean = ir => received =>
     matchMethods(ir.request.method.orElse(Option("GET")))(received.method) &&
       matchHeaders(ir.request.matchingRules)(ir.request.headers)(received.headers) &&
-      matchPaths(ir.request.path.orElse(Option("/")))(ir.request.query)(received.path)(received.query) &&
+      matchPaths(PathAndQuery(ir.request.path.orElse(Option("/")), ir.request.query))(PathAndQuery(received.path, received.query)) &&
       matchBodies(ir.request.matchingRules)(ir.request.body)(received.body)
 
   lazy val matchResponse: Boolean => List[Interaction] => InteractionResponse => \/[String, Interaction] = strictMatching => interactions => received =>
@@ -93,32 +93,29 @@ object StatusMatching extends GeneralMatcher {
 
 object PathMatching extends GeneralMatcher {
 
-  lazy val matchPaths: Option[String] => Option[String] => Option[String] => Option[String] => Boolean = expectedPath => expectedQuery => receivedPath => receivedQuery => {
-    val expected = constructPath(expectedPath)(expectedQuery)
-    val received = constructPath(receivedPath)(receivedQuery)
+  case class PathAndQuery(path: Option[String], query: Option[String])
 
-    generalMatcher(expected, received, (e: String, r: String) => {
-      val ex = toPathStructure(e)
-      val re = toPathStructure(r)
+  lazy val matchPaths: PathAndQuery => PathAndQuery => Boolean = expected => received =>
+    matchPathsWithPredicate(expected)(received) {
+      (ex: PathStructure, re: PathStructure) => {
+        ex.path == re.path && equalListsOfTuples(ex.params, re.params)
+      }
+    }
 
-      ex.path == re.path && equalListsOfTuples(ex.params, re.params)
-    })
-  }
+  lazy val matchPathsStrict: PathAndQuery => PathAndQuery => Boolean = expected => received =>
+    matchPathsWithPredicate(expected)(received) {
+      (ex: PathStructure, re: PathStructure) => {
+        ex.path == re.path && ex.params.length == re.params.length && equalListsOfTuples(ex.params, re.params)
+      }
+    }
 
-  lazy val matchPathsStrict: Option[String] => Option[String] => Option[String] => Option[String] => Boolean = expectedPath => expectedQuery => receivedPath => receivedQuery => {
-    val expected = constructPath(expectedPath)(expectedQuery)
-    val received = constructPath(receivedPath)(receivedQuery)
+  private lazy val matchPathsWithPredicate: PathAndQuery => PathAndQuery => ((PathStructure, PathStructure) => Boolean) => Boolean = expected => received => predicate =>
+    generalMatcher(
+      constructPath(expected).map(toPathStructure), constructPath(received).map(toPathStructure), predicate
+    )
 
-    generalMatcher(expected, received, (e: String, r: String) => {
-      val ex = toPathStructure(e)
-      val re = toPathStructure(r)
-
-      ex.path == re.path && ex.params.length == re.params.length && equalListsOfTuples(ex.params, re.params)
-    })
-  }
-
-  private lazy val constructPath: Option[String] => Option[String] => Option[String] = path => query => Option {
-    path.getOrElse("").split('?').toList ++ List(query.map(q => URLDecoder.decode(q, StandardCharsets.UTF_8.name())).getOrElse("")) match {
+  private lazy val constructPath: PathAndQuery => Option[String] = pathAndQuery => Option {
+    pathAndQuery.path.getOrElse("").split('?').toList ++ List(pathAndQuery.query.map(q => URLDecoder.decode(q, StandardCharsets.UTF_8.name())).getOrElse("")) match {
       case Nil => "/"
       case x :: xs => List(x, xs.filter(!_.isEmpty).mkString("&")).mkString("?")
     }

@@ -174,11 +174,11 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
 
       val expected = "/foo/bar/hello?id=abc123&name=joey&job=dentist&hobby=skiing"
 
-      matchPaths(expected)(None)(expected)(None) shouldEqual true
-      matchPaths(expected)(None)("/foo/bar/hello?hobby=skiing&name=joey&id=abc123&job=dentist")(None) shouldEqual true
-      matchPaths(expected)(None)("/foo/bar/hello?hobby=skiing&name=joey")("id=abc123&job=dentist") shouldEqual true
-      matchPaths(expected)(None)("/foo/bar/hello?hobby=skiing")(None) shouldEqual false
-      matchPaths("/foo/bar/hello")(None)("/foo/bar/hello?hobby=skiing")(None) shouldEqual true // forgiving in what you receive...
+      matchPaths(PathAndQuery(expected, None))(PathAndQuery(expected, None)) shouldEqual true
+      matchPaths(PathAndQuery(expected, None))(PathAndQuery("/foo/bar/hello?hobby=skiing&name=joey&id=abc123&job=dentist", None)) shouldEqual true
+      matchPaths(PathAndQuery(expected, None))(PathAndQuery("/foo/bar/hello?hobby=skiing&name=joey", "id=abc123&job=dentist")) shouldEqual true
+      matchPaths(PathAndQuery(expected, None))(PathAndQuery("/foo/bar/hello?hobby=skiing", None)) shouldEqual false
+      matchPaths(PathAndQuery("/foo/bar/hello", None))(PathAndQuery("/foo/bar/hello?hobby=skiing", None)) shouldEqual true // forgiving in what you receive...
 
     }
 
