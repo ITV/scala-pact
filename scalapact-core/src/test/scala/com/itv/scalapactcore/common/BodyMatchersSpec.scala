@@ -8,7 +8,7 @@ class BodyMatchersSpec extends FunSpec with Matchers {
 
   implicit def toOption[A](thing: A): Option[A] = Option(thing)
 
-  import com.itv.scalapactcore.common.matching.InteractionMatchers._
+  import com.itv.scalapactcore.common.matching.BodyMatching._
 
   describe("Matching bodies") {
 

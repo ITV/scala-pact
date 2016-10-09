@@ -1,6 +1,11 @@
 package com.itv.scalapactcore.common
 
 import com.itv.scalapactcore.MatchingRule
+import com.itv.scalapactcore.common.matching.BodyMatching._
+import com.itv.scalapactcore.common.matching.HeaderMatching._
+import com.itv.scalapactcore.common.matching.MethodMatching._
+import com.itv.scalapactcore.common.matching.PathMatching._
+import com.itv.scalapactcore.common.matching.StatusMatching._
 import org.scalatest.{FunSpec, Matchers}
 
 import scala.language.implicitConversions
@@ -9,8 +14,6 @@ import scala.language.implicitConversions
 class InteractionMatchersSpec extends FunSpec with Matchers {
 
   implicit def toOption[A](thing: A): Option[A] = Option(thing)
-
-  import com.itv.scalapactcore.common.matching.InteractionMatchers._
 
   describe("Matching status codes") {
 

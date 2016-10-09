@@ -15,7 +15,11 @@ import scalaz._
 
 object InteractionMatchers {
 
-  type MatchingRules = Option[Map[String, MatchingRule]]
+  import StatusMatching._
+  import PathMatching._
+  import HeaderMatching._
+  import MethodMatching._
+  import BodyMatching._
 
   lazy val matchRequest: Boolean => List[Interaction] => InteractionRequest => \/[String, Interaction] = strictMatching => interactions => received =>
     interactions.find { ir =>
@@ -57,13 +61,117 @@ object InteractionMatchers {
       matchHeaders(ir.response.matchingRules)(ir.response.headers)(received.headers) &&
       matchBodies(ir.response.matchingRules)(ir.response.body)(received.body)
 
+}
+
+sealed trait GeneralMatcher {
+
+  protected def generalMatcher[A](expected: Option[A], received: Option[A], predicate: (A, A) => Boolean): Boolean =
+    (expected, received) match {
+      case (None, None) => true
+
+      case (Some(null), Some(null)) => true
+      case (None, Some(null)) => true
+      case (Some(null), None) => true
+
+      case (Some("null"), Some("null")) => true
+      case (None, Some("null")) => true
+      case (Some("null"), None) => true
+
+      case (None, Some(_)) => true
+      case (Some(_), None) => false
+      case (Some(e), Some(r)) => predicate(e, r)
+    }
+
+}
+
+object StatusMatching extends GeneralMatcher {
+
   lazy val matchStatusCodes: Option[Int] => Option[Int] => Boolean = expected => received =>
     generalMatcher(expected, received, (e: Int, r: Int) => e == r)
+
+}
+
+object PathMatching extends GeneralMatcher {
+
+  lazy val matchPaths: Option[String] => Option[String] => Option[String] => Option[String] => Boolean = expectedPath => expectedQuery => receivedPath => receivedQuery => {
+    val expected = constructPath(expectedPath)(expectedQuery)
+    val received = constructPath(receivedPath)(receivedQuery)
+
+    generalMatcher(expected, received, (e: String, r: String) => {
+      val ex = toPathStructure(e)
+      val re = toPathStructure(r)
+
+      ex.path == re.path && equalListsOfTuples(ex.params, re.params)
+    })
+  }
+
+  lazy val matchPathsStrict: Option[String] => Option[String] => Option[String] => Option[String] => Boolean = expectedPath => expectedQuery => receivedPath => receivedQuery => {
+    val expected = constructPath(expectedPath)(expectedQuery)
+    val received = constructPath(receivedPath)(receivedQuery)
+
+    generalMatcher(expected, received, (e: String, r: String) => {
+      val ex = toPathStructure(e)
+      val re = toPathStructure(r)
+
+      ex.path == re.path && ex.params.length == re.params.length && equalListsOfTuples(ex.params, re.params)
+    })
+  }
+
+  private lazy val constructPath: Option[String] => Option[String] => Option[String] = path => query => Option {
+    path.getOrElse("").split('?').toList ++ List(query.map(q => URLDecoder.decode(q, StandardCharsets.UTF_8.name())).getOrElse("")) match {
+      case Nil => "/"
+      case x :: xs => List(x, xs.filter(!_.isEmpty).mkString("&")).mkString("?")
+    }
+  }
+
+  case class PathStructure(path: String, params: List[(String, String)])
+
+  private lazy val toPathStructure: String => PathStructure = fullPath =>
+    if(fullPath.isEmpty) PathStructure("", Nil)
+    else {
+      fullPath.split('?').toList match {
+        case Nil => PathStructure("", Nil) //should never happen
+        case x :: Nil => PathStructure(x, Nil)
+        case x :: xs =>
+
+          val params: List[(String, String)] = Helpers.pairTuples(xs.mkString.split('&').toList.flatMap(p => p.split('=').toList))
+
+          PathStructure(x, params)
+      }
+    }
+
+  private def equalListsOfTuples(listA: List[(String, String)], listB: List[(String, String)]): Boolean = {
+    @annotation.tailrec
+    def rec(remaining: List[((String, String), Int)], compare: List[((String, String), Int)], equalSoFar: Boolean): Boolean = {
+      if(!equalSoFar) false
+      else {
+        remaining match {
+          case Nil => true
+          case x :: xs =>
+            rec(xs, compare, compare.exists(p => p._1._1 == x._1._1 && p._1._2 == x._1._2 && p._2 == x._2))
+        }
+      }
+    }
+
+    listA.groupBy(_._1)
+      .map(p => rec(p._2.zipWithIndex, listB.groupBy(_._1).getOrElse(p._1, Nil).zipWithIndex, equalSoFar = true))
+      .forall(_ == true)
+  }
+
+}
+
+object MethodMatching extends GeneralMatcher {
 
   lazy val matchMethods: Option[String] => Option[String] => Boolean = expected => received =>
     generalMatcher(expected, received, (e: String, r: String) => e.toUpperCase == r.toUpperCase)
 
-  lazy val matchHeaders: MatchingRules => Option[Map[String, String]] => Option[Map[String, String]] => Boolean = matchingRules => expected => received => {
+}
+
+object HeaderMatching extends GeneralMatcher {
+
+  type HeaderMatchingRules = Option[Map[String, MatchingRule]]
+
+  lazy val matchHeaders: HeaderMatchingRules => Option[Map[String, String]] => Option[Map[String, String]] => Boolean = matchingRules => expected => received => {
 
     val legalCharSeparators = List('(',')','<','>','@',',',';',':','\\','"','/','[',']','?','=','{','}')
 
@@ -100,10 +208,10 @@ object InteractionMatchers {
         strippedMatchingRules
           .flatMap { rules => rules.find(p => p._1 == header._1) } // Find the rule that matches the expected header
           .flatMap { rule =>
-            rule._2.regex.flatMap { regex =>
-              r.map(h => (h._1.toLowerCase, h._2)).get(header._1).map(rec => rec.matches(regex))
-            }
+          rule._2.regex.flatMap { regex =>
+            r.map(h => (h._1.toLowerCase, h._2)).get(header._1).map(rec => rec.matches(regex))
           }
+        }
           .getOrElse(true)
       }.forall(_ == true)
 
@@ -119,31 +227,13 @@ object InteractionMatchers {
     generalMatcher(expected, received, predicate(matchingRules))
   }
 
-  lazy val matchPaths: Option[String] => Option[String] => Option[String] => Option[String] => Boolean = expectedPath => expectedQuery => receivedPath => receivedQuery => {
-    val expected = constructPath(expectedPath)(expectedQuery)
-    val received = constructPath(receivedPath)(receivedQuery)
+}
 
-    generalMatcher(expected, received, (e: String, r: String) => {
-      val ex = toPathStructure(e)
-      val re = toPathStructure(r)
+object BodyMatching extends GeneralMatcher {
 
-      ex.path == re.path && equalListsOfTuples(ex.params, re.params)
-    })
-  }
+  type BodyMatchingRules = Option[Map[String, MatchingRule]]
 
-  lazy val matchPathsStrict: Option[String] => Option[String] => Option[String] => Option[String] => Boolean = expectedPath => expectedQuery => receivedPath => receivedQuery => {
-    val expected = constructPath(expectedPath)(expectedQuery)
-    val received = constructPath(receivedPath)(receivedQuery)
-
-    generalMatcher(expected, received, (e: String, r: String) => {
-      val ex = toPathStructure(e)
-      val re = toPathStructure(r)
-
-      ex.path == re.path && ex.params.length == re.params.length && equalListsOfTuples(ex.params, re.params)
-    })
-  }
-
-  lazy val matchBodies: MatchingRules => Option[String] => Option[String] => Boolean = matchingRules => expected => received =>
+  lazy val matchBodies: BodyMatchingRules => Option[String] => Option[String] => Boolean = matchingRules => expected => received =>
     expected match {
       case Some(str) if stringIsJson(str) =>
         generalMatcher(expected, received, (e: String, r: String) => (e.parseOption |@| r.parseOption) { (e, r) => (e =~ r)(matchingRules) }.exists(_ == true)) // Use exists instead of contains for backwards compatibility with 2.10
@@ -155,7 +245,7 @@ object InteractionMatchers {
         generalMatcher(expected, received, (e: String, r: String) => PlainTextEquality.check(e, r))
     }
 
-  lazy val matchBodiesStrict: Boolean => MatchingRules => Option[String] => Option[String] => Boolean = beSelectivelyPermissive => matchingRules => expected => received =>
+  lazy val matchBodiesStrict: Boolean => BodyMatchingRules => Option[String] => Option[String] => Boolean = beSelectivelyPermissive => matchingRules => expected => received =>
     expected match {
       case Some(str) if stringIsJson(str) =>
         generalMatcher(expected, received, (e: String, r: String) => (e.parseOption |@| r.parseOption) { (e, r) => (e =<>= r)(beSelectivelyPermissive)(matchingRules) }.exists(_ == true)) // Use exists instead of contains for backwards compatibility with 2.10
@@ -174,64 +264,6 @@ object InteractionMatchers {
     try {
       Option(XML.loadString(str))
     } catch {
-      case e: Throwable => None
+      case _: Throwable => None
     }
-
-  private def generalMatcher[A](expected: Option[A], received: Option[A], predicate: (A, A) => Boolean): Boolean =
-    (expected, received) match {
-      case (None, None) => true
-
-      case (Some(null), Some(null)) => true
-      case (None, Some(null)) => true
-      case (Some(null), None) => true
-
-      case (Some("null"), Some("null")) => true
-      case (None, Some("null")) => true
-      case (Some("null"), None) => true
-
-      case (None, Some(r)) => true
-      case (Some(e), None) => false
-      case (Some(e), Some(r)) => predicate(e, r)
-    }
-
-  private lazy val constructPath: Option[String] => Option[String] => Option[String] = path => query => Option {
-    path.getOrElse("").split('?').toList ++ List(query.map(q => URLDecoder.decode(q, StandardCharsets.UTF_8.name())).getOrElse("")) match {
-      case Nil => "/"
-      case x :: xs => List(x, xs.filter(!_.isEmpty).mkString("&")).mkString("?")
-    }
-  }
-
-  private lazy val toPathStructure: String => PathStructure = fullPath =>
-    if(fullPath.isEmpty) PathStructure("", Nil)
-    else {
-      fullPath.split('?').toList match {
-        case Nil => PathStructure("", Nil) //should never happen
-        case x :: Nil => PathStructure(x, Nil)
-        case x :: xs =>
-
-          val params: List[(String, String)] = Helpers.pairTuples(xs.mkString.split('&').toList.flatMap(p => p.split('=').toList))
-
-          PathStructure(x, params)
-      }
-    }
-
-  private def equalListsOfTuples(listA: List[(String, String)], listB: List[(String, String)]): Boolean = {
-    @annotation.tailrec
-    def rec(remaining: List[((String, String), Int)], compare: List[((String, String), Int)], equalSoFar: Boolean): Boolean = {
-      if(!equalSoFar) false
-      else {
-        remaining match {
-          case Nil => true
-          case x :: xs =>
-            rec(xs, compare, compare.exists(p => p._1._1 == x._1._1 && p._1._2 == x._1._2 && p._2 == x._2))
-        }
-      }
-    }
-
-    listA.groupBy(_._1)
-      .map(p => rec(p._2.zipWithIndex, listB.groupBy(_._1).getOrElse(p._1, Nil).zipWithIndex, equalSoFar = true))
-      .forall(_ == true)
-  }
 }
-
-case class PathStructure(path: String, params: List[(String, String)])

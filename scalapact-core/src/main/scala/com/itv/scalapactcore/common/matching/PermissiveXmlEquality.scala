@@ -1,6 +1,6 @@
 package com.itv.scalapactcore.common.matching
 
-import InteractionMatchers.MatchingRules
+import com.itv.scalapactcore.common.matching.BodyMatching.BodyMatchingRules
 
 import scala.language.implicitConversions
 import scala.xml.{Elem, Node}
@@ -11,14 +11,14 @@ object PermissiveXmlEquality {
   implicit def toXmlEqualityWrapper(json: Elem): XmlEqualityWrapper = XmlEqualityWrapper(json)
 
   case class XmlEqualityWrapper(xml: Elem) {
-    def =~(to: Elem): MatchingRules => Boolean = matchingRules => PermissiveXmlEqualityHelper.areEqual(matchingRules, xml, to)
-    def =<>=(to: Elem): Boolean => MatchingRules => Boolean = beSelectivelyPermissive => matchingRules => StrictXmlEqualityHelper.areEqual(beSelectivelyPermissive, matchingRules, xml, to)
+    def =~(to: Elem): BodyMatchingRules => Boolean = matchingRules => PermissiveXmlEqualityHelper.areEqual(matchingRules, xml, to)
+    def =<>=(to: Elem): Boolean => BodyMatchingRules => Boolean = beSelectivelyPermissive => matchingRules => StrictXmlEqualityHelper.areEqual(beSelectivelyPermissive, matchingRules, xml, to)
   }
 }
 
 object StrictXmlEqualityHelper {
 
-  def areEqual(beSelectivelyPermissive: Boolean, matchingRules: MatchingRules, expected: Elem, received: Elem): Boolean =
+  def areEqual(beSelectivelyPermissive: Boolean, matchingRules: BodyMatchingRules, expected: Elem, received: Elem): Boolean =
     (expected.headOption |@| received.headOption) { (e, r) => compareNodes(beSelectivelyPermissive)(e)(r) } match {
       case Some(bool) => bool
       case None => false
@@ -55,7 +55,7 @@ object PermissiveXmlEqualityHelper {
     * fields or array elements are out of order, as long as they are present since json
     * doesn't not guarantee element order.
     */
-  def areEqual(matchingRules: MatchingRules, expected: Elem, received: Elem): Boolean =
+  def areEqual(matchingRules: BodyMatchingRules, expected: Elem, received: Elem): Boolean =
     (expected.headOption |@| received.headOption) { (e, r) => compareNodes(e)(r) } match {
       case Some(bool) => bool
       case None => false
