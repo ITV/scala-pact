@@ -2,7 +2,7 @@ package com.itv.scalapactcore.common
 
 import org.scalatest.{FunSpec, Matchers}
 import com.itv.scalapactcore.common.matching.ScalaPactXmlEquality._
-import com.itv.scalapactcore.common.matching.PermissiveXmlEqualityHelper
+import com.itv.scalapactcore.common.matching.SharedXmlEqualityHelpers
 
 class XmlEqualitySpec extends FunSpec with Matchers {
 
@@ -57,11 +57,11 @@ class XmlEqualitySpec extends FunSpec with Matchers {
 
     it("should be able to tell if one map of strings exists in another") {
 
-      PermissiveXmlEqualityHelper.mapContainsMap(Map("a" -> "b"))(Map("a" -> "b")) shouldEqual true
-      PermissiveXmlEqualityHelper.mapContainsMap(Map.empty[String, String])(Map("a" -> "b")) shouldEqual true
-      PermissiveXmlEqualityHelper.mapContainsMap(Map("a" -> "b", "c" -> "d"))(Map("a" -> "b")) shouldEqual false
-      PermissiveXmlEqualityHelper.mapContainsMap(Map("a" -> "b"))(Map("a" -> "b", "c" -> "d")) shouldEqual true
-      PermissiveXmlEqualityHelper.mapContainsMap(Map("a" -> "b"))(Map.empty[String, String]) shouldEqual false
+      SharedXmlEqualityHelpers.mapContainsMap(Map("a" -> "b"))(Map("a" -> "b")) shouldEqual true
+      SharedXmlEqualityHelpers.mapContainsMap(Map.empty[String, String])(Map("a" -> "b")) shouldEqual true
+      SharedXmlEqualityHelpers.mapContainsMap(Map("a" -> "b", "c" -> "d"))(Map("a" -> "b")) shouldEqual false
+      SharedXmlEqualityHelpers.mapContainsMap(Map("a" -> "b"))(Map("a" -> "b", "c" -> "d")) shouldEqual true
+      SharedXmlEqualityHelpers.mapContainsMap(Map("a" -> "b"))(Map.empty[String, String]) shouldEqual false
 
     }
 
