@@ -9,20 +9,20 @@ import scalaz.Scalaz._
 
 object ScalaPactXmlEquality {
 
-  implicit def toXmlEqualityWrapper(json: Elem): XmlEqualityWrapper = XmlEqualityWrapper(json)
+  implicit def toXmlEqualityWrapper(xmlElem: Elem): XmlEqualityWrapper = XmlEqualityWrapper(xmlElem)
 
   case class XmlEqualityWrapper(xml: Elem) {
     def =~(to: Elem): BodyMatchingRules => Boolean = matchingRules =>
-      PermissiveXmlEqualityHelper.areEqual(matchingRules, xml, to, "")
+      PermissiveXmlEqualityHelper.areEqual(matchingRules, xml, to, xml.label)
     def =<>=(to: Elem): Boolean => BodyMatchingRules => Boolean = beSelectivelyPermissive => matchingRules =>
-      StrictXmlEqualityHelper.areEqual(beSelectivelyPermissive, matchingRules, xml, to, "")
+      StrictXmlEqualityHelper.areEqual(beSelectivelyPermissive, matchingRules, xml, to, xml.label)
   }
 }
 
 object StrictXmlEqualityHelper {
 
   def areEqual(beSelectivelyPermissive: Boolean, matchingRules: BodyMatchingRules, expected: Elem, received: Elem, accumulatedXmlPath: String): Boolean = {
-    println(">>> Matching Xml (P) >>>")
+    println(">>> Matching Xml (S) >>>")
     (expected.headOption |@| received.headOption) { (e, r) => compareNodes(beSelectivelyPermissive)(e)(r)(accumulatedXmlPath) } match {
       case Some(bool) => bool
       case None => false
@@ -75,9 +75,14 @@ object PermissiveXmlEqualityHelper {
     lazy val attributesEqual = SharedXmlEqualityHelpers.mapContainsMap(expected.attributes.asAttrMap)(received.attributes.asAttrMap)
     lazy val childLengthOk = expected.child.length <= received.child.length
 
+    println("prefixEqual: " + prefixEqual)
+    println("labelEqual: " + labelEqual)
+    println("attributesEqual: " + attributesEqual)
+    println("childLengthOk: " + childLengthOk)
+
     lazy val childrenEqual =
       if(expected.child.isEmpty) expected.text == received.text
-      else expected.child.forall { eN => received.child.exists(rN => compareNodes(eN)(rN)(accumulatedXmlPath)) }
+      else expected.child.forall { eN => received.child.exists(rN => compareNodes(eN)(rN)(accumulatedXmlPath + "." + expected.label)) }
 
     prefixEqual && labelEqual && attributesEqual && childLengthOk && childrenEqual
   }
