@@ -157,7 +157,7 @@ object PermissiveJsonEqualityHelper {
 
 object SharedJsonEqualityHelpers {
 
-  val findMatchingRules: String => Map[String, MatchingRule] => Option[List[MatchingRuleContext]] = accumulatedJsonPath => m =>
+  private val findMatchingRules: String => Map[String, MatchingRule] => Option[List[MatchingRuleContext]] = accumulatedJsonPath => m =>
     if (accumulatedJsonPath.length > 0) {
       m.map(r => (r._1.replace("['", ".").replace("']", ""), r._2)).filter { r =>
         r._1.endsWith(accumulatedJsonPath) || WildCardRuleMatching.findMatchingRuleWithWildCards(accumulatedJsonPath)(r._1)

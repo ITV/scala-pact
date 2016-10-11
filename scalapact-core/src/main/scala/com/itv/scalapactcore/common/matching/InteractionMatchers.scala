@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets
 
 import argonaut.Argonaut._
 import com.itv.scalapactcore.common.Helpers
-import com.itv.scalapactcore.common.matching.PermissiveXmlEquality._
+import com.itv.scalapactcore.common.matching.ScalaPactXmlEquality._
 import com.itv.scalapactcore.common.matching.ScalaPactJsonEquality._
 import com.itv.scalapactcore.{Interaction, InteractionRequest, InteractionResponse, MatchingRule}
 

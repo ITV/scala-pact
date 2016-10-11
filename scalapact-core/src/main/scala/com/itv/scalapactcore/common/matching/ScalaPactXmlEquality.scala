@@ -6,7 +6,7 @@ import scala.language.implicitConversions
 import scala.xml.{Elem, Node}
 import scalaz.Scalaz._
 
-object PermissiveXmlEquality {
+object ScalaPactXmlEquality {
 
   implicit def toXmlEqualityWrapper(json: Elem): XmlEqualityWrapper = XmlEqualityWrapper(json)
 
