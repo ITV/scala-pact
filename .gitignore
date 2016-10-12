@@ -8,7 +8,7 @@ project/target
 .sbt-local
 sbt
 .ensime*
-
+sonatype.sbt
 
 # Misc
 .DS_Store
