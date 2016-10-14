@@ -7,6 +7,8 @@ import scala.language.implicitConversions
 import scala.xml.{Elem, Node}
 import scalaz.Scalaz._
 
+import com.itv.scalapactcore.common.ColourOuput._
+
 object ScalaPactXmlEquality {
 
   implicit def toXmlEqualityWrapper(xmlElem: Elem): XmlEqualityWrapper = XmlEqualityWrapper(xmlElem)
@@ -103,33 +105,55 @@ object PermissiveXmlEqualityHelper {
     prefixEqual && labelEqual && attributesEqual && childLengthOk && childrenEqual
   }
 
-
 }
 
 object SharedXmlEqualityHelpers {
 
   lazy val checkAttributeEquality: BodyMatchingRules => String => Map[String, String] => Map[String, String] => Boolean = matchingRules => accumulatedXmlPath => e => r => {
 
-    val rulesMap = r.flatMap { ra =>
-      Map(ra._1 -> findMatchingRules(accumulatedXmlPath + ".@" + ra._1)(matchingRules).getOrElse(Nil))
+    val rulesMap = e.flatMap { ex =>
+      Map(ex._1 -> findMatchingRules(accumulatedXmlPath + ".@" + ex._1)(matchingRules).getOrElse(Nil))
     }.filter(_._2.nonEmpty)
 
-    val a = rulesMap.applyOrElse("fish", (_: String) => Nil)
+    val (attributesWithRules, attributesWithoutRules) = e.partition(p => rulesMap.contains(p._1))
 
-    println("Attribute matching rules:\n" + a)
+    println("rule   : " + attributesWithRules)
+    println("norule : " + attributesWithoutRules)
 
-    val (rule, norule) = r.partition(kvp => rulesMap.contains(kvp._1))
-
-    println("rule   : " + rule)
-    println("norule : " + norule)
-
-    SharedXmlEqualityHelpers.mapContainsMap(e)(r)
+    if(attributesWithRules.isEmpty){
+      SharedXmlEqualityHelpers.mapContainsMap(e)(r)
+    } else {
+      attributesWithRules.forall(attributeRulesCheck(rulesMap)(r)) && mapContainsMap(attributesWithoutRules)(r)
+    }
   }
 
   lazy val mapContainsMap: Map[String, String] => Map[String, String] => Boolean = e => r =>
     e.forall { ee =>
       r.exists(rr => rr._1 == ee._1 && rr._2 == ee._2)
     }
+
+  private lazy val attributeRulesCheck: Map[String, List[MatchingRuleContext]] => Map[String, String] => ((String, String)) => Boolean = rulesMap => receivedAttributes => attribute =>
+    rulesMap(attribute._1).map(_.rule).forall(attributeRuleTest(receivedAttributes)(attribute))
+
+  private lazy val attributeRuleTest: Map[String, String] => ((String, String)) => MatchingRule => Boolean = receivedAttributes => attribute => rule => {
+    val a = MatchingRule.unapply(rule)
+
+    MatchingRule.unapply(rule) match {
+      case Some((Some(matchType), None, None)) if matchType == "type" =>
+        true //Always a string? Hmmmmm... Attributes are strings but they contain other types.
+
+      case Some((Some(matchType), Some(regex), _)) if matchType == "regex" =>
+        receivedAttributes
+          .get(attribute._1)
+          .map(_.matches(regex))
+          .getOrElse(false)
+
+      case _ =>
+        println("Unexpected match type during attribute matching with rule".red)
+        false
+
+    }
+  }
 
   private val findMatchingRules: String => BodyMatchingRules => Option[List[MatchingRuleContext]] = accumulatedJsonPath => m =>
     if (accumulatedJsonPath.length > 0) {
