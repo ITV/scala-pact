@@ -86,23 +86,30 @@ object PermissiveXmlEqualityHelper {
 
   lazy val compareNodes: BodyMatchingRules => Node => Node => String => Boolean = matchingRules => expected => received => accumulatedXmlPath => {
 
-    println(accumulatedXmlPath)
+    // val rulesMap = e.flatMap { ex =>
+    //   Map(ex._1 -> findMatchingRules(accumulatedXmlPath + ".@" + ex._1)(matchingRules).getOrElse(Nil))
+    // }.filter(_._2.nonEmpty)
 
-    lazy val prefixEqual = expected.prefix == received.prefix
-    lazy val labelEqual = expected.label == received.label
-    lazy val attributesEqual = SharedXmlEqualityHelpers.checkAttributeEquality(matchingRules)(accumulatedXmlPath)(expected.attributes.asAttrMap)(received.attributes.asAttrMap)
-    lazy val childLengthOk = expected.child.length <= received.child.length
+    // println(accumulatedXmlPath)
 
-    println("prefixEqual: " + prefixEqual)
-    println("labelEqual: " + labelEqual)
-    println("attributesEqual: " + attributesEqual)
-    println("childLengthOk: " + childLengthOk)
+    SharedXmlEqualityHelpers.matchNodeWithRules(matchingRules)(accumulatedXmlPath)(expected)(received) match {
+      case _ =>
+        lazy val prefixEqual = expected.prefix == received.prefix
+        lazy val labelEqual = expected.label == received.label
+        lazy val attributesEqual = SharedXmlEqualityHelpers.checkAttributeEquality(matchingRules)(accumulatedXmlPath)(expected.attributes.asAttrMap)(received.attributes.asAttrMap)
+        lazy val childLengthOk = expected.child.length <= received.child.length
 
-    lazy val childrenEqual =
-      if(expected.child.isEmpty) expected.text == received.text
-      else expected.child.forall { eN => received.child.exists(rN => compareNodes(matchingRules)(eN)(rN)(accumulatedXmlPath + "." + expected.label)) }
+        // println("prefixEqual: " + prefixEqual)
+        // println("labelEqual: " + labelEqual)
+        // println("attributesEqual: " + attributesEqual)
+        // println("childLengthOk: " + childLengthOk)
 
-    prefixEqual && labelEqual && attributesEqual && childLengthOk && childrenEqual
+        lazy val childrenEqual =
+          if(expected.child.isEmpty) expected.text == received.text
+          else expected.child.forall { eN => received.child.exists(rN => compareNodes(matchingRules)(eN)(rN)(accumulatedXmlPath + "." + eN.label)) }
+
+        prefixEqual && labelEqual && attributesEqual && childLengthOk && childrenEqual
+    }
   }
 
 }
@@ -116,9 +123,6 @@ object SharedXmlEqualityHelpers {
     }.filter(_._2.nonEmpty)
 
     val (attributesWithRules, attributesWithoutRules) = e.partition(p => rulesMap.contains(p._1))
-
-    println("rule   : " + attributesWithRules)
-    println("norule : " + attributesWithoutRules)
 
     if(attributesWithRules.isEmpty){
       SharedXmlEqualityHelpers.mapContainsMap(e)(r)
@@ -163,6 +167,26 @@ object SharedXmlEqualityHelpers {
         }.map(kvp => MatchingRuleContext(kvp._1.replace("$.body", ""), kvp._2)).toList.some
       )
     } else None
+
+  val matchNodeWithRules: BodyMatchingRules => String => Node => Node => ArrayMatchingStatus = matchingRules => accumulatedXmlPath => ex => re => {
+
+    println("****** matchNodeWithRules ******")
+
+    println(accumulatedXmlPath + " : " + ex)
+
+    val simplifyPath: String => String = path =>
+      path.replace("$.body.", "").replaceAll("""\[\d+\]""","")
+
+    val rules = matchingRules.map { mrs =>
+      mrs.filter(mr => simplifyPath(mr._1) == accumulatedXmlPath)
+    }
+
+    println(rules)
+
+    println()
+
+    NoRuleMatchRequired
+  }
 
 //  def compareValues(matchingRules: BodyMatchingRules, expected: Json, received: Json, accumulatedJsonPath: String): Boolean =
 //    (matchingRules >>= findMatchingRules(accumulatedJsonPath)).map(_.map(_.rule)) match {
