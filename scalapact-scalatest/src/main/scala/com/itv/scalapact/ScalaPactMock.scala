@@ -55,15 +55,14 @@ object ScalaPactMock extends LazyLogging {
   }
 
   def runConsumerIntegrationTest(pactDescription: ScalaPactDescriptionFinal)(test: ScalaPactMockConfig => Unit): Unit = {
-    val protocol = "http"
-    val host = "localhost"
-    val port = findFreePort()
 
-    val wireMockServer = new WireMockServer(wireMockConfig().port(port))
+    val mockConfig = ScalaPactMockConfig("http", "localhost", findFreePort())
+
+    val wireMockServer = new WireMockServer(wireMockConfig().port(mockConfig.port))
 
     wireMockServer.start()
 
-    WireMock.configureFor(host, port)
+    WireMock.configureFor(mockConfig.host, mockConfig.port)
 
     pactDescription.interactions.foreach { i =>
 
@@ -129,11 +128,9 @@ object ScalaPactMock extends LazyLogging {
       }
     }
 
-    val baseUrl = protocol + "://" + host + ":" + port
+    logger.info("> ScalaPact mock running at: " + mockConfig.baseUrl)
 
-    logger.info("> ScalaPact mock running at: " + baseUrl)
-
-    configuredTestRunner(pactDescription)(ScalaPactMockConfig(protocol + "://" + host + ":" + port))(test)
+    configuredTestRunner(pactDescription)(mockConfig)(test)
 
     wireMockServer.stop()
   }
@@ -185,4 +182,6 @@ object ScalaPactMock extends LazyLogging {
 
 }
 
-case class ScalaPactMockConfig(baseUrl: String)
+case class ScalaPactMockConfig(protocol: String, host: String, port: Int) {
+  val baseUrl: String = protocol + "://" + host + ":" + port
+}
