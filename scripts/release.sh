@@ -12,7 +12,7 @@ print_warning() {
 
 trap print_warning ERR
 
-bash check-versions.sh
+bash scripts/check-versions.sh
 
 echo -e "Have you run the local tests and are you confident in the build? [y/n] \c"
 read CONFIRM

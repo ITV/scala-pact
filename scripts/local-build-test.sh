@@ -5,10 +5,18 @@
 
 set -e
 
+cleanUpOnError() {
+    echo "Error detected, cleaning up before exit"
+    pkill -1 -f sbt-launch.jar
+    exit 1
+}
+
+trap cleanUpOnError ERR
+
 echo "Building and testing locally published Scala-Pact"
 echo "*************************************************"
 
-bash check-versions.sh
+bash scripts/check-versions.sh
 
 echo -e "Have you considered clearing out ~/.ivy2/local to ensure old artefacts aren't being picked up? [y/n] \c"
 read CLEAR_LOCAL_CHECK
@@ -58,7 +66,7 @@ echo "Checking verifier..."
 cd scalapact-scalatest
 sbt "pact-stubber --port 1234" &
 
-COUNTDOWN=15
+COUNTDOWN=30
 
 echo "...giving the stubber a $COUNTDOWN second head start to warm up..."
 
@@ -68,6 +76,8 @@ do
     COUNTDOWN=$(($COUNTDOWN - 1))
     sleep 1
 done
+
+echo "Verifying..."
 
 sbt "pact-verify --source target/pacts"
 

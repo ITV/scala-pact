@@ -30,7 +30,7 @@ This should help us keep a linear history.
 Before submitting your pull request, you should do your best to check it all works!
 
 The process has been codified into the `local-build-test.sh` shell script in the project root. This script builds, tests, and publishes everything to your local .ivy2 repo. Run from the project root directory using (takes about 5 minutes to complete):
-`bash local-build-test.sh`
+`bash scripts/local-build-test.sh`
 
 Here is the current testing procedure (in order):
 
