@@ -2,6 +2,7 @@ package com.itv.scalapactcore.common.matching
 
 import com.itv.scalapactcore.MatchingRule
 import com.itv.scalapactcore.common.matching.BodyMatching.BodyMatchingRules
+import com.itv.scalapactcore.common.Helpers
 
 import scala.language.implicitConversions
 import scala.xml.{Elem, Node}
@@ -180,18 +181,20 @@ object SharedXmlEqualityHelpers {
       mrs.filter(mr => mr._1.replace("$.body.", "").startsWith(accumulatedXmlPath))
     }.getOrElse(Map.empty[String, MatchingRule])
 
-    val results = rules.map { rule =>
-      rule._1.replace("$.body.", "").replace(accumulatedXmlPath, "") match {
-        case r: String if r.startsWith(".@") =>
-          val attribute = (r.replace(".@", ""), "")
-          if(attributeRuleTest(re.attributes.asAttrMap)(attribute)(rule._2)) RuleMatchSuccess
-          else RuleMatchFailure
+    val results = rules.map(rule => (rule._1.replace("$.body.", "").replace(accumulatedXmlPath, ""), rule._2)).map(kvp => traverseAndMatch(kvp._1)(kvp._2)(ex)(re))
 
-        case r: String =>
-          println(s"Unexpected rule: $r".yellow)
-          RuleMatchFailure
-      }
-    }
+    // val results = rules.map { rule =>
+    //   rule._1.replace("$.body.", "").replace(accumulatedXmlPath, "") match {
+    //     case r: String if r.startsWith(".@") =>
+    //       val attribute = (r.replace(".@", ""), "")
+    //       if(attributeRuleTest(re.attributes.asAttrMap)(attribute)(rule._2)) RuleMatchSuccess
+    //       else RuleMatchFailure
+    //
+    //     case r: String =>
+    //       println(s"Unexpected rule: $r".yellow)
+    //       RuleMatchFailure
+    //   }
+    // }
 
     println(rules)
     println(results)
@@ -199,6 +202,56 @@ object SharedXmlEqualityHelpers {
     println()
 
     ArrayMatchingStatus.listArrayMatchStatusToSingle(RuleMatchFailure :: Nil)
+  }
+
+  val traverseAndMatch: String => MatchingRule => Node => Node => ArrayMatchingStatus = remainingRulePath => rule => ex => re => {
+
+    remainingRulePath match {
+      case rp: String if rp.startsWith(".@") =>
+        println(s"Found attribute rule: $rp".yellow)
+        val attribute = (rp.replace(".@", ""), "")
+        val res = if(attributeRuleTest(re.attributes.asAttrMap)(attribute)(rule)) RuleMatchSuccess
+        else RuleMatchFailure
+
+        println(s"> $res".yellow)
+
+        res
+
+      case rp: String if rp.startsWith(".") =>
+        println(s"Found field rule: $rp".yellow)
+
+        val maybeFieldName = """\w+""".r.findFirstIn(rp)
+        val leftOverPath = """\.\w+""".r.replaceFirstIn(rp, "")
+        maybeFieldName.flatMap { fieldName =>
+          println(ex.label)
+          println(ex.child.map(_.label))
+          (ex.child.find(n => n.label == fieldName) |@| re.child.find(n => n.label == fieldName)) { (e, r) =>
+            if(leftOverPath.isEmpty) RuleMatchFailure //TODO: Now what?
+            else traverseAndMatch(leftOverPath)(rule)(e)(r)
+          }
+        }.getOrElse {
+          println(s"> Expected or Received XMl was missing a field node: $maybeFieldName".yellow)
+          RuleMatchFailure
+        }
+
+      case rp: String if rp.matches("""\[\d+\].+""") =>
+        println(s"Found array rule: $rp".yellow)
+
+        val index: Int = """\d+""".r.findFirstIn(rp).flatMap(Helpers.safeStringToInt).getOrElse(-1)
+        val leftOverPath = """\[\d+\]""".r.replaceFirstIn(remainingRulePath, "")
+
+        (ex.child(index).headOption |@| re.child(index).headOption) { (e, r) =>
+          if(leftOverPath.isEmpty) RuleMatchFailure //TODO: Now what?
+          else traverseAndMatch(leftOverPath)(rule)(e)(r)
+        }.getOrElse {
+          println(s"> Expected or Received XMl was missing a child array node at position: $index".yellow)
+          RuleMatchFailure
+        }
+
+      case rp: String =>
+        println(s"Unexpected rule: $rp".yellow)
+        RuleMatchFailure
+    }
   }
 
 //  def compareValues(matchingRules: BodyMatchingRules, expected: Json, received: Json, accumulatedJsonPath: String): Boolean =
