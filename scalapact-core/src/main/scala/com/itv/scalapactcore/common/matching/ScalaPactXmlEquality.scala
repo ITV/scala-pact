@@ -93,7 +93,9 @@ object PermissiveXmlEqualityHelper {
     // println(accumulatedXmlPath)
 
     SharedXmlEqualityHelpers.matchNodeWithRules(matchingRules)(accumulatedXmlPath)(expected)(received) match {
-      case _ =>
+      case RuleMatchSuccess => true
+      case RuleMatchFailure => false
+      case NoRuleMatchRequired =>
         lazy val prefixEqual = expected.prefix == received.prefix
         lazy val labelEqual = expected.label == received.label
         lazy val attributesEqual = SharedXmlEqualityHelpers.checkAttributeEquality(matchingRules)(accumulatedXmlPath)(expected.attributes.asAttrMap)(received.attributes.asAttrMap)
@@ -174,18 +176,29 @@ object SharedXmlEqualityHelpers {
 
     println(accumulatedXmlPath + " : " + ex)
 
-    val simplifyPath: String => String = path =>
-      path.replace("$.body.", "").replaceAll("""\[\d+\]""","")
-
     val rules = matchingRules.map { mrs =>
-      mrs.filter(mr => simplifyPath(mr._1) == accumulatedXmlPath)
+      mrs.filter(mr => mr._1.replace("$.body.", "").startsWith(accumulatedXmlPath))
+    }.getOrElse(Map.empty[String, MatchingRule])
+
+    val results = rules.map { rule =>
+      rule._1.replace("$.body.", "").replace(accumulatedXmlPath, "") match {
+        case r: String if r.startsWith(".@") =>
+          val attribute = (r.replace(".@", ""), "")
+          if(attributeRuleTest(re.attributes.asAttrMap)(attribute)(rule._2)) RuleMatchSuccess
+          else RuleMatchFailure
+
+        case r: String =>
+          println(s"Unexpected rule: $r".yellow)
+          RuleMatchFailure
+      }
     }
 
     println(rules)
+    println(results)
 
     println()
 
-    NoRuleMatchRequired
+    ArrayMatchingStatus.listArrayMatchStatusToSingle(RuleMatchFailure :: Nil)
   }
 
 //  def compareValues(matchingRules: BodyMatchingRules, expected: Json, received: Json, accumulatedJsonPath: String): Boolean =
