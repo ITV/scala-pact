@@ -51,19 +51,24 @@ object StrictXmlEqualityHelper {
 
     println(accumulatedXmlPath)
 
-    lazy val prefixEqual = expected.prefix == received.prefix
-    lazy val labelEqual = expected.label == received.label
-    lazy val attributesLengthOk = expected.attributes.length == received.attributes.length
-    lazy val attributesEqual = SharedXmlEqualityHelpers.checkAttributeEquality(matchingRules)(accumulatedXmlPath)(expected.attributes.asAttrMap)(received.attributes.asAttrMap)
-    lazy val childLengthOk = expected.child.length == received.child.length
+    SharedXmlEqualityHelpers.matchNodeWithRules(matchingRules)(accumulatedXmlPath)(expected)(received) match {
+      case RuleMatchSuccess => true
+      case RuleMatchFailure => false
+      case NoRuleMatchRequired =>
+        lazy val prefixEqual = expected.prefix == received.prefix
+        lazy val labelEqual = expected.label == received.label
+        lazy val attributesLengthOk = expected.attributes.length == received.attributes.length
+        lazy val attributesEqual = SharedXmlEqualityHelpers.checkAttributeEquality(matchingRules)(accumulatedXmlPath)(expected.attributes.asAttrMap)(received.attributes.asAttrMap)
+        lazy val childLengthOk = expected.child.length == received.child.length
 
-    lazy val childrenEqual =
-      if(expected.child.isEmpty) expected.text == received.text
-      else {
-        expected.child.zip(received.child).forall(p => compareNodes(beSelectivelyPermissive)(matchingRules)(p._1)(p._2)(accumulatedXmlPath + "." + expected.label))
-      }
+        lazy val childrenEqual =
+          if(expected.child.isEmpty) expected.text == received.text
+          else {
+            expected.child.zip(received.child).forall(p => compareNodes(beSelectivelyPermissive)(matchingRules)(p._1)(p._2)(accumulatedXmlPath + "." + expected.label))
+          }
 
-    prefixEqual && labelEqual && attributesLengthOk && attributesEqual && childLengthOk && childrenEqual
+        prefixEqual && labelEqual && attributesLengthOk && attributesEqual && childLengthOk && childrenEqual
+    }
   }
 
 }
@@ -181,7 +186,11 @@ object SharedXmlEqualityHelpers {
       mrs.filter(mr => mr._1.replace("$.body.", "").startsWith(accumulatedXmlPath))
     }.getOrElse(Map.empty[String, MatchingRule])
 
-    val results = rules.map(rule => (rule._1.replace("$.body.", "").replace(accumulatedXmlPath, ""), rule._2)).map(kvp => traverseAndMatch(kvp._1)(kvp._2)(ex)(re))
+    val results =
+      rules
+        .map(rule => (rule._1.replace("$.body.", "").replace(accumulatedXmlPath, ""), rule._2))
+        .map(kvp => traverseAndMatch(kvp._1)(kvp._2)(ex)(re))
+        .toList
 
     // val results = rules.map { rule =>
     //   rule._1.replace("$.body.", "").replace(accumulatedXmlPath, "") match {
@@ -201,7 +210,7 @@ object SharedXmlEqualityHelpers {
 
     println()
 
-    ArrayMatchingStatus.listArrayMatchStatusToSingle(RuleMatchFailure :: Nil)
+    ArrayMatchingStatus.listArrayMatchStatusToSingle(results)
   }
 
   val traverseAndMatch: String => MatchingRule => Node => Node => ArrayMatchingStatus = remainingRulePath => rule => ex => re => {
@@ -222,13 +231,55 @@ object SharedXmlEqualityHelpers {
 
         val maybeFieldName = """\w+""".r.findFirstIn(rp)
         val leftOverPath = """\.\w+""".r.replaceFirstIn(rp, "")
-        maybeFieldName.flatMap { fieldName =>
+        maybeFieldName.map { fieldName =>
+
+          println(fieldName)
           println(ex.label)
           println(ex.child.map(_.label))
-          (ex.child.find(n => n.label == fieldName) |@| re.child.find(n => n.label == fieldName)) { (e, r) =>
-            if(leftOverPath.isEmpty) RuleMatchFailure //TODO: Now what?
-            else traverseAndMatch(leftOverPath)(rule)(e)(r)
+          println(leftOverPath)
+
+          if(fieldName == ex.label && fieldName == re.label) {
+            if(leftOverPath.isEmpty) {
+              rule match {
+                case MatchingRule(Some(ruleType), _, _) if ruleType == "type" =>
+                  println(s"Type rule found.".yellow)
+                  // This is best effort type checking, not ideal.
+                  // Eventually we just have to say that it passes on the assumption, having ruled out
+                  // other options, that we have two arbitrary strings.
+                  ex.text match {
+                    case x if x.isEmpty => // Any numeric
+                      if(re.text.isEmpty) RuleMatchSuccess else RuleMatchFailure
+                    case x if x.matches("""\d+""") => // Any numeric
+                      if(re.text.matches("""\d+""")) RuleMatchSuccess else RuleMatchFailure
+                    case x if x.matches("""true|false""") => // Any Boolean
+                      if(re.text.matches("""true|false""")) RuleMatchSuccess else RuleMatchFailure
+                    case x => // Finally, any arbitrary string
+                      RuleMatchSuccess
+
+                  }
+
+                case MatchingRule(Some(ruleType), Some(regex), _) =>
+                  println(s"Regex rule found.".yellow)
+                  if(re.text.matches(regex)) RuleMatchSuccess else RuleMatchFailure
+
+                case MatchingRule(Some(ruleType), None, _) =>
+                  println(s"Regex rule found but no pattern supplied.".yellow)
+                  RuleMatchFailure
+
+                case MatchingRule(_, _, Some(min)) =>
+                  println(s"Invalid rule, tried to test array min of $min on a leaf node".yellow)
+                  RuleMatchFailure
+
+                case unexpectedRule =>
+                  println(s"Unexpected rule: $unexpectedRule".yellow)
+                  RuleMatchFailure
+
+              }
+            }
+            else traverseAndMatch(leftOverPath)(rule)(ex)(re)
           }
+          else RuleMatchFailure
+
         }.getOrElse {
           println(s"> Expected or Received XMl was missing a field node: $maybeFieldName".yellow)
           RuleMatchFailure
@@ -239,6 +290,11 @@ object SharedXmlEqualityHelpers {
 
         val index: Int = """\d+""".r.findFirstIn(rp).flatMap(Helpers.safeStringToInt).getOrElse(-1)
         val leftOverPath = """\[\d+\]""".r.replaceFirstIn(remainingRulePath, "")
+
+        println("<< " + ex.label)
+        println("<< " + ex)
+        println("<< " + ex.child(0))
+        println("<< index: " + index)
 
         (ex.child(index).headOption |@| re.child(index).headOption) { (e, r) =>
           if(leftOverPath.isEmpty) RuleMatchFailure //TODO: Now what?
