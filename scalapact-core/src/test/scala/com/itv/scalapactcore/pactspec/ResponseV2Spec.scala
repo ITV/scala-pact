@@ -35,10 +35,10 @@ class ResponseV2Spec extends PactSpecTester {
     it("should check the response body specs") {
       testResponseSpecs(
         List(
-          fetchResponseSpec("/response/body/additional property with type matcher.json")(StrictAndNonStrict),
+          // fetchResponseSpec("/response/body/additional property with type matcher.json")(StrictAndNonStrict),
 
           //--- Not implemented
-//          fetchResponseSpec("/response/body/array at top level with matchers xml.json")(StrictAndNonStrict),
+          // fetchResponseSpec("/response/body/array at top level with matchers xml.json")(StrictAndNonStrict),
           //--- Not implemented
 
           // fetchResponseSpec("/response/body/array at top level with matchers.json")(StrictAndNonStrict),
@@ -46,21 +46,17 @@ class ResponseV2Spec extends PactSpecTester {
           // fetchResponseSpec("/response/body/array at top level.json")(StrictAndNonStrict),
           // fetchResponseSpec("/response/body/array in different order xml.json")(StrictOnly),
           // fetchResponseSpec("/response/body/array in different order.json")(StrictOnly),
-
-          //--- Not implemented
-//          fetchResponseSpec("/response/body/array with regex matcher xml.json")(StrictAndNonStrict),
-          //--- Not implemented
-
+          // fetchResponseSpec("/response/body/array with regex matcher xml.json")(StrictAndNonStrict),
           // fetchResponseSpec("/response/body/array with regex matcher.json")(StrictAndNonStrict),
 
           //--- Not implemented
-//          fetchResponseSpec("/response/body/array with type matcher mismatch xml.json")(StrictAndNonStrict),
+          // fetchResponseSpec("/response/body/array with type matcher mismatch xml.json")(StrictAndNonStrict),
           //--- Not implemented
 
           // fetchResponseSpec("/response/body/array with type matcher mismatch.json")(StrictAndNonStrict),
 
           //--- Not implemented
-          fetchResponseSpec("/response/body/array with type matcher xml.json")(StrictAndNonStrict)//,
+          // fetchResponseSpec("/response/body/array with type matcher xml.json")(StrictAndNonStrict)//,
           //--- Not implemented
 
           // fetchResponseSpec("/response/body/array with type matcher.json")(StrictAndNonStrict),

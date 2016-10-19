@@ -268,7 +268,7 @@ object SharedXmlEqualityHelpers {
         println(s"Found field rule path: '$rp'".yellow)
 
         val maybeFieldName = """\w+""".r.findFirstIn(rp)
-        val leftOverPath = """\.\w+""".r.replaceFirstIn(rp, "")
+        val leftOverPath = """\.\w+""".r.replaceFirstIn(rp, "").replace(".#text", "")
         maybeFieldName.map { fieldName =>
 
           if(fieldName == ex.label && fieldName == re.label) {
