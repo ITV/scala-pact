@@ -1,6 +1,6 @@
 package com.itv.scalapactcore.pactspec
 
-import com.itv.scalapactcore.pactspec.util.{PactSpecTester, StrictAndNonStrict, StrictOnly}
+import com.itv.scalapactcore.pactspec.util.PactSpecTester
 
 class ResponseV1Spec extends PactSpecTester {
 

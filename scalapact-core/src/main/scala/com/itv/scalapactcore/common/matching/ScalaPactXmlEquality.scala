@@ -217,11 +217,29 @@ object SharedXmlEqualityHelpers {
   val isNumericValueRegex = """(^-?)(\d+)(\.?\d)(\d*)"""
   val isBooleanValueRegex = """true|false"""
 
+  // This is best effort type checking, not ideal.
+  // Eventually we just have to say that it passes on the assumption, having ruled out
+  // other options, that we have two arbitrary strings.
+  val typeCheck: Node => Node => ArrayMatchingStatus = ex => re =>
+    ex.text match {
+      case x if x.isEmpty => // Any numeric
+        if(re.text.isEmpty) RuleMatchSuccess else RuleMatchFailure
+      case x if x.matches(isNumericValueRegex) => // Any numeric, can be negative, can have decimal places
+        if(re.text.matches(isNumericValueRegex)) RuleMatchSuccess else RuleMatchFailure
+      case x if x.matches(isBooleanValueRegex) => // Any Boolean
+        if(re.text.matches(isBooleanValueRegex)) RuleMatchSuccess else RuleMatchFailure
+      case x => // Finally, any arbitrary string
+        RuleMatchSuccess
+    }
+
+  val regexCheck: String => Node => ArrayMatchingStatus = regex => re =>
+    if(re.text.matches(regex)) RuleMatchSuccess else RuleMatchFailure
+
   val traverseAndMatch: String => MatchingRule => Node => Node => ArrayMatchingStatus = remainingRulePath => rule => ex => re => {
 
     remainingRulePath match {
       case rp: String if rp.startsWith(".@") =>
-        println(s"Found attribute rule: $rp".yellow)
+        println(s"Found attribute path: '$rp'".yellow)
         val attribute = (rp.replace(".@", ""), "")
         val res = if(attributeRuleTest(re.attributes.asAttrMap)(attribute)(rule)) RuleMatchSuccess
         else RuleMatchFailure
@@ -230,8 +248,43 @@ object SharedXmlEqualityHelpers {
 
         res
 
-      case rp: String if rp.startsWith(".") =>
-        println(s"Found field rule: $rp".yellow)
+      case rp: String if rp.isEmpty =>
+        //Seems odd, but this basically means the rule must be applied to the current node.
+        //TODO: Very similar to below... refactor?
+        rule match {
+          case MatchingRule(Some(ruleType), _, _) if ruleType == "type" =>
+            println(s"Type rule found.".yellow)
+            typeCheck(ex)(re)
+
+          case MatchingRule(Some(ruleType), _, Some(min)) if ruleType == "type" =>
+            println(s"Type rule found.".yellow)
+
+            val res = List(
+             typeCheck(ex)(re),
+             if(re.child.length >= min) RuleMatchSuccess else RuleMatchFailure
+            )
+
+            ArrayMatchingStatus.listArrayMatchStatusToSingle(res)
+
+          case MatchingRule(Some(ruleType), Some(regex), _) if ruleType == "regex" =>
+            println(s"Regex rule found.".yellow)
+            regexCheck(regex)(re)
+
+          case MatchingRule(Some(ruleType), None, _) =>
+            println(s"Regex rule found but no pattern supplied.".yellow)
+            RuleMatchFailure
+
+          case MatchingRule(_, _, Some(min)) =>
+            println(s"Array length min check".yellow)
+            if(re.child.length >= min) RuleMatchSuccess else RuleMatchFailure
+
+          case unexpectedRule =>
+            println(s"Unexpected leaf rule: $unexpectedRule".yellow)
+            RuleMatchFailure
+        }
+
+      case rp: String if rp.matches("^.[a-zA-Z].*") =>
+        println(s"Found field rule path: '$rp'".yellow)
 
         val maybeFieldName = """\w+""".r.findFirstIn(rp)
         val leftOverPath = """\.\w+""".r.replaceFirstIn(rp, "")
@@ -247,24 +300,11 @@ object SharedXmlEqualityHelpers {
               rule match {
                 case MatchingRule(Some(ruleType), _, _) if ruleType == "type" =>
                   println(s"Type rule found.".yellow)
-                  // This is best effort type checking, not ideal.
-                  // Eventually we just have to say that it passes on the assumption, having ruled out
-                  // other options, that we have two arbitrary strings.
-                  ex.text match {
-                    case x if x.isEmpty => // Any numeric
-                      if(re.text.isEmpty) RuleMatchSuccess else RuleMatchFailure
-                    case x if x.matches(isNumericValueRegex) => // Any numeric, can be negative, can have decimal places
-                      if(re.text.matches(isNumericValueRegex)) RuleMatchSuccess else RuleMatchFailure
-                    case x if x.matches(isBooleanValueRegex) => // Any Boolean
-                      if(re.text.matches(isBooleanValueRegex)) RuleMatchSuccess else RuleMatchFailure
-                    case x => // Finally, any arbitrary string
-                      RuleMatchSuccess
+                  typeCheck(ex)(re)
 
-                  }
-
-                case MatchingRule(Some(ruleType), Some(regex), _) =>
+                case MatchingRule(Some(ruleType), Some(regex), _) if ruleType == "regex" =>
                   println(s"Regex rule found.".yellow)
-                  if(re.text.matches(regex)) RuleMatchSuccess else RuleMatchFailure
+                  regexCheck(regex)(re)
 
                 case MatchingRule(Some(ruleType), None, _) =>
                   println(s"Regex rule found but no pattern supplied.".yellow)
@@ -275,7 +315,7 @@ object SharedXmlEqualityHelpers {
                   RuleMatchFailure
 
                 case unexpectedRule =>
-                  println(s"Unexpected rule: $unexpectedRule".yellow)
+                  println(s"Unexpected leaf rule: $unexpectedRule".yellow)
                   RuleMatchFailure
 
               }
@@ -289,27 +329,47 @@ object SharedXmlEqualityHelpers {
           RuleMatchFailure
         }
 
-      case rp: String if rp.matches("""\[\d+\].+""") =>
-        println(s"Found array rule: $rp".yellow)
+      case rp: String if rp.matches("""\[\d+\].+""") || rp.matches("""\.\d+""") =>
+        println(s"Found array rule path: '$rp'".yellow)
 
         val index: Int = """\d+""".r.findFirstIn(rp).flatMap(Helpers.safeStringToInt).getOrElse(-1)
-        val leftOverPath = """\[\d+\]""".r.replaceFirstIn(remainingRulePath, "")
+        val leftOverPath = """(\.?)(\[?)\d+(\]?)""".r.replaceFirstIn(remainingRulePath, "")
 
         println("<< " + ex.label)
         println("<< " + ex)
-        println("<< " + ex.child(0))
-        println("<< index: " + index)
+        // println("<< " + ex.child(0))
+        // println("<< index: " + index)
 
-        (ex.child(index).headOption |@| re.child(index).headOption) { (e, r) =>
-          if(leftOverPath.isEmpty) RuleMatchFailure //TODO: Now what?
-          else traverseAndMatch(leftOverPath)(rule)(e)(r)
+        (ex.child.headOption |@| re.child.drop(index).headOption) { (e, r) =>
+          traverseAndMatch(leftOverPath)(rule)(e)(r)
         }.getOrElse {
           println(s"> Expected or Received XMl was missing a child array node at position: $index".yellow)
           RuleMatchFailure
         }
 
+      case rp: String if rp.matches("""^\[\*\].+""") =>
+        println(s"Found array wildcard rule path: '$rp'".yellow)
+
+        val leftOverPath = """^\[\*\]""".r.replaceFirstIn(remainingRulePath, "")
+
+        println("<< " + ex.label)
+        println("<< " + ex)
+        // println("<< " + ex.child(0))
+        // println("<< index: " + index)
+
+        ex.child.headOption.map { en =>
+          re.child.map { rn =>
+            traverseAndMatch(leftOverPath)(rule)(en)(rn)
+          }
+        }.map { l =>
+          ArrayMatchingStatus.listArrayMatchStatusToSingle(l.toList)
+        }.getOrElse {
+          println(s"> Expected was missing a child array node at position 0".yellow)
+          RuleMatchFailure
+        }
+
       case rp: String =>
-        println(s"Unexpected rule: $rp".yellow)
+        println(s"Unexpected branch rule path: '$rp'".yellow)
         RuleMatchFailure
     }
   }

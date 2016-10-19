@@ -87,14 +87,12 @@ class RequestV2Spec extends PactSpecTester {
 //          fetchRequestSpec("/request/body/array with nested array that matches.json")(StrictAndNonStrict),
 
           //--- Not implemented
-//          fetchRequestSpec("/request/body/array with regular expression in element xml.json")(StrictAndNonStrict),
+         fetchRequestSpec("/request/body/array with regular expression in element xml.json")(StrictAndNonStrict)//,
           //--- Not implemented
 
 //          fetchRequestSpec("/request/body/array with regular expression in element.json")(StrictAndNonStrict),
 
-          //--- Not implemented
-//          fetchRequestSpec("/request/body/array with regular expression that does not match in element xml.json")(StrictAndNonStrict),
-          //--- Not implemented
+        //  fetchRequestSpec("/request/body/array with regular expression that does not match in element xml.json")(StrictAndNonStrict),
 
 //          fetchRequestSpec("/request/body/array with regular expression that does not match in element.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/different value found at index xml.json")(StrictAndNonStrict),
@@ -104,17 +102,9 @@ class RequestV2Spec extends PactSpecTester {
 //          fetchRequestSpec("/request/body/empty body no content type.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/empty body.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/empty found at key where not empty expected xml.json")(StrictAndNonStrict),
-
-          //--- Not implemented
-//          fetchRequestSpec("/request/body/matches with regex with bracket notation xml.json")(StrictAndNonStrict),
-          //--- Not implemented
-
+        //  fetchRequestSpec("/request/body/matches with regex with bracket notation xml.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/matches with regex with bracket notation.json")(StrictAndNonStrict),
-
-          //--- Not implemented
-          fetchRequestSpec("/request/body/matches with regex xml.json")(StrictAndNonStrict)//,
-          //--- Not implemented
-
+        //  fetchRequestSpec("/request/body/matches with regex xml.json")(StrictAndNonStrict)//,
 //          fetchRequestSpec("/request/body/matches with regex.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/matches with type.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/matches xml.json")(StrictAndNonStrict),
