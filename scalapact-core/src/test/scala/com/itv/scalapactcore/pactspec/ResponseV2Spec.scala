@@ -60,13 +60,13 @@ class ResponseV2Spec extends PactSpecTester {
           fetchResponseSpec("/response/body/array with type matcher mismatch.json")(StrictAndNonStrict),
 
           //--- Not implemented
-//          fetchResponseSpec("/response/body/array with type matcher xml.json")(StrictAndNonStrict),
+          // fetchResponseSpec("/response/body/array with type matcher xml.json")(StrictAndNonStrict),
           //--- Not implemented
 
           fetchResponseSpec("/response/body/array with type matcher.json")(StrictAndNonStrict),
 
           //--- Not implemented
-//          fetchResponseSpec("/response/body/deeply nested objects xml.json")(StrictAndNonStrict),
+          // fetchResponseSpec("/response/body/deeply nested objects xml.json")(StrictAndNonStrict),
           //--- Not implemented
 
           fetchResponseSpec("/response/body/deeply nested objects.json")(StrictAndNonStrict),
@@ -78,11 +78,7 @@ class ResponseV2Spec extends PactSpecTester {
           fetchResponseSpec("/response/body/empty body.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/keys out of order match xml.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/keys out of order match.json")(StrictAndNonStrict),
-
-          //--- Not implemented
-//          fetchResponseSpec("/response/body/matches with regex xml.json")(StrictAndNonStrict),
-          //--- Not implemented
-
+          fetchResponseSpec("/response/body/matches with regex xml.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/matches with regex.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/matches with type.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/matches xml.json")(StrictAndNonStrict),
@@ -106,35 +102,19 @@ class ResponseV2Spec extends PactSpecTester {
           fetchResponseSpec("/response/body/null found in array when not null expected.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/number found at key when string expected.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/number found in array when string expected.json")(StrictAndNonStrict),
-
-          //--- Not implemented
-//          fetchResponseSpec("/response/body/objects in array first matches xml.json")(StrictAndNonStrict),
-          //--- Not implemented
-
+          fetchResponseSpec("/response/body/objects in array first matches xml.json")(StrictOnly),
           fetchResponseSpec("/response/body/objects in array first matches.json")(StrictOnly),
-
-          //--- Not implemented
-//          fetchResponseSpec("/response/body/objects in array no matches xml.json")(StrictAndNonStrict),
-          //--- Not implemented
-
+          fetchResponseSpec("/response/body/objects in array no matches xml.json")(StrictOnly),
           fetchResponseSpec("/response/body/objects in array no matches.json")(StrictOnly),
-
-          //--- Not implemented
-//          fetchResponseSpec("/response/body/objects in array second matches xml.json")(StrictAndNonStrict),
-          //--- Not implemented
-
+          fetchResponseSpec("/response/body/objects in array second matches xml.json")(StrictOnly),
           fetchResponseSpec("/response/body/objects in array second matches.json")(StrictOnly),
 
           //--- Not implemented
-//          fetchResponseSpec("/response/body/objects in array type matching xml.json")(StrictAndNonStrict),
+          // fetchResponseSpec("/response/body/objects in array type matching xml.json")(StrictAndNonStrict),
           //--- Not implemented
 
           fetchResponseSpec("/response/body/objects in array type matching.json")(NonStrictOnly),
-
-          //--- Not implemented
-//          fetchResponseSpec("/response/body/objects in array with type mismatching xml.json")(StrictAndNonStrict),
-          //--- Not implemented
-
+          fetchResponseSpec("/response/body/objects in array with type mismatching xml.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/objects in array with type mismatching.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/plain text that does not match.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/plain text that matches.json")(StrictAndNonStrict),
@@ -144,23 +124,20 @@ class ResponseV2Spec extends PactSpecTester {
           fetchResponseSpec("/response/body/string found in array when number expected.json")(StrictAndNonStrict),
 
           //--- Not implemented
-//          fetchResponseSpec("/response/body/unexpected index with missing value xml.json")(StrictOnly),
-//          fetchResponseSpec("/response/body/unexpected index with non-empty value xml.json")(StrictOnly),
+          // fetchResponseSpec("/response/body/unexpected index with missing value xml.json")(StrictOnly),
+          // fetchResponseSpec("/response/body/unexpected index with non-empty value xml.json")(StrictOnly),
           //--- Not implemented
 
           fetchResponseSpec("/response/body/unexpected index with not null value.json")(StrictOnly),
           fetchResponseSpec("/response/body/unexpected index with null value.json")(StrictOnly),
 
           //--- Not implemented
-//          fetchResponseSpec("/response/body/unexpected key with empty value xml.json")(StrictOnly),
-//          fetchResponseSpec("/response/body/unexpected key with non-empty value xml.json")(StrictOnly),
+          // fetchResponseSpec("/response/body/unexpected key with empty value xml.json")(StrictOnly),
+          // fetchResponseSpec("/response/body/unexpected key with non-empty value xml.json")(StrictOnly),
           //--- Not implemented
 
-          fetchResponseSpec("/response/body/unexpected key with null value.json")(StrictAndNonStrict)//,
-
-          //--- Not implemented
-//          fetchResponseSpec("/response/body/value found in array when empty expected xml.json")(StrictAndNonStrict)
-          //--- Not implemented
+          fetchResponseSpec("/response/body/unexpected key with null value.json")(StrictAndNonStrict),
+          fetchResponseSpec("/response/body/value found in array when empty expected xml.json")(StrictAndNonStrict)
         )
       )
     }
