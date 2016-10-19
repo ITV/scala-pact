@@ -48,11 +48,7 @@ class ResponseV2Spec extends PactSpecTester {
           // fetchResponseSpec("/response/body/array in different order.json")(StrictOnly),
           // fetchResponseSpec("/response/body/array with regex matcher xml.json")(StrictAndNonStrict),
           // fetchResponseSpec("/response/body/array with regex matcher.json")(StrictAndNonStrict),
-
-          //--- Not implemented
           // fetchResponseSpec("/response/body/array with type matcher mismatch xml.json")(StrictAndNonStrict),
-          //--- Not implemented
-
           // fetchResponseSpec("/response/body/array with type matcher mismatch.json")(StrictAndNonStrict),
 
           //--- Not implemented
@@ -102,7 +98,7 @@ class ResponseV2Spec extends PactSpecTester {
           // fetchResponseSpec("/response/body/objects in array second matches.json")(StrictOnly),
 
           //--- Not implemented
-          // fetchResponseSpec("/response/body/objects in array type matching xml.json")(StrictAndNonStrict)//,
+          fetchResponseSpec("/response/body/objects in array type matching xml.json")(StrictAndNonStrict)//,
           //--- Not implemented
 
           // fetchResponseSpec("/response/body/objects in array type matching.json")(NonStrictOnly),

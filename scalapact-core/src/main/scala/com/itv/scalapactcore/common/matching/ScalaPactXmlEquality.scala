@@ -104,7 +104,7 @@ object PermissiveXmlEqualityHelper {
       case RuleMatchSuccess => true
       case RuleMatchFailure => false
       case NoRuleMatchRequired =>
-        println("Here??")
+        println("Here: " + accumulatedXmlPath)
         lazy val prefixEqual = expected.prefix == received.prefix
         lazy val labelEqual = expected.label == received.label
         lazy val attributesEqual = SharedXmlEqualityHelpers.checkAttributeEquality(matchingRules)(accumulatedXmlPath)(expected.attributes.asAttrMap)(received.attributes.asAttrMap)
@@ -135,6 +135,8 @@ object SharedXmlEqualityHelpers {
     val rulesMap = e.flatMap { ex =>
       Map(ex._1 -> findMatchingRules(accumulatedXmlPath + ".@" + ex._1)(matchingRules).getOrElse(Nil))
     }.filter(_._2.nonEmpty)
+
+    println(rulesMap)
 
     val (attributesWithRules, attributesWithoutRules) = e.partition(p => rulesMap.contains(p._1))
 
@@ -204,17 +206,26 @@ object SharedXmlEqualityHelpers {
   // This is best effort type checking, not ideal.
   // Eventually we just have to say that it passes on the assumption, having ruled out
   // other options, that we have two arbitrary strings.
-  val typeCheck: Node => Node => ArrayMatchingStatus = ex => re =>
-    ex.text match {
-      case x if x.isEmpty => // Any numeric
-        if(re.text.isEmpty) RuleMatchSuccess else RuleMatchFailure
-      case x if x.matches(isNumericValueRegex) => // Any numeric, can be negative, can have decimal places
-        if(re.text.matches(isNumericValueRegex)) RuleMatchSuccess else RuleMatchFailure
-      case x if x.matches(isBooleanValueRegex) => // Any Boolean
-        if(re.text.matches(isBooleanValueRegex)) RuleMatchSuccess else RuleMatchFailure
-      case x => // Finally, any arbitrary string
-        RuleMatchSuccess
-    }
+  val typeCheck: Node => Node => ArrayMatchingStatus = ex => re => {
+
+    val label = ex.child.headOption.map(_.label)
+
+    val nodeCheck = if(re.child.forall(c => c.label == label)) RuleMatchSuccess else RuleMatchFailure
+
+    val leafCheck =
+        ex.text match {
+        case x if x.isEmpty => // Any numeric
+          if(re.text.isEmpty) RuleMatchSuccess else RuleMatchFailure
+        case x if x.matches(isNumericValueRegex) => // Any numeric, can be negative, can have decimal places
+          if(re.text.matches(isNumericValueRegex)) RuleMatchSuccess else RuleMatchFailure
+        case x if x.matches(isBooleanValueRegex) => // Any Boolean
+          if(re.text.matches(isBooleanValueRegex)) RuleMatchSuccess else RuleMatchFailure
+        case x => // Finally, any arbitrary string
+          RuleMatchSuccess
+      }
+
+    ArrayMatchingStatus.listArrayMatchStatusToSingle(List(nodeCheck, leafCheck))
+  }
 
   val regexCheck: String => Node => ArrayMatchingStatus = regex => re =>
     if(re.text.matches(regex)) RuleMatchSuccess else RuleMatchFailure
@@ -234,11 +245,11 @@ object SharedXmlEqualityHelpers {
         //TODO: Very similar to below... refactor?
         rule match {
           case MatchingRule(Some(ruleType), _, _) if ruleType == "type" =>
-            println(s"Type rule found.".yellow)
+            println(s"Type rule for empty rule path found.".yellow)
             typeCheck(ex)(re)
 
           case MatchingRule(Some(ruleType), _, Some(min)) if ruleType == "type" =>
-            println(s"Type rule found.".yellow)
+            println(s"Type rule with min found.".yellow)
 
             val res = List(
              typeCheck(ex)(re),
