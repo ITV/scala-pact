@@ -74,6 +74,7 @@ trait PactSpecTester extends FunSpec with Matchers {
           doResponseMatch(spec, i, strictMatching = true, shouldMatch = !spec.`match`, path)
 
         case StrictOnly =>
+          println("StrictOnly: " + spec.`match`)
           doResponseMatch(spec, i, strictMatching = false, shouldMatch = !spec.`match`, path)
           doResponseMatch(spec, i, strictMatching = true, shouldMatch = spec.`match`, path)
 

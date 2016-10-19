@@ -125,17 +125,13 @@ class ResponseV2Spec extends PactSpecTester {
 
           //--- Not implemented
           // fetchResponseSpec("/response/body/unexpected index with missing value xml.json")(StrictOnly),
-          // fetchResponseSpec("/response/body/unexpected index with non-empty value xml.json")(StrictOnly),
+          fetchResponseSpec("/response/body/unexpected index with non-empty value xml.json")(StrictOnly)//,
           //--- Not implemented
 
           // fetchResponseSpec("/response/body/unexpected index with not null value.json")(StrictOnly),
           // fetchResponseSpec("/response/body/unexpected index with null value.json")(StrictOnly),
-
-          //--- Not implemented
-          // fetchResponseSpec("/response/body/unexpected key with empty value xml.json")(StrictOnly),
-          fetchResponseSpec("/response/body/unexpected key with non-empty value xml.json")(StrictOnly)//,
-          //--- Not implemented
-
+          // fetchResponseSpec("/response/body/unexpected key with empty value xml.json")(StrictAndNonStrict),
+          // fetchResponseSpec("/response/body/unexpected key with non-empty value xml.json")(StrictAndNonStrict),
           // fetchResponseSpec("/response/body/unexpected key with null value.json")(StrictAndNonStrict),
           // fetchResponseSpec("/response/body/value found in array when empty expected xml.json")(StrictAndNonStrict)
         )

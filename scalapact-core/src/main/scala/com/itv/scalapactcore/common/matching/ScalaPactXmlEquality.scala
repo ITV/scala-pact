@@ -33,6 +33,7 @@ object ScalaPactXmlEquality {
 object StrictXmlEqualityHelper {
 
   def areEqual(beSelectivelyPermissive: Boolean, matchingRules: BodyMatchingRules, expected: Elem, received: Elem, accumulatedXmlPath: String): Boolean = {
+    println(">>>> STRICT")
     (expected.headOption |@| received.headOption) { (e, r) => compareNodes(beSelectivelyPermissive)(matchingRules)(e)(r)(accumulatedXmlPath) } match {
       case Some(bool) => bool
       case None => false
@@ -47,15 +48,32 @@ object StrictXmlEqualityHelper {
       case NoRuleMatchRequired =>
         lazy val prefixEqual = expected.prefix == received.prefix
         lazy val labelEqual = expected.label == received.label
-        lazy val attributesLengthOk = expected.attributes.length == received.attributes.length
+        lazy val attributesLengthOk =
+          if(beSelectivelyPermissive) expected.attributes.length <= received.attributes.length
+          else expected.attributes.length == received.attributes.length
+
         lazy val attributesEqual = SharedXmlEqualityHelpers.checkAttributeEquality(matchingRules)(accumulatedXmlPath)(expected.attributes.asAttrMap)(received.attributes.asAttrMap)
-        lazy val childLengthOk = expected.child.length == received.child.length
+        lazy val childLengthOk =
+          if(beSelectivelyPermissive) expected.child.length <= received.child.length
+          else expected.child.length == received.child.length
 
         lazy val childrenEqual =
           if(expected.child.isEmpty) expected.text == received.text
           else {
             expected.child.zip(received.child).forall(p => compareNodes(beSelectivelyPermissive)(matchingRules)(p._1)(p._2)(accumulatedXmlPath + "." + expected.label))
           }
+
+        // lazy val childrenEqual =
+        //   if(expected.child.isEmpty) expected.text == received.text
+        //   else expected.child.forall { eN => received.child.exists(rN => compareNodes(matchingRules)(eN)(rN)(accumulatedXmlPath + "." + eN.label)) }
+
+
+
+        println(s"prefixEqual    : $prefixEqual")
+        println(s"labelEqual     : $labelEqual")
+        println(s"attributesEqual: $attributesEqual")
+        println(s"childLengthOk  : $childLengthOk")
+        println(s"childrenEqual  : $attributesEqual")
 
         prefixEqual && labelEqual && attributesLengthOk && attributesEqual && childLengthOk && childrenEqual
     }
@@ -73,6 +91,7 @@ object PermissiveXmlEqualityHelper {
     * doesn't not guarantee element order.
     */
   def areEqual(matchingRules: BodyMatchingRules, expected: Elem, received: Elem, accumulatedXmlPath: String): Boolean = {
+    println(">>>> PERMISSIVE")
     (expected.headOption |@| received.headOption) { (e, r) => compareNodes(matchingRules)(e)(r)(accumulatedXmlPath) } match {
       case Some(bool) => bool
       case None => false
@@ -85,6 +104,7 @@ object PermissiveXmlEqualityHelper {
       case RuleMatchSuccess => true
       case RuleMatchFailure => false
       case NoRuleMatchRequired =>
+        println("Here??")
         lazy val prefixEqual = expected.prefix == received.prefix
         lazy val labelEqual = expected.label == received.label
         lazy val attributesEqual = SharedXmlEqualityHelpers.checkAttributeEquality(matchingRules)(accumulatedXmlPath)(expected.attributes.asAttrMap)(received.attributes.asAttrMap)
@@ -93,6 +113,14 @@ object PermissiveXmlEqualityHelper {
         lazy val childrenEqual =
           if(expected.child.isEmpty) expected.text == received.text
           else expected.child.forall { eN => received.child.exists(rN => compareNodes(matchingRules)(eN)(rN)(accumulatedXmlPath + "." + eN.label)) }
+
+
+        println(s"prefixEqual    : $prefixEqual")
+        println(s"labelEqual     : $labelEqual")
+        println(s"attributesEqual: $attributesEqual")
+        println(s"childLengthOk  : $childLengthOk")
+        println(s"childrenEqual  : $attributesEqual")
+
 
         prefixEqual && labelEqual && attributesEqual && childLengthOk && childrenEqual
     }
