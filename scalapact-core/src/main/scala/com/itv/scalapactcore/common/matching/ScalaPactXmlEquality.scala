@@ -212,6 +212,10 @@ object SharedXmlEqualityHelpers {
 
     ArrayMatchingStatus.listArrayMatchStatusToSingle(results)
   }
+  // Maybe negative, must have digits, may have decimal and if so must have a
+  // digit after it, can have more trailing digits.
+  val isNumericValueRegex = """(^-?)(\d+)(\.?\d)(\d*)"""
+  val isBooleanValueRegex = """true|false"""
 
   val traverseAndMatch: String => MatchingRule => Node => Node => ArrayMatchingStatus = remainingRulePath => rule => ex => re => {
 
@@ -249,10 +253,10 @@ object SharedXmlEqualityHelpers {
                   ex.text match {
                     case x if x.isEmpty => // Any numeric
                       if(re.text.isEmpty) RuleMatchSuccess else RuleMatchFailure
-                    case x if x.matches("""\d+""") => // Any numeric
-                      if(re.text.matches("""\d+""")) RuleMatchSuccess else RuleMatchFailure
-                    case x if x.matches("""true|false""") => // Any Boolean
-                      if(re.text.matches("""true|false""")) RuleMatchSuccess else RuleMatchFailure
+                    case x if x.matches(isNumericValueRegex) => // Any numeric, can be negative, can have decimal places
+                      if(re.text.matches(isNumericValueRegex)) RuleMatchSuccess else RuleMatchFailure
+                    case x if x.matches(isBooleanValueRegex) => // Any Boolean
+                      if(re.text.matches(isBooleanValueRegex)) RuleMatchSuccess else RuleMatchFailure
                     case x => // Finally, any arbitrary string
                       RuleMatchSuccess
 
