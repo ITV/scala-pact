@@ -21,26 +21,18 @@ object ScalaPactXmlEquality {
       StrictXmlEqualityHelper.areEqual(beSelectivelyPermissive, xmlPathToJsonPath(matchingRules), xml, to, xml.label)
   }
 
-  private val xmlPathToJsonPath: BodyMatchingRules => BodyMatchingRules = matchingRules => {
-
-    println("Before: " + matchingRules.map(_.map(_.toString + "\n")).getOrElse("<none>"))
-
-    val res = matchingRules.map { mrs =>
+  private val xmlPathToJsonPath: BodyMatchingRules => BodyMatchingRules = matchingRules =>
+    matchingRules.map { mrs =>
       mrs.map { mr =>
         (mr._1.replaceAll("""\[\'""", ".").replaceAll("""\'\]""", ""), mr._2)
       }
     }
 
-    println("After: " + res.map(_.map(_.toString + "\n")).getOrElse("<none>"))
-
-    res
-  }
 }
 
 object StrictXmlEqualityHelper {
 
   def areEqual(beSelectivelyPermissive: Boolean, matchingRules: BodyMatchingRules, expected: Elem, received: Elem, accumulatedXmlPath: String): Boolean = {
-    println(">>> Matching Xml (S) >>>")
     (expected.headOption |@| received.headOption) { (e, r) => compareNodes(beSelectivelyPermissive)(matchingRules)(e)(r)(accumulatedXmlPath) } match {
       case Some(bool) => bool
       case None => false
@@ -48,8 +40,6 @@ object StrictXmlEqualityHelper {
   }
 
   lazy val compareNodes: Boolean => BodyMatchingRules => Node => Node => String => Boolean = beSelectivelyPermissive => matchingRules => expected => received => accumulatedXmlPath => {
-
-    println(accumulatedXmlPath)
 
     SharedXmlEqualityHelpers.matchNodeWithRules(matchingRules)(accumulatedXmlPath)(expected)(received) match {
       case RuleMatchSuccess => true
@@ -83,7 +73,6 @@ object PermissiveXmlEqualityHelper {
     * doesn't not guarantee element order.
     */
   def areEqual(matchingRules: BodyMatchingRules, expected: Elem, received: Elem, accumulatedXmlPath: String): Boolean = {
-    println(">>> Matching Xml (P) >>>")
     (expected.headOption |@| received.headOption) { (e, r) => compareNodes(matchingRules)(e)(r)(accumulatedXmlPath) } match {
       case Some(bool) => bool
       case None => false
@@ -91,12 +80,6 @@ object PermissiveXmlEqualityHelper {
   }
 
   lazy val compareNodes: BodyMatchingRules => Node => Node => String => Boolean = matchingRules => expected => received => accumulatedXmlPath => {
-
-    // val rulesMap = e.flatMap { ex =>
-    //   Map(ex._1 -> findMatchingRules(accumulatedXmlPath + ".@" + ex._1)(matchingRules).getOrElse(Nil))
-    // }.filter(_._2.nonEmpty)
-
-    // println(accumulatedXmlPath)
 
     SharedXmlEqualityHelpers.matchNodeWithRules(matchingRules)(accumulatedXmlPath)(expected)(received) match {
       case RuleMatchSuccess => true
@@ -106,11 +89,6 @@ object PermissiveXmlEqualityHelper {
         lazy val labelEqual = expected.label == received.label
         lazy val attributesEqual = SharedXmlEqualityHelpers.checkAttributeEquality(matchingRules)(accumulatedXmlPath)(expected.attributes.asAttrMap)(received.attributes.asAttrMap)
         lazy val childLengthOk = expected.child.length <= received.child.length
-
-        // println("prefixEqual: " + prefixEqual)
-        // println("labelEqual: " + labelEqual)
-        // println("attributesEqual: " + attributesEqual)
-        // println("childLengthOk: " + childLengthOk)
 
         lazy val childrenEqual =
           if(expected.child.isEmpty) expected.text == received.text
@@ -178,10 +156,6 @@ object SharedXmlEqualityHelpers {
 
   val matchNodeWithRules: BodyMatchingRules => String => Node => Node => ArrayMatchingStatus = matchingRules => accumulatedXmlPath => ex => re => {
 
-    println("****** matchNodeWithRules ******")
-
-    println(accumulatedXmlPath + " : " + ex)
-
     val rules = matchingRules.map { mrs =>
       mrs.filter(mr => mr._1.replace("$.body.", "").startsWith(accumulatedXmlPath))
     }.getOrElse(Map.empty[String, MatchingRule])
@@ -191,24 +165,6 @@ object SharedXmlEqualityHelpers {
         .map(rule => (rule._1.replace("$.body.", "").replace(accumulatedXmlPath, ""), rule._2))
         .map(kvp => traverseAndMatch(kvp._1)(kvp._2)(ex)(re))
         .toList
-
-    // val results = rules.map { rule =>
-    //   rule._1.replace("$.body.", "").replace(accumulatedXmlPath, "") match {
-    //     case r: String if r.startsWith(".@") =>
-    //       val attribute = (r.replace(".@", ""), "")
-    //       if(attributeRuleTest(re.attributes.asAttrMap)(attribute)(rule._2)) RuleMatchSuccess
-    //       else RuleMatchFailure
-    //
-    //     case r: String =>
-    //       println(s"Unexpected rule: $r".yellow)
-    //       RuleMatchFailure
-    //   }
-    // }
-
-    println(rules)
-    println(results)
-
-    println()
 
     ArrayMatchingStatus.listArrayMatchStatusToSingle(results)
   }
@@ -239,25 +195,22 @@ object SharedXmlEqualityHelpers {
 
     remainingRulePath match {
       case rp: String if rp.startsWith(".@") =>
-        println(s"Found attribute path: '$rp'".yellow)
+        // println(s"Found attribute path: '$rp'".yellow)
         val attribute = (rp.replace(".@", ""), "")
-        val res = if(attributeRuleTest(re.attributes.asAttrMap)(attribute)(rule)) RuleMatchSuccess
+
+        if(attributeRuleTest(re.attributes.asAttrMap)(attribute)(rule)) RuleMatchSuccess
         else RuleMatchFailure
-
-        println(s"> $res".yellow)
-
-        res
 
       case rp: String if rp.isEmpty =>
         //Seems odd, but this basically means the rule must be applied to the current node.
         //TODO: Very similar to below... refactor?
         rule match {
           case MatchingRule(Some(ruleType), _, _) if ruleType == "type" =>
-            println(s"Type rule found.".yellow)
+            // println(s"Type rule found.".yellow)
             typeCheck(ex)(re)
 
           case MatchingRule(Some(ruleType), _, Some(min)) if ruleType == "type" =>
-            println(s"Type rule found.".yellow)
+            // println(s"Type rule found.".yellow)
 
             val res = List(
              typeCheck(ex)(re),
@@ -267,55 +220,50 @@ object SharedXmlEqualityHelpers {
             ArrayMatchingStatus.listArrayMatchStatusToSingle(res)
 
           case MatchingRule(Some(ruleType), Some(regex), _) if ruleType == "regex" =>
-            println(s"Regex rule found.".yellow)
+            // println(s"Regex rule found.".yellow)
             regexCheck(regex)(re)
 
           case MatchingRule(Some(ruleType), None, _) =>
-            println(s"Regex rule found but no pattern supplied.".yellow)
+            // println(s"Regex rule found but no pattern supplied.".yellow)
             RuleMatchFailure
 
           case MatchingRule(_, _, Some(min)) =>
-            println(s"Array length min check".yellow)
+            // println(s"Array length min check".yellow)
             if(re.child.length >= min) RuleMatchSuccess else RuleMatchFailure
 
           case unexpectedRule =>
-            println(s"Unexpected leaf rule: $unexpectedRule".yellow)
+            // println(s"Unexpected leaf rule: $unexpectedRule".yellow)
             RuleMatchFailure
         }
 
       case rp: String if rp.matches("^.[a-zA-Z].*") =>
-        println(s"Found field rule path: '$rp'".yellow)
+        // println(s"Found field rule path: '$rp'".yellow)
 
         val maybeFieldName = """\w+""".r.findFirstIn(rp)
         val leftOverPath = """\.\w+""".r.replaceFirstIn(rp, "")
         maybeFieldName.map { fieldName =>
 
-          println(fieldName)
-          println(ex.label)
-          println(ex.child.map(_.label))
-          println(leftOverPath)
-
           if(fieldName == ex.label && fieldName == re.label) {
             if(leftOverPath.isEmpty) {
               rule match {
                 case MatchingRule(Some(ruleType), _, _) if ruleType == "type" =>
-                  println(s"Type rule found.".yellow)
+                  // println(s"Type rule found.".yellow)
                   typeCheck(ex)(re)
 
                 case MatchingRule(Some(ruleType), Some(regex), _) if ruleType == "regex" =>
-                  println(s"Regex rule found.".yellow)
+                  // println(s"Regex rule found.".yellow)
                   regexCheck(regex)(re)
 
                 case MatchingRule(Some(ruleType), None, _) =>
-                  println(s"Regex rule found but no pattern supplied.".yellow)
+                  // println(s"Regex rule found but no pattern supplied.".yellow)
                   RuleMatchFailure
 
                 case MatchingRule(_, _, Some(min)) =>
-                  println(s"Invalid rule, tried to test array min of $min on a leaf node".yellow)
+                  // println(s"Invalid rule, tried to test array min of $min on a leaf node".yellow)
                   RuleMatchFailure
 
                 case unexpectedRule =>
-                  println(s"Unexpected leaf rule: $unexpectedRule".yellow)
+                  // println(s"Unexpected leaf rule: $unexpectedRule".yellow)
                   RuleMatchFailure
 
               }
@@ -325,37 +273,27 @@ object SharedXmlEqualityHelpers {
           else RuleMatchFailure
 
         }.getOrElse {
-          println(s"> Expected or Received XMl was missing a field node: $maybeFieldName".yellow)
+          println(s"Expected or Received XMl was missing a field node: $maybeFieldName".yellow)
           RuleMatchFailure
         }
 
-      case rp: String if rp.matches("""\[\d+\].+""") || rp.matches("""\.\d+""") =>
-        println(s"Found array rule path: '$rp'".yellow)
+      case rp: String if rp.matches("""^\[\d+\].*""") || rp.matches("""\.\d+""") =>
+        //println(s"Found array rule path: '$rp'".yellow)
 
         val index: Int = """\d+""".r.findFirstIn(rp).flatMap(Helpers.safeStringToInt).getOrElse(-1)
         val leftOverPath = """(\.?)(\[?)\d+(\]?)""".r.replaceFirstIn(remainingRulePath, "")
 
-        println("<< " + ex.label)
-        println("<< " + ex)
-        // println("<< " + ex.child(0))
-        // println("<< index: " + index)
-
         (ex.child.headOption |@| re.child.drop(index).headOption) { (e, r) =>
           traverseAndMatch(leftOverPath)(rule)(e)(r)
         }.getOrElse {
-          println(s"> Expected or Received XMl was missing a child array node at position: $index".yellow)
+          println(s"Received XMl was missing a child array node at position: $index".yellow)
           RuleMatchFailure
         }
 
       case rp: String if rp.matches("""^\[\*\].+""") =>
-        println(s"Found array wildcard rule path: '$rp'".yellow)
+        // println(s"Found array wildcard rule path: '$rp'".yellow)
 
         val leftOverPath = """^\[\*\]""".r.replaceFirstIn(remainingRulePath, "")
-
-        println("<< " + ex.label)
-        println("<< " + ex)
-        // println("<< " + ex.child(0))
-        // println("<< index: " + index)
 
         ex.child.headOption.map { en =>
           re.child.map { rn =>
@@ -364,86 +302,14 @@ object SharedXmlEqualityHelpers {
         }.map { l =>
           ArrayMatchingStatus.listArrayMatchStatusToSingle(l.toList)
         }.getOrElse {
-          println(s"> Expected was missing a child array node at position 0".yellow)
+          println(s"Expected was missing a child array node at position 0".yellow)
           RuleMatchFailure
         }
 
       case rp: String =>
-        println(s"Unexpected branch rule path: '$rp'".yellow)
+        // println(s"Unexpected branch rule path: '$rp'".yellow)
         RuleMatchFailure
     }
   }
-
-//  def compareValues(matchingRules: BodyMatchingRules, expected: Json, received: Json, accumulatedJsonPath: String): Boolean =
-//    (matchingRules >>= findMatchingRules(accumulatedJsonPath)).map(_.map(_.rule)) match {
-//      case Some(rules) if rules.nonEmpty =>
-//        rules.forall {
-//          case rule if rule.`match`.exists(_ == "type") => //Use exists for 2.10 compat
-//            expected.name == received.name
-//
-//          case rule if received.isString && rule.`match`.exists(_ == "regex") && rule.regex.isDefined => //Use exists for 2.10 compat
-//            rule.regex.exists { regexRule =>
-//              received.string.exists(_.matches(regexRule))
-//            }
-//
-//          case rule =>
-//            println(("Found unknown rule '" + rule + "' for path '" + accumulatedJsonPath + "' while matching " + expected.toString + " with " + received.toString()).yellow)
-//            false
-//        }
-//
-//      case Some(rules) if rules.isEmpty =>
-//        expected == received
-//
-//      case None =>
-//        expected == received
-//    }
-//
-//  def matchArrayWithRules(matchingRules: BodyMatchingRules, expectedArray: Option[Json.JsonArray], receivedArray: Option[Json.JsonArray], accumulatedJsonPath: String): ArrayMatchingStatus = {
-//
-//    def checkRule(currentPath: String, ruleAndContext: MatchingRuleContext, ea: Json.JsonArray, ra: Json.JsonArray): ArrayMatchingStatus = {
-//
-//      //TODO: Missing regex...?
-//      if(currentPath == ruleAndContext.path) {
-//        MatchingRule.unapply(ruleAndContext.rule).map {
-//          case (None, None, Some(arrayMin)) =>
-//            if (ra.length >= arrayMin) RuleMatchSuccess
-//            else RuleMatchFailure
-//
-//          case (Some(matchType), None, Some(arrayMin)) if matchType == "type" =>
-//            // Yay typed languages! We know the types are equal, they're both arrays!
-//            if (ra.length >= arrayMin) RuleMatchSuccess
-//            else RuleMatchFailure
-//
-//          case (Some(matchType), None, None) if matchType == "type" =>
-//            // Yay typed languages! We know the types are equal, they're both arrays!
-//            RuleMatchSuccess
-//
-//          case _ =>
-//            NoRuleMatchRequired
-//        }.getOrElse(NoRuleMatchRequired)
-//      } else if(ruleAndContext.path.contains("*")) {
-//        // We have a rule that isn't a simple match on the path and includes a wildcard.
-//        WildCardRuleMatching.arrayRuleMatchWithWildcards(currentPath)(ruleAndContext)(ea)(ra)
-//      } else if(ruleAndContext.path.startsWith(currentPath + "[")) {
-//        // We have a rule that isn't a simple match on the path and may be an array positional match like fish[2]
-//        WildCardRuleMatching.arrayRuleMatchWithWildcards(currentPath)(ruleAndContext)(ea)(ra)
-//      } else {
-//        println(("Unknown rule type: '" + ruleAndContext.rule + "' for path '" + ruleAndContext.path).yellow)
-//        RuleMatchFailure
-//      }
-//    }
-//
-//    (expectedArray |@| receivedArray) { (ja, ra) =>
-//      matchingRules >>= findMatchingRules(accumulatedJsonPath) match {
-//
-//        case Some(rules) =>
-//          ArrayMatchingStatus.listArrayMatchStatusToSingle(rules.map(r => checkRule(accumulatedJsonPath, r, ja, ra)))
-//
-//        case None =>
-//          NoRuleMatchRequired
-//
-//      }
-//    }.getOrElse(NoRuleMatchRequired)
-//  }
 
 }
