@@ -1,7 +1,7 @@
 package com.itv.scalapact.plugin.verifier
 
 import com.itv.scalapactcore._
-import com.itv.scalapactcore.common.InteractionMatchers._
+import com.itv.scalapactcore.common.matching.InteractionMatchers._
 import com.itv.scalapactcore.common.ColourOuput._
 import com.itv.scalapactcore.common.{Arguments, Helpers, LocalPactFileLoader, PactBrokerAddressValidation}
 
