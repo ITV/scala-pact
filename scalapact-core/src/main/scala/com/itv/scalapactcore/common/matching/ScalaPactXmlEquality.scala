@@ -92,6 +92,7 @@ object PermissiveXmlEqualityHelper {
     */
   def areEqual(matchingRules: BodyMatchingRules, expected: Elem, received: Elem, accumulatedXmlPath: String): Boolean = {
     println(">>>> PERMISSIVE")
+    println("rules: " + matchingRules)
     (expected.headOption |@| received.headOption) { (e, r) => compareNodes(matchingRules)(e)(r)(accumulatedXmlPath) } match {
       case Some(bool) => bool
       case None => false
@@ -152,6 +153,11 @@ object SharedXmlEqualityHelpers {
       r.exists(rr => rr._1 == ee._1 && rr._2 == ee._2)
     }
 
+  lazy val mapContainsMapIgnoreValues: Map[String, String] => Map[String, String] => Boolean = e => r =>
+    e.forall { ee =>
+      r.exists(rr => rr._1 == ee._1)
+    }
+
   private lazy val attributeRulesCheck: Map[String, List[MatchingRuleContext]] => Map[String, String] => ((String, String)) => Boolean = rulesMap => receivedAttributes => attribute =>
     rulesMap(attribute._1).map(_.rule).forall(attributeRuleTest(receivedAttributes)(attribute))
 
@@ -186,13 +192,22 @@ object SharedXmlEqualityHelpers {
 
   val matchNodeWithRules: BodyMatchingRules => String => Node => Node => ArrayMatchingStatus = matchingRules => accumulatedXmlPath => ex => re => {
 
+    println(">>>accumulatedXmlPath: " + accumulatedXmlPath)
+
     val rules = matchingRules.map { mrs =>
-      mrs.filter(mr => mr._1.replace("$.body.", "").startsWith(accumulatedXmlPath))
+      mrs.filter { mr =>
+        val mrPath = mr._1.replace("$.body.", "").replace("$.body", "")
+
+        // To account for paths that start at the root.
+        mrPath.startsWith(accumulatedXmlPath) || mrPath.isEmpty || mrPath.startsWith("[")
+      }
     }.getOrElse(Map.empty[String, MatchingRule])
+
+    println(">>>" + rules)
 
     val results =
       rules
-        .map(rule => (rule._1.replace("$.body.", "").replace(accumulatedXmlPath, ""), rule._2))
+        .map(rule => (rule._1.replace("$.body.", "").replace("$.body", "").replace(accumulatedXmlPath, ""), rule._2))
         .map(kvp => traverseAndMatch(kvp._1)(kvp._2)(ex)(re))
         .toList
 
@@ -208,12 +223,26 @@ object SharedXmlEqualityHelpers {
   // other options, that we have two arbitrary strings.
   val typeCheck: Node => Node => ArrayMatchingStatus = ex => re => {
 
-    val label = ex.child.headOption.map(_.label)
+    // Received node contains same attributes as expected
+    val attributesOk = if(mapContainsMapIgnoreValues(ex.attributes.asAttrMap)(re.attributes.asAttrMap)) RuleMatchSuccess else RuleMatchFailure
 
-    val nodeCheck = if(re.child.forall(c => c.label == label)) RuleMatchSuccess else RuleMatchFailure
+    println(ex.attributes.asAttrMap + " vs. " + re.attributes.asAttrMap)
 
+    // Children are all the same type
+    val childrenLabel = ex.child.headOption.map(_.label)
+
+    println(childrenLabel + " -> " + re.child.map(_.label))
+
+    // No label means no children, so that's a success
+    val nodeChildrenCheck = childrenLabel.map { lbl =>
+      if(re.child.forall(c => c.label == lbl)) RuleMatchSuccess else RuleMatchFailure
+    }.getOrElse(RuleMatchSuccess)
+
+    // If this is a leaf node, check the types align
+    // This always works (strangely it may seem..) because it fails
+    // successfully assuming an arbitrary string.
     val leafCheck =
-        ex.text match {
+      ex.text match {
         case x if x.isEmpty => // Any numeric
           if(re.text.isEmpty) RuleMatchSuccess else RuleMatchFailure
         case x if x.matches(isNumericValueRegex) => // Any numeric, can be negative, can have decimal places
@@ -224,7 +253,11 @@ object SharedXmlEqualityHelpers {
           RuleMatchSuccess
       }
 
-    ArrayMatchingStatus.listArrayMatchStatusToSingle(List(nodeCheck, leafCheck))
+    println("> attributesOk: " + attributesOk)
+    println("> nodeChildrenCheck: " + nodeChildrenCheck)
+    println("> leafCheck: " + leafCheck)
+
+    ArrayMatchingStatus.listArrayMatchStatusToSingle(List(attributesOk, nodeChildrenCheck, leafCheck))
   }
 
   val regexCheck: String => Node => ArrayMatchingStatus = regex => re =>
@@ -329,7 +362,7 @@ object SharedXmlEqualityHelpers {
           RuleMatchFailure
         }
 
-      case rp: String if rp.matches("""^\[\*\].+""") =>
+      case rp: String if rp.matches("""^\[\*\].*""") =>
         println(s"Found array wildcard rule path: '$rp'".yellow)
 
         val leftOverPath = """^\[\*\]""".r.replaceFirstIn(remainingRulePath, "")
@@ -344,6 +377,13 @@ object SharedXmlEqualityHelpers {
           println(s"Expected was missing a child array node at position 0".yellow)
           RuleMatchFailure
         }
+
+      case rp: String if rp.matches("""^\.\*""") =>
+        println(s"Found array wildcard rule path: '$rp'".yellow)
+
+        val leftOverPath = """^\.\*""".r.replaceFirstIn(remainingRulePath, "")
+
+        traverseAndMatch(leftOverPath)(rule)(ex)(re)
 
       case rp: String =>
         println(s"Unexpected branch rule path: '$rp'".yellow)
