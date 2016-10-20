@@ -53,7 +53,7 @@ object ScalaPactMock extends LazyLogging {
     else port
   }
 
-  def runConsumerIntegrationTest(pactDescription: ScalaPactDescriptionFinal)(test: ScalaPactMockConfig => Unit): Unit = {
+  def runConsumerIntegrationTest(strict: Boolean)(pactDescription: ScalaPactDescriptionFinal)(test: ScalaPactMockConfig => Unit): Unit = {
 
     val mockConfig = ScalaPactMockConfig("http", "localhost", findFreePort())
 
@@ -63,7 +63,7 @@ object ScalaPactMock extends LazyLogging {
         protocol = Option(mockConfig.protocol),
         port = Option(mockConfig.port),
         localPactPath = None,
-        strictMode = Option(false) // TODO: Should be able to decide which mode to use.
+        strictMode = Option(strict) // TODO: Should be able to decide which mode to use.
       ),
       pacts = List(ScalaPactContractWriter.producePactFromDescription(pactDescription))
     )

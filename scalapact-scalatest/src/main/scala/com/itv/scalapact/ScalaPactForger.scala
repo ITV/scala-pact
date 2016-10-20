@@ -10,7 +10,17 @@ object ScalaPactForger {
 
   implicit val options = ScalaPactOptions.DefaultOptions
 
-  object forgePact {
+  object forgePact extends ForgePactElements {
+    protected val strict: Boolean = false
+  }
+
+  object forgeStrictPact extends ForgePactElements {
+    protected val strict: Boolean = true
+  }
+
+  sealed trait ForgePactElements {
+    protected val strict: Boolean
+
     def between(consumer: String): ScalaPartialPact = new ScalaPartialPact(consumer)
 
     class ScalaPartialPact(consumer: String) {
@@ -27,7 +37,7 @@ object ScalaPactForger {
       def addInteraction(interaction: ScalaPactInteraction): ScalaPactDescription = new ScalaPactDescription(consumer, provider, interactions ++ List(interaction))
 
       def runConsumerTest(test: ScalaPactMockConfig => Unit)(implicit options: ScalaPactOptions): Unit = {
-        ScalaPactMock.runConsumerIntegrationTest(
+        ScalaPactMock.runConsumerIntegrationTest(strict)(
           ScalaPactDescriptionFinal(
             consumer,
             provider,
