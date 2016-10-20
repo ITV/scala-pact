@@ -3,11 +3,10 @@ package com.itv.scalapact
 import java.io.{File, PrintWriter}
 import java.nio.charset.StandardCharsets
 
-import com.itv.scalapact.ScalaPactForger.{ScalaPactMatchingRuleRegex, ScalaPactMatchingRuleType, ScalaPactMatchingRule, ScalaPactDescriptionFinal}
+import com.itv.scalapact.ScalaPactForger.{ScalaPactDescriptionFinal, ScalaPactInteractionFinal, ScalaPactMatchingRule, ScalaPactMatchingRuleRegex, ScalaPactMatchingRuleType}
 import com.itv.scalapactcore._
 
 import scala.language.implicitConversions
-import scala.util.Random
 
 object ScalaPactContractWriter {
 
@@ -48,35 +47,39 @@ object ScalaPactContractWriter {
 
   private def producePactJson(pactDescription: ScalaPactDescriptionFinal): String = {
     ScalaPactWriter.pactToJsonString(
-      Pact(
-        provider = PactActor(pactDescription.provider),
-        consumer = PactActor(pactDescription.consumer),
-        interactions = pactDescription.interactions.map { i =>
+      producePactFromDescription(pactDescription)
+    )
+  }
 
-          val pathAndQuery: (String, String) = i.request.path.split('?').toList ++ List(i.request.query.getOrElse("")) match {
-            case Nil => ("/", "")
-            case x :: xs => (x, xs.filter(!_.isEmpty).mkString("&"))
-          }
+  lazy val producePactFromDescription: ScalaPactDescriptionFinal => Pact = pactDescription =>
+    Pact(
+      provider = PactActor(pactDescription.provider),
+      consumer = PactActor(pactDescription.consumer),
+      interactions = pactDescription.interactions.map { convertInteractionsFinalToInteractions }
+    )
 
-          Interaction(
-            providerState = i.providerState,
-            description = i.description,
-            request = InteractionRequest(
-              method = i.request.method.method,
-              path = pathAndQuery._1,
-              query = pathAndQuery._2,
-              headers = i.request.headers,
-              body = i.request.body,
-              matchingRules = i.request.matchingRules
-            ),
-            response = InteractionResponse(
-              status = i.response.status,
-              headers = i.response.headers,
-              body = i.response.body,
-              matchingRules = i.response.matchingRules
-            )
-          )
-        }
+  lazy val convertInteractionsFinalToInteractions: ScalaPactInteractionFinal => Interaction = i => {
+    val pathAndQuery: (String, String) = i.request.path.split('?').toList ++ List(i.request.query.getOrElse("")) match {
+      case Nil => ("/", "")
+      case x :: xs => (x, xs.filter(!_.isEmpty).mkString("&"))
+    }
+
+    Interaction(
+      providerState = i.providerState,
+      description = i.description,
+      request = InteractionRequest(
+        method = i.request.method.method,
+        path = pathAndQuery._1,
+        query = pathAndQuery._2,
+        headers = i.request.headers,
+        body = i.request.body,
+        matchingRules = i.request.matchingRules
+      ),
+      response = InteractionResponse(
+        status = i.response.status,
+        headers = i.response.headers,
+        body = i.response.body,
+        matchingRules = i.response.matchingRules
       )
     )
   }

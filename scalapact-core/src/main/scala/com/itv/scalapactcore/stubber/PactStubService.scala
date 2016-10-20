@@ -7,6 +7,7 @@ import org.http4s.dsl._
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.util.CaseInsensitiveString
 import org.http4s.{HttpService, Request, Response, Status}
+import org.http4s.server.Server
 
 import scalaz.{-\/, \/-}
 
@@ -20,6 +21,16 @@ object PactStubService {
       .mountService(PactStubService.service(config.giveStrictMode), "/")
       .run
       .awaitShutdown()
+  }
+
+  lazy val runServer: Arguments => Server = config => {
+    BlazeBuilder.bindHttp(config.givePort, config.giveHost)
+      .mountService(PactStubService.service(config.giveStrictMode), "/")
+      .run
+  }
+
+  lazy val stopServer: Server => Unit = server => {
+    server.shutdown
   }
 
   private val isAdminCall: Request => Boolean = request =>
