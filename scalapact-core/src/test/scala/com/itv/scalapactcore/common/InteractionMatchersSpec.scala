@@ -255,6 +255,34 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
 
     }
 
+    it("should be able to match json bodies with rules") {
+
+      val expected =
+        """
+          |{
+          |  "name":"joe"
+          |}
+        """.stripMargin
+
+      val received =
+        """
+          |{
+          |  "name":"eirik"
+          |}
+        """.stripMargin
+
+      val rules: Option[Map[String, MatchingRule]] = Option(
+        Map(
+          "$.body.name" -> MatchingRule(Option("regex"), Option("\\w+"), None)
+        )
+      )
+
+      withClue("Didn't match json body with rule") {
+        matchBodies(rules)(expected)(expected) shouldEqual true
+      }
+
+    }
+
     it("should be able to match xml bodies") {
 
       val expected1 =
