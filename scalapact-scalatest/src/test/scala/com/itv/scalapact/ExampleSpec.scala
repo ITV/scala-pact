@@ -234,7 +234,7 @@ class ExampleSpec extends FunSpec with Matchers {
       val json: String => String = value => {
         s"""
           |{
-          |  "name" : $value
+          |  "name" : "$value"
           |}
         """.stripMargin
       }
