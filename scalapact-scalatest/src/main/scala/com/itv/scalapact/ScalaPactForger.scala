@@ -84,6 +84,7 @@ object ScalaPactForger {
   }
   case class ScalaPactMatchingRuleRegex(key: String, regex: String) extends ScalaPactMatchingRule
   case class ScalaPactMatchingRuleType(key: String) extends ScalaPactMatchingRule
+  case class ScalaPactMatchingRuleArrayMinLength(key: String, minimum: Int) extends ScalaPactMatchingRule
 
   case class ScalaPactMatchingRules(rules: List[ScalaPactMatchingRule]) {
     def ~>(newRules: ScalaPactMatchingRules): ScalaPactMatchingRules = ScalaPactMatchingRules(
@@ -94,6 +95,24 @@ object ScalaPactForger {
   object headerRegexRule {
     def apply(key: String, regex: String): ScalaPactMatchingRules = ScalaPactMatchingRules(
       rules = List(ScalaPactMatchingRuleRegex("$.headers." + key, regex))
+    )
+  }
+
+  object bodyRegexRule {
+    def apply(key: String, regex: String): ScalaPactMatchingRules = ScalaPactMatchingRules(
+      rules = List(ScalaPactMatchingRuleRegex("$.body." + key, regex))
+    )
+  }
+
+  object bodyTypeRule {
+    def apply(key: String): ScalaPactMatchingRules = ScalaPactMatchingRules(
+      rules = List(ScalaPactMatchingRuleType("$.body." + key))
+    )
+  }
+
+  object bodyArrayMinimumLengthRule {
+    def apply(key: String, minimum: Int): ScalaPactMatchingRules = ScalaPactMatchingRules(
+      rules = List(ScalaPactMatchingRuleArrayMinLength("$.body." + key, minimum))
     )
   }
 

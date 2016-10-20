@@ -3,7 +3,7 @@ package com.itv.scalapact
 import java.io.{File, PrintWriter}
 import java.nio.charset.StandardCharsets
 
-import com.itv.scalapact.ScalaPactForger.{ScalaPactDescriptionFinal, ScalaPactInteractionFinal, ScalaPactMatchingRule, ScalaPactMatchingRuleRegex, ScalaPactMatchingRuleType}
+import com.itv.scalapact.ScalaPactForger.{ScalaPactDescriptionFinal, ScalaPactInteractionFinal, ScalaPactMatchingRule, ScalaPactMatchingRuleArrayMinLength, ScalaPactMatchingRuleRegex, ScalaPactMatchingRuleType}
 import com.itv.scalapactcore._
 
 import scala.language.implicitConversions
@@ -92,6 +92,10 @@ object ScalaPactContractWriter {
 
         case ScalaPactMatchingRuleRegex(key, regex) =>
           Map(key -> MatchingRule("regex", regex, None))
+
+        case ScalaPactMatchingRuleArrayMinLength(key, min) =>
+          Map(key -> MatchingRule(None, None, min))
+
       }.foldLeft(Map.empty[String, MatchingRule])(_ ++ _)
     }
 
