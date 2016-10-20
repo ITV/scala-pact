@@ -32,13 +32,11 @@ object ScalaPactXmlEquality {
 
 object StrictXmlEqualityHelper {
 
-  def areEqual(beSelectivelyPermissive: Boolean, matchingRules: BodyMatchingRules, expected: Elem, received: Elem, accumulatedXmlPath: String): Boolean = {
-    println(">>>> STRICT")
+  def areEqual(beSelectivelyPermissive: Boolean, matchingRules: BodyMatchingRules, expected: Elem, received: Elem, accumulatedXmlPath: String): Boolean =
     (expected.headOption |@| received.headOption) { (e, r) => compareNodes(beSelectivelyPermissive)(matchingRules)(e)(r)(accumulatedXmlPath) } match {
       case Some(bool) => bool
       case None => false
     }
-  }
 
   lazy val compareNodes: Boolean => BodyMatchingRules => Node => Node => String => Boolean = beSelectivelyPermissive => matchingRules => expected => received => accumulatedXmlPath => {
 
@@ -63,18 +61,6 @@ object StrictXmlEqualityHelper {
             expected.child.zip(received.child).forall(p => compareNodes(beSelectivelyPermissive)(matchingRules)(p._1)(p._2)(accumulatedXmlPath + "." + expected.label))
           }
 
-        // lazy val childrenEqual =
-        //   if(expected.child.isEmpty) expected.text == received.text
-        //   else expected.child.forall { eN => received.child.exists(rN => compareNodes(matchingRules)(eN)(rN)(accumulatedXmlPath + "." + eN.label)) }
-
-
-
-        println(s"prefixEqual    : $prefixEqual")
-        println(s"labelEqual     : $labelEqual")
-        println(s"attributesEqual: $attributesEqual")
-        println(s"childLengthOk  : $childLengthOk")
-        println(s"childrenEqual  : $attributesEqual")
-
         prefixEqual && labelEqual && attributesLengthOk && attributesEqual && childLengthOk && childrenEqual
     }
   }
@@ -90,14 +76,11 @@ object PermissiveXmlEqualityHelper {
     * fields or array elements are out of order, as long as they are present since json
     * doesn't not guarantee element order.
     */
-  def areEqual(matchingRules: BodyMatchingRules, expected: Elem, received: Elem, accumulatedXmlPath: String): Boolean = {
-    println(">>>> PERMISSIVE")
-    println("rules: " + matchingRules)
+  def areEqual(matchingRules: BodyMatchingRules, expected: Elem, received: Elem, accumulatedXmlPath: String): Boolean =
     (expected.headOption |@| received.headOption) { (e, r) => compareNodes(matchingRules)(e)(r)(accumulatedXmlPath) } match {
       case Some(bool) => bool
       case None => false
     }
-  }
 
   lazy val compareNodes: BodyMatchingRules => Node => Node => String => Boolean = matchingRules => expected => received => accumulatedXmlPath => {
 
@@ -105,7 +88,7 @@ object PermissiveXmlEqualityHelper {
       case RuleMatchSuccess => true
       case RuleMatchFailure => false
       case NoRuleMatchRequired =>
-        println("Here: " + accumulatedXmlPath)
+
         lazy val prefixEqual = expected.prefix == received.prefix
         lazy val labelEqual = expected.label == received.label
         lazy val attributesEqual = SharedXmlEqualityHelpers.checkAttributeEquality(matchingRules)(accumulatedXmlPath)(expected.attributes.asAttrMap)(received.attributes.asAttrMap)
@@ -115,14 +98,6 @@ object PermissiveXmlEqualityHelper {
           if(expected.child.isEmpty) expected.text == received.text
           else expected.child.forall { eN => received.child.exists(rN => compareNodes(matchingRules)(eN)(rN)(accumulatedXmlPath + "." + eN.label)) }
 
-
-        println(s"prefixEqual    : $prefixEqual")
-        println(s"labelEqual     : $labelEqual")
-        println(s"attributesEqual: $attributesEqual")
-        println(s"childLengthOk  : $childLengthOk")
-        println(s"childrenEqual  : $attributesEqual")
-
-
         prefixEqual && labelEqual && attributesEqual && childLengthOk && childrenEqual
     }
   }
@@ -130,14 +105,16 @@ object PermissiveXmlEqualityHelper {
 }
 
 object SharedXmlEqualityHelpers {
+  // Maybe negative, must have digits, may have decimal and if so must have a
+  // digit after it, can have more trailing digits.
+  val isNumericValueRegex = """(^-?)(\d+)(\.?\d)(\d*)"""
+  val isBooleanValueRegex = """true|false"""
 
   lazy val checkAttributeEquality: BodyMatchingRules => String => Map[String, String] => Map[String, String] => Boolean = matchingRules => accumulatedXmlPath => e => r => {
 
     val rulesMap = e.flatMap { ex =>
       Map(ex._1 -> findMatchingRules(accumulatedXmlPath + ".@" + ex._1)(matchingRules).getOrElse(Nil))
     }.filter(_._2.nonEmpty)
-
-    println(rulesMap)
 
     val (attributesWithRules, attributesWithoutRules) = e.partition(p => rulesMap.contains(p._1))
 
@@ -166,7 +143,29 @@ object SharedXmlEqualityHelpers {
 
     MatchingRule.unapply(rule) match {
       case Some((Some(matchType), None, None)) if matchType == "type" =>
-        true //Always a string? Hmmmmm... Attributes are strings but they contain other types.
+      receivedAttributes
+        .get(attribute._1)
+        .map { value =>
+          // Another best effort type check
+          attribute._2 match {
+            case x if x.isEmpty => // Empty
+              // println(s"Expect attribute '${attribute._1}' to be empty, and got: $value'".yellow)
+              value.isEmpty
+
+            case x if x.matches(isNumericValueRegex) => // Any numeric, can be negative, can have decimal places
+              // println(s"Expect attribute '${attribute._1}' to be numeric, and got: $value'".yellow)
+              value.matches(isNumericValueRegex)
+
+            case x if x.matches(isBooleanValueRegex) => // Any Boolean
+              // println(s"Expect attribute '${attribute._1}' to be a boolean, and got: $value'".yellow)
+              value.matches(isBooleanValueRegex)
+
+            case x => // Finally, any arbitrary string
+              // println(s"Cannot identify type of attribute '${attribute._1}' assuming string".yellow)
+              true
+          }
+        }
+        .exists(_ == true)
 
       case Some((Some(matchType), Some(regex), _)) if matchType == "regex" =>
         receivedAttributes
@@ -191,9 +190,6 @@ object SharedXmlEqualityHelpers {
     } else None
 
   val matchNodeWithRules: BodyMatchingRules => String => Node => Node => ArrayMatchingStatus = matchingRules => accumulatedXmlPath => ex => re => {
-
-    println(">>>accumulatedXmlPath: " + accumulatedXmlPath)
-
     val rules = matchingRules.map { mrs =>
       mrs.filter { mr =>
         val mrPath = mr._1.replace("$.body.", "").replace("$.body", "")
@@ -203,8 +199,6 @@ object SharedXmlEqualityHelpers {
       }
     }.getOrElse(Map.empty[String, MatchingRule])
 
-    println(">>>" + rules)
-
     val results =
       rules
         .map(rule => (rule._1.replace("$.body.", "").replace("$.body", "").replace(accumulatedXmlPath, ""), rule._2))
@@ -213,10 +207,6 @@ object SharedXmlEqualityHelpers {
 
     ArrayMatchingStatus.listArrayMatchStatusToSingle(results)
   }
-  // Maybe negative, must have digits, may have decimal and if so must have a
-  // digit after it, can have more trailing digits.
-  val isNumericValueRegex = """(^-?)(\d+)(\.?\d)(\d*)"""
-  val isBooleanValueRegex = """true|false"""
 
   // This is best effort type checking, not ideal.
   // Eventually we just have to say that it passes on the assumption, having ruled out
@@ -226,12 +216,8 @@ object SharedXmlEqualityHelpers {
     // Received node contains same attributes as expected
     val attributesOk = if(mapContainsMapIgnoreValues(ex.attributes.asAttrMap)(re.attributes.asAttrMap)) RuleMatchSuccess else RuleMatchFailure
 
-    println(ex.attributes.asAttrMap + " vs. " + re.attributes.asAttrMap)
-
     // Children are all the same type
     val childrenLabel = ex.child.headOption.map(_.label)
-
-    println(childrenLabel + " -> " + re.child.map(_.label))
 
     // No label means no children, so that's a success
     val nodeChildrenCheck = childrenLabel.map { lbl =>
@@ -243,7 +229,7 @@ object SharedXmlEqualityHelpers {
     // successfully assuming an arbitrary string.
     val leafCheck =
       ex.text match {
-        case x if x.isEmpty => // Any numeric
+        case x if x.isEmpty => // Empty
           if(re.text.isEmpty) RuleMatchSuccess else RuleMatchFailure
         case x if x.matches(isNumericValueRegex) => // Any numeric, can be negative, can have decimal places
           if(re.text.matches(isNumericValueRegex)) RuleMatchSuccess else RuleMatchFailure
@@ -252,10 +238,6 @@ object SharedXmlEqualityHelpers {
         case x => // Finally, any arbitrary string
           RuleMatchSuccess
       }
-
-    println("> attributesOk: " + attributesOk)
-    println("> nodeChildrenCheck: " + nodeChildrenCheck)
-    println("> leafCheck: " + leafCheck)
 
     ArrayMatchingStatus.listArrayMatchStatusToSingle(List(attributesOk, nodeChildrenCheck, leafCheck))
   }
@@ -267,22 +249,28 @@ object SharedXmlEqualityHelpers {
 
     remainingRulePath match {
       case rp: String if rp.startsWith(".@") =>
-        println(s"Found attribute path: '$rp'".yellow)
-        val attribute = (rp.replace(".@", ""), "")
+        // println(s"Found attribute path: '$rp'".yellow)
+        val attributeKey = rp.replace(".@", "")
 
-        if(attributeRuleTest(re.attributes.asAttrMap)(attribute)(rule)) RuleMatchSuccess
-        else RuleMatchFailure
+        ex.attributes.asAttrMap.get(attributeKey).map { attributeValue =>
+          if(attributeRuleTest(re.attributes.asAttrMap)((attributeKey -> attributeValue))(rule)) RuleMatchSuccess
+          else RuleMatchFailure
+        }.getOrElse {
+          println(s"Could not extract attribute from expected Node.".yellow)
+          RuleMatchFailure
+        }
+
 
       case rp: String if rp.isEmpty =>
         //Seems odd, but this basically means the rule must be applied to the current node.
         //TODO: Very similar to below... refactor?
         rule match {
           case MatchingRule(Some(ruleType), _, _) if ruleType == "type" =>
-            println(s"Type rule for empty rule path found.".yellow)
+            // println(s"Type rule for empty rule path found.".yellow)
             typeCheck(ex)(re)
 
           case MatchingRule(Some(ruleType), _, Some(min)) if ruleType == "type" =>
-            println(s"Type rule with min found.".yellow)
+            // println(s"Type rule with min found.".yellow)
 
             val res = List(
              typeCheck(ex)(re),
@@ -292,24 +280,24 @@ object SharedXmlEqualityHelpers {
             ArrayMatchingStatus.listArrayMatchStatusToSingle(res)
 
           case MatchingRule(Some(ruleType), Some(regex), _) if ruleType == "regex" =>
-            println(s"Regex rule found.".yellow)
+            // println(s"Regex rule found.".yellow)
             regexCheck(regex)(re)
 
           case MatchingRule(Some(ruleType), None, _) =>
-            println(s"Regex rule found but no pattern supplied.".yellow)
+            // println(s"Regex rule found but no pattern supplied.".yellow)
             RuleMatchFailure
 
           case MatchingRule(_, _, Some(min)) =>
-            println(s"Array length min check".yellow)
+            // println(s"Array length min check".yellow)
             if(re.child.length >= min) RuleMatchSuccess else RuleMatchFailure
 
           case unexpectedRule =>
-            println(s"Unexpected leaf rule: $unexpectedRule".yellow)
+            // println(s"Unexpected leaf rule: $unexpectedRule".yellow)
             RuleMatchFailure
         }
 
       case rp: String if rp.matches("^.[a-zA-Z].*") =>
-        println(s"Found field rule path: '$rp'".yellow)
+        // println(s"Found field rule path: '$rp'".yellow)
 
         val maybeFieldName = """\w+""".r.findFirstIn(rp)
         val leftOverPath = """\.\w+""".r.replaceFirstIn(rp, "").replace(".#text", "")
@@ -319,23 +307,23 @@ object SharedXmlEqualityHelpers {
             if(leftOverPath.isEmpty) {
               rule match {
                 case MatchingRule(Some(ruleType), _, _) if ruleType == "type" =>
-                  println(s"Type rule found.".yellow)
+                  // println(s"Type rule found.".yellow)
                   typeCheck(ex)(re)
 
                 case MatchingRule(Some(ruleType), Some(regex), _) if ruleType == "regex" =>
-                  println(s"Regex rule found.".yellow)
+                  // println(s"Regex rule found.".yellow)
                   regexCheck(regex)(re)
 
                 case MatchingRule(Some(ruleType), None, _) =>
-                  println(s"Regex rule found but no pattern supplied.".yellow)
+                  // println(s"Regex rule found but no pattern supplied.".yellow)
                   RuleMatchFailure
 
                 case MatchingRule(_, _, Some(min)) =>
-                  println(s"Invalid rule, tried to test array min of $min on a leaf node".yellow)
+                  // println(s"Invalid rule, tried to test array min of $min on a leaf node".yellow)
                   RuleMatchFailure
 
                 case unexpectedRule =>
-                  println(s"Unexpected leaf rule: $unexpectedRule".yellow)
+                  // println(s"Unexpected leaf rule: $unexpectedRule".yellow)
                   RuleMatchFailure
 
               }
@@ -345,12 +333,12 @@ object SharedXmlEqualityHelpers {
           else RuleMatchFailure
 
         }.getOrElse {
-          println(s"Expected or Received XMl was missing a field node: $maybeFieldName".yellow)
+          // println(s"Expected or Received XMl was missing a field node: $maybeFieldName".yellow)
           RuleMatchFailure
         }
 
       case rp: String if rp.matches("""^\[\d+\].*""") || rp.matches("""\.\d+""") =>
-        println(s"Found array rule path: '$rp'".yellow)
+        // println(s"Found array rule path: '$rp'".yellow)
 
         val index: Int = """\d+""".r.findFirstIn(rp).flatMap(Helpers.safeStringToInt).getOrElse(-1)
         val leftOverPath = """(\.?)(\[?)\d+(\]?)""".r.replaceFirstIn(remainingRulePath, "")
@@ -358,12 +346,12 @@ object SharedXmlEqualityHelpers {
         (ex.child.headOption |@| re.child.drop(index).headOption) { (e, r) =>
           traverseAndMatch(leftOverPath)(rule)(e)(r)
         }.getOrElse {
-          println(s"Received XMl was missing a child array node at position: $index".yellow)
+          // println(s"Received XMl was missing a child array node at position: $index".yellow)
           RuleMatchFailure
         }
 
       case rp: String if rp.matches("""^\[\*\].*""") =>
-        println(s"Found array wildcard rule path: '$rp'".yellow)
+        // println(s"Found array wildcard rule path: '$rp'".yellow)
 
         val leftOverPath = """^\[\*\]""".r.replaceFirstIn(remainingRulePath, "")
 
@@ -374,19 +362,19 @@ object SharedXmlEqualityHelpers {
         }.map { l =>
           ArrayMatchingStatus.listArrayMatchStatusToSingle(l.toList)
         }.getOrElse {
-          println(s"Expected was missing a child array node at position 0".yellow)
+          // println(s"Expected was missing a child array node at position 0".yellow)
           RuleMatchFailure
         }
 
-      case rp: String if rp.matches("""^\.\*""") =>
-        println(s"Found array wildcard rule path: '$rp'".yellow)
+      case rp: String if rp.matches("""^\.\*.*""") =>
+        // println(s"Found array wildcard rule path: '$rp'".yellow)
 
         val leftOverPath = """^\.\*""".r.replaceFirstIn(remainingRulePath, "")
 
         traverseAndMatch(leftOverPath)(rule)(ex)(re)
 
       case rp: String =>
-        println(s"Unexpected branch rule path: '$rp'".yellow)
+        // println(s"Unexpected branch rule path: '$rp'".yellow)
         RuleMatchFailure
     }
   }
