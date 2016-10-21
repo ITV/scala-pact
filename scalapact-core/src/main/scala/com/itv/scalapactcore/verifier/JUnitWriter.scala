@@ -1,4 +1,4 @@
-package com.itv.scalapact.plugin.verifier
+package com.itv.scalapactcore.verifier
 
 import java.io.{File, PrintWriter}
 

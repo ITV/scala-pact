@@ -1,4 +1,4 @@
-package com.itv.scalapact.plugin.verifier
+package com.itv.scalapactcore.verifier
 
 import com.itv.scalapactcore._
 import com.itv.scalapactcore.common.matching.InteractionMatchers._
@@ -199,3 +199,7 @@ object Verifier {
 case class PactVerifyResult(pact: Pact, results: List[\/[String, Interaction]])
 
 class ProviderStateFailure(key: String) extends Exception()
+
+case class ProviderState(key: String, f: String => Boolean)
+case class VersionedConsumer(name: String, version: String)
+case class PactVerifySettings(providerStates: List[ProviderState], pactBrokerAddress: String, projectVersion: String, providerName: String, consumerNames: List[String], versionedConsumerNames: List[VersionedConsumer])

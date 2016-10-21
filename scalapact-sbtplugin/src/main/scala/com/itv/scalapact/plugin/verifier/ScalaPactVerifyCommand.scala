@@ -3,6 +3,7 @@ package com.itv.scalapact.plugin.verifier
 import com.itv.scalapact.plugin.ScalaPactPlugin
 import com.itv.scalapactcore.common.CommandArguments._
 import com.itv.scalapactcore.common.ColourOuput._
+import com.itv.scalapactcore.verifier._
 import sbt._
 
 import scala.language.implicitConversions
@@ -41,7 +42,3 @@ object ScalaPactVerifyCommand {
     state
   }
 }
-
-case class ProviderState(key: String, f: String => Boolean)
-case class VersionedConsumer(name: String, version: String)
-case class PactVerifySettings(providerStates: List[ProviderState], pactBrokerAddress: String, projectVersion: String, providerName: String, consumerNames: List[String], versionedConsumerNames: List[VersionedConsumer])
