@@ -31,8 +31,8 @@ class StrictExampleSpec extends FunSpec with Matchers {
 
       // Different builder
       forgeStrictPact
-        .between("My Consumer")
-        .and("Their Provider Service")
+        .between("My Strict Consumer")
+        .and("Their Strict Provider Service")
         .addInteraction(
           interaction
             .description("a strict match")
