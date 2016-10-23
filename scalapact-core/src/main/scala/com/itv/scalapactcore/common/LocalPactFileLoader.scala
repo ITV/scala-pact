@@ -14,8 +14,12 @@ object LocalPactFileLoader {
     def rec(files: List[File], acc: List[String]): List[String] = {
       files match {
         case Nil =>
-          println("No pact files found")
-          acc
+          if(acc.isEmpty) {
+            println("WARNING: No pact files found.".yellow)
+            acc
+          } else {
+            acc
+          }
 
         case x :: xs if !x.exists() =>
           println("Supplied pact path does not exist! Aborting file load.".red)

@@ -3,6 +3,8 @@ package com.itv.scalapact
 import com.itv.scalapactcore.common.Arguments
 import com.itv.scalapactcore.verifier.{PactVerifySettings, ProviderState, Verifier, VersionedConsumer}
 
+import java.io.{File, FileWriter, BufferedWriter}
+
 import scala.language.implicitConversions
 
 object ScalaPactVerify {
@@ -20,22 +22,14 @@ object ScalaPactVerify {
 
     protected val strict: Boolean
 
-    def between(consumer: String): ScalaPartialPactVerify = new ScalaPartialPactVerify(consumer)
+    def withPactSource(sourceType: PactSourceType): ScalaPactVerifyProviderStates = new ScalaPactVerifyProviderStates(sourceType)
 
-    class ScalaPartialPactVerify(consumer: String) {
-      def and(provider: String): ScalaPactVerifySource = new ScalaPactVerifySource(consumer, provider)
+    class ScalaPactVerifyProviderStates(sourceType: PactSourceType) {
+      def setupProviderState(given: String)(setupProviderState: String => Boolean): ScalaPactVerifyRunner = new ScalaPactVerifyRunner(sourceType, given, setupProviderState)
+      def noSetupRequired: ScalaPactVerifyRunner = new ScalaPactVerifyRunner(sourceType, None, None)
     }
 
-    class ScalaPactVerifySource(consumer: String, provider: String) {
-      def withPactSource(sourceType: PactSourceType): ScalaPactVerifyProviderStates = new ScalaPactVerifyProviderStates(consumer, provider, sourceType)
-    }
-
-    class ScalaPactVerifyProviderStates(consumer: String, provider: String, sourceType: PactSourceType) {
-      def setupProviderState(given: String)(setupProviderState: String => Boolean): ScalaPactVerifyRunner = new ScalaPactVerifyRunner(consumer, provider, sourceType, given, setupProviderState)
-      def noSetupRequired: ScalaPactVerifyRunner = new ScalaPactVerifyRunner(consumer, provider, sourceType, None, None)
-    }
-
-    class ScalaPactVerifyRunner(consumer: String, provider: String, sourceType: PactSourceType, given: Option[String], setupProviderState: Option[String => Boolean]) {
+    class ScalaPactVerifyRunner(sourceType: PactSourceType, given: Option[String], setupProviderState: Option[String => Boolean]) {
 
       def runVerificationAgainst(port: Int): Unit = doVerification("http", "localhost", port)
 
@@ -52,13 +46,40 @@ object ScalaPactVerify {
           } yield List(ProviderState(g, ps))
 
         val (verifySettings, arguments) = sourceType match {
-          case directory(path) =>
+          case pactContractString(json) =>
+            val tmp = File.createTempFile("tmp_pact_", ".json")
+
+            val fileWriter = new FileWriter(tmp, true)
+
+            val bw = new BufferedWriter(fileWriter)
+            bw.write(json)
+            bw.close()
+
             (
               PactVerifySettings(
                 providerStates = providerStatesList.getOrElse(Nil),
                 pactBrokerAddress = "",
                 projectVersion = "",
-                providerName = provider,
+                providerName = "",
+                consumerNames = Nil,
+                versionedConsumerNames = Nil
+              ),
+              Arguments(
+                host = host,
+                protocol = protocol,
+                port = port,
+                localPactPath = tmp.getAbsolutePath(),
+                strictMode = strict
+              )
+            )
+
+          case loadFromLocal(path) =>
+            (
+              PactVerifySettings(
+                providerStates = providerStatesList.getOrElse(Nil),
+                pactBrokerAddress = "",
+                projectVersion = "",
+                providerName = "",
                 consumerNames = Nil,
                 versionedConsumerNames = Nil
               ),
@@ -71,14 +92,14 @@ object ScalaPactVerify {
               )
             )
 
-          case pactBroker(url) =>
+          case pactBroker(url, providerName, consumerNames) =>
             (
               PactVerifySettings(
                 providerStates = providerStatesList.getOrElse(Nil),
                 pactBrokerAddress = url,
                 projectVersion = "",
-                providerName = provider,
-                consumerNames = List(consumer),
+                providerName = providerName,
+                consumerNames = consumerNames,
                 versionedConsumerNames = Nil
               ),
               Arguments(
@@ -90,15 +111,15 @@ object ScalaPactVerify {
               )
             )
 
-          case pactBrokerWithVersion(url, version) =>
+          case pactBrokerWithVersion(url, version, providerName, consumerNames) =>
             (
               PactVerifySettings(
                 providerStates = providerStatesList.getOrElse(Nil),
                 pactBrokerAddress = url,
                 projectVersion = "",
-                providerName = provider,
+                providerName = providerName,
                 consumerNames = Nil,
-                versionedConsumerNames = List(VersionedConsumer(consumer, version))
+                versionedConsumerNames = consumerNames.map(c => VersionedConsumer(c, version))
               ),
               Arguments(
                 host = host,
@@ -117,13 +138,14 @@ object ScalaPactVerify {
   }
 
   sealed trait PactSourceType
-  case class directory(path: String) extends PactSourceType
-  case class pactBroker(url: String) extends PactSourceType {
-    def withContractVersion(version: String): pactBrokerWithVersion = pactBrokerWithVersion(url, version)
+  case class loadFromLocal(path: String) extends PactSourceType
+  case class pactBroker(url: String, provider: String, consumers: List[String]) extends PactSourceType {
+    def withContractVersion(version: String): pactBrokerWithVersion = pactBrokerWithVersion(url, version, provider, consumers)
   }
-  case class pactBrokerWithVersion(url: String, contractVersion: String) extends PactSourceType {
-    def withContractVersion(version: String): pactBrokerWithVersion = pactBrokerWithVersion(url, version)
+  case class pactBrokerWithVersion(url: String, contractVersion: String, provider: String, consumers: List[String]) extends PactSourceType {
+    def withContractVersion(version: String): pactBrokerWithVersion = pactBrokerWithVersion(url, version, provider, consumers)
   }
+  case class pactContractString(json: String) extends PactSourceType
 
   private class ScalaPactVerifyFailed extends Exception
 
