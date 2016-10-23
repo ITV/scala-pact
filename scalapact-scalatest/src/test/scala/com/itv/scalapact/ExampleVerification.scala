@@ -20,7 +20,7 @@ class ExampleVerification extends FunSpec with Matchers with BeforeAndAfterAll {
     },
     "interactions" : [
       {
-        "description" : "Just an example",
+        "description" : "Simple example",
         "request" : {
           "method" : "GET",
           "path" : "/example"
@@ -28,6 +28,17 @@ class ExampleVerification extends FunSpec with Matchers with BeforeAndAfterAll {
         "response" : {
           "status" : 200,
           "body" : "Success"
+        }
+      },
+      {
+        "description" : "A strict example",
+        "request" : {
+          "method" : "GET",
+          "path" : "/strict"
+        },
+        "response" : {
+          "status" : 200,
+          "body" : ["red", "blue"]
         }
       }
     ]
@@ -42,10 +53,15 @@ class ExampleVerification extends FunSpec with Matchers with BeforeAndAfterAll {
 
     WireMock.configureFor("localhost", 1234)
 
-    val response = aResponse().withStatus(200).withBody("Success")
+    val response1 = aResponse().withStatus(200).withBody("Success")
+    val response2 = aResponse().withStatus(200).withBody("[\"blue\", \"red\"]")
 
     wireMockServer.stubFor(
-      get(urlEqualTo("/example")).willReturn(response)
+      get(urlEqualTo("/example")).willReturn(response1)
+    )
+
+    wireMockServer.stubFor(
+      get(urlEqualTo("/strict")).willReturn(response2)
     )
   }
 
@@ -59,10 +75,30 @@ class ExampleVerification extends FunSpec with Matchers with BeforeAndAfterAll {
     it("should be able to verify a simple contract") {
 
      verifyPact
-       .withPactSource(pactContractString(samplePact)) // OR .withPactSource(pactBroker("url")) OR .withPactSource(pactBroker("url").withContractVersion("1.0.0"))
+       .withPactSource(pactAsJsonString(samplePact))
        .noSetupRequired
-       .runVerificationAgainst("localhost", 1234)
+       .runVerificationAgainst(1234)
 
+    }
+
+    it("should verify a permissive pact") {
+
+      verifyPact
+        .withPactSource(pactAsJsonString(samplePact))
+        .noSetupRequired
+        .runVerificationAgainst(1234)
+
+    }
+
+    it("should fail to verify a pact, strictly verified, that does not conform to the Pact spec.") {
+
+      intercept[ScalaPactVerifyFailed] {
+        verifyPact
+          .withPactSource(pactAsJsonString(samplePact))
+          .noSetupRequired
+          .runStrictVerificationAgainst(1234)
+      }
+      
     }
 
   }

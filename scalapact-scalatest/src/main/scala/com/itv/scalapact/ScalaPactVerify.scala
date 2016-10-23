@@ -1,6 +1,7 @@
 package com.itv.scalapact
 
 import com.itv.scalapactcore.common.Arguments
+import com.itv.scalapactcore.common.Helpers
 import com.itv.scalapactcore.verifier.{PactVerifySettings, ProviderState, Verifier, VersionedConsumer}
 
 import java.io.{File, FileWriter, BufferedWriter}
@@ -10,17 +11,7 @@ import scala.language.implicitConversions
 object ScalaPactVerify {
   implicit def toOption[A](a: A): Option[A] = Option(a)
 
-  object verifyPact extends VerifyPactElements {
-    protected val strict: Boolean = false
-  }
-
-  object verifyStrictPact extends VerifyPactElements {
-    protected val strict: Boolean = true
-  }
-
-  sealed trait VerifyPactElements {
-
-    protected val strict: Boolean
+  object verifyPact {
 
     def withPactSource(sourceType: PactSourceType): ScalaPactVerifyProviderStates = new ScalaPactVerifyProviderStates(sourceType)
 
@@ -31,13 +22,23 @@ object ScalaPactVerify {
 
     class ScalaPactVerifyRunner(sourceType: PactSourceType, given: Option[String], setupProviderState: Option[String => Boolean]) {
 
-      def runVerificationAgainst(port: Int): Unit = doVerification("http", "localhost", port)
+      def runStrictVerificationAgainst(port: Int): Unit = doVerification("http", "localhost", port, true)
 
-      def runVerificationAgainst(host: String, port: Int): Unit = doVerification("http", host, port)
+      def runStrictVerificationAgainst(host: String, port: Int): Unit = doVerification("http", host, port, true)
 
-      def runVerificationAgainst(protocol: String, host: String, port: Int): Unit = doVerification(protocol, host, port)
+      def runStrictVerificationAgainst(protocol: String, host: String, port: Int): Unit = doVerification(protocol, host, port, true)
 
-      private def doVerification(protocol: String, host: String, port: Int): Unit = {
+      def runStrictVerificationAgainst(target: VerifyTargetConfig): Unit = doVerification(target.protocol, target.host, target.port, true)
+
+      def runVerificationAgainst(port: Int): Unit = doVerification("http", "localhost", port, false)
+
+      def runVerificationAgainst(host: String, port: Int): Unit = doVerification("http", host, port, false)
+
+      def runVerificationAgainst(protocol: String, host: String, port: Int): Unit = doVerification(protocol, host, port, false)
+
+      def runVerificationAgainst(target: VerifyTargetConfig): Unit = doVerification(target.protocol, target.host, target.port, false)
+
+      private def doVerification(protocol: String, host: String, port: Int, strict: Boolean): Unit = {
 
         val providerStatesList =
           for {
@@ -46,7 +47,7 @@ object ScalaPactVerify {
           } yield List(ProviderState(g, ps))
 
         val (verifySettings, arguments) = sourceType match {
-          case pactContractString(json) =>
+          case pactAsJsonString(json) =>
             val tmp = File.createTempFile("tmp_pact_", ".json")
 
             val fileWriter = new FileWriter(tmp, true)
@@ -145,8 +146,29 @@ object ScalaPactVerify {
   case class pactBrokerWithVersion(url: String, contractVersion: String, provider: String, consumers: List[String]) extends PactSourceType {
     def withContractVersion(version: String): pactBrokerWithVersion = pactBrokerWithVersion(url, version, provider, consumers)
   }
-  case class pactContractString(json: String) extends PactSourceType
+  case class pactAsJsonString(json: String) extends PactSourceType
 
-  private class ScalaPactVerifyFailed extends Exception
+  class ScalaPactVerifyFailed extends Exception
+
+  object VerifyTargetConfig {
+
+    def apply(port: Int): VerifyTargetConfig = VerifyTargetConfig("http", "localhost", port)
+    def apply(host: String, port: Int): VerifyTargetConfig = VerifyTargetConfig("http", host, port)
+
+    def fromUrl(url: String): Option[VerifyTargetConfig] = {
+      try {
+        val pattern = """^([a-z]+):\/\/([a-z0-9\.\-_]+):(\d+).*""".r
+        val pattern(protocol, host, port) = url.toLowerCase
+
+        VerifyTargetConfig(protocol, host, Helpers.safeStringToInt(port).getOrElse(80))
+      } catch {
+        case e: Throwable =>
+          println("Could not parse url '" + url + "', expected something like: http://localhost:80 (must specify the port!)")
+          None
+      }
+    }
+
+  }
+  case class VerifyTargetConfig(protocol: String, host: String, port: Int)
 
 }
