@@ -8,7 +8,7 @@ object Build extends sbt.Build with BuildExtra {
     sbtPlugin := true,
     organization := "com.itv.plugins",
     name := "scalapact-plugin",
-    version := "1.0.3-SNAPSHOT",
+    version := "2.0.0-RC1",
     sbtVersion in Global := "0.13.11",
     scalaVersion in Global := "2.10.6",
     scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
