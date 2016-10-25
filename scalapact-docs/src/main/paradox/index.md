@@ -18,6 +18,9 @@ Scala-Pact is a library for generating Consumer Driven Contract files in Scala p
 
 ScalaPact is intended for Scala developers who are looking for a better way to manage the HTTP contracts between their services.
 
+## Source code
+The source for Scala-Pact can be found on [github](https://github.com/ITV/scala-pact).
+
 ## Acknowledgments
 ScalaPact is not an original idea - this project would never have happened without those who came before us:
 
