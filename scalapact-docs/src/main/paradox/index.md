@@ -6,8 +6,10 @@
 * [Basic usage guide](basic-usage.md)
 * [Advanced usage](advanced/index.md)
 * [Philosophy](philosophy/index.md)
+* [Scala-Pact Example Projects](example.md)
 * [Get help](help.md)
 * [Project dependancies](project-deps.md)
+* [Change log](change-log.md)
 
 @@@
 
@@ -23,10 +25,16 @@ ScalaPact is not an original idea - this project would never have happened witho
 1. [Thoughtworks / Ian Robinson / Martin Fowler](http://martinfowler.com/articles/consumerDrivenContracts.html)
 
 ## Change Log
-Updates and information about changes made between releases can be found in the [change log](https://github.com/ITV/scala-pact/blob/master/CHANGELOG.md).
+Updates and information about changes made between releases can be found in the @ref:[change log](change-log.md).
+
+## Licence
+Scala-Pact is free to use under the ITV OSS licence, more information can be found [in the licence file](https://github.com/ITV/scala-pact/blob/master/LICENCE.md).
 
 ## Example projects
 Fully working, albeit simple, example projects have been setup in the [example folder](https://github.com/ITV/scala-pact/tree/master/example).
 
 ## Pact Specification Compliance Level
 Scala-Pact is now fully compliant with version 2 of the official pact specification.
+
+## Contributing
+All contributions are very welcome, please see [the project's contributing file](https://github.com/ITV/scala-pact/blob/master/CONTRIBUTING.md) for details of how to get involved.
