@@ -10,6 +10,7 @@
 * [Get help](help.md)
 * [Project dependancies](project-deps.md)
 * [Change log](change-log.md)
+* [Contributing](contributing.md)
 
 @@@
 
@@ -37,4 +38,4 @@ Fully working, albeit simple, example projects have been setup in the [example f
 Scala-Pact is now fully compliant with version 2 of the official pact specification.
 
 ## Contributing
-All contributions are very welcome, please see [the project's contributing file](https://github.com/ITV/scala-pact/blob/master/CONTRIBUTING.md) for details of how to get involved.
+All contributions are very welcome, please see our @ref:[contributing guide](contributing.md) for details of how to get involved.
