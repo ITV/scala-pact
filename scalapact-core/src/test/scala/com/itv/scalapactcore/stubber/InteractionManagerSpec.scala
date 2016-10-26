@@ -44,7 +44,7 @@ class InteractionManagerSpec extends FunSpec with Matchers {
 
       interactionManager.addInteraction(interaction)
 
-      val matched = interactionManager.findMatchingInteraction(requestDetails, strictMatching = false).toOption
+      val matched = interactionManager.findMatchingInteraction(requestDetails, strictMatching = false).right
 
       matched.isDefined shouldEqual true
       matched.get.response.status shouldEqual Some(200)
@@ -96,7 +96,7 @@ class InteractionManagerSpec extends FunSpec with Matchers {
 
       interactionManager.addInteraction(interaction)
 
-      val matched = interactionManager.findMatchingInteraction(requestDetails, strictMatching = false).toOption
+      val matched = interactionManager.findMatchingInteraction(requestDetails, strictMatching = false).right
 
       matched.isDefined shouldEqual true
       matched.get.response.status shouldEqual Some(200)
@@ -146,12 +146,12 @@ class InteractionManagerSpec extends FunSpec with Matchers {
 
       interactionManager.addInteraction(interaction)
 
-      val matched1 = interactionManager.findMatchingInteraction(requestDetails1, strictMatching = false).toOption
+      val matched1 = interactionManager.findMatchingInteraction(requestDetails1, strictMatching = false).right
 
       matched1.isDefined shouldEqual true
       matched1.get.response.status shouldEqual Some(200)
 
-      interactionManager.findMatchingInteraction(requestDetails2, strictMatching = false).toOption.isEmpty shouldEqual true
+      interactionManager.findMatchingInteraction(requestDetails2, strictMatching = false).isLeft shouldEqual true
     }
 
     it("should be able to match a get request with lots of headers") {
@@ -187,7 +187,7 @@ class InteractionManagerSpec extends FunSpec with Matchers {
 
       interactionManager.addInteraction(interaction)
 
-      val matched = interactionManager.findMatchingInteraction(requestDetails, strictMatching = false).toOption
+      val matched = interactionManager.findMatchingInteraction(requestDetails, strictMatching = false).right
 
       matched.isDefined shouldEqual true
       matched.get.response.status shouldEqual Some(200)
@@ -234,7 +234,7 @@ class InteractionManagerSpec extends FunSpec with Matchers {
 
       interactionManager.addInteraction(interaction)
 
-      val matched = interactionManager.findMatchingInteraction(requestDetails2, strictMatching = false).toOption
+      val matched = interactionManager.findMatchingInteraction(requestDetails2, strictMatching = false).right
       matched.isDefined shouldEqual true
       matched.get.response.status shouldEqual Some(200)
     }
@@ -284,12 +284,12 @@ class InteractionManagerSpec extends FunSpec with Matchers {
 
       interactionManager.addInteraction(interaction)
 
-      val matched = interactionManager.findMatchingInteraction(goodRequestDetails, strictMatching = false).toOption
+      val matched = interactionManager.findMatchingInteraction(goodRequestDetails, strictMatching = false).right
 
       matched.isDefined shouldEqual true
       matched.get.response.status shouldEqual Some(200)
 
-      interactionManager.findMatchingInteraction(badRequestDetails, strictMatching = false).toOption.isEmpty shouldEqual true
+      interactionManager.findMatchingInteraction(badRequestDetails, strictMatching = false).isLeft shouldEqual true
     }
 
     it("should be able to match a get request with parameters") {
@@ -362,24 +362,24 @@ class InteractionManagerSpec extends FunSpec with Matchers {
       interactionManager.addInteraction(interaction)
 
       withClue("goodRequestDetails1") {
-        interactionManager.findMatchingInteraction(goodRequestDetails1, strictMatching = false).toOption.isDefined shouldEqual true
+        interactionManager.findMatchingInteraction(goodRequestDetails1, strictMatching = false).right.isDefined shouldEqual true
       }
 
       withClue("goodRequestDetails2") {
-        interactionManager.findMatchingInteraction(goodRequestDetails2, strictMatching = false).toOption.isDefined shouldEqual true
+        interactionManager.findMatchingInteraction(goodRequestDetails2, strictMatching = false).right.isDefined shouldEqual true
       }
 
       withClue("goodRequestDetails3") {
-        interactionManager.findMatchingInteraction(goodRequestDetails3, strictMatching = false).toOption.isDefined shouldEqual true
+        interactionManager.findMatchingInteraction(goodRequestDetails3, strictMatching = false).right.isDefined shouldEqual true
       }
 
       withClue("goodRequestDetails4") {
-        interactionManager.findMatchingInteraction(goodRequestDetails4, strictMatching = false).toOption.isDefined shouldEqual true
+        interactionManager.findMatchingInteraction(goodRequestDetails4, strictMatching = false).right.isDefined shouldEqual true
       }
 
       withClue("badRequestDetails1") {
         //Forgiving in what you receive...
-        interactionManager.findMatchingInteraction(badRequestDetails1, strictMatching = false).toOption.isDefined shouldEqual true
+        interactionManager.findMatchingInteraction(badRequestDetails1, strictMatching = false).right.isDefined shouldEqual true
       }
 
     }

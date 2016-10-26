@@ -9,7 +9,7 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
     it("should be able to read Pact files") {
       val pactEither = ScalaPactReader.jsonStringToPact(PactFileExamples.simpleAsString)
 
-      pactEither.toOption.get shouldEqual PactFileExamples.simple
+      pactEither.right.get shouldEqual PactFileExamples.simple
     }
 
     it("should be able to write Pact files") {
@@ -26,7 +26,7 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
 
       val json = ScalaPactWriter.pactToJsonString(PactFileExamples.simple)
 
-      val pact = ScalaPactReader.jsonStringToPact(json).toOption.get
+      val pact = ScalaPactReader.jsonStringToPact(json).right.get
 
       val `reJson'd` = ScalaPactWriter.pactToJsonString(pact)
 
@@ -38,7 +38,7 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
     it("should be able to read ruby format json") {
       val pactEither = ScalaPactReader.jsonStringToPact(PactFileExamples.simpleAsString)
 
-      pactEither.toOption.get shouldEqual PactFileExamples.simple
+      pactEither.right.get shouldEqual PactFileExamples.simple
     }
 
     it("should be able to write a pact file in ruby format") {
@@ -55,7 +55,7 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
 
       val json = ScalaPactWriter.pactToJsonString(PactFileExamples.verySimple)
 
-      val pact = ScalaPactReader.jsonStringToPact(json).toOption.get
+      val pact = ScalaPactReader.jsonStringToPact(json).right.get
 
       val `reJson'd` = ScalaPactWriter.pactToJsonString(pact)
 
@@ -67,7 +67,7 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
     it("should be able to read ruby format json with no body") {
       val pactEither = ScalaPactReader.jsonStringToPact(PactFileExamples.verySimpleAsString)
 
-      pactEither.toOption.get shouldEqual PactFileExamples.verySimple
+      pactEither.right.get shouldEqual PactFileExamples.verySimple
     }
 
     it("should be able to write a pact file in ruby format with no body") {

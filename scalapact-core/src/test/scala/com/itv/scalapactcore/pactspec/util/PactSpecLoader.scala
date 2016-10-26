@@ -78,11 +78,11 @@ object SpecReader {
 object JsonBodySpecialCaseHelper {
 
   val extractMatches: String => String \/ Boolean = json =>
-    json.parse.disjunction.map(j => (j.hcursor --\ "match").focus.flatMap(_.bool).exists(_ == true)) //Uses exists for 2.10 compt
+    json.parse.map(j => (j.hcursor --\ "match").focus.flatMap(_.bool).exists(_ == true)) //Uses exists for 2.10 compt
       .leftMap(e => "Extracting 'match': " + e)
 
   val extractComment: String => String \/ String = json =>
-    json.parse.disjunction.map(j => (j.hcursor --\ "comment").focus.flatMap(_.string).map(_.toString()).getOrElse("<missing comment>"))
+    json.parse.map(j => (j.hcursor --\ "comment").focus.flatMap(_.string).map(_.toString()).getOrElse("<missing comment>"))
       .leftMap(e => "Extracting 'comment': " + e)
 
   def extractInteractionRequestOrResponse[I]: String => String => argonaut.DecodeJson[I] => String \/ (I, Option[String]) = field => json => { implicit decoder =>
@@ -91,7 +91,6 @@ object JsonBodySpecialCaseHelper {
         requestResponseMinusBody
           .toString
           .decodeEither[I]
-          .disjunction
           .map(i => (i, maybeBody))
           .leftMap(e => "Extracting 'expected or actual': " + e)
 

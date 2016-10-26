@@ -2,20 +2,22 @@ name := "scalapact-core"
 
 organization := "com.itv"
 
-version := "2.0.0-RC1"
+version := "2.0.0-RC2"
 
 scalaVersion := "2.11.8"
 
 crossScalaVersions := Seq("2.10.6", "2.11.8")
 
+scalacOptions ++= Seq("-unchecked", "-deprecation")
+
+lazy val http4sVersion = "0.14.11a"
+
 libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "2.2.1" % "test",
-  "org.scalaz" %% "scalaz-core" % "7.2.2",
-  "io.argonaut" %% "argonaut" % "6.2-M1" withSources() withJavadoc(),
-  "org.http4s" %% "http4s-blaze-server" % "0.13.2a" withSources() withJavadoc(),
-  "org.http4s" %% "http4s-dsl"          % "0.13.2a" withSources() withJavadoc(),
-  "org.http4s" %% "http4s-argonaut"     % "0.13.2a" withSources() withJavadoc(),
-  "org.scalaj" %% "scalaj-http" % "2.2.1"
+  "org.http4s" %% "http4s-blaze-server" % http4sVersion,
+  "org.http4s" %% "http4s-blaze-client" % http4sVersion,
+  "org.http4s" %% "http4s-dsl"          % http4sVersion,
+  "org.http4s" %% "http4s-argonaut"     % http4sVersion
 )
 
 publishTo := {

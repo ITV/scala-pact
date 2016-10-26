@@ -43,12 +43,12 @@ trait PactSpecTester extends FunSpec with Matchers {
 
   private def doRequestMatch(spec: RequestSpec, i: Interaction, strictMatching: Boolean, shouldMatch: Boolean, path: String): Unit = {
     matchRequest(strictMatching)(i :: Nil)(spec.actual) match {
-      case \/-(r) =>
+      case Right(_) =>
         // Found a match
         if (shouldMatch) 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
         else fail(makeErrorString(path, spec.comment, strictMatching, spec.actual.toString, spec.expected.toString))
 
-      case -\/(l) =>
+      case Left(_) =>
         // Failed to match
         if (shouldMatch) fail(makeErrorString(path, spec.comment, strictMatching, spec.actual.toString, spec.expected.toString))
         else 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
@@ -87,12 +87,12 @@ trait PactSpecTester extends FunSpec with Matchers {
 
   private def doResponseMatch(spec: ResponseSpec, i: Interaction, strictMatching: Boolean, shouldMatch: Boolean, path: String): Unit = {
     matchResponse(strictMatching)(i :: Nil)(spec.actual) match {
-      case \/-(_) =>
+      case Right(_) =>
         // Found a match
         if (shouldMatch) 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
         else fail(makeErrorString(path, spec.comment, strictMatching, spec.actual.toString, spec.expected.toString))
 
-      case -\/(_) =>
+      case Left(_) =>
         // Failed to match
         if (shouldMatch) fail(makeErrorString(path, spec.comment, strictMatching, spec.actual.toString, spec.expected.toString))
         else 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...

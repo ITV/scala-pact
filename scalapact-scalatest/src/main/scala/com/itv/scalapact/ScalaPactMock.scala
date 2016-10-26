@@ -7,9 +7,8 @@ import com.itv.scalapact.ScalaPactForger._
 import com.itv.scalapactcore.common.{Arguments, ConfigAndPacts}
 import com.itv.scalapactcore.stubber.InteractionManager._
 import com.itv.scalapactcore.stubber.PactStubService._
-import com.typesafe.scalalogging.LazyLogging
 
-object ScalaPactMock extends LazyLogging {
+object ScalaPactMock {
 
   private def configuredTestRunner(pactDescription: ScalaPactDescriptionFinal)(config: ScalaPactMockConfig)(test: => ScalaPactMockConfig => Unit) = {
 
@@ -70,7 +69,11 @@ object ScalaPactMock extends LazyLogging {
 
     val server = (addToInteractionManager andThen runServer)(configAndPacts)
 
-    logger.info("> ScalaPact mock running at: " + mockConfig.baseUrl)
+    // This if naff, but sometimes isn't quite ready when we run the first test for some reason.
+    // TODO: Fix this properly
+    Thread.sleep(100)
+
+    println("> ScalaPact mock running at: " + mockConfig.baseUrl)
 
     configuredTestRunner(pactDescription)(mockConfig)(test)
 

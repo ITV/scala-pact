@@ -4,8 +4,6 @@ import argonaut.Json
 import com.itv.scalapactcore.MatchingRule
 import com.itv.scalapactcore.common._
 
-import scalaz.Scalaz._
-
 import ColourOuput._
 
 object WildCardRuleMatching {
@@ -89,14 +87,21 @@ object WildCardRuleMatching {
     val nextRuleAndContext = ruleAndContext.copy(path = (arrayNameToExtract :: remaining).mkString("."))
 
     val maybeArrayField = expectedArray.headOption.flatMap(_.objectFields.flatMap(_.find(f => f.toString == arrayName)))
-    val maybeExpectedArray = (expectedArray.headOption |@| maybeArrayField) { (element, field) => element.field(field) }
+
+    val maybeExpectedArray =
+      expectedArray.headOption.flatMap { element =>
+        maybeArrayField.flatMap { field =>
+          element.field(field)
+        }
+      }
+
     val maybeReceivedArrays = maybeArrayField.map { field =>
       receivedArray.map { a =>
         a.field(field)
       }
     }.getOrElse(Nil)
 
-    val extractedExpectedArray = maybeExpectedArray.flatten.getOrElse(Json.jEmptyObject)
+    val extractedExpectedArray = maybeExpectedArray.getOrElse(Json.jEmptyObject)
     val allReceivedArrays = maybeReceivedArrays
 
     NextArrayToMatch(arrayName, nextRuleAndContext, extractedExpectedArray, allReceivedArrays.map(_.getOrElse(Json.jEmptyObject)))

@@ -4,7 +4,6 @@ import java.io.File
 
 import com.itv.scalapactcore.{Pact, ScalaPactReader}
 
-import scalaz.\/-
 import com.itv.scalapactcore.common.ColourOuput._
 
 object LocalPactFileLoader {
@@ -58,7 +57,7 @@ object LocalPactFileLoader {
   private val deserializeIntoPact: List[String] => List[Pact] = pactJsonStrings => {
     pactJsonStrings.map { json =>
       ScalaPactReader.jsonStringToPact(json)
-    }.collect { case \/-(p) => p }
+    }.collect { case Right(p) => p }
   }
 
   lazy val loadPactFiles: String => Arguments => ConfigAndPacts = defaultLocation => config => {

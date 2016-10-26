@@ -3,10 +3,6 @@ package com.itv.scalapactcore
 import argonaut._
 import Argonaut._
 
-import scalaz._
-import Scalaz._
-
-
 object PactImplicits {
   implicit lazy val PactCodecJson: CodecJson[Pact] = casecodec3(Pact.apply, Pact.unapply)(
     "provider", "consumer", "interactions"
@@ -47,7 +43,7 @@ case class MatchingRule(`match`: Option[String], regex: Option[String], min: Opt
 
 object ScalaPactReader {
 
-  val jsonStringToPact: String => String \/ Pact = json => {
+  val jsonStringToPact: String => Either[String, Pact] = json => {
     val brokenPact: Option[(PactActor, PactActor, List[(Option[Interaction], Option[String], Option[String])])] = for {
       provider <- JsonBodySpecialCaseHelper.extractPactActor("provider")(json)
       consumer <- JsonBodySpecialCaseHelper.extractPactActor("consumer")(json)
@@ -71,8 +67,8 @@ object ScalaPactReader {
       )
 
     } match {
-      case Some(pact) => pact.right
-      case None => s"Could not read pact from json: $json".left
+      case Some(pact) => Right(pact)
+      case None => Left(s"Could not read pact from json: $json")
     }
   }
 
@@ -104,7 +100,7 @@ object ScalaPactWriter {
           requestBody <- maybeRequestBody
           requestField <- bodilessInteraction.cursor.downField("request")
           bodyField <- requestField.downField("body")
-          updated <- bodyField.set(requestBody).some
+          updated <- Option(bodyField.set(requestBody))
         } yield updated.undo
       } match {
         case ok @ Some(s) => ok
@@ -116,7 +112,7 @@ object ScalaPactWriter {
           responseBody <- maybeResponseBody
           responseField <- withRequestBody.flatMap(_.cursor.downField("response"))
           bodyField <- responseField.downField("body")
-          updated <- bodyField.set(responseBody).some
+          updated <- Option(bodyField.set(responseBody))
         } yield updated.undo
       } match {
         case ok @ Some(s) => ok
@@ -130,7 +126,7 @@ object ScalaPactWriter {
 
     val json = for {
       interactionsField <- pactNoInteractionsAsJson.cursor.downField("interactions")
-      updated <- interactionsField.withFocus(_.withArray(p => interactions)).some
+      updated <- Option(interactionsField.withFocus(_.withArray(p => interactions)))
     } yield updated.undo
 
     // I don't believe you can ever see this exception.
@@ -162,7 +158,7 @@ object JsonBodySpecialCaseHelper {
         j.string.map(_.toString)
 
       case _ =>
-        j.toString.some
+        Option(j.toString)
     }
 
     interations.map { is =>
@@ -192,4 +188,3 @@ object JsonBodySpecialCaseHelper {
   }
 
 }
-

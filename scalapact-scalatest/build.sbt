@@ -3,17 +3,18 @@ name := "scalapact-scalatest"
 
 organization := "com.itv"
 
-version := "2.0.0-RC1"
+version := "2.0.0-RC2"
 
 scalaVersion := "2.11.7"
 
+scalacOptions ++= Seq("-unchecked", "-deprecation")
+
 libraryDependencies <++= version { scalapactVersion =>
   Seq(
+    "com.itv" %% "scalapact-core" % scalapactVersion,
+    "org.scalaj" %% "scalaj-http" % "1.1.5" % "test",
     "org.scalatest" %% "scalatest" % "2.2.4" % "test",
     "org.json4s" %% "json4s-native" % "3.3.0" % "test",
-    "org.scalaj" %% "scalaj-http" % "1.1.5",
-    "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
-    "com.itv" %% "scalapact-core" % scalapactVersion,
     "com.github.tomakehurst" % "wiremock" % "1.56" % "test"
   )
 }

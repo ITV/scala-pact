@@ -1,4 +1,4 @@
-package com.itv.scalapactcore.stubber
+package com.itv.scalapactcore.common
 
 import java.nio.charset.StandardCharsets
 

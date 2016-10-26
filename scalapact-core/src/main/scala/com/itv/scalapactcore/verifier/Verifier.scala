@@ -3,18 +3,16 @@ package com.itv.scalapactcore.verifier
 import com.itv.scalapactcore._
 import com.itv.scalapactcore.common.matching.InteractionMatchers._
 import com.itv.scalapactcore.common.ColourOuput._
-import com.itv.scalapactcore.common.{Arguments, Helpers, LocalPactFileLoader, PactBrokerAddressValidation}
-
-import scalaj.http.{Http, HttpResponse}
-import scalaz.Scalaz._
-import scalaz._
-
+import com.itv.scalapactcore.common._
 import argonaut._
 import Argonaut._
-
 import PactImplicits._
 
+import scala.util.Left
+
 object Verifier {
+
+  private final case class ValidatedDetails(validatedAddress: String, providerName: String, consumerName: String, consumerVersion: String)
 
   lazy val verify: PactVerifySettings => Arguments => Boolean = pactVerifySettings => arguments => {
 
@@ -28,19 +26,30 @@ object Verifier {
           pactVerifySettings.versionedConsumerNames.map(vc => vc.copy(version = "/version/" + vc.version))
 
       val latestPacts : List[Pact] = versionConsumers.map { consumer =>
-        val details = for {
-          consumerName <- Helpers.urlEncode(consumer.name)
-          validatedAddress <- PactBrokerAddressValidation.checkPactBrokerAddress(pactVerifySettings.pactBrokerAddress)
-          providerName <- Helpers.urlEncode(pactVerifySettings.providerName)
-        } yield (validatedAddress, providerName, consumerName, consumer.version)
+
+        // I'm missing applicative builder now I can tell you...
+        val details: Either[String, ValidatedDetails] =
+          Helpers.urlEncode(consumer.name) match {
+            case Right(consumerName) =>
+              Helpers.urlEncode(pactVerifySettings.providerName) match {
+                case Right(providerName) =>
+                  PactBrokerAddressValidation.checkPactBrokerAddress(pactVerifySettings.pactBrokerAddress) match {
+                    case Right(validatedAddress) =>
+                      Right(ValidatedDetails(validatedAddress, providerName, consumerName, consumer.version))
+                    case Left(l) => Left(l)
+                  }
+                case Left(l) => Left(l)
+              }
+            case Left(l) => Left(l)
+          }
 
         details match {
-          case -\/(l) =>
+          case Left(l) =>
             println(l.red)
             None
 
-          case \/-((b, p, c, v)) =>
-            fetchAndReadPact(b + "/pacts/provider/" + p + "/consumer/" + c + v)
+          case Right(v) =>
+            fetchAndReadPact(v.validatedAddress + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + v.consumerVersion)
         }
       }.collect {
         case Some(s) => s
@@ -71,8 +80,10 @@ object Verifier {
 
           val matchResult = (doRequest(arguments)(maybeProviderState) andThen attemptMatch(arguments.giveStrictMode)(List(interaction)))(interaction.request)
 
-
-          matchResult.leftMap(m => errorMessage(interaction)(m))
+          matchResult match {
+            case r @ Right(_) => r
+            case Left(m) => Left(errorMessage(interaction)(m))
+          }
         }
       )
     }
@@ -88,18 +99,18 @@ object Verifier {
         failures = failureCount,
         time = endTime - startTime / 1000,
         testCases = result.results.collect {
-          case \/-(r) => JUnitXmlBuilder.testCasePass(r.description)
-          case -\/(l) => JUnitXmlBuilder.testCaseFail("Failure", l)
+          case Right(r) => JUnitXmlBuilder.testCasePass(r.description)
+          case Left(l) => JUnitXmlBuilder.testCaseFail("Failure", l)
         }
       )
       JUnitWriter.writePactVerifyResults(result.pact.consumer.name)(result.pact.provider.name)(content.toString)
     }
 
     pactVerifyResults.foreach { result =>
-      println(("Results for pact between " + result.pact.consumer + " and " + result.pact.provider).white.bold)
+      println(("Results for pact between " + result.pact.consumer.name + " and " + result.pact.provider.name).white.bold)
       result.results.foreach {
-        case \/-(r) => println((" - [  OK  ] " + r.description).green)
-        case -\/(l) => println((" - [FAILED] " + l).red)
+        case Right(r) => println((" - [  OK  ] " + r.description).green)
+        case Left(l) => println((" - [FAILED] " + l).red)
       }
     }
 
@@ -108,10 +119,13 @@ object Verifier {
     !foundErrors
   }
 
-  private lazy val attemptMatch: Boolean => List[Interaction] => \/[String, InteractionResponse] => \/[String, Interaction] = strictMatching => interactions => requestResult =>
-    requestResult.flatMap(matchResponse(strictMatching)(interactions))
+  private lazy val attemptMatch: Boolean => List[Interaction] => Either[String, InteractionResponse] => Either[String, Interaction] = strictMatching => interactions => requestResult =>
+    requestResult match {
+      case Right(r) => matchResponse(strictMatching)(interactions)(r)
+      case Left(s) => Left(s)
+    }
 
-  private lazy val doRequest: Arguments => Option[ProviderState] => InteractionRequest => \/[String, InteractionResponse] = arguments => maybeProviderState => interactionRequest => {
+  private lazy val doRequest: Arguments => Option[ProviderState] => InteractionRequest => Either[String, InteractionResponse] = arguments => maybeProviderState => interactionRequest => {
     val baseUrl = s"${arguments.giveProtocol}://" + arguments.giveHost + ":" + arguments.givePort
 
     try {
@@ -139,41 +153,36 @@ object Verifier {
 
     try {
       InteractionRequest.unapply(interactionRequest) match {
-        case Some((Some(method), Some(path), params, _, _, _)) =>
+        case Some((Some(_), Some(_), _, _, _, _)) =>
 
-          httpResponseToInteractionResponse {
-            //TODO: Rewrite this stuff to be less iffy...
-            val basicRequest = Http(baseUrl + path + params.map(s => "?" + s).getOrElse(""))
+          ScalaPactHttp.doInteractionRequest(baseUrl, interactionRequest)
+            .unsafePerformSyncAttempt
+            .leftMap { t =>
+              println(s"Error in response: ${t.getMessage}".red)
+              t.getMessage
+            }
+            .toEither
 
-            val withData =
-              if (interactionRequest.body.isDefined && interactionRequest.body.exists(!_.isEmpty)) basicRequest.postData(interactionRequest.body.get)
-              else basicRequest
-
-            val withHeaders =
-              if (interactionRequest.headers.isDefined) withData.headers(interactionRequest.headers.getOrElse(Map.empty[String, String]))
-              else withData
-
-            val withMethod =
-              withHeaders.method(method)
-
-            withMethod.asString
-          }.right
-
-        case _ => ("Invalid request was missing either method or path: " + interactionRequest).left
+        case _ => Left("Invalid request was missing either method or path: " + interactionRequest)
 
       }
     } catch {
       case e: Throwable =>
-        e.getMessage.left
+        Left(e.getMessage)
     }
   }
 
-  def fetchAndReadPact(address: String): Option[Pact] = {
+  private def fetchAndReadPact(address: String): Option[Pact] = {
     println(s"Attempting to fetch pact from pact broker at: $address".white.bold)
 
-    Http(address).header("Accept", "application/json").asString match {
-      case r: HttpResponse[String] if r.is2xx =>
-        val pact = ScalaPactReader.jsonStringToPact(r.body).toOption
+    ScalaPactHttp.doRequest(ScalaPactHttp.GET, address, "", Map("Accept" -> "application/json"), None).map {
+      case r: SimpleResponse if r.is2xx =>
+        val pact = r.body.map(ScalaPactReader.jsonStringToPact).flatMap {
+          case Right(p) => Option(p)
+          case Left(msg) =>
+            println(s"Error: $msg".yellow)
+            None
+        }
 
         if(pact.isEmpty) {
           println("Could not convert good response to Pact:\n" + r.body)
@@ -183,20 +192,18 @@ object Verifier {
       case _ =>
         println(s"Failed to load consumer pact from: $address".red)
         None
+    }.unsafePerformSyncAttempt.toEither match {
+      case Right(p) => p
+      case Left(e) =>
+        println(s"Error: ${e.getMessage}".yellow)
+        None
     }
-  }
 
-  private lazy val httpResponseToInteractionResponse: HttpResponse[String] => InteractionResponse = response =>
-    InteractionResponse(
-      status = Option(response.code),
-      headers = if(response.headers.isEmpty) None else Option(response.headers.map(p => p._1 -> p._2.mkString)),
-      body = if(response.body.isEmpty) None else Option(response.body),
-      matchingRules = None
-    )
+  }
 
 }
 
-case class PactVerifyResult(pact: Pact, results: List[\/[String, Interaction]])
+case class PactVerifyResult(pact: Pact, results: List[Either[String, Interaction]])
 
 class ProviderStateFailure(key: String) extends Exception()
 

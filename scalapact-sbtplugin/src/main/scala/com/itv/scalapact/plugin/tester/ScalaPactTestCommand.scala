@@ -75,9 +75,12 @@ object ScalaPactTestCommand {
             None
         }
         fileContents.flatMap { t =>
-          val option = ScalaPactReader.jsonStringToPact(t).toOption
-          if (option.isEmpty) errorCount += 1
-          option
+          ScalaPactReader.jsonStringToPact(t) match {
+            case Right(r) => Option(r)
+            case Left(_) =>
+              errorCount += 1
+              None
+          }
         }
       }
         .collect { case Some(s) => s }

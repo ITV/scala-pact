@@ -1,12 +1,11 @@
 package com.itv.scalapact
 
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.{MappingBuilder, WireMock}
+import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
-import org.scalatest.{FunSpec, Matchers, BeforeAndAfterAll}
-
-import ScalaPactVerify._
+import com.itv.scalapact.ScalaPactVerify._
+import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
 
 class ExampleVerification extends FunSpec with Matchers with BeforeAndAfterAll {
 
@@ -98,7 +97,7 @@ class ExampleVerification extends FunSpec with Matchers with BeforeAndAfterAll {
           .noSetupRequired
           .runStrictVerificationAgainst(1234)
       }
-      
+
     }
 
   }

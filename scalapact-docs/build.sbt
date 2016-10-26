@@ -2,14 +2,9 @@ name := "website"
 
 organization := "com.itv"
 
-version := "1.0.2"
+version := "2.0.0-RC2"
 
 scalaVersion := "2.11.8"
-
-libraryDependencies ++= Seq(
-  "org.scalatest" %% "scalatest" % "2.2.1" % "test" withSources() withJavadoc(),
-  "org.scalacheck" %% "scalacheck" % "1.12.1" % "test" withSources() withJavadoc()
-)
 
 initialCommands := "import com.itv.website._"
 

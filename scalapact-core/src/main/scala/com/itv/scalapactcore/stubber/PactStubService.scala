@@ -1,15 +1,13 @@
 package com.itv.scalapactcore.stubber
 
 import com.itv.scalapactcore._
-import com.itv.scalapactcore.common.Arguments
+import com.itv.scalapactcore.common.{Arguments, Http4sRequestResponseFactory}
 import com.itv.scalapactcore.common.ColourOuput._
 import org.http4s.dsl._
+import org.http4s.server.Server
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.util.CaseInsensitiveString
 import org.http4s.{HttpService, Request, Response, Status}
-import org.http4s.server.Server
-
-import scalaz.{-\/, \/-}
 
 object PactStubService {
 
@@ -37,9 +35,10 @@ object PactStubService {
     request.pathInfo.startsWith("/interactions") &&
       request.headers.get(CaseInsensitiveString("X-Pact-Admin")).exists(h => h.value == "true")
 
-  private val service: Boolean => HttpService = strictMatching => HttpService {
-    case req => matchRequestWithResponse(strictMatching)(req)
-  }
+  private val service: Boolean => HttpService = strictMatching =>
+    HttpService.lift { req =>
+      matchRequestWithResponse(strictMatching)(req)
+    }
 
   private def matchRequestWithResponse(strictMatching: Boolean)(req: Request): scalaz.concurrent.Task[Response] = {
     if(isAdminCall(req)) {
@@ -51,13 +50,13 @@ object PactStubService {
 
         case m if m == "POST" || m == "PUT" =>
           ScalaPactReader.jsonStringToPact(req.bodyAsText.runLog.map(body => Option(body.foldLeft("")(_ + _))).unsafePerformSync.getOrElse("")) match {
-            case \/-(r) =>
+            case Right(r) =>
               InteractionManager.addInteractions(r.interactions)
 
               val output = ScalaPactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), InteractionManager.getInteractions))
               Ok(output)
 
-            case -\/(l) =>
+            case Left(l) =>
               InternalServerError(l)
           }
 
@@ -71,7 +70,7 @@ object PactStubService {
     }
     else {
 
-      import HeaderImplicitConversions._
+      import com.itv.scalapactcore.common.HeaderImplicitConversions._
 
       InteractionManager.findMatchingInteraction(
         InteractionRequest(
@@ -84,19 +83,19 @@ object PactStubService {
         ),
         strictMatching = strictMatching
       ) match {
-        case \/-(ir) =>
-          Status.fromInt(ir.response.status.getOrElse(200)) match {
-            case \/-(code) =>
+        case Right(ir) =>
+          Status.fromInt(ir.response.status.getOrElse(200)).toEither match {
+            case Right(code) =>
               Http4sRequestResponseFactory.buildResponse(
                 status = code,
                 headers = ir.response.headers.getOrElse(Map.empty),
                 body = ir.response.body
               )
 
-            case -\/(l) => InternalServerError(l.sanitized)
+            case Left(l) => InternalServerError(l.sanitized)
           }
 
-        case -\/(message) =>
+        case Left(message) =>
           NotFound(message)
       }
 

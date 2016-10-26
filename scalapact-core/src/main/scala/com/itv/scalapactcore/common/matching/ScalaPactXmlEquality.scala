@@ -6,7 +6,6 @@ import com.itv.scalapactcore.common.Helpers
 
 import scala.language.implicitConversions
 import scala.xml.{Elem, Node}
-import scalaz.Scalaz._
 
 import com.itv.scalapactcore.common.ColourOuput._
 
@@ -33,7 +32,11 @@ object ScalaPactXmlEquality {
 object StrictXmlEqualityHelper {
 
   def areEqual(beSelectivelyPermissive: Boolean, matchingRules: BodyMatchingRules, expected: Elem, received: Elem, accumulatedXmlPath: String): Boolean =
-    (expected.headOption |@| received.headOption) { (e, r) => compareNodes(beSelectivelyPermissive)(matchingRules)(e)(r)(accumulatedXmlPath) } match {
+    expected.headOption.flatMap { e =>
+      received.headOption.map { r =>
+        compareNodes(beSelectivelyPermissive)(matchingRules)(e)(r)(accumulatedXmlPath)
+      }
+    } match {
       case Some(bool) => bool
       case None => false
     }
@@ -77,7 +80,11 @@ object PermissiveXmlEqualityHelper {
     * doesn't not guarantee element order.
     */
   def areEqual(matchingRules: BodyMatchingRules, expected: Elem, received: Elem, accumulatedXmlPath: String): Boolean =
-    (expected.headOption |@| received.headOption) { (e, r) => compareNodes(matchingRules)(e)(r)(accumulatedXmlPath) } match {
+    expected.headOption.flatMap { e =>
+      received.headOption.map { r =>
+        compareNodes(matchingRules)(e)(r)(accumulatedXmlPath)
+      }
+    } match {
       case Some(bool) => bool
       case None => false
     }
@@ -143,29 +150,29 @@ object SharedXmlEqualityHelpers {
 
     MatchingRule.unapply(rule) match {
       case Some((Some(matchType), None, None)) if matchType == "type" =>
-      receivedAttributes
-        .get(attribute._1)
-        .map { value =>
-          // Another best effort type check
-          attribute._2 match {
-            case x if x.isEmpty => // Empty
-              // println(s"Expect attribute '${attribute._1}' to be empty, and got: $value'".yellow)
-              value.isEmpty
+        receivedAttributes
+          .get(attribute._1)
+          .map { value =>
+            // Another best effort type check
+            attribute._2 match {
+              case x if x.isEmpty => // Empty
+                // println(s"Expect attribute '${attribute._1}' to be empty, and got: $value'".yellow)
+                value.isEmpty
 
-            case x if x.matches(isNumericValueRegex) => // Any numeric, can be negative, can have decimal places
-              // println(s"Expect attribute '${attribute._1}' to be numeric, and got: $value'".yellow)
-              value.matches(isNumericValueRegex)
+              case x if x.matches(isNumericValueRegex) => // Any numeric, can be negative, can have decimal places
+                // println(s"Expect attribute '${attribute._1}' to be numeric, and got: $value'".yellow)
+                value.matches(isNumericValueRegex)
 
-            case x if x.matches(isBooleanValueRegex) => // Any Boolean
-              // println(s"Expect attribute '${attribute._1}' to be a boolean, and got: $value'".yellow)
-              value.matches(isBooleanValueRegex)
+              case x if x.matches(isBooleanValueRegex) => // Any Boolean
+                // println(s"Expect attribute '${attribute._1}' to be a boolean, and got: $value'".yellow)
+                value.matches(isBooleanValueRegex)
 
-            case x => // Finally, any arbitrary string
-              // println(s"Cannot identify type of attribute '${attribute._1}' assuming string".yellow)
-              true
+              case x => // Finally, any arbitrary string
+                // println(s"Cannot identify type of attribute '${attribute._1}' assuming string".yellow)
+                true
+            }
           }
-        }
-        .exists(_ == true)
+          .exists(_ == true)
 
       case Some((Some(matchType), Some(regex), _)) if matchType == "regex" =>
         receivedAttributes
@@ -182,10 +189,10 @@ object SharedXmlEqualityHelpers {
 
   private val findMatchingRules: String => BodyMatchingRules => Option[List[MatchingRuleContext]] = accumulatedJsonPath => m =>
     if (accumulatedJsonPath.length > 0) {
-      m.flatMap(
+      m.map(
         _.map(r => (r._1.replace("['", ".").replace("']", ""), r._2)).filter { r =>
           r._1.endsWith(accumulatedJsonPath) || WildCardRuleMatching.findMatchingRuleWithWildCards(accumulatedJsonPath)(r._1)
-        }.map(kvp => MatchingRuleContext(kvp._1.replace("$.body", ""), kvp._2)).toList.some
+        }.map(kvp => MatchingRuleContext(kvp._1.replace("$.body", ""), kvp._2)).toList
       )
     } else None
 
@@ -343,8 +350,10 @@ object SharedXmlEqualityHelpers {
         val index: Int = """\d+""".r.findFirstIn(rp).flatMap(Helpers.safeStringToInt).getOrElse(-1)
         val leftOverPath = """(\.?)(\[?)\d+(\]?)""".r.replaceFirstIn(remainingRulePath, "")
 
-        (ex.child.headOption |@| re.child.drop(index).headOption) { (e, r) =>
-          traverseAndMatch(leftOverPath)(rule)(e)(r)
+        ex.child.headOption.flatMap { e =>
+          re.child.drop(index).headOption.flatMap { r =>
+            Option(traverseAndMatch(leftOverPath)(rule)(e)(r))
+          }
         }.getOrElse {
           // println(s"Received XMl was missing a child array node at position: $index".yellow)
           RuleMatchFailure
