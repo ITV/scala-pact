@@ -2,7 +2,7 @@ name := "website"
 
 organization := "com.itv"
 
-version := "1.0.2"
+version := "1.0.5-SNAPSHOT"
 
 scalaVersion := "2.11.8"
 

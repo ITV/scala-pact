@@ -1,2 +1,2 @@
 
-addSbtPlugin("com.itv.plugins" % "scalapact-plugin" % "1.0.3-SNAPSHOT")
+addSbtPlugin("com.itv.plugins" % "scalapact-plugin" % "1.0.5-SNAPSHOT")
