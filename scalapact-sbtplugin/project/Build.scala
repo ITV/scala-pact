@@ -23,8 +23,13 @@ object Build extends sbt.Build with BuildExtra {
         "org.scalaj" %% "scalaj-http" % "2.2.1"
       )
     },
-    publishTo := Some("Artifactory Realm" at "https://itvrepos.artifactoryonline.com/itvrepos/cps-libs"),
-    resolvers := itvResolvers,
+    publishTo := {
+      val nexus = "https://oss.sonatype.org/"
+      if (isSnapshot.value)
+        Some("snapshots" at nexus + "content/repositories/snapshots")
+      else
+        Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+    },
     publishMavenStyle := true,
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => false },
