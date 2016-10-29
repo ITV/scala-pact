@@ -2,6 +2,7 @@ package com.itv.scalapact.plugin.tester
 
 import java.io.File
 
+import com.itv.scalapact.plugin.PactParser
 import com.itv.scalapact.plugin.utils.{FileManipulator, FileSystemManipulator}
 import com.itv.scalapactcore.common.ColourOuput._
 import com.itv.scalapactcore.{Pact, ScalaPactReader}
@@ -10,10 +11,10 @@ import sbt._
 import scala.language.implicitConversions
 
 
-case class PactAggregator(fileManipulator: FileManipulator = FileSystemManipulator, pactParser: String => Option[Pact] = t => ScalaPactReader.jsonStringToPact(t).toOption) extends (SquashDefn => Option[Pact]) {
+case class PactAggregator(fileManipulator: FileManipulator = FileSystemManipulator, pactParser: PactParser = t => ScalaPactReader.jsonStringToPact(t).toOption) extends (SquashDefn => Option[Pact]) {
   def apply(squashed: SquashDefn): Option[Pact] = {
     import squashed.files
-    val (pacts, errorCount) = files.foldLeft((List[Pact]()), 0) { case ((pacts, error), file) => pactParser(fileManipulator.loadFileAndDelete(file)).fold((pacts, error + 1))(p => (pacts :+ p, error)) }
+    val (pacts, errorCount) = files.sortBy(_.name).foldLeft((List[Pact]()), 0) { case ((pacts, error), file) => pactParser(fileManipulator.loadFileAndDelete(file)).fold((pacts, error + 1))(p => (pacts :+ p, error)) }
     println("> " + errorCount + " errors")
     pacts match {
       case head :: tail => Some(tail.foldLeft(head)((acc, p) => acc.copy(interactions = acc.interactions ++ p.interactions)))

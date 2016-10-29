@@ -8,10 +8,7 @@ import org.scalatest.{FlatSpec, Matchers}
 
 import scala.language.implicitConversions
 
-class GroupOfPactFilesSpec extends FlatSpec with Matchers with MockitoSugar {
-
-  import org.mockito.Mockito._
-
+trait SquashedFixture {
   val rootPath = "src/test/resources/pact-specification-version-2/testcases/samplePacts"
 
   implicit def toFile(s: String) = new File(s"$rootPath/$s")
@@ -26,6 +23,12 @@ class GroupOfPactFilesSpec extends FlatSpec with Matchers with MockitoSugar {
     "goggins_thor_62e8f8e2614b1d717fea311047e5aa2afb2f3729.json",
     "goggins_thor_ee6caee11c0f665814b760d76f4f61edb1533929.json"
   ))
+
+}
+
+class GroupOfPactFilesSpec extends FlatSpec with Matchers with MockitoSugar with SquashedFixture {
+
+  import org.mockito.Mockito._
 
   "GroupOfPactFiles" should "creatable from a directory" in {
     GroupOfPactFiles(new File(rootPath)) shouldBe
