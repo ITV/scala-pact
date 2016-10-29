@@ -8,11 +8,7 @@ import com.itv.scalapactcore.{Interaction, Pact, PactActor}
 import org.scalatest.{FlatSpec, Matchers}
 import org.scalatest.mock.MockitoSugar
 
-
-class PactAggregatorSpec extends FlatSpec with Matchers with MockitoSugar {
-
-  import org.mockito.Mockito._
-
+trait PactFixture extends MockitoSugar {
   val consumer = PactActor("someConsumer")
   val provider = PactActor("someProvider")
   val interaction1 = mock[Interaction]
@@ -22,6 +18,13 @@ class PactAggregatorSpec extends FlatSpec with Matchers with MockitoSugar {
   val pact123 = new Pact(provider, consumer, List(interaction1, interaction2, interaction3))
   val pact4 = new Pact(provider, consumer, List(interaction4))
   val pact1234 = new Pact(provider, consumer, List(interaction1, interaction2, interaction3, interaction4))
+
+
+}
+
+class PactAggregatorSpec extends FlatSpec with Matchers with PactFixture {
+
+  import org.mockito.Mockito._
 
   val file123 = new File("123")
   val file4 = new File("4")

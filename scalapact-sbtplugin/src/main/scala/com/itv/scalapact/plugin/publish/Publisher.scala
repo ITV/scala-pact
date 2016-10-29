@@ -5,7 +5,7 @@ import com.itv.scalapactcore.common.ColourOuput._
 import com.itv.scalapactcore.common.{ConfigAndPacts, Helpers, PactBrokerAddressValidation}
 import com.itv.scalapactcore.{Pact, ScalaPactWriter}
 
-import scalaj.http.{Http, HttpRequest, HttpResponse}
+import scalaj.http.{Http, HttpResponse}
 import scalaz.{-\/, \/, \/-}
 
 case class PublishDetails(pactBrokerAddress: String, providerName: String, consumerName: String, versionToPublishAs: String, pact: Pact)
@@ -37,15 +37,18 @@ object Publisher {
 
   def apply() = new Publisher(httpService, addressGenerator, pactFormatter)
 
+  def pactToDetails(pactBrokerAddress: String, versionToPublishAs: String) (pact: Pact): \/[String, PublishDetails] = {
+    for {
+      validatedAddress <- PactBrokerAddressValidation.checkPactBrokerAddress(pactBrokerAddress)
+      providerName <- Helpers.urlEncode(pact.provider.name)
+      consumerName <- Helpers.urlEncode(pact.consumer.name)
+    } yield PublishDetails(validatedAddress, providerName, consumerName, versionToPublishAs, pact)
+
+  }
+
   def publishToBroker: Publisher => String => String => ConfigAndPacts => Unit = publisher => pactBrokerAddress => versionToPublishAs => configAndPacts => {
     configAndPacts.pacts.foreach { pact =>
-      val details = for {
-        validatedAddress <- PactBrokerAddressValidation.checkPactBrokerAddress(pactBrokerAddress)
-        providerName <- Helpers.urlEncode(pact.provider.name)
-        consumerName <- Helpers.urlEncode(pact.consumer.name)
-      } yield PublishDetails(validatedAddress, providerName, consumerName, versionToPublishAs, pact)
-
-      details match {
+      pactToDetails(pactBrokerAddress, versionToPublishAs)(pact) match {
         case -\/(l) => println(l.red)
         case \/-(details) => publisher(details)
       }
