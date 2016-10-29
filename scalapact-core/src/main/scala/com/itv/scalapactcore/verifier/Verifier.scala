@@ -8,6 +8,8 @@ import argonaut._
 import Argonaut._
 import PactImplicits._
 
+import RightBiasEither._
+
 import scala.util.Left
 
 object Verifier {
@@ -17,7 +19,7 @@ object Verifier {
   lazy val verify: PactVerifySettings => Arguments => Boolean = pactVerifySettings => arguments => {
 
     val pacts: List[Pact] = if(arguments.localPactPath.isDefined) {
-      println(s"Attempting to use local pact files at: '${arguments.localPactPath.get}'".white.bold)
+      println(s"Attempting to use local pact files at: '${arguments.localPactPath.getOrElse("<path missing>")}'".white.bold)
       LocalPactFileLoader.loadPactFiles("pacts")(arguments).pacts
     } else {
 
@@ -28,20 +30,13 @@ object Verifier {
       val latestPacts : List[Pact] = versionConsumers.map { consumer =>
 
         // I'm missing applicative builder now I can tell you...
-        val details: Either[String, ValidatedDetails] =
-          Helpers.urlEncode(consumer.name) match {
-            case Right(consumerName) =>
-              Helpers.urlEncode(pactVerifySettings.providerName) match {
-                case Right(providerName) =>
-                  PactBrokerAddressValidation.checkPactBrokerAddress(pactVerifySettings.pactBrokerAddress) match {
-                    case Right(validatedAddress) =>
-                      Right(ValidatedDetails(validatedAddress, providerName, consumerName, consumer.version))
-                    case Left(l) => Left(l)
-                  }
-                case Left(l) => Left(l)
-              }
-            case Left(l) => Left(l)
-          }
+        val details: Either[String, ValidatedDetails] = {
+          for {
+            c  <- Helpers.urlEncode(consumer.name)
+            p  <- Helpers.urlEncode(pactVerifySettings.providerName)
+            pb <- PactBrokerAddressValidation.checkPactBrokerAddress(pactVerifySettings.pactBrokerAddress)
+          } yield ValidatedDetails(pb, p, c, consumer.version)
+        }
 
         details match {
           case Left(l) =>
@@ -80,10 +75,7 @@ object Verifier {
 
           val matchResult = (doRequest(arguments)(maybeProviderState) andThen attemptMatch(arguments.giveStrictMode)(List(interaction)))(interaction.request)
 
-          matchResult match {
-            case r @ Right(_) => r
-            case Left(m) => Left(errorMessage(interaction)(m))
-          }
+          matchResult.leftMap(errorMessage(interaction))
         }
       )
     }
@@ -120,32 +112,50 @@ object Verifier {
   }
 
   private lazy val attemptMatch: Boolean => List[Interaction] => Either[String, InteractionResponse] => Either[String, Interaction] = strictMatching => interactions => requestResult =>
-    requestResult match {
-      case Right(r) => matchResponse(strictMatching)(interactions)(r)
-      case Left(s) => Left(s)
-    }
+    requestResult.flatMap(matchResponse(strictMatching)(interactions))
 
   private lazy val doRequest: Arguments => Option[ProviderState] => InteractionRequest => Either[String, InteractionResponse] = arguments => maybeProviderState => interactionRequest => {
     val baseUrl = s"${arguments.giveProtocol}://" + arguments.giveHost + ":" + arguments.givePort
 
+    // Started wart removing...
+//    val providerStateRun = maybeProviderState.map { ps =>
+//      val key = ps.key
+//
+//      println(s"Attempting to run provider state: $key".yellow.bold)
+//
+//      val success = ps.f(key)
+//
+//      if(success) {
+//        println(s"Provider state ran successfully".yellow.bold)
+//        Right(success)
+//      } else {
+//        println(s"Provider state run failed".red.bold)
+//        println("--------------------".yellow.bold)
+//        println(s"Error executing unknown provider state function with key: $key".red)
+//        Left(s"Error executing unknown provider state function with key: $key")
+//      }
+//    }
+
     try {
+
       if(maybeProviderState.isDefined) {
         println("--------------------".yellow.bold)
-        println(s"Attempting to run provider state: ${maybeProviderState.get.key}".yellow.bold)
+        val key = maybeProviderState.map(_.key).getOrElse("<missing key>")
 
-        val success = maybeProviderState.get.f(maybeProviderState.get.key)
+        println(s"Attempting to run provider state: $key".yellow.bold)
 
+        val success = maybeProviderState.map(_.f(key)).getOrElse(true)
 
         if(success) println(s"Provider state ran successfully".yellow.bold)
         else println(s"Provider state run failed".red.bold)
         println("--------------------".yellow.bold)
 
-        if(!success) throw new ProviderStateFailure(maybeProviderState.get.key)
+        if(!success) throw new ProviderStateFailure(key)
       }
     } catch {
-      case e: Throwable =>
+      case _: Throwable =>
         if(maybeProviderState.isDefined) {
-          println(s"Error executing unknown provider state function with key: ${maybeProviderState.get.key}".red)
+          println(s"Error executing unknown provider state function with key: ${maybeProviderState.map(_.key).getOrElse("<missing key>")}".red)
         } else {
           println("Error executing unknown provider state function!".red)
         }
@@ -170,6 +180,7 @@ object Verifier {
       case e: Throwable =>
         Left(e.getMessage)
     }
+
   }
 
   private def fetchAndReadPact(address: String): Option[Pact] = {
