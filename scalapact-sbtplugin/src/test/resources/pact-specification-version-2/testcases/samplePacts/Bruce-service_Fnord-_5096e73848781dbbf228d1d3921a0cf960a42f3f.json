@@ -1,0 +1,34 @@
+{
+  "provider" : {
+    "name" : "Fnord "
+  },
+  "consumer" : {
+    "name" : "Bruce service"
+  },
+  "interactions" : [
+    {
+      "providerState" : "Programmes 2_4259 has been set up with latest productionId:2/4259/0229#001, title:Family Guy for broadcaster itv with features 'hls'",
+      "description" : "Fnord Programme api v3",
+      "request" : {
+        "method" : "GET",
+        "path" : "/platform/itvonline/samsung/programmes/2_4259",
+        "query" : "broadcaster=itv&features=hls",
+        "headers" : {
+          "Accept" : "application/vnd.itv.hubsvc.programme.v3+hal+json"
+        }
+      },
+      "response" : {
+        "status" : 200,
+        "body" : {
+          "id" : "2/4259",
+          "title" : "Family Guy",
+          "_embedded" : {
+            "latestProduction" : {
+              "productionId" : "2/4259/0229#001"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

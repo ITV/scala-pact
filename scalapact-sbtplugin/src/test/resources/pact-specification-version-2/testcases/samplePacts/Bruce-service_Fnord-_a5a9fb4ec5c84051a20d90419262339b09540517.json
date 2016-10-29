@@ -1,0 +1,35 @@
+{
+  "provider" : {
+    "name" : "Fnord "
+  },
+  "consumer" : {
+    "name" : "Bruce service"
+  },
+  "interactions" : [
+    {
+      "providerState" : "Production 1_9310_0222.001 has been set up with programme title The Only Way is Essex for broadcaster itv for features hls for variant-platform samsung",
+      "description" : "Fnord Production api v3",
+      "request" : {
+        "method" : "GET",
+        "path" : "/platform/itvonline/samsung/production/1_9310_0222.001",
+        "query" : "broadcaster=itv&features=hls",
+        "headers" : {
+          "Accept" : "application/vnd.itv.hubsvc.production.v3+hal+json"
+        }
+      },
+      "response" : {
+        "status" : 200,
+        "body" : {
+          "production" : {
+            "productionId" : "1/9310/0222#001",
+            "_embedded" : {
+              "programme" : {
+                "title" : "The Only Way is Essex"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

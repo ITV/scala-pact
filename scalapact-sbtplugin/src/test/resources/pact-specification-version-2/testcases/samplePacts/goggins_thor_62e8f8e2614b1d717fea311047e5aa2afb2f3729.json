@@ -1,0 +1,26 @@
+{
+  "provider" : {
+    "name" : "thor"
+  },
+  "consumer" : {
+    "name" : "goggins"
+  },
+  "interactions" : [
+    {
+      "providerState" : "Production [1/0694] returns [2] items",
+      "description" : "An example of a production id  having multiple variant",
+      "request" : {
+        "method" : "GET",
+        "path" : "/vod/availability",
+        "query" : "productionId=1_0694",
+        "headers" : {
+          "Accept" : "application/vnd.itv.oas.licenced-variant.v1+hal+json"
+        }
+      },
+      "response" : {
+        "status" : 200,
+        "body" : "{\n  \"_embedded\": {\n    \"licenceVariantMapping\": [\n     {\n        \"uri\": \"1-0694-9016-001/6/1/VAR008/1-0694-9016-001_6_1_VAR008.ism/.m3u8\",\n        \"productionId\": \"1/0694/9016#001\",\n        \"until\": \"2016-11-18T23:59:59.999Z\",\n        \"adRule\": \"NEVER\",\n        \"from\": \"2016-10-19T00:00:00.000Z\",\n        \"platformTag\": \"mobile\",\n        \"featureSet\": [\n          \"hls\",\n          \"fairplay\"\n        ]\n      } ,\n     {\n        \"uri\": \"1-0694-9016-001/6/1/VAR003/1-0694-9016-001_6_1_VAR003.ism/.m3u8\",\n        \"productionId\": \"1/0694/9016#001\",\n        \"until\": \"2016-11-18T23:59:59.999Z\",\n        \"adRule\": \"ALWAYS\",\n        \"from\": \"2016-10-19T00:00:00.000Z\",\n        \"platformTag\": \"mobile\",\n        \"featureSet\": [\n          \"hls\",\n          \"aes\"\n        ]\n      }]\n    }\n}"
+      }
+    }
+  ]
+}

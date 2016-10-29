@@ -1,0 +1,33 @@
+{
+  "provider" : {
+    "name" : "Fnord "
+  },
+  "consumer" : {
+    "name" : "Bruce service"
+  },
+  "interactions" : [
+    {
+      "providerState" : "Channels contains a channel with the name ITV",
+      "description" : "Fnord channels api",
+      "request" : {
+        "method" : "GET",
+        "path" : "/platform/itvonline/samsung/channels",
+        "headers" : {
+          "Accept" : "application/vnd.itv.hubsvc.channel.v2+hal+json"
+        }
+      },
+      "response" : {
+        "status" : 200,
+        "body" : {
+          "_embedded" : {
+            "channels" : [
+              {
+                "name" : "ITV"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

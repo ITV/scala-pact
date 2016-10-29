@@ -1,0 +1,26 @@
+{
+  "provider" : {
+    "name" : "thor"
+  },
+  "consumer" : {
+    "name" : "goggins"
+  },
+  "interactions" : [
+    {
+      "providerState" : "Production [1/0694] returns [0] items",
+      "description" : "Production Id not existing gives an empty list",
+      "request" : {
+        "method" : "GET",
+        "path" : "/vod/availability",
+        "query" : "productionId=1_0694",
+        "headers" : {
+          "Accept" : "application/vnd.itv.oas.licenced-variant.v1+hal+json"
+        }
+      },
+      "response" : {
+        "status" : 200,
+        "body" : "{\n  \"_embedded\": {\n    \"licenceVariantMapping\": [\n     ]\n    }\n}"
+      }
+    }
+  ]
+}
