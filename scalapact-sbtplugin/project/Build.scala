@@ -8,7 +8,7 @@ object Build extends sbt.Build with BuildExtra {
     sbtPlugin := true,
     organization := "com.itv.plugins",
     name := "scalapact-plugin",
-    version := "1.0.5-SNAPSHOT",
+    version := "1.0.6-SNAPSHOT",
     sbtVersion in Global := "0.13.11",
     scalaVersion in Global := "2.10.6",
     scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
@@ -16,11 +16,12 @@ object Build extends sbt.Build with BuildExtra {
       Seq(
         "io.argonaut" %% "argonaut" % "6.2-M1" withSources() withJavadoc(),
         "org.http4s" %% "http4s-blaze-server" % "0.13.2a" withSources() withJavadoc(),
-        "org.http4s" %% "http4s-dsl"          % "0.13.2a" withSources() withJavadoc(),
-        "org.http4s" %% "http4s-argonaut"     % "0.13.2a" withSources() withJavadoc(),
+        "org.http4s" %% "http4s-dsl" % "0.13.2a" withSources() withJavadoc(),
+        "org.http4s" %% "http4s-argonaut" % "0.13.2a" withSources() withJavadoc(),
         "com.itv" %% "scalapact-core" % scalapactVersion,
         "org.scalatest" %% "scalatest" % "2.2.6" % "test",
-        "org.scalaj" %% "scalaj-http" % "2.2.1"
+        "org.scalaj" %% "scalaj-http" % "2.2.1",
+        "org.mockito" % "mockito-all" % "1.10.19" % "test"
       )
     },
     publishTo := {
@@ -28,7 +29,7 @@ object Build extends sbt.Build with BuildExtra {
       if (isSnapshot.value)
         Some("snapshots" at nexus + "content/repositories/snapshots")
       else
-        Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+        Some("releases" at nexus + "service/local/staging/deploy/maven2")
     },
     publishMavenStyle := true,
     publishArtifact in Test := false,
