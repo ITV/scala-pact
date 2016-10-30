@@ -29,7 +29,10 @@ trait PactFileIntegrationFixture {
     }
   })
 
-  def nukePacts = pactDir.listFiles().foreach (_.delete)
+  def nukePacts = pactDir.listFiles() match {
+    case l: Array[File] => l.filter(_.isFile).foreach(_.delete)
+    case _ =>
+  }
 
 }
 
