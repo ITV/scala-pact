@@ -31,7 +31,8 @@ object GroupOfPactFiles {
     if (pactDir.exists && pactDir.isDirectory) {
       Some(GroupOfPactFiles(pactDir.listFiles().toList.filter { f =>
         println(s"Found $f")
-        f.getName.endsWith(".json") }))
+        f.getName.endsWith(".json")
+      }))
     }
     else None
   }
@@ -81,8 +82,10 @@ object ScalaPactTestCommand {
 
   val pactDir = new java.io.File("target/pacts")
 
+  def doPactTest = GroupOfPactFiles.applyWithMessages(pactDir) foreach (_.squash(squasher))
+
   private lazy val pactTest: State => State = state => {
-    GroupOfPactFiles.applyWithMessages(pactDir) foreach (_.squash(squasher))
+    doPactTest
     state
   }
 
