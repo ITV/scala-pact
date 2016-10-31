@@ -39,7 +39,7 @@ object ScalaPactHttp {
   }
 
   private val maybeMethodToMethod: Option[String] => HttpMethod = maybeMethod =>
-    maybeMethod.map {
+    maybeMethod.map(_.toUpperCase).map {
       case "GET" => GET
       case "POST" => POST
       case "PUT" => PUT
