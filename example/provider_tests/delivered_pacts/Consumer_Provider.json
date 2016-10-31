@@ -1,0 +1,29 @@
+{
+  "provider" : {
+    "name" : "Provider"
+  },
+  "consumer" : {
+    "name" : "Consumer"
+  },
+  "interactions" : [
+    {
+      "providerState" : "Results: Bob, Fred, Harry",
+      "description" : "Fetching results",
+      "request" : {
+        "method" : "GET",
+        "path" : "/results"
+      },
+      "response" : {
+        "status" : 200,
+        "body" : {
+          "count" : 3,
+          "results" : [
+            "Bob",
+            "Fred",
+            "Harry"
+          ]
+        }
+      }
+    }
+  ]
+}
