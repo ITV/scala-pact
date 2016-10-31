@@ -19,14 +19,18 @@ object ProviderClient {
     }
   }
 
-  def fetchAuthToken(host: String, port: Int): Option[Token] = {
-    Http("http://" + host + ":" + port).asString match {
-      case r: HttpResponse[String] if r.is2xx =>
-        parse(r.body).extractOpt[Token]
+  def fetchAuthToken(host: String, port: Int, name: String): Option[Token] = {
+    Http("http://" + host + ":" + port + "/auth_token?name=" + name)
+      .headers(("Accept", "application/json"), ("Name", name))
+      .asString match {
+        case r: HttpResponse[String] if r.is2xx =>
+          println(">> " + r)
+          parse(r.body).extractOpt[Token]
 
-      case _ =>
-        None
-    }
+        case r: HttpResponse[String] =>
+          println("<< " + r)
+          None
+      }
   }
 
 }

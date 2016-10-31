@@ -5,7 +5,7 @@ import org.json4s.native.Serialization._
 import org.scalatest.{FunSpec, Matchers}
 
 class ProviderClientSpec extends FunSpec with Matchers {
-  // This import can be anyway, it's only here to stop it being re-organised.
+  
   // The import contains two things:
   // 1. The consumer test DSL/Builder
   // 2. Helper implicits, for instance, values will automatically be converted
@@ -59,14 +59,13 @@ class ProviderClientSpec extends FunSpec with Matchers {
             .uponReceiving(
               method = GET,
               path = "/auth_token",
-              // Query params can be attached to the path or added separately
-              query = "name=Bob",
-              headers = Map("Accept" -> "application/json"),
+              query = None,
+              headers = Map("Accept" -> "application/json", "Name" -> "Bob"),
               body = None,
               matchingRules =
                 // When stubbing (during this test or externally), we don't mind
                 // what the name is, as long as it only contains letters.
-                headerRegexRule("name", "^([a-zA-Z]+)$")
+                headerRegexRule("Name", "^([a-zA-Z]+)$")
             ).willRespondWith(
               status = 202,
               headers = Map("Content-Type" -> "application/json"),
@@ -79,7 +78,7 @@ class ProviderClientSpec extends FunSpec with Matchers {
             )
         )
         .runConsumerTest { mockConfig =>
-          val token = ProviderClient.fetchAuthToken(mockConfig.host, mockConfig.port)
+          val token = ProviderClient.fetchAuthToken(mockConfig.host, mockConfig.port, "Sally")
 
           token.isDefined shouldEqual true
           token.get.token shouldEqual "abcABC123"
