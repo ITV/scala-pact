@@ -24,6 +24,38 @@
           ]
         }
       }
+    },
+    {
+      "description" : "Fetching least secure auth token ever",
+      "request" : {
+        "method" : "GET",
+        "path" : "/auth_token",
+        "matchingRules" : {
+          "$.headers.Name" : {
+            "match" : "regex",
+            "regex" : "^([a-zA-Z]+)$"
+          }
+        },
+        "headers" : {
+          "Accept" : "application/json",
+          "Name" : "Bob"
+        }
+      },
+      "response" : {
+        "status" : 202,
+        "headers" : {
+          "Content-Type" : "application/json; charset=UTF-8"
+        },
+        "body" : {
+          "token" : "abcABC123"
+        },
+        "matchingRules" : {
+          "$.body.token" : {
+            "match" : "regex",
+            "regex" : "^([a-zA-Z0-9]+)$"
+          }
+        }
+      }
     }
   ]
 }

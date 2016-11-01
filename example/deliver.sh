@@ -31,4 +31,4 @@ mkdir -p provider/delivered_pacts
 cp $PACT_FILE provider/delivered_pacts/$PACT_NAME
 
 mkdir -p provider_tests/delivered_pacts
-cp $PACT_FILE provider/delivered_pacts/$PACT_NAME
+cp $PACT_FILE provider_tests/delivered_pacts/$PACT_NAME

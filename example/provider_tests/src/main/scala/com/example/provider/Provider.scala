@@ -5,10 +5,6 @@ import org.http4s.dsl._
 import _root_.argonaut._
 import Argonaut._
 import org.http4s.argonaut._
-import java.io.File
-
-import scala.io.Source
-import scala.util.Random
 
 import org.http4s.util.CaseInsensitiveString
 
@@ -17,9 +13,9 @@ object Provider {
   import ResultResponseImplicits._
   import TokenResponseImplicits._
 
-  val service = HttpService {
+  val service: (String => List[String]) => (Int => String) => HttpService = loadPeopleData => genToken => HttpService {
     case GET -> Root / "results" =>
-      Ok(ResultResponse(3, loadPeople).asJson)
+      Ok(ResultResponse(3, loadPeopleData("people.txt")).asJson)
 
     case request @ GET -> Root / "auth_token" =>
 
@@ -28,7 +24,7 @@ object Provider {
 
       (acceptHeader, nameHeader) match {
         case (Some(accept), Some(name)) =>
-          val token = Random.alphanumeric.take(10).mkString
+          val token = genToken(10)
           Accepted(Token(token).asJson)
 
         case (Some(_), None) =>
@@ -41,13 +37,6 @@ object Provider {
           BadRequest("Missing accept and name headers")
       }
   }
-
-  def loadPeople: List[String] =
-    Source.fromFile(new File("people.txt").toURI)
-      .getLines
-      .mkString
-      .split(',')
-      .toList
 
 }
 
