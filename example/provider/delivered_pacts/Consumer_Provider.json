@@ -7,6 +7,25 @@
   },
   "interactions" : [
     {
+      "providerState" : "Results: Bob, Fred, Harry",
+      "description" : "Fetching results",
+      "request" : {
+        "method" : "GET",
+        "path" : "/results"
+      },
+      "response" : {
+        "status" : 200,
+        "body" : {
+          "count" : 3,
+          "results" : [
+            "Bob",
+            "Fred",
+            "Harry"
+          ]
+        }
+      }
+    },
+    {
       "description" : "Fetching least secure auth token ever",
       "request" : {
         "method" : "GET",
@@ -25,7 +44,7 @@
       "response" : {
         "status" : 202,
         "headers" : {
-          "Content-Type" : "application/json"
+          "Content-Type" : "application/json; charset=UTF-8"
         },
         "body" : {
           "token" : "abcABC123"
@@ -35,25 +54,6 @@
             "match" : "regex",
             "regex" : "^([a-zA-Z0-9]+)$"
           }
-        }
-      }
-    },
-    {
-      "providerState" : "Results: Bob, Fred, Harry",
-      "description" : "Fetching results",
-      "request" : {
-        "method" : "GET",
-        "path" : "/results"
-      },
-      "response" : {
-        "status" : 200,
-        "body" : {
-          "count" : 3,
-          "results" : [
-            "Bob",
-            "Fred",
-            "Harry"
-          ]
         }
       }
     }

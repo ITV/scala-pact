@@ -5,7 +5,7 @@ import org.json4s.native.Serialization._
 import org.scalatest.{FunSpec, Matchers}
 
 class ProviderClientSpec extends FunSpec with Matchers {
-  
+
   // The import contains two things:
   // 1. The consumer test DSL/Builder
   // 2. Helper implicits, for instance, values will automatically be converted
@@ -68,7 +68,7 @@ class ProviderClientSpec extends FunSpec with Matchers {
                 headerRegexRule("Name", "^([a-zA-Z]+)$")
             ).willRespondWith(
               status = 202,
-              headers = Map("Content-Type" -> "application/json"),
+              headers = Map("Content-Type" -> "application/json; charset=UTF-8"),
               body = """{"token":"abcABC123"}""",
               matchingRules =
                 // When verifying externally, we don't mind what is in the token
