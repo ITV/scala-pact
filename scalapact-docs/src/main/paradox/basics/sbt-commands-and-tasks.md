@@ -1,4 +1,4 @@
-# SBT Commands and Tasks
+# SBT Commands
 
 ## pact-test
 You can run the Pact test cases just by executing `sbt test` as normal. Because of the way the library has been written, running the tests will generate a series of Pact JSON files, one for each interaction.
@@ -64,11 +64,11 @@ Once the consumer has defined the contract as CDC tests and exported them to Pac
 
 The verifier is quite a simple idea: load a Pact file, make all the requests and compare all the responses to the expected ones.
 
-The ScalaPact verifier can be run by entering `sbt pact-verify`.
+The Scala-Pact verifier can be run by entering `sbt pact-verify`.
 
 The verifier will write out JUnit results to the `target/test-reports` directory in order to fail builds.
 
-You can also invoke the verifier via a @ref:[test case](../philosophy/verification-strategies.md) if you prefer.
+You can also invoke the verifier via a @ref:[test case](../articles/verification-strategies.md) if you prefer.
 
 #### Command Line Options
 You can also run the verifier using a combination of the following command line options. Below are the defaults:

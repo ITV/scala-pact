@@ -1,4 +1,4 @@
-# Libraries and dependencies
+# Dependencies
 The Pact integration test library itself depends on other of Scala libraries to make it work.
 
 ## Java 8

@@ -1,4 +1,4 @@
-# Concepts and background
+# Articles
 
 @@@ index
 
@@ -7,3 +7,7 @@
 * [Verification strategies](verification-strategies.md)
 
 @@@
+
+1. [Motivation for Scala-Pact](motivation.md)
+1. [Pact vs. integration tests](pact-vs-integration.md)
+1. [Verification strategies](verification-strategies.md)

@@ -1,5 +1,5 @@
 
-# Contract sharing with Pact Broker
+# Pact Broker
 During a build process you will need some mechanism for delivering the Pact files your consumer tests generate to your provider ready for verification.
 
 You can do this any way you like, they are just JSON files after all, but we are currently exploring [pact-broker](https://github.com/bethesque/pact_broker). Pact Broker is a Ruby service that allows you to post and look up versioned Pact files.

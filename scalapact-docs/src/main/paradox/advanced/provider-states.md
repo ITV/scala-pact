@@ -1,6 +1,6 @@
 
 # Provider states
-ScalaPact currently offers limited support for provider states.
+Scala-Pact currently offers limited support for provider states.
 
 Sometimes, you need to warn your provider that a contract relies on the providing system being in a particular state. For example, your contract describes requesting a document resource via a GET request with the document's id as a query parameter. If you send the Pact contract to your provider, but that document id doesn't exist on their system, then verification will fail through no-ones fault.
 

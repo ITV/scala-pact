@@ -1,5 +1,5 @@
 # Change log
-All notable changes to this project will be documented in this file.
+All notable changes and releases to this project will be documented here.
 
 ## 2.0.0 - 2016-11-01
 - Full Pact Specification Version 2.0 Compliance
@@ -8,16 +8,17 @@ All notable changes to this project will be documented in this file.
 - Strict mode
 - Reduced library dependencies
 - Improved mock config object
+- Handle lowercase method during verify ([smithleej])
 
 ## 1.0.2 - 2016-10-04
 - Remove logging implementation dependencies ([agustafson])
-- Added example projects ([davesmith00000])
-- ScalaPactContractWriter creates directories 'target' and 'pacts' if they don't exist ([raoulk])
+- Added example projects
+- Scala-PactContractWriter creates directories 'target' and 'pacts' if they don't exist ([raoulk])
 - Add preflight request operation (OPTIONS) ([itsDanOades])
-- Codified testing process in a shell script. ([davesmith00000])
+- Codified testing process in a shell script.
 
 ## 1.0.1 - 2016-07-19
-- Verifier does not post data if body is empty ([davesmith00000])
+- Verifier does not post data if body is empty
 - Added the ability to specify a pact version when verifying ([itsDanOades])
 
 ## 1.0.0 - 2016-05-26

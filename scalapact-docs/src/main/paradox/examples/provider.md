@@ -1,7 +1,7 @@
 # The Provider
 In the @ref:[consumer](consumer.md) example guide we generated our Pact contract. Now to see if it works!
 
-As previously mentioned, there are two [verification strategies](../philosophy/verification-strategies.md) and both are demonstrated in the example projects.
+As previously mentioned, there are two [verification strategies](../articles/verification-strategies.md) and both are demonstrated in the example projects.
 
 ## Strategy #1: External Verification
 

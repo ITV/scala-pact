@@ -1,4 +1,4 @@
-# Pact tests vs integration tests
+# Pact vs Integration
 Technically, when you write a Pact test you are creating an integration test, in that:
 
 1. You write some client code to make the call to your provider;

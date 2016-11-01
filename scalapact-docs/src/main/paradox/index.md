@@ -1,14 +1,14 @@
-# Scala-Pact Documentation
+# Scala-Pact
 
 @@@ index
 
 * [Setup guide](setup.md)
 * [Basic usage](basics/index.md)
 * [Advanced usage](advanced/index.md)
-* [Philosophy](philosophy/index.md)
-* [Scala-Pact Example Projects](examples/index.md)
+* [Articles](articles/index.md)
+* [Example projects](examples/index.md)
 * [Get help](help.md)
-* [Project dependancies](project-deps.md)
+* [Dependancies](project-deps.md)
 * [Change log](change-log.md)
 * [Contributing](contributing.md)
 
@@ -16,17 +16,19 @@
 
 Scala-Pact is a library for generating Consumer Driven Contract files in Scala projects following the PACT standard using [ScalaTest](http://www.scalatest.org/). Includes supporting tools that use Pact files to verify and stub services.
 
-ScalaPact is intended for Scala developers who are looking for a better way to manage the HTTP contracts between their services.
+Scala-Pact is intended for Scala developers who are looking for a better way to manage the HTTP contracts between their services.
 
 ## Source code
 The source for Scala-Pact can be found on [github](https://github.com/ITV/scala-pact).
 
 ## Acknowledgments
-ScalaPact is not an original idea - this project would never have happened without those who came before us:
+Scala-Pact is not an original idea - this project would never have happened without those who came before us:
 
 1. [DiUS](https://github.com/DiUS)
 1. [Pact Foundation](https://github.com/pact-foundation)
 1. [Thoughtworks / Ian Robinson / Martin Fowler](http://martinfowler.com/articles/consumerDrivenContracts.html)
+
+It would also not have been possible to get the project to it's current state without the efforts of the people who have contributed to it. Either as code contributors (see the @ref:[change log](change-log.md) for details), idea generators / critics, and fearless testers using it on production systems even though they should know better.
 
 ## Change Log
 Updates and information about changes made between releases can be found in the @ref:[change log](change-log.md).
@@ -37,7 +39,7 @@ Scala-Pact is free to use under the ITV OSS licence, more information can be fou
 ## Example projects
 Fully working, albeit simple, example projects have been setup in the [example folder](https://github.com/ITV/scala-pact/tree/master/example).
 
-## Pact Specification Compliance Level
+## Pact Compliance
 Scala-Pact is now fully compliant with version 2 of the official pact specification.
 
 ## Contributing
