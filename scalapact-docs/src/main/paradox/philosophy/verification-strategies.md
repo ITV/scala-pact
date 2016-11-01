@@ -24,9 +24,9 @@ Data stores are more challenging. The idea here is to set up a locally running v
 
 The local datastore could be a true local instance, it would be an in-memory protocol-equivalent store that your service knowns how to run on startup, it could also be a something like a docker image.
 
-Data injection is done using @ref[provider states](../advanced/provider-states.md). A provider state is simply a hook with a string key that gives you an opportunity to set up the state of the provider before the verification is done. In Scala-Pact, provider states are setup in your SBT files and hence you can use any scala libraries or constructs you like or even break out back to a shell script.
+Data injection is done using @ref:[provider states](../advanced/provider-states.md). A provider state is simply a hook with a string key that gives you an opportunity to set up the state of the provider before the verification is done. In Scala-Pact, provider states are setup in your SBT files and hence you can use any scala libraries or constructs you like or even break out back to a shell script.
 
-Once your service is isolated, you then run the @ref[verifier](../basics/sbt-commands-and-tasks.md) against your service.
+Once your service is isolated, you then run the @ref:[verifier](../basics/sbt-commands-and-tasks.md) against your service.
 
 ## Internal verification
 
@@ -36,4 +36,4 @@ The first thing to note is that you have full access to your codebase so now you
 
 A better strategy though maybe, in this type of verification, to view this as the inverse of the consumer tests. The consumer tests only test the small piece of code that actually handles connecting to the provider. We can do the same here, isolate the part of the provider responsible for adhereing to the contract i.e. the routing and marshalling code.
 
-Please see the @ref[example projects](../examples) for working demonstrations of both approaches.
+Please see the @ref:[example projects](../examples/index.md) for working demonstrations of both approaches.

@@ -1,12 +1,4 @@
-#Scala-Pact Example Projects
-
-This is a simple demonstration of Pact CDC testing in action. There are two SBT projects, one for the consumer and another for the provider. Both contain the bare minimum to demonstrate how pact testing works.
-
-The examples don't go into great depth, for more information you should refer to the main [README](https://github.com/ITV/scala-pact/blob/master/README.md) file.
-
-There is an assumption that you will be running this on linux or mac and have Scala + SBT setup.
-
-##Consumer
+# The Consumer
 The consumer project owns and generates the Pact contract file.
 
 The Pact contract file is the result of an [integration test](https://github.com/ITV/scala-pact/blob/example-projects/example/consumer/src/test/scala/com/example/consumer/ProviderClientSpec.scala) that tests a [real, albeit crude piece of client code](https://github.com/ITV/scala-pact/blob/example-projects/example/consumer/src/main/scala/com/example/consumer/ProviderClient.scala) against a mock.
@@ -27,7 +19,7 @@ Try it, you should be able to go hit [the results end point in your browser](htt
 
 You could also use the [standalone stubber](https://github.com/ITV/scala-pact/tree/master/scalapact-standalone-stubber). If you plan to use this in a CI pipeline you should consider assembling it into a JAR by running `sbt assembly`.
 
-##Delivering the pact file
+## Delivering the pact file
 In a real scenario, you would probably use Pact Broker to send the newly created Pact contract to the Provider ahead of verification.
 
 In our demo, we're going to skip that on the assumption that you don't have a [Pact Broker](https://github.com/bethesque/pact_broker) handy, but full details of how to integrate with [Pact Broker](https://github.com/bethesque/pact_broker) can be found in the main [README](https://github.com/ITV/scala-pact/blob/master/README.md) file.
@@ -38,25 +30,3 @@ bash deliver.sh
 ```
 
 This script simply copies the `Consumer_Provider.json` file into the `provider/delivered_pacts` directory.
-
-##Provider
-Now to see if it works!
-
-You will need two terminal windows, both of which are open in the `provider` directory.
-
-In the first terminal window, run `sbt run` to start the service.
-
-In the second terminal window, run:
-```
-sbt "pact-verify --source delivered_pacts/ --host localhost --port 8080"
-```
-*Note: the `--source delivered_pacts/` bit that tells the verifier you want to use local pact files in the directory specified.*
-
-This will replay the request(s) in the Pact contract file against the service and check that the responses match.
-
-###Additionally...
-This example setup contains one extra thing, which is an example of how to use provider states. The test suite declares a `given("...")` requirement and it is fulfilled during verification by the function in the `pact.sbt` at the root of the provider project.
-
-##Things to note
-1. The consumer and provider scala projects both use different case classes to represent the data. This does not matter, only the Pact file matters.
-1. The consumer and provider scala projects both use different json libraries to read/write the json. This does not matter either, the contract is in no way less solid for the difference in library or marshalling logic.

@@ -3,10 +3,10 @@
 @@@ index
 
 * [Setup guide](setup.md)
-* [Basic usage guide](basic-usage.md)
+* [Basic usage](basics/index.md)
 * [Advanced usage](advanced/index.md)
 * [Philosophy](philosophy/index.md)
-* [Scala-Pact Example Projects](example.md)
+* [Scala-Pact Example Projects](examples/index.md)
 * [Get help](help.md)
 * [Project dependancies](project-deps.md)
 * [Change log](change-log.md)

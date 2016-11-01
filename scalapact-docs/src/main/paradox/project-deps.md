@@ -1,17 +1,16 @@
-# Library dependencies
-The Pact integration test library itself depends on a range of Scala/Java libraries.
+# Libraries and dependencies
+The Pact integration test library itself depends on other of Scala libraries to make it work.
 
-## Http4s
-[Http4s](http://http4s.org/) powers ScalaPact's stubber.
+## Java 8
+Scala-Pact is currently only compiled to Java 8.
 
-## Argonaut
-[Argonaut](http://argonaut.io/) is used to read and write the JSON Pact files.
+## Http4s (0.14.11a)
+The dependency is on [Http4s](http://http4s.org/) which is used by the stubber, verifier and test frameworks.
 
-## ScalaTest
-[ScalaTest](http://www.scalatest.org/) is both our test suite of choice and the target for the ScalaPact implementation.
+Http4s also pulls in some of it's own dependencies that Scala-Pact makes use of. These are:
 
-## Scalaj-Http
-[Scalaj-Http](https://github.com/scalaj/scalaj-http) is used for quick synchronous HTTP calls.
+#### Argonaut
+The Http4s 0.14.11a flavour of [Argonaut](http://argonaut.io/) is also used by Scala-Pact to read and write the Pact files.
 
-## Scalaz
-[Scalaz](https://github.com/scalaz/scalaz) is the glue that holds it all together.
+#### Scalaz
+The Http4s 0.14.11a flavour of [Scalaz](https://github.com/scalaz/scalaz) which is the glue that holds Http4s together, but Scala-Pact has no direct dependency on it.

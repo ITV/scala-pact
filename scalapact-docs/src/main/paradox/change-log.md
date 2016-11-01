@@ -1,6 +1,14 @@
 # Change log
 All notable changes to this project will be documented in this file.
 
+## 2.0.0 - 2016-11-01
+- Full Pact Specification Version 2.0 Compliance
+- Body matching rules
+- Provider verification test framework
+- Strict mode
+- Reduced library dependencies
+- Improved mock config object
+
 ## 1.0.2 - 2016-10-04
 - Remove logging implementation dependencies ([agustafson])
 - Added example projects ([davesmith00000])
