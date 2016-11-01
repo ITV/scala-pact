@@ -2,9 +2,9 @@ name := "scalapact-standalone-stubber"
 
 organization := "com.itv"
 
-version := "2.0.0-RC2"
+version := "2.0.0"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.8"
 
 libraryDependencies <++= version { scalapactVersion =>
   Seq(

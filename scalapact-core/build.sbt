@@ -2,7 +2,7 @@ name := "scalapact-core"
 
 organization := "com.itv"
 
-version := "2.0.0-RC2"
+version := "2.0.0"
 
 scalaVersion := "2.11.8"
 

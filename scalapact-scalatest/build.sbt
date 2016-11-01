@@ -3,9 +3,9 @@ name := "scalapact-scalatest"
 
 organization := "com.itv"
 
-version := "2.0.0-RC2"
+version := "2.0.0"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.8"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
