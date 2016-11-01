@@ -28,7 +28,7 @@ Scala-Pact is not an original idea - this project would never have happened with
 1. [Pact Foundation](https://github.com/pact-foundation)
 1. [Thoughtworks / Ian Robinson / Martin Fowler](http://martinfowler.com/articles/consumerDrivenContracts.html)
 
-It would also not have been possible to get the project to it's current state without the efforts of the people who have contributed to it. Either as code contributors (see the @ref:[change log](change-log.md) for details), idea generators / critics, and fearless testers using it on production systems even though they should know better.
+It would also not have been possible to get the project to it's current state without the efforts of the people who have contributed to it. Either as code contributors (see the @ref:[change log](change-log.md) for details), idea generators / critics, or as fearless testers using it on production systems even though they should know better.
 
 ## Change Log
 Updates and information about changes made between releases can be found in the @ref:[change log](change-log.md).
