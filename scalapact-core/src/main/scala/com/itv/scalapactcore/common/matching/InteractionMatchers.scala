@@ -13,51 +13,33 @@ import scala.xml._
 
 object InteractionMatchers {
 
-  import StatusMatching._
-  import PathMatching._
-  import HeaderMatching._
-  import MethodMatching._
-  import BodyMatching._
-
   lazy val matchRequest: Boolean => List[Interaction] => InteractionRequest => Either[String, Interaction] = strictMatching => interactions => received =>
-    interactions.find { ir =>
-      if(strictMatching) isStrictRequestMatch(ir)(received)
-      else isNonStrictRequestMatch(ir)(received)
+    interactions.find { interaction =>
+      InteractionMatchingPrograms
+        .matchRequestProgram(interaction.request, received)
+        .foldMap {
+          if(strictMatching) MatchingInterpreters.Request.strict
+          else MatchingInterpreters.Request.permissive
+        }
+        .success
     } match {
       case Some(matching) => Right(matching)
       case None => Left("No matching request for: " + received)
     }
 
-  lazy val isStrictRequestMatch: Interaction => InteractionRequest => Boolean = ir => received =>
-    matchMethods(ir.request.method.orElse(Option("GET")))(received.method) &&
-      matchHeaders(ir.request.matchingRules)(ir.request.headers)(received.headers) &&
-      matchPathsStrict(PathAndQuery(ir.request.path.orElse(Option("/")), ir.request.query))(PathAndQuery(received.path, received.query)) &&
-      matchBodiesStrict(false)(ir.request.matchingRules)(ir.request.body)(received.body)
-
-  lazy val isNonStrictRequestMatch: Interaction => InteractionRequest => Boolean = ir => received =>
-    matchMethods(ir.request.method.orElse(Option("GET")))(received.method) &&
-      matchHeaders(ir.request.matchingRules)(ir.request.headers)(received.headers) &&
-      matchPaths(PathAndQuery(ir.request.path.orElse(Option("/")), ir.request.query))(PathAndQuery(received.path, received.query)) &&
-      matchBodies(ir.request.matchingRules)(ir.request.body)(received.body)
-
   lazy val matchResponse: Boolean => List[Interaction] => InteractionResponse => Either[String, Interaction] = strictMatching => interactions => received =>
-    interactions.find{ ir =>
-      if(strictMatching) isStrictResponseMatch(ir)(received)
-      else isNonStrictResponseMatch(ir)(received)
+    interactions.find { interaction =>
+      InteractionMatchingPrograms
+        .matchResponseProgram(interaction.response, received)
+        .foldMap {
+          if(strictMatching) MatchingInterpreters.Response.strict
+          else MatchingInterpreters.Response.permissive
+        }
+        .success
     } match {
       case Some(matching) => Right(matching)
       case None => Left("No matching response for: " + received)
     }
-
-  lazy val isStrictResponseMatch: Interaction => InteractionResponse => Boolean = ir => received =>
-    matchStatusCodes(ir.response.status)(received.status) &&
-      matchHeaders(ir.response.matchingRules)(ir.response.headers)(received.headers) &&
-      matchBodiesStrict(true)(ir.response.matchingRules)(ir.response.body)(received.body)
-
-  lazy val isNonStrictResponseMatch: Interaction => InteractionResponse => Boolean = ir => received =>
-    matchStatusCodes(ir.response.status)(received.status) &&
-      matchHeaders(ir.response.matchingRules)(ir.response.headers)(received.headers) &&
-      matchBodies(ir.response.matchingRules)(ir.response.body)(received.body)
 
 }
 
