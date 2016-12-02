@@ -10,15 +10,13 @@ import com.itv.scalapactcore.stubber.PactStubService._
 
 object ScalaPactMock {
 
-  private def configuredTestRunner(pactDescription: ScalaPactDescriptionFinal)(config: ScalaPactMockConfig)(test: => ScalaPactMockConfig => Unit) = {
+  private def configuredTestRunner[A](pactDescription: ScalaPactDescriptionFinal)(config: ScalaPactMockConfig)(test: => ScalaPactMockConfig => A): A = {
 
     if(pactDescription.options.writePactFiles) {
       ScalaPactContractWriter.writePactContracts(pactDescription)
     }
 
     test(config)
-
-    ()
   }
 
   // Ported from a Java gist
@@ -52,7 +50,7 @@ object ScalaPactMock {
     else port
   }
 
-  def runConsumerIntegrationTest(strict: Boolean)(pactDescription: ScalaPactDescriptionFinal)(test: ScalaPactMockConfig => Unit): Unit = {
+  def runConsumerIntegrationTest[A](strict: Boolean)(pactDescription: ScalaPactDescriptionFinal)(test: ScalaPactMockConfig => A): A = {
 
     val mockConfig = ScalaPactMockConfig("http", "localhost", findFreePort())
 
@@ -75,9 +73,10 @@ object ScalaPactMock {
 
     println("> ScalaPact mock running at: " + mockConfig.baseUrl)
 
-    configuredTestRunner(pactDescription)(mockConfig)(test)
+    val result = configuredTestRunner(pactDescription)(mockConfig)(test)
 
     stopServer(server)
+    result
   }
 
 }
