@@ -3,11 +3,20 @@ A library for generating Consumer Driven Contract files in Scala projects follow
 
 Scala-Pact is intended for Scala developers who are looking for a better way to manage the HTTP contracts between their services.
 
-##Latest version is 2.0.0##
-To get started with SBT, simply add the following to your `build.sbt` file:
+## Latest version is 2.0.0
 
+To get started with SBT:
+
+Add the following line to you `build.sbt` file to setup the test framework:
 ```scala
 libraryDependencies += "com.itv" %% "scalapact-scalatest" % "2.0.0"
 ```
 
-Please visit our [official documentation site](http://io.itv.com/scala-pact/) for more details.
+Add this line to your `project/plugins.sbt` file to install the plugin:
+```scala
+addSbtPlugin("com.itv.plugins" % "scalapact-plugin" % "2.0.0")
+```
+
+Please visit our [official documentation site](http://io.itv.com/scala-pact/) for more details and examples.
+
+There is also an [example project](http://io.itv.com/scala-pact/example.html) setup for reference.
