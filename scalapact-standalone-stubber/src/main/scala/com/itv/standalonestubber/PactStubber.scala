@@ -16,7 +16,7 @@ object PactStubber {
 
     val interactionManager: InteractionManager = new InteractionManager
 
-    (parseArguments andThen loadPactFiles("pacts") andThen interactionManager.addToInteractionManager andThen startServer)(args)
+    (parseArguments andThen loadPactFiles("pacts") andThen interactionManager.addToInteractionManager andThen startServer(interactionManager))(args)
 
   }
 

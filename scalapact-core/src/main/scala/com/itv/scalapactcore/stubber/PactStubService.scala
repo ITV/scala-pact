@@ -18,11 +18,11 @@ object PactStubService {
   private val nThreads: Int = 50
   private val executorService: ExecutorService = Executors.newFixedThreadPool(nThreads)
 
-  def startServer: Arguments => Unit = config => {
+  def startServer: InteractionManager => Arguments => Unit = interactionManager => config => {
     println(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort).white.bold)
     println(("Strict matching mode: " + config.giveStrictMode).white.bold)
 
-    runServer(new InteractionManager)(nThreads)(config).awaitShutdown()
+    runServer(interactionManager)(nThreads)(config).awaitShutdown()
   }
 
   def runServer: InteractionManager => Int => Arguments => Server = interactionManager => connectionPoolSize => config => {

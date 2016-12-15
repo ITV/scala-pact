@@ -23,7 +23,7 @@ object ScalaPactStubberCommand {
 
     val interactionManager: InteractionManager = new InteractionManager
 
-    (parseArguments andThen loadPactFiles("target/pacts") andThen interactionManager.addToInteractionManager andThen startServer)(args)
+    (parseArguments andThen loadPactFiles("target/pacts") andThen interactionManager.addToInteractionManager andThen startServer(interactionManager))(args)
 
     pactTestedState
   }
