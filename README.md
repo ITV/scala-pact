@@ -19,4 +19,4 @@ addSbtPlugin("com.itv.plugins" % "scalapact-plugin" % "2.0.0")
 
 Please visit our [official documentation site](http://io.itv.com/scala-pact/) for more details and examples.
 
-There is also an [example project](http://io.itv.com/scala-pact/example.html) setup for reference.
+There is also an [example project](http://io.itv.com/scala-pact/examples/index.html) setup for reference.
