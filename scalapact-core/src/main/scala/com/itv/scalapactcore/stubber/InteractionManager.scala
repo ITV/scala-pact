@@ -4,10 +4,7 @@ import com.itv.scalapactcore.common.ColourOuput._
 import com.itv.scalapactcore.common.{Arguments, ConfigAndPacts}
 import com.itv.scalapactcore.{Interaction, InteractionRequest}
 
-object InteractionManager extends InteractionManager
-
-//Use trait for testing or you'll have race conditions!
-trait InteractionManager {
+class InteractionManager {
 
   import com.itv.scalapactcore.common.matching.InteractionMatchers._
 
