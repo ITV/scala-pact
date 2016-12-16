@@ -4,16 +4,16 @@ organization := "com.itv"
 
 version := "2.0.1-SNAPSHOT"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.1"
 
-crossScalaVersions := Seq("2.10.6", "2.11.8")
+crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.1")
 
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
-lazy val http4sVersion = "0.14.11a"
+lazy val http4sVersion = "0.15.0a"
 
-libraryDependencies ++= Seq(
-  "org.scalatest" %% "scalatest" % "2.2.1" % "test",
+libraryDependencies <++= Seq(
+  "org.scalatest" %% "scalatest" % "3.0.0" % "test",
   "org.http4s" %% "http4s-blaze-server" % http4sVersion,
   "org.http4s" %% "http4s-blaze-client" % http4sVersion,
   "org.http4s" %% "http4s-dsl"          % http4sVersion,

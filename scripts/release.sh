@@ -39,6 +39,6 @@ cd ..
 
 echo ">>> Test Framework"
 cd scalapact-scalatest
-sbt publishSigned
+sbt +publishSigned
 sbt sonatypeRelease
 cd ..

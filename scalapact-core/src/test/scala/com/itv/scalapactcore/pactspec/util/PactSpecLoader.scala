@@ -80,10 +80,12 @@ object JsonBodySpecialCaseHelper {
   val extractMatches: String => String \/ Boolean = json =>
     json.parse.map(j => (j.hcursor --\ "match").focus.flatMap(_.bool).exists(_ == true)) //Uses exists for 2.10 compt
       .leftMap(e => "Extracting 'match': " + e)
+      .disjunction
 
   val extractComment: String => String \/ String = json =>
     json.parse.map(j => (j.hcursor --\ "comment").focus.flatMap(_.string).map(_.toString()).getOrElse("<missing comment>"))
       .leftMap(e => "Extracting 'comment': " + e)
+      .disjunction
 
   def extractInteractionRequestOrResponse[I]: String => String => argonaut.DecodeJson[I] => String \/ (I, Option[String]) = field => json => { implicit decoder =>
     separateRequestResponseFromBody(field)(json).flatMap(RequestResponseAndBody.unapply) match {
@@ -93,6 +95,7 @@ object JsonBodySpecialCaseHelper {
           .decodeEither[I]
           .map(i => (i, maybeBody))
           .leftMap(e => "Extracting 'expected or actual': " + e)
+          .disjunction
 
       case Some((None, _)) =>
         val msg = s"Could not convert request to Json object: $json".left
