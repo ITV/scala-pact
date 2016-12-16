@@ -24,6 +24,7 @@ object Build extends sbt.Build with BuildExtra {
       else
         Some("releases"  at nexus + "service/local/staging/deploy/maven2")
     },
+    //sonatypeProfileName := "com.itv", //I need this... somehow! (doesn't work)
     publishMavenStyle := true,
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => false },
