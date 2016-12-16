@@ -117,25 +117,6 @@ object Verifier {
   private lazy val doRequest: Arguments => Option[ProviderState] => InteractionRequest => Either[String, InteractionResponse] = arguments => maybeProviderState => interactionRequest => {
     val baseUrl = s"${arguments.giveProtocol}://" + arguments.giveHost + ":" + arguments.givePort
 
-    // Started wart removing...
-//    val providerStateRun = maybeProviderState.map { ps =>
-//      val key = ps.key
-//
-//      println(s"Attempting to run provider state: $key".yellow.bold)
-//
-//      val success = ps.f(key)
-//
-//      if(success) {
-//        println(s"Provider state ran successfully".yellow.bold)
-//        Right(success)
-//      } else {
-//        println(s"Provider state run failed".red.bold)
-//        println("--------------------".yellow.bold)
-//        println(s"Error executing unknown provider state function with key: $key".red)
-//        Left(s"Error executing unknown provider state function with key: $key")
-//      }
-//    }
-
     try {
 
       if(maybeProviderState.isDefined) {
@@ -153,12 +134,13 @@ object Verifier {
         if(!success) throw new ProviderStateFailure(key)
       }
     } catch {
-      case _: Throwable =>
+      case t: Throwable =>
         if(maybeProviderState.isDefined) {
           println(s"Error executing unknown provider state function with key: ${maybeProviderState.map(_.key).getOrElse("<missing key>")}".red)
         } else {
           println("Error executing unknown provider state function!".red)
         }
+        throw t
     }
 
     try {
