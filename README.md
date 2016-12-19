@@ -3,7 +3,7 @@ A library for generating Consumer Driven Contract files in Scala projects follow
 
 Scala-Pact is intended for Scala developers who are looking for a better way to manage the HTTP contracts between their services.
 
-## Latest version is 2.0.0
+## Latest version is 2.1.0
 
 To get started with SBT:
 
