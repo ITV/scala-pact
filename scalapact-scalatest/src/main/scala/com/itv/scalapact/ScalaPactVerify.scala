@@ -40,11 +40,8 @@ object ScalaPactVerify {
 
       private def doVerification(protocol: String, host: String, port: Int, strict: Boolean): Unit = {
 
-        val providerStatesList =
-          for {
-            g  <- given
-            ps <- setupProviderState
-          } yield List(ProviderState(g, ps))
+        val providerStateFunc = given.flatMap( g => setupProviderState).getOrElse({ _ : String => true})
+
 
         val (verifySettings, arguments) = sourceType match {
           case pactAsJsonString(json) =>
@@ -58,7 +55,7 @@ object ScalaPactVerify {
 
             (
               PactVerifySettings(
-                providerStates = providerStatesList.getOrElse(Nil),
+                providerStates = providerStateFunc,
                 pactBrokerAddress = "",
                 projectVersion = "",
                 providerName = "",
@@ -77,7 +74,7 @@ object ScalaPactVerify {
           case loadFromLocal(path) =>
             (
               PactVerifySettings(
-                providerStates = providerStatesList.getOrElse(Nil),
+                providerStates = providerStateFunc,
                 pactBrokerAddress = "",
                 projectVersion = "",
                 providerName = "",
@@ -96,7 +93,7 @@ object ScalaPactVerify {
           case pactBroker(url, providerName, consumerNames) =>
             (
               PactVerifySettings(
-                providerStates = providerStatesList.getOrElse(Nil),
+                providerStates = providerStateFunc,
                 pactBrokerAddress = url,
                 projectVersion = "",
                 providerName = providerName,
@@ -115,7 +112,7 @@ object ScalaPactVerify {
           case pactBrokerWithVersion(url, version, providerName, consumerNames) =>
             (
               PactVerifySettings(
-                providerStates = providerStatesList.getOrElse(Nil),
+                providerStates = providerStateFunc,
                 pactBrokerAddress = url,
                 projectVersion = "",
                 providerName = providerName,

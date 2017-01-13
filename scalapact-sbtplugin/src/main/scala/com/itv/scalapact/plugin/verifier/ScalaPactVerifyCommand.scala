@@ -24,8 +24,21 @@ object ScalaPactVerifyCommand {
     println("** ScalaPact: Running Verifier     **".white.bold)
     println("*************************************".white.bold)
 
+    val directPactStates: Seq[(String, String => Boolean)] = Project.extract(state).get(ScalaPactPlugin.providerStates)
+    val patternMatchedStates: (String => Boolean) = Project.extract(state).get(ScalaPactPlugin.providerStateMatcher)
+
+    val mappedDirectPactStates: Seq[PartialFunction[String, Boolean]] = directPactStates.map{ case (key, handler) =>
+        PartialFunction(handler)
+    }
+    val defaultHandler: PartialFunction[String, Boolean] = {
+      case _ => false
+    }
+    val combinedPactStates = mappedDirectPactStates.fold[PartialFunction[String, Boolean]](PartialFunction(patternMatchedStates)){
+      case (matcher,  acc) => acc orElse matcher
+    } orElse defaultHandler
+
     val pactVerifySettings = PactVerifySettings(
-      providerStates = Project.extract(state).get(ScalaPactPlugin.providerStates),
+      providerStates = combinedPactStates,
       pactBrokerAddress = Project.extract(state).get(ScalaPactPlugin.pactBrokerAddress),
       projectVersion = Project.extract(state).get(Keys.version),
       providerName = Project.extract(state).get(ScalaPactPlugin.providerName),

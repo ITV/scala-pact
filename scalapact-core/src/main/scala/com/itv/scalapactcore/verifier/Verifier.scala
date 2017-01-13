@@ -71,7 +71,7 @@ object Verifier {
         pact = pact,
         results = pact.interactions.map { interaction =>
 
-          val maybeProviderState = interaction.providerState.flatMap(p => pactVerifySettings.providerStates.find(j => j.key == p))
+          val maybeProviderState = interaction.providerState.map(p => ProviderState(p, PartialFunction(pactVerifySettings.providerStates)))
 
           val matchResult = (doRequest(arguments)(maybeProviderState) andThen attemptMatch(arguments.giveStrictMode)(List(interaction)))(interaction.request)
 
@@ -202,4 +202,4 @@ class ProviderStateFailure(key: String) extends Exception()
 
 case class ProviderState(key: String, f: String => Boolean)
 case class VersionedConsumer(name: String, version: String)
-case class PactVerifySettings(providerStates: List[ProviderState], pactBrokerAddress: String, projectVersion: String, providerName: String, consumerNames: List[String], versionedConsumerNames: List[VersionedConsumer])
+case class PactVerifySettings(providerStates: (String => Boolean), pactBrokerAddress: String, projectVersion: String, providerName: String, consumerNames: List[String], versionedConsumerNames: List[VersionedConsumer])
