@@ -12,7 +12,7 @@ import scala.language.implicitConversions
 
 object ScalaPactPlugin extends Plugin {
 
-  val providerStateMatcher = SettingKey[(String => Boolean)]("provider-state-matcher", "A list of provider state setup functions")
+  val providerStateMatcher = SettingKey[(String => Boolean)]("provider-state-matcher", "Alternative partial function for provider state setup")
   val providerStates = SettingKey[Seq[(String, String => Boolean)]]("provider-states", "A list of provider state setup functions")
   val pactBrokerAddress = SettingKey[String]("pactBrokerAddress", "The base url to publish / pull pact contract files to and from.")
   val providerName = SettingKey[String]("providerName", "The name of the service to verify")
