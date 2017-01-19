@@ -4,21 +4,20 @@ import java.io.IOException
 import java.net.ServerSocket
 
 import com.itv.scalapact.ScalaPactForger._
-import com.itv.scalapactcore.common.{Arguments, ConfigAndPacts}
-import com.itv.scalapactcore.stubber.InteractionManager._
+import com.itv.scalapactcore.common.{Arguments, ConfigAndPacts, ScalaPactHttp}
+import com.itv.scalapactcore.stubber.InteractionManager
 import com.itv.scalapactcore.stubber.PactStubService._
+import org.http4s.server.Server
 
 object ScalaPactMock {
 
-  private def configuredTestRunner(pactDescription: ScalaPactDescriptionFinal)(config: ScalaPactMockConfig)(test: => ScalaPactMockConfig => Unit) = {
+  private def configuredTestRunner[A](pactDescription: ScalaPactDescriptionFinal)(config: ScalaPactMockConfig)(test: => ScalaPactMockConfig => A): A = {
 
     if(pactDescription.options.writePactFiles) {
       ScalaPactContractWriter.writePactContracts(pactDescription)
     }
 
     test(config)
-
-    ()
   }
 
   // Ported from a Java gist
@@ -27,32 +26,34 @@ object ScalaPactMock {
     var port = -1
 
     try {
-      socket.setReuseAddress(true)
+      socket.setReuseAddress(false)
       port = socket.getLocalPort
 
       try {
         socket.close()
       } catch {
         // Ignore IOException on close()
-        case e: IOException =>
+        case _: IOException =>
       }
     } catch{
-      case e: IOException =>
+      case _: IOException =>
     } finally {
       if (socket != null) {
         try {
           socket.close()
         } catch {
-          case e: IOException =>
+          case _: IOException =>
         }
       }
     }
 
-    if(port == -1) throw new IllegalStateException("Could not find a free TCP/IP port to start embedded Jetty HTTP Server on")
+    if(port == -1) throw new IllegalStateException("Could not find a free TCP/IP port to start embedded HTTP Server on")
     else port
   }
 
-  def runConsumerIntegrationTest(strict: Boolean)(pactDescription: ScalaPactDescriptionFinal)(test: ScalaPactMockConfig => Unit): Unit = {
+  def runConsumerIntegrationTest[A](strict: Boolean)(pactDescription: ScalaPactDescriptionFinal)(test: ScalaPactMockConfig => A): A = {
+
+    val interactionManager: InteractionManager = new InteractionManager
 
     val mockConfig = ScalaPactMockConfig("http", "localhost", findFreePort())
 
@@ -67,18 +68,37 @@ object ScalaPactMock {
       pacts = List(ScalaPactContractWriter.producePactFromDescription(pactDescription))
     )
 
-    val server = (addToInteractionManager andThen runServer)(configAndPacts)
+    val connectionPoolSize: Int = 5
 
-    // This if naff, but sometimes isn't quite ready when we run the first test for some reason.
-    // TODO: Fix this properly
-    Thread.sleep(100)
+    val server = (interactionManager.addToInteractionManager andThen runServer(interactionManager)(connectionPoolSize))(configAndPacts)
 
-    println("> ScalaPact mock running at: " + mockConfig.baseUrl)
+    println("> ScalaPact stub running at: " + mockConfig.baseUrl)
 
-    configuredTestRunner(pactDescription)(mockConfig)(test)
-
-    stopServer(server)
+    waitForServerThenTest(server, mockConfig, test, pactDescription)
   }
+
+  private def waitForServerThenTest[A](server: Server, mockConfig: ScalaPactMockConfig, test: ScalaPactMockConfig => A, pactDescription: ScalaPactDescriptionFinal): A = {
+    def rec(attemptsRemaining: Int, intervalMillis: Int): A = {
+      if(isStubReady(mockConfig)) {
+        val result = configuredTestRunner(pactDescription)(mockConfig)(test)
+
+        stopServer(server)
+
+        result
+      } else if(attemptsRemaining == 0) {
+        throw new Exception("Could not connect to stub are: " + mockConfig.baseUrl)
+      } else {
+        println(">  ...waiting for stub, attempts remaining: " + attemptsRemaining)
+        Thread.sleep(intervalMillis)
+        rec(attemptsRemaining - 1, intervalMillis)
+      }
+    }
+
+    rec(5, 100)
+  }
+
+  private def isStubReady(mockConfig: ScalaPactMockConfig): Boolean =
+    ScalaPactHttp.doRequest(ScalaPactHttp.GET, mockConfig.baseUrl, "/stub/status", Map("X-Pact-Admin" -> "true"), None).unsafePerformSync.is2xx
 
 }
 

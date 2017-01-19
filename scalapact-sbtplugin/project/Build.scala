@@ -8,8 +8,8 @@ object Build extends sbt.Build with BuildExtra {
     sbtPlugin := true,
     organization := "com.itv.plugins",
     name := "scalapact-plugin",
-    version := "2.0.1-SNAPSHOT",
-    sbtVersion in Global := "0.13.11",
+    version := "2.1.1-SNAPSHOT",
+    sbtVersion in Global := "0.13.13",
     scalaVersion in Global := "2.10.6",
     scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
     libraryDependencies <++= version { scalapactVersion =>
@@ -24,6 +24,7 @@ object Build extends sbt.Build with BuildExtra {
       else
         Some("releases"  at nexus + "service/local/staging/deploy/maven2")
     },
+    //sonatypeProfileName := "com.itv", //I need this... somehow! (doesn't work)
     publishMavenStyle := true,
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => false },

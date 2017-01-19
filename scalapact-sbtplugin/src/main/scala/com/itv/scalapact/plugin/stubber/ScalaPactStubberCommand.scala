@@ -5,7 +5,7 @@ import sbt._
 import com.itv.scalapactcore.common.CommandArguments._
 import com.itv.scalapactcore.common.LocalPactFileLoader._
 import com.itv.scalapactcore.stubber.PactStubService._
-import com.itv.scalapactcore.stubber.InteractionManager._
+import com.itv.scalapactcore.stubber.InteractionManager
 import com.itv.scalapactcore.common.ColourOuput._
 
 object ScalaPactStubberCommand {
@@ -21,7 +21,9 @@ object ScalaPactStubberCommand {
 
     val pactTestedState = Command.process("pact-test", state)
 
-    (parseArguments andThen loadPactFiles("target/pacts") andThen addToInteractionManager andThen startServer)(args)
+    val interactionManager: InteractionManager = new InteractionManager
+
+    (parseArguments andThen loadPactFiles("target/pacts") andThen interactionManager.addToInteractionManager andThen startServer(interactionManager))(args)
 
     pactTestedState
   }

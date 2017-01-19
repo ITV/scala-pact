@@ -29,6 +29,7 @@ If you prefer, you can use the stubber dynamically by adding and removing pacts 
 
 `X-Pact-Admin=true`
 
+- `GET /stub/status` returns 200 every time, in case you just want to check it's running / accessible
 - `GET /interactions` returns a list of all currently loaded interactions
 - `POST | PUT /interactions` accepts a Pact JSON string and adds all the interactions to the pool it matches against
 - `DELETE /interactions` Clears all the current interactions so you can start again

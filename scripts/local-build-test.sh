@@ -57,7 +57,7 @@ echo ">>> Test Framework"
 cd scalapact-scalatest
 sbt clean update compile
 sbt test
-sbt publish-local
+sbt "+ publish-local"
 sbt pact-test
 cd ..
 

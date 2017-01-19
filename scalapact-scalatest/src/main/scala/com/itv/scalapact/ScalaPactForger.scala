@@ -36,7 +36,7 @@ object ScalaPactForger {
         */
       def addInteraction(interaction: ScalaPactInteraction): ScalaPactDescription = new ScalaPactDescription(consumer, provider, interactions ++ List(interaction))
 
-      def runConsumerTest(test: ScalaPactMockConfig => Unit)(implicit options: ScalaPactOptions): Unit = {
+      def runConsumerTest[A](test: ScalaPactMockConfig => A)(implicit options: ScalaPactOptions): A = {
         ScalaPactMock.runConsumerIntegrationTest(strict)(
           ScalaPactDescriptionFinal(
             consumer,
