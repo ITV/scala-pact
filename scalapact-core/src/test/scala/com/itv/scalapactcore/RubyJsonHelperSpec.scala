@@ -21,8 +21,8 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
     it("should be able to extract a list of interactions paired with their bodies") {
 
       val interaction1 = Interaction(
-        provider_state = Option("a simple state"),
-        providerState = None,
+        provider_state = None,
+        providerState = Option("a simple state"),
         description = "a simple request",
         request = InteractionRequest(
           method = Option("GET"),
@@ -53,8 +53,8 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
       val interaction1ResponseBody = Option("""{"fish":["cod","haddock","flying"]}""")
 
       val interaction2 = Interaction(
-        provider_state = Option("a simple state 2"),
-        providerState = None,
+        provider_state = None,
+        providerState = Option("a simple state 2"),
         description = "a simple request 2",
         request = InteractionRequest(
           method = Option("GET"),
