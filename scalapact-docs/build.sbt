@@ -2,11 +2,9 @@ name := "website"
 
 organization := "com.itv"
 
-version := "2.1.1-SNAPSHOT"
+version := "2.1.0"
 
-scalaVersion := "2.11.8"
-
-initialCommands := "import com.itv.website._"
+scalaVersion := "2.12.1"
 
 enablePlugins(ParadoxSitePlugin)
 
@@ -16,7 +14,6 @@ lazy val root = (project in file(".")).
   enablePlugins(ParadoxPlugin).
   settings(
     name := "Scala-Pact Docs",
-    siteSubdirName in Paradox := "",
     paradoxTheme := Some(builtinParadoxTheme("generic"))
   )
 
