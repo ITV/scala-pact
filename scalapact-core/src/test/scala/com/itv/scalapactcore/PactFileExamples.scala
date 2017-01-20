@@ -156,7 +156,7 @@ object PactFileExamples {
                          |          }
                          |        }
                          |      },
-                         |      "provider_state" : "a simple state"
+                         |      "providerState" : "a simple state"
                          |    },
                          |    {
                          |      "request" : {
@@ -181,7 +181,7 @@ object PactFileExamples {
                          |          ]
                          |        }
                          |      },
-                         |      "provider_state" : "a simple state 2"
+                         |      "providerState" : "a simple state 2"
                          |    }
                          |  ]
                          |}""".stripMargin
@@ -236,7 +236,7 @@ object PactFileExamples {
                                  |          }
                                  |        }
                                  |      },
-                                 |      "providerState" : "a simple state"
+                                 |      "provider_state" : "a simple state"
                                  |    },
                                  |    {
                                  |      "request" : {
@@ -261,7 +261,7 @@ object PactFileExamples {
                                  |          ]
                                  |        }
                                  |      },
-                                 |      "providerState" : "a simple state 2"
+                                 |      "provider_state" : "a simple state 2"
                                  |    }
                                  |  ]
                                  |}""".stripMargin

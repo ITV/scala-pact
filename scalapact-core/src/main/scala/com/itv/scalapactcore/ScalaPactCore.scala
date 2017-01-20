@@ -36,7 +36,7 @@ object PactLens {
     _.providerState
   )
 
-  val providerStatePicker : Interaction => Option[String] = interaction => interaction.provider_state.orElse(interaction.providerState)
+  val providerStatePicker : Interaction => Option[String] = interaction => interaction.providerState.orElse(interaction.provider_state)
 
   val providerStateWriterLens : Lens[Interaction, Option[String]] = Lens.lensu[Interaction, Option[String]](
     (interaction, maybeProviderState) => interaction.copy(provider_state = maybeProviderState),
@@ -99,8 +99,6 @@ object ScalaPactWriter {
 
     val interactions: JsonArray =
       pact.interactions
-        .map ( i => PactLens.providerStateWriterLens.set(i, i.providerState) )
-        .map ( i => PactLens.providerStateReaderLens.set(i, None) )
         .map { i =>
 
         val maybeRequestBody = i.request.body.flatMap { rb =>
