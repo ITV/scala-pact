@@ -2,6 +2,7 @@ package com.itv.scalapactcore
 
 import argonaut._
 import Argonaut._
+import scalaz.Lens
 
 object PactImplicits {
   implicit lazy val PactCodecJson: CodecJson[Pact] = casecodec3(Pact.apply, Pact.unapply)(
@@ -12,8 +13,8 @@ object PactImplicits {
     "name"
   )
 
-  implicit lazy val InteractionCodecJson: CodecJson[Interaction] = casecodec4(Interaction.apply, Interaction.unapply)(
-    "providerState", "description", "request", "response"
+  implicit lazy val InteractionCodecJson: CodecJson[Interaction] = casecodec5(Interaction.apply, Interaction.unapply)(
+    "provider_state", "providerState", "description", "request", "response"
   )
 
   implicit lazy val InteractionRequestCodecJson: CodecJson[InteractionRequest] = casecodec6(InteractionRequest.apply, InteractionRequest.unapply)(
@@ -29,9 +30,23 @@ object PactImplicits {
   )
 }
 
+object PactLens {
+  val providerStateReaderLens : Lens[Interaction, Option[String]] = Lens.lensu[Interaction, Option[String]](
+    (interaction, maybeProviderState) => interaction.copy(providerState = maybeProviderState),
+    _.providerState
+  )
+
+  val providerStatePicker : Interaction => Option[String] = interaction => interaction.provider_state.orElse(interaction.providerState)
+
+  val providerStateWriterLens : Lens[Interaction, Option[String]] = Lens.lensu[Interaction, Option[String]](
+    (interaction, maybeProviderState) => interaction.copy(provider_state = maybeProviderState),
+    _.provider_state
+  )
+}
+
 case class Pact(provider: PactActor, consumer: PactActor, interactions: List[Interaction])
 case class PactActor(name: String)
-case class Interaction(providerState: Option[String], description: String, request: InteractionRequest, response: InteractionResponse)
+case class Interaction(provider_state: Option[String], providerState: Option[String], description: String, request: InteractionRequest, response: InteractionResponse)
 case class InteractionRequest(method: Option[String], path: Option[String], query: Option[String], headers: Option[Map[String, String]], body: Option[String], matchingRules: Option[Map[String, MatchingRule]]) {
   def unapply: Option[(Option[String], Option[String], Option[String], Option[Map[String, String]], Option[String])] = Some {
     (method, path, query, headers, body)
@@ -64,6 +79,8 @@ object ScalaPactReader {
         provider = bp._1,
         consumer = bp._2,
         interactions = interactions
+          .map(i => PactLens.providerStateReaderLens.set(i, PactLens.providerStatePicker(i)))
+          .map(i => PactLens.providerStateWriterLens.set(i, None) )
       )
 
     } match {
@@ -80,47 +97,51 @@ object ScalaPactWriter {
 
   val pactToJsonString: Pact => String = pact => {
 
-    val interactions: JsonArray = pact.interactions.map { i =>
+    val interactions: JsonArray =
+      pact.interactions
+        .map ( i => PactLens.providerStateWriterLens.set(i, i.providerState) )
+        .map ( i => PactLens.providerStateReaderLens.set(i, None) )
+        .map { i =>
 
-      val maybeRequestBody = i.request.body.flatMap { rb =>
-        rb.parseOption.orElse(Option(jString(rb)))
-      }
+        val maybeRequestBody = i.request.body.flatMap { rb =>
+          rb.parseOption.orElse(Option(jString(rb)))
+        }
 
-      val maybeResponseBody = i.response.body.flatMap { rb =>
-        rb.parseOption.orElse(Option(jString(rb)))
-      }
+        val maybeResponseBody = i.response.body.flatMap { rb =>
+          rb.parseOption.orElse(Option(jString(rb)))
+        }
 
-      val bodilessInteraction = i.copy(
-        request = i.request.copy(body = None),
-        response = i.response.copy(body = None)
-      ).asJson
+        val bodilessInteraction = i.copy(
+          request = i.request.copy(body = None),
+          response = i.response.copy(body = None)
+        ).asJson
 
-      val withRequestBody = {
-        for {
-          requestBody <- maybeRequestBody
-          requestField <- bodilessInteraction.cursor.downField("request")
-          bodyField <- requestField.downField("body")
-          updated <- Option(bodyField.set(requestBody))
-        } yield updated.undo
-      } match {
-        case ok @ Some(s) => ok
-        case None => Option(bodilessInteraction) // There wasn't a body, but there was still an interaction.
-      }
+        val withRequestBody = {
+          for {
+            requestBody <- maybeRequestBody
+            requestField <- bodilessInteraction.cursor.downField("request")
+            bodyField <- requestField.downField("body")
+            updated <- Option(bodyField.set(requestBody))
+          } yield updated.undo
+        } match {
+          case ok @ Some(s) => ok
+          case None => Option(bodilessInteraction) // There wasn't a body, but there was still an interaction.
+        }
 
-      val withResponseBody = {
-        for {
-          responseBody <- maybeResponseBody
-          responseField <- withRequestBody.flatMap(_.cursor.downField("response"))
-          bodyField <- responseField.downField("body")
-          updated <- Option(bodyField.set(responseBody))
-        } yield updated.undo
-      } match {
-        case ok @ Some(s) => ok
-        case None => withRequestBody // There wasn't a body, but there was still an interaction.
-      }
+        val withResponseBody = {
+          for {
+            responseBody <- maybeResponseBody
+            responseField <- withRequestBody.flatMap(_.cursor.downField("response"))
+            bodyField <- responseField.downField("body")
+            updated <- Option(bodyField.set(responseBody))
+          } yield updated.undo
+        } match {
+          case ok @ Some(s) => ok
+          case None => withRequestBody // There wasn't a body, but there was still an interaction.
+        }
 
-      withResponseBody
-    }.collect { case Some(s) => s }
+        withResponseBody
+      }.collect { case Some(s) => s }
 
     val pactNoInteractionsAsJson = pact.copy(interactions = Nil).asJson
 
