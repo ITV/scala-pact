@@ -27,7 +27,7 @@ class ScalaPactVerifyCommandSpec extends FunSpec with Matchers {
           true
       }
 
-      val combined = ScalaPactVerifyCommand.combineProviderStates(directPactStates, patternMatchedStates)
+      val combined = ScalaPactVerifyCommand.combineProviderStatesIntoTotalFunction(directPactStates, patternMatchedStates)
 
       withClue("With key: abc") {
         result = ""
