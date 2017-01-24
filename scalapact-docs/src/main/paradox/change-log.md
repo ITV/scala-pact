@@ -1,6 +1,22 @@
 # Change log
 All notable changes and releases to this project will be documented here.
 
+With thanks to all contributors!
+
+- [itsDanOades]
+- [smithleej]
+- [Iulian-Antohe]
+- [blake-boesinger]
+- [agustafson]
+- [raoulk]
+- [BenParker22]
+- [jtsmith0107]
+- ...your name here? :-)
+
+## 2.1.1 - 2017-01-24
+- Accept `provider_state` on Pact file read to support old Pact formats ([itsDanOades])
+- Added new `providerStateMatcher` partial function as a slicker, more useful alternative to the old mechanism. ([jtsmith0107])
+
 ## 2.1.0 - 2016-12-16
 - Scala 2.12 release
     - Depends on http4s 0.15.0a which is bundled with argonaut 6.2-RC1 and scalaz 7.2.7
@@ -42,3 +58,4 @@ All notable changes and releases to this project will be documented here.
 [agustafson]: https://github.com/agustafson
 [raoulk]: https://github.com/raoulk
 [BenParker22]: https://github.com/BenParker22
+[jtsmith0107]: https://github.com/jtsmith0107

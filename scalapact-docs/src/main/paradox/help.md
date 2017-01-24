@@ -10,6 +10,6 @@ If you're a developer and you're feeling brave and generous, feel free to submit
 Good places to start are the official [pact.io](http://www.pact.io) website or this article on [CDC](http://martinfowler.com/articles/consumerDrivenContracts.html).
 
 ## Help using Scala-Pact or Pact
-Please direct questions to the official [Pact support google group](https://groups.google.com/forum/#!forum/pact-support). As well as queries, we would love to hear feedback about your experiences with Scala-Pact and Pact generally.
+Please direct questions either to the [stackoverflow](http://stackoverflow.com/questions/tagged/pact) page or the official [Pact support google group](https://groups.google.com/forum/#!forum/pact-support). As well as queries, we would love to hear feedback about your experiences with Scala-Pact and Pact generally.
 
 If you're a developer looking to contribute or build a new Pact implementation there's a [group](https://groups.google.com/forum/#!forum/pact-dev) for that too!

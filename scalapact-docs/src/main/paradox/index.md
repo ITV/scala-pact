@@ -43,4 +43,7 @@ Fully working, albeit simple, example projects have been setup in the [example f
 Scala-Pact is now fully compliant with version 2 of the official pact specification.
 
 ## Contributing
-All contributions are very welcome, please see our @ref:[contributing guide](contributing.md) for details of how to get involved.
+All contributions are very welcome and appreciated, please see our @ref:[contributing guide](contributing.md) for details of how to get involved.
+
+## Maintenance
+Scala-Pact is principally maintained by [davesmith00000](https://github.com/davesmith00000), please [get in touch](help.md) if you require support, wish to report an issue or would like to help out.
