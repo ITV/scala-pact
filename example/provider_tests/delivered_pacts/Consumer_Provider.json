@@ -7,26 +7,6 @@
   },
   "interactions" : [
     {
-      "providerState" : "Results: Bob, Fred, Harry",
-      "description" : "Fetching results",
-      "request" : {
-        "method" : "GET",
-        "path" : "/results"
-      },
-      "response" : {
-        "status" : 200,
-        "body" : {
-          "count" : 3,
-          "results" : [
-            "Bob",
-            "Fred",
-            "Harry"
-          ]
-        }
-      }
-    },
-    {
-      "description" : "Fetching least secure auth token ever",
       "request" : {
         "method" : "GET",
         "path" : "/auth_token",
@@ -41,6 +21,7 @@
           "Name" : "Bob"
         }
       },
+      "description" : "Fetching least secure auth token ever",
       "response" : {
         "status" : 202,
         "headers" : {
@@ -56,6 +37,25 @@
           }
         }
       }
+    },
+    {
+      "request" : {
+        "method" : "GET",
+        "path" : "/results"
+      },
+      "description" : "Fetching results",
+      "response" : {
+        "status" : 200,
+        "body" : {
+          "count" : 3,
+          "results" : [
+            "Bob",
+            "Fred",
+            "Harry"
+          ]
+        }
+      },
+      "providerState" : "Results: Bob, Fred, Harry"
     }
   ]
 }
