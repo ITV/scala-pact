@@ -119,20 +119,28 @@ object Verifier {
 
     try {
 
-      if(maybeProviderState.isDefined) {
-        println("--------------------".yellow.bold)
-        val key = maybeProviderState.map(_.key).getOrElse("<missing key>")
+      maybeProviderState match {
+        case Some(ps) =>
+          println("--------------------".yellow.bold)
+          println(s"Attempting to run provider state: ${ps.key}".yellow.bold)
 
-        println(s"Attempting to run provider state: $key".yellow.bold)
+          val success = ps.f(ps.key)
 
-        val success = maybeProviderState.map(_.f(key)).getOrElse(true)
+          if(success)
+            println(s"Provider state ran successfully".yellow.bold)
+          else
+            println(s"Provider state run failed".red.bold)
 
-        if(success) println(s"Provider state ran successfully".yellow.bold)
-        else println(s"Provider state run failed".red.bold)
-        println("--------------------".yellow.bold)
+          println("--------------------".yellow.bold)
 
-        if(!success) throw new ProviderStateFailure(key)
+          if(!success) {
+            throw new ProviderStateFailure(ps.key)
+          }
+
+        case None =>
+          // No provider state run needed
       }
+
     } catch {
       case t: Throwable =>
         if(maybeProviderState.isDefined) {
