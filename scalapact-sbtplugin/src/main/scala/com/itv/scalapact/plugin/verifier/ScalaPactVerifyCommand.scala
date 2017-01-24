@@ -24,18 +24,7 @@ object ScalaPactVerifyCommand {
     println("** ScalaPact: Running Verifier     **".white.bold)
     println("*************************************".white.bold)
 
-    val directPactStates: Seq[(String, String => Boolean)] = Project.extract(state).get(ScalaPactPlugin.providerStates)
-    val patternMatchedStates: (String => Boolean) = Project.extract(state).get(ScalaPactPlugin.providerStateMatcher)
-
-    val mappedDirectPactStates: Seq[PartialFunction[String, Boolean]] = directPactStates.map{ case (key, handler) =>
-        PartialFunction(handler)
-    }
-    val defaultHandler: PartialFunction[String, Boolean] = {
-      case _ => false
-    }
-    val combinedPactStates = mappedDirectPactStates.fold[PartialFunction[String, Boolean]](PartialFunction(patternMatchedStates)){
-      case (matcher,  acc) => acc orElse matcher
-    } orElse defaultHandler
+    val combinedPactStates = combineProviderStates(Project.extract(state).get(ScalaPactPlugin.providerStates), Project.extract(state).get(ScalaPactPlugin.providerStateMatcher))
 
     val pactVerifySettings = PactVerifySettings(
       providerStates = combinedPactStates,
@@ -53,5 +42,19 @@ object ScalaPactVerifyCommand {
     if(successfullyVerified) sys.exit(0) else sys.exit(1)
 
     state
+  }
+
+  def combineProviderStates(directPactStates: Seq[(String, String => Boolean)], patternMatchedStates: PartialFunction[String, Boolean]): PartialFunction[String, Boolean] = {
+    val mappedDirectPactStates: Seq[PartialFunction[String, Boolean]] = directPactStates.map{ case (key, handler) =>
+      PartialFunction(handler)
+    }
+
+    val defaultHandler: PartialFunction[String, Boolean] = {
+      case _ => false
+    }
+
+    mappedDirectPactStates.fold[PartialFunction[String, Boolean]](PartialFunction(patternMatchedStates)){
+      case (matcher,  acc) => acc orElse matcher
+    } orElse defaultHandler
   }
 }

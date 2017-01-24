@@ -4,7 +4,6 @@ import com.itv.scalapact.plugin.publish.ScalaPactPublishCommand
 import com.itv.scalapact.plugin.stubber.ScalaPactStubberCommand
 import com.itv.scalapact.plugin.tester.ScalaPactTestCommand
 import com.itv.scalapact.plugin.verifier.ScalaPactVerifyCommand
-import com.itv.scalapactcore.common.Arguments
 import sbt.Keys._
 import sbt._
 
@@ -12,7 +11,7 @@ import scala.language.implicitConversions
 
 object ScalaPactPlugin extends Plugin {
 
-  val providerStateMatcher = SettingKey[(String => Boolean)]("provider-state-matcher", "Alternative partial function for provider state setup")
+  val providerStateMatcher = SettingKey[PartialFunction[String, Boolean]]("provider-state-matcher", "Alternative partial function for provider state setup")
   val providerStates = SettingKey[Seq[(String, String => Boolean)]]("provider-states", "A list of provider state setup functions")
   val pactBrokerAddress = SettingKey[String]("pactBrokerAddress", "The base url to publish / pull pact contract files to and from.")
   val providerName = SettingKey[String]("providerName", "The name of the service to verify")
@@ -23,6 +22,7 @@ object ScalaPactPlugin extends Plugin {
 
 
   private val pactSettings = Seq(
+    providerStateMatcher := PartialFunction { (_: String) => true },
     providerStates := Seq(("default", (key: String) => true)),
     pactBrokerAddress := "",
     providerName := "",

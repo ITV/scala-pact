@@ -14,7 +14,8 @@ object Build extends sbt.Build with BuildExtra {
     scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
     libraryDependencies <++= version { scalapactVersion =>
       Seq(
-        "com.itv" %% "scalapact-core" % scalapactVersion
+        "com.itv" %% "scalapact-core" % scalapactVersion,
+        "org.scalatest" %% "scalatest" % "3.0.1" % "test"
       )
     },
     publishTo := {
