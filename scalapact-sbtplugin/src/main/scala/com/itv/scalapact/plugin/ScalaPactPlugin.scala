@@ -22,7 +22,7 @@ object ScalaPactPlugin extends Plugin {
 
 
   private val pactSettings = Seq(
-    providerStateMatcher := PartialFunction { (_: String) => true },
+    providerStateMatcher := PartialFunction { (_: String) => false },
     providerStates := Seq(("default", (key: String) => true)),
     pactBrokerAddress := "",
     providerName := "",
