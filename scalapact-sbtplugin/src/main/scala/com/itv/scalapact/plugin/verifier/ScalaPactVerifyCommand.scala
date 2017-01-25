@@ -45,11 +45,18 @@ object ScalaPactVerifyCommand {
   }
 
   def combineProviderStatesIntoTotalFunction(directPactStates: Seq[(String, String => Boolean)], patternMatchedStates: PartialFunction[String, Boolean]): String => Boolean = {
-    directPactStates
+    val l = directPactStates
       .map { ps =>
         { case s: String if s == ps._1 => ps._2(ps._1) }: PartialFunction[String, Boolean]
       }
-      .fold(patternMatchedStates)(_ orElse _)
-      .orElse { case _: String => false }
+
+    l match {
+      case Nil =>
+        patternMatchedStates orElse { case _: String => false }
+
+      case xs: List[PartialFunction[String, Boolean]] =>
+        xs.reduce(_ orElse _) orElse patternMatchedStates orElse { case _: String => false }
+
+    }
   }
 }
