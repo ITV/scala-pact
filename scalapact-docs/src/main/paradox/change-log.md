@@ -13,6 +13,9 @@ With thanks to all contributors!
 - [jtsmith0107]
 - ...your name here? :-)
 
+## 2.1.2 - 2017-01-25
+- BUGFIX: Small issue that slipped through testing: In order for providerStates to work you had to declare a providerStateMatcher somewhere even if you already have a normal providerState setting. This has been resolved.
+
 ## 2.1.1 - 2017-01-24
 - Accept `provider_state` on Pact file read to support old Pact formats ([itsDanOades])
 - Added new `providerStateMatcher` partial function as a slicker, more useful alternative to the old mechanism. ([jtsmith0107])
