@@ -278,7 +278,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
       )
 
       withClue("Didn't match json body with rule") {
-        matchBodies(rules)(expected)(expected) shouldEqual true
+        matchBodies(rules)(expected)(received) shouldEqual true
       }
 
     }
