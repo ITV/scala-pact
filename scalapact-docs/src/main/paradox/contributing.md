@@ -2,6 +2,8 @@
 
 All efforts to contribute to this project are welcome and encouraged. Scala-Pact can only be better with more eyes looking for problems and more minds trying to solve them.
 
+A full list of our wonderful contributors can be found in the @ref:[change log](change-log.md). 
+
 If you would like to contribute, there are principally two ways you can help.
 
 ### Raising issues

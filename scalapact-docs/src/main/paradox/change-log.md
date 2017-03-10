@@ -11,7 +11,11 @@ With thanks to all contributors!
 - [raoulk]
 - [BenParker22]
 - [jtsmith0107]
+- [yasuba]
 - ...your name here? :-)
+
+## 2.1.3 - TBC
+- BUGFIX: Bad test case fixed that would previously always succeed ([yasuba])
 
 ## 2.1.2 - 2017-01-25
 - BUGFIX: Small issue that slipped through testing: In order for providerStates to work you had to declare a providerStateMatcher somewhere even if you already have a normal providerState setting. This has been resolved.
@@ -62,3 +66,4 @@ With thanks to all contributors!
 [raoulk]: https://github.com/raoulk
 [BenParker22]: https://github.com/BenParker22
 [jtsmith0107]: https://github.com/jtsmith0107
+[yasuba]: https://github.com/yasuba
