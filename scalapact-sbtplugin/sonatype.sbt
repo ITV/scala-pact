@@ -1,2 +1,0 @@
-
-sonatypeProfileName := "com.itv"

@@ -21,10 +21,10 @@ object ScalaPactPublishCommand {
 
     val pactTestedState = Command.process("pact-test", state)
 
-    val pactBrokerAddress: String = Project.extract(pactTestedState).get(ScalaPactPlugin.pactBrokerAddress)
+    val pactBrokerAddress: String = Project.extract(pactTestedState).get(ScalaPactPlugin.autoImport.pactBrokerAddress)
     val projectVersion: String = Project.extract(pactTestedState).get(Keys.version)
-    val pactContractVersion: String = Project.extract(pactTestedState).get(ScalaPactPlugin.pactContractVersion)
-    val allowSnapshotPublish: Boolean = Project.extract(pactTestedState).get(ScalaPactPlugin.allowSnapshotPublish)
+    val pactContractVersion: String = Project.extract(pactTestedState).get(ScalaPactPlugin.autoImport.pactContractVersion)
+    val allowSnapshotPublish: Boolean = Project.extract(pactTestedState).get(ScalaPactPlugin.autoImport.allowSnapshotPublish)
 
     val versionToPublishAs = if(pactContractVersion.isEmpty) projectVersion else pactContractVersion
 

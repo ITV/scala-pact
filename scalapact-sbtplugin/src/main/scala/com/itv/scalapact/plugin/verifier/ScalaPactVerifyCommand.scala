@@ -24,16 +24,16 @@ object ScalaPactVerifyCommand {
     println("** ScalaPact: Running Verifier     **".white.bold)
     println("*************************************".white.bold)
 
-    val combinedPactStates = combineProviderStatesIntoTotalFunction(Project.extract(state).get(ScalaPactPlugin.providerStates), Project.extract(state).get(ScalaPactPlugin.providerStateMatcher))
+    val combinedPactStates = combineProviderStatesIntoTotalFunction(Project.extract(state).get(ScalaPactPlugin.autoImport.providerStates), Project.extract(state).get(ScalaPactPlugin.autoImport.providerStateMatcher))
 
     val pactVerifySettings = PactVerifySettings(
       providerStates = combinedPactStates,
-      pactBrokerAddress = Project.extract(state).get(ScalaPactPlugin.pactBrokerAddress),
+      pactBrokerAddress = Project.extract(state).get(ScalaPactPlugin.autoImport.pactBrokerAddress),
       projectVersion = Project.extract(state).get(Keys.version),
-      providerName = Project.extract(state).get(ScalaPactPlugin.providerName),
-      consumerNames = Project.extract(state).get(ScalaPactPlugin.consumerNames).toList,
+      providerName = Project.extract(state).get(ScalaPactPlugin.autoImport.providerName),
+      consumerNames = Project.extract(state).get(ScalaPactPlugin.autoImport.consumerNames).toList,
       versionedConsumerNames =
-        Project.extract(state).get(ScalaPactPlugin.versionedConsumerNames).toList
+        Project.extract(state).get(ScalaPactPlugin.autoImport.versionedConsumerNames).toList
         .map(t => VersionedConsumer(t._1, t._2))
     )
 
