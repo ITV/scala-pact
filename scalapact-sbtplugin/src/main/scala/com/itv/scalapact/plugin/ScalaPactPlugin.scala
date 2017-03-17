@@ -29,8 +29,11 @@ object ScalaPactPlugin extends AutoPlugin {
   private val pactSettings = Seq(
     providerStateMatcher := PartialFunction { (_: String) => false },
     providerStates := Seq(),
+    pactBrokerAddress := "",
+    providerName := "",
     consumerNames := Seq.empty[String],
     versionedConsumerNames := Seq.empty[(String,String)],
+    pactContractVersion := "",
     allowSnapshotPublish := false
   )
 
