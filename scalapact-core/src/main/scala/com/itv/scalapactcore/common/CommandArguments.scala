@@ -14,7 +14,8 @@ object CommandArguments {
       protocol = argMap.get("--protocol"),
       port = argMap.get("--port").flatMap(Helpers.safeStringToInt),
       localPactPath = argMap.get("--source"),
-      strictMode = argMap.get("--strict").flatMap(Helpers.safeStringToBoolean)
+      strictMode = argMap.get("--strict").flatMap(Helpers.safeStringToBoolean),
+      clientTimeout = argMap.get("--clientTimeout").flatMap(Helpers.safeStringToInt)
     )
 }
 
@@ -79,9 +80,10 @@ object Helpers {
 
 }
 
-case class Arguments(host: Option[String], protocol: Option[String], port: Option[Int], localPactPath: Option[String], strictMode: Option[Boolean]) {
+case class Arguments(host: Option[String], protocol: Option[String], port: Option[Int], localPactPath: Option[String], strictMode: Option[Boolean], clientTimeout: Option[Int]) {
   val giveHost: String = host.getOrElse("localhost")
   val giveProtocol: String = protocol.getOrElse("http")
   val givePort: Int = port.getOrElse(1234)
   val giveStrictMode: Boolean = strictMode.getOrElse(false)
+  val giveClientTimeout: Int = port.getOrElse(1)
 }

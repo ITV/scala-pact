@@ -67,7 +67,8 @@ object ScalaPactVerify {
                 protocol = protocol,
                 port = port,
                 localPactPath = tmp.getAbsolutePath(),
-                strictMode = strict
+                strictMode = strict,
+                clientTimeout = 1
               )
             )
 
@@ -86,7 +87,8 @@ object ScalaPactVerify {
                 protocol = protocol,
                 port = port,
                 localPactPath = path,
-                strictMode = strict
+                strictMode = strict,
+                clientTimeout = 1
               )
             )
 
@@ -105,7 +107,8 @@ object ScalaPactVerify {
                 protocol = protocol,
                 port = port,
                 localPactPath = None,
-                strictMode = strict
+                strictMode = strict,
+                clientTimeout = 1
               )
             )
 
@@ -124,7 +127,8 @@ object ScalaPactVerify {
                 protocol = protocol,
                 port = port,
                 localPactPath = None,
-                strictMode = strict
+                strictMode = strict,
+                clientTimeout = 1
               )
             )
         }
