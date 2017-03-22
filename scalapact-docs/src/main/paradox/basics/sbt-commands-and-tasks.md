@@ -78,6 +78,9 @@ You can also run the verifier using a combination of the following command line 
 
 *Note that files in the source folder are recursively loaded. Specifying a local source folder takes precedence over loading remote files from Pact Broker (see below)*
 
+When verifying a contract the default timeout for client requests is 1 second. This can be set using the client timeout flag.
+`--clientTimeout 1`
+
 #### Verifying with Pact Broker during a CI build
 If you're using the publish command to send files to Pact Broker, you'll also want to know how to verify against them in the provider project.
 
