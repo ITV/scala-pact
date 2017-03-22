@@ -14,20 +14,20 @@ import scalaz.concurrent.Task
 
 object ScalaPactHttp {
 
-  private val client = HttpClientHelper.buildPooledBlazeHttpClient(1, None)
+  private val client = HttpClientHelper.buildPooledBlazeHttpClient(1, None, Some(1))
 
   def doRequest(method: HttpMethod, baseUrl: String, endPoint: String, headers: Map[String, String], body: Option[String]): Task[SimpleResponse] = {
     HttpClientHelper.doRequest(baseUrl, endPoint, method.http4sMethod, headers, body, client)
   }
 
-  def doInteractionRequest(url: String, ir: InteractionRequest): Task[InteractionResponse] = {
+  def doInteractionRequest(url: String, ir: InteractionRequest, clientTimeout : Option[Int]): Task[InteractionResponse] = {
     HttpClientHelper.doRequest(
       baseUrl = url,
       endPoint = ir.path.getOrElse("") + ir.query.map(s => "?" + s).getOrElse(""),
       method = maybeMethodToMethod(ir.method).http4sMethod,
       headers = ir.headers.getOrElse(Map.empty[String, String]),
       body = ir.body,
-      httpClient = client
+      httpClient = HttpClientHelper.buildPooledBlazeHttpClient(1, None, clientTimeout)
     ).map { r =>
       InteractionResponse(
         status = Option(r.statusCode),
@@ -86,15 +86,15 @@ object HttpClientHelper {
       .collect { case Some(h) => (h._1.toString, h._2) }
       .toMap
 
-  private lazy val blazeClientConfig: Option[ExecutorService] => BlazeClientConfig = maybeExecutor => BlazeClientConfig.defaultConfig.copy(
-    requestTimeout = 1.second,
+  private lazy val blazeClientConfig: Option[Int] => Option[ExecutorService] => BlazeClientConfig = clientTimeout => maybeExecutor => BlazeClientConfig.defaultConfig.copy(
+    requestTimeout = clientTimeout.getOrElse(1).second,
     userAgent = Option(`User-Agent`(AgentProduct("thor", Option(BuildInfo.version)))),
     endpointAuthentication = false,
     customExecutor = maybeExecutor
   )
 
-  def buildPooledBlazeHttpClient(maxTotalConnections: Int, maybeExecutor: Option[ExecutorService]): Client =
-    PooledHttp1Client(maxTotalConnections, blazeClientConfig(maybeExecutor))
+  def buildPooledBlazeHttpClient(maxTotalConnections: Int, maybeExecutor: Option[ExecutorService], clientTimeout : Option[Int]): Client =
+    PooledHttp1Client(maxTotalConnections, blazeClientConfig(clientTimeout)(maybeExecutor))
 
   private def buildUri(baseUrl: String, endpoint: String): Task[Uri] =
     Task.fromDisjunction(

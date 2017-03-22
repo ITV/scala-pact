@@ -116,6 +116,7 @@ object Verifier {
 
   private lazy val doRequest: Arguments => Option[ProviderState] => InteractionRequest => Either[String, InteractionResponse] = arguments => maybeProviderState => interactionRequest => {
     val baseUrl = s"${arguments.giveProtocol}://" + arguments.giveHost + ":" + arguments.givePort
+    val clientTimeout = arguments.clientTimeout
 
     try {
 
@@ -155,7 +156,7 @@ object Verifier {
       InteractionRequest.unapply(interactionRequest) match {
         case Some((Some(_), Some(_), _, _, _, _)) =>
 
-          ScalaPactHttp.doInteractionRequest(baseUrl, interactionRequest)
+          ScalaPactHttp.doInteractionRequest(baseUrl, interactionRequest, clientTimeout)
             .unsafePerformSyncAttempt
             .leftMap { t =>
               println(s"Error in response: ${t.getMessage}".red)
