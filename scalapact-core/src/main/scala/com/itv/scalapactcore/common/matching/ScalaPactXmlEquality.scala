@@ -315,6 +315,7 @@ object SharedXmlEqualityHelpers {
 
         println("maybeFieldName: " + maybeFieldName + " leftOverPath: " + leftOverPath)
 
+
         if(leftOverPath.startsWith("[")) {
           traverseAndMatch(leftOverPath, rule, ex, re)
         } else {
@@ -355,10 +356,12 @@ object SharedXmlEqualityHelpers {
         println(s"Found array wildcard rule path: '$rp'".yellow)
 
         val leftOverPath = """^\[\*\]""".r.replaceFirstIn(remainingRulePath, "")
+        val leftOverPath2 = """\.\w+""".r.replaceFirstIn(leftOverPath, "").replace(".#text", "")
+        println("leftOverPath: " + leftOverPath + " leftOverPath2: " + leftOverPath2)
 
         ex.child.headOption.map { en =>
           re.child.map { rn =>
-            traverseAndMatch(leftOverPath, rule, en, rn)
+            traverseAndMatch(leftOverPath2, rule, en, rn)
           }
         }.map { l =>
           ArrayMatchingStatus.listArrayMatchStatusToSingle(l.toList)
