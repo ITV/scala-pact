@@ -146,9 +146,7 @@ object MethodMatching extends GeneralMatcher {
 
 object HeaderMatching extends GeneralMatcher {
 
-  type HeaderMatchingRules = Option[Map[String, MatchingRule]]
-
-  lazy val matchHeaders: HeaderMatchingRules => Option[Map[String, String]] => Option[Map[String, String]] => Boolean = matchingRules => expected => received => {
+  lazy val matchHeaders: Option[Map[String, MatchingRule]] => Option[Map[String, String]] => Option[Map[String, String]] => Boolean = matchingRules => expected => received => {
 
     val legalCharSeparators = List('(',')','<','>','@',',',';',':','\\','"','/','[',']','?','=','{','}')
 
@@ -208,9 +206,7 @@ object HeaderMatching extends GeneralMatcher {
 
 object BodyMatching extends GeneralMatcher {
 
-  type BodyMatchingRules = Option[Map[String, MatchingRule]]
-
-  lazy val matchBodies: BodyMatchingRules => Option[String] => Option[String] => Boolean = matchingRules => expected => received =>
+  lazy val matchBodies: Option[Map[String, MatchingRule]] => Option[String] => Option[String] => Boolean = matchingRules => expected => received =>
     expected match {
       case Some(str) if stringIsJson(str) =>
         val predicate = (e: String, r: String) =>
@@ -232,7 +228,7 @@ object BodyMatching extends GeneralMatcher {
         generalMatcher(expected, received, (e: String, r: String) => PlainTextEquality.check(e, r))
     }
 
-  lazy val matchBodiesStrict: Boolean => BodyMatchingRules => Option[String] => Option[String] => Boolean = beSelectivelyPermissive => matchingRules => expected => received =>
+  lazy val matchBodiesStrict: Boolean => Option[Map[String, MatchingRule]] => Option[String] => Option[String] => Boolean = beSelectivelyPermissive => matchingRules => expected => received =>
     expected match {
       case Some(str) if stringIsJson(str) =>
         val predicate = (e: String, r: String) =>
