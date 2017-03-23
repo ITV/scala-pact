@@ -1,4 +1,4 @@
-name := "website"
+name := "scalapact-docs"
 
 organization := "com.itv"
 
