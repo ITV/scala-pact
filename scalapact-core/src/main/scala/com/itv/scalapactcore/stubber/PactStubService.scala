@@ -59,7 +59,7 @@ object PactStubService {
           Ok(output)
 
         case m if m == "POST" || m == "PUT" && req.pathInfo.startsWith("/interactions") =>
-          ScalaPactReader.jsonStringToPact(req.bodyAsText.runLog.map(body => Option(body.foldLeft("")(_ + _))).unsafePerformSync.getOrElse("")) match {
+          ScalaPactReader.jsonStringToPact(req.bodyAsText.runLog.map(body => Option(body.mkString)).unsafePerformSync.getOrElse("")) match {
             case Right(r) =>
               interactionManager.addInteractions(r.interactions)
 
@@ -88,7 +88,7 @@ object PactStubService {
           headers = Option(req.headers),
           query = if(req.params.isEmpty) None else Option(req.params.toList.map(p => p._1 + "=" + p._2).mkString("&")),
           path = Option(req.pathInfo),
-          body = req.bodyAsText.runLast.unsafePerformSync,
+          body = req.bodyAsText.runLog.map(body => Option(body.mkString)).unsafePerformSync,
           matchingRules = None
         ),
         strictMatching = strictMatching
