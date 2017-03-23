@@ -207,6 +207,10 @@ object SharedXmlEqualityHelpers {
         .map(kvp => traverseAndMatch(kvp._1, kvp._2, ex, re))
         .toList
 
+    println("---------------")
+    println(rules)
+    println(results)
+
     ArrayMatchingStatus.listArrayMatchStatusToSingle(results)
   }
 
@@ -258,7 +262,7 @@ object SharedXmlEqualityHelpers {
 
     remainingRulePath match {
       case rp: String if rp.startsWith(".@") =>
-         println(s"Found attribute path: '$rp'".yellow)
+        println(s"Found attribute path: '$rp'".yellow)
         val attributeKey = rp.replace(".@", "")
 
         ex.attributes.asAttrMap.get(attributeKey).map { attributeValue =>
@@ -304,29 +308,43 @@ object SharedXmlEqualityHelpers {
         }
 
       case rp: String if rp.matches("^\\.[a-zA-Z].*") =>
-         println(s"Found field rule path: '$rp'".yellow)
+        println(s"Found field rule path: '$rp'".yellow)
 
         val maybeFieldName = """\w+""".r.findFirstIn(rp)
         val leftOverPath = """\.\w+""".r.replaceFirstIn(rp, "").replace(".#text", "")
 
         println("maybeFieldName: " + maybeFieldName + " leftOverPath: " + leftOverPath)
 
-        maybeFieldName.flatMap { fieldName =>
-          for {
-            e <- ex.child.find(n => n.label == fieldName)
-            r <- re.child.find(n => n.label == fieldName)
-          } yield traverseAndMatch(leftOverPath, rule, e, r)
-        }.getOrElse(RuleMatchFailure)
+        if(leftOverPath.startsWith("[")) {
+          traverseAndMatch(leftOverPath, rule, ex, re)
+        } else {
+          maybeFieldName.flatMap { fieldName =>
+            println(">> " + ex.child.find(n => n.label == fieldName))
+            println("looking for " + fieldName)
+            println("got: " + ex.child.map(_.label))
+
+            for {
+              e <- ex.child.find(n => n.label == fieldName)
+              r <- re.child.find(n => n.label == fieldName)
+            } yield traverseAndMatch(leftOverPath, rule, e, r)
+          }.getOrElse(RuleMatchFailure)
+        }
 
       case rp: String if rp.matches("""^\[\d+\].*""") || rp.matches("""\.\d+""") =>
-         println(s"Found array rule path: '$rp'".yellow)
+        println(s"Found array rule path: '$rp'".yellow)
+        println("remainingRulePath: " + remainingRulePath)
 
         val index: Int = """\d+""".r.findFirstIn(rp).flatMap(Helpers.safeStringToInt).getOrElse(-1)
         val leftOverPath = """(\.?)(\[?)\d+(\]?)""".r.replaceFirstIn(remainingRulePath, "")
+        val leftOverPath2 = """\.\w+""".r.replaceFirstIn(leftOverPath, "").replace(".#text", "")
+
+        println("index: " + index + " leftOverPath: " + leftOverPath + " leftOverPath2: " + leftOverPath2)
 
         ex.child.headOption.flatMap { e =>
           re.child.drop(index).headOption.flatMap { r =>
-            Option(traverseAndMatch(leftOverPath, rule, e, r))
+            println("e: " + e)
+            println("r: " + r)
+            Option(traverseAndMatch(leftOverPath2, rule, e, r))
           }
         }.getOrElse {
            println(s"Received XMl was missing a child array node at position: $index".yellow)
