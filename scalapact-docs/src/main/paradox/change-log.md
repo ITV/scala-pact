@@ -15,6 +15,7 @@ With thanks to all contributors!
 - ...your name here? :-)
 
 ## 2.1.3 - TBC
+- Convert SBT plugin to AutoPlugin ([yasuba])
 - BUGFIX: Bad test case fixed that would previously always succeed ([yasuba])
 
 ## 2.1.2 - 2017-01-25
