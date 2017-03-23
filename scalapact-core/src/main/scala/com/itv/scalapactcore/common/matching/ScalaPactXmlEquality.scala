@@ -1,7 +1,6 @@
 package com.itv.scalapactcore.common.matching
 
 import com.itv.scalapactcore.MatchingRule
-import com.itv.scalapactcore.common.matching.BodyMatching.BodyMatchingRules
 import com.itv.scalapactcore.common.Helpers
 
 import scala.language.implicitConversions
@@ -14,13 +13,13 @@ object ScalaPactXmlEquality {
   implicit def toXmlEqualityWrapper(xmlElem: Elem): XmlEqualityWrapper = XmlEqualityWrapper(xmlElem)
 
   case class XmlEqualityWrapper(xml: Elem) {
-    def =~(to: Elem): BodyMatchingRules => Boolean = matchingRules =>
+    def =~(to: Elem): Option[Map[String, MatchingRule]] => Boolean = matchingRules =>
       PermissiveXmlEqualityHelper.areEqual(xmlPathToJsonPath(matchingRules), xml, to, xml.label)
-    def =<>=(to: Elem): Boolean => BodyMatchingRules => Boolean = beSelectivelyPermissive => matchingRules =>
+    def =<>=(to: Elem): Boolean => Option[Map[String, MatchingRule]] => Boolean = beSelectivelyPermissive => matchingRules =>
       StrictXmlEqualityHelper.areEqual(beSelectivelyPermissive, xmlPathToJsonPath(matchingRules), xml, to, xml.label)
   }
 
-  private val xmlPathToJsonPath: BodyMatchingRules => BodyMatchingRules = matchingRules =>
+  private val xmlPathToJsonPath: Option[Map[String, MatchingRule]] => Option[Map[String, MatchingRule]] = matchingRules =>
     matchingRules.map { mrs =>
       mrs.map { mr =>
         (mr._1.replaceAll("""\[\'""", ".").replaceAll("""\'\]""", ""), mr._2)
@@ -31,7 +30,7 @@ object ScalaPactXmlEquality {
 
 object StrictXmlEqualityHelper {
 
-  def areEqual(beSelectivelyPermissive: Boolean, matchingRules: BodyMatchingRules, expected: Elem, received: Elem, accumulatedXmlPath: String): Boolean =
+  def areEqual(beSelectivelyPermissive: Boolean, matchingRules: Option[Map[String, MatchingRule]], expected: Elem, received: Elem, accumulatedXmlPath: String): Boolean =
     expected.headOption.flatMap { e =>
       received.headOption.map { r =>
         compareNodes(beSelectivelyPermissive)(matchingRules)(e)(r)(accumulatedXmlPath)
@@ -41,7 +40,7 @@ object StrictXmlEqualityHelper {
       case None => false
     }
 
-  lazy val compareNodes: Boolean => BodyMatchingRules => Node => Node => String => Boolean = beSelectivelyPermissive => matchingRules => expected => received => accumulatedXmlPath => {
+  lazy val compareNodes: Boolean => Option[Map[String, MatchingRule]] => Node => Node => String => Boolean = beSelectivelyPermissive => matchingRules => expected => received => accumulatedXmlPath => {
 
     SharedXmlEqualityHelpers.matchNodeWithRules(matchingRules)(accumulatedXmlPath)(expected)(received) match {
       case RuleMatchSuccess => true
@@ -79,7 +78,7 @@ object PermissiveXmlEqualityHelper {
     * fields or array elements are out of order, as long as they are present since json
     * doesn't not guarantee element order.
     */
-  def areEqual(matchingRules: BodyMatchingRules, expected: Elem, received: Elem, accumulatedXmlPath: String): Boolean =
+  def areEqual(matchingRules: Option[Map[String, MatchingRule]], expected: Elem, received: Elem, accumulatedXmlPath: String): Boolean =
     expected.headOption.flatMap { e =>
       received.headOption.map { r =>
         compareNodes(matchingRules)(e)(r)(accumulatedXmlPath)
@@ -89,7 +88,7 @@ object PermissiveXmlEqualityHelper {
       case None => false
     }
 
-  lazy val compareNodes: BodyMatchingRules => Node => Node => String => Boolean = matchingRules => expected => received => accumulatedXmlPath => {
+  lazy val compareNodes: Option[Map[String, MatchingRule]] => Node => Node => String => Boolean = matchingRules => expected => received => accumulatedXmlPath => {
     SharedXmlEqualityHelpers.matchNodeWithRules(matchingRules)(accumulatedXmlPath)(expected)(received) match {
       case RuleMatchSuccess => true
       case RuleMatchFailure => false
@@ -116,7 +115,7 @@ object SharedXmlEqualityHelpers {
   val isNumericValueRegex = """-?\d*\.?\d*$"""
   val isBooleanValueRegex = """true|false"""
 
-  lazy val checkAttributeEquality: BodyMatchingRules => String => Map[String, String] => Map[String, String] => Boolean = matchingRules => accumulatedXmlPath => e => r => {
+  lazy val checkAttributeEquality: Option[Map[String, MatchingRule]] => String => Map[String, String] => Map[String, String] => Boolean = matchingRules => accumulatedXmlPath => e => r => {
 
     val rulesMap = e.flatMap { ex =>
       Map(ex._1 -> findMatchingRules(accumulatedXmlPath + ".@" + ex._1)(matchingRules).getOrElse(Nil))
@@ -186,7 +185,7 @@ object SharedXmlEqualityHelpers {
     }
   }
 
-  private val findMatchingRules: String => BodyMatchingRules => Option[List[MatchingRuleContext]] = accumulatedJsonPath => m =>
+  private val findMatchingRules: String => Option[Map[String, MatchingRule]] => Option[List[MatchingRuleContext]] = accumulatedJsonPath => m =>
     if (accumulatedJsonPath.length > 0) {
       m.map(
         _.map(r => (r._1.replace("['", ".").replace("']", ""), r._2)).filter { r =>
@@ -195,7 +194,7 @@ object SharedXmlEqualityHelpers {
       )
     } else None
 
-  val matchNodeWithRules: BodyMatchingRules => String => Node => Node => ArrayMatchingStatus = matchingRules => accumulatedXmlPath => ex => re => {
+  val matchNodeWithRules: Option[Map[String, MatchingRule]] => String => Node => Node => ArrayMatchingStatus = matchingRules => accumulatedXmlPath => ex => re => {
     val rules = matchingRules.map { mrs =>
       mrs.filter { mr =>
         val mrPath = mr._1.replace("$.body.", "").replace("$.body", "")
