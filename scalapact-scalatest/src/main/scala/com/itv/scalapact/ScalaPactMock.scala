@@ -63,8 +63,8 @@ object ScalaPactMock {
         protocol = Option(mockConfig.protocol),
         port = Option(mockConfig.port),
         localPactPath = None,
-        strictMode = Option(strict), // TODO: Should be able to decide which mode to use.
-        clientTimeout = 1
+        strictMode = Option(strict),
+        clientTimeout = 2 // Should never ever take this long. Used to make an http request against the local stub.
       ),
       pacts = List(ScalaPactContractWriter.producePactFromDescription(pactDescription))
     )

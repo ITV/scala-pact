@@ -1,7 +1,5 @@
 package com.itv.scalapactcore.common
 
-import java.util.concurrent.ExecutorService
-
 import com.itv.scalapactcore.{InteractionRequest, InteractionResponse}
 import org.http4s.client.Client
 import org.http4s.client.blaze.{BlazeClientConfig, PooledHttp1Client}
@@ -14,20 +12,22 @@ import scalaz.concurrent.Task
 
 object ScalaPactHttp {
 
-  private val client = HttpClientHelper.buildPooledBlazeHttpClient(1, None, Some(1))
+  private val maxTotalConnections: Int = 1
+
+  private val client = HttpClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, 3.seconds)
 
   def doRequest(method: HttpMethod, baseUrl: String, endPoint: String, headers: Map[String, String], body: Option[String]): Task[SimpleResponse] = {
     HttpClientHelper.doRequest(baseUrl, endPoint, method.http4sMethod, headers, body, client)
   }
 
-  def doInteractionRequest(url: String, ir: InteractionRequest, clientTimeout : Option[Int]): Task[InteractionResponse] = {
+  def doInteractionRequest(url: String, ir: InteractionRequest, clientTimeout: Duration): Task[InteractionResponse] = {
     HttpClientHelper.doRequest(
       baseUrl = url,
       endPoint = ir.path.getOrElse("") + ir.query.map(s => "?" + s).getOrElse(""),
       method = maybeMethodToMethod(ir.method).http4sMethod,
       headers = ir.headers.getOrElse(Map.empty[String, String]),
       body = ir.body,
-      httpClient = HttpClientHelper.buildPooledBlazeHttpClient(1, None, clientTimeout)
+      httpClient = HttpClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, clientTimeout)
     ).map { r =>
       InteractionResponse(
         status = Option(r.statusCode),
@@ -86,25 +86,25 @@ object HttpClientHelper {
       .collect { case Some(h) => (h._1.toString, h._2) }
       .toMap
 
-  private lazy val blazeClientConfig: Option[Int] => Option[ExecutorService] => BlazeClientConfig = clientTimeout => maybeExecutor => BlazeClientConfig.defaultConfig.copy(
-    requestTimeout = clientTimeout.getOrElse(1).second,
-    userAgent = Option(`User-Agent`(AgentProduct("thor", Option(BuildInfo.version)))),
+  private def blazeClientConfig(clientTimeout: Duration): BlazeClientConfig = BlazeClientConfig.defaultConfig.copy(
+    requestTimeout = clientTimeout,
+    userAgent = Option(`User-Agent`(AgentProduct("scala-pact", Option(BuildInfo.version)))),
     endpointAuthentication = false,
-    customExecutor = maybeExecutor
+    customExecutor = None
   )
-
-  def buildPooledBlazeHttpClient(maxTotalConnections: Int, maybeExecutor: Option[ExecutorService], clientTimeout : Option[Int]): Client =
-    PooledHttp1Client(maxTotalConnections, blazeClientConfig(clientTimeout)(maybeExecutor))
 
   private def buildUri(baseUrl: String, endpoint: String): Task[Uri] =
     Task.fromDisjunction(
       Uri.fromString(baseUrl + endpoint).leftMap(l => new Exception(l.message))
     )
 
-  private lazy val extractResponse: Response => Task[SimpleResponse] = response =>
+  private def extractResponse(response: Response): Task[SimpleResponse] =
     response.bodyAsText.runLog[Task, String].map { maybeBody =>
       SimpleResponse(response.status.code, headersToMap(response.headers), Some(maybeBody.mkString))
     }
+
+  def buildPooledBlazeHttpClient(maxTotalConnections: Int, clientTimeout: Duration): Client =
+    PooledHttp1Client(maxTotalConnections, blazeClientConfig(clientTimeout))
 
   def doRequest(baseUrl: String, endPoint: String, method: Method, headers: Map[String, String], body: Option[String], httpClient: Client): Task[SimpleResponse] =
     for {

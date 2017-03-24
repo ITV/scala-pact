@@ -15,6 +15,7 @@ object Build extends sbt.Build with BuildExtra {
     libraryDependencies <++= version { scalapactVersion =>
       Seq(
         "com.itv" %% "scalapact-core" % scalapactVersion,
+        "org.scalactic" %% "scalactic" % "3.0.1",
         "org.scalatest" %% "scalatest" % "3.0.1" % "test"
       )
     },

@@ -16,7 +16,7 @@ object Verifier {
 
   private final case class ValidatedDetails(validatedAddress: String, providerName: String, consumerName: String, consumerVersion: String)
 
-  lazy val verify: PactVerifySettings => Arguments => Boolean = pactVerifySettings => arguments => {
+  def verify(pactVerifySettings: PactVerifySettings): Arguments => Boolean = arguments => {
 
     val pacts: List[Pact] = if(arguments.localPactPath.isDefined) {
       println(s"Attempting to use local pact files at: '${arguments.localPactPath.getOrElse("<path missing>")}'".white.bold)
@@ -29,7 +29,6 @@ object Verifier {
 
       val latestPacts : List[Pact] = versionConsumers.map { consumer =>
 
-        // I'm missing applicative builder now I can tell you...
         val details: Either[String, ValidatedDetails] = {
           for {
             c  <- Helpers.urlEncode(consumer.name)
@@ -53,7 +52,7 @@ object Verifier {
       latestPacts
     }
 
-    println(s"Verifying against '${arguments.giveHost}', port '${arguments.givePort}'".white.bold)
+    println(s"Verifying against '${arguments.giveHost}' on port '${arguments.givePort}' with a timeout of ${arguments.clientTimeout.getOrElse(1)} second(s).".white.bold)
 
     val startTime = System.currentTimeMillis().toDouble
 
@@ -73,7 +72,7 @@ object Verifier {
 
           val maybeProviderState = interaction.providerState.map(p => ProviderState(p, PartialFunction(pactVerifySettings.providerStates)))
 
-          val matchResult = (doRequest(arguments)(maybeProviderState) andThen attemptMatch(arguments.giveStrictMode)(List(interaction)))(interaction.request)
+          val matchResult = (doRequest(arguments, maybeProviderState) andThen attemptMatch(arguments.giveStrictMode, List(interaction)))(interaction.request)
 
           matchResult.leftMap(errorMessage(interaction))
         }
@@ -111,12 +110,12 @@ object Verifier {
     !foundErrors
   }
 
-  private lazy val attemptMatch: Boolean => List[Interaction] => Either[String, InteractionResponse] => Either[String, Interaction] = strictMatching => interactions => requestResult =>
+  private def attemptMatch(strictMatching: Boolean, interactions: List[Interaction]): Either[String, InteractionResponse] => Either[String, Interaction] = requestResult =>
     requestResult.flatMap(matchResponse(strictMatching)(interactions))
 
-  private lazy val doRequest: Arguments => Option[ProviderState] => InteractionRequest => Either[String, InteractionResponse] = arguments => maybeProviderState => interactionRequest => {
+  private def doRequest(arguments: Arguments, maybeProviderState: Option[ProviderState]): InteractionRequest => Either[String, InteractionResponse] = interactionRequest => {
     val baseUrl = s"${arguments.giveProtocol}://" + arguments.giveHost + ":" + arguments.givePort
-    val clientTimeout = arguments.clientTimeout
+    val clientTimeout = arguments.giveClientTimeoutInSeconds
 
     try {
 

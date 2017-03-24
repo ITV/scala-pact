@@ -15,7 +15,8 @@ libraryDependencies <++= version { scalapactVersion =>
   Seq(
     "com.itv" %% "scalapact-core" % scalapactVersion,
     "org.scalaj" %% "scalaj-http" % "2.3.0" % "test",
-    "org.scalatest" %% "scalatest" % "3.0.0" % "test",
+    "org.scalactic" %% "scalactic" % "3.0.1",
+    "org.scalatest" %% "scalatest" % "3.0.1" % "test",
     "org.json4s" %% "json4s-native" % "3.5.0" % "test",
     "com.github.tomakehurst" % "wiremock" % "1.56" % "test"
   )

@@ -76,7 +76,7 @@ class ExampleVerification extends FunSpec with Matchers with BeforeAndAfterAll {
      verifyPact
        .withPactSource(pactAsJsonString(samplePact))
        .noSetupRequired
-       .runVerificationAgainst(1234)
+       .runVerificationAgainst(1234, 5)
 
     }
 
