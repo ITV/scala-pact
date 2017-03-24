@@ -13,7 +13,7 @@ In the first terminal window, run `sbt run` to start the service.
 
 In the second terminal window, run:
 ```
-sbt "pact-verify --source delivered_pacts/ --host localhost --port 8080"
+sbt "pact-verify --source delivered_pacts/ --host localhost --port 8080 --clientTimeout 2"
 ```
 *Note: the `--source delivered_pacts/` bit that tells the verifier you want to use local pact files in the directory specified.*
 

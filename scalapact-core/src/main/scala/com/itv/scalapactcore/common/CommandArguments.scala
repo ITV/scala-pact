@@ -3,6 +3,8 @@ package com.itv.scalapactcore.common
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
+import scala.concurrent.duration._
+
 object CommandArguments {
 
   val parseArguments: Seq[String] => Arguments = args =>
@@ -26,7 +28,7 @@ object Helpers {
     def rec[A](l: List[A], acc: List[Map[A, A]]): List[Map[A, A]] = {
       l match {
         case Nil => acc
-        case x :: Nil => acc
+        case _ :: Nil => acc
         case x :: xs => rec(l.drop(2), Map(x -> xs.head) :: acc)
       }
     }
@@ -51,14 +53,14 @@ object Helpers {
     try {
       Option(s.toInt)
     } catch {
-      case e: Throwable => None
+      case _: Throwable => None
     }
 
   val safeStringToBoolean: String => Option[Boolean] = s =>
     try {
       Option(s.toBoolean)
     } catch {
-      case e: Throwable => None
+      case _: Throwable => None
     }
 
   val urlEncode: String => Either[String, String] = str => {
@@ -73,7 +75,7 @@ object Helpers {
           .replace("%7E", "~")
       )
     } catch {
-      case e: Throwable =>
+      case _: Throwable =>
         Left(s"Failed to url encode: $str")
     }
   }
@@ -85,5 +87,5 @@ case class Arguments(host: Option[String], protocol: Option[String], port: Optio
   val giveProtocol: String = protocol.getOrElse("http")
   val givePort: Int = port.getOrElse(1234)
   val giveStrictMode: Boolean = strictMode.getOrElse(false)
-  val giveClientTimeout: Int = port.getOrElse(1)
+  val giveClientTimeoutInSeconds: Duration = clientTimeout.map(s => Duration(s, SECONDS)).getOrElse(Duration(1, SECONDS))
 }

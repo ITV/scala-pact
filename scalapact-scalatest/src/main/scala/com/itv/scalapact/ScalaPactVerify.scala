@@ -2,7 +2,7 @@ package com.itv.scalapact
 
 import com.itv.scalapactcore.common.Arguments
 import com.itv.scalapactcore.common.Helpers
-import com.itv.scalapactcore.verifier.{PactVerifySettings, ProviderState, Verifier, VersionedConsumer}
+import com.itv.scalapactcore.verifier.{PactVerifySettings, Verifier, VersionedConsumer}
 
 import java.io.{File, FileWriter, BufferedWriter}
 
@@ -22,23 +22,22 @@ object ScalaPactVerify {
 
     class ScalaPactVerifyRunner(sourceType: PactSourceType, given: Option[String], setupProviderState: Option[String => Boolean]) {
 
-      def runStrictVerificationAgainst(port: Int): Unit = doVerification("http", "localhost", port, true)
+      def runStrictVerificationAgainst(port: Int): Unit = doVerification("http", "localhost", port, VerifyTargetConfig.defaultClientTimeoutInSeconds, strict = true)
+      def runStrictVerificationAgainst(port: Int, clientTimeoutInSeconds: Int): Unit = doVerification("http", "localhost", port, clientTimeoutInSeconds, strict = true)
+      def runStrictVerificationAgainst(host: String, port: Int): Unit = doVerification("http", host, port, VerifyTargetConfig.defaultClientTimeoutInSeconds, strict = true)
+      def runStrictVerificationAgainst(host: String, port: Int, clientTimeoutInSeconds: Int): Unit = doVerification("http", host, port, clientTimeoutInSeconds, strict = true)
+      def runStrictVerificationAgainst(protocol: String, host: String, port: Int): Unit = doVerification(protocol, host, port, VerifyTargetConfig.defaultClientTimeoutInSeconds, strict = true)
+      def runStrictVerificationAgainst(target: VerifyTargetConfig): Unit = doVerification(target.protocol, target.host, target.port, target.clientTimeoutInSeconds, strict = true)
 
-      def runStrictVerificationAgainst(host: String, port: Int): Unit = doVerification("http", host, port, true)
+      def runVerificationAgainst(port: Int): Unit = doVerification("http", "localhost", port, VerifyTargetConfig.defaultClientTimeoutInSeconds, strict = false)
+      def runVerificationAgainst(port: Int, clientTimeoutInSeconds: Int): Unit = doVerification("http", "localhost", port, clientTimeoutInSeconds, strict = false)
+      def runVerificationAgainst(host: String, port: Int): Unit = doVerification("http", host, port, VerifyTargetConfig.defaultClientTimeoutInSeconds, strict = false)
+      def runVerificationAgainst(host: String, port: Int, clientTimeoutInSeconds: Int): Unit = doVerification("http", host, port, clientTimeoutInSeconds, strict = false)
+      def runVerificationAgainst(protocol: String, host: String, port: Int): Unit = doVerification(protocol, host, port, VerifyTargetConfig.defaultClientTimeoutInSeconds, strict = false)
+      def runVerificationAgainst(protocol: String, host: String, port: Int, clientTimeoutInSeconds: Int): Unit = doVerification(protocol, host, port, clientTimeoutInSeconds, strict = false)
+      def runVerificationAgainst(target: VerifyTargetConfig): Unit = doVerification(target.protocol, target.host, target.port, target.clientTimeoutInSeconds, strict = false)
 
-      def runStrictVerificationAgainst(protocol: String, host: String, port: Int): Unit = doVerification(protocol, host, port, true)
-
-      def runStrictVerificationAgainst(target: VerifyTargetConfig): Unit = doVerification(target.protocol, target.host, target.port, true)
-
-      def runVerificationAgainst(port: Int): Unit = doVerification("http", "localhost", port, false)
-
-      def runVerificationAgainst(host: String, port: Int): Unit = doVerification("http", host, port, false)
-
-      def runVerificationAgainst(protocol: String, host: String, port: Int): Unit = doVerification(protocol, host, port, false)
-
-      def runVerificationAgainst(target: VerifyTargetConfig): Unit = doVerification(target.protocol, target.host, target.port, false)
-
-      private def doVerification(protocol: String, host: String, port: Int, strict: Boolean): Unit = {
+      private def doVerification(protocol: String, host: String, port: Int, clientTimeoutInSeconds: Int, strict: Boolean): Unit = {
 
         val providerStateFunc = given.flatMap( g => setupProviderState).getOrElse({ _ : String => true})
 
@@ -68,7 +67,7 @@ object ScalaPactVerify {
                 port = port,
                 localPactPath = tmp.getAbsolutePath(),
                 strictMode = strict,
-                clientTimeout = 1
+                clientTimeout = clientTimeoutInSeconds
               )
             )
 
@@ -88,7 +87,7 @@ object ScalaPactVerify {
                 port = port,
                 localPactPath = path,
                 strictMode = strict,
-                clientTimeout = 1
+                clientTimeout = clientTimeoutInSeconds
               )
             )
 
@@ -108,7 +107,7 @@ object ScalaPactVerify {
                 port = port,
                 localPactPath = None,
                 strictMode = strict,
-                clientTimeout = 1
+                clientTimeout = clientTimeoutInSeconds
               )
             )
 
@@ -128,7 +127,7 @@ object ScalaPactVerify {
                 port = port,
                 localPactPath = None,
                 strictMode = strict,
-                clientTimeout = 1
+                clientTimeout = clientTimeoutInSeconds
               )
             )
         }
@@ -153,15 +152,20 @@ object ScalaPactVerify {
 
   object VerifyTargetConfig {
 
-    def apply(port: Int): VerifyTargetConfig = VerifyTargetConfig("http", "localhost", port)
-    def apply(host: String, port: Int): VerifyTargetConfig = VerifyTargetConfig("http", host, port)
+    val defaultClientTimeoutInSeconds: Int = 2
 
-    def fromUrl(url: String): Option[VerifyTargetConfig] = {
+    def apply(port: Int): VerifyTargetConfig = VerifyTargetConfig("http", "localhost", port, defaultClientTimeoutInSeconds)
+    def apply(port: Int, clientTimeoutInSeconds: Int): VerifyTargetConfig = VerifyTargetConfig("http", "localhost", port, clientTimeoutInSeconds)
+    def apply(host: String, port: Int): VerifyTargetConfig = VerifyTargetConfig("http", host, port, defaultClientTimeoutInSeconds)
+    def apply(host: String, port: Int, clientTimeoutInSeconds: Int): VerifyTargetConfig = VerifyTargetConfig("http", host, port, clientTimeoutInSeconds)
+
+    def fromUrl(url: String): Option[VerifyTargetConfig] = fromUrl(url, defaultClientTimeoutInSeconds)
+    def fromUrl(url: String, clientTimeoutInSeconds: Int): Option[VerifyTargetConfig] = {
       try {
         val pattern = """^([a-z]+):\/\/([a-z0-9\.\-_]+):(\d+).*""".r
         val pattern(protocol, host, port) = url.toLowerCase
 
-        VerifyTargetConfig(protocol, host, Helpers.safeStringToInt(port).getOrElse(80))
+        VerifyTargetConfig(protocol, host, Helpers.safeStringToInt(port).getOrElse(80), clientTimeoutInSeconds)
       } catch {
         case e: Throwable =>
           println("Could not parse url '" + url + "', expected something like: http://localhost:80 (must specify the port!)")
@@ -170,6 +174,11 @@ object ScalaPactVerify {
     }
 
   }
-  case class VerifyTargetConfig(protocol: String, host: String, port: Int)
+  case class VerifyTargetConfig(protocol: String, host: String, port: Int, clientTimeoutInSeconds: Int) {
+    def withProtocol(protocol: String): VerifyTargetConfig = this.copy(protocol = protocol)
+    def withHost(host: String): VerifyTargetConfig = this.copy(host = host)
+    def withPort(port: Int): VerifyTargetConfig = this.copy(port = port)
+    def withClientTimeoutInSeconds(clientTimeoutInSeconds: Int): VerifyTargetConfig = this.copy(clientTimeoutInSeconds = clientTimeoutInSeconds)
+  }
 
 }
