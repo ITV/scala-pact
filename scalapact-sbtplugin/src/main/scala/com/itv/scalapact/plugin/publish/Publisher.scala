@@ -18,7 +18,7 @@ object Publisher {
               case Right(providerName) =>
                 PactBrokerAddressValidation.checkPactBrokerAddress(pactBrokerAddress) match {
                   case Right(validatedAddress) =>
-                    Right(ValidatedDetails(validatedAddress, providerName, consumerName))
+                    Right(ValidatedDetails(validatedAddress.address, providerName, consumerName))
                   case Left(l) => Left(l)
                 }
               case Left(l) => Left(l)
