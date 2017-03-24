@@ -51,8 +51,6 @@ class StrictExampleSpec extends FunSpec with Matchers {
           // Note that the only difference is the array order
           val result = SimpleClient.doPostRequest(mockConfig.baseUrl, endPoint, Map.empty, json("Fred")(10)(List("blue", "red")))
 
-          println(result)
-
           result.status should equal(598)
           result.headers.get("X-Pact-Admin") shouldEqual Some("Pact Match Failure")
           result.body.contains("No matching") shouldEqual true

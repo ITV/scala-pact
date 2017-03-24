@@ -19,6 +19,7 @@ With thanks to all contributors!
 - Ability to set a client timeout on verification ([itsDanOades])
 - XML matching rules now work as expected
 - Pact match failures against the stubber now return a 598 status, NOT a misleading 404.
+- BUGFIX: Pact stubber now accepts chunked requests
 - BUGFIX: Pact broker addresses can now include a port number
 - BUGFIX: Bad test case fixed that would previously always succeed ([yasuba])
 
