@@ -14,7 +14,7 @@ With thanks to all contributors!
 - [yasuba]
 - ...your name here? :-)
 
-## 2.1.3 - TBC
+## 2.1.3 - 2017-03-24
 - Convert SBT plugin to AutoPlugin ([yasuba])
 - Ability to set a client timeout on verification ([itsDanOades])
 - XML matching rules now work as expected
