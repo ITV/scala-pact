@@ -47,6 +47,8 @@ object PactStubService {
       matchRequestWithResponse(interactionManager, strictMatching)(req)
     }
 
+  private val pactMatchFailureStatus: Status = Status.fromIntAndReason(598, "Pact Match Failure").toOption.getOrElse(InternalServerError)
+
   private def matchRequestWithResponse(interactionManager: InteractionManager, strictMatching: Boolean)(req: Request): scalaz.concurrent.Task[Response] = {
     if(isAdminCall(req)) {
 
@@ -106,7 +108,11 @@ object PactStubService {
           }
 
         case Left(message) =>
-          NotFound(message)
+          Http4sRequestResponseFactory.buildResponse(
+            status = pactMatchFailureStatus,
+            headers = Map("X-Pact-Admin" -> "Pact Match Failure"),
+            body = Option(message)
+          )
       }
 
     }
