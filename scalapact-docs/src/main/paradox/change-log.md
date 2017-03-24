@@ -16,6 +16,10 @@ With thanks to all contributors!
 
 ## 2.1.3 - TBC
 - Convert SBT plugin to AutoPlugin ([yasuba])
+- Ability to set a client timeout on verification ([itsDanOades])
+- XML matching rules now work as expected
+- Pact match failures against the stubber now return a 598 status, NOT a misleading 404.
+- BUGFIX: Pact broker addresses can now include a port number
 - BUGFIX: Bad test case fixed that would previously always succeed ([yasuba])
 
 ## 2.1.2 - 2017-01-25
