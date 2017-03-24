@@ -14,7 +14,7 @@ import scala.util.Left
 
 object Verifier {
 
-  private final case class ValidatedDetails(validatedAddress: String, providerName: String, consumerName: String, consumerVersion: String)
+  private final case class ValidatedDetails(validatedAddress: ValidPactBrokerAddress, providerName: String, consumerName: String, consumerVersion: String)
 
   def verify(pactVerifySettings: PactVerifySettings): Arguments => Boolean = arguments => {
 
@@ -43,7 +43,7 @@ object Verifier {
             None
 
           case Right(v) =>
-            fetchAndReadPact(v.validatedAddress + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + v.consumerVersion)
+            fetchAndReadPact(v.validatedAddress.address + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + v.consumerVersion)
         }
       }.collect {
         case Some(s) => s
