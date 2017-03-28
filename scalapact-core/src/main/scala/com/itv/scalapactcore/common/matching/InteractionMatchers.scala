@@ -13,7 +13,7 @@ import scala.xml._
 
 object InteractionMatchers {
 
-  lazy val matchRequest: Boolean => List[Interaction] => InteractionRequest => Either[String, Interaction] = strictMatching => interactions => received =>
+  def matchRequest(strictMatching: Boolean, interactions: List[Interaction], received: InteractionRequest): Either[String, Interaction] =
     interactions.find { interaction =>
       InteractionMatchingPrograms
         .matchRequestProgram(interaction.request, received)
@@ -27,7 +27,7 @@ object InteractionMatchers {
       case None => Left("No matching request for: " + received)
     }
 
-  lazy val matchResponse: Boolean => List[Interaction] => InteractionResponse => Either[String, Interaction] = strictMatching => interactions => received =>
+  def matchResponse(strictMatching: Boolean, interactions: List[Interaction]): InteractionResponse => Either[String, Interaction] = received =>
     interactions.find { interaction =>
       InteractionMatchingPrograms
         .matchResponseProgram(interaction.response, received)

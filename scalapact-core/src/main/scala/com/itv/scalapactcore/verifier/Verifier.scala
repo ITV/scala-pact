@@ -111,7 +111,7 @@ object Verifier {
   }
 
   private def attemptMatch(strictMatching: Boolean, interactions: List[Interaction]): Either[String, InteractionResponse] => Either[String, Interaction] = requestResult =>
-    requestResult.flatMap(matchResponse(strictMatching)(interactions))
+    requestResult.flatMap(matchResponse(strictMatching, interactions))
 
   private def doRequest(arguments: Arguments, maybeProviderState: Option[ProviderState]): InteractionRequest => Either[String, InteractionResponse] = interactionRequest => {
     val baseUrl = s"${arguments.giveProtocol}://" + arguments.giveHost + ":" + arguments.givePort

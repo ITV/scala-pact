@@ -42,7 +42,7 @@ trait PactSpecTester extends FunSpec with Matchers {
   }
 
   private def doRequestMatch(spec: RequestSpec, i: Interaction, strictMatching: Boolean, shouldMatch: Boolean, path: String): Unit = {
-    matchRequest(strictMatching)(i :: Nil)(spec.actual) match {
+    matchRequest(strictMatching, i :: Nil, spec.actual) match {
       case Right(_) =>
         // Found a match
         if (shouldMatch) 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
@@ -86,7 +86,7 @@ trait PactSpecTester extends FunSpec with Matchers {
   }
 
   private def doResponseMatch(spec: ResponseSpec, i: Interaction, strictMatching: Boolean, shouldMatch: Boolean, path: String): Unit = {
-    matchResponse(strictMatching)(i :: Nil)(spec.actual) match {
+    matchResponse(strictMatching, i :: Nil)(spec.actual) match {
       case Right(_) =>
         // Found a match
         if (shouldMatch) 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
