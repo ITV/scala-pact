@@ -144,8 +144,18 @@ trait PrimitiveConversionFunctions {
 
 }
 
+case class IrNode(label: String, ns: Option[String], attributes: Map[String, IrNodePrimitive], value: Option[IrNodePrimitive], children: List[IrNode]) {
 
-case class IrNode(label: String, ns: Option[String], attributes: Map[String, IrNodePrimitive], value: Option[IrNodePrimitive], children: List[IrNode])
+  def renderAsString(indent: Int = 0): String = {
+    val i = List.fill(indent)("  ").mkString
+    val n = ns.map(" " + _ + "").getOrElse("")
+    val v = value.map(" " + _.toString()).getOrElse("")
+    val a = if(attributes.isEmpty) "" else s"(${attributes.map(p => p._1 + "=" + p._2.toString()).mkString(", ")})"
+    val c = if(children.isEmpty) "" else "\n" + children.map(_.renderAsString(indent + 1)).mkString("\n")
+    s"$i- $label$n$v$a$c"
+  }
+
+}
 
 sealed trait IrNodePrimitive {
   def isString: Boolean
@@ -155,6 +165,7 @@ sealed trait IrNodePrimitive {
   def asString: Option[String]
   def asNumber: Option[Double]
   def asBoolean: Option[Boolean]
+  override def toString(): String
 }
 case class IrStringNode(value: String) extends IrNodePrimitive {
   def isString: Boolean = true
@@ -164,6 +175,7 @@ case class IrStringNode(value: String) extends IrNodePrimitive {
   def asString: Option[String] = Option(value)
   def asNumber: Option[Double] = None
   def asBoolean: Option[Boolean] = None
+  override def toString(): String = value.toString
 }
 case class IrNumberNode(value: Double) extends IrNodePrimitive {
   def isString: Boolean = false
@@ -173,6 +185,7 @@ case class IrNumberNode(value: Double) extends IrNodePrimitive {
   def asString: Option[String] = None
   def asNumber: Option[Double] = Option(value)
   def asBoolean: Option[Boolean] = None
+  override def toString(): String = value.toString
 }
 case class IrBooleanNode(value: Boolean) extends IrNodePrimitive {
   def isString: Boolean = false
@@ -182,6 +195,7 @@ case class IrBooleanNode(value: Boolean) extends IrNodePrimitive {
   def asString: Option[String] = None
   def asNumber: Option[Double] = None
   def asBoolean: Option[Boolean] = Option(value)
+  override def toString(): String = value.toString
 }
 case object IrNullNode extends IrNodePrimitive {
   def isString: Boolean = false
@@ -191,65 +205,5 @@ case object IrNullNode extends IrNodePrimitive {
   def asString: Option[String] = None
   def asNumber: Option[Double] = None
   def asBoolean: Option[Boolean] = None
+  override def toString(): String = "null"
 }
-
-/*
- root can be either a JSON object, a JSON array, or an XML node
- */
-//case class MatchIR(root: MatchIRRoot)
-//
-//case class MatchIRRoot(map: Option[Map[MatchIRLabel, MatchIRAny]], list: Option[List[MatchIRAny]], field: Option[MatchIRMap])
-//
-//sealed trait MatchIRAny {
-//  val isPrimitive: Boolean
-//  val isField: Boolean
-//}
-//
-//sealed trait MatchIRField extends MatchIRAny {
-//  val label: MatchIRLabel
-//  val isPrimitive: Boolean = false
-//  val isField: Boolean = true
-//}
-//case class MatchIRMap(label: MatchIRLabel, fields: Map[MatchIRLabel, MatchIRAny]) extends MatchIRField
-//case class MatchIRList(label: MatchIRLabel, children: List[MatchIRAny]) extends MatchIRField
-//
-//case class MatchIRLabel(value: String)
-//
-//// Primitives
-//sealed trait MatchIRPrimitive extends MatchIRAny {
-//  val isPrimitive: Boolean = true
-//  val isField: Boolean = false
-//}
-//case class MatchIRString(value: String) extends MatchIRPrimitive
-//case class MatchIRInt(value: String) extends MatchIRPrimitive
-//case class MatchIRBoolean(value: String) extends MatchIRPrimitive
-
-/*
-
-JSON contains:
-object
-array
-string
-int
-boolean
-null
-
-XML contains
-nodes with child nodes
-nodes with attributes
-untyped node values
-
-You can model JSON in XML but not the other way around in either direction you loose information.
-XML to JSON you loose attributes
-JSON to XML you loose some type information e.g. XML has no explicit definition of arrays
-
-Some cases:
-
-#1
-{
-  "fish":{}
-}
-equals
-<fish></fish>
-
- */
