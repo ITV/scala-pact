@@ -25,7 +25,7 @@ trait JsonConversionFunctions {
   protected def jsonToIrNode(label: String, json: Json): IrNode = {
     json match {
       case j: Json if j.isArray =>
-        IrNode(label, None, Map(), None, Nil)
+        IrNode(label, None, Map(), None, jsonArrayToIrNodeList(label, j))
 
       case j: Json if j.isObject =>
         IrNode(label, None, Map(), None, jsonObjectToIrNodeList(j))
@@ -48,10 +48,16 @@ trait JsonConversionFunctions {
   protected def jsonObjectToIrNodeList(json: Json): List[IrNode] =
     json.objectFieldsOrEmpty.map(p => json.field(p).map(q => jsonToIrNode(p, q))).collect { case Some(s) => s }
 
+  protected def jsonArrayToIrNodeList(parentLabel: String, json: Json): List[IrNode] = {
+    json.arrayOrEmpty.map(j => jsonToIrNode(parentLabel, j))
+  }
+
   protected def jsonRootToIrNode(json: Json): Option[IrNode] =
     json match {
       case j: Json if j.isArray =>
-        None
+        Option(
+          IrNode("", None, Map(), None, jsonArrayToIrNodeList("", j))
+        )
 
       case j: Json if j.isObject =>
         Option(

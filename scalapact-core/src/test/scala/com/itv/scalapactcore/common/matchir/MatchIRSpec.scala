@@ -118,6 +118,93 @@ class MatchIRSpec extends FunSpec with Matchers {
 
     }
 
+    it("should convert a simple top level array") {
+
+      val json: String =
+        """
+          |[1,2,3]
+        """.stripMargin
+
+      val ir: Option[IrNode] = Option {
+        IrNode("", None, Map(), None,
+          List(
+            IrNode("", None, Map(), Some(IrNumberNode(1)), Nil),
+            IrNode("", None, Map(), Some(IrNumberNode(2)), Nil),
+            IrNode("", None, Map(), Some(IrNumberNode(3)), Nil)
+          )
+        )
+      }
+
+      MatchIR.fromJSON(json) shouldEqual ir
+
+    }
+
+//    it("should be able to convert a top level array with one node") {
+//
+//      val json: String =
+//        """
+//          |[
+//          |  {
+//          |    "fish": {
+//          |      "breed": "cod"
+//          |    }
+//          |  },
+//          |  {
+//          |    "fish": {
+//          |      "breed": "haddock"
+//          |    }
+//          |  }
+//          |]
+//        """.stripMargin
+//
+//      val ir: Option[IrNode] =
+//        Option {
+//          IrNode("", // This is the top level empty array
+//            None,
+//            Map(),
+//            None,
+//            List(
+//              IrNode("", // the top level array's name (empty) is propagated to the children
+//                None,
+//                Map(),
+//                None,
+//                List(
+//                  IrNode(
+//                    "fish",
+//                    None,
+//                    Map(),
+//                    None,
+//                    List(
+//                      IrNode("breed", None, Map(), Some(IrStringNode("cod")), Nil)
+//                    )
+//                  )
+//                )
+//              ),
+//              IrNode("",
+//                None,
+//                Map(),
+//                None,
+//                List(
+//                  IrNode(
+//                    "fish",
+//                    None,
+//                    Map(),
+//                    None,
+//                    List(
+//                      IrNode("breed", None, Map(), Some(IrStringNode("haddock")), Nil)
+//                    )
+//                  )
+//                )
+//              )
+//            )
+//          )
+//
+//        }
+//
+//      MatchIR.fromJSON(json) shouldEqual ir
+//
+//    }
+
   }
 
 }
