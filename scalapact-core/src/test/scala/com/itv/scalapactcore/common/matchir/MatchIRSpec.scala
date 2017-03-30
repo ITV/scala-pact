@@ -14,7 +14,7 @@ class MatchIRSpec extends FunSpec with Matchers {
 
       val xml: String = <fish></fish>.toString()
 
-      val ir: Option[IrNode] = IrNode("fish", Map(), None, Nil)
+      val ir: Option[IrNode] = IrNode("fish", None, Map(), None, Nil)
 
       MatchIR.fromXml(xml) shouldEqual ir
 
@@ -24,7 +24,19 @@ class MatchIRSpec extends FunSpec with Matchers {
 
       val xml: String = <fish>haddock</fish>.toString()
 
-      val ir: Option[IrNode] = IrNode("fish", Map(), Some(IrStringNode("haddock")), Nil)
+      val ir: Option[IrNode] = IrNode("fish", None, Map(), Some(IrStringNode("haddock")), Nil)
+
+      MatchIR.fromXml(xml) shouldEqual ir
+
+    }
+
+    it("should be able to convert one node with a namespace") {
+
+      val xml: String = <ns1:fish>haddock</ns1:fish>.toString()
+
+      println(">>>" + <ns1:fish>haddock</ns1:fish>.namespace)
+
+      val ir: Option[IrNode] = IrNode("fish", "ns1", Map(), Some(IrStringNode("haddock")), Nil)
 
       MatchIR.fromXml(xml) shouldEqual ir
 
@@ -36,6 +48,7 @@ class MatchIRSpec extends FunSpec with Matchers {
 
       val ir: Option[IrNode] = IrNode(
         "fish",
+        None,
         Map("id" -> IrIntNode(3), "description" -> IrStringNode("A fish"), "endangered" -> IrBooleanNode(false)),
         None,
         Nil
@@ -49,9 +62,9 @@ class MatchIRSpec extends FunSpec with Matchers {
 
       val xml: String = <fish><breed>cod</breed></fish>.toString()
 
-      val ir: Option[IrNode] = IrNode("fish", Map(), None,
+      val ir: Option[IrNode] = IrNode("fish", None, Map(), None,
         List(
-          IrNode("breed", Map(), Some(IrStringNode("code")), Nil)
+          IrNode("breed", None, Map(), Some(IrStringNode("code")), Nil)
         )
       )
 
@@ -72,9 +85,9 @@ class MatchIRSpec extends FunSpec with Matchers {
           |}
         """.stripMargin
 
-      val ir = IrNode("", Map(), None,
+      val ir = IrNode("", None, Map(), None,
         List(
-          IrNode("fish", Map(), None, Nil)
+          IrNode("fish", None, Map(), None, Nil)
         )
       )
 
@@ -93,11 +106,11 @@ class MatchIRSpec extends FunSpec with Matchers {
           |}
         """.stripMargin
 
-      val ir = IrNode("", Map(), None,
+      val ir = IrNode("", None, Map(), None,
         List(
-          IrNode("fish", Map(), None,
+          IrNode("fish", None, Map(), None,
             List(
-              IrNode("breed", Map(), Some(IrStringNode("cod")), Nil)
+              IrNode("breed", None, Map(), Some(IrStringNode("cod")), Nil)
             )
           )
         )

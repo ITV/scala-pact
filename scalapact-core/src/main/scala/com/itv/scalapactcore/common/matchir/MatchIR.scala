@@ -79,7 +79,7 @@ object MatchIR {
 //      println("5> " + elem.isAtom)
 //      println("6> " + elem)
 
-      IrNode(elem.label, convertAttributes(elem.attributes.asAttrMap), extractElemValue(elem), Nil)
+      IrNode(elem.label, Option(elem.prefix), convertAttributes(elem.attributes.asAttrMap), extractElemValue(elem), Nil)
 
 //
 //      val v: Option[Map[MatchIRLabel, MatchIRAny]] = Option(
@@ -113,7 +113,7 @@ object MatchIR {
 
 }
 
-case class IrNode(label: String, attributes: Map[String, IrNodePrimitive], value: Option[IrNodePrimitive], children: List[IrNode])
+case class IrNode(label: String, ns: Option[String], attributes: Map[String, IrNodePrimitive], value: Option[IrNodePrimitive], children: List[IrNode])
 
 sealed trait IrNodePrimitive {
   def isString: Boolean
