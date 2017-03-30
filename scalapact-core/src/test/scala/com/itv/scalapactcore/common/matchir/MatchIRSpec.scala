@@ -139,71 +139,71 @@ class MatchIRSpec extends FunSpec with Matchers {
 
     }
 
-//    it("should be able to convert a top level array with one node") {
-//
-//      val json: String =
-//        """
-//          |[
-//          |  {
-//          |    "fish": {
-//          |      "breed": "cod"
-//          |    }
-//          |  },
-//          |  {
-//          |    "fish": {
-//          |      "breed": "haddock"
-//          |    }
-//          |  }
-//          |]
-//        """.stripMargin
-//
-//      val ir: Option[IrNode] =
-//        Option {
-//          IrNode("", // This is the top level empty array
-//            None,
-//            Map(),
-//            None,
-//            List(
-//              IrNode("", // the top level array's name (empty) is propagated to the children
-//                None,
-//                Map(),
-//                None,
-//                List(
-//                  IrNode(
-//                    "fish",
-//                    None,
-//                    Map(),
-//                    None,
-//                    List(
-//                      IrNode("breed", None, Map(), Some(IrStringNode("cod")), Nil)
-//                    )
-//                  )
-//                )
-//              ),
-//              IrNode("",
-//                None,
-//                Map(),
-//                None,
-//                List(
-//                  IrNode(
-//                    "fish",
-//                    None,
-//                    Map(),
-//                    None,
-//                    List(
-//                      IrNode("breed", None, Map(), Some(IrStringNode("haddock")), Nil)
-//                    )
-//                  )
-//                )
-//              )
-//            )
-//          )
-//
-//        }
-//
-//      MatchIR.fromJSON(json) shouldEqual ir
-//
-//    }
+    it("should be able to convert a top level array with two nodes") {
+
+      val json: String =
+        """
+          |[
+          |  {
+          |    "fish": {
+          |      "breed": "cod"
+          |    }
+          |  },
+          |  {
+          |    "fish": {
+          |      "breed": "haddock"
+          |    }
+          |  }
+          |]
+        """.stripMargin
+
+      val ir: Option[IrNode] =
+        Option {
+          IrNode("", // This is the top level empty array
+            None,
+            Map(),
+            None,
+            List(
+              IrNode("", // the top level array's name (empty) is propagated to the children
+                None,
+                Map(),
+                None,
+                List(
+                  IrNode(
+                    "fish",
+                    None,
+                    Map(),
+                    None,
+                    List(
+                      IrNode("breed", None, Map(), Some(IrStringNode("cod")), Nil)
+                    )
+                  )
+                )
+              ),
+              IrNode("",
+                None,
+                Map(),
+                None,
+                List(
+                  IrNode(
+                    "fish",
+                    None,
+                    Map(),
+                    None,
+                    List(
+                      IrNode("breed", None, Map(), Some(IrStringNode("haddock")), Nil)
+                    )
+                  )
+                )
+              )
+            )
+          )
+
+        }
+
+      MatchIR.fromJSON(json) shouldEqual ir
+
+    }
 
   }
 
