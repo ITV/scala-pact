@@ -1,6 +1,6 @@
 package com.itv.scalapactcore.common.matchir
 
-import scala.xml.{Elem, XML}
+import scala.xml.{Elem, XML, Node, NodeSeq}
 
 import com.itv.scalapactcore.common.ColourOuput._
 
@@ -56,17 +56,30 @@ object MatchIR {
       case (k, v) => Map(k -> IrStringNode(v))
     }
 
-  private def extractElemValue(elem: Elem): Option[IrNodePrimitive] = {
-    val value: String = elem.child.text
-
-    elem.child.flatMap(_.child).toList match {
+  private def childNodesToValueMaybePrimitive(nodes: List[Node], value: String): Option[IrNodePrimitive] =
+    nodes match {
       case Nil if value == null => Option(IrNullNode)
       case Nil if value.matches(isNumericValueRegex) => safeStringToInt(value).map(IrIntNode)
       case Nil if value.matches(isBooleanValueRegex) => safeStringToBoolean(value).map(IrBooleanNode)
       case Nil => Option(IrStringNode(value))
       case _ => None
     }
-  }
+
+  private def extractNodeValue(node: Node): Option[IrNodePrimitive] =
+    childNodesToValueMaybePrimitive(node.child.flatMap(_.child).toList, node.child.text)
+
+  private def extractNodeChildren(node: Node): List[IrNode] =
+    node.child.toList.map(nodeToIrNode)
+
+  private def nodeToIrNode(node: Node): IrNode =
+    extractNodeValue(node) match {
+      case nodeValue: Some[IrNodePrimitive] =>
+        IrNode(node.label, Option(node.prefix), convertAttributes(node.attributes.asAttrMap), nodeValue, Nil)
+
+      case None =>
+        IrNode(node.label, Option(node.prefix), convertAttributes(node.attributes.asAttrMap), None, extractNodeChildren(node))
+    }
+
 
   def fromXml(xmlString: String): Option[IrNode] = {
 
@@ -79,7 +92,7 @@ object MatchIR {
 //      println("5> " + elem.isAtom)
 //      println("6> " + elem)
 
-      IrNode(elem.label, Option(elem.prefix), convertAttributes(elem.attributes.asAttrMap), extractElemValue(elem), Nil)
+      nodeToIrNode(elem)
 
 //
 //      val v: Option[Map[MatchIRLabel, MatchIRAny]] = Option(

@@ -64,7 +64,7 @@ class MatchIRSpec extends FunSpec with Matchers {
 
       val ir: Option[IrNode] = IrNode("fish", None, Map(), None,
         List(
-          IrNode("breed", None, Map(), Some(IrStringNode("code")), Nil)
+          IrNode("breed", None, Map(), Some(IrStringNode("cod")), Nil)
         )
       )
 
