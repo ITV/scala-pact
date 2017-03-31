@@ -75,53 +75,6 @@ class MatchIRSpec extends FunSpec with Matchers {
   describe("Converting JSON to MatchIR") {
 
     it("should be able to convert one node") {
-
-      println("----JSON-----")
-      println(MatchIR.fromJSON("""{"configStatus":{"localOverride":{"exists":true,"path":"/etc/itv/thor.json"},"environmentSpecific":{"exists":true,"path":"/etc/itv/thor-env.json"}},"appVersion":"0.1.1490204916862.27","odinStatus":{"statusCode":-1,"message":"Odin status not checked"},"healthy":true,"jordStatus":{"statusCode":-1,"message":"Jord status not checked"}}""").map(_.renderAsString()).getOrElse(""))
-      println("----XML 1 ------")
-      val x = MatchIR.fromXml("""<soapenv:Envelope xmlns:ns6="http://ref.itvplc.ads/Schema/Syndication/Service/PackageImageFacade/1.0" xmlns:ns5="http://ref.itvplc.ads/Schema/Syndication/Service/PackageAssetFacade/1.0" xmlns:pac="http://ref.itvplc.ads/PackageAssetsPrePublish" xmlns:ns4="http://ref.itvplc.ads/Schema/Syndication/Partners/Common/Common/BusinessObjects/1.0" xmlns:ns3="http://ref.itvplc.ads/Schema/Syndication/Event/PackageEvtMsgDetails/1.0" xmlns:ns2="http://ref.itvplc.ads/Schema/Common/Header/1.0" xmlns:ns1="http://ref.itvplc.ads/Schema/Syndication/Event/Package/1.0" xmlns:ns="http://ref.itvplc.ads/Schema/Syndication/PackageEventPublish/1.0" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
-                                |      <soapenv:Header/>
-                                |      <soapenv:Body>
-                                |        <ns:PackageEventPublishProcessRequest>
-                                |          <ns1:PackageEvent>
-                                |            <ns2:HeaderRq>
-                                |              <ns2:RqUID/>
-                                |              <ns2:Action/>
-                                |            </ns2:HeaderRq>
-                                |            <ns3:PackageHeader>
-                                |              <ns3:PackageInstanceId/>
-                                |              <ns3:PackageName/>
-                                |              <ns3:Operation/>
-                                |            </ns3:PackageHeader>
-                                |            <ns3:PackageEventMessage>
-                                |              <ns3:JVMetadataEvtMsg>
-                                |                <ns4:MetadataInqRq>
-                                |                  <ns2:HeaderRq>
-                                |                    <ns2:RqUID>123456</ns2:RqUID>
-                                |                    <ns2:Action>Add</ns2:Action>
-                                |                  </ns2:HeaderRq>
-                                |                  <ns4:ProductionId>2/4663/0003#001</ns4:ProductionId>
-                                |                  <ns4:PlatformType>CTV</ns4:PlatformType>
-                                |                  <ns4:PartnerId>Freesat</ns4:PartnerId>
-                                |                  <ns4:MetadataType>Update</ns4:MetadataType>
-                                |                </ns4:MetadataInqRq>
-                                |              </ns3:JVMetadataEvtMsg>
-                                |            </ns3:PackageEventMessage>
-                                |            <ns3:EventName>JVMetadata</ns3:EventName>
-                                |            <ns3:PackageNameValue>
-                                |              <ns3:Name/>
-                                |              <ns3:Value/>
-                                |            </ns3:PackageNameValue>
-                                |          </ns1:PackageEvent>
-                                |        </ns:PackageEventPublishProcessRequest>
-                                |      </soapenv:Body>
-                                |    </soapenv:Envelope>""".stripMargin)
-
-      println(x.getOrElse(""))
-      println("----XML 2------")
-      println(x.map(_.renderAsString()).getOrElse(""))
-      println("---------")
-
       val json: String =
         """
           |{
@@ -136,7 +89,6 @@ class MatchIRSpec extends FunSpec with Matchers {
       )
 
       MatchIR.fromJSON(json) shouldEqual ir
-
     }
 
     it("should be able to convert two nested nodes and a value") {

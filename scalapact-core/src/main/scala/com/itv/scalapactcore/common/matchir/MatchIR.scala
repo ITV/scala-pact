@@ -10,7 +10,7 @@ object MatchIR extends XmlConversionFunctions with JsonConversionFunctions with 
 
   def fromXml(xmlString: String): Option[IrNode] =
     safeStringToXml(xmlString).map { elem =>
-      nodeToIrNode(elem)
+      nodeToIrNode(scala.xml.Utility.trim(elem))
     }
 
   def fromJSON(jsonString: String): Option[IrNode] =
@@ -148,9 +148,9 @@ case class IrNode(label: String, ns: Option[String], attributes: Map[String, IrN
 
   def renderAsString(indent: Int = 0): String = {
     val i = List.fill(indent)("  ").mkString
-    val n = ns.map(" " + _ + "").getOrElse("")
-    val v = value.map(" " + _.toString()).getOrElse("")
-    val a = if(attributes.isEmpty) "" else s"(${attributes.map(p => p._1 + "=" + p._2.toString()).mkString(", ")})"
+    val n = ns.map("  namespace: " + _ + "").getOrElse("")
+    val v = value.map(v => "  value: " + v.renderAsString).getOrElse("")
+    val a = if(attributes.isEmpty) "" else s"  atrributes: [${attributes.map(p => p._1 + "=" + p._2.renderAsString).mkString(", ")}]"
     val c = if(children.isEmpty) "" else "\n" + children.map(_.renderAsString(indent + 1)).mkString("\n")
     s"$i- $label$n$v$a$c"
   }
@@ -165,7 +165,7 @@ sealed trait IrNodePrimitive {
   def asString: Option[String]
   def asNumber: Option[Double]
   def asBoolean: Option[Boolean]
-  override def toString(): String
+  def renderAsString: String
 }
 case class IrStringNode(value: String) extends IrNodePrimitive {
   def isString: Boolean = true
@@ -175,7 +175,7 @@ case class IrStringNode(value: String) extends IrNodePrimitive {
   def asString: Option[String] = Option(value)
   def asNumber: Option[Double] = None
   def asBoolean: Option[Boolean] = None
-  override def toString(): String = value.toString
+  def renderAsString: String = value
 }
 case class IrNumberNode(value: Double) extends IrNodePrimitive {
   def isString: Boolean = false
@@ -185,7 +185,7 @@ case class IrNumberNode(value: Double) extends IrNodePrimitive {
   def asString: Option[String] = None
   def asNumber: Option[Double] = Option(value)
   def asBoolean: Option[Boolean] = None
-  override def toString(): String = value.toString
+  def renderAsString: String = value.toString
 }
 case class IrBooleanNode(value: Boolean) extends IrNodePrimitive {
   def isString: Boolean = false
@@ -195,7 +195,7 @@ case class IrBooleanNode(value: Boolean) extends IrNodePrimitive {
   def asString: Option[String] = None
   def asNumber: Option[Double] = None
   def asBoolean: Option[Boolean] = Option(value)
-  override def toString(): String = value.toString
+  def renderAsString: String = value.toString
 }
 case object IrNullNode extends IrNodePrimitive {
   def isString: Boolean = false
@@ -205,5 +205,5 @@ case object IrNullNode extends IrNodePrimitive {
   def asString: Option[String] = None
   def asNumber: Option[Double] = None
   def asBoolean: Option[Boolean] = None
-  override def toString(): String = "null"
+  def renderAsString: String = "null"
 }
