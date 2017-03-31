@@ -6,7 +6,7 @@ import com.itv.scalapactcore.common.ColourOuput._
 
 import argonaut._
 
-object MatchIR extends XmlConversionFunctions with JsonConversionFunctions with PrimitiveConversionFunctions {
+object MatchIr extends XmlConversionFunctions with JsonConversionFunctions with PrimitiveConversionFunctions {
 
   def fromXml(xmlString: String): Option[IrNode] =
     safeStringToXml(xmlString).map { elem =>
@@ -22,31 +22,34 @@ object MatchIR extends XmlConversionFunctions with JsonConversionFunctions with 
 
 trait JsonConversionFunctions {
 
+  val rootNodeLabel = "(--root node--)"
+  val unnamedNodeLabel = "(--node has no label--)"
+
   protected def jsonToIrNode(label: String, json: Json): IrNode = {
     json match {
       case j: Json if j.isArray =>
-        IrNode(label, None, Map(), None, jsonArrayToIrNodeList(label, j))
+        IrNode(label, jsonArrayToIrNodeList(label, j))
 
       case j: Json if j.isObject =>
-        IrNode(label, None, Map(), None, jsonObjectToIrNodeList(j))
+        IrNode(label, jsonObjectToIrNodeList(j))
 
       case j: Json if j.isNull =>
-        IrNode(label, None, Map(), Some(null), Nil)
+        IrNode(label, IrNullNode)
 
       case j: Json if j.isNumber =>
-        IrNode(label, None, Map(), j.number.flatMap(_.toDouble).map(d => IrNumberNode(d)), Nil)
+        IrNode(label, j.number.flatMap(_.toDouble).map(d => IrNumberNode(d)))
 
       case j: Json if j.isBool =>
-        IrNode(label, None, Map(), j.bool.map(IrBooleanNode), Nil)
+        IrNode(label, j.bool.map(IrBooleanNode))
 
       case j: Json if j.isString =>
-        IrNode(label, None, Map(), j.string.map(IrStringNode), Nil)
+        IrNode(label, j.string.map(IrStringNode))
     }
 
   }
 
   protected def jsonObjectToIrNodeList(json: Json): List[IrNode] =
-    json.objectFieldsOrEmpty.map(p => json.field(p).map(q => jsonToIrNode(p, q))).collect { case Some(s) => s }
+    json.objectFieldsOrEmpty.map(l => if(l.isEmpty) unnamedNodeLabel else l).map(p => json.field(p).map(q => jsonToIrNode(p, q))).collect { case Some(s) => s }
 
   protected def jsonArrayToIrNodeList(parentLabel: String, json: Json): List[IrNode] = {
     json.arrayOrEmpty.map(j => jsonToIrNode(parentLabel, j))
@@ -56,12 +59,12 @@ trait JsonConversionFunctions {
     json match {
       case j: Json if j.isArray =>
         Option(
-          IrNode("", None, Map(), None, jsonArrayToIrNodeList("", j))
+          IrNode(rootNodeLabel, jsonArrayToIrNodeList(unnamedNodeLabel, j))
         )
 
       case j: Json if j.isObject =>
         Option(
-          IrNode("", None, Map(), None, jsonObjectToIrNodeList(j))
+          IrNode(rootNodeLabel, jsonObjectToIrNodeList(j))
         )
 
       case _ =>
@@ -100,10 +103,10 @@ trait XmlConversionFunctions extends PrimitiveConversionFunctions {
   protected def nodeToIrNode(node: Node): IrNode =
     extractNodeValue(node) match {
       case nodeValue: Some[IrNodePrimitive] =>
-        IrNode(node.label, Option(node.prefix), convertAttributes(node.attributes.asAttrMap), nodeValue, Nil)
+        IrNode(node.label, nodeValue, Nil, Option(node.prefix), convertAttributes(node.attributes.asAttrMap))
 
       case None =>
-        IrNode(node.label, Option(node.prefix), convertAttributes(node.attributes.asAttrMap), None, extractNodeChildren(node))
+        IrNode(node.label, None, extractNodeChildren(node), Option(node.prefix), convertAttributes(node.attributes.asAttrMap))
     }
 
 }
@@ -142,68 +145,4 @@ trait PrimitiveConversionFunctions {
         None
     }
 
-}
-
-case class IrNode(label: String, ns: Option[String], attributes: Map[String, IrNodePrimitive], value: Option[IrNodePrimitive], children: List[IrNode]) {
-
-  def renderAsString(indent: Int = 0): String = {
-    val i = List.fill(indent)("  ").mkString
-    val n = ns.map("  namespace: " + _ + "").getOrElse("")
-    val v = value.map(v => "  value: " + v.renderAsString).getOrElse("")
-    val a = if(attributes.isEmpty) "" else s"  atrributes: [${attributes.map(p => p._1 + "=" + p._2.renderAsString).mkString(", ")}]"
-    val c = if(children.isEmpty) "" else "\n" + children.map(_.renderAsString(indent + 1)).mkString("\n")
-    s"$i- $label$n$v$a$c"
-  }
-
-}
-
-sealed trait IrNodePrimitive {
-  def isString: Boolean
-  def isNumber: Boolean
-  def isBoolean: Boolean
-  def isNull: Boolean
-  def asString: Option[String]
-  def asNumber: Option[Double]
-  def asBoolean: Option[Boolean]
-  def renderAsString: String
-}
-case class IrStringNode(value: String) extends IrNodePrimitive {
-  def isString: Boolean = true
-  def isNumber: Boolean = false
-  def isBoolean: Boolean = false
-  def isNull: Boolean = false
-  def asString: Option[String] = Option(value)
-  def asNumber: Option[Double] = None
-  def asBoolean: Option[Boolean] = None
-  def renderAsString: String = value
-}
-case class IrNumberNode(value: Double) extends IrNodePrimitive {
-  def isString: Boolean = false
-  def isNumber: Boolean = true
-  def isBoolean: Boolean = false
-  def isNull: Boolean = false
-  def asString: Option[String] = None
-  def asNumber: Option[Double] = Option(value)
-  def asBoolean: Option[Boolean] = None
-  def renderAsString: String = value.toString
-}
-case class IrBooleanNode(value: Boolean) extends IrNodePrimitive {
-  def isString: Boolean = false
-  def isNumber: Boolean = false
-  def isBoolean: Boolean = true
-  def isNull: Boolean = false
-  def asString: Option[String] = None
-  def asNumber: Option[Double] = None
-  def asBoolean: Option[Boolean] = Option(value)
-  def renderAsString: String = value.toString
-}
-case object IrNullNode extends IrNodePrimitive {
-  def isString: Boolean = false
-  def isNumber: Boolean = false
-  def isBoolean: Boolean = false
-  def isNull: Boolean = true
-  def asString: Option[String] = None
-  def asNumber: Option[Double] = None
-  def asBoolean: Option[Boolean] = None
-  def renderAsString: String = "null"
 }
