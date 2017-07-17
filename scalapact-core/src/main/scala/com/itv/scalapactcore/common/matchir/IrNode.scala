@@ -12,7 +12,7 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
 
   def renderAsString: String = renderAsString(0)
 
-  def renderAsString(indent: Int = 0): String = {
+  def renderAsString(indent: Int): String = {
     val i = List.fill(indent)("  ").mkString
     val n = ns.map("  namespace: " + _ + "").getOrElse("")
     val v = value.map(v => "  value: " + v.renderAsString).getOrElse("")
@@ -43,7 +43,7 @@ object IrNode {
 
 }
 
-case class IrArrayNode()
+//case class IrArrayNode() //Not needed?
 
 sealed trait IrNodePrimitive {
   def isString: Boolean
