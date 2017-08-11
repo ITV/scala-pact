@@ -1,6 +1,6 @@
 package com.itv.scalapactcore.common.matchir
 
-case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[IrNode], ns: Option[String], attributes: Map[String, IrNodePrimitive]) {
+case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[IrNode], ns: Option[String], attributes: Map[String, IrNodePrimitive], path: IrNodePath) {
 
   val arrays: Map[String, List[IrNode]] =
     children.groupBy(_.label).filter(_._2.length > 1)
@@ -27,19 +27,19 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
 object IrNode {
 
   def apply(label: String): IrNode =
-    IrNode(label, None, Nil, None, Map.empty[String, IrNodePrimitive])
+    IrNode(label, None, Nil, None, Map.empty[String, IrNodePrimitive], IrNodePathEmpty)
 
   def apply(label: String, value: IrNodePrimitive): IrNode =
-    IrNode(label, Option(value), Nil, None, Map.empty[String, IrNodePrimitive])
+    IrNode(label, Option(value), Nil, None, Map.empty[String, IrNodePrimitive], IrNodePathEmpty)
 
   def apply(label: String, value: Option[IrNodePrimitive]): IrNode =
-    IrNode(label, value, Nil, None, Map.empty[String, IrNodePrimitive])
+    IrNode(label, value, Nil, None, Map.empty[String, IrNodePrimitive], IrNodePathEmpty)
 
   def apply(label: String, children: IrNode*): IrNode =
-    IrNode(label, None, children.toList, None, Map.empty[String, IrNodePrimitive])
+    IrNode(label, None, children.toList, None, Map.empty[String, IrNodePrimitive], IrNodePathEmpty)
 
   def apply(label: String, children: List[IrNode]): IrNode =
-    IrNode(label, None, children, None, Map.empty[String, IrNodePrimitive])
+    IrNode(label, None, children, None, Map.empty[String, IrNodePrimitive], IrNodePathEmpty)
 
 }
 

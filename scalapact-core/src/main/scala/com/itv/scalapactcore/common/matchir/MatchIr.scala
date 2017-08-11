@@ -103,10 +103,10 @@ trait XmlConversionFunctions extends PrimitiveConversionFunctions {
   protected def nodeToIrNode(node: Node): IrNode =
     extractNodeValue(node) match {
       case nodeValue: Some[IrNodePrimitive] =>
-        IrNode(node.label, nodeValue, Nil, Option(node.prefix), convertAttributes(node.attributes.asAttrMap))
+        IrNode(node.label, nodeValue, Nil, Option(node.prefix), convertAttributes(node.attributes.asAttrMap), IrNodePathEmpty())
 
       case None =>
-        IrNode(node.label, None, extractNodeChildren(node), Option(node.prefix), convertAttributes(node.attributes.asAttrMap))
+        IrNode(node.label, None, extractNodeChildren(node), Option(node.prefix), convertAttributes(node.attributes.asAttrMap), IrNodePathEmpty())
     }
 
 }
