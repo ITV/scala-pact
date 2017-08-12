@@ -9,6 +9,7 @@
 * [Example projects](examples/index.md)
 * [Get help](help.md)
 * [Dependancies](project-deps.md)
+* [Roadmap](roadmap.md)
 * [Change log](change-log.md)
 * [Contributing](contributing.md)
 
@@ -32,6 +33,9 @@ It would also not have been possible to get the project to it's current state wi
 
 ## Change Log
 Updates and information about changes made between releases can be found in the @ref:[change log](change-log.md).
+
+## Roadmap
+The intended @ref:[roadmap](roadmap.md) for the planned work on the project.
 
 ## Licence
 Scala-Pact is free to use under the ITV OSS licence, more information can be found [in the licence file](https://github.com/ITV/scala-pact/blob/master/LICENCE.md).
