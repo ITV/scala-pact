@@ -1,7 +1,9 @@
 package com.itv.scalapactcore.common.matchir
 
 sealed trait IrNodePath {
-  def <~(fieldName: String): IrNodePath = IrNodePathField(fieldName, this)
+  def <~(fieldName: String): IrNodePath =
+    if(fieldName == "*") IrNodePathArrayAnyElement(this) else IrNodePathField(fieldName, this)
+
   def <~(arrayIndex: Int): IrNodePath = IrNodePathArrayElement(arrayIndex, this)
 
   def renderAsString: String = {
@@ -14,10 +16,13 @@ sealed trait IrNodePath {
           acc
 
         case IrNodePathField(fieldName, parent) =>
-          rec(parent, "." + fieldName + acc)
+          rec(parent, s".$fieldName$acc")
 
         case IrNodePathArrayElement(arrayIndex, parent) =>
-          rec(parent, "[" + arrayIndex + "]" + acc)
+          rec(parent, s"[$arrayIndex]$acc")
+
+        case IrNodePathArrayAnyElement(parent) =>
+          rec(parent, s"[*]$acc")
       }
     }
 
@@ -30,3 +35,4 @@ case object IrNodePathEmpty extends IrNodePath {
 }
 case class IrNodePathField(fieldName: String, parent: IrNodePath) extends IrNodePath
 case class IrNodePathArrayElement(index: Int, parent: IrNodePath) extends IrNodePath
+case class IrNodePathArrayAnyElement(parent: IrNodePath) extends IrNodePath

@@ -24,6 +24,12 @@ class IrNodePathSpec extends FunSpec with Matchers {
       path.renderAsString shouldEqual ".fish.chips[2].ketchup"
     }
 
+    it("should be able to represent any element in an array") {
+      val path = IrNodePathEmpty <~ "fish" <~ "chips" <~ "*" <~ "ketchup"
+
+      path.renderAsString shouldEqual ".fish.chips[*].ketchup"
+    }
+
   }
 
   describe("converting XmlPath to IrNodePath") {
