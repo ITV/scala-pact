@@ -32,11 +32,11 @@ class IrNodePathSpec extends FunSpec with Matchers {
 
   }
 
-  describe("converting XmlPath to IrNodePath") {
+  describe("converting JsonPath to IrNodePath") {
     pending
   }
 
-  describe("converting JsonPath to IrNodePath") {
+  describe("converting XmlPath to IrNodePath") {
     pending
   }
 
