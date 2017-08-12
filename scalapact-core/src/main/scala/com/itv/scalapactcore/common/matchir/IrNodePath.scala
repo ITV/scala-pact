@@ -1,13 +1,44 @@
 package com.itv.scalapactcore.common.matchir
 
+import scala.annotation.tailrec
+
 sealed trait IrNodePath {
   def <~(fieldName: String): IrNodePath =
     if(fieldName == "*") IrNodePathArrayAnyElement(this) else IrNodePathField(fieldName, this)
 
   def <~(arrayIndex: Int): IrNodePath = IrNodePathArrayElement(arrayIndex, this)
 
+  def ===(other: IrNodePath): Boolean = {
+    @tailrec
+    def rec(a: IrNodePath, b: IrNodePath): Boolean =
+      (a, b) match {
+        case (IrNodePathEmpty, IrNodePathEmpty) =>
+          true
+
+        case (IrNodePathField(fieldNameA, parentA), IrNodePathField(fieldNameB, parentB)) if fieldNameA == fieldNameB =>
+          rec(parentA, parentB)
+
+        case (IrNodePathArrayElement(indexA, parentA), IrNodePathArrayElement(indexB, parentB)) if indexA == indexB =>
+          rec(parentA, parentB)
+
+        case (IrNodePathArrayAnyElement(parentA), IrNodePathArrayAnyElement(parentB)) =>
+          rec(parentA, parentB)
+
+        case (IrNodePathArrayAnyElement(parentA), IrNodePathArrayElement(_, parentB)) =>
+          rec(parentA, parentB)
+
+        case (IrNodePathArrayElement(_, parentA), IrNodePathArrayAnyElement(parentB)) =>
+          rec(parentA, parentB)
+
+        case _ =>
+          false
+      }
+
+    rec(this, other)
+  }
+
   def renderAsString: String = {
-    def rec(irNodePath: IrNodePath, acc: String): String = {
+    def rec(irNodePath: IrNodePath, acc: String): String =
       irNodePath match {
         case p @ IrNodePathEmpty if acc.isEmpty =>
           p.name
@@ -24,7 +55,6 @@ sealed trait IrNodePath {
         case IrNodePathArrayAnyElement(parent) =>
           rec(parent, s"[*]$acc")
       }
-    }
 
     rec(this, "")
   }
