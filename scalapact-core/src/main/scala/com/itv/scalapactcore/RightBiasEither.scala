@@ -1,7 +1,5 @@
 package com.itv.scalapactcore
 
-import scala.language.implicitConversions
-
 object RightBiasEither {
   implicit def makeBetterEither[AA, BB](e: Either[AA, BB]): RightBiasEither[AA, BB] = new RightBiasEither(e)
 

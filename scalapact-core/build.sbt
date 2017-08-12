@@ -8,7 +8,24 @@ scalaVersion := "2.12.1"
 
 crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.1")
 
-scalacOptions ++= Seq("-unchecked", "-deprecation")
+// Pinched shamelessly from https://tpolecat.github.io/2014/04/11/scalac-flags.html
+scalacOptions ++= Seq(
+//  "-Yno-imports", // Powerful but boring. Essentially you have to pull in everything... one day.
+  "-deprecation",
+  "-encoding", "UTF-8",       // yes, this is 2 args
+  "-feature",
+  "-language:existentials",
+  "-language:higherKinds",
+  "-language:implicitConversions",
+  "-unchecked"
+//  "-Xfatal-warnings",
+//  "-Xlint",
+//  "-Yno-adapted-args",
+//  "-Ywarn-dead-code",        // N.B. doesn't work well with the ??? hole
+//  "-Ywarn-numeric-widen",
+//  "-Ywarn-value-discard",
+//  "-Xfuture"
+)
 
 lazy val http4sVersion = "0.15.0a"
 
