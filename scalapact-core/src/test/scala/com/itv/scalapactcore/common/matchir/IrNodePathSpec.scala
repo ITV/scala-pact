@@ -33,11 +33,25 @@ class IrNodePathSpec extends FunSpec with Matchers {
   }
 
   describe("converting JsonPath to IrNodePath") {
-    pending
+
+    it("should be isomorphic to JsonPath") {
+      pending
+
+      val jsonPath = ".animals[*].dogs[2].collies[1].rover"
+      val expected = IrNodePathEmpty <~ "animals" <~ "*" <~ "dogs" <~ 2 <~ "collies" <~ 1 <~ "rover"
+
+      val nodePath = IrNodePath.fromJsonPath(jsonPath)
+
+    }
+
   }
 
   describe("converting XmlPath to IrNodePath") {
-    pending
+
+    it("should be isomorphic to XmlPath") {
+      pending
+    }
+
   }
 
   describe("comparing two IrNodePaths") {

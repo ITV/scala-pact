@@ -2,6 +2,18 @@ package com.itv.scalapactcore.common.matchir
 
 import scala.annotation.tailrec
 
+object IrNodePath {
+
+  val fromJsonPath: String => IrNodePath = ???
+
+  val toJsonPath: IrNodePath => String = ???
+
+  val fromXmlPath: String => IrNodePath = ???
+
+  val toXmlPath: IrNodePath => String = ???
+
+}
+
 sealed trait IrNodePath {
   def <~(fieldName: String): IrNodePath =
     if(fieldName == "*") IrNodePathArrayAnyElement(this) else IrNodePathField(fieldName, this)
@@ -36,6 +48,10 @@ sealed trait IrNodePath {
 
     rec(this, other)
   }
+
+  val toJsonPath: String = IrNodePath.toJsonPath(this)
+
+  val toXmlPath: String = IrNodePath.toXmlPath(this)
 
   def renderAsString: String = {
     def rec(irNodePath: IrNodePath, acc: String): String =
