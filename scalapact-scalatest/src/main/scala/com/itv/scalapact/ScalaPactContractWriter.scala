@@ -14,7 +14,7 @@ object ScalaPactContractWriter {
     "[^a-zA-Z0-9-]".r.replaceAllIn(name.replace(" ", "-"), "")
 
   val writePactContracts: ScalaPactDescriptionFinal => Unit = pactDescription => {
-    val dirPath = "target/pacts"
+    val dirPath = System.getProperty("pact.rootDir", "target/pacts")
     val dirFile = new File(dirPath)
 
     if (!dirFile.exists()) {
