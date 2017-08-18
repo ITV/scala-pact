@@ -30,25 +30,35 @@ class IrNodePathSpec extends FunSpec with Matchers {
       path.renderAsString shouldEqual ".fish.chips[*].ketchup"
     }
 
+    it("should be able to represent a path to an xml attribute") {
+      pending
+    }
+
+    it("should be able to represent a path to an xml text element") {
+      pending
+    }
+
   }
 
-  describe("converting JsonPath to IrNodePath") {
+  describe("converting IrNodePath to and from PactPath") {
 
-    it("should be isomorphic to JsonPath") {
+    it("should be able to convert dot syntax") {
       pending
 
       val jsonPath = ".animals[*].dogs[2].collies[1].rover"
       val expected = IrNodePathEmpty <~ "animals" <~ "*" <~ "dogs" <~ 2 <~ "collies" <~ 1 <~ "rover"
 
-      val nodePath = IrNodePath.fromJsonPath(jsonPath)
+      val nodePath = PactPath.fromPactPath(jsonPath)
+
+
 
     }
 
-  }
+    it("should be able to convert bracket syntax") {
+      pending
+    }
 
-  describe("converting XmlPath to IrNodePath") {
-
-    it("should be isomorphic to XmlPath") {
+    it("should be able to convert a combination of dot and bracket syntax") {
       pending
     }
 

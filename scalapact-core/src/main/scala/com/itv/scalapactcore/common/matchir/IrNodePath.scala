@@ -2,15 +2,23 @@ package com.itv.scalapactcore.common.matchir
 
 import scala.annotation.tailrec
 
-object IrNodePath {
+/**
+  * PactPath (defined in the pact standard) is JsonPath with a few tweaks to support
+  * querying XML with a nearly JsonPath-like syntax. Specific modifications to JsonPath are:
+  *
+  * - names match to element names ($.body.animals maps to <animals>)
+  * - @names match to attribute names
+  * - #text match to the text elements
+  *
+  * JsonPath support a ["xxx"] form which we use for to escape the @ and #. e.g.
+  * foo.bar["#text"]
+  * foo.bar['@id']
+  */
+object PactPath {
 
-  val fromJsonPath: String => IrNodePath = ???
+  val fromPactPath: String => IrNodePath = ???
 
-  val toJsonPath: IrNodePath => String = ???
-
-  val fromXmlPath: String => IrNodePath = ???
-
-  val toXmlPath: IrNodePath => String = ???
+  val toPactPath: IrNodePath => String = ???
 
 }
 
@@ -49,9 +57,7 @@ sealed trait IrNodePath {
     rec(this, other)
   }
 
-  val toJsonPath: String = IrNodePath.toJsonPath(this)
-
-  val toXmlPath: String = IrNodePath.toXmlPath(this)
+  val toJsonPath: String = PactPath.toPactPath(this)
 
   def renderAsString: String = {
     def rec(irNodePath: IrNodePath, acc: String): String =
