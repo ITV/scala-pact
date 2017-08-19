@@ -1,6 +1,9 @@
 package com.itv.scalapactcore.common.matchir
 
+import com.itv.scalapactcore.common.matchir.PactPathParseResult.{PactPathParseFailure, PactPathParseSuccess}
 import org.scalatest.{FunSpec, Matchers}
+
+import scala.language.postfixOps
 
 class IrNodePathSpec extends FunSpec with Matchers {
 
@@ -52,16 +55,18 @@ class IrNodePathSpec extends FunSpec with Matchers {
 
       val expected = IrNodePathEmpty <~ "animals" <~ "*" <~ "dogs" <~ 2 <~ "collie" <~ "rover" <@ "name"
 
-      val nodePath = PactPath.fromPactPath(jsonPath).getOrElse(fail("Could not parse path"))
+      PactPath.fromPactPath(jsonPath) match {
+        case PactPathParseSuccess(irNodePath) =>
+          withClue("Created paths are equal") {
+            irNodePath === expected shouldEqual true
+          }
 
-      withClue("Created paths are equal") {
-        println(nodePath)
-        println(expected)
-        nodePath === expected shouldEqual true
-      }
+          withClue("Rendered path are as expected") {
+            irNodePath.renderAsString shouldEqual jsonPath
+          }
 
-      withClue("Rendered path are as expected") {
-        nodePath.renderAsString shouldEqual jsonPath
+        case e: PactPathParseFailure =>
+          fail(e.errorString)
       }
 
     }
@@ -77,36 +82,46 @@ class IrNodePathSpec extends FunSpec with Matchers {
         PactPath.fromPactPath(jsonPathA) === PactPath.fromPactPath(jsonPathB) shouldEqual true
       }
 
-      val nodePath = PactPath.fromPactPath(jsonPathA).getOrElse(fail("Could not parse path"))
+      PactPath.fromPactPath(jsonPathA) match {
+        case PactPathParseSuccess(irNodePath) =>
 
-      withClue("Created paths are equal") {
-        nodePath === expected shouldEqual true
-      }
+          withClue("Created paths are equal") {
+            irNodePath === expected shouldEqual true
+          }
 
-      val expectedRender = ".animals[*].dogs[2].collie.rover['@name']" // renders as dot syntax
+          val expectedRender = ".animals[*].dogs[2].collie.rover['@name']" // renders as dot syntax
 
-      withClue("Rendered path are as expected") {
-        nodePath.renderAsString shouldEqual expectedRender
+          withClue("Rendered path are as expected") {
+            irNodePath.renderAsString shouldEqual expectedRender
+          }
+
+        case e: PactPathParseFailure =>
+          fail(e.errorString)
       }
 
     }
 
     it("should be able to convert to and from a combination of dot and bracket syntax") {
 
-      val jsonPath = ".animals[*].dogs[2]['collie'].rover['@name']"
+      val jsonPath = ".animals[*].dogs[2]['collie'].rover['#text']"
 
-      val expected = IrNodePathEmpty <~ "animals" <~ "*" <~ "dogs" <~ 2 <~ "collie" <~ "rover" <@ "name"
+      val expected = IrNodePathEmpty <~ "animals" <~ "*" <~ "dogs" <~ 2 <~ "collie" <~ "rover" text
 
-      val nodePath = PactPath.fromPactPath(jsonPath).getOrElse(fail("Could not parse path"))
+      PactPath.fromPactPath(jsonPath) match {
+        case PactPathParseSuccess(irNodePath) =>
 
-      withClue("Created paths are equal") {
-        nodePath === expected shouldEqual true
-      }
+          withClue("Created paths are equal") {
+            irNodePath === expected shouldEqual true
+          }
 
-      val expectedRender = ".animals[*].dogs[2].collie.rover['@name']" // renders as dot syntax
+          val expectedRender = ".animals[*].dogs[2].collie.rover['#text']" // renders as dot syntax
 
-      withClue("Rendered path are as expected") {
-        nodePath.renderAsString shouldEqual expectedRender
+          withClue("Rendered path are as expected") {
+            irNodePath.renderAsString shouldEqual expectedRender
+          }
+
+        case e: PactPathParseFailure =>
+          fail(e.errorString)
       }
 
     }

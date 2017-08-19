@@ -18,26 +18,85 @@ import scala.util.matching.Regex
   */
 object PactPath {
 
+  import PactPathPatterns._
+  import PactPathParseResult._
+
   val toPactPath: IrNodePath => String = _.renderAsString
 
-  private val fieldCapture: Regex = """^(.|\[[\'|\"])([a-zA-Z0-9:-_]+)([\'|\"]\])?""".r
-
-  val fromPactPath: String => Option[IrNodePath] = pactPath => {
-    def rec(remaining: String): Option[IrNodePath] =
+  val fromPactPath: String => PactPathParseResult = pactPath => {
+    def rec(remaining: String, acc: IrNodePath): PactPathParseResult =
       remaining match {
-        case fieldCapture(_, fieldName, _) =>
-          println(fieldName)
-          None
+        // Complete, success
+        case "" =>
+          PactPathParseSuccess(acc)
 
+        // Fields
+        case fieldNamePrefix(p, r) =>
+          rec(r, acc)
+
+        case fieldName(name, r) =>
+          rec(r, acc <~ name)
+
+        case fieldNameSuffix(_, r) =>
+          rec(r, acc)
+
+        // Arrays
+        case arrayAnyElement(_, r) =>
+          rec(r, acc <~ "*")
+
+        case arrayElementAtIndex(i, r) =>
+          safeStringToInt(i) match {
+            case Some(index) =>
+              rec(r, acc <~ index)
+
+            case None =>
+              PactPathParseFailure(pactPath, remaining, Some(s"Could not convert '$i' to array index."))
+          }
+
+        // XML Addons
+        case xmlAttributeName(attributeName, r) =>
+          rec(r, acc <@ attributeName)
+
+        case xmlTextElement(_, r) =>
+          rec(r, acc text)
+
+        // Unmatched, failure
         case _ =>
-          println("Boom!")
-          None
+          println("b")
+          PactPathParseFailure(pactPath, remaining, None)
 
       }
 
-    rec(pactPath)
+    rec(pactPath, IrNodePathEmpty)
   }
 
+  private lazy val safeStringToInt: String => Option[Int] = str => try { Option(str.toInt) } catch { case e: Throwable => None }
+
+}
+
+sealed trait PactPathParseResult
+
+object PactPathParseResult {
+  case class PactPathParseSuccess(irNodePath: IrNodePath) extends PactPathParseResult
+  case class PactPathParseFailure(original: String, lookingAt: String, specificError: Option[String]) extends PactPathParseResult {
+    def errorString: String =
+      s"${specificError.getOrElse("Failed to parse PactPath")}. Was looking at '$lookingAt' in '$original'"
+  }
+}
+
+object PactPathPatterns {
+  // Fields
+  val fieldNamePrefix: Regex ="""^(\.|\[[\'|\"])(.*)$""".r
+  val fieldName: Regex = """^([a-zA-Z0-9:\-_]+)(.*)$""".r // TODO: This is very limited, technically any escaped string is valid
+  val fieldNameSuffix: Regex = """^([\'|\"]\])(.*)$""".r
+
+  // Arrays
+  val arrayAnyElement: Regex = """^(\[\*\])(.*)$""".r
+  val arrayElementAtIndex: Regex = """^\[(\d+)\](.*)$""".r
+
+  // Xml addons
+  val xmlAttributeName: Regex = """^@([a-zA-Z0-9:\-_]+)(.*)$""".r
+  val xmlTextElement: Regex = """^#([a-zA-Z0-9:\-_]+)(.*)$""".r
 }
 
 sealed trait IrNodePath {
