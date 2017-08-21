@@ -99,6 +99,10 @@ object PactPathPatterns {
   val xmlTextElement: Regex = """^#([a-zA-Z0-9:\-_]+)(.*)$""".r
 }
 
+object IrNodePath {
+  val fromPactPath: String => PactPathParseResult = PactPath.fromPactPath
+}
+
 sealed trait IrNodePath {
   def <~(fieldName: String): IrNodePath =
     if(fieldName == "*") IrNodePathArrayAnyElement(this) else IrNodePathField(fieldName, this)
