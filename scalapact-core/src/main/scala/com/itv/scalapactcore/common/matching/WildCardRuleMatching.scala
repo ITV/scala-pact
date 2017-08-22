@@ -120,32 +120,34 @@ object WildCardRuleMatching {
           if (ra.arrayOrEmpty.length >= arrayMin) RuleMatchSuccess
           else RuleMatchFailure
 
-        case (Some(matchType), None, Some(arrayMin)) if ra.isArray && matchType == "type" =>
+        case (Some("type"), None, Some(arrayMin)) if ra.isArray =>
           if (ra.arrayOrEmpty.length >= arrayMin) RuleMatchSuccess
           else RuleMatchFailure
 
-        case (Some(matchType), None, None) if ra.isArray && matchType == "type" =>
+        case (Some("type"), None, None) if ra.isArray =>
           RuleMatchSuccess
 
-        case (Some(matchType), None, None) if ra.isArray && matchType == "regex" =>
+        case (Some("regex"), None, None) if ra.isArray =>
           println("Regex match specified but no rule was supplied".yellow)
           RuleMatchFailure
 
+        case (Some("regex"), Some(regularExpression), None) if ra.isString =>
+          if(ra.string.exists(_.matches(regularExpression))) RuleMatchSuccess
+          else RuleMatchFailure
+
+        case (Some("type"), None, None) if ra.isObject =>
+          RuleMatchSuccess
+
         case (_, _, _) if ra.isObject =>
-          val e: Json = next.expected
 
           val matching = PermissiveJsonEqualityHelper.areEqual(
             Map(next.ruleAndContext.path -> next.ruleAndContext.rule),
-            e,
+            next.expected,
             ra,
             next.fieldName
           )
 
           if(matching) RuleMatchSuccess else RuleMatchFailure
-
-        case (Some(matchType), Some(regularExpression), None) if ra.isString && matchType == "regex" =>
-          if(ra.string.exists(_.matches(regularExpression))) RuleMatchSuccess
-          else RuleMatchFailure
 
         case (None, None, None) =>
           println("Rule match ignored since no rule was available.".yellow)
