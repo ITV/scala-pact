@@ -31,7 +31,7 @@ object PactPath {
           PactPathParseSuccess(acc)
 
         // Fields
-        case fieldNamePrefix(p, r) =>
+        case fieldNamePrefix(_, r) =>
           rec(r, acc)
 
         case fieldName(name, r) =>
@@ -70,7 +70,7 @@ object PactPath {
     rec(pactPath, IrNodePathEmpty)
   }
 
-  private lazy val safeStringToInt: String => Option[Int] = str => try { Option(str.toInt) } catch { case e: Throwable => None }
+  private lazy val safeStringToInt: String => Option[Int] = str => try { Option(str.toInt) } catch { case _: Throwable => None }
 
 }
 
