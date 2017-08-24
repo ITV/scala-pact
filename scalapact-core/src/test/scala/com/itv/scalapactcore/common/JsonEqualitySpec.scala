@@ -1,10 +1,9 @@
 package com.itv.scalapactcore.common
 
 import org.scalatest.{FunSpec, Matchers}
-
 import argonaut._
 import Argonaut._
-
+import com.itv.scalapactcore.MatchingRule
 import com.itv.scalapactcore.common.matching.ScalaPactJsonEquality._
 
 class JsonEqualitySpec extends FunSpec with Matchers {
@@ -147,6 +146,144 @@ class JsonEqualitySpec extends FunSpec with Matchers {
         """.stripMargin
 
       (a.parseOption.get =~ b.parseOption.get)(None) shouldEqual true
+    }
+
+  }
+
+  describe("Specific cases") {
+
+    it("should cope with case #1: regex match after wildcard") {
+
+      val a =
+        """
+          |{
+          |  "x": {
+          |    "y": [
+          |      {
+          |        "myDateTime": {
+          |          "at": "2016-12-18T21:00Z"
+          |        }
+          |      },
+          |      {
+          |        "myDateTime": {
+          |          "at": "2017-01-11T00:01Z"
+          |        }
+          |      }
+          |    ]
+          |  }
+          |}
+        """.stripMargin
+
+      val b =
+        """
+          |{
+          |  "x": {
+          |    "y": [
+          |      {
+          |        "myDateTime": {
+          |          "at": "2016-12-18T21:00Z"
+          |        }
+          |      },
+          |      {
+          |        "myDateTime": {
+          |          "at": "2017-01-11T00:01Z"
+          |        }
+          |      }
+          |    ]
+          |  }
+          |}
+        """.stripMargin
+
+      val regex = "^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2})(:(\\d{2})){0,1}(Z|\\+0100)$"
+
+      val rules: Option[Map[String, MatchingRule]] =
+        Option(
+          Map(
+            "$.body.x.y[*].myDateTime.at" -> MatchingRule(Option("regex"), Option(regex), None)
+          )
+        )
+
+      withClue("Empty A") {
+        ("{}".parseOption.get =~ b.parseOption.get) (rules) shouldEqual true
+      }
+
+      withClue("No rules") {
+        (a.parseOption.get =~ b.parseOption.get)(None) shouldEqual true
+      }
+
+      withClue("The regex is valid") {
+        "2016-12-18T21:00Z".matches(regex) shouldEqual true
+      }
+
+      withClue("A equals B and rule checked") {
+       (a.parseOption.get =~ b.parseOption.get) (rules) shouldEqual true // Failure was here originally
+      }
+
+    }
+
+    it("should cope with case #2: type match after wildcard") {
+
+      val a =
+        """
+          |{
+          |  "x": {
+          |    "y": [
+          |      {
+          |        "myDateTime": {
+          |          "at": "2016-12-18T21:00Z"
+          |        }
+          |      },
+          |      {
+          |        "myDateTime": {
+          |          "at": "2017-01-11T00:01Z"
+          |        }
+          |      }
+          |    ]
+          |  }
+          |}
+        """.stripMargin
+
+      val b =
+        """
+          |{
+          |  "x": {
+          |    "y": [
+          |      {
+          |        "myDateTime": {
+          |          "at": "2016-12-18T21:00Z"
+          |        }
+          |      },
+          |      {
+          |        "myDateTime": {
+          |          "at": "2017-01-11T00:01Z"
+          |        }
+          |      }
+          |    ]
+          |  }
+          |}
+        """.stripMargin
+
+      val rules: Option[Map[String, MatchingRule]] =
+        Option(
+          Map(
+            "$.body.x.y[*].myDateTime.at" -> MatchingRule(Option("type"), None, None),
+            "$.body.x.y[*].myDateTime" -> MatchingRule(Option("type"), None, None),
+            "$.body.x.y[*]" -> MatchingRule(Option("type"), None, None)
+          )
+        )
+
+      withClue("Empty A") {
+        ("{}".parseOption.get =~ b.parseOption.get) (rules) shouldEqual true
+      }
+
+      withClue("No rules") {
+        (a.parseOption.get =~ b.parseOption.get)(None) shouldEqual true
+      }
+
+      withClue("A equals B and rule checked") {
+        (a.parseOption.get =~ b.parseOption.get) (rules) shouldEqual true // Failure was here originally
+      }
+
     }
 
   }

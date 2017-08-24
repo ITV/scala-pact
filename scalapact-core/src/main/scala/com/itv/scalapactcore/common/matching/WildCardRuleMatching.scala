@@ -23,6 +23,7 @@ object WildCardRuleMatching {
 
   val arrayRuleMatchWithWildcards: String => MatchingRuleContext => Json.JsonArray => Json.JsonArray => ArrayMatchingStatus = currentPath => ruleAndContext => expectedArray => receivedArray => {
 
+    val fieldCharacters = "[A-Za-z0-9:\\-_]+"
     val pathSegments = ruleAndContext.copy(path = ruleAndContext.path.replace(currentPath, "")).path.split('.').toList
 
     def rec(remainingSegments: List[String], acc: List[ArrayMatchingStatus], ea: Json.JsonArray, ra: Json.JsonArray): ArrayMatchingStatus = {
@@ -36,7 +37,7 @@ object WildCardRuleMatching {
         case h::Nil if h == "*" =>
           rec(Nil, acc :+ RuleMatchFailure, ea, ra)
 
-        case h::Nil if h.matches("^[A-Za-z0-9-_]+") =>
+        case h::Nil if h.matches(s"^$fieldCharacters") =>
           val next = extractSubArrays(h, ruleAndContext, Nil, ea, ra)
           val res = checkFieldInAllArrayElements(next)
 
@@ -48,13 +49,13 @@ object WildCardRuleMatching {
             rec("[*]" :: Nil, acc, ea, List(ra(index)))
           }.getOrElse(RuleMatchFailure)
 
-        case h::Nil =>
+        case _::Nil =>
           rec(Nil, acc :+ RuleMatchFailure, ea, ra)
 
         case allArrayElements::allFields::remaining if allArrayElements == "[*]" && allFields == "*" =>
           rec(remaining, acc :+ checkAllFieldsInAllArrayElements(ruleAndContext, ea, ra), ea, ra)
 
-        case allArrayElements::newArrayToMatch::remaining if allArrayElements == "[*]" && newArrayToMatch.matches("^[A-Za-z0-9-_]+\\[\\*\\]") =>
+        case allArrayElements::newArrayToMatch::remaining if allArrayElements == "[*]" && newArrayToMatch.matches(s"^$fieldCharacters\\[\\*\\]") =>
           val next = extractSubArrays(newArrayToMatch, ruleAndContext, remaining, ea, ra)
 
           val res = next.received.map(_.arrayOrEmpty).map { ra =>
@@ -63,8 +64,14 @@ object WildCardRuleMatching {
 
           rec(Nil, acc ++ res, ea, ra)
 
-        case allArrayElements::oneField::_ if allArrayElements == "[*]" && oneField.matches("^[A-Za-z0-9-_]+") =>
-          val next = extractSubArrays(oneField, ruleAndContext, Nil, ea, ra)
+        case allArrayElements::oneField::remaining if allArrayElements == "[*]" && oneField.matches(s"^$fieldCharacters$$") =>
+          val next = extractSubArrays(oneField, ruleAndContext, remaining, ea, ra)
+          val res = checkFieldInAllArrayElements(next)
+
+          rec(Nil, acc ++ res, ea, ra)
+
+        case allArrayElements::oneField::remaining if allArrayElements == "[*]" && oneField.matches(s"^$fieldCharacters") =>
+          val next = extractSubArrays(oneField, ruleAndContext, remaining, ea, ra)
           val res = checkFieldInAllArrayElements(next)
 
           rec(Nil, acc ++ res, ea, ra)
@@ -109,26 +116,39 @@ object WildCardRuleMatching {
 
   private def checkFieldInAllArrayElements(next: NextArrayToMatch): List[ArrayMatchingStatus] =
     next.received.map { ra =>
-      //TODO: Missing regex!!
       MatchingRule.unapply(next.ruleAndContext.rule).map {
-        case (None, None, Some(arrayMin)) =>
-          if (ra.isArray && ra.arrayOrEmpty.length >= arrayMin) RuleMatchSuccess
+        case (None, None, Some(arrayMin)) if ra.isArray =>
+          if (ra.arrayOrEmpty.length >= arrayMin) RuleMatchSuccess
           else RuleMatchFailure
 
-        case (Some(matchType), None, Some(arrayMin)) if matchType == "type" =>
-          if (ra.isArray && ra.arrayOrEmpty.length >= arrayMin) RuleMatchSuccess
+        case (Some("type"), None, Some(arrayMin)) if ra.isArray =>
+          if (ra.arrayOrEmpty.length >= arrayMin) RuleMatchSuccess
           else RuleMatchFailure
 
-        case (Some(matchType), None, None) if matchType == "type" =>
+        case (Some("type"), None, None) if ra.isArray =>
           RuleMatchSuccess
 
-        case (Some(matchType), None, None) if matchType == "regex" =>
+        case (Some("regex"), None, None) if ra.isArray =>
           println("Regex match specified but no rule was supplied".yellow)
           RuleMatchFailure
 
-        case (Some(matchType), Some(regularExpression), None) if matchType == "regex" =>
-          if(ra.isString && ra.string.exists(_.matches(regularExpression))) RuleMatchSuccess
+        case (Some("regex"), Some(regularExpression), None) if ra.isString =>
+          if(ra.string.exists(_.matches(regularExpression))) RuleMatchSuccess
           else RuleMatchFailure
+
+        case (Some("type"), None, None) if ra.isObject =>
+          RuleMatchSuccess
+
+        case (_, _, _) if !ra.isArray =>
+
+          val matching = PermissiveJsonEqualityHelper.areEqual(
+            Map(next.ruleAndContext.path -> next.ruleAndContext.rule),
+            next.expected,
+            ra,
+            next.fieldName
+          )
+
+          if(matching) RuleMatchSuccess else RuleMatchFailure
 
         case (None, None, None) =>
           println("Rule match ignored since no rule was available.".yellow)
