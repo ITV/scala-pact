@@ -38,7 +38,7 @@ libraryDependencies ++= Seq(
   "org.http4s" %% "http4s-argonaut"     % http4sVersion
 )
 
-wartremoverWarnings ++= Warts.unsafe
+//wartremoverWarnings ++= Warts.unsafe
 
 publishTo := {
   val nexus = "https://oss.sonatype.org/"
