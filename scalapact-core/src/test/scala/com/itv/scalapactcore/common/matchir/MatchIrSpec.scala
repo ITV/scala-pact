@@ -37,7 +37,7 @@ class MatchIrSpec extends FunSpec with Matchers {
       val xml: String = <ns1:fish>haddock</ns1:fish>.toString()
 
       val ir: Option[IrNode] = Option {
-        IrNode("fish", Some(IrStringNode("haddock")), Nil, Option("ns1"), Map.empty[String, IrNodePrimitive], IrNodePathEmpty)
+        IrNode("fish", Some(IrStringNode("haddock")), Nil, Option("ns1"), Map.empty[String, IrStringNode], IrNodePathEmpty)
       }
 
       MatchIr.fromXml(xml) shouldEqual ir
@@ -79,7 +79,7 @@ class MatchIrSpec extends FunSpec with Matchers {
           value = Option(IrStringNode("bait")),
           children = List(IrNode("breed", IrStringNode("cod"))),
           ns = None,
-          attributes = Map.empty[String, IrNodePrimitive],
+          attributes = Map.empty[String, IrStringNode],
           path = IrNodePathEmpty
         )
       }

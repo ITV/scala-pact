@@ -4,12 +4,12 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
 
   import IrNodeEqualityResult._
 
-  def =~=(other: IrNode): IrNodeEqualityResult = {
+  def ===(other: IrNode)(strict: Boolean): IrNodeEqualityResult = {
     check[String](labelTest(path), this.label, other.label) +
     check[Option[IrNodePrimitive]](valueTest(path), this.value, other.value) +
-    check[List[IrNode]](childrenTest(path), this.children, other.children) +
+    check[List[IrNode]](childrenTest(strict)(path), this.children, other.children) +
     check[Option[String]](namespaceTest(path), this.ns, other.ns) +
-    check[Map[String, IrNodePrimitive]](attributesTest(path), this.attributes, other.attributes) +
+    check[Map[String, IrNodePrimitive]](attributesTest(strict)(path), this.attributes, other.attributes) +
     check[IrNodePath](pathTest(path), this.path, other.path)
   }
 
@@ -75,9 +75,45 @@ object IrNodeEqualityResult {
     path => (a, b) =>
       if(a === b) IrNodesEqual else IrNodesNotEqual(s"Path '${a.renderAsString}' does not equal '${b.renderAsString}'", path)
 
-  val childrenTest: IrNodePath => (List[IrNode], List[IrNode]) => IrNodeEqualityResult = ???
+  val childrenTest: Boolean => IrNodePath => (List[IrNode], List[IrNode]) => IrNodeEqualityResult =
+    strict => path => (a, b) =>
+      if(strict) {
+        ???
+      } else {
+        ???
+      }
 
-  val attributesTest: IrNodePath => (Map[String, IrNodePrimitive], Map[String, IrNodePrimitive]) => IrNodeEqualityResult = ???
+  private val checkAttributesTest: IrNodePath => (Map[String, IrNodePrimitive], Map[String, IrNodePrimitive]) => IrNodeEqualityResult = path => (a, b) =>
+    a.toList.map { p =>
+      b.get(p._1) match {
+        case None =>
+          IrNodesNotEqual(s"Attribute ${p._1} was missing", path)
+
+        case Some(v: IrNodePrimitive) =>
+          if(v == p._2) IrNodesEqual else IrNodesNotEqual(s"Attribute value for '${p._1}' of '${p._2.renderAsString}' does not equal '${v.renderAsString}'", path)
+      }
+    } match {
+      case Nil => IrNodesEqual
+      case head :: tail => tail.foldLeft[IrNodeEqualityResult](head)(_ + _)
+    }
+
+  val attributesTest: Boolean => IrNodePath => (Map[String, IrNodePrimitive], Map[String, IrNodePrimitive]) => IrNodeEqualityResult =
+    strict => path => (a, b) =>
+      if(strict) {
+        val as = a.toList
+        val bs = b.toList
+        val asNames = as.map(_._1)
+        val bsNames = bs.map(_._1)
+
+        if(asNames.length != bsNames.length) {
+          IrNodesNotEqual(s"Differing number of attributes between ['${asNames.mkString(", ")}'] and ['${bsNames.mkString(", ")}']", path)
+        } else if(asNames != bsNames) {
+          IrNodesNotEqual(s"Differing attribute order between ['${asNames.mkString(", ")}'] and ['${bsNames.mkString(", ")}']", path)
+        } else {
+          checkAttributesTest(path)(a, b)
+        }
+
+      } else checkAttributesTest(path)(a, b)
 
   def check[A](f: (A, A) => IrNodeEqualityResult, propA: A, propB: A): IrNodeEqualityResult = f(propA, propB)
 
