@@ -75,12 +75,27 @@ object IrNodeEqualityResult {
     path => (a, b) =>
       if(a === b) IrNodesEqual else IrNodesNotEqual(s"Path '${a.renderAsString}' does not equal '${b.renderAsString}'", path)
 
+  implicit private def listOfResultsToResult(l: List[IrNodeEqualityResult]): IrNodeEqualityResult =
+    l match {
+      case Nil => IrNodesEqual
+      case x :: xs => xs.foldLeft(x)(_ + _)
+    }
+
   val childrenTest: Boolean => IrNodePath => (List[IrNode], List[IrNode]) => IrNodeEqualityResult =
     strict => path => (a, b) =>
       if(strict) {
-        ???
+        if(a.length != b.length) {
+          IrNodesNotEqual(s"Differing number of children. Expected ${a.length} got ${b.length}", path)
+        } else {
+          a.zip(b).map(p => (p._1 === p._2)(strict))
+        }
       } else {
-        ???
+        a.map { n1 =>
+          b.find(n2 => (n1 === n2)(strict).isEqual) match {
+            case Some(_) => IrNodesEqual
+            case None => IrNodesNotEqual(s"Could not find matching child node for:\n${n1.renderAsString}", path)
+          }
+        }
       }
 
   private val checkAttributesTest: IrNodePath => (Map[String, IrNodePrimitive], Map[String, IrNodePrimitive]) => IrNodeEqualityResult = path => (a, b) =>
@@ -92,10 +107,8 @@ object IrNodeEqualityResult {
         case Some(v: IrNodePrimitive) =>
           if(v == p._2) IrNodesEqual else IrNodesNotEqual(s"Attribute value for '${p._1}' of '${p._2.renderAsString}' does not equal '${v.renderAsString}'", path)
       }
-    } match {
-      case Nil => IrNodesEqual
-      case head :: tail => tail.foldLeft[IrNodeEqualityResult](head)(_ + _)
     }
+
 
   val attributesTest: Boolean => IrNodePath => (Map[String, IrNodePrimitive], Map[String, IrNodePrimitive]) => IrNodeEqualityResult =
     strict => path => (a, b) =>
@@ -121,6 +134,8 @@ object IrNodeEqualityResult {
 
 sealed trait IrNodeEqualityResult {
 
+  val isEqual: Boolean
+
   def +(other: IrNodeEqualityResult): IrNodeEqualityResult =
     (this, other) match {
       case (IrNodesEqual, IrNodesEqual) => IrNodesEqual
@@ -130,8 +145,12 @@ sealed trait IrNodeEqualityResult {
     }
 
 }
-case object IrNodesEqual extends IrNodeEqualityResult
-case class IrNodesNotEqual(differences: List[IrNodeDiff]) extends IrNodeEqualityResult
+case object IrNodesEqual extends IrNodeEqualityResult {
+  val isEqual: Boolean = true
+}
+case class IrNodesNotEqual(differences: List[IrNodeDiff]) extends IrNodeEqualityResult {
+  val isEqual: Boolean = false
+}
 
 case class IrNodeDiff(message: String, path: IrNodePath)
 
