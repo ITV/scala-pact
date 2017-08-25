@@ -69,6 +69,25 @@ class MatchIrSpec extends FunSpec with Matchers {
 
     }
 
+    it("should be able to convert two nested nodes and two values") {
+
+      val xml: String = <fish><breed>cod</breed>bait</fish>.toString()
+
+      val ir: Option[IrNode] = Option {
+        IrNode(
+          label = "fish",
+          value = Option(IrStringNode("bait")),
+          children = List(IrNode("breed", IrStringNode("cod"))),
+          ns = None,
+          attributes = Map.empty[String, IrNodePrimitive],
+          path = IrNodePathEmpty
+        )
+      }
+
+      MatchIr.fromXml(xml) shouldEqual ir
+
+    }
+
   }
 
   describe("Converting JSON to MatchIR") {
