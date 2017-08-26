@@ -9,7 +9,7 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
 
   def ===(other: IrNode)(strict: Boolean): IrNodeEqualityResult = {
     check[String](labelTest(path), this.label, other.label) +
-    check[Option[IrNodePrimitive]](valueTest(path), this.value, other.value) +
+    check[Option[IrNodePrimitive]](valueTest(strict)(path), this.value, other.value) +
     check[List[IrNode]](childrenTest(strict)(path), this.children, other.children) +
     check[Option[String]](namespaceTest(path), this.ns, other.ns) +
     check[Map[String, IrNodePrimitive]](attributesTest(strict)(path), this.attributes, other.attributes) +
@@ -46,19 +46,33 @@ object IrNodeEqualityResult {
       if(a == b) IrNodesEqual else IrNodesNotEqual(s"Label '$a' did not match '$b'", path)
     }
 
-  val valueTest: IrNodePath => (Option[IrNodePrimitive], Option[IrNodePrimitive]) => IrNodeEqualityResult = path => {
-    case (Some(v1: IrNodePrimitive), Some(v2: IrNodePrimitive)) =>
-      if(v1 == v2) IrNodesEqual else IrNodesNotEqual(s"Value '${v1.renderAsString}' did not match '${v2.renderAsString}'", path)
+  val valueTest: Boolean => IrNodePath => (Option[IrNodePrimitive], Option[IrNodePrimitive]) => IrNodeEqualityResult =
+    strict => path =>
+      if(strict) {
+        case (Some(v1: IrNodePrimitive), Some(v2: IrNodePrimitive)) =>
+          if(v1 == v2) IrNodesEqual else IrNodesNotEqual(s"Value '${v1.renderAsString}' did not match '${v2.renderAsString}'", path)
 
-    case (Some(v1: IrNodePrimitive), None) =>
-      IrNodesNotEqual(s"Value '${v1.renderAsString}' did not match empty value", path)
+        case (Some(v1: IrNodePrimitive), None) =>
+          IrNodesNotEqual(s"Value '${v1.renderAsString}' did not match empty value", path)
 
-    case (None, Some(v2: IrNodePrimitive)) =>
-      IrNodesNotEqual(s"Empty value did not match '${v2.renderAsString}'", path)
+        case (None, Some(v2: IrNodePrimitive)) =>
+          IrNodesNotEqual(s"Empty value did not match '${v2.renderAsString}'", path)
 
-    case (None, None) =>
-      IrNodesEqual
-  }
+        case (None, None) =>
+          IrNodesEqual
+      } else {
+        case (Some(v1: IrNodePrimitive), Some(v2: IrNodePrimitive)) =>
+          if(v1 == v2) IrNodesEqual else IrNodesNotEqual(s"Value '${v1.renderAsString}' did not match '${v2.renderAsString}'", path)
+
+        case (Some(v1: IrNodePrimitive), None) =>
+          IrNodesNotEqual(s"Value '${v1.renderAsString}' did not match empty value", path)
+
+        case (None, Some(v2: IrNodePrimitive)) =>
+          IrNodesEqual
+
+        case (None, None) =>
+          IrNodesEqual
+      }
 
   val namespaceTest: IrNodePath => (Option[String], Option[String]) => IrNodeEqualityResult = path => {
     case (Some(v1: String), Some(v2: String)) =>
@@ -96,7 +110,7 @@ object IrNodeEqualityResult {
         a.map { n1 =>
           b.find(n2 => (n1 === n2)(strict).isEqual) match {
             case Some(_) => IrNodesEqual
-            case None => IrNodesNotEqual(s"Could not find matching child node for:\n${n1.renderAsString}", path)
+            case None => IrNodesNotEqual(s"Could not find matching child for:\n${n1.renderAsString}", path)
           }
         }
       }
@@ -165,6 +179,9 @@ object IrNodesNotEqual {
 }
 
 object IrNode {
+
+  def empty: IrNode =
+    IrNode("", None, Nil, None, Map.empty[String, IrNodePrimitive], IrNodePathEmpty)
 
   def apply(label: String): IrNode =
     IrNode(label, None, Nil, None, Map.empty[String, IrNodePrimitive], IrNodePathEmpty)

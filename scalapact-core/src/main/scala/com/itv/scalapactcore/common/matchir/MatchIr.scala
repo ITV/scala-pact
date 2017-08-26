@@ -6,6 +6,19 @@ import com.itv.scalapactcore.common.ColourOuput._
 
 import argonaut._
 
+object MatchIrConverters extends XmlConversionFunctions with JsonConversionFunctions with PrimitiveConversionFunctions {
+
+  implicit def xmlToIrNode(elem: Elem): IrNode =
+    nodeToIrNode(scala.xml.Utility.trim(elem))
+
+
+  implicit def jsonToIrNode(json: Json): IrNode =
+    jsonRootToIrNode(json) match {
+      case Some(v) => v
+      case None => IrNode.empty
+    }
+}
+
 object MatchIr extends XmlConversionFunctions with JsonConversionFunctions with PrimitiveConversionFunctions {
 
   def fromXml(xmlString: String): Option[IrNode] =
