@@ -72,7 +72,7 @@ class XmlEqualitySpec extends FunSpec with Matchers {
         )
       }
 
-      (expected =~ received)/*(rules)*/ shouldEqual true
+      check(expected =~ received)
     }
 
     it("should be able to accept equality with a rule in a simple case with a sub element") {
@@ -85,7 +85,7 @@ class XmlEqualitySpec extends FunSpec with Matchers {
         )
       }
 
-      (expected =~ received)/*(rules)*/ shouldEqual true
+      check(expected =~ received)
     }
 
     it("should be able to handle a more complicated match") {
@@ -99,24 +99,24 @@ class XmlEqualitySpec extends FunSpec with Matchers {
 
       val expected = <fish><breed>haddock</breed><side>peas</side></fish>
       val received = <fish><breed>cod</breed><side>chips</side></fish>
-      (expected =~ received)/*(rules)*/ shouldEqual true
+      check(expected =~ received)
 
       val expected2 = <fish><breed>haddock</breed><side>peas</side></fish>
       val received2 = <fish><breed>1</breed><side>chips</side></fish>
-      (expected2 =~ received2)/*(rules)*/ shouldEqual false
+      (expected2 =~ received2).isEqual shouldEqual false
 
       val expected3 = <fish><breed>haddock</breed><side>peas</side></fish>
       val received3 = <fish><breed>cod</breed><side>hamburgers</side></fish>
-      (expected3 =~ received3)/*(rules)*/ shouldEqual false
+      (expected3 =~ received3).isEqual shouldEqual false
 
       val expected4 = <fish><breed>haddock</breed><side>peas</side><sauce>ketchup</sauce></fish>
       val received4 = <fish><breed>cod</breed><side>chips</side><sauce>ketchup</sauce></fish>
-      (expected4 =~ received4)/*(rules)*/ shouldEqual true
+      check(expected4 =~ received4)
 
       // Not sure if this is the desired behaviour.
       val expected5 = <fish><breed>haddock</breed><side>peas</side><sauce>ketchup</sauce></fish>
       val received5 = <fish><breed>cod</breed><side>chips</side><sauce>brown</sauce></fish>
-      (expected5 =~ received5)/*(rules)*/ shouldEqual true
+      check(expected5 =~ received5)
     }
 
   }

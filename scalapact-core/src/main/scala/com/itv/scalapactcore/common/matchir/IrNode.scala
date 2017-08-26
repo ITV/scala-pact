@@ -110,7 +110,7 @@ object IrNodeEqualityResult {
         a.map { n1 =>
           b.find(n2 => (n1 === n2)(strict).isEqual) match {
             case Some(_) => IrNodesEqual
-            case None => IrNodesNotEqual(s"Could not find matching child for:\n${n1.renderAsString}", path)
+            case None => IrNodesNotEqual(s"Could not find match for:\n${n1.renderAsString}", path)
           }
         }
       }
