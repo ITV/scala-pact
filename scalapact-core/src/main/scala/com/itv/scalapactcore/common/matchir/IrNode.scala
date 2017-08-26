@@ -4,6 +4,9 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
 
   import IrNodeEqualityResult._
 
+  def =~(other: IrNode): IrNodeEqualityResult = ===(other)(strict = false)
+  def =<>=(other: IrNode): IrNodeEqualityResult = ===(other)(strict = true)
+
   def ===(other: IrNode)(strict: Boolean): IrNodeEqualityResult = {
     check[String](labelTest(path), this.label, other.label) +
     check[Option[IrNodePrimitive]](valueTest(path), this.value, other.value) +
@@ -150,6 +153,9 @@ case object IrNodesEqual extends IrNodeEqualityResult {
 }
 case class IrNodesNotEqual(differences: List[IrNodeDiff]) extends IrNodeEqualityResult {
   val isEqual: Boolean = false
+
+  def renderDifferences: String =
+    differences.map(d => s"""Node at: ${d.path}\n  ${d.message}""").mkString("\n")
 }
 
 case class IrNodeDiff(message: String, path: IrNodePath)
