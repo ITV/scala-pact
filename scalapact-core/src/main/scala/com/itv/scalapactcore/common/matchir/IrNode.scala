@@ -213,6 +213,7 @@ sealed trait IrNodePrimitive {
   def asNumber: Option[Double]
   def asBoolean: Option[Boolean]
   def renderAsString: String
+  def primitiveTypeName: String
 }
 case class IrStringNode(value: String) extends IrNodePrimitive {
   def isString: Boolean = true
@@ -223,6 +224,7 @@ case class IrStringNode(value: String) extends IrNodePrimitive {
   def asNumber: Option[Double] = None
   def asBoolean: Option[Boolean] = None
   def renderAsString: String = value
+  def primitiveTypeName: String = "string"
 }
 case class IrNumberNode(value: Double) extends IrNodePrimitive {
   def isString: Boolean = false
@@ -233,6 +235,7 @@ case class IrNumberNode(value: Double) extends IrNodePrimitive {
   def asNumber: Option[Double] = Option(value)
   def asBoolean: Option[Boolean] = None
   def renderAsString: String = value.toString
+  def primitiveTypeName: String = "number"
 }
 case class IrBooleanNode(value: Boolean) extends IrNodePrimitive {
   def isString: Boolean = false
@@ -243,6 +246,7 @@ case class IrBooleanNode(value: Boolean) extends IrNodePrimitive {
   def asNumber: Option[Double] = None
   def asBoolean: Option[Boolean] = Option(value)
   def renderAsString: String = value.toString
+  def primitiveTypeName: String = "boolean"
 }
 case object IrNullNode extends IrNodePrimitive {
   def isString: Boolean = false
@@ -253,6 +257,7 @@ case object IrNullNode extends IrNodePrimitive {
   def asNumber: Option[Double] = None
   def asBoolean: Option[Boolean] = None
   def renderAsString: String = "null"
+  def primitiveTypeName: String = "null"
 }
 
 object IrNodeAttributes {

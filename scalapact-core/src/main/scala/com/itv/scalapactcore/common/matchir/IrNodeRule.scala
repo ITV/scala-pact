@@ -3,8 +3,6 @@ package com.itv.scalapactcore.common.matchir
 import com.itv.scalapactcore.MatchingRule
 import com.itv.scalapactcore.common.matchir.PactPathParseResult.{PactPathParseFailure, PactPathParseSuccess}
 
-import scala.util.matching.Regex
-
 case class IrNodeMatchingRules(rules: List[IrNodeRule]) {
 
   def +(other: IrNodeMatchingRules): IrNodeMatchingRules =
@@ -14,28 +12,34 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule]) {
     rules.find(_.path === path)
 
   def validateNode(path: IrNodePath, expected: IrNode, actual: IrNode): Option[IrNodeEqualityResult] = {
-    findForPath(path).map {
+    findForPath(path).flatMap {
       case IrNodeTypeRule(_) =>
-        ???
+        None
 
       case IrNodeRegexRule(regex, _) =>
-        ???
+        None
 
       case IrNodeMinArrayLengthRule(len, _) =>
-        ???
+        None
     }
   }
 
   def validatePrimitive(path: IrNodePath, expected: IrNodePrimitive, actual: IrNodePrimitive): Option[IrNodeEqualityResult] = {
-    findForPath(path).map {
+    findForPath(path).flatMap {
       case IrNodeTypeRule(_) =>
-        ???
+        Option {
+          if (expected.primitiveTypeName == actual.primitiveTypeName) IrNodesEqual
+          else IrNodesNotEqual(s"Primitive type '${expected.primitiveTypeName}' did not match actual '${actual.primitiveTypeName}'", path)
+        }
 
-      case IrNodeRegexRule(regex, _) =>
-        ???
+      case IrNodeRegexRule(regex, _) if expected.isString && actual.isString =>
+        actual.asString.map { str =>
+          if(regex.r.findAllIn(str).nonEmpty) IrNodesEqual
+          else IrNodesNotEqual(s"String '$str' did not match pattern '$regex'", path)
+        }
 
-      case IrNodeMinArrayLengthRule(len, _) =>
-        ???
+      case IrNodeMinArrayLengthRule(_, _) =>
+        None
     }
   }
 
