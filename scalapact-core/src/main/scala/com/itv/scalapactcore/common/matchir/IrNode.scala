@@ -23,6 +23,7 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
 
   def withNamespace(ns: String): IrNode = this.copy(ns = Option(ns))
   def withAttributes(attributes: Map[String, IrNodePrimitive]): IrNode = this.copy(attributes = attributes)
+  def withPath(path: IrNodePath): IrNode = this.copy(path = path)
 
   def renderAsString: String = renderAsString(0)
 
@@ -169,7 +170,7 @@ case class IrNodesNotEqual(differences: List[IrNodeDiff]) extends IrNodeEquality
   val isEqual: Boolean = false
 
   def renderDifferences: String =
-    differences.map(d => s"""Node at: ${d.path}\n  ${d.message}""").mkString("\n")
+    differences.map(d => s"""Node at: ${d.path.renderAsString}\n  ${d.message}""").mkString("\n")
 }
 
 case class IrNodeDiff(message: String, path: IrNodePath)

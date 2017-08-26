@@ -157,10 +157,13 @@ sealed trait IrNodePath {
           p.name
 
         case IrNodePathEmpty =>
-          acc
+          if(acc.startsWith(".[")) acc.drop(1) else acc
 
         case IrNodePathField(fieldName, parent) =>
-          rec(parent, s".$fieldName$acc")
+          if(fieldName != MatchIr.unnamedNodeLabel && fieldName != MatchIr.rootNodeLabel)
+            rec(parent, s".$fieldName$acc")
+          else
+            rec(parent, s".$acc")
 
         case IrNodePathArrayElement(arrayIndex, parent) =>
           rec(parent, s"[$arrayIndex]$acc")

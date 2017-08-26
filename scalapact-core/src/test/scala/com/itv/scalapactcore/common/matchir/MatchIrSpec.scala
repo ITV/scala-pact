@@ -1,101 +1,106 @@
 package com.itv.scalapactcore.common.matchir
 
 import org.scalatest.{FunSpec, Matchers}
-
-import scala.language.implicitConversions
-import scala.xml.XML
+import com.itv.scalapactcore.common.matchir.MatchIrConverters._
 
 class MatchIrSpec extends FunSpec with Matchers {
 
-  describe("Converting XML to MatchIR") {
-
-    it("should be able to convert one node") {
-
-      val xml: String = <fish></fish>.toString()
-
-      val ir: Option[IrNode] = Option {
-        IrNode("fish")
-      }
-
-      MatchIr.fromXml(xml) shouldEqual ir
-
+  def check(res: IrNodeEqualityResult): Unit =
+    res match {
+      case p @ IrNodesEqual => p shouldEqual IrNodesEqual
+      case e: IrNodesNotEqual => fail(e.renderDifferences)
     }
 
-    it("should be able to convert one node with content") {
-
-      val xml: String = <fish>haddock</fish>.toString()
-
-      val ir: Option[IrNode] = Option {
-        IrNode("fish", IrStringNode("haddock"))
-      }
-
-      MatchIr.fromXml(xml) shouldEqual ir
-
-    }
-
-    it("should be able to convert one node with a namespace") {
-
-      val xml: String = <ns1:fish>haddock</ns1:fish>.toString()
-
-      val ir: Option[IrNode] = Option {
-        IrNode("fish", Some(IrStringNode("haddock")), Nil, Option("ns1"), Map.empty[String, IrStringNode], IrNodePathEmpty)
-      }
-
-      MatchIr.fromXml(xml) shouldEqual ir
-
-    }
-
-    it("should be able to convert one node with attributes") {
-
-      val xml: String = <fish id="3" description="A fish" endangered="false"></fish>.toString()
-
-      val ir: Option[IrNode] = Option {
-        IrNode("fish")
-          .withAttributes(Map("id" -> IrNumberNode(3), "description" -> IrStringNode("A fish"), "endangered" -> IrBooleanNode(false)))
-      }
-
-      MatchIr.fromXml(xml) shouldEqual ir
-
-    }
-
-    it("should be able to convert two nested nodes and a value") {
-
-      val xml: String = <fish><breed>cod</breed></fish>.toString()
-
-      val ir: Option[IrNode] = Option {
-        IrNode("fish", IrNode("breed", IrStringNode("cod")))
-      }
-
-      MatchIr.fromXml(xml) shouldEqual ir
-
-    }
-
-    it("should be able to convert two nested nodes and two values") {
-      pending //TODO: Not sure if this is a thing we care about? It's technically valid...
-
-      val xml: String = <fish><breed>cod</breed>bait</fish>.toString()
-
-      val ir: IrNode =
-        IrNode(
-          label = "fish",
-          value = Option(IrStringNode("bait")),
-          children = List(IrNode("breed", IrStringNode("cod"))),
-          ns = None,
-          attributes = Map.empty[String, IrStringNode],
-          path = IrNodePathEmpty
-        )
-
-      MatchIr.fromXml(xml).get =~ ir match {
-        case r @ IrNodesEqual =>
-          r shouldEqual IrNodesEqual
-
-        case r: IrNodesNotEqual =>
-          fail(r.renderDifferences)
-      }
-
-    }
-
-  }
+//  describe("Converting XML to MatchIR") {
+//
+//    it("should be able to convert one node") {
+//
+//      val xml: String = <fish></fish>.toString()
+//
+//      val ir: Option[IrNode] = Option {
+//        IrNode("fish")
+//      }
+//
+//      MatchIr.fromXml(xml) shouldEqual ir
+//
+//    }
+//
+//    it("should be able to convert one node with content") {
+//
+//      val xml: String = <fish>haddock</fish>.toString()
+//
+//      val ir: Option[IrNode] = Option {
+//        IrNode("fish", IrStringNode("haddock"))
+//      }
+//
+//      MatchIr.fromXml(xml) shouldEqual ir
+//
+//    }
+//
+//    it("should be able to convert one node with a namespace") {
+//
+//      val xml: String = <ns1:fish>haddock</ns1:fish>.toString()
+//
+//      val ir: Option[IrNode] = Option {
+//        IrNode("fish", Some(IrStringNode("haddock")), Nil, Option("ns1"), Map.empty[String, IrStringNode], IrNodePathEmpty)
+//      }
+//
+//      MatchIr.fromXml(xml) shouldEqual ir
+//
+//    }
+//
+//    it("should be able to convert one node with attributes") {
+//
+//      val xml: String = <fish id="3" description="A fish" endangered="false"></fish>.toString()
+//
+//      val ir: Option[IrNode] = Option {
+//        IrNode("fish")
+//          .withAttributes(Map("id" -> IrNumberNode(3), "description" -> IrStringNode("A fish"), "endangered" -> IrBooleanNode(false)))
+//
+//      }
+//
+//      MatchIr.fromXml(xml) shouldEqual ir
+//
+//    }
+//
+//    it("should be able to convert two nested nodes and a value") {
+//
+//      val xml: String = <fish><breed>cod</breed></fish>.toString()
+//
+//      val ir: Option[IrNode] = Option {
+//        IrNode("fish", IrNode("breed", IrStringNode("cod")))
+//      }
+//
+//      MatchIr.fromXml(xml) shouldEqual ir
+//
+//    }
+//
+//    it("should be able to convert two nested nodes and two values") {
+//      pending //TODO: Not sure if this is a thing we care about? It's technically valid...
+//
+//      val xml: String = <fish><breed>cod</breed>bait</fish>.toString()
+//
+//      val ir: IrNode =
+//        IrNode(
+//          label = "fish",
+//          value = Option(IrStringNode("bait")),
+//          children = List(IrNode("breed", IrStringNode("cod"))),
+//          ns = None,
+//          attributes = Map.empty[String, IrStringNode],
+//          path = IrNodePathEmpty
+//        )
+//
+//      MatchIr.fromXml(xml).get =~ ir match {
+//        case r @ IrNodesEqual =>
+//          r shouldEqual IrNodesEqual
+//
+//        case r: IrNodesNotEqual =>
+//          fail(r.renderDifferences)
+//      }
+//
+//    }
+//
+//  }
 
   describe("Converting JSON to MatchIR") {
 
@@ -107,11 +112,10 @@ class MatchIrSpec extends FunSpec with Matchers {
           |}
         """.stripMargin
 
-      val ir: Option[IrNode] = Option {
-        IrNode(MatchIr.rootNodeLabel, IrNode("fish"))
-      }
+      val ir: IrNode =
+        IrNode(MatchIr.rootNodeLabel, IrNode("fish").withPath(IrNodePathEmpty <~ "fish"))
 
-      MatchIr.fromJSON(json) shouldEqual ir
+      check(MatchIr.fromJSON(json).get =<>= ir)
     }
 
     it("should be able to convert two nested nodes and a value") {
@@ -125,7 +129,7 @@ class MatchIrSpec extends FunSpec with Matchers {
           |}
         """.stripMargin
 
-      val ir: Option[IrNode] = Option {
+      val ir: IrNode =
         IrNode(
           MatchIr.rootNodeLabel,
           IrNode(
@@ -133,12 +137,11 @@ class MatchIrSpec extends FunSpec with Matchers {
             IrNode(
               "breed",
               IrStringNode("cod")
-            )
-          )
-        )
-      }
+            ).withPath(IrNodePathEmpty <~ "fish" <~ "breed")
+          ).withPath(IrNodePathEmpty <~ "fish")
+        ).withPath(IrNodePathEmpty)
 
-      MatchIr.fromJSON(json) shouldEqual ir
+      check(MatchIr.fromJSON(json).get =<>= ir)
 
     }
 
@@ -149,16 +152,15 @@ class MatchIrSpec extends FunSpec with Matchers {
           |[1,2,3]
         """.stripMargin
 
-      val ir: Option[IrNode] = Option {
+      val ir: IrNode =
         IrNode(
           MatchIr.rootNodeLabel,
-          IrNode(MatchIr.unnamedNodeLabel, IrNumberNode(1)),
-          IrNode(MatchIr.unnamedNodeLabel, IrNumberNode(2)),
-          IrNode(MatchIr.unnamedNodeLabel, IrNumberNode(3))
-        )
-      }
+          IrNode(MatchIr.unnamedNodeLabel, IrNumberNode(1)).withPath(IrNodePathEmpty <~ 0),
+          IrNode(MatchIr.unnamedNodeLabel, IrNumberNode(2)).withPath(IrNodePathEmpty <~ 1),
+          IrNode(MatchIr.unnamedNodeLabel, IrNumberNode(3)).withPath(IrNodePathEmpty <~ 2)
+        ).withPath(IrNodePathEmpty)
 
-      MatchIr.fromJSON(json) shouldEqual ir
+      check(MatchIr.fromJSON(json).get =<>= ir)
 
     }
 
@@ -180,28 +182,25 @@ class MatchIrSpec extends FunSpec with Matchers {
           |]
         """.stripMargin
 
-      val ir: Option[IrNode] = Option {
+      val ir: IrNode =
         IrNode(MatchIr.rootNodeLabel,
           IrNode(
             MatchIr.unnamedNodeLabel,
             IrNode(
               "fish",
-              IrNode("breed", IrStringNode("cod"))
-            )
-          ),
+              IrNode("breed", IrStringNode("cod")).withPath(IrNodePathEmpty <~ 0 <~ "fish" <~ "breed")
+            ).withPath(IrNodePathEmpty <~ 0 <~ "fish")
+          ).withPath(IrNodePathEmpty <~ 0),
           IrNode(
             MatchIr.unnamedNodeLabel,
             IrNode(
               "fish",
-              IrNode("breed", IrStringNode("haddock"))
-            )
-          )
-        )
-      }
+              IrNode("breed", IrStringNode("haddock")).withPath(IrNodePathEmpty <~ 1 <~ "fish" <~ "breed")
+            ).withPath(IrNodePathEmpty <~ 1 <~ "fish")
+          ).withPath(IrNodePathEmpty <~ 1)
+        ).withPath(IrNodePathEmpty)
 
-//      println(ir.map(_.renderAsString).getOrElse("OOPS"))
-
-      MatchIr.fromJSON(json) shouldEqual ir
+      check(MatchIr.fromJSON(json).get =<>= ir)
 
     }
 
@@ -229,7 +228,7 @@ class MatchIrSpec extends FunSpec with Matchers {
           |}
         """.stripMargin
 
-      val expected: Option[IrNode] = Option {
+      val expected: IrNode =
 
         IrNode(
           MatchIr.rootNodeLabel,
@@ -239,52 +238,42 @@ class MatchIrSpec extends FunSpec with Matchers {
               "river",
               IrNode(
                 "fish",
-                IrNode("breed", IrStringNode("cod"))
-              )
-            ),
+                IrNode("breed", IrStringNode("cod")).withPath(IrNodePathEmpty <~ "river" <~ 0 <~ "fish" <~ "breed")
+              ).withPath(IrNodePathEmpty <~ "river" <~ 0 <~ "fish")
+            ).withPath(IrNodePathEmpty <~ "river" <~ 0),
             IrNode(
               "river",
               IrNode(
                 "fish",
-                IrNode("breed", IrStringNode("haddock"))
-              )
-            )
-          ),
+                IrNode("breed", IrStringNode("haddock")).withPath(IrNodePathEmpty <~ "river" <~ 1 <~ "fish" <~ "breed")
+              ).withPath(IrNodePathEmpty <~ "river" <~ 1 <~ "fish")
+            ).withPath(IrNodePathEmpty <~ "river" <~ 1)
+          ).withPath(IrNodePathEmpty <~ "river"),
           IrNode(
             "riverbank",
             IrNode(
               "grassy",
               IrBooleanNode(true)
-            ),
+            ).withPath(IrNodePathEmpty <~ "riverbank" <~ "grassy"),
             IrNode(
               "flowers",
               IrNode(
                 "flowers",
                 IrStringNode("poppies")
-              ),
+              ).withPath(IrNodePathEmpty <~ "riverbank" <~ "flowers" <~ 0),
               IrNode(
                 "flowers",
                 IrStringNode("daisies")
-              ),
+              ).withPath(IrNodePathEmpty <~ "riverbank" <~ "flowers" <~ 1),
               IrNode(
                 "flowers",
                 IrStringNode("dandelions")
-              )
-            )
-          )
-        )
+              ).withPath(IrNodePathEmpty <~ "riverbank" <~ "flowers" <~ 2)
+            ).withPath(IrNodePathEmpty <~ "riverbank" <~ "flowers")
+          ).withPath(IrNodePathEmpty <~ "riverbank")
+        ).withPath(IrNodePathEmpty)
 
-      }
-
-//      println("Expected: ")
-//      println(expected.map(_.renderAsString).getOrElse("OOPS: Failed to render 'expected' as string"))
-
-      val actual = MatchIr.fromJSON(json)
-
-//      println("Actual: ")
-//      println(actual.map(_.renderAsString).getOrElse("OOPS: Failed to render 'actual' as string"))
-
-      actual shouldEqual expected
+      check(MatchIr.fromJSON(json).get =<>= expected)
 
     }
 
