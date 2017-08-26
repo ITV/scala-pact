@@ -113,7 +113,10 @@ sealed trait IrNodePath {
 
   def text: IrNodePath = IrNodePathTextElement(this)
 
-  def ===(other: IrNodePath): Boolean = {
+  def =~=(other: IrNodePath): Boolean = isEqualTo(other, strict = false)
+  def ===(other: IrNodePath): Boolean = isEqualTo(other, strict = true)
+
+  def isEqualTo(other: IrNodePath, strict: Boolean): Boolean = {
     @tailrec
     def rec(a: IrNodePath, b: IrNodePath): Boolean =
       (a, b) match {
@@ -123,7 +126,10 @@ sealed trait IrNodePath {
         case (IrNodePathField(fieldNameA, parentA), IrNodePathField(fieldNameB, parentB)) if fieldNameA == fieldNameB =>
           rec(parentA, parentB)
 
-        case (IrNodePathArrayElement(indexA, parentA), IrNodePathArrayElement(indexB, parentB)) if indexA == indexB =>
+        case (IrNodePathArrayElement(indexA, parentA), IrNodePathArrayElement(indexB, parentB)) if strict && indexA == indexB =>
+          rec(parentA, parentB)
+
+        case (IrNodePathArrayElement(_, parentA), IrNodePathArrayElement(_, parentB)) if !strict =>
           rec(parentA, parentB)
 
         case (IrNodePathArrayAnyElement(parentA), IrNodePathArrayAnyElement(parentB)) =>

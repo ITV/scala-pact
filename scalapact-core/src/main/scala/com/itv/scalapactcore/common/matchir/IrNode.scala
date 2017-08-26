@@ -13,7 +13,7 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
     check[List[IrNode]](childrenTest(strict)(path), this.children, other.children) +
     check[Option[String]](namespaceTest(path), this.ns, other.ns) +
     check[IrNodeAttributes](attributesTest(strict)(path), this.attributes, other.attributes) +
-    check[IrNodePath](pathTest(path), this.path, other.path)
+    check[IrNodePath](pathTest(strict)(path), this.path, other.path)
   }
 
   val arrays: Map[String, List[IrNode]] =
@@ -89,9 +89,12 @@ object IrNodeEqualityResult {
       IrNodesEqual
   }
 
-  val pathTest: IrNodePath => (IrNodePath, IrNodePath) => IrNodeEqualityResult =
-    path => (a, b) =>
-      if(a === b) IrNodesEqual else IrNodesNotEqual(s"Path '${a.renderAsString}' does not equal '${b.renderAsString}'", path)
+  val pathTest: Boolean => IrNodePath => (IrNodePath, IrNodePath) => IrNodeEqualityResult =
+    strict => path => (a, b) =>
+      if(strict)
+        if(a === b) IrNodesEqual else IrNodesNotEqual(s"Path '${a.renderAsString}' does not equal '${b.renderAsString}'", path)
+      else
+        if(a =~= b) IrNodesEqual else IrNodesNotEqual(s"Path '${a.renderAsString}' does not equal '${b.renderAsString}'", path)
 
   implicit private def listOfResultsToResult(l: List[IrNodeEqualityResult]): IrNodeEqualityResult =
     l match {
