@@ -1,18 +1,18 @@
 package com.itv.scalapactcore.common.matchir
 
-case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[IrNode], ns: Option[String], attributes: Map[String, IrNodePrimitive], path: IrNodePath) {
+case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[IrNode], ns: Option[String], attributes: IrNodeAttributes, path: IrNodePath) {
 
   import IrNodeEqualityResult._
 
-  def =~(other: IrNode): IrNodeEqualityResult = ===(other)(strict = false)
-  def =<>=(other: IrNode): IrNodeEqualityResult = ===(other)(strict = true)
+  def =~(other: IrNode): IrNodeEqualityResult = isEqualTo(other, strict = false)
+  def =<>=(other: IrNode): IrNodeEqualityResult = isEqualTo(other, strict = true)
 
-  def ===(other: IrNode)(strict: Boolean): IrNodeEqualityResult = {
+  def isEqualTo(other: IrNode, strict: Boolean): IrNodeEqualityResult = {
     check[String](labelTest(path), this.label, other.label) +
     check[Option[IrNodePrimitive]](valueTest(strict)(path), this.value, other.value) +
     check[List[IrNode]](childrenTest(strict)(path), this.children, other.children) +
     check[Option[String]](namespaceTest(path), this.ns, other.ns) +
-    check[Map[String, IrNodePrimitive]](attributesTest(strict)(path), this.attributes, other.attributes) +
+    check[IrNodeAttributes](attributesTest(strict)(path), this.attributes, other.attributes) +
     check[IrNodePath](pathTest(path), this.path, other.path)
   }
 
@@ -22,7 +22,7 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
   val arraysKeys: List[String] = arrays.keys.toList
 
   def withNamespace(ns: String): IrNode = this.copy(ns = Option(ns))
-  def withAttributes(attributes: Map[String, IrNodePrimitive]): IrNode = this.copy(attributes = attributes)
+  def withAttributes(attributes: IrNodeAttributes): IrNode = this.copy(attributes = attributes)
   def withPath(path: IrNodePath): IrNode = this.copy(path = path)
 
   def renderAsString: String = renderAsString(0)
@@ -31,7 +31,7 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
     val i = List.fill(indent)("  ").mkString
     val n = ns.map("  namespace: " + _ + "").getOrElse("")
     val v = value.map(v => "  value: " + v.renderAsString).getOrElse("")
-    val a = if(attributes.isEmpty) "" else s"  attributes: [${attributes.map(p => p._1 + "=" + p._2.renderAsString).mkString(", ")}]"
+    val a = if(attributes.attributes.isEmpty) "" else s"  attributes: [${attributes.attributes.map(p => p._1 + "=" + p._2.value.renderAsString).mkString(", ")}]"
     val l = if(arraysKeys.isEmpty) "" else s"  arrays: [${arraysKeys.mkString(", ")}]"
     val c = if(children.isEmpty) "" else "\n" + children.map(_.renderAsString(indent + 1)).mkString("\n")
     val p = "  " + path.renderAsString
@@ -105,34 +105,34 @@ object IrNodeEqualityResult {
         if(a.length != b.length) {
           IrNodesNotEqual(s"Differing number of children. Expected ${a.length} got ${b.length}", path)
         } else {
-          a.zip(b).map(p => (p._1 === p._2)(strict))
+          a.zip(b).map(p => p._1.isEqualTo(p._2, strict))
         }
       } else {
         a.map { n1 =>
-          b.find(n2 => (n1 === n2)(strict).isEqual) match {
+          b.find(n2 => n1.isEqualTo(n2, strict).isEqual) match {
             case Some(_) => IrNodesEqual
             case None => IrNodesNotEqual(s"Could not find match for:\n${n1.renderAsString}", path)
           }
         }
       }
 
-  private val checkAttributesTest: IrNodePath => (Map[String, IrNodePrimitive], Map[String, IrNodePrimitive]) => IrNodeEqualityResult = path => (a, b) =>
-    a.toList.map { p =>
-      b.get(p._1) match {
+  private val checkAttributesTest: IrNodePath => (IrNodeAttributes, IrNodeAttributes) => IrNodeEqualityResult = path => (a, b) =>
+    a.attributes.toList.map { p =>
+      b.attributes.get(p._1) match {
         case None =>
           IrNodesNotEqual(s"Attribute ${p._1} was missing", path)
 
-        case Some(v: IrNodePrimitive) =>
-          if(v == p._2) IrNodesEqual else IrNodesNotEqual(s"Attribute value for '${p._1}' of '${p._2.renderAsString}' does not equal '${v.renderAsString}'", path)
+        case Some(v: IrNodeAttribute) =>
+          if(v == p._2) IrNodesEqual else IrNodesNotEqual(s"Attribute value for '${p._1}' of '${p._2.value.renderAsString}' does not equal '${v.value.renderAsString}'", path)
       }
     }
 
 
-  val attributesTest: Boolean => IrNodePath => (Map[String, IrNodePrimitive], Map[String, IrNodePrimitive]) => IrNodeEqualityResult =
+  val attributesTest: Boolean => IrNodePath => (IrNodeAttributes, IrNodeAttributes) => IrNodeEqualityResult =
     strict => path => (a, b) =>
       if(strict) {
-        val as = a.toList
-        val bs = b.toList
+        val as = a.attributes.toList
+        val bs = b.attributes.toList
         val asNames = as.map(_._1)
         val bsNames = bs.map(_._1)
 
@@ -182,22 +182,22 @@ object IrNodesNotEqual {
 object IrNode {
 
   def empty: IrNode =
-    IrNode("", None, Nil, None, Map.empty[String, IrNodePrimitive], IrNodePathEmpty)
+    IrNode("", None, Nil, None, IrNodeAttributes.empty, IrNodePathEmpty)
 
   def apply(label: String): IrNode =
-    IrNode(label, None, Nil, None, Map.empty[String, IrNodePrimitive], IrNodePathEmpty)
+    IrNode(label, None, Nil, None, IrNodeAttributes.empty, IrNodePathEmpty)
 
   def apply(label: String, value: IrNodePrimitive): IrNode =
-    IrNode(label, Option(value), Nil, None, Map.empty[String, IrNodePrimitive], IrNodePathEmpty)
+    IrNode(label, Option(value), Nil, None, IrNodeAttributes.empty, IrNodePathEmpty)
 
   def apply(label: String, value: Option[IrNodePrimitive]): IrNode =
-    IrNode(label, value, Nil, None, Map.empty[String, IrNodePrimitive], IrNodePathEmpty)
+    IrNode(label, value, Nil, None, IrNodeAttributes.empty, IrNodePathEmpty)
 
   def apply(label: String, children: IrNode*): IrNode =
-    IrNode(label, None, children.toList, None, Map.empty[String, IrNodePrimitive], IrNodePathEmpty)
+    IrNode(label, None, children.toList, None, IrNodeAttributes.empty, IrNodePathEmpty)
 
   def apply(label: String, children: List[IrNode]): IrNode =
-    IrNode(label, None, children, None, Map.empty[String, IrNodePrimitive], IrNodePathEmpty)
+    IrNode(label, None, children, None, IrNodeAttributes.empty, IrNodePathEmpty)
 
 }
 
@@ -251,3 +251,17 @@ case object IrNullNode extends IrNodePrimitive {
   def asBoolean: Option[Boolean] = None
   def renderAsString: String = "null"
 }
+
+object IrNodeAttributes {
+
+  def empty: IrNodeAttributes = IrNodeAttributes(Map.empty[String, IrNodeAttribute])
+
+}
+
+case class IrNodeAttributes(attributes: Map[String, IrNodeAttribute]) {
+
+  def +(other: IrNodeAttributes): IrNodeAttributes =
+    IrNodeAttributes(this.attributes ++ other.attributes)
+
+}
+case class IrNodeAttribute(value: IrNodePrimitive, path: IrNodePath)

@@ -1,7 +1,6 @@
 package com.itv.scalapactcore.common.matchir
 
 import org.scalatest.{FunSpec, Matchers}
-import com.itv.scalapactcore.common.matchir.MatchIrConverters._
 
 class MatchIrSpec extends FunSpec with Matchers {
 
@@ -11,70 +10,75 @@ class MatchIrSpec extends FunSpec with Matchers {
       case e: IrNodesNotEqual => fail(e.renderDifferences)
     }
 
-//  describe("Converting XML to MatchIR") {
-//
-//    it("should be able to convert one node") {
-//
-//      val xml: String = <fish></fish>.toString()
-//
-//      val ir: Option[IrNode] = Option {
-//        IrNode("fish")
-//      }
-//
-//      MatchIr.fromXml(xml) shouldEqual ir
-//
-//    }
-//
-//    it("should be able to convert one node with content") {
-//
-//      val xml: String = <fish>haddock</fish>.toString()
-//
-//      val ir: Option[IrNode] = Option {
-//        IrNode("fish", IrStringNode("haddock"))
-//      }
-//
-//      MatchIr.fromXml(xml) shouldEqual ir
-//
-//    }
-//
-//    it("should be able to convert one node with a namespace") {
-//
-//      val xml: String = <ns1:fish>haddock</ns1:fish>.toString()
-//
-//      val ir: Option[IrNode] = Option {
-//        IrNode("fish", Some(IrStringNode("haddock")), Nil, Option("ns1"), Map.empty[String, IrStringNode], IrNodePathEmpty)
-//      }
-//
-//      MatchIr.fromXml(xml) shouldEqual ir
-//
-//    }
-//
-//    it("should be able to convert one node with attributes") {
-//
-//      val xml: String = <fish id="3" description="A fish" endangered="false"></fish>.toString()
-//
-//      val ir: Option[IrNode] = Option {
-//        IrNode("fish")
-//          .withAttributes(Map("id" -> IrNumberNode(3), "description" -> IrStringNode("A fish"), "endangered" -> IrBooleanNode(false)))
-//
-//      }
-//
-//      MatchIr.fromXml(xml) shouldEqual ir
-//
-//    }
-//
-//    it("should be able to convert two nested nodes and a value") {
-//
-//      val xml: String = <fish><breed>cod</breed></fish>.toString()
-//
-//      val ir: Option[IrNode] = Option {
-//        IrNode("fish", IrNode("breed", IrStringNode("cod")))
-//      }
-//
-//      MatchIr.fromXml(xml) shouldEqual ir
-//
-//    }
-//
+  describe("Converting XML to MatchIR") {
+
+    it("should be able to convert one node") {
+
+      val xml: String = <fish></fish>.toString()
+
+      val ir: IrNode =
+        IrNode("fish").withPath(IrNodePathEmpty <~ "fish")
+
+      check(MatchIr.fromXml(xml).get =<>= ir)
+
+    }
+
+    it("should be able to convert one node with content") {
+
+      val xml: String = <fish>haddock</fish>.toString()
+
+      val ir: IrNode =
+        IrNode("fish", IrStringNode("haddock")).withPath(IrNodePathEmpty <~ "fish")
+
+      check(MatchIr.fromXml(xml).get =<>= ir)
+
+    }
+
+    it("should be able to convert one node with a namespace") {
+
+      val xml: String = <ns1:fish>haddock</ns1:fish>.toString()
+
+      val ir: IrNode =
+        IrNode("fish", IrStringNode("haddock"))
+          .withNamespace("ns1")
+          .withPath(IrNodePathEmpty <~ "fish")
+
+      check(MatchIr.fromXml(xml).get =<>= ir)
+
+    }
+
+    it("should be able to convert one node with attributes") {
+
+      val xml: String = <fish id="3" description="A fish" endangered="false"></fish>.toString()
+
+      val ir: IrNode =
+        IrNode("fish")
+          .withAttributes(
+            IrNodeAttributes(
+              Map(
+                "id" -> IrNodeAttribute(IrNumberNode(3), IrNodePathEmpty <~ "fish" <@ "id"),
+                "description" -> IrNodeAttribute(IrStringNode("A fish"), IrNodePathEmpty <~ "fish" <@ "description"),
+                "endangered" -> IrNodeAttribute(IrBooleanNode(false), IrNodePathEmpty <~ "fish" <@ "endangered")
+              )
+            )
+          )
+          .withPath(IrNodePathEmpty <~ "fish")
+
+      check(MatchIr.fromXml(xml).get =<>= ir)
+
+    }
+
+    it("should be able to convert two nested nodes and a value") {
+
+      val xml: String = <fish><breed>cod</breed></fish>.toString()
+
+      val ir: IrNode =
+        IrNode("fish", IrNode("breed", IrStringNode("cod")).withPath(IrNodePathEmpty <~ "fish" <~ "breed")).withPath(IrNodePathEmpty <~ "fish")
+
+      check(MatchIr.fromXml(xml).get =<>= ir)
+
+    }
+
 //    it("should be able to convert two nested nodes and two values") {
 //      pending //TODO: Not sure if this is a thing we care about? It's technically valid...
 //
@@ -99,8 +103,8 @@ class MatchIrSpec extends FunSpec with Matchers {
 //      }
 //
 //    }
-//
-//  }
+
+  }
 
   describe("Converting JSON to MatchIR") {
 

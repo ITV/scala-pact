@@ -9,7 +9,7 @@ import argonaut._
 object MatchIrConverters extends XmlConversionFunctions with JsonConversionFunctions with PrimitiveConversionFunctions {
 
   implicit def xmlToIrNode(elem: Elem): IrNode =
-    nodeToIrNode(scala.xml.Utility.trim(elem))
+    nodeToIrNode(scala.xml.Utility.trim(elem), IrNodePathEmpty)
 
 
   implicit def jsonToIrNode(json: Json): IrNode =
@@ -23,7 +23,7 @@ object MatchIr extends XmlConversionFunctions with JsonConversionFunctions with 
 
   def fromXml(xmlString: String): Option[IrNode] =
     safeStringToXml(xmlString).map { elem =>
-      nodeToIrNode(scala.xml.Utility.trim(elem))
+      nodeToIrNode(scala.xml.Utility.trim(elem), IrNodePathEmpty)
     }
 
   def fromJSON(jsonString: String): Option[IrNode] =
@@ -101,13 +101,27 @@ trait JsonConversionFunctions {
 
 trait XmlConversionFunctions extends PrimitiveConversionFunctions {
 
-  protected def convertAttributes(attributes: Map[String, String]): Map[String, IrNodePrimitive] =
-    attributes.flatMap {
-      case (k, v) if v == null => Map(k -> IrNullNode)
-      case (k, v) if v.matches(isNumericValueRegex) => safeStringToDouble(v).map(IrNumberNode).map(vv => Map(k -> vv)).getOrElse(Map.empty[String, IrNumberNode])
-      case (k, v) if v.matches(isBooleanValueRegex) => safeStringToBoolean(v).map(IrBooleanNode).map(vv => Map(k -> vv)).getOrElse(Map.empty[String, IrBooleanNode])
-      case (k, v) => Map(k -> IrStringNode(v))
-    }
+  protected def convertAttributes(attributes: Map[String, String], pathToParent: IrNodePath): IrNodeAttributes =
+    attributes.toList.reverse.map {
+      case (k, v) if v == null =>
+        IrNodeAttributes(Map(k -> IrNodeAttribute(IrNullNode, pathToParent <@ k)))
+
+      case (k, v) if v.matches(isNumericValueRegex) =>
+        safeStringToDouble(v)
+          .map(IrNumberNode)
+          .map(vv => IrNodeAttributes(Map(k -> IrNodeAttribute(vv, pathToParent <@ k))))
+          .getOrElse(IrNodeAttributes.empty)
+
+      case (k, v) if v.matches(isBooleanValueRegex) =>
+        safeStringToBoolean(v)
+          .map(IrBooleanNode)
+          .map(vv => IrNodeAttributes(Map(k -> IrNodeAttribute(vv, pathToParent <@ k))))
+          .getOrElse(IrNodeAttributes.empty)
+
+      case (k, v) =>
+        IrNodeAttributes(Map(k -> IrNodeAttribute(IrStringNode(v), pathToParent <@ k)))
+
+    }.foldLeft(IrNodeAttributes.empty)(_ + _)
 
   protected def childNodesToValueMaybePrimitive(nodes: List[Node], value: String): Option[IrNodePrimitive] =
     nodes match {
@@ -122,16 +136,16 @@ trait XmlConversionFunctions extends PrimitiveConversionFunctions {
   protected def extractNodeValue(node: Node): Option[IrNodePrimitive] =
     childNodesToValueMaybePrimitive(node.child.flatMap(_.child).toList, node.child.text)
 
-  protected def extractNodeChildren(node: Node): List[IrNode] =
-    node.child.toList.map(nodeToIrNode)
+  protected def extractNodeChildren(node: Node, pathToParent: IrNodePath): List[IrNode] =
+    node.child.toList.map(n => nodeToIrNode(n, pathToParent))
 
-  protected def nodeToIrNode(node: Node): IrNode =
+  protected def nodeToIrNode(node: Node, initialPath: IrNodePath): IrNode =
     extractNodeValue(node) match {
       case nodeValue: Some[IrNodePrimitive] =>
-        IrNode(node.label, nodeValue, Nil, Option(node.prefix), convertAttributes(node.attributes.asAttrMap), IrNodePathEmpty)
+        IrNode(node.label, nodeValue, Nil, Option(node.prefix), convertAttributes(node.attributes.asAttrMap, initialPath <~ node.label), initialPath <~ node.label)
 
       case None =>
-        IrNode(node.label, None, extractNodeChildren(node), Option(node.prefix), convertAttributes(node.attributes.asAttrMap), IrNodePathEmpty)
+        IrNode(node.label, None, extractNodeChildren(node, initialPath <~ node.label), Option(node.prefix), convertAttributes(node.attributes.asAttrMap, initialPath <~ node.label), initialPath <~ node.label)
     }
 
 }
