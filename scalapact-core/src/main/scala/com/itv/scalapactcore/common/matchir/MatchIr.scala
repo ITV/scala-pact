@@ -42,6 +42,7 @@ trait JsonConversionFunctions {
     json match {
       case j: Json if j.isArray =>
         IrNode(label, jsonArrayToIrNodeList(label, j, pathToParent)).withPath(pathToParent)
+          .markAsJsonArray(true)
 
       case j: Json if j.isObject =>
         IrNode(label, jsonObjectToIrNodeList(j, pathToParent)).withPath(pathToParent)
@@ -84,6 +85,7 @@ trait JsonConversionFunctions {
         Option(
           IrNode(rootNodeLabel, jsonArrayToIrNodeList(unnamedNodeLabel, j, initialPath))
             .withPath(initialPath)
+            .markAsJsonArray(true)
         )
 
       case j: Json if j.isObject =>
@@ -142,10 +144,10 @@ trait XmlConversionFunctions extends PrimitiveConversionFunctions {
   protected def nodeToIrNode(node: Node, initialPath: IrNodePath): IrNode =
     extractNodeValue(node) match {
       case nodeValue: Some[IrNodePrimitive] =>
-        IrNode(node.label, nodeValue, Nil, Option(node.prefix), convertAttributes(node.attributes.asAttrMap, initialPath <~ node.label), initialPath <~ node.label)
+        IrNode(node.label, nodeValue, Nil, Option(node.prefix), convertAttributes(node.attributes.asAttrMap, initialPath <~ node.label), false, initialPath <~ node.label)
 
       case None =>
-        IrNode(node.label, None, extractNodeChildren(node, initialPath <~ node.label), Option(node.prefix), convertAttributes(node.attributes.asAttrMap, initialPath <~ node.label), initialPath <~ node.label)
+        IrNode(node.label, None, extractNodeChildren(node, initialPath <~ node.label), Option(node.prefix), convertAttributes(node.attributes.asAttrMap, initialPath <~ node.label), false, initialPath <~ node.label)
     }
 
 }

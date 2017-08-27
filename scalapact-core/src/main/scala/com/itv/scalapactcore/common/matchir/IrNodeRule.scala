@@ -40,12 +40,17 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule]) {
 
       case IrNodeMinArrayLengthRule(_, _) =>
         None
+
+      case _ =>
+        None
     }
   }
 
 }
 
 object IrNodeMatchingRules {
+
+  implicit val defaultEmptyRules: IrNodeMatchingRules = IrNodeMatchingRules.empty
 
   def empty: IrNodeMatchingRules = IrNodeMatchingRules(Nil)
 
