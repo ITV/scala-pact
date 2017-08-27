@@ -16,11 +16,15 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule]) {
       case IrNodeTypeRule(_) =>
         None
 
-      case IrNodeRegexRule(regex, _) =>
+      case IrNodeRegexRule(_, _) =>
         None
 
       case IrNodeMinArrayLengthRule(len, _) =>
-        None
+        Option {
+          if (actual.arrays.getOrElse(expected.label, Nil).length >= len) IrNodesEqual
+          else IrNodesNotEqual(s"Array '${expected.label}' did not meet minimum length requirement of '$len'", path)
+        }
+
     }
   }
 

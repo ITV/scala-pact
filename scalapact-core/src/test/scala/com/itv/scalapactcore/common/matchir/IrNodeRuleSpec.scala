@@ -88,8 +88,31 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
 
     }
 
+    // This is plainly nonsense
     it("should not validate a node using regex") {
-      pending
+
+      implicit val rules: IrNodeMatchingRules =
+        IrNodeMatchingRules(
+          IrNodeRegexRule("\\[\\]", IrNodePathEmpty <~ "fish")
+        )
+
+      val expected: IrNode = MatchIr.fromJSON(
+        """
+          |{
+          |  "fish": {}
+          |}
+        """.stripMargin
+      ).get
+
+      val actual: IrNode = MatchIr.fromJSON(
+        """
+          |{
+          |  "fish": []
+          |}
+        """.stripMargin
+      ).get
+
+      (expected =<>= actual).isEqual shouldEqual false
     }
 
     it("should be able to validate a node primitive using regex") {
@@ -120,11 +143,78 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
     }
 
     it("should be able to check an array node is of minimum length") {
-      pending
+
+      implicit val rules: IrNodeMatchingRules =
+        IrNodeMatchingRules(
+          IrNodeMinArrayLengthRule(1, IrNodePathEmpty <~ "fish")
+        )
+
+      val expected: IrNode = MatchIr.fromJSON(
+        """
+          |{
+          |  "fish": [{"id":1}, {"id":2}, {"id":3}]
+          |}
+        """.stripMargin
+      ).get
+
+      val actual: IrNode = MatchIr.fromJSON(
+        """
+          |{
+          |  "fish": [{"id":27}]
+          |}
+        """.stripMargin
+      ).get
+
+      withClue("objects in an array") {
+        check(expected =<>= actual)
+      }
+
+      val expected2: IrNode = MatchIr.fromJSON(
+        """
+          |{
+          |  "fish": [1,2,3]
+          |}
+        """.stripMargin
+      ).get
+
+      val actual2: IrNode = MatchIr.fromJSON(
+        """
+          |{
+          |  "fish": [27]
+          |}
+        """.stripMargin
+      ).get
+
+      withClue("integers in an array") {
+        check(expected2 =<>= actual2)
+      }
     }
 
+    // Again, this is nonsense, just here for completeness.
     it("should not attempt to check the array length of a primitive") {
-      pending
+
+      implicit val rules: IrNodeMatchingRules =
+        IrNodeMatchingRules(
+          IrNodeMinArrayLengthRule(1, IrNodePathEmpty <~ "fish")
+        )
+
+      val expected: IrNode = MatchIr.fromJSON(
+        """
+          |{
+          |  "fish": "cod"
+          |}
+        """.stripMargin
+      ).get
+
+      val actual: IrNode = MatchIr.fromJSON(
+        """
+          |{
+          |  "fish": 1
+          |}
+        """.stripMargin
+      ).get
+
+      (expected =<>= actual).isEqual shouldEqual false
     }
 
   }

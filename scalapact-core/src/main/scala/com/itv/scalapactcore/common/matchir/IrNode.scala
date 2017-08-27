@@ -11,14 +11,14 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
     check[Boolean](nodeType(path), this.isJsonArray, other.isJsonArray) +
     check[String](labelTest(path), this.label, other.label) +
     check[Option[IrNodePrimitive]](valueTest(strict)(path), this.value, other.value).orElse(rules, path, this.value, other.value) +
-    check[List[IrNode]](childrenTest(strict)(path)(rules), this.children, other.children) +
+    check[List[IrNode]](childrenTest(strict)(path)(rules), this.children, other.children).orElse(rules, path, this, other) +
     check[Option[String]](namespaceTest(path), this.ns, other.ns) +
     check[IrNodeAttributes](attributesTest(strict)(path), this.attributes, other.attributes) +
     check[IrNodePath](pathTest(strict)(path), this.path, other.path)
   }
 
   val arrays: Map[String, List[IrNode]] =
-    children.groupBy(_.label).filter(_._2.length > 1)
+    children.groupBy(_.label)
 
   val arraysKeys: List[String] = arrays.keys.toList
 
