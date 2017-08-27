@@ -117,19 +117,19 @@ object MatchingInterpreters {
       def apply[A](stage: MatchRequestStageA[A]): Id[A] = {
         stage match {
           case MatchRequestMethod(expected, actual) =>
-            if(MethodMatching.matchMethods(expected.method)(actual.method)) MatchMethodSuccess
+            if(MethodMatching.matchMethods(expected.method, actual.method)) MatchMethodSuccess
             else MatchMethodFailed
 
           case MatchRequestPath(expected, actual) =>
-            if(PathMatching.matchPaths(PathAndQuery(expected.path, expected.query))(PathAndQuery(actual.path, actual.query))) MatchPathSuccess
+            if(PathMatching.matchPaths(PathAndQuery(expected.path, expected.query), PathAndQuery(actual.path, actual.query))) MatchPathSuccess
             else MatchPathFailed
 
           case MatchRequestHeaders(expected, actual) =>
-            if(HeaderMatching.matchHeaders(expected.matchingRules)(expected.headers)(actual.headers)) MatchHeadersSuccess
+            if(HeaderMatching.matchHeaders(expected.matchingRules, expected.headers, actual.headers)) MatchHeadersSuccess
             else MatchHeadersFailed
 
           case MatchRequestBody(expected, actual) =>
-            if(BodyMatching.matchBodies(expected.matchingRules)(expected.body)(actual.body)) MatchBodySuccess
+            if(BodyMatching.matchBodies(expected.matchingRules, expected.body, actual.body)) MatchBodySuccess
             else MatchBodyFailed
 
         }
@@ -142,19 +142,19 @@ object MatchingInterpreters {
       def apply[A](stage: MatchRequestStageA[A]): Id[A] = {
         stage match {
           case MatchRequestMethod(expected, actual) =>
-            if(MethodMatching.matchMethods(expected.method)(actual.method)) MatchMethodSuccess
+            if(MethodMatching.matchMethods(expected.method, actual.method)) MatchMethodSuccess
             else MatchMethodFailed
 
           case MatchRequestPath(expected, actual) =>
-            if(PathMatching.matchPathsStrict(PathAndQuery(expected.path, expected.query))(PathAndQuery(actual.path, actual.query))) MatchPathSuccess
+            if(PathMatching.matchPathsStrict(PathAndQuery(expected.path, expected.query), PathAndQuery(actual.path, actual.query))) MatchPathSuccess
             else MatchPathFailed
 
           case MatchRequestHeaders(expected, actual) =>
-            if(HeaderMatching.matchHeaders(expected.matchingRules)(expected.headers)(actual.headers)) MatchHeadersSuccess
+            if(HeaderMatching.matchHeaders(expected.matchingRules, expected.headers, actual.headers)) MatchHeadersSuccess
             else MatchHeadersFailed
 
           case MatchRequestBody(expected, actual) =>
-            if(BodyMatching.matchBodiesStrict(false)(expected.matchingRules)(expected.body)(actual.body)) MatchBodySuccess
+            if(BodyMatching.matchBodiesStrict(false, expected.matchingRules, expected.body, actual.body)) MatchBodySuccess
             else MatchBodyFailed
 
         }
@@ -171,15 +171,15 @@ object MatchingInterpreters {
       def apply[A](stage: MatchResponseStageA[A]): Id[A] = {
         stage match {
           case MatchResponseStatus(expected, actual) =>
-            if(StatusMatching.matchStatusCodes(expected.status)(actual.status)) MatchStatusSuccess
+            if(StatusMatching.matchStatusCodes(expected.status, actual.status)) MatchStatusSuccess
             else MatchStatusFailed
 
           case MatchResponseHeaders(expected, actual) =>
-            if(HeaderMatching.matchHeaders(expected.matchingRules)(expected.headers)(actual.headers)) MatchHeadersSuccess
+            if(HeaderMatching.matchHeaders(expected.matchingRules, expected.headers, actual.headers)) MatchHeadersSuccess
             else MatchHeadersFailed
 
           case MatchResponseBody(expected, actual) =>
-            if(BodyMatching.matchBodies(expected.matchingRules)(expected.body)(actual.body)) MatchBodySuccess
+            if(BodyMatching.matchBodies(expected.matchingRules, expected.body, actual.body)) MatchBodySuccess
             else MatchBodyFailed
 
         }
@@ -192,15 +192,15 @@ object MatchingInterpreters {
       def apply[A](stage: MatchResponseStageA[A]): Id[A] = {
         stage match {
           case MatchResponseStatus(expected, actual) =>
-            if(StatusMatching.matchStatusCodes(expected.status)(actual.status)) MatchStatusSuccess
+            if(StatusMatching.matchStatusCodes(expected.status, actual.status)) MatchStatusSuccess
             else MatchStatusFailed
 
           case MatchResponseHeaders(expected, actual) =>
-            if(HeaderMatching.matchHeaders(expected.matchingRules)(expected.headers)(actual.headers)) MatchHeadersSuccess
+            if(HeaderMatching.matchHeaders(expected.matchingRules, expected.headers, actual.headers)) MatchHeadersSuccess
             else MatchHeadersFailed
 
           case MatchResponseBody(expected, actual) =>
-            if(BodyMatching.matchBodiesStrict(true)(expected.matchingRules)(expected.body)(actual.body)) MatchBodySuccess
+            if(BodyMatching.matchBodiesStrict(true, expected.matchingRules, expected.body, actual.body)) MatchBodySuccess
             else MatchBodyFailed
 
         }

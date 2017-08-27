@@ -66,7 +66,7 @@ sealed trait GeneralMatcher {
 
 object StatusMatching extends GeneralMatcher {
 
-  lazy val matchStatusCodes: Option[Int] => Option[Int] => Boolean = expected => received =>
+  def matchStatusCodes(expected: Option[Int], received: Option[Int]): Boolean =
     generalMatcher(expected, received, (e: Int, r: Int) => e == r)
 
 }
@@ -75,21 +75,21 @@ object PathMatching extends GeneralMatcher {
 
   case class PathAndQuery(path: Option[String], query: Option[String])
 
-  lazy val matchPaths: PathAndQuery => PathAndQuery => Boolean = expected => received =>
-    matchPathsWithPredicate(expected)(received) {
+  def matchPaths(expected: PathAndQuery, received: PathAndQuery): Boolean =
+    matchPathsWithPredicate(expected, received) {
       (ex: PathStructure, re: PathStructure) => {
         ex.path == re.path && equalListsOfTuples(ex.params, re.params)
       }
     }
 
-  lazy val matchPathsStrict: PathAndQuery => PathAndQuery => Boolean = expected => received =>
-    matchPathsWithPredicate(expected)(received) {
+  def matchPathsStrict(expected: PathAndQuery, received: PathAndQuery): Boolean =
+    matchPathsWithPredicate(expected, received) {
       (ex: PathStructure, re: PathStructure) => {
         ex.path == re.path && ex.params.length == re.params.length && equalListsOfTuples(ex.params, re.params)
       }
     }
 
-  private lazy val matchPathsWithPredicate: PathAndQuery => PathAndQuery => ((PathStructure, PathStructure) => Boolean) => Boolean = expected => received => predicate =>
+  private def matchPathsWithPredicate(expected: PathAndQuery, received: PathAndQuery)(predicate: (PathStructure, PathStructure) => Boolean): Boolean =
     generalMatcher(
       constructPath(expected).map(toPathStructure), constructPath(received).map(toPathStructure), predicate
     )
@@ -139,14 +139,14 @@ object PathMatching extends GeneralMatcher {
 
 object MethodMatching extends GeneralMatcher {
 
-  lazy val matchMethods: Option[String] => Option[String] => Boolean = expected => received =>
+  def matchMethods(expected: Option[String], received: Option[String]): Boolean =
     generalMatcher(expected, received, (e: String, r: String) => e.toUpperCase == r.toUpperCase)
 
 }
 
 object HeaderMatching extends GeneralMatcher {
 
-  lazy val matchHeaders: Option[Map[String, MatchingRule]] => Option[Map[String, String]] => Option[Map[String, String]] => Boolean = matchingRules => expected => received => {
+  def matchHeaders(matchingRules: Option[Map[String, MatchingRule]], expected: Option[Map[String, String]], received: Option[Map[String, String]]): Boolean = {
 
     val legalCharSeparators = List('(',')','<','>','@',',',';',':','\\','"','/','[',']','?','=','{','}')
 
@@ -206,7 +206,7 @@ object HeaderMatching extends GeneralMatcher {
 
 object BodyMatching extends GeneralMatcher {
 
-  lazy val matchBodies: Option[Map[String, MatchingRule]] => Option[String] => Option[String] => Boolean = matchingRules => expected => received =>
+  def matchBodies(matchingRules: Option[Map[String, MatchingRule]], expected: Option[String], received: Option[String]): Boolean =
     expected match {
       case Some(str) if stringIsJson(str) =>
         val predicate = (e: String, r: String) =>
@@ -228,7 +228,7 @@ object BodyMatching extends GeneralMatcher {
         generalMatcher(expected, received, (e: String, r: String) => PlainTextEquality.check(e, r))
     }
 
-  lazy val matchBodiesStrict: Boolean => Option[Map[String, MatchingRule]] => Option[String] => Option[String] => Boolean = beSelectivelyPermissive => matchingRules => expected => received =>
+  def matchBodiesStrict(beSelectivelyPermissive: Boolean, matchingRules: Option[Map[String, MatchingRule]], expected: Option[String], received: Option[String]): Boolean =
     expected match {
       case Some(str) if stringIsJson(str) =>
         val predicate = (e: String, r: String) =>

@@ -162,7 +162,7 @@ class MatchIrSpec extends FunSpec with Matchers {
           IrNode(MatchIr.unnamedNodeLabel, IrNumberNode(1)).withPath(IrNodePathEmpty <~ 0),
           IrNode(MatchIr.unnamedNodeLabel, IrNumberNode(2)).withPath(IrNodePathEmpty <~ 1),
           IrNode(MatchIr.unnamedNodeLabel, IrNumberNode(3)).withPath(IrNodePathEmpty <~ 2)
-        ).withPath(IrNodePathEmpty)
+        ).withPath(IrNodePathEmpty).markAsJsonArray(true)
 
       check(MatchIr.fromJSON(json).get =<>= ir)
 
@@ -202,7 +202,7 @@ class MatchIrSpec extends FunSpec with Matchers {
               IrNode("breed", IrStringNode("haddock")).withPath(IrNodePathEmpty <~ 1 <~ "fish" <~ "breed")
             ).withPath(IrNodePathEmpty <~ 1 <~ "fish")
           ).withPath(IrNodePathEmpty <~ 1)
-        ).withPath(IrNodePathEmpty)
+        ).withPath(IrNodePathEmpty).markAsJsonArray(true)
 
       check(MatchIr.fromJSON(json).get =<>= ir)
 
@@ -252,7 +252,7 @@ class MatchIrSpec extends FunSpec with Matchers {
                 IrNode("breed", IrStringNode("haddock")).withPath(IrNodePathEmpty <~ "river" <~ 1 <~ "fish" <~ "breed")
               ).withPath(IrNodePathEmpty <~ "river" <~ 1 <~ "fish")
             ).withPath(IrNodePathEmpty <~ "river" <~ 1)
-          ).withPath(IrNodePathEmpty <~ "river"),
+          ).withPath(IrNodePathEmpty <~ "river").markAsJsonArray(true),
           IrNode(
             "riverbank",
             IrNode(
@@ -273,7 +273,7 @@ class MatchIrSpec extends FunSpec with Matchers {
                 "flowers",
                 IrStringNode("dandelions")
               ).withPath(IrNodePathEmpty <~ "riverbank" <~ "flowers" <~ 2)
-            ).withPath(IrNodePathEmpty <~ "riverbank" <~ "flowers")
+            ).withPath(IrNodePathEmpty <~ "riverbank" <~ "flowers").markAsJsonArray(true)
           ).withPath(IrNodePathEmpty <~ "riverbank")
         ).withPath(IrNodePathEmpty)
 

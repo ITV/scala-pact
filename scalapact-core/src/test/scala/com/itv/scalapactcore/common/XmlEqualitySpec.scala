@@ -1,7 +1,7 @@
 package com.itv.scalapactcore.common
 
 import com.itv.scalapactcore.MatchingRule
-import com.itv.scalapactcore.common.matchir.{IrNodeEqualityResult, IrNodesEqual, IrNodesNotEqual}
+import com.itv.scalapactcore.common.matchir.{IrNodeEqualityResult, IrNodeMatchingRules, IrNodesEqual, IrNodesNotEqual}
 import com.itv.scalapactcore.common.matchir.MatchIrConverters._
 import org.scalatest.{FunSpec, Matchers}
 
@@ -68,9 +68,11 @@ class XmlEqualitySpec extends FunSpec with Matchers {
 
       val rules: Option[Map[String, MatchingRule]] = Option {
         Map(
-          "fish" -> MatchingRule(Option("regex"), Some("haddock|cod"), None)
+          ".fish.type" -> MatchingRule(Option("regex"), Some("haddock|cod"), None)
         )
       }
+
+      implicit val irRules: IrNodeMatchingRules = IrNodeMatchingRules.fromPactRules(rules)
 
       check(expected =~ received)
     }
@@ -81,9 +83,11 @@ class XmlEqualitySpec extends FunSpec with Matchers {
 
       val rules: Option[Map[String, MatchingRule]] = Option {
         Map(
-          "fish.side" -> MatchingRule(Option("type"), None, None)
+          ".fish.side" -> MatchingRule(Option("type"), None, None)
         )
       }
+
+      implicit val irRules: IrNodeMatchingRules = IrNodeMatchingRules.fromPactRules(rules)
 
       check(expected =~ received)
     }
@@ -92,10 +96,12 @@ class XmlEqualitySpec extends FunSpec with Matchers {
 
       val rules: Option[Map[String, MatchingRule]] = Option {
         Map(
-          "fish.breed" -> MatchingRule(Option("type"), None, None),
-          "fish.side" -> MatchingRule(Option("regex"), Some("peas|chips"), None)
+          ".fish.breed" -> MatchingRule(Option("type"), None, None),
+          ".fish.side" -> MatchingRule(Option("regex"), Some("peas|chips"), None)
         )
       }
+
+      implicit val irRules: IrNodeMatchingRules = IrNodeMatchingRules.fromPactRules(rules)
 
       val expected = <fish><breed>haddock</breed><side>peas</side></fish>
       val received = <fish><breed>cod</breed><side>chips</side></fish>
@@ -113,26 +119,11 @@ class XmlEqualitySpec extends FunSpec with Matchers {
       val received4 = <fish><breed>cod</breed><side>chips</side><sauce>ketchup</sauce></fish>
       check(expected4 =~ received4)
 
-      // Not sure if this is the desired behaviour.
       val expected5 = <fish><breed>haddock</breed><side>peas</side><sauce>ketchup</sauce></fish>
       val received5 = <fish><breed>cod</breed><side>chips</side><sauce>brown</sauce></fish>
-      check(expected5 =~ received5)
+      (expected5 =~ received5).isEqual shouldEqual false
     }
 
   }
-
-//  describe("map in map") {
-//
-//    it("should be able to tell if one map of strings exists in another") {
-//
-//      SharedXmlEqualityHelpers.mapContainsMap(Map("a" -> "b"), Map("a" -> "b")) shouldEqual true
-//      SharedXmlEqualityHelpers.mapContainsMap(Map.empty[String, String], Map("a" -> "b")) shouldEqual true
-//      SharedXmlEqualityHelpers.mapContainsMap(Map("a" -> "b", "c" -> "d"), Map("a" -> "b")) shouldEqual false
-//      SharedXmlEqualityHelpers.mapContainsMap(Map("a" -> "b"), Map("a" -> "b", "c" -> "d")) shouldEqual true
-//      SharedXmlEqualityHelpers.mapContainsMap(Map("a" -> "b"), Map.empty[String, String]) shouldEqual false
-//
-//    }
-//
-//  }
 
 }
