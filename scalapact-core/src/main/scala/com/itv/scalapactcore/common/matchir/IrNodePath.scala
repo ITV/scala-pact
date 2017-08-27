@@ -30,6 +30,10 @@ object PactPath {
         case "" =>
           PactPathParseSuccess(acc)
 
+        // Prefixes
+        case dollarPrefix(_, r) =>
+          rec(r, acc)
+
         // Fields
         case fieldNamePrefix(_, r) =>
           rec(r, acc)
@@ -62,7 +66,6 @@ object PactPath {
 
         // Unmatched, failure
         case _ =>
-          println("b")
           PactPathParseFailure(pactPath, remaining, None)
 
       }
@@ -85,6 +88,9 @@ object PactPathParseResult {
 }
 
 object PactPathPatterns {
+  // Prefixes
+  val dollarPrefix: Regex ="""^(\$.body|\$.headers)(.*)$""".r
+
   // Fields
   val fieldNamePrefix: Regex ="""^(\.|\[[\'|\"])(.*)$""".r
   val fieldName: Regex = """^([a-zA-Z0-9:\-_]+)(.*)$""".r // TODO: This is very limited, technically any escaped string is valid

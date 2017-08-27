@@ -49,6 +49,35 @@ class IrNodePathSpec extends FunSpec with Matchers {
 
   describe("converting IrNodePath to and from PactPath") {
 
+
+    it("should strip off '$.body'") {
+      val jsonPath = "$.body.foo"
+
+      val expected = IrNodePathEmpty <~ "foo"
+
+      PactPath.fromPactPath(jsonPath) match {
+        case PactPathParseSuccess(irNodePath) =>
+          irNodePath === expected shouldEqual true
+
+        case e: PactPathParseFailure =>
+          fail(e.errorString)
+      }
+    }
+
+    it("should strip off '$.headers'") {
+      val jsonPath = "$.headers.foo"
+
+      val expected = IrNodePathEmpty <~ "foo"
+
+      PactPath.fromPactPath(jsonPath) match {
+        case PactPathParseSuccess(irNodePath) =>
+          irNodePath === expected shouldEqual true
+
+        case e: PactPathParseFailure =>
+          fail(e.errorString)
+      }
+    }
+
     it("should be able to convert to and from dot syntax") {
 
       val jsonPath = ".animals[*].dogs[2].collie.rover['@name']"
