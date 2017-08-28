@@ -5,8 +5,7 @@ import java.nio.charset.StandardCharsets
 
 import argonaut.Argonaut._
 import com.itv.scalapactcore.common.Helpers
-import com.itv.scalapactcore.common.matching.ScalaPactXmlEquality._
-import com.itv.scalapactcore.common.matching.ScalaPactJsonEquality._
+import com.itv.scalapactcore.common.matchir._
 import com.itv.scalapactcore.{Interaction, InteractionRequest, InteractionResponse, MatchingRule}
 
 import scala.xml._
@@ -206,49 +205,74 @@ object HeaderMatching extends GeneralMatcher {
 
 object BodyMatching extends GeneralMatcher {
 
-  def matchBodies(matchingRules: Option[Map[String, MatchingRule]], expected: Option[String], received: Option[String]): Boolean =
+  // TODO: Remove when we do proper error reporting for matching all the things. Side effect.
+  def matchResultToBoolean(irNodeEqualityResult: IrNodeEqualityResult): Boolean =
+    irNodeEqualityResult match {
+      case IrNodesEqual =>
+        true
+
+      case e: IrNodesNotEqual =>
+        println(e.renderDifferences)
+        false
+    }
+
+  def matchBodies(matchingRules: Option[Map[String, MatchingRule]], expected: Option[String], received: Option[String]): Boolean = {
+    implicit val rules: IrNodeMatchingRules = IrNodeMatchingRules.fromPactRules(matchingRules)
+
     expected match {
       case Some(str) if stringIsJson(str) =>
         val predicate = (e: String, r: String) =>
-          e.parseOption.flatMap { ee => r.parseOption.map { rr =>
-              (ee =~ rr)(matchingRules)
-          }}.exists(_ == true) // Use exists instead of contains for backwards compatibility with 2.10
+          MatchIr.fromJSON(e).flatMap { ee =>
+            MatchIr.fromJSON(r).map { rr =>
+              matchResultToBoolean(ee =~ rr)
+            }
+          }.exists(_ == true) //2.10 compat
 
         generalMatcher(expected, received, predicate)
 
       case Some(str) if stringIsXml(str) =>
         val predicate = (e: String, r: String) =>
-          safeStringToXml(e).flatMap { ee => safeStringToXml(r).map { rr =>
-            (ee =~ rr)(matchingRules)
-          }}.exists(_ == true) // Use exists instead of contains for backwards compatibility with 2.10
+          MatchIr.fromXml(e).flatMap { ee =>
+            MatchIr.fromXml(r).map { rr =>
+              matchResultToBoolean(ee =~ rr)
+            }
+          }.exists(_ == true) //2.10 compat
 
         generalMatcher(expected, received, predicate)
 
       case _ =>
         generalMatcher(expected, received, (e: String, r: String) => PlainTextEquality.check(e, r))
     }
+  }
 
-  def matchBodiesStrict(beSelectivelyPermissive: Boolean, matchingRules: Option[Map[String, MatchingRule]], expected: Option[String], received: Option[String]): Boolean =
+  def matchBodiesStrict(beSelectivelyPermissive: Boolean, matchingRules: Option[Map[String, MatchingRule]], expected: Option[String], received: Option[String]): Boolean = {
+    implicit val rules: IrNodeMatchingRules = IrNodeMatchingRules.fromPactRules(matchingRules)
+
     expected match {
       case Some(str) if stringIsJson(str) =>
         val predicate = (e: String, r: String) =>
-          e.parseOption.flatMap { ee => r.parseOption.map { rr =>
-            (ee =<>= rr)(beSelectivelyPermissive)(matchingRules)
-          }}.exists(_ == true) // Use exists instead of contains for backwards compatibility with 2.10
+          MatchIr.fromJSON(e).flatMap { ee =>
+            MatchIr.fromJSON(r).map { rr =>
+              matchResultToBoolean(ee =<>= rr)
+            }
+          }.exists(_ == true) //2.10 compat
 
         generalMatcher(expected, received, predicate)
 
       case Some(str) if stringIsXml(str) =>
         val predicate = (e: String, r: String) =>
-          safeStringToXml(e).flatMap { ee => safeStringToXml(r).map { rr =>
-            (ee =<>= rr)(beSelectivelyPermissive)(matchingRules)
-          }}.exists(_ == true) // Use exists instead of contains for backwards compatibility with 2.10
+          MatchIr.fromXml(e).flatMap { ee =>
+            MatchIr.fromXml(r).map { rr =>
+              matchResultToBoolean(ee =<>= rr)
+            }
+          }.exists(_ == true) //2.10 compat
 
         generalMatcher(expected, received, predicate)
 
       case _ =>
         generalMatcher(expected, received, (e: String, r: String) => PlainTextEquality.check(e, r))
     }
+  }
 
   lazy val stringIsJson: String => Boolean = str => str.parseOption.isDefined
   lazy val stringIsXml: String => Boolean = str => safeStringToXml(str).isDefined

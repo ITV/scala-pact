@@ -81,11 +81,17 @@ object IrNodeMatchingRules {
             case (PactPathParseSuccess(path), MatchingRule(Some("regex"), Some(regex), _)) =>
               IrNodeMatchingRules(IrNodeRegexRule(regex, path))
 
+            case (PactPathParseSuccess(path), MatchingRule(None, Some(regex), _)) =>
+              IrNodeMatchingRules(IrNodeRegexRule(regex, path))
+
             case (PactPathParseSuccess(path), MatchingRule(Some("min"), _, Some(len))) =>
               IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path))
 
-            case _ =>
-              println("Failed to read rule: " + pair._2.renderAsString)
+            case (PactPathParseSuccess(path), MatchingRule(None, _, Some(len))) =>
+              IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path))
+
+            case (p, r) =>
+              println("Failed to read rule: " + r.renderAsString + s" for path '$p'")
               empty
           }
         }

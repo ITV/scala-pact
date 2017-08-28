@@ -55,7 +55,7 @@ case class InteractionRequest(method: Option[String], path: Option[String], quer
 case class InteractionResponse(status: Option[Int], headers: Option[Map[String, String]], body: Option[String], matchingRules: Option[Map[String, MatchingRule]])
 
 case class MatchingRule(`match`: Option[String], regex: Option[String], min: Option[Int]) {
-  def renderAsString: String = s"Rule type: ${`match`.getOrElse("")}  regex: ${regex.getOrElse("")}  min: ${min.getOrElse(-1).toString}"
+  def renderAsString: String = s"Rule type: '${`match`.getOrElse("")}'  regex: '${regex.getOrElse("")}'  min: '${min.getOrElse(-1).toString}'"
 }
 
 object ScalaPactReader {

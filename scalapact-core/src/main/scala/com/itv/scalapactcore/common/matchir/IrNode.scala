@@ -10,8 +10,8 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
   def isEqualTo(other: IrNode, strict: Boolean, rules: IrNodeMatchingRules): IrNodeEqualityResult = {
     check[Boolean](nodeType(path), this.isJsonArray, other.isJsonArray) +
     check[String](labelTest(path), this.label, other.label) +
-    check[Option[IrNodePrimitive]](valueTest(strict)(path), this.value, other.value).orElse(rules, path, this.value, other.value) +
-    check[List[IrNode]](childrenTest(strict)(path)(rules), this.children, other.children).orElse(rules, path, this, other) +
+    check[Option[IrNodePrimitive]](valueTest(strict)(path), this.value, other.value).ruleCheck(rules, path, this.value, other.value) +
+    check[List[IrNode]](childrenTest(strict)(path)(rules), this.children, other.children).ruleCheck(rules, path, this, other) +
     check[Option[String]](namespaceTest(path), this.ns, other.ns) +
     check[IrNodeAttributes](attributesTest(strict)(path), this.attributes, other.attributes) +
     check[IrNodePath](pathTest(strict)(path), this.path, other.path)
@@ -159,6 +159,7 @@ object IrNodeEqualityResult {
 
       } else checkAttributesTest(path)(a, b)
 
+
   def check[A](f: (A, A) => IrNodeEqualityResult, propA: A, propB: A): IrNodeEqualityResult = f(propA, propB)
 
 }
@@ -175,40 +176,34 @@ sealed trait IrNodeEqualityResult {
       case (IrNodesNotEqual(d1), IrNodesNotEqual(d2)) => IrNodesNotEqual(d1 ++ d2)
     }
 
-  def orElse(rules: IrNodeMatchingRules, path: IrNodePath, expected: IrNode, actual: IrNode): IrNodeEqualityResult =
-    if(this.isEqual) this
-    else {
-      rules.validateNode(path, expected, actual) match {
-        case Some(IrNodesEqual) =>
-          IrNodesEqual
+  def ruleCheck(rules: IrNodeMatchingRules, path: IrNodePath, expected: IrNode, actual: IrNode): IrNodeEqualityResult =
+    rules.validateNode(path, expected, actual) match {
+      case Some(IrNodesEqual) =>
+        IrNodesEqual
 
-        case Some(res) =>
-          this + res
+      case Some(res) =>
+        this + res
 
-        case None =>
-          this
-      }
+      case None =>
+        this
     }
 
-  def orElse(rules: IrNodeMatchingRules, path: IrNodePath, expected: Option[IrNodePrimitive], actual: Option[IrNodePrimitive]): IrNodeEqualityResult =
-    if(this.isEqual) this
-    else {
-      (expected, actual) match {
-        case (Some(e), Some(a)) =>
-          rules.validatePrimitive(path, e, a) match {
-            case Some(IrNodesEqual) =>
-              IrNodesEqual
+  def ruleCheck(rules: IrNodeMatchingRules, path: IrNodePath, expected: Option[IrNodePrimitive], actual: Option[IrNodePrimitive]): IrNodeEqualityResult =
+    (expected, actual) match {
+      case (Some(e), Some(a)) =>
+        rules.validatePrimitive(path, e, a) match {
+          case Some(IrNodesEqual) =>
+            IrNodesEqual
 
-            case Some(res) =>
-              this + res
+          case Some(res) =>
+            this + res
 
-            case None =>
-              this
-          }
+          case None =>
+            this
+        }
 
-        case _ =>
-          this
-      }
+      case _ =>
+        this
     }
 
 }

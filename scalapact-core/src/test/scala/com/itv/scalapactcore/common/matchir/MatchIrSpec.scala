@@ -23,6 +23,23 @@ class MatchIrSpec extends FunSpec with Matchers {
 
     }
 
+    it("should be able to convert xml with a doctype node") {
+
+      val xml: String = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><animals><alligator name=\"Mary\"/></animals>"
+
+      val ir: IrNode =
+        IrNode("animals",
+          IrNode("alligator")
+            .withAttributes(
+              IrNodeAttributes(Map("name" -> IrNodeAttribute(IrStringNode("Mary"), IrNodePathEmpty <~ "animals" <~ "alligator" <@ "name")))
+            )
+            .withPath(IrNodePathEmpty <~ "animals" <~ "alligator")
+        ).withPath(IrNodePathEmpty <~ "animals")
+
+      check(MatchIr.fromXml(xml).get =<>= ir)
+
+    }
+
     it("should be able to convert one node with content") {
 
       val xml: String = <fish>haddock</fish>.toString()
