@@ -47,8 +47,23 @@ class IrNodePathSpec extends FunSpec with Matchers {
 
   }
 
-  describe("converting IrNodePath to and from PactPath") {
+  describe("path traversal") {
 
+    it("should be able to return a path to it's parent") {
+
+      (IrNodePathEmpty <~ "fish" <~ "chips").parent === (IrNodePathEmpty <~ "fish") shouldEqual true
+      (IrNodePathEmpty <~ "fish" <~ 2 <~ "chips").parent ===  (IrNodePathEmpty <~ "fish" <~ 2) shouldEqual true
+      (IrNodePathEmpty <~ "fish" <~ "chips" <~ 2).parent ===  (IrNodePathEmpty <~ "fish" <~ "chips") shouldEqual true
+      (IrNodePathEmpty <~ "fish" <~ "*" <~ "chips").parent ===  (IrNodePathEmpty <~ "fish" <~ "*") shouldEqual true
+      (IrNodePathEmpty <~ "fish" <~ "chips" <~ "*").parent ===  (IrNodePathEmpty <~ "fish" <~ "chips") shouldEqual true
+      (IrNodePathEmpty <~ "fish" <~ "chips" <@ "ketchup").parent ===  (IrNodePathEmpty <~ "fish" <~ "chips") shouldEqual true
+      (IrNodePathEmpty <~ "fish" <~ "chips" text).parent ===  (IrNodePathEmpty <~ "fish" <~ "chips") shouldEqual true
+
+    }
+
+  }
+
+  describe("converting IrNodePath to and from PactPath") {
 
     it("should strip off '$.body'") {
       val jsonPath = "$.body.foo"

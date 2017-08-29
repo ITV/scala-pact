@@ -122,6 +122,8 @@ sealed trait IrNodePath {
   def =~=(other: IrNodePath): Boolean = isEqualTo(other, strict = false)
   def ===(other: IrNodePath): Boolean = isEqualTo(other, strict = true)
 
+  val parent: IrNodePath
+
   def isEqualTo(other: IrNodePath, strict: Boolean): Boolean = {
     @tailrec
     def rec(a: IrNodePath, b: IrNodePath): Boolean =
@@ -196,6 +198,7 @@ sealed trait IrNodePath {
 
 case object IrNodePathEmpty extends IrNodePath {
   val name: String = "."
+  val parent: IrNodePath = IrNodePathEmpty
 }
 case class IrNodePathField(fieldName: String, parent: IrNodePath) extends IrNodePath
 case class IrNodePathArrayElement(index: Int, parent: IrNodePath) extends IrNodePath
