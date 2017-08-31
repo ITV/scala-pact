@@ -3,6 +3,8 @@ package com.itv.scalapactcore.common.matchir
 import com.itv.scalapactcore.MatchingRule
 import org.scalatest.{FunSpec, Matchers}
 
+import scala.language.postfixOps
+
 class IrNodeRuleSpec extends FunSpec with Matchers {
 
   def check(res: IrNodeEqualityResult): Unit =
@@ -28,6 +30,29 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
           IrNodeTypeRule(IrNodePathEmpty <~ "fish"),
           IrNodeRegexRule("cod|haddock", IrNodePathEmpty <~ "fish" <~ "breed"),
           IrNodeMinArrayLengthRule(1, IrNodePathEmpty <~ "fish" <~ "fins")
+        )
+
+      IrNodeMatchingRules.fromPactRules(pactRules) shouldEqual expected
+
+    }
+
+    it("should be able to convert more advanced pact matching rules into IrNodeRules") {
+
+      val pactRules: Option[Map[String, MatchingRule]] = Option {
+        Map(
+          ".fish[*]" -> MatchingRule(Some("type"), None, None),
+          ".fish[2]" -> MatchingRule(Some("type"), None, None),
+          ".fish['#text']" -> MatchingRule(Some("type"), None, None),
+          ".fish['@id']" -> MatchingRule(Some("type"), None, None)
+        )
+      }
+
+      val expected: IrNodeMatchingRules =
+        IrNodeMatchingRules(
+          IrNodeTypeRule(IrNodePathEmpty <~ "fish" <~ "*"),
+          IrNodeTypeRule(IrNodePathEmpty <~ "fish" <~ 2),
+          IrNodeTypeRule(IrNodePathEmpty <~ "fish" text),
+          IrNodeTypeRule(IrNodePathEmpty <~ "fish" <@ "id")
         )
 
       IrNodeMatchingRules.fromPactRules(pactRules) shouldEqual expected
@@ -215,6 +240,66 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
       ).get
 
       (expected =<>= actual).isEqual shouldEqual false
+    }
+  }
+
+  describe("Validating a node using rules in XML specific cases") {
+
+    it("should be able to validate an xml element") {
+
+      implicit val rules: IrNodeMatchingRules =
+        IrNodeMatchingRules(
+          IrNodeRegexRule("cod|haddock", IrNodePathEmpty <~ "fish" <~ "breed")
+        )
+
+      val expected: IrNode = MatchIr.fromXml(
+        <fish><breed>cod</breed></fish>.toString()
+      ).get
+
+      val actual: IrNode = MatchIr.fromXml(
+        <fish><breed>cod</breed></fish>.toString()
+      ).get
+
+      check(expected =<>= actual)
+
+    }
+
+    it("should be able to validate an xml attribute using regex") {
+
+      implicit val rules: IrNodeMatchingRules =
+        IrNodeMatchingRules(
+          IrNodeRegexRule("abc123|def456", IrNodePathEmpty <~ "fish" <~ "breed" <@ "id")
+        )
+
+      val expected: IrNode = MatchIr.fromXml(
+        <fish><breed id="abc123">cod</breed></fish>.toString()
+      ).get
+
+      val actual: IrNode = MatchIr.fromXml(
+        <fish><breed id="def456">cod</breed></fish>.toString()
+      ).get
+
+      check(expected =<>= actual)
+
+    }
+
+    it("should be able to validate an xml text element using regex") {
+
+      implicit val rules: IrNodeMatchingRules =
+        IrNodeMatchingRules(
+          IrNodeRegexRule("cod|haddock", IrNodePathEmpty <~ "fish" <~ "breed" text)
+        )
+
+      val expected: IrNode = MatchIr.fromXml(
+        <fish><breed>cod</breed></fish>.toString()
+      ).get
+
+      val actual: IrNode = MatchIr.fromXml(
+        <fish><breed>haddock</breed></fish>.toString()
+      ).get
+
+      check(expected =<>= actual)
+
     }
 
   }
