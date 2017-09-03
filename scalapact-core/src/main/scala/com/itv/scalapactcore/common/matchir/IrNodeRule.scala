@@ -50,6 +50,8 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule]) {
     }
   }
 
+  def renderAsString: String = s"Rules:\n - ${rules.map(r => r.renderAsString).mkString("\n - ")}"
+
 }
 
 object IrNodeMatchingRules {
@@ -104,6 +106,19 @@ object IrNodeMatchingRules {
 
 sealed trait IrNodeRule {
   val path: IrNodePath
+
+  def renderAsString: String =
+    this match {
+      case IrNodeTypeRule(p) =>
+        s"""Type rule [${p.renderAsString}]"""
+
+      case IrNodeRegexRule(r, p) =>
+        s"""Regex rule [$r] [${p.renderAsString}]"""
+
+      case IrNodeMinArrayLengthRule(l, p) =>
+        s"""Min array length rule [$l] [${p.renderAsString}]"""
+    }
+
 }
 case class IrNodeTypeRule(path: IrNodePath) extends IrNodeRule
 case class IrNodeRegexRule(regex: String, path: IrNodePath) extends IrNodeRule

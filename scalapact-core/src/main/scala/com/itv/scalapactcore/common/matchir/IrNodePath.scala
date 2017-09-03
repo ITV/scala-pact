@@ -110,6 +110,14 @@ object IrNodePath {
 }
 
 sealed trait IrNodePath {
+
+  def isEmpty: Boolean
+  def isField: Boolean
+  def isArrayIndex: Boolean
+  def isArrayWildcard: Boolean
+  def isAttribute: Boolean
+  def isTextElement: Boolean
+
   def <~(fieldName: String): IrNodePath =
     if(fieldName == "*") IrNodePathArrayAnyElement(this) else IrNodePathField(fieldName, this)
 
@@ -173,23 +181,23 @@ sealed trait IrNodePath {
         case IrNodePathEmpty =>
           if(acc.startsWith(".[")) acc.drop(1) else acc
 
-        case IrNodePathField(fieldName, parent) =>
+        case IrNodePathField(fieldName, parentNode) =>
           if(fieldName != MatchIr.unnamedNodeLabel && fieldName != MatchIr.rootNodeLabel)
-            rec(parent, s".$fieldName$acc")
+            rec(parentNode, s".$fieldName$acc")
           else
-            rec(parent, s".$acc")
+            rec(parentNode, s".$acc")
 
-        case IrNodePathArrayElement(arrayIndex, parent) =>
-          rec(parent, s"[$arrayIndex]$acc")
+        case IrNodePathArrayElement(arrayIndex, parentNode) =>
+          rec(parentNode, s"[$arrayIndex]$acc")
 
-        case IrNodePathArrayAnyElement(parent) =>
-          rec(parent, s"[*]$acc")
+        case IrNodePathArrayAnyElement(parentNode) =>
+          rec(parentNode, s"[*]$acc")
 
-        case IrNodePathFieldAttribute(attributeName, parent) =>
-          rec(parent, s"['@$attributeName']$acc")
+        case IrNodePathFieldAttribute(attributeName, parentNode) =>
+          rec(parentNode, s"['@$attributeName']$acc")
 
-        case IrNodePathTextElement(parent) =>
-          rec(parent, s"['#text']$acc")
+        case IrNodePathTextElement(parentNode) =>
+          rec(parentNode, s"['#text']$acc")
       }
 
     rec(this, "")
@@ -199,9 +207,50 @@ sealed trait IrNodePath {
 case object IrNodePathEmpty extends IrNodePath {
   val name: String = "."
   val parent: IrNodePath = IrNodePathEmpty
+  def isEmpty: Boolean = true
+  def isField: Boolean = false
+  def isArrayIndex: Boolean = false
+  def isArrayWildcard: Boolean = false
+  def isAttribute: Boolean = false
+  def isTextElement: Boolean = false
 }
-case class IrNodePathField(fieldName: String, parent: IrNodePath) extends IrNodePath
-case class IrNodePathArrayElement(index: Int, parent: IrNodePath) extends IrNodePath
-case class IrNodePathArrayAnyElement(parent: IrNodePath) extends IrNodePath
-case class IrNodePathFieldAttribute(attributeName: String, parent: IrNodePath) extends IrNodePath
-case class IrNodePathTextElement(parent: IrNodePath) extends IrNodePath
+case class IrNodePathField(fieldName: String, parent: IrNodePath) extends IrNodePath {
+  def isEmpty: Boolean = false
+  def isField: Boolean = true
+  def isArrayIndex: Boolean = false
+  def isArrayWildcard: Boolean = false
+  def isAttribute: Boolean = false
+  def isTextElement: Boolean = false
+}
+case class IrNodePathArrayElement(index: Int, parent: IrNodePath) extends IrNodePath {
+  def isEmpty: Boolean = false
+  def isField: Boolean = false
+  def isArrayIndex: Boolean = true
+  def isArrayWildcard: Boolean = false
+  def isAttribute: Boolean = false
+  def isTextElement: Boolean = false
+}
+case class IrNodePathArrayAnyElement(parent: IrNodePath) extends IrNodePath {
+  def isEmpty: Boolean = false
+  def isField: Boolean = false
+  def isArrayIndex: Boolean = false
+  def isArrayWildcard: Boolean = true
+  def isAttribute: Boolean = false
+  def isTextElement: Boolean = false
+}
+case class IrNodePathFieldAttribute(attributeName: String, parent: IrNodePath) extends IrNodePath {
+  def isEmpty: Boolean = false
+  def isField: Boolean = false
+  def isArrayIndex: Boolean = false
+  def isArrayWildcard: Boolean = false
+  def isAttribute: Boolean = true
+  def isTextElement: Boolean = false
+}
+case class IrNodePathTextElement(parent: IrNodePath) extends IrNodePath {
+  def isEmpty: Boolean = false
+  def isField: Boolean = false
+  def isArrayIndex: Boolean = false
+  def isArrayWildcard: Boolean = false
+  def isAttribute: Boolean = false
+  def isTextElement: Boolean = true
+}

@@ -1,5 +1,7 @@
 package com.itv.scalapactcore.common.matchir
 
+import scala.language.postfixOps
+
 case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[IrNode], ns: Option[String], attributes: IrNodeAttributes, isJsonArray: Boolean, path: IrNodePath) {
 
   import IrNodeEqualityResult._
