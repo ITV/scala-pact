@@ -9,7 +9,7 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule]) {
     IrNodeMatchingRules(rules ++ other.rules)
 
   def findForPath(path: IrNodePath): Option[IrNodeRule] =
-    rules.find(_.path === path)
+    rules.find(_.path.noText === path.noText)
 
   def validateNode(path: IrNodePath, expected: IrNode, actual: IrNode): Option[IrNodeEqualityResult] = {
     findForPath(path).flatMap {

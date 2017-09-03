@@ -130,6 +130,8 @@ sealed trait IrNodePath {
   def =~=(other: IrNodePath): Boolean = isEqualTo(other, strict = false)
   def ===(other: IrNodePath): Boolean = isEqualTo(other, strict = true)
 
+  def noText: IrNodePath = if(this.isTextElement) this.parent else this
+
   val parent: IrNodePath
 
   def isEqualTo(other: IrNodePath, strict: Boolean): Boolean = {
