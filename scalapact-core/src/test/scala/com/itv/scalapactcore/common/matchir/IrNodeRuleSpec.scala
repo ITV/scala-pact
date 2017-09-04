@@ -304,4 +304,30 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
 
   }
 
+  describe("structural checks") {
+
+    it("should be able to compare node types") {
+
+      implicit val rules: IrNodeMatchingRules =
+        IrNodeMatchingRules(
+          IrNodeTypeRule(IrNodePathEmpty <~ "fish"),
+          IrNodeMinArrayLengthRule(2, IrNodePathEmpty <~ "fish"),
+          IrNodeTypeRule(IrNodePathEmpty <~ "fish" <~ "breed" <~ 0),
+          IrNodeTypeRule(IrNodePathEmpty <~ "fish" <~ "breed" <~ 1)
+        )
+
+      val expected: IrNode = MatchIr.fromXml(
+        <fish><breed id="abc123">cod</breed></fish>.toString()
+      ).get
+
+      val actual: IrNode = MatchIr.fromXml(
+        <fish><breed id="def456">haddock</breed><breed id="ghi789">plaice</breed></fish>.toString()
+      ).get
+
+      check(expected =<>= actual)
+
+    }
+
+  }
+
 }
