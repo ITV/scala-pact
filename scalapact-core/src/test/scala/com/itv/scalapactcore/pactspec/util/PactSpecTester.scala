@@ -4,8 +4,6 @@ import com.itv.scalapactcore.{Interaction, InteractionRequest, InteractionRespon
 import com.itv.scalapactcore.common.matching.InteractionMatchers._
 import org.scalatest.{FunSpec, Matchers}
 
-import scalaz.{-\/, \/-}
-
 trait PactSpecTester extends FunSpec with Matchers {
 
   val pactSpecVersion: String
@@ -46,11 +44,11 @@ trait PactSpecTester extends FunSpec with Matchers {
       case Right(_) =>
         // Found a match
         if (shouldMatch) 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
-        else fail(makeErrorString(path, spec.comment, strictMatching, spec.actual.toString, spec.expected.toString))
+        else fail(makeErrorString(path, spec.comment, strictMatching, spec.actual.renderAsString, spec.expected.renderAsString))
 
       case Left(_) =>
         // Failed to match
-        if (shouldMatch) fail(makeErrorString(path, spec.comment, strictMatching, spec.actual.toString, spec.expected.toString))
+        if (shouldMatch) fail(makeErrorString(path, spec.comment, strictMatching, spec.actual.renderAsString, spec.expected.renderAsString))
         else 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
     }
   }
@@ -90,17 +88,17 @@ trait PactSpecTester extends FunSpec with Matchers {
       case Right(_) =>
         // Found a match
         if (shouldMatch) 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
-        else fail(makeErrorString(path, spec.comment, strictMatching, spec.actual.toString, spec.expected.toString))
+        else fail(makeErrorString(path, spec.comment, strictMatching, spec.actual.renderAsString, spec.expected.renderAsString))
 
       case Left(_) =>
         // Failed to match
-        if (shouldMatch) fail(makeErrorString(path, spec.comment, strictMatching, spec.actual.toString, spec.expected.toString))
+        if (shouldMatch) fail(makeErrorString(path, spec.comment, strictMatching, spec.actual.renderAsString, spec.expected.renderAsString))
         else 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
     }
   }
 
   private def makeErrorString(path: String, comment: String, strictMatching: Boolean, actual: String, expected: String): String = {
-    s"[$path] " + comment + "\nStrict matching: '" + strictMatching + "'\nActual: " + actual + "\nExpected: " + expected
+    s"[$path] " + comment + "\nStrict matching: '" + strictMatching + "\n\nExpected:\n" + expected + "'\nActual:\n" + actual + "\n"
   }
 
 }
