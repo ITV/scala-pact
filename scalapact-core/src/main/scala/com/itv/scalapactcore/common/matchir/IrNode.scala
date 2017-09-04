@@ -200,12 +200,6 @@ sealed trait IrNodeEqualityResult {
       case (IrNodesNotEqual(d1), IrNodesNotEqual(d2)) => IrNodesNotEqual(d1 ++ d2)
     }
 
-  def withStructureCheck(rules: IrNodeMatchingRules, path: IrNodePath, expected: IrNode, actual: IrNode): IrNodeEqualityResult =
-    this
-
-  def withStructureCheck(rules: IrNodeMatchingRules, path: IrNodePath, expected: Option[IrNodePrimitive], actual: Option[IrNodePrimitive]): IrNodeEqualityResult =
-    this
-
 }
 case object IrNodesEqual extends IrNodeEqualityResult {
   val isEqual: Boolean = true
@@ -346,4 +340,12 @@ object RuleChecks {
       case _ =>
         equalityResult
     }
+
+
+//  def withStructureCheck(rules: IrNodeMatchingRules, path: IrNodePath, expected: IrNode, actual: IrNode): IrNodeEqualityResult =
+//    this
+//
+//  def withStructureCheck(rules: IrNodeMatchingRules, path: IrNodePath, expected: Option[IrNodePrimitive], actual: Option[IrNodePrimitive]): IrNodeEqualityResult =
+//    this
+
 }
