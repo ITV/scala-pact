@@ -2,7 +2,7 @@ package com.itv.scalapactcore.common.matchir
 
 import scala.language.{implicitConversions, postfixOps}
 
-case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[IrNode], ns: Option[String], attributes: IrNodeAttributes, isJsonArray: Boolean, path: IrNodePath) {
+case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[IrNode], ns: Option[String], attributes: IrNodeAttributes, isArray: Boolean, path: IrNodePath) {
 
   import IrNodeEqualityResult._
 
@@ -11,7 +11,7 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
 
   def isEqualTo(other: IrNode, strict: Boolean, rules: IrNodeMatchingRules): IrNodeEqualityResult = {
 
-    val nodeEquality = check[Boolean](nodeType(path), this.isJsonArray, other.isJsonArray) +
+    val nodeEquality = check[Boolean](nodeType(path), this.isArray, other.isArray) +
     check[String](labelTest(path), this.label, other.label) +
     check[Option[IrNodePrimitive]](valueTest(strict)(path)(rules), this.value, other.value) +
     check[Option[String]](namespaceTest(path), this.ns, other.ns) +
@@ -35,7 +35,7 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
   def withNamespace(ns: String): IrNode = this.copy(ns = Option(ns))
   def withAttributes(attributes: IrNodeAttributes): IrNode = this.copy(attributes = attributes)
   def withPath(path: IrNodePath): IrNode = this.copy(path = path)
-  def markAsJsonArray(boolean: Boolean): IrNode = this.copy(isJsonArray = boolean)
+  def markAsArray(boolean: Boolean): IrNode = this.copy(isArray = boolean)
 
   def renderAsString: String = renderAsString(0)
 
@@ -129,7 +129,7 @@ object IrNodeEqualityResult {
       case x :: xs => xs.foldLeft(x)(_ + _)
     }
 
-  private def checkChildren(strict: Boolean, rules: IrNodeMatchingRules, a: List[IrNode], b: List[IrNode]): IrNodeEqualityResult =
+  private def strictCheckChildren(strict: Boolean, rules: IrNodeMatchingRules, a: List[IrNode], b: List[IrNode]): IrNodeEqualityResult =
     a.zip(b).zipWithIndex.map { pi =>
       val p = pi._1
       val i = pi._2
@@ -138,27 +138,36 @@ object IrNodeEqualityResult {
         .getOrElse(p._1.isEqualTo(p._2, strict, rules))
     }
 
+  private def permissiveCheckChildren(path: IrNodePath, strict: Boolean, rules: IrNodeMatchingRules, a: List[IrNode], b: List[IrNode]): IrNodeEqualityResult =
+    a.map { n1 =>
+      b.zipWithIndex.find { n2 =>
+        val p = n2._1
+        val i = n2._2
+
+        RuleChecks.checkForNode(rules, path <~ i, n1.withPath(n1.path <~ i), p.withPath(n1.path <~ i))
+          .getOrElse(n1.isEqualTo(n2._1, strict, rules)).isEqual
+      } match {
+        case Some(_) => IrNodesEqual
+        case None => IrNodesNotEqual(s"Could not find match for:\n${n1.renderAsString}", path)
+      }
+    }
+
   val childrenTest: Boolean => IrNodePath => IrNodeMatchingRules => (IrNode, IrNode) => (List[IrNode], List[IrNode]) => IrNodeEqualityResult =
     strict => path => rules => (parentA, parentB) => (a, b) => {
       if (strict) {
         if (a.length != b.length) {
           val parentCheck: Option[IrNodeEqualityResult] = RuleChecks.checkForNode(rules, parentA.path, parentA, parentB)
 
-          val childrenCheck: IrNodeEqualityResult = checkChildren(strict, rules, a, b)
+          val childrenCheck: IrNodeEqualityResult = strictCheckChildren(strict, rules, a, b)
 
           parentCheck.map(p => p + childrenCheck).getOrElse(IrNodesNotEqual(s"Differing number of children. Expected ${a.length} got ${b.length}", path))
+        } else if (parentA.isArray) {
+          strictCheckChildren(strict, rules, a, b)
         } else {
-          checkChildren(strict, rules, a, b)
+          permissiveCheckChildren(path, strict, rules, a, b)
         }
       } else {
-        a.map { n1 =>
-          b.find { n2 =>
-            n1.isEqualTo(n2, strict, rules).isEqual
-          } match {
-            case Some(_) => IrNodesEqual
-            case None => IrNodesNotEqual(s"Could not find match for:\n${n1.renderAsString}", path)
-          }
-        }
+        permissiveCheckChildren(path, strict, rules, a, b)
       }
     }
 
@@ -193,8 +202,6 @@ object IrNodeEqualityResult {
 
         if(asNames.length != bsNames.length) {
           IrNodesNotEqual(s"Differing number of attributes between ['${asNames.mkString(", ")}'] and ['${bsNames.mkString(", ")}']", path)
-        } else if(asNames != bsNames) {
-          IrNodesNotEqual(s"Differing attribute order between ['${asNames.mkString(", ")}'] and ['${bsNames.mkString(", ")}']", path)
         } else {
           checkAttributesTest(path)(rules)(a, b)
         }
@@ -247,22 +254,22 @@ object IrNodesNotEqual {
 object IrNode {
 
   def empty: IrNode =
-    IrNode("", None, Nil, None, IrNodeAttributes.empty, isJsonArray = false, IrNodePathEmpty)
+    IrNode("", None, Nil, None, IrNodeAttributes.empty, isArray = false, IrNodePathEmpty)
 
   def apply(label: String): IrNode =
-    IrNode(label, None, Nil, None, IrNodeAttributes.empty, isJsonArray = false, IrNodePathEmpty)
+    IrNode(label, None, Nil, None, IrNodeAttributes.empty, isArray = false, IrNodePathEmpty)
 
   def apply(label: String, value: IrNodePrimitive): IrNode =
-    IrNode(label, Option(value), Nil, None, IrNodeAttributes.empty, isJsonArray = false, IrNodePathEmpty)
+    IrNode(label, Option(value), Nil, None, IrNodeAttributes.empty, isArray = false, IrNodePathEmpty)
 
   def apply(label: String, value: Option[IrNodePrimitive]): IrNode =
-    IrNode(label, value, Nil, None, IrNodeAttributes.empty, isJsonArray = false, IrNodePathEmpty)
+    IrNode(label, value, Nil, None, IrNodeAttributes.empty, isArray = false, IrNodePathEmpty)
 
   def apply(label: String, children: IrNode*): IrNode =
-    IrNode(label, None, children.toList, None, IrNodeAttributes.empty, isJsonArray = false, IrNodePathEmpty)
+    IrNode(label, None, children.toList, None, IrNodeAttributes.empty, isArray = false, IrNodePathEmpty)
 
   def apply(label: String, children: List[IrNode]): IrNode =
-    IrNode(label, None, children, None, IrNodeAttributes.empty, isJsonArray = false, IrNodePathEmpty)
+    IrNode(label, None, children, None, IrNodeAttributes.empty, isArray = false, IrNodePathEmpty)
 
 }
 

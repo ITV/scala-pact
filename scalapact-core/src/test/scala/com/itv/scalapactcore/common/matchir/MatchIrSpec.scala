@@ -23,6 +23,49 @@ class MatchIrSpec extends FunSpec with Matchers {
 
     }
 
+    it("should be able to detect an array") {
+
+      val xml: String = <fish><breed>cod</breed><breed>haddock</breed></fish>.toString()
+
+      val ir: IrNode =
+        IrNode(
+          "fish",
+          List(
+            IrNode("breed", IrStringNode("cod")).withPath(IrNodePathEmpty <~ "fish" <~ "breed"),
+            IrNode("breed", IrStringNode("haddock")).withPath(IrNodePathEmpty <~ "fish" <~ "breed")
+          )
+        ).withPath(IrNodePathEmpty <~ "fish").markAsArray(true)
+
+      val expected = MatchIr.fromXml(xml).get
+
+      expected.isArray shouldEqual true
+
+      check(expected =<>= ir)
+
+    }
+
+    it("should be able to NOT detect an array") {
+
+      val xml: String = <fish><breed>cod</breed><breed>haddock</breed><chips/></fish>.toString()
+
+      val ir: IrNode =
+        IrNode(
+          "fish",
+          List(
+            IrNode("breed", IrStringNode("cod")).withPath(IrNodePathEmpty <~ "fish" <~ "breed"),
+            IrNode("breed", IrStringNode("haddock")).withPath(IrNodePathEmpty <~ "fish" <~ "breed"),
+            IrNode("chips").withPath(IrNodePathEmpty <~ "fish" <~ "chips")
+          )
+        ).withPath(IrNodePathEmpty <~ "fish").markAsArray(false)
+
+      val expected = MatchIr.fromXml(xml).get
+
+      expected.isArray shouldEqual false
+
+      check(expected =<>= ir)
+
+    }
+
     it("should be able to convert xml with a doctype node") {
 
       val xml: String = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><animals><alligator name=\"Mary\"/></animals>"
@@ -179,7 +222,7 @@ class MatchIrSpec extends FunSpec with Matchers {
           IrNode(MatchIr.unnamedNodeLabel, IrNumberNode(1)).withPath(IrNodePathEmpty <~ 0),
           IrNode(MatchIr.unnamedNodeLabel, IrNumberNode(2)).withPath(IrNodePathEmpty <~ 1),
           IrNode(MatchIr.unnamedNodeLabel, IrNumberNode(3)).withPath(IrNodePathEmpty <~ 2)
-        ).withPath(IrNodePathEmpty).markAsJsonArray(true)
+        ).withPath(IrNodePathEmpty).markAsArray(true)
 
       check(MatchIr.fromJSON(json).get =<>= ir)
 
@@ -219,7 +262,7 @@ class MatchIrSpec extends FunSpec with Matchers {
               IrNode("breed", IrStringNode("haddock")).withPath(IrNodePathEmpty <~ 1 <~ "fish" <~ "breed")
             ).withPath(IrNodePathEmpty <~ 1 <~ "fish")
           ).withPath(IrNodePathEmpty <~ 1)
-        ).withPath(IrNodePathEmpty).markAsJsonArray(true)
+        ).withPath(IrNodePathEmpty).markAsArray(true)
 
       check(MatchIr.fromJSON(json).get =<>= ir)
 
@@ -269,7 +312,7 @@ class MatchIrSpec extends FunSpec with Matchers {
                 IrNode("breed", IrStringNode("haddock")).withPath(IrNodePathEmpty <~ "river" <~ 1 <~ "fish" <~ "breed")
               ).withPath(IrNodePathEmpty <~ "river" <~ 1 <~ "fish")
             ).withPath(IrNodePathEmpty <~ "river" <~ 1)
-          ).withPath(IrNodePathEmpty <~ "river").markAsJsonArray(true),
+          ).withPath(IrNodePathEmpty <~ "river").markAsArray(true),
           IrNode(
             "riverbank",
             IrNode(
@@ -290,7 +333,7 @@ class MatchIrSpec extends FunSpec with Matchers {
                 "flowers",
                 IrStringNode("dandelions")
               ).withPath(IrNodePathEmpty <~ "riverbank" <~ "flowers" <~ 2)
-            ).withPath(IrNodePathEmpty <~ "riverbank" <~ "flowers").markAsJsonArray(true)
+            ).withPath(IrNodePathEmpty <~ "riverbank" <~ "flowers").markAsArray(true)
           ).withPath(IrNodePathEmpty <~ "riverbank")
         ).withPath(IrNodePathEmpty)
 
