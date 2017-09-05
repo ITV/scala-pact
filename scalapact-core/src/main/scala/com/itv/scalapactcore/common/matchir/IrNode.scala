@@ -10,13 +10,15 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
   def =<>=(other: IrNode)(implicit rules: IrNodeMatchingRules): IrNodeEqualityResult = isEqualTo(other, strict = true, rules)
 
   def isEqualTo(other: IrNode, strict: Boolean, rules: IrNodeMatchingRules): IrNodeEqualityResult = {
-    check[Boolean](nodeType(path), this.isJsonArray, other.isJsonArray) +
+    val equality = check[Boolean](nodeType(path), this.isJsonArray, other.isJsonArray) +
     check[String](labelTest(path), this.label, other.label) +
     check[Option[IrNodePrimitive]](valueTest(strict)(path)(rules), this.value, other.value) +
     check[List[IrNode]](childrenTest(strict)(path)(rules)(this, other), this.children, other.children) +
     check[Option[String]](namespaceTest(path), this.ns, other.ns) +
     check[IrNodeAttributes](attributesTest(strict)(path)(rules), this.attributes, other.attributes) +
     check[IrNodePath](pathTest(strict)(path), this.path, other.path)
+
+    RuleChecks.checkForNode(rules, path, this, other).getOrElse(equality)
   }
 
   val arrays: Map[String, List[IrNode]] =
