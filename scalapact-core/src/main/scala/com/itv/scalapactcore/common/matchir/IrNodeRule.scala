@@ -11,20 +11,34 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule]) {
   def findForPath(path: IrNodePath): List[IrNodeRule] =
     rules.filter(_.path.noText === path.noText)
 
-  def validateNode(path: IrNodePath, expected: IrNode, actual: IrNode): List[IrNodeEqualityResult] =
-    findForPath(path).map {
-      case IrNodeTypeRule(_) =>
-        None
+  def validateNode(path: IrNodePath, expected: IrNode, actual: IrNode): List[IrNodeEqualityResult] = {
+    findForPath(path).flatMap {
+      case r @ IrNodeTypeRule(_) =>
+        (expected.value, actual.value) match {
+          case (Some(e), Some(a)) =>
+            if(e.primitiveTypeName == a.primitiveTypeName) List(IrNodesEqual)
+            else List(IrNodesNotEqual(s"Primitive type '${e.primitiveTypeName}' did not match actual '${a.primitiveTypeName}'", path))
+
+          case (Some(_), None) =>
+            List(IrNodesNotEqual(s"Missing actual value, could not check rule: " + r.renderAsString, path))
+
+          case (_, Some(_)) =>
+            List(IrNodesNotEqual(s"Missing expected value, could not check rule: " + r.renderAsString, path))
+
+          case (_, _) =>
+            Nil
+        }
 
       case IrNodeRegexRule(_, _) =>
-        None
+        Nil
 
       case IrNodeMinArrayLengthRule(len, _) =>
-        Option {
+        List {
           if (actual.children.length >= len) IrNodesEqual
           else IrNodesNotEqual(s"Array '${expected.label}' did not meet minimum length requirement of '$len'", path)
         }
-    }.collect { case Some(s) => s}
+    }
+  }
 
   def findAncestralTypeRule(path: IrNodePath): List[IrNodeRule] = {
     (path, findForPath(path.parent).find(p => p.isTypeRule).toList) match {

@@ -1,7 +1,6 @@
 package com.itv.scalapactcore.common.matchir
 
-import scala.language.postfixOps
-import scala.language.implicitConversions
+import scala.language.{implicitConversions, postfixOps}
 
 case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[IrNode], ns: Option[String], attributes: IrNodeAttributes, isJsonArray: Boolean, path: IrNodePath) {
 
@@ -92,7 +91,7 @@ object IrNodeEqualityResult {
           }
         }
 
-      RuleChecks.checkForPrimitive(equality, rules, path, a, b, false)
+      RuleChecks.checkForPrimitive(rules, path, a, b, checkParentTypeRule = false).getOrElse(equality)
   }
 
   val namespaceTest: IrNodePath => (Option[String], Option[String]) => IrNodeEqualityResult = path => {
@@ -122,26 +121,32 @@ object IrNodeEqualityResult {
       case x :: xs => xs.foldLeft(x)(_ + _)
     }
 
+  private def checkChildren(strict: Boolean, rules: IrNodeMatchingRules, a: List[IrNode], b: List[IrNode]): IrNodeEqualityResult =
+    a.zip(b).zipWithIndex.map { pi =>
+      val p = pi._1
+      val i = pi._2
+
+      RuleChecks.checkForNode(rules, p._1.path, p._1, p._2)
+        .orElse(RuleChecks.checkForNode(rules, p._1.path <~ i, p._1.withPath(p._1.path <~ i), p._2.withPath(p._1.path <~ i)))
+        .getOrElse(p._1.isEqualTo(p._2, strict, rules))
+    }
+
   val childrenTest: Boolean => IrNodePath => IrNodeMatchingRules => (IrNode, IrNode) => (List[IrNode], List[IrNode]) => IrNodeEqualityResult =
     strict => path => rules => (parentA, parentB) => (a, b) => {
       if (strict) {
         if (a.length != b.length) {
-          val parentCheck = RuleChecks.checkForNode(IrNodesNotEqual(s"Differing number of children. Expected ${a.length} got ${b.length}", path), rules, parentA.path, parentA, parentB)
+          val parentCheck: Option[IrNodeEqualityResult] = RuleChecks.checkForNode(rules, parentA.path, parentA, parentB)
 
-          val childrenCheck = a.zip(b).map { p =>
-            RuleChecks.checkForNode(parentCheck, rules, p._1.path, p._1, p._2)
-          }
+          val childrenCheck: IrNodeEqualityResult = checkChildren(strict, rules, a, b)
 
-          parentCheck + childrenCheck
+          parentCheck.map(p => p + childrenCheck).getOrElse(IrNodesNotEqual(s"Differing number of children. Expected ${a.length} got ${b.length}", path))
         } else {
-          a.zip(b).map { p =>
-            RuleChecks.checkForNode(p._1.isEqualTo(p._2, strict, rules), rules, p._1.path, p._1, p._2)
-          }
+          checkChildren(strict, rules, a, b)
         }
       } else {
         a.map { n1 =>
           b.find { n2 =>
-            RuleChecks.checkForNode(n1.isEqualTo(n2, strict, rules), rules, n1.path, n1, n2).isEqual
+            RuleChecks.checkForNode(rules, n1.path, n1, n2).getOrElse(n1.isEqualTo(n2, strict, rules)).isEqual
           } match {
             case Some(_) => IrNodesEqual
             case None => IrNodesNotEqual(s"Could not find match for:\n${n1.renderAsString}", path)
@@ -160,13 +165,12 @@ object IrNodeEqualityResult {
           if(v == p._2) IrNodesEqual
           else {
             RuleChecks.checkForPrimitive(
-              IrNodesNotEqual(s"Attribute value for '${p._1}' of '${p._2.value.renderAsString}' does not equal '${v.value.renderAsString}'", path),
               rules,
               p._2.path,
               Option(p._2.value),
               Option(v.value),
-              true
-            )
+              checkParentTypeRule = true
+            ).getOrElse(IrNodesNotEqual(s"Attribute value for '${p._1}' of '${p._2.value.renderAsString}' does not equal '${v.value.renderAsString}'", path))
           }
       }
     }
@@ -236,22 +240,22 @@ object IrNodesNotEqual {
 object IrNode {
 
   def empty: IrNode =
-    IrNode("", None, Nil, None, IrNodeAttributes.empty, false, IrNodePathEmpty)
+    IrNode("", None, Nil, None, IrNodeAttributes.empty, isJsonArray = false, IrNodePathEmpty)
 
   def apply(label: String): IrNode =
-    IrNode(label, None, Nil, None, IrNodeAttributes.empty, false, IrNodePathEmpty)
+    IrNode(label, None, Nil, None, IrNodeAttributes.empty, isJsonArray = false, IrNodePathEmpty)
 
   def apply(label: String, value: IrNodePrimitive): IrNode =
-    IrNode(label, Option(value), Nil, None, IrNodeAttributes.empty, false, IrNodePathEmpty)
+    IrNode(label, Option(value), Nil, None, IrNodeAttributes.empty, isJsonArray = false, IrNodePathEmpty)
 
   def apply(label: String, value: Option[IrNodePrimitive]): IrNode =
-    IrNode(label, value, Nil, None, IrNodeAttributes.empty, false, IrNodePathEmpty)
+    IrNode(label, value, Nil, None, IrNodeAttributes.empty, isJsonArray = false, IrNodePathEmpty)
 
   def apply(label: String, children: IrNode*): IrNode =
-    IrNode(label, None, children.toList, None, IrNodeAttributes.empty, false, IrNodePathEmpty)
+    IrNode(label, None, children.toList, None, IrNodeAttributes.empty, isJsonArray = false, IrNodePathEmpty)
 
   def apply(label: String, children: List[IrNode]): IrNode =
-    IrNode(label, None, children, None, IrNodeAttributes.empty, false, IrNodePathEmpty)
+    IrNode(label, None, children, None, IrNodeAttributes.empty, isJsonArray = false, IrNodePathEmpty)
 
 }
 
@@ -327,22 +331,34 @@ case class IrNodeAttribute(value: IrNodePrimitive, path: IrNodePath)
 
 object RuleChecks {
 
-  def checkForNode(equalityResult: IrNodeEqualityResult, rules: IrNodeMatchingRules, path: IrNodePath, expected: IrNode, actual: IrNode): IrNodeEqualityResult =
-    rules.validateNode(path, expected, actual).foldLeft(equalityResult)(_ + _)
+  implicit private def resultToOption(v: IrNodeEqualityResult): Option[IrNodeEqualityResult] =
+    Option(v)
 
-  def checkForPrimitive(equalityResult: IrNodeEqualityResult, rules: IrNodeMatchingRules, path: IrNodePath, expected: Option[IrNodePrimitive], actual: Option[IrNodePrimitive], checkParentTypeRule: Boolean): IrNodeEqualityResult =
+  implicit private def listResultsToOption(l: List[IrNodeEqualityResult]): Option[IrNodeEqualityResult] =
+    l match {
+      case Nil =>
+        None
+
+      case x :: xs =>
+        xs.foldLeft(x)(_ + _)
+    }
+
+  def checkForNode(rules: IrNodeMatchingRules, path: IrNodePath, expected: IrNode, actual: IrNode): Option[IrNodeEqualityResult] =
+    rules.validateNode(path, expected, actual)
+
+  def checkForPrimitive(rules: IrNodeMatchingRules, path: IrNodePath, expected: Option[IrNodePrimitive], actual: Option[IrNodePrimitive], checkParentTypeRule: Boolean): Option[IrNodeEqualityResult] =
     (expected, actual) match {
       case (Some(e), Some(a)) =>
-        rules.validatePrimitive(path, e, a, checkParentTypeRule).foldLeft(equalityResult)(_ + _)
+        rules.validatePrimitive(path, e, a, checkParentTypeRule)
 
       case (Some(e), None) =>
-        IrNodesNotEqual("", path)
+        IrNodesNotEqual(s"Missing 'actual' value '${e.renderAsString}'", path)
 
       case (None, Some(a)) =>
-        IrNodesNotEqual("", path)
+        IrNodesNotEqual(s"Missing 'expected' value '${a.renderAsString}'", path)
 
       case (None, None) =>
-        IrNodesNotEqual("", path)
+        IrNodesEqual
     }
 
 }
