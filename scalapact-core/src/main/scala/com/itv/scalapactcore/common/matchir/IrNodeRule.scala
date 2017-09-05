@@ -29,8 +29,21 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule]) {
             Nil
         }
 
-      case IrNodeRegexRule(_, _) =>
-        Nil
+      case r @ IrNodeRegexRule(_, _) =>
+        (expected.value, actual.value) match {
+          case (Some(e), Some(a)) =>
+            if(e.isString && a.isString && a.asString.map(_.matches(r.regex)).getOrElse(false)) List(IrNodesEqual)
+            else List(IrNodesNotEqual(s"Regex '${r.regex}' did not match actual '${a.asString.getOrElse("<missing value>")}'", path))
+
+          case (Some(_), None) =>
+            List(IrNodesNotEqual(s"Missing actual value, could not check rule: " + r.renderAsString, path))
+
+          case (_, Some(_)) =>
+            List(IrNodesNotEqual(s"Missing expected value, could not check rule: " + r.renderAsString, path))
+
+          case (_, _) =>
+            Nil
+        }
 
       case IrNodeMinArrayLengthRule(len, _) =>
         List {

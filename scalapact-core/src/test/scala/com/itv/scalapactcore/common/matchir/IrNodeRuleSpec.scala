@@ -171,7 +171,9 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
 
       implicit val rules: IrNodeMatchingRules =
         IrNodeMatchingRules(
-          IrNodeMinArrayLengthRule(1, IrNodePathEmpty <~ "fish")
+          IrNodeMinArrayLengthRule(1, IrNodePathEmpty <~ "fish"),
+          IrNodeTypeRule(IrNodePathEmpty <~ "fish" <~ "*"),
+          IrNodeTypeRule(IrNodePathEmpty <~ "fish" <~ "*" <~ "id")
         )
 
       val expected: IrNode = MatchIr.fromJSON(
@@ -326,6 +328,38 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
 
       check(expected =<>= actual)
 
+    }
+
+    it("should be able to check types by wildcard") {
+
+      implicit val rules: IrNodeMatchingRules =
+        IrNodeMatchingRules(
+          IrNodeMinArrayLengthRule(1, IrNodePathEmpty <~ "fish"),
+          IrNodeTypeRule(IrNodePathEmpty <~ "fish"),
+          IrNodeTypeRule(IrNodePathEmpty <~ "fish" <~ "*" <*)
+        )
+
+      val expected: IrNode = MatchIr.fromJSON(
+        """
+          |{
+          |  "fish": [
+          |    { "name": "a" }
+          |  ]
+          |}
+        """.stripMargin
+      ).get
+
+      val actual: IrNode = MatchIr.fromJSON(
+        """
+          |{
+          |  "fish": [
+          |    { "name": 10 }
+          |  ]
+          |}
+        """.stripMargin
+      ).get
+
+      (expected =<>= actual).isEqual shouldEqual false
     }
 
   }

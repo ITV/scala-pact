@@ -10,15 +10,21 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
   def =<>=(other: IrNode)(implicit rules: IrNodeMatchingRules): IrNodeEqualityResult = isEqualTo(other, strict = true, rules)
 
   def isEqualTo(other: IrNode, strict: Boolean, rules: IrNodeMatchingRules): IrNodeEqualityResult = {
-    val equality = check[Boolean](nodeType(path), this.isJsonArray, other.isJsonArray) +
+
+    val nodeEquality = check[Boolean](nodeType(path), this.isJsonArray, other.isJsonArray) +
     check[String](labelTest(path), this.label, other.label) +
     check[Option[IrNodePrimitive]](valueTest(strict)(path)(rules), this.value, other.value) +
-    check[List[IrNode]](childrenTest(strict)(path)(rules)(this, other), this.children, other.children) +
     check[Option[String]](namespaceTest(path), this.ns, other.ns) +
     check[IrNodeAttributes](attributesTest(strict)(path)(rules), this.attributes, other.attributes) +
     check[IrNodePath](pathTest(strict)(path), this.path, other.path)
 
-    RuleChecks.checkForNode(rules, path, this, other).getOrElse(equality)
+    val childEquality = check[List[IrNode]](childrenTest(strict)(path)(rules)(this, other), this.children, other.children)
+
+    val ruleResults = RuleChecks.checkForNode(rules, path, this, other)
+
+    ruleResults
+      .map(_ + childEquality)
+      .getOrElse(nodeEquality + childEquality)
   }
 
   val arrays: Map[String, List[IrNode]] =
@@ -128,8 +134,7 @@ object IrNodeEqualityResult {
       val p = pi._1
       val i = pi._2
 
-      RuleChecks.checkForNode(rules, p._1.path, p._1, p._2)
-        .orElse(RuleChecks.checkForNode(rules, p._1.path <~ i, p._1.withPath(p._1.path <~ i), p._2.withPath(p._1.path <~ i)))
+      RuleChecks.checkForNode(rules, p._1.path <~ i, p._1.withPath(p._1.path <~ i), p._2.withPath(p._1.path <~ i))
         .getOrElse(p._1.isEqualTo(p._2, strict, rules))
     }
 
@@ -148,7 +153,7 @@ object IrNodeEqualityResult {
       } else {
         a.map { n1 =>
           b.find { n2 =>
-            RuleChecks.checkForNode(rules, n1.path, n1, n2).getOrElse(n1.isEqualTo(n2, strict, rules)).isEqual
+            n1.isEqualTo(n2, strict, rules).isEqual
           } match {
             case Some(_) => IrNodesEqual
             case None => IrNodesNotEqual(s"Could not find match for:\n${n1.renderAsString}", path)
