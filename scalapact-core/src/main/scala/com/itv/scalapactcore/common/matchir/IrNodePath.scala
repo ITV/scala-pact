@@ -1,5 +1,7 @@
 package com.itv.scalapactcore.common.matchir
 
+import com.itv.scalapactcore.common.matchir.PactPathPatterns.anyField
+
 import scala.annotation.tailrec
 import scala.language.postfixOps
 import scala.util.matching.Regex
@@ -64,6 +66,10 @@ object PactPath {
         case xmlTextElement(_, r) =>
           rec(r, acc text)
 
+        // Suffixes
+        case anyField(_, r) =>
+          rec(r, acc <*)
+
         // Unmatched, failure
         case _ =>
           PactPathParseFailure(pactPath, remaining, None)
@@ -103,6 +109,9 @@ object PactPathPatterns {
   // Xml addons
   val xmlAttributeName: Regex = """^@([a-zA-Z0-9:\-_]+)(.*)$""".r
   val xmlTextElement: Regex = """^#([a-zA-Z0-9:\-_]+)(.*)$""".r
+
+  // Suffixes
+  val anyField: Regex ="""^(\*)(.*)$""".r
 }
 
 object IrNodePath {
@@ -117,6 +126,7 @@ sealed trait IrNodePath {
   def isArrayWildcard: Boolean
   def isAttribute: Boolean
   def isTextElement: Boolean
+  def isAnyField: Boolean
 
   def <~(fieldName: String): IrNodePath =
     if(fieldName == "*") IrNodePathArrayAnyElement(this) else IrNodePathField(fieldName, this)
@@ -126,6 +136,8 @@ sealed trait IrNodePath {
   def <@(attributeName: String): IrNodePath = IrNodePathFieldAttribute(attributeName, this)
 
   def text: IrNodePath = IrNodePathTextElement(this)
+
+  def <* : IrNodePath = IrNodePathAnyField(this)
 
   def =~=(other: IrNodePath): Boolean = isEqualTo(other, strict = false)
   def ===(other: IrNodePath): Boolean = isEqualTo(other, strict = true)
@@ -165,6 +177,12 @@ sealed trait IrNodePath {
         case (IrNodePathArrayElement(_, parentA), IrNodePathArrayAnyElement(parentB)) =>
           rec(parentA, parentB)
 
+        case (IrNodePathAnyField(parentA), IrNodePathAnyField(parentB)) =>
+          rec(parentA, parentB)
+
+        case (IrNodePathAnyField(parentA), IrNodePathField(_, parentB)) =>
+          rec(parentA, parentB)
+
         case _ =>
           false
       }
@@ -200,6 +218,9 @@ sealed trait IrNodePath {
 
         case IrNodePathTextElement(parentNode) =>
           rec(parentNode, s"['#text']$acc")
+
+        case IrNodePathAnyField(parentNode) =>
+          rec(parentNode, s".*$acc")
       }
 
     rec(this, "")
@@ -215,6 +236,7 @@ case object IrNodePathEmpty extends IrNodePath {
   def isArrayWildcard: Boolean = false
   def isAttribute: Boolean = false
   def isTextElement: Boolean = false
+  def isAnyField: Boolean = false
 }
 case class IrNodePathField(fieldName: String, parent: IrNodePath) extends IrNodePath {
   def isEmpty: Boolean = false
@@ -223,6 +245,7 @@ case class IrNodePathField(fieldName: String, parent: IrNodePath) extends IrNode
   def isArrayWildcard: Boolean = false
   def isAttribute: Boolean = false
   def isTextElement: Boolean = false
+  def isAnyField: Boolean = false
 }
 case class IrNodePathArrayElement(index: Int, parent: IrNodePath) extends IrNodePath {
   def isEmpty: Boolean = false
@@ -231,6 +254,7 @@ case class IrNodePathArrayElement(index: Int, parent: IrNodePath) extends IrNode
   def isArrayWildcard: Boolean = false
   def isAttribute: Boolean = false
   def isTextElement: Boolean = false
+  def isAnyField: Boolean = false
 }
 case class IrNodePathArrayAnyElement(parent: IrNodePath) extends IrNodePath {
   def isEmpty: Boolean = false
@@ -239,6 +263,7 @@ case class IrNodePathArrayAnyElement(parent: IrNodePath) extends IrNodePath {
   def isArrayWildcard: Boolean = true
   def isAttribute: Boolean = false
   def isTextElement: Boolean = false
+  def isAnyField: Boolean = false
 }
 case class IrNodePathFieldAttribute(attributeName: String, parent: IrNodePath) extends IrNodePath {
   def isEmpty: Boolean = false
@@ -247,6 +272,7 @@ case class IrNodePathFieldAttribute(attributeName: String, parent: IrNodePath) e
   def isArrayWildcard: Boolean = false
   def isAttribute: Boolean = true
   def isTextElement: Boolean = false
+  def isAnyField: Boolean = false
 }
 case class IrNodePathTextElement(parent: IrNodePath) extends IrNodePath {
   def isEmpty: Boolean = false
@@ -255,4 +281,15 @@ case class IrNodePathTextElement(parent: IrNodePath) extends IrNodePath {
   def isArrayWildcard: Boolean = false
   def isAttribute: Boolean = false
   def isTextElement: Boolean = true
+  def isAnyField: Boolean = false
+}
+
+case class IrNodePathAnyField(parent: IrNodePath) extends IrNodePath {
+  def isEmpty: Boolean = false
+  def isField: Boolean = false
+  def isArrayIndex: Boolean = false
+  def isArrayWildcard: Boolean = false
+  def isAttribute: Boolean = false
+  def isTextElement: Boolean = false
+  def isAnyField: Boolean = true
 }

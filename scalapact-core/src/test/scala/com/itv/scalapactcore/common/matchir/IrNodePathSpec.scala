@@ -170,6 +170,20 @@ class IrNodePathSpec extends FunSpec with Matchers {
 
     }
 
+    it("should be able to cope with * fields") {
+      val jsonPath = "$.body.foo.*"
+
+      val expected = IrNodePathEmpty <~ "foo" <*
+
+      PactPath.fromPactPath(jsonPath) match {
+        case PactPathParseSuccess(irNodePath) =>
+          irNodePath === expected shouldEqual true
+
+        case e: PactPathParseFailure =>
+          fail(e.errorString)
+      }
+    }
+
   }
 
   describe("comparing two IrNodePaths") {
