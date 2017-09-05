@@ -6,4 +6,7 @@ object PlainTextEquality {
     expected.trim == received.trim
   }
 
+  def checkOutcome(expected: String, received: String): MatchOutcome =
+    if(expected.trim == received.trim) MatchOutcomeSuccess else MatchOutcomeFailed("Plain test bodies did not match")
+
 }

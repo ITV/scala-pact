@@ -140,7 +140,7 @@ object IrNodeEqualityResult {
 
   private def permissiveCheckChildren(path: IrNodePath, strict: Boolean, rules: IrNodeMatchingRules, a: List[IrNode], b: List[IrNode]): IrNodeEqualityResult =
     a.map { n1 =>
-      b.zipWithIndex.find { n2 =>
+      b.zipWithIndex.find { n2 => //TODO: zipWithIndex and array rules hack here can go with proper array path building!
         val p = n2._1
         val i = n2._2
 
@@ -241,8 +241,11 @@ case object IrNodesEqual extends IrNodeEqualityResult {
 case class IrNodesNotEqual(differences: List[IrNodeDiff]) extends IrNodeEqualityResult {
   val isEqual: Boolean = false
 
+  def renderDifferencesList: List[String] =
+    differences.map(d => s"""Node at: ${d.path.renderAsString}\n  ${d.message}""")
+
   def renderDifferences: String =
-    differences.map(d => s"""Node at: ${d.path.renderAsString}\n  ${d.message}""").mkString("\n")
+    renderDifferencesList.mkString("\n")
 }
 
 case class IrNodeDiff(message: String, path: IrNodePath)

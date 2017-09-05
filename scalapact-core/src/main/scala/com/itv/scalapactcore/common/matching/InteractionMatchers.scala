@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets
 
 import argonaut.Argonaut._
 import com.itv.scalapactcore.common.Helpers
+import com.itv.scalapactcore.common.matching.PathMatching.PathAndQuery
 import com.itv.scalapactcore.common.matchir._
 import com.itv.scalapactcore.{Interaction, InteractionRequest, InteractionResponse, MatchingRule}
 
@@ -12,39 +13,58 @@ import scala.xml._
 
 object InteractionMatchers {
 
-  def matchRequest(strictMatching: Boolean, interactions: List[Interaction], received: InteractionRequest): Either[String, Interaction] =
-    interactions.find { interaction =>
-      InteractionMatchingPrograms
-        .matchRequestProgram(interaction.request, received)
-        .foldMap {
-          if(strictMatching) MatchingInterpreters.Request.strict
-          else MatchingInterpreters.Request.permissive
-        }
-        .success
-    } match {
-      case Some(matching) => Right(matching)
-      case None => Left("No matching request for: " + received)
+  def matchRequest(strictMatching: Boolean, interactions: List[Interaction], received: InteractionRequest): Either[String, Interaction] = {
+    val result = interactions.find { interaction =>
+      matchSingleRequest(strictMatching, interaction.request.matchingRules, interaction.request, received).isSuccess
     }
 
-  def matchResponse(strictMatching: Boolean, interactions: List[Interaction]): InteractionResponse => Either[String, Interaction] = received =>
-    interactions.find { interaction =>
-      InteractionMatchingPrograms
-        .matchResponseProgram(interaction.response, received)
-        .foldMap {
-          if(strictMatching) MatchingInterpreters.Response.strict
-          else MatchingInterpreters.Response.permissive
-        }
-        .success
-    } match {
+    result match {
       case Some(matching) => Right(matching)
-      case None => Left("No matching response for: " + received)
+      case None => Left("No matching request for: " + received.renderAsString)
+    }
+  }
+
+  def matchSingleRequest(strictMatching: Boolean, rules: Option[Map[String, MatchingRule]], expected: InteractionRequest, received: InteractionRequest): MatchOutcome = {
+    if(strictMatching) {
+      MethodMatching.matchMethods(expected.method, received.method) +
+        PathMatching.matchPathsStrict(PathAndQuery(expected.path, expected.query), PathAndQuery(received.path, received.query)) +
+        HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
+        BodyMatching.matchBodiesStrict(rules, expected.body, received.body)
+    } else {
+      MethodMatching.matchMethods(expected.method, received.method) +
+        PathMatching.matchPaths(PathAndQuery(expected.path, expected.query), PathAndQuery(received.path, received.query)) +
+        HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
+        BodyMatching.matchBodies(rules, expected.body, received.body)
+    }
+  }
+
+  def matchResponse(strictMatching: Boolean, interactions: List[Interaction]): InteractionResponse => Either[String, Interaction] = received => {
+    val result = interactions.find { interaction =>
+      matchSingleResponse(strictMatching, interaction.response.matchingRules, interaction.response, received).isSuccess
+    }
+
+    result match {
+      case Some(matching) => Right(matching)
+      case None => Left("No matching response for: " + received.renderAsString)
+    }
+  }
+
+  def matchSingleResponse(strictMatching: Boolean, rules: Option[Map[String, MatchingRule]], expected: InteractionResponse, received: InteractionResponse): MatchOutcome =
+    if(strictMatching) {
+      StatusMatching.matchStatusCodes(expected.status, received.status) +
+        HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
+        BodyMatching.matchBodiesStrict(rules, expected.body, received.body)
+    } else {
+      StatusMatching.matchStatusCodes(expected.status, received.status) +
+        HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
+        BodyMatching.matchBodies(rules, expected.body, received.body)
     }
 
 }
 
 sealed trait GeneralMatcher {
 
-  protected def generalMatcher[A](expected: Option[A], received: Option[A], predicate: (A, A) => Boolean): Boolean =
+  protected def generalMatcher[A, GenericSuccess, GenericFailure](expected: Option[A], received: Option[A], predicate: (A, A) => Boolean): Boolean =
     (expected, received) match {
       case (None, None) => true
 
@@ -61,12 +81,35 @@ sealed trait GeneralMatcher {
       case (Some(e), Some(r)) => predicate(e, r)
     }
 
+  protected def generalOutcomeMatcher[A, Outcome, S <: Outcome, F <: Outcome](expected: Option[A], received: Option[A], defaultSuccess: S, defaultFailure: F, predicate: (A, A) => Outcome): Outcome =
+    (expected, received) match {
+      case (None, None) => defaultSuccess
+
+      case (Some(null), Some(null)) => defaultSuccess
+      case (None, Some(null)) => defaultSuccess
+      case (Some(null), None) => defaultSuccess
+
+      case (Some("null"), Some("null")) => defaultSuccess
+      case (None, Some("null")) => defaultSuccess
+      case (Some("null"), None) => defaultSuccess
+
+      case (None, Some(_)) => defaultSuccess
+      case (Some(_), None) => defaultFailure
+      case (Some(e), Some(r)) => predicate(e, r)
+    }
+
 }
 
 object StatusMatching extends GeneralMatcher {
 
-  def matchStatusCodes(expected: Option[Int], received: Option[Int]): Boolean =
-    generalMatcher(expected, received, (e: Int, r: Int) => e == r)
+  def matchStatusCodes(expected: Option[Int], received: Option[Int]): MatchOutcome =
+    generalOutcomeMatcher(
+      expected,
+      received,
+      MatchOutcomeSuccess,
+      MatchOutcomeFailed("Status codes did not match"),
+      (e: Int, r: Int) => if(e == r) MatchOutcomeSuccess else MatchOutcomeFailed(s"Status code '$e' did not match '$r'")
+    )
 
 }
 
@@ -74,19 +117,25 @@ object PathMatching extends GeneralMatcher {
 
   case class PathAndQuery(path: Option[String], query: Option[String])
 
-  def matchPaths(expected: PathAndQuery, received: PathAndQuery): Boolean =
-    matchPathsWithPredicate(expected, received) {
+  def matchPaths(expected: PathAndQuery, received: PathAndQuery): MatchOutcome = {
+    val matches = matchPathsWithPredicate(expected, received) {
       (ex: PathStructure, re: PathStructure) => {
         ex.path == re.path && equalListsOfTuples(ex.params, re.params)
       }
     }
 
-  def matchPathsStrict(expected: PathAndQuery, received: PathAndQuery): Boolean =
-    matchPathsWithPredicate(expected, received) {
+    if(matches) MatchOutcomeSuccess else MatchOutcomeFailed("Paths do not match")
+  }
+
+  def matchPathsStrict(expected: PathAndQuery, received: PathAndQuery): MatchOutcome = {
+    val matches = matchPathsWithPredicate(expected, received) {
       (ex: PathStructure, re: PathStructure) => {
         ex.path == re.path && ex.params.length == re.params.length && equalListsOfTuples(ex.params, re.params)
       }
     }
+
+    if(matches) MatchOutcomeSuccess else MatchOutcomeFailed("Paths do not match")
+  }
 
   private def matchPathsWithPredicate(expected: PathAndQuery, received: PathAndQuery)(predicate: (PathStructure, PathStructure) => Boolean): Boolean =
     generalMatcher(
@@ -138,14 +187,20 @@ object PathMatching extends GeneralMatcher {
 
 object MethodMatching extends GeneralMatcher {
 
-  def matchMethods(expected: Option[String], received: Option[String]): Boolean =
-    generalMatcher(expected, received, (e: String, r: String) => e.toUpperCase == r.toUpperCase)
+  def matchMethods(expected: Option[String], received: Option[String]): MatchOutcome =
+    generalOutcomeMatcher(
+      expected,
+      received,
+      MatchOutcomeSuccess,
+      MatchOutcomeFailed("Methods did not match"),
+      (e: String, r: String) => if(e.toUpperCase == r.toUpperCase) MatchOutcomeSuccess else MatchOutcomeFailed(s"Method '${e.toUpperCase}' did not match '${r.toUpperCase}'")
+    )
 
 }
 
 object HeaderMatching extends GeneralMatcher {
 
-  def matchHeaders(matchingRules: Option[Map[String, MatchingRule]], expected: Option[Map[String, String]], received: Option[Map[String, String]]): Boolean = {
+  def matchHeaders(matchingRules: Option[Map[String, MatchingRule]], expected: Option[Map[String, String]], received: Option[Map[String, String]]): MatchOutcome = {
 
     val legalCharSeparators = List('(',')','<','>','@',',',';',':','\\','"','/','[',']','?','=','{','}')
 
@@ -160,7 +215,7 @@ object HeaderMatching extends GeneralMatcher {
       }
     }
 
-    val predicate = (matchingRules: Option[Map[String, MatchingRule]]) => (e: Map[String, String], r: Map[String, String]) => {
+    val predicate: Option[Map[String, MatchingRule]] => (Map[String, String], Map[String, String]) => MatchOutcome = matchingRules => (e, r) => {
 
       val strippedMatchingRules = matchingRules.map { mmr =>
         mmr
@@ -195,10 +250,10 @@ object HeaderMatching extends GeneralMatcher {
         .toSet
         .subsetOf(r.map(p => standardise(p)).toSet)
 
-      noRuleMatchResult && withRuleMatchResult
+      if(noRuleMatchResult && withRuleMatchResult) MatchOutcomeSuccess else MatchOutcomeFailed("Headers did not match")
     }
 
-    generalMatcher(expected, received, predicate(matchingRules))
+    generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Headers did not match"), predicate(matchingRules))
   }
 
 }
@@ -206,71 +261,70 @@ object HeaderMatching extends GeneralMatcher {
 object BodyMatching extends GeneralMatcher {
 
   // TODO: Remove when we do proper error reporting for matching all the things. Side effect.
-  def matchResultToBoolean(irNodeEqualityResult: IrNodeEqualityResult): Boolean =
+  def nodeMatchToMatchResult(irNodeEqualityResult: IrNodeEqualityResult): MatchOutcome =
     irNodeEqualityResult match {
       case IrNodesEqual =>
-        true
+        MatchOutcomeSuccess
 
       case e: IrNodesNotEqual =>
-        println(e.renderDifferences)
-        false
+        MatchOutcomeFailed(e.renderDifferencesList)
     }
 
-  def matchBodies(matchingRules: Option[Map[String, MatchingRule]], expected: Option[String], received: Option[String]): Boolean = {
+  def matchBodies(matchingRules: Option[Map[String, MatchingRule]], expected: Option[String], received: Option[String]): MatchOutcome = {
     implicit val rules: IrNodeMatchingRules = IrNodeMatchingRules.fromPactRules(matchingRules)
 
     expected match {
       case Some(str) if stringIsJson(str) =>
-        val predicate = (e: String, r: String) =>
+        val predicate: (String, String) => MatchOutcome = (e, r) =>
           MatchIr.fromJSON(e).flatMap { ee =>
             MatchIr.fromJSON(r).map { rr =>
-              matchResultToBoolean(ee =~ rr)
+              nodeMatchToMatchResult(ee =~ rr)
             }
-          }.exists(_ == true) //2.10 compat
+          }.getOrElse(MatchOutcomeFailed("Failed to parse JSON body"))
 
-        generalMatcher(expected, received, predicate)
+        generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Body mismatch"), predicate)
 
       case Some(str) if stringIsXml(str) =>
-        val predicate = (e: String, r: String) =>
+        val predicate: (String, String) => MatchOutcome = (e, r) =>
           MatchIr.fromXml(e).flatMap { ee =>
             MatchIr.fromXml(r).map { rr =>
-              matchResultToBoolean(ee =~ rr)
+              nodeMatchToMatchResult(ee =~ rr)
             }
-          }.exists(_ == true) //2.10 compat
+          }.getOrElse(MatchOutcomeFailed("Failed to parse XML body"))
 
-        generalMatcher(expected, received, predicate)
+        generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Body mismatch"), predicate)
 
       case _ =>
-        generalMatcher(expected, received, (e: String, r: String) => PlainTextEquality.check(e, r))
+        generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Body mismatch"), (e: String, r: String) => PlainTextEquality.checkOutcome(e, r))
     }
   }
 
-  def matchBodiesStrict(beSelectivelyPermissive: Boolean, matchingRules: Option[Map[String, MatchingRule]], expected: Option[String], received: Option[String]): Boolean = {
+  def matchBodiesStrict(matchingRules: Option[Map[String, MatchingRule]], expected: Option[String], received: Option[String]): MatchOutcome = {
     implicit val rules: IrNodeMatchingRules = IrNodeMatchingRules.fromPactRules(matchingRules)
 
     expected match {
       case Some(str) if stringIsJson(str) =>
-        val predicate = (e: String, r: String) =>
+        val predicate: (String, String) => MatchOutcome = (e, r) =>
           MatchIr.fromJSON(e).flatMap { ee =>
             MatchIr.fromJSON(r).map { rr =>
-              matchResultToBoolean(ee =<>= rr)
+              nodeMatchToMatchResult(ee =<>= rr)
             }
-          }.exists(_ == true) //2.10 compat
+          }.getOrElse(MatchOutcomeFailed("Failed to parse JSON body"))
 
-        generalMatcher(expected, received, predicate)
+        generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Body mismatch"), predicate)
 
       case Some(str) if stringIsXml(str) =>
-        val predicate = (e: String, r: String) =>
+        val predicate: (String, String) => MatchOutcome = (e, r) =>
           MatchIr.fromXml(e).flatMap { ee =>
             MatchIr.fromXml(r).map { rr =>
-              matchResultToBoolean(ee =<>= rr)
+              nodeMatchToMatchResult(ee =<>= rr)
             }
-          }.exists(_ == true) //2.10 compat
+          }.getOrElse(MatchOutcomeFailed("Failed to parse XML body"))
 
-        generalMatcher(expected, received, predicate)
+        generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Body mismatch"), predicate)
 
       case _ =>
-        generalMatcher(expected, received, (e: String, r: String) => PlainTextEquality.check(e, r))
+        generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Body mismatch"), (e: String, r: String) => PlainTextEquality.checkOutcome(e, r))
     }
   }
 

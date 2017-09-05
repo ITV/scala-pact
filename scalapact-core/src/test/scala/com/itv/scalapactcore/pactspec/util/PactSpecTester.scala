@@ -2,6 +2,7 @@ package com.itv.scalapactcore.pactspec.util
 
 import com.itv.scalapactcore.{Interaction, InteractionRequest, InteractionResponse}
 import com.itv.scalapactcore.common.matching.InteractionMatchers._
+import com.itv.scalapactcore.common.matching.{MatchOutcomeFailed, MatchOutcomeSuccess}
 import org.scalatest.{FunSpec, Matchers}
 
 trait PactSpecTester extends FunSpec with Matchers {
@@ -40,15 +41,15 @@ trait PactSpecTester extends FunSpec with Matchers {
   }
 
   private def doRequestMatch(spec: RequestSpec, i: Interaction, strictMatching: Boolean, shouldMatch: Boolean, path: String): Unit = {
-    matchRequest(strictMatching, i :: Nil, spec.actual) match {
-      case Right(_) =>
+    matchSingleRequest(strictMatching, i.request.matchingRules, i.request, spec.actual) match {
+      case MatchOutcomeSuccess =>
         // Found a match
         if (shouldMatch) 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
-        else fail(makeErrorString(path, spec.comment, strictMatching, spec.actual.renderAsString, spec.expected.renderAsString))
+        else fail(makeErrorString(shouldMatch, path, spec.comment, strictMatching, spec.actual.renderAsString, spec.expected.renderAsString, ""))
 
-      case Left(_) =>
+      case e: MatchOutcomeFailed =>
         // Failed to match
-        if (shouldMatch) fail(makeErrorString(path, spec.comment, strictMatching, spec.actual.renderAsString, spec.expected.renderAsString))
+        if (shouldMatch) fail(makeErrorString(shouldMatch, path, spec.comment, strictMatching, spec.actual.renderAsString, spec.expected.renderAsString, e.renderDifferences))
         else 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
     }
   }
@@ -84,21 +85,21 @@ trait PactSpecTester extends FunSpec with Matchers {
   }
 
   private def doResponseMatch(spec: ResponseSpec, i: Interaction, strictMatching: Boolean, shouldMatch: Boolean, path: String): Unit = {
-    matchResponse(strictMatching, i :: Nil)(spec.actual) match {
-      case Right(_) =>
+    matchSingleResponse(strictMatching, i.response.matchingRules, i.response, spec.actual) match {
+      case MatchOutcomeSuccess =>
         // Found a match
         if (shouldMatch) 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
-        else fail(makeErrorString(path, spec.comment, strictMatching, spec.actual.renderAsString, spec.expected.renderAsString))
+        else fail(makeErrorString(shouldMatch, path, spec.comment, strictMatching, spec.actual.renderAsString, spec.expected.renderAsString, ""))
 
-      case Left(_) =>
+      case e: MatchOutcomeFailed =>
         // Failed to match
-        if (shouldMatch) fail(makeErrorString(path, spec.comment, strictMatching, spec.actual.renderAsString, spec.expected.renderAsString))
+        if (shouldMatch) fail(makeErrorString(shouldMatch, path, spec.comment, strictMatching, spec.actual.renderAsString, spec.expected.renderAsString, e.renderDifferences))
         else 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
     }
   }
 
-  private def makeErrorString(path: String, comment: String, strictMatching: Boolean, actual: String, expected: String): String = {
-    s"[$path] " + comment + "\nStrict matching: '" + strictMatching + "\n\nExpected:\n" + expected + "'\nActual:\n" + actual + "\n"
+  private def makeErrorString(shouldMatch: Boolean, path: String, comment: String, strictMatching: Boolean, actual: String, expected: String, differences: String): String = {
+    s"Expected match: $shouldMatch\n[$path] " + comment + "\nStrict matching: '" + strictMatching + "\n\nExpected:\n" + expected + "'\nActual:\n" + actual + "\nMatch Errors: [\n"+ differences +"\n]"
   }
 
 }
