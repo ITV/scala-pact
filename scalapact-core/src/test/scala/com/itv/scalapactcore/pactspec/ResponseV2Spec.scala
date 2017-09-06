@@ -36,6 +36,7 @@ class ResponseV2Spec extends PactSpecTester {
       testResponseSpecs(
         List(
           fetchResponseSpec("/response/body/additional property with type matcher.json")(StrictAndNonStrict),
+          fetchResponseSpec("/response/body/additional property with type matcher that does not match.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/array at top level with matchers xml.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/array at top level with matchers.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/array at top level xml.json")(StrictAndNonStrict),
@@ -63,6 +64,8 @@ class ResponseV2Spec extends PactSpecTester {
           fetchResponseSpec("/response/body/matches with type.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/matches xml.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/matches.json")(StrictAndNonStrict),
+          fetchResponseSpec("/response/body/matches with floats.json")(StrictAndNonStrict),
+          fetchResponseSpec("/response/body/matches with integers.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/missing body found when empty expected.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/missing body no content type.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/missing body xml.json")(StrictAndNonStrict),
@@ -104,6 +107,7 @@ class ResponseV2Spec extends PactSpecTester {
           fetchResponseSpec("/response/body/unexpected index with null value.json")(StrictOnly),
           fetchResponseSpec("/response/body/unexpected key with empty value xml.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/unexpected key with non-empty value xml.json")(StrictAndNonStrict),
+          fetchResponseSpec("/response/body/unexpected key with not null value.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/unexpected key with null value.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/value found in array when empty expected xml.json")(StrictAndNonStrict)
         )
