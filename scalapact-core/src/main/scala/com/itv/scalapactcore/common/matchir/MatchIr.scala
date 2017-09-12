@@ -160,7 +160,11 @@ trait XmlConversionFunctions extends PrimitiveConversionFunctions {
               false
           }
 
-        IrNode(node.label, None, children, Option(node.prefix), convertAttributes(node.attributes.asAttrMap, initialPath <~ node.label), isArray, initialPath <~ node.label)
+        val updatedChildren =
+          if (isArray) children.zipWithIndex.map(ci => ci._1.withPath(ci._1.path <~ ci._2))
+          else children
+
+        IrNode(node.label, None, updatedChildren, Option(node.prefix), convertAttributes(node.attributes.asAttrMap, initialPath <~ node.label), isArray, initialPath <~ node.label)
     }
 
 }

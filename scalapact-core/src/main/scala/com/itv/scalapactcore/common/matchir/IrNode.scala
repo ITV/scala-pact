@@ -130,22 +130,14 @@ object IrNodeEqualityResult {
     }
 
   private def strictCheckChildren(strict: Boolean, rules: IrNodeMatchingRules, a: List[IrNode], b: List[IrNode]): IrNodeEqualityResult =
-    a.zip(b).zipWithIndex.map { pi =>
-      val p = pi._1
-      val i = pi._2
-
-      RuleChecks.checkForNode(rules, p._1.path <~ i, p._1.withPath(p._1.path <~ i), p._2.withPath(p._1.path <~ i))
-        .getOrElse(p._1.isEqualTo(p._2, strict, rules))
+    a.zip(b).map { p =>
+        p._1.isEqualTo(p._2, strict, rules)
     }
 
   private def permissiveCheckChildren(path: IrNodePath, strict: Boolean, rules: IrNodeMatchingRules, a: List[IrNode], b: List[IrNode]): IrNodeEqualityResult =
     a.map { n1 =>
-      b.zipWithIndex.find { n2 => //TODO: zipWithIndex and array rules hack here can go with proper array path building!
-        val p = n2._1
-        val i = n2._2
-
-        RuleChecks.checkForNode(rules, path <~ i, n1.withPath(n1.path <~ i), p.withPath(n1.path <~ i))
-          .getOrElse(n1.isEqualTo(n2._1, strict, rules)).isEqual
+      b.find { n2 =>
+          n1.isEqualTo(n2, strict, rules).isEqual
       } match {
         case Some(_) => IrNodesEqual
         case None => IrNodesNotEqual(s"Could not find match for:\n${n1.renderAsString}", path)

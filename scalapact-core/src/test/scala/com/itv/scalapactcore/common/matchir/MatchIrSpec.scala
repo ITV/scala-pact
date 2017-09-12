@@ -31,8 +31,8 @@ class MatchIrSpec extends FunSpec with Matchers {
         IrNode(
           "fish",
           List(
-            IrNode("breed", IrStringNode("cod")).withPath(IrNodePathEmpty <~ "fish" <~ "breed"),
-            IrNode("breed", IrStringNode("haddock")).withPath(IrNodePathEmpty <~ "fish" <~ "breed")
+            IrNode("breed", IrStringNode("cod")).withPath(IrNodePathEmpty <~ "fish" <~ "breed" <~ 0),
+            IrNode("breed", IrStringNode("haddock")).withPath(IrNodePathEmpty <~ "fish" <~ "breed" <~ 1)
           )
         ).withPath(IrNodePathEmpty <~ "fish").markAsArray(true)
 
