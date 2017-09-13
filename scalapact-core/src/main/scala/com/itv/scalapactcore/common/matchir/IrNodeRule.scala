@@ -33,7 +33,7 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
   def findForPath(path: IrNodePath): List[IrNodeRule] = {
     val res = rules.filter(_.path.noText === path.noText)
 
-    RuleProcessTracing.log("findForPath: " + res.map(_.renderAsString).mkString(", "))
+    RuleProcessTracing.log(s"findForPath [${path.renderAsString}]:" + res.map(_.renderAsString).mkString(", "))
 
     res
   }
@@ -43,7 +43,7 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
 
     findForPath(path).flatMap {
       case r @ IrNodeTypeRule(_) =>
-        RuleProcessTracing.log("Checking type...")
+        RuleProcessTracing.log("Checking node level type rule against values...")
 
         val res = (expected.value, actual.value) match {
           case (Some(e), Some(a)) =>
@@ -57,7 +57,8 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
             List(IrNodesNotEqual(s"Missing expected value, could not check rule: " + r.renderAsString, path))
 
           case (_, _) =>
-            Nil
+            RuleProcessTracing.log(" ...no values")
+            List(IrNodesEqual)
         }
 
         RuleProcessTracing.log(s"  ...${res.map(p => if(p.isEqual) "success" else "failure").mkString(", ")}")
@@ -101,6 +102,8 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
   }
 
   def findAncestralTypeRule(path: IrNodePath): List[IrNodeRule] = {
+    RuleProcessTracing.log("Finding ancestral type rule")
+
     val res = (path, findForPath(path.parent).find(p => p.isTypeRule).toList) match {
       case (IrNodePathEmpty, l) =>
         l
@@ -112,7 +115,7 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
         l
     }
 
-    RuleProcessTracing.log("findAncestralTypeRule: " + res.map(_.renderAsString).mkString(", "))
+    RuleProcessTracing.log(s"findAncestralTypeRule [${path.renderAsString}]: " + res.map(_.renderAsString).mkString(", "))
 
     res
   }
@@ -168,6 +171,22 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
         RuleProcessTracing.log("Checking failed, unexpected condition met.")
         None
     }.collect { case Some(s) => s }
+  }
+
+  def findMinArrayLengthRule(path: IrNodePath): IrNodeMatchingRules = {
+    RuleProcessTracing.log("Finding min array length rule")
+
+    val res = findForPath(path).find(p => p.isMinArrayLengthRule) match {
+      case Some(r) =>
+        List(r)
+
+      case None =>
+        Nil
+    }
+
+    RuleProcessTracing.log(s"findMinArrayLengthRule [${path.renderAsString}]: " + res.map(_.renderAsString).mkString(", "))
+
+    IrNodeMatchingRules(res, withTracing)
   }
 
   def renderAsString: String = s"Rules:\n - ${rules.map(r => r.renderAsString).mkString("\n - ")}"

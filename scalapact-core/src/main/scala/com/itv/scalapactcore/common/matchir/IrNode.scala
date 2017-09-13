@@ -148,7 +148,13 @@ object IrNodeEqualityResult {
     strict => path => rules => (parentA, parentB) => (a, b) => {
       if (strict) {
         if (a.length != b.length) {
-          val parentCheck: Option[IrNodeEqualityResult] = RuleChecks.checkForNode(rules, parentA.path, parentA, parentB)
+          val parentCheck: Option[IrNodeEqualityResult] =
+            RuleChecks.checkForNode(
+              rules.findMinArrayLengthRule(parentA.path),
+              parentA.path,
+              parentA,
+              parentB
+            )
 
           val childrenCheck: IrNodeEqualityResult = strictCheckChildren(strict, rules, a, b)
 

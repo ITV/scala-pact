@@ -394,7 +394,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
 
       val res = expected =<>= actual
 
-      println(res.renderAsString)
+//      println(res.renderAsString)
 
       res.isEqual shouldEqual false
     }
