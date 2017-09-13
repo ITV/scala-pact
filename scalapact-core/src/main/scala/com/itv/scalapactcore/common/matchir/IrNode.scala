@@ -2,7 +2,7 @@ package com.itv.scalapactcore.common.matchir
 
 import scala.language.{implicitConversions, postfixOps}
 
-case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[IrNode], ns: Option[String], attributes: IrNodeAttributes, isArray: Boolean, path: IrNodePath) {
+case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[IrNode], ns: Option[String], attributes: IrNodeAttributes, isArray: Boolean, isXml: Boolean, path: IrNodePath) {
 
   import IrNodeEqualityResult._
 
@@ -35,7 +35,8 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
   def withNamespace(ns: String): IrNode = this.copy(ns = Option(ns))
   def withAttributes(attributes: IrNodeAttributes): IrNode = this.copy(attributes = attributes)
   def withPath(path: IrNodePath): IrNode = this.copy(path = path)
-  def markAsArray(boolean: Boolean): IrNode = this.copy(isArray = boolean)
+  def markAsArray: IrNode = this.copy(isArray = true)
+  def markAsXml: IrNode = this.copy(isXml = true)
 
   def renderAsString: String = renderAsString(0)
 
@@ -255,22 +256,22 @@ object IrNodesNotEqual {
 object IrNode {
 
   def empty: IrNode =
-    IrNode("", None, Nil, None, IrNodeAttributes.empty, isArray = false, IrNodePathEmpty)
+    IrNode("", None, Nil, None, IrNodeAttributes.empty, isArray = false, isXml = false, IrNodePathEmpty)
 
   def apply(label: String): IrNode =
-    IrNode(label, None, Nil, None, IrNodeAttributes.empty, isArray = false, IrNodePathEmpty)
+    IrNode(label, None, Nil, None, IrNodeAttributes.empty, isArray = false, isXml = false, IrNodePathEmpty)
 
   def apply(label: String, value: IrNodePrimitive): IrNode =
-    IrNode(label, Option(value), Nil, None, IrNodeAttributes.empty, isArray = false, IrNodePathEmpty)
+    IrNode(label, Option(value), Nil, None, IrNodeAttributes.empty, isArray = false, isXml = false, IrNodePathEmpty)
 
   def apply(label: String, value: Option[IrNodePrimitive]): IrNode =
-    IrNode(label, value, Nil, None, IrNodeAttributes.empty, isArray = false, IrNodePathEmpty)
+    IrNode(label, value, Nil, None, IrNodeAttributes.empty, isArray = false, isXml = false, IrNodePathEmpty)
 
   def apply(label: String, children: IrNode*): IrNode =
-    IrNode(label, None, children.toList, None, IrNodeAttributes.empty, isArray = false, IrNodePathEmpty)
+    IrNode(label, None, children.toList, None, IrNodeAttributes.empty, isArray = false, isXml = false, IrNodePathEmpty)
 
   def apply(label: String, children: List[IrNode]): IrNode =
-    IrNode(label, None, children, None, IrNodeAttributes.empty, isArray = false, IrNodePathEmpty)
+    IrNode(label, None, children, None, IrNodeAttributes.empty, isArray = false, isXml = false, IrNodePathEmpty)
 
 }
 

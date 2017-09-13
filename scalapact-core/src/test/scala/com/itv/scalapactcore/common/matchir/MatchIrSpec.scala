@@ -17,7 +17,7 @@ class MatchIrSpec extends FunSpec with Matchers {
       val xml: String = <fish></fish>.toString()
 
       val ir: IrNode =
-        IrNode("fish").withPath(IrNodePathEmpty <~ "fish")
+        IrNode("fish").withPath(IrNodePathEmpty <~ "fish").markAsXml
 
       check(MatchIr.fromXml(xml).get =<>= ir)
 
@@ -31,10 +31,10 @@ class MatchIrSpec extends FunSpec with Matchers {
         IrNode(
           "fish",
           List(
-            IrNode("breed", IrStringNode("cod")).withPath(IrNodePathEmpty <~ "fish" <~ "breed" <~ 0),
-            IrNode("breed", IrStringNode("haddock")).withPath(IrNodePathEmpty <~ "fish" <~ "breed" <~ 1)
+            IrNode("breed", IrStringNode("cod")).withPath(IrNodePathEmpty <~ "fish" <~ "breed" <~ 0).markAsXml,
+            IrNode("breed", IrStringNode("haddock")).withPath(IrNodePathEmpty <~ "fish" <~ "breed" <~ 1).markAsXml
           )
-        ).withPath(IrNodePathEmpty <~ "fish").markAsArray(true)
+        ).withPath(IrNodePathEmpty <~ "fish").markAsArray.markAsXml
 
       val expected = MatchIr.fromXml(xml).get
 
@@ -52,11 +52,11 @@ class MatchIrSpec extends FunSpec with Matchers {
         IrNode(
           "fish",
           List(
-            IrNode("breed", IrStringNode("cod")).withPath(IrNodePathEmpty <~ "fish" <~ "breed"),
-            IrNode("breed", IrStringNode("haddock")).withPath(IrNodePathEmpty <~ "fish" <~ "breed"),
-            IrNode("chips").withPath(IrNodePathEmpty <~ "fish" <~ "chips")
+            IrNode("breed", IrStringNode("cod")).withPath(IrNodePathEmpty <~ "fish" <~ "breed").markAsXml,
+            IrNode("breed", IrStringNode("haddock")).withPath(IrNodePathEmpty <~ "fish" <~ "breed").markAsXml,
+            IrNode("chips").withPath(IrNodePathEmpty <~ "fish" <~ "chips").markAsXml
           )
-        ).withPath(IrNodePathEmpty <~ "fish").markAsArray(false)
+        ).withPath(IrNodePathEmpty <~ "fish").markAsXml
 
       val expected = MatchIr.fromXml(xml).get
 
@@ -76,8 +76,8 @@ class MatchIrSpec extends FunSpec with Matchers {
             .withAttributes(
               IrNodeAttributes(Map("name" -> IrNodeAttribute(IrStringNode("Mary"), IrNodePathEmpty <~ "animals" <~ "alligator" <@ "name")))
             )
-            .withPath(IrNodePathEmpty <~ "animals" <~ "alligator")
-        ).withPath(IrNodePathEmpty <~ "animals")
+            .withPath(IrNodePathEmpty <~ "animals" <~ "alligator").markAsXml
+        ).withPath(IrNodePathEmpty <~ "animals").markAsXml
 
       check(MatchIr.fromXml(xml).get =<>= ir)
 
@@ -88,7 +88,7 @@ class MatchIrSpec extends FunSpec with Matchers {
       val xml: String = <fish>haddock</fish>.toString()
 
       val ir: IrNode =
-        IrNode("fish", IrStringNode("haddock")).withPath(IrNodePathEmpty <~ "fish")
+        IrNode("fish", IrStringNode("haddock")).withPath(IrNodePathEmpty <~ "fish").markAsXml
 
       check(MatchIr.fromXml(xml).get =<>= ir)
 
@@ -102,6 +102,7 @@ class MatchIrSpec extends FunSpec with Matchers {
         IrNode("fish", IrStringNode("haddock"))
           .withNamespace("ns1")
           .withPath(IrNodePathEmpty <~ "fish")
+          .markAsXml
 
       check(MatchIr.fromXml(xml).get =<>= ir)
 
@@ -123,6 +124,7 @@ class MatchIrSpec extends FunSpec with Matchers {
             )
           )
           .withPath(IrNodePathEmpty <~ "fish")
+          .markAsXml
 
       check(MatchIr.fromXml(xml).get =<>= ir)
 
@@ -133,7 +135,7 @@ class MatchIrSpec extends FunSpec with Matchers {
       val xml: String = <fish><breed>cod</breed></fish>.toString()
 
       val ir: IrNode =
-        IrNode("fish", IrNode("breed", IrStringNode("cod")).withPath(IrNodePathEmpty <~ "fish" <~ "breed")).withPath(IrNodePathEmpty <~ "fish")
+        IrNode("fish", IrNode("breed", IrStringNode("cod")).withPath(IrNodePathEmpty <~ "fish" <~ "breed").markAsXml).withPath(IrNodePathEmpty <~ "fish").markAsXml
 
       check(MatchIr.fromXml(xml).get =<>= ir)
 
@@ -222,7 +224,7 @@ class MatchIrSpec extends FunSpec with Matchers {
           IrNode(MatchIr.unnamedNodeLabel, IrNumberNode(1)).withPath(IrNodePathEmpty <~ 0),
           IrNode(MatchIr.unnamedNodeLabel, IrNumberNode(2)).withPath(IrNodePathEmpty <~ 1),
           IrNode(MatchIr.unnamedNodeLabel, IrNumberNode(3)).withPath(IrNodePathEmpty <~ 2)
-        ).withPath(IrNodePathEmpty).markAsArray(true)
+        ).withPath(IrNodePathEmpty).markAsArray
 
       check(MatchIr.fromJSON(json).get =<>= ir)
 
@@ -262,7 +264,7 @@ class MatchIrSpec extends FunSpec with Matchers {
               IrNode("breed", IrStringNode("haddock")).withPath(IrNodePathEmpty <~ 1 <~ "fish" <~ "breed")
             ).withPath(IrNodePathEmpty <~ 1 <~ "fish")
           ).withPath(IrNodePathEmpty <~ 1)
-        ).withPath(IrNodePathEmpty).markAsArray(true)
+        ).withPath(IrNodePathEmpty).markAsArray
 
       check(MatchIr.fromJSON(json).get =<>= ir)
 
@@ -312,7 +314,7 @@ class MatchIrSpec extends FunSpec with Matchers {
                 IrNode("breed", IrStringNode("haddock")).withPath(IrNodePathEmpty <~ "river" <~ 1 <~ "fish" <~ "breed")
               ).withPath(IrNodePathEmpty <~ "river" <~ 1 <~ "fish")
             ).withPath(IrNodePathEmpty <~ "river" <~ 1)
-          ).withPath(IrNodePathEmpty <~ "river").markAsArray(true),
+          ).withPath(IrNodePathEmpty <~ "river").markAsArray,
           IrNode(
             "riverbank",
             IrNode(
@@ -333,7 +335,7 @@ class MatchIrSpec extends FunSpec with Matchers {
                 "flowers",
                 IrStringNode("dandelions")
               ).withPath(IrNodePathEmpty <~ "riverbank" <~ "flowers" <~ 2)
-            ).withPath(IrNodePathEmpty <~ "riverbank" <~ "flowers").markAsArray(true)
+            ).withPath(IrNodePathEmpty <~ "riverbank" <~ "flowers").markAsArray
           ).withPath(IrNodePathEmpty <~ "riverbank")
         ).withPath(IrNodePathEmpty)
 
