@@ -11,7 +11,7 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
 
   def isEqualTo(other: IrNode, strict: Boolean, rules: IrNodeMatchingRules): IrNodeEqualityResult = {
 
-    val nodeEquality = check[Boolean](nodeType(path), this.isArray, other.isArray) +
+    val nodeEquality = check[Boolean](nodeType(path)(this.isXml), this.isArray, other.isArray) +
     check[String](labelTest(path), this.label, other.label) +
     check[Option[IrNodePrimitive]](valueTest(strict)(path)(rules), this.value, other.value) +
     check[Option[String]](namespaceTest(path), this.ns, other.ns) +
@@ -55,13 +55,15 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
 
 object IrNodeEqualityResult {
 
-  val nodeType: IrNodePath => (Boolean, Boolean) => IrNodeEqualityResult =
-    path => (a, b) => {
-      val f = (bb: Boolean) => if(bb) "array" else "object"
+  val nodeType: IrNodePath => Boolean => (Boolean, Boolean) => IrNodeEqualityResult =
+    path => isXml => (a, b) =>
+      if (isXml) IrNodesEqual
+      else {
+        val f = (bb: Boolean) => if(bb) "array" else "object"
 
-      if(a == b) IrNodesEqual
-      else IrNodesNotEqual(s"Expected type '${f(a)}' but got '${f(b)}'", path)
-    }
+        if(a == b) IrNodesEqual
+        else IrNodesNotEqual(s"Expected type '${f(a)}' but got '${f(b)}'", path)
+      }
 
   val labelTest: IrNodePath => (String, String) => IrNodeEqualityResult =
     path => (a, b) => {
