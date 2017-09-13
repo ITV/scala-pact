@@ -128,6 +128,8 @@ sealed trait IrNodePath {
   def isTextElement: Boolean
   def isAnyField: Boolean
 
+  def giveArrayIndex: Int
+
   def <~(fieldName: String): IrNodePath =
     if(fieldName == "*") IrNodePathArrayAnyElement(this) else IrNodePathField(fieldName, this)
 
@@ -237,6 +239,7 @@ case object IrNodePathEmpty extends IrNodePath {
   def isAttribute: Boolean = false
   def isTextElement: Boolean = false
   def isAnyField: Boolean = false
+  def giveArrayIndex: Int = 0
 }
 case class IrNodePathField(fieldName: String, parent: IrNodePath) extends IrNodePath {
   def isEmpty: Boolean = false
@@ -246,6 +249,7 @@ case class IrNodePathField(fieldName: String, parent: IrNodePath) extends IrNode
   def isAttribute: Boolean = false
   def isTextElement: Boolean = false
   def isAnyField: Boolean = false
+  def giveArrayIndex: Int = 0
 }
 case class IrNodePathArrayElement(index: Int, parent: IrNodePath) extends IrNodePath {
   def isEmpty: Boolean = false
@@ -255,6 +259,7 @@ case class IrNodePathArrayElement(index: Int, parent: IrNodePath) extends IrNode
   def isAttribute: Boolean = false
   def isTextElement: Boolean = false
   def isAnyField: Boolean = false
+  def giveArrayIndex: Int = index
 }
 case class IrNodePathArrayAnyElement(parent: IrNodePath) extends IrNodePath {
   def isEmpty: Boolean = false
@@ -264,6 +269,7 @@ case class IrNodePathArrayAnyElement(parent: IrNodePath) extends IrNodePath {
   def isAttribute: Boolean = false
   def isTextElement: Boolean = false
   def isAnyField: Boolean = false
+  def giveArrayIndex: Int = 0
 }
 case class IrNodePathFieldAttribute(attributeName: String, parent: IrNodePath) extends IrNodePath {
   def isEmpty: Boolean = false
@@ -273,6 +279,7 @@ case class IrNodePathFieldAttribute(attributeName: String, parent: IrNodePath) e
   def isAttribute: Boolean = true
   def isTextElement: Boolean = false
   def isAnyField: Boolean = false
+  def giveArrayIndex: Int = 0
 }
 case class IrNodePathTextElement(parent: IrNodePath) extends IrNodePath {
   def isEmpty: Boolean = false
@@ -282,6 +289,7 @@ case class IrNodePathTextElement(parent: IrNodePath) extends IrNodePath {
   def isAttribute: Boolean = false
   def isTextElement: Boolean = true
   def isAnyField: Boolean = false
+  def giveArrayIndex: Int = 0
 }
 
 case class IrNodePathAnyField(parent: IrNodePath) extends IrNodePath {
@@ -292,4 +300,5 @@ case class IrNodePathAnyField(parent: IrNodePath) extends IrNodePath {
   def isAttribute: Boolean = false
   def isTextElement: Boolean = false
   def isAnyField: Boolean = true
+  def giveArrayIndex: Int = 0
 }

@@ -30,8 +30,12 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
   def withProcessTracing: IrNodeMatchingRules = this.copy(withTracing = RuleProcessTracing.enabled)
   def withProcessTracing(context: String): IrNodeMatchingRules = this.copy(withTracing = RuleProcessTracing.enabled.withContext(context))
 
-  def findForPath(path: IrNodePath): List[IrNodeRule] = {
-    val res = rules.filter(_.path.noText === path.noText)
+  def findForPath(path: IrNodePath, isXml: Boolean): List[IrNodeRule] = {
+    val res =
+      if(isXml && path.isField)
+        rules.filter(p => (p.path.noText === path.noText) || (p.path.noText === (path.noText <~ 0)))
+      else
+        rules.filter(_.path.noText === path.noText)
 
     RuleProcessTracing.log(s"findForPath [${path.renderAsString}]:" + res.map(_.renderAsString).mkString(", "))
 
@@ -41,7 +45,7 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
   def validateNode(path: IrNodePath, expected: IrNode, actual: IrNode): List[IrNodeEqualityResult] = {
     RuleProcessTracing.log("validateNode at: " + path.renderAsString)
 
-    findForPath(path).flatMap {
+    findForPath(path, expected.isXml).flatMap {
       case r @ IrNodeTypeRule(_) =>
         RuleProcessTracing.log("Checking node level type rule against values...")
 
@@ -66,7 +70,7 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
         res
 
       case r @ IrNodeRegexRule(_, _) =>
-        RuleProcessTracing.log("Checking regex...")
+        RuleProcessTracing.log(s"Checking regex on '${actual.value.flatMap(_.asString).getOrElse("")}'...")
 
         val res = (expected.value, actual.value) match {
           case (Some(e), Some(a)) =>
@@ -101,15 +105,15 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
     }
   }
 
-  def findAncestralTypeRule(path: IrNodePath): List[IrNodeRule] = {
+  def findAncestralTypeRule(path: IrNodePath, isXml: Boolean): List[IrNodeRule] = {
     RuleProcessTracing.log("Finding ancestral type rule")
 
-    val res = (path, findForPath(path.parent).find(p => p.isTypeRule).toList) match {
+    val res = (path, findForPath(path.parent, isXml).find(p => p.isTypeRule).toList) match {
       case (IrNodePathEmpty, l) =>
         l
 
       case (p, Nil) =>
-        findAncestralTypeRule(p.parent)
+        findAncestralTypeRule(p.parent, isXml)
 
       case (_, l) =>
         l
@@ -122,9 +126,9 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
 
   def validatePrimitive(path: IrNodePath, expected: IrNodePrimitive, actual: IrNodePrimitive, checkParentTypeRule: Boolean): List[IrNodeEqualityResult] = {
     RuleProcessTracing.log(s"validatePrimitive (checkParentTypeRule=$checkParentTypeRule) at: " + path.renderAsString)
-    val parentTypeRules = if(checkParentTypeRule) findAncestralTypeRule(path) else Nil
+    val parentTypeRules = if(checkParentTypeRule) findAncestralTypeRule(path, isXml = false) else Nil
 
-    (parentTypeRules ++ findForPath(path)).map {
+    (parentTypeRules ++ findForPath(path, isXml = false)).map {
       case IrNodeTypeRule(_) =>
         RuleProcessTracing.log("Checking type...")
         val res = Option {
@@ -137,7 +141,7 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
         res
 
       case IrNodeRegexRule(regex, _) if expected.isString && actual.isString =>
-        RuleProcessTracing.log("Checking regex on String...")
+        RuleProcessTracing.log(s"Checking regex on String '${actual.asString.getOrElse("")}'...")
 
         val res = actual.asString.map { str =>
           if (regex.r.findAllIn(str).nonEmpty) IrNodesEqual
@@ -149,7 +153,7 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
         res
 
       case IrNodeRegexRule(regex, _) =>
-        RuleProcessTracing.log("Checking regex on non-String...")
+        RuleProcessTracing.log(s"Checking regex on non-String '${actual.asString.getOrElse("")}'...")
 
         val res = Option {
           val str = actual.renderAsString
@@ -173,10 +177,10 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
     }.collect { case Some(s) => s }
   }
 
-  def findMinArrayLengthRule(path: IrNodePath): IrNodeMatchingRules = {
+  def findMinArrayLengthRule(path: IrNodePath, isXml: Boolean): IrNodeMatchingRules = {
     RuleProcessTracing.log("Finding min array length rule")
 
-    val res = findForPath(path).find(p => p.isMinArrayLengthRule) match {
+    val res = findForPath(path, isXml).find(p => p.isMinArrayLengthRule) match {
       case Some(r) =>
         List(r)
 
