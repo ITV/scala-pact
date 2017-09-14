@@ -152,8 +152,8 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
 
         res
 
-      case IrNodeRegexRule(regex, _) =>
-        RuleProcessTracing.log(s"Checking regex on non-String '${actual.asString.getOrElse("")}'...")
+      case IrNodeRegexRule(regex, p) =>
+        RuleProcessTracing.log(s"Checking regex on non-String '${actual.renderAsString}'...")
 
         val res = Option {
           val str = actual.renderAsString

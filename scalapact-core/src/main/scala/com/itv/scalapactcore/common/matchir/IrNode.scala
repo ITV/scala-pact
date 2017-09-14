@@ -345,7 +345,7 @@ case class IrNumberNode(value: Double) extends IrNodePrimitive {
   def asString: Option[String] = None
   def asNumber: Option[Double] = Option(value)
   def asBoolean: Option[Boolean] = None
-  def renderAsString: String = value.toString
+  def renderAsString: String = value.toString.replaceAll(".0", "")
   def primitiveTypeName: String = "number"
 }
 case class IrBooleanNode(value: Boolean) extends IrNodePrimitive {

@@ -367,7 +367,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
       implicit val rules: IrNodeMatchingRules =
         IrNodeMatchingRules(
           IrNodeMinArrayLengthRule(1, IrNodePathEmpty <~ "fish"),
-          IrNodeTypeRule(IrNodePathEmpty <~ "fish"),
+          IrNodeTypeRule(IrNodePathEmpty <~ "fish" <~ "*" <*),
           IrNodeRegexRule("\\d+", IrNodePathEmpty <~ "fish" <~ "*" <~ "name")
         )//.withProcessTracing("should be able to check regex by wildcard")
 
