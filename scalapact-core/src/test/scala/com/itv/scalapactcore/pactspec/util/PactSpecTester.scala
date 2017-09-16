@@ -99,7 +99,7 @@ trait PactSpecTester extends FunSpec with Matchers {
   }
 
   private def makeErrorString(shouldMatch: Boolean, path: String, comment: String, strictMatching: Boolean, actual: String, expected: String, differences: String): String = {
-    s"Expected match: $shouldMatch\n[$path] " + comment + "\nStrict matching: '" + strictMatching + "\n\nExpected:\n" + expected + "'\nActual:\n" + actual + "\nMatch Errors: [\n"+ differences +"\n]"
+    s"Expected match: $shouldMatch\n[$path] " + comment + "\nStrict matching: '" + strictMatching + "'\n\nExpected:\n" + expected + "\nActual:\n" + actual + "\nMatch Errors: [\n"+ differences +"\n]"
   }
 
 }
