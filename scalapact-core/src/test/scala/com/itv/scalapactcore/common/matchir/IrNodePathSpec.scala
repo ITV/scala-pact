@@ -63,6 +63,80 @@ class IrNodePathSpec extends FunSpec with Matchers {
 
   }
 
+  describe("path rewriting") {
+
+    it("should be able to split a path into segments") {
+
+      val path = IrNodePathEmpty <~ "pond" <~ "fish" <~ "*" <~ "breed" <~ "cod"
+
+      val expected = List(
+        IrNodePathEmpty <~ "pond",
+        IrNodePathEmpty <~ "fish" <~ "*",
+        IrNodePathEmpty <~ "breed",
+        IrNodePathEmpty <~ "cod"
+      )
+
+      path.split shouldEqual expected
+
+    }
+
+    it("should be able to combine segments into a path") {
+
+      val path = IrNodePathEmpty <~ "pond" <~ "fish" <~ "*" <~ "breed" <~ "cod"
+
+      val segments = List(
+        IrNodePathEmpty <~ "pond",
+        IrNodePathEmpty <~ "fish" <~ "*",
+        IrNodePathEmpty <~ "breed",
+        IrNodePathEmpty <~ "cod"
+      )
+
+      IrNodePath.combine(segments) === path shouldEqual true
+
+    }
+
+    it("should be able to invert a path") {
+
+      val actual = (IrNodePathEmpty <~ "fish" <~ "*" <~ "breed" <~ "cod" <~ "colour").invert
+
+      val expected = IrNodePathEmpty <~ "colour" <~ "cod" <~ "breed" <~ "fish" <~ "*"
+
+      actual === expected shouldEqual true
+
+    }
+
+    it("should be able to append/re-parent one path on another") {
+
+      val expected = IrNodePathEmpty <~ "fish" <~ "*" <~ "breed" <~ "cod" <~ "colour"
+
+      val actual = (IrNodePathEmpty <~ "fish" <~ "*" <~ "breed") ++ (IrNodePathEmpty <~ "cod" <~ "colour")
+
+      actual === expected shouldEqual true
+
+    }
+
+    it("should be able to return a list of paths with backwards indexes") {
+
+      val expected: List[IrNodePath] = List(
+        IrNodePathEmpty <~ "fish" <~ "chips" <~ 2 <~ "sauce" <~ 0,
+        IrNodePathEmpty <~ "fish" <~ 0 <~ "chips" <~ 2 <~ "sauce" <~ 0
+      )
+
+      val path = IrNodePathEmpty <~ "fish" <~ "chips" <~ 2 <~ "sauce"
+
+      val actual = path.withIndexes
+
+      println("e: [" + expected.map(_.renderAsString).mkString(", ") + "]")
+      println("a: [" + actual.map(_.renderAsString).mkString(", ") + "]")
+
+      actual.foreach { p =>
+        expected.exists(_ === p) shouldEqual true
+      }
+
+    }
+
+  }
+
   describe("converting IrNodePath to and from PactPath") {
 
     it("should strip off '$.body'") {
