@@ -32,10 +32,30 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
 
   def findForPath(path: IrNodePath, isXml: Boolean): List[IrNodeRule] = {
     val res =
-      if(isXml && path.isField)
-        rules.filter(p => (p.path.noText === path.noText) || (p.path.noText === (path.noText <~ 0)))
-      else
+      if(isXml) {
+        rules.filter(_.path.noText === path.noText) match {
+          case Nil =>
+            val unmodifiedPathRules = path.withIndexes.flatMap { indexedPath =>
+              rules.filter(_.path.noText === indexedPath.noText)
+            }
+
+            if(path.isArrayWildcard || path.isArrayIndex)  {
+              val minusArray = path.parent.withIndexes.flatMap { indexedPath =>
+                rules.filter(_.path.noText === indexedPath.noText)
+              }
+
+              unmodifiedPathRules ++ minusArray
+            }
+            else {
+              unmodifiedPathRules
+            }
+
+          case l: List[IrNodeRule] =>
+            l
+        }
+      } else {
         rules.filter(_.path.noText === path.noText)
+      }
 
     RuleProcessTracing.log(s"findForPath [${path.renderAsString}]:" + res.map(_.renderAsString).mkString(", "))
 

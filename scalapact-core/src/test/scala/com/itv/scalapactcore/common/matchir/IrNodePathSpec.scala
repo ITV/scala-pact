@@ -119,6 +119,7 @@ class IrNodePathSpec extends FunSpec with Matchers {
 
       val expected: List[IrNodePath] = List(
         IrNodePathEmpty <~ "fish" <~ "chips" <~ 2 <~ "sauce" <~ 0,
+        IrNodePathEmpty <~ "fish" <~ 0 <~ "chips" <~ 2 <~ "sauce",
         IrNodePathEmpty <~ "fish" <~ 0 <~ "chips" <~ 2 <~ "sauce" <~ 0
       )
 
@@ -129,8 +130,8 @@ class IrNodePathSpec extends FunSpec with Matchers {
       println("e: [" + expected.map(_.renderAsString).mkString(", ") + "]")
       println("a: [" + actual.map(_.renderAsString).mkString(", ") + "]")
 
-      actual.foreach { p =>
-        expected.exists(_ === p) shouldEqual true
+      expected.foreach { p =>
+        actual.exists(_ === p) shouldEqual true
       }
 
     }

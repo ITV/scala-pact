@@ -348,16 +348,29 @@ object IrNodePath {
 
         case x :: xs if x.isField =>
           val p = indexPathSoFar ++ (x <~ 0)
-          val next = (p ++ IrNodePath.combine(xs)).invert
+          val next = p ++ IrNodePath.combine(xs)
           rec(xs, p, next :: acc)
 
         case x :: xs =>
           val p = indexPathSoFar ++ x
-          val next = (p ++ IrNodePath.combine(xs)).invert
+          val next = p ++ IrNodePath.combine(xs)
           rec(xs, p, if (acc.exists(_ === next)) acc else next :: acc)
       }
 
-    rec(path.invert.split, IrNodePath.empty, Nil)
+    def deduplicate(remaining: List[IrNodePath], acc: List[IrNodePath]): List[IrNodePath] =
+      remaining match {
+        case Nil =>
+          acc
+
+        case x :: xs if acc.exists(_ === x) =>
+          deduplicate(xs, acc)
+
+        case x :: xs =>
+          deduplicate(xs, x :: acc)
+
+      }
+
+    deduplicate(rec(path.invert.split, IrNodePath.empty, Nil).map(_.invert) ++ rec(path.split, IrNodePath.empty, Nil), Nil)
   }
 
   def split(path: IrNodePath): List[IrNodePath] = {

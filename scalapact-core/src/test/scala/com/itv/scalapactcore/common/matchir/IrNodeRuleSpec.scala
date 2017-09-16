@@ -357,6 +357,27 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
 
     }
 
+    it("should be able to regex check indexed nodes") {
+
+      implicit val rules: IrNodeMatchingRules =
+        IrNodeMatchingRules(
+          IrNodeRegexRule("^[a-z][a-z][a-z][0-9][0-9][0-9]$", IrNodePathEmpty <~ "fish" <@ "id"),
+          IrNodeRegexRule("haddock|plaice", IrNodePathEmpty <~ "fish" <~ 0 <~ "breeds" <~ 0 <~ "breed"),
+          IrNodeRegexRule("haddock|plaice", IrNodePathEmpty <~ "fish" <~ 0 <~ "breeds" <~ 1 <~ "breed")
+        ).withProcessTracing("regex check indexed nodes")
+
+      val expected: IrNode = MatchIr.fromXml(
+        <fish id="abc123"><breeds><breed>plaice</breed><breed>haddock</breed></breeds></fish>.toString()
+      ).get
+
+      val actual: IrNode = MatchIr.fromXml(
+        <fish id="def456"><breeds><breed>haddock</breed><breed>plaice</breed></breeds></fish>.toString()
+      ).get
+
+      check(expected =<>= actual)
+
+    }
+
     it("should be able to check types by wildcard") {
 
       implicit val rules: IrNodeMatchingRules =

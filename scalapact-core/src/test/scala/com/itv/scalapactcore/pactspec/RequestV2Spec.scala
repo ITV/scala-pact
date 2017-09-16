@@ -1,6 +1,6 @@
 package com.itv.scalapactcore.pactspec
 
-import com.itv.scalapactcore.pactspec.util.{PactSpecTester, StrictAndNonStrict}
+import com.itv.scalapactcore.pactspec.util.{PactSpecTester, StrictAndNonStrict, StrictOnly}
 
 class RequestV2Spec extends PactSpecTester {
 
@@ -79,11 +79,12 @@ class RequestV2Spec extends PactSpecTester {
 //         fetchRequestSpec("/request/body/array with at least one element not matching example type.json")(StrictAndNonStrict),
 
 //         fetchRequestSpec("/request/body/array with nested array that does not match.json")(StrictAndNonStrict),
-//         fetchRequestSpec("/request/body/array with nested array that matches.json")(StrictAndNonStrict),
+
+          //
+         fetchRequestSpec("/request/body/array with nested array that matches.json")(StrictAndNonStrict)//,
+
 //         fetchRequestSpec("/request/body/array with regular expression in element xml.json")(StrictAndNonStrict),
 //         fetchRequestSpec("/request/body/array with regular expression in element.json")(StrictAndNonStrict),
-
-
 //         fetchRequestSpec("/request/body/array with regular expression that does not match in element xml.json")(StrictOnly),
 //         fetchRequestSpec("/request/body/array with regular expression that does not match in element.json")(StrictOnly),
 //         fetchRequestSpec("/request/body/different value found at index xml.json")(StrictAndNonStrict),
@@ -95,15 +96,11 @@ class RequestV2Spec extends PactSpecTester {
 //         fetchRequestSpec("/request/body/empty found at key where not empty expected xml.json")(StrictAndNonStrict),
 //         fetchRequestSpec("/request/body/matches with regex with bracket notation xml.json")(StrictAndNonStrict),
 //         fetchRequestSpec("/request/body/matches with regex with bracket notation.json")(StrictAndNonStrict),
-
-          //
-         fetchRequestSpec("/request/body/matches with regex xml.json")(StrictAndNonStrict)//,
-
+//         fetchRequestSpec("/request/body/matches with regex xml.json")(StrictAndNonStrict),
 //         fetchRequestSpec("/request/body/matches with regex.json")(StrictAndNonStrict),
 //         fetchRequestSpec("/request/body/matches with type.json")(StrictAndNonStrict),
 //         fetchRequestSpec("/request/body/matches xml.json")(StrictAndNonStrict),
 //         fetchRequestSpec("/request/body/matches.json")(StrictAndNonStrict),
-
 //         fetchRequestSpec("/request/body/matches with floats.json")(StrictAndNonStrict),
 //         fetchRequestSpec("/request/body/matches with integers.json")(StrictAndNonStrict),
 //         fetchRequestSpec("/request/body/missing body found when empty expected.json")(StrictAndNonStrict),
