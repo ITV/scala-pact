@@ -13,9 +13,9 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
 
     val nodeEquality = check[Boolean](nodeType(path)(this.isXml), this.isArray, other.isArray) +
     check[String](labelTest(path), this.label, other.label) +
-    check[Option[IrNodePrimitive]](valueTest(strict)(path)(rules), this.value, other.value) +
+    check[Option[IrNodePrimitive]](valueTest(strict)(this.isXml)(path)(rules), this.value, other.value) +
     check[Option[String]](namespaceTest(path), this.ns, other.ns) +
-    check[IrNodeAttributes](attributesTest(strict)(path)(rules), this.attributes, other.attributes) +
+    check[IrNodeAttributes](attributesTest(strict)(this.isXml)(path)(rules), this.attributes, other.attributes) +
     check[IrNodePath](pathTest(strict)(this.isXml)(path), this.path, other.path)
 
     val ruleResults = RuleChecks.checkForNode(rules, path, this, other)
@@ -64,8 +64,8 @@ object IrNodeEqualityResult {
       if(a == b) IrNodesEqual else IrNodesNotEqual(s"Label '$a' did not match '$b'", path)
     }
 
-  val valueTest: Boolean => IrNodePath => IrNodeMatchingRules => (Option[IrNodePrimitive], Option[IrNodePrimitive]) => IrNodeEqualityResult = {
-    strict => path => rules => (a, b) =>
+  val valueTest: Boolean => Boolean => IrNodePath => IrNodeMatchingRules => (Option[IrNodePrimitive], Option[IrNodePrimitive]) => IrNodeEqualityResult = {
+    strict => isXml => path => rules => (a, b) =>
         val equality = if (strict) {
           (a, b) match {
             case (Some(v1: IrNodePrimitive), Some(v2: IrNodePrimitive)) =>
@@ -96,7 +96,7 @@ object IrNodeEqualityResult {
           }
         }
 
-      RuleChecks.checkForPrimitive(rules, path, a, b, checkParentTypeRule = false).getOrElse(equality)
+      RuleChecks.checkForPrimitive(rules, path, a, b, checkParentTypeRule = true, isXml).getOrElse(equality)
   }
 
   val namespaceTest: IrNodePath => (Option[String], Option[String]) => IrNodeEqualityResult = path => {
@@ -204,7 +204,8 @@ object IrNodeEqualityResult {
       }
     }
 
-  private val checkAttributesTest: IrNodePath => IrNodeMatchingRules => (IrNodeAttributes, IrNodeAttributes) => IrNodeEqualityResult = path => rules => (a, b) =>
+  private val checkAttributesTest: IrNodePath => Boolean => IrNodeMatchingRules => (IrNodeAttributes, IrNodeAttributes) => IrNodeEqualityResult =
+    path => isXml => rules => (a, b) =>
     a.attributes.toList.map { p =>
       b.attributes.get(p._1) match {
         case None =>
@@ -218,15 +219,16 @@ object IrNodeEqualityResult {
               p._2.path,
               Option(p._2.value),
               Option(v.value),
-              checkParentTypeRule = true
+              checkParentTypeRule = true,
+              isXml
             ).getOrElse(IrNodesNotEqual(s"Attribute value for '${p._1}' of '${p._2.value.renderAsString}' does not equal '${v.value.renderAsString}'", path))
           }
       }
     }
 
 
-  val attributesTest: Boolean => IrNodePath => IrNodeMatchingRules => (IrNodeAttributes, IrNodeAttributes) => IrNodeEqualityResult =
-    strict => path => rules => (a, b) =>
+  val attributesTest: Boolean => Boolean => IrNodePath => IrNodeMatchingRules => (IrNodeAttributes, IrNodeAttributes) => IrNodeEqualityResult =
+    strict => isXml => path => rules => (a, b) =>
       if(strict) {
         val as = a.attributes.toList
         val bs = b.attributes.toList
@@ -236,10 +238,10 @@ object IrNodeEqualityResult {
         if(asNames.length != bsNames.length) {
           IrNodesNotEqual(s"Differing number of attributes between ['${asNames.mkString(", ")}'] and ['${bsNames.mkString(", ")}']", path)
         } else {
-          checkAttributesTest(path)(rules)(a, b)
+          checkAttributesTest(path)(isXml)(rules)(a, b)
         }
 
-      } else checkAttributesTest(path)(rules)(a, b)
+      } else checkAttributesTest(path)(isXml)(rules)(a, b)
 
 
   def check[A](f: (A, A) => IrNodeEqualityResult, propA: A, propB: A): IrNodeEqualityResult = f(propA, propB)
@@ -396,10 +398,10 @@ object RuleChecks {
   def checkForNode(rules: IrNodeMatchingRules, path: IrNodePath, expected: IrNode, actual: IrNode): Option[IrNodeEqualityResult] =
     rules.validateNode(path, expected, actual)
 
-  def checkForPrimitive(rules: IrNodeMatchingRules, path: IrNodePath, expected: Option[IrNodePrimitive], actual: Option[IrNodePrimitive], checkParentTypeRule: Boolean): Option[IrNodeEqualityResult] =
+  def checkForPrimitive(rules: IrNodeMatchingRules, path: IrNodePath, expected: Option[IrNodePrimitive], actual: Option[IrNodePrimitive], checkParentTypeRule: Boolean, isXml: Boolean): Option[IrNodeEqualityResult] =
     (expected, actual) match {
       case (Some(e), Some(a)) =>
-        rules.validatePrimitive(path, e, a, checkParentTypeRule)
+        rules.validatePrimitive(path, e, a, checkParentTypeRule, isXml)
 
       case (Some(e), None) =>
         IrNodesNotEqual(s"Missing 'actual' value '${e.renderAsString}'", path)

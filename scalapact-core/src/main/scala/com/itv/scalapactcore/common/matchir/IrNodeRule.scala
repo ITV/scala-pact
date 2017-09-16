@@ -144,11 +144,11 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
     res
   }
 
-  def validatePrimitive(path: IrNodePath, expected: IrNodePrimitive, actual: IrNodePrimitive, checkParentTypeRule: Boolean): List[IrNodeEqualityResult] = {
+  def validatePrimitive(path: IrNodePath, expected: IrNodePrimitive, actual: IrNodePrimitive, checkParentTypeRule: Boolean, isXml: Boolean): List[IrNodeEqualityResult] = {
     RuleProcessTracing.log(s"validatePrimitive (checkParentTypeRule=$checkParentTypeRule) at: " + path.renderAsString)
-    val parentTypeRules = if(checkParentTypeRule) findAncestralTypeRule(path, isXml = false) else Nil
+    val parentTypeRules = if(checkParentTypeRule) findAncestralTypeRule(path, isXml) else Nil
 
-    (parentTypeRules ++ findForPath(path, isXml = false)).map {
+    (parentTypeRules ++ findForPath(path, isXml)).map {
       case IrNodeTypeRule(_) =>
         RuleProcessTracing.log("Checking type...")
         val res = Option {
