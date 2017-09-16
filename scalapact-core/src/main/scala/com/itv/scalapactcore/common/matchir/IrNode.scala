@@ -18,9 +18,9 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
     check[IrNodeAttributes](attributesTest(strict)(path)(rules), this.attributes, other.attributes) +
     check[IrNodePath](pathTest(strict)(this.isXml)(path), this.path, other.path)
 
-    val childEquality = check[List[IrNode]](childrenTest(strict)(path)(rules)(this, other), this.children, other.children)
-
     val ruleResults = RuleChecks.checkForNode(rules, path, this, other)
+
+    val childEquality = check[List[IrNode]](childrenTest(strict)(path)(rules)(this, other), this.children, other.children)
 
     ruleResults
       .map(_ + childEquality)

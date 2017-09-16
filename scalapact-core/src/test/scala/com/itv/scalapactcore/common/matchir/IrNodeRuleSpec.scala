@@ -167,6 +167,33 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
 
     }
 
+    it("should be able to validate a non-string node primitive using regex") {
+
+      implicit val rules: IrNodeMatchingRules =
+        IrNodeMatchingRules(
+          IrNodeRegexRule("[0-9]", IrNodePathEmpty <~ "count")
+        )//.withProcessTracing("validate a non-string node primitive using regex")
+
+      val expected: IrNode = MatchIr.fromJSON(
+        """
+          |{
+          |  "count": 4
+          |}
+        """.stripMargin
+      ).get
+
+      val actual: IrNode = MatchIr.fromJSON(
+        """
+          |{
+          |  "count": 5
+          |}
+        """.stripMargin
+      ).get
+
+      check(expected =<>= actual)
+
+    }
+
     it("should be able to check an array node is of minimum length") {
 
       implicit val rules: IrNodeMatchingRules =

@@ -70,12 +70,12 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
         res
 
       case r @ IrNodeRegexRule(_, _) =>
-        RuleProcessTracing.log(s"Checking regex on '${actual.value.flatMap(_.asString).getOrElse("")}'...")
+        RuleProcessTracing.log(s"Checking regex on '${actual.value.map(_.renderAsString).getOrElse("<missing>")}'...")
 
         val res = (expected.value, actual.value) match {
-          case (Some(e), Some(a)) =>
-            if(e.isString && a.isString && a.asString.map(_.matches(r.regex)).getOrElse(false)) List(IrNodesEqual)
-            else List(IrNodesNotEqual(s"Regex '${r.regex}' did not match actual '${a.asString.getOrElse("<missing value>")}'", path))
+          case (Some(_), Some(a)) =>
+            if (a.renderAsString.matches(r.regex)) List(IrNodesEqual)
+            else List(IrNodesNotEqual(s"Regex '${r.regex}' did not match actual '${a.renderAsString}'", path))
 
           case (Some(_), None) =>
             List(IrNodesNotEqual(s"Missing actual value, could not check rule: " + r.renderAsString, path))
