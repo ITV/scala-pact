@@ -1,5 +1,7 @@
 package com.itv.scalapactcore.common.matchir
 
+import com.itv.scalapactcore.common.matchir.PactPathParseResult.{PactPathParseFailure, PactPathParseSuccess}
+
 import scala.annotation.tailrec
 import scala.language.postfixOps
 import scala.util.matching.Regex
@@ -81,7 +83,27 @@ object PactPath {
 
 }
 
-sealed trait PactPathParseResult
+sealed trait PactPathParseResult {
+
+  def toOption: Option[IrNodePath] =
+    this match {
+      case PactPathParseSuccess(p) =>
+        Option(p)
+
+      case _ =>
+        None
+    }
+
+  def toEither: Either[String, IrNodePath] =
+    this match {
+      case PactPathParseSuccess(p) =>
+        Right(p)
+
+      case e: PactPathParseFailure =>
+        Left(e.errorString)
+    }
+
+}
 
 object PactPathParseResult {
   case class PactPathParseSuccess(irNodePath: IrNodePath) extends PactPathParseResult

@@ -311,6 +311,24 @@ class IrNodePathSpec extends FunSpec with Matchers {
       (IrNodePathEmpty <~ "fish" <~ "chips" text) === expected shouldEqual true
     }
 
+    it("should check equality with wildcards") {
+
+      val result = for {
+        rulePath <- IrNodePath.fromPactPath("$.body.animals[*].children[*].*").toEither
+        nodePath <- IrNodePath.fromPactPath("$.body.animals[0].children[0].age").toEither
+      } yield (rulePath, nodePath)
+
+      result match {
+        case Right(tuple) =>
+          println(tuple._1.renderAsString, tuple._2.renderAsString)
+          tuple._1 === tuple._2 shouldEqual true
+          
+        case Left(e) =>
+          fail(e)
+      }
+
+    }
+
   }
 
 }
