@@ -1,6 +1,6 @@
 package com.itv.scalapactcore.pactspec
 
-import com.itv.scalapactcore.pactspec.util.{NonStrictOnly, PactSpecTester, StrictAndNonStrict, StrictOnly}
+import com.itv.scalapactcore.pactspec.util.{PactSpecTester, StrictAndNonStrict}
 
 class RequestV2Spec extends PactSpecTester {
 
@@ -97,17 +97,15 @@ class RequestV2Spec extends PactSpecTester {
 //         fetchRequestSpec("/request/body/matches with regex with bracket notation.json")(StrictAndNonStrict),
 
           //
-//         fetchRequestSpec("/request/body/matches with regex xml.json")(StrictAndNonStrict)//,
+         fetchRequestSpec("/request/body/matches with regex xml.json")(StrictAndNonStrict)//,
 
 //         fetchRequestSpec("/request/body/matches with regex.json")(StrictAndNonStrict),
 //         fetchRequestSpec("/request/body/matches with type.json")(StrictAndNonStrict),
 //         fetchRequestSpec("/request/body/matches xml.json")(StrictAndNonStrict),
 //         fetchRequestSpec("/request/body/matches.json")(StrictAndNonStrict),
 
-          //
-//         fetchRequestSpec("/request/body/matches with floats.json")(StrictAndNonStrict), //<-- This is actually not correct
-         fetchRequestSpec("/request/body/matches with integers.json")(StrictAndNonStrict)//,
-
+//         fetchRequestSpec("/request/body/matches with floats.json")(StrictAndNonStrict),
+//         fetchRequestSpec("/request/body/matches with integers.json")(StrictAndNonStrict),
 //         fetchRequestSpec("/request/body/missing body found when empty expected.json")(StrictAndNonStrict),
 //         fetchRequestSpec("/request/body/missing body no content type.json")(StrictAndNonStrict),
 //         fetchRequestSpec("/request/body/missing body.json")(StrictAndNonStrict),

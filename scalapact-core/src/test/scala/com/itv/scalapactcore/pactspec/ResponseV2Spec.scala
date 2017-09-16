@@ -1,6 +1,6 @@
 package com.itv.scalapactcore.pactspec
 
-import com.itv.scalapactcore.pactspec.util.{NonStrictOnly, PactSpecTester, StrictAndNonStrict, StrictOnly}
+import com.itv.scalapactcore.pactspec.util.{PactSpecTester, StrictAndNonStrict, StrictOnly}
 
 class ResponseV2Spec extends PactSpecTester {
 
@@ -92,7 +92,7 @@ class ResponseV2Spec extends PactSpecTester {
           fetchResponseSpec("/response/body/objects in array second matches xml.json")(StrictOnly),
           fetchResponseSpec("/response/body/objects in array second matches.json")(StrictOnly),
           fetchResponseSpec("/response/body/objects in array type matching xml.json")(StrictAndNonStrict),
-          fetchResponseSpec("/response/body/objects in array type matching.json")(NonStrictOnly),
+          fetchResponseSpec("/response/body/objects in array type matching.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/objects in array with type mismatching xml.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/objects in array with type mismatching.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/plain text that does not match.json")(StrictAndNonStrict),
