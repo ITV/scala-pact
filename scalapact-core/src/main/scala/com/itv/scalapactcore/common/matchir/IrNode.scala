@@ -27,11 +27,6 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
       .getOrElse(nodeEquality + childEquality)
   }
 
-  val arrays: Map[String, List[IrNode]] =
-    children.groupBy(_.label)
-
-  val arraysKeys: List[String] = arrays.keys.toList
-
   def withNamespace(ns: String): IrNode = this.copy(ns = Option(ns))
   def withAttributes(attributes: IrNodeAttributes): IrNode = this.copy(attributes = attributes)
   def withPath(path: IrNodePath): IrNode = this.copy(path = path)
@@ -45,10 +40,9 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
     val n = ns.map("  namespace: " + _ + "").getOrElse("")
     val v = value.map(v => "  value: " + v.renderAsString).getOrElse("")
     val a = if(attributes.attributes.isEmpty) "" else s"  attributes: [${attributes.attributes.map(p => p._1 + "=" + p._2.value.renderAsString).mkString(", ")}]"
-    val l = if(arraysKeys.isEmpty) "" else s"  arrays: [${arraysKeys.mkString(", ")}]"
     val c = if(children.isEmpty) "" else "\n" + children.map(_.renderAsString(indent + 1)).mkString("\n")
     val p = "  " + path.renderAsString
-    s"$i- $label$n$v$a$l$p$c"
+    s"$i- $label$n$v$a$p$c"
   }
 
 }
