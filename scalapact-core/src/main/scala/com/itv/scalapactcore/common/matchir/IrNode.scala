@@ -15,11 +15,11 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
     check[String](labelTest(other.path), this.label, other.label) +
     check[Option[IrNodePrimitive]](valueTest(strict, this.isXml, other.path, rules), this.value, other.value) +
     check[Option[String]](namespaceTest(other.path), this.ns, other.ns) +
-    check[IrNodeAttributes](attributesTest(strict, this.isXml, other.path, rules), this.attributes, other.attributes)
+    check[IrNodeAttributes](attributesTest(strict, this.isXml, bePermissive, other.path, rules), this.attributes, other.attributes)
 
     val ruleResults = RuleChecks.checkForNode(rules, other.path, this, other)
 
-    val childEquality = check[List[IrNode]](childrenTest(strict, other.path, bePermissive, rules, this, other), this.children, other.children)
+    val childEquality = check[List[IrNode]](childrenTest(strict, other.path, isXml, bePermissive, rules, this, other), this.children, other.children)
 
     ruleResults
       .map(_ + childEquality)
@@ -133,10 +133,10 @@ object IrNodeEqualityResult {
       }
     }
 
-  val childrenTest: (Boolean, IrNodePath, Boolean, IrNodeMatchingRules, IrNode, IrNode) => (List[IrNode], List[IrNode]) => IrNodeEqualityResult =
-    (strict, path, bePermissive, rules, parentA, parentB) => (a, b) => {
+  val childrenTest: (Boolean, IrNodePath, Boolean, Boolean, IrNodeMatchingRules, IrNode, IrNode) => (List[IrNode], List[IrNode]) => IrNodeEqualityResult =
+    (strict, path, isXml, bePermissive, rules, parentA, parentB) => (a, b) => {
       if (strict) {
-        if (a.length != b.length) {
+        if (a.length != b.length && (!bePermissive || (bePermissive && parentA.isArray && !isXml))) {
           val parentCheck: Option[IrNodeEqualityResult] =
             RuleChecks.checkForNode(
               rules.findMinArrayLengthRule(parentA.path, parentA.isXml),
@@ -194,15 +194,15 @@ object IrNodeEqualityResult {
     }
 
 
-  val attributesTest: (Boolean, Boolean, IrNodePath, IrNodeMatchingRules) => (IrNodeAttributes, IrNodeAttributes) => IrNodeEqualityResult =
-    (strict, isXml, path, rules) => (a, b) =>
+  val attributesTest: (Boolean, Boolean, Boolean, IrNodePath, IrNodeMatchingRules) => (IrNodeAttributes, IrNodeAttributes) => IrNodeEqualityResult =
+    (strict, isXml, bePermissive, path, rules) => (a, b) =>
       if(strict) {
         val as = a.attributes.toList
         val bs = b.attributes.toList
         val asNames = as.map(_._1)
         val bsNames = bs.map(_._1)
 
-        if(asNames.length != bsNames.length) {
+        if(asNames.length != bsNames.length && !bePermissive) {
           IrNodesNotEqual(s"Differing number of attributes between ['${asNames.mkString(", ")}'] and ['${bsNames.mkString(", ")}']", path)
         } else {
           checkAttributesTest(path, isXml, rules)(a, b)
