@@ -11,16 +11,15 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
 
   def isEqualTo(other: IrNode, strict: Boolean, rules: IrNodeMatchingRules): IrNodeEqualityResult = {
 
-    val nodeEquality = check[Boolean](nodeType(path)(this.isXml), this.isArray, other.isArray) +
-    check[String](labelTest(path), this.label, other.label) +
-    check[Option[IrNodePrimitive]](valueTest(strict)(this.isXml)(path)(rules), this.value, other.value) +
-    check[Option[String]](namespaceTest(path), this.ns, other.ns) +
-    check[IrNodeAttributes](attributesTest(strict)(this.isXml)(path)(rules), this.attributes, other.attributes) +
-    check[IrNodePath](pathTest(strict)(this.isXml)(path), this.path, other.path)
+    val nodeEquality = check[Boolean](nodeType(other.path)(this.isXml), this.isArray, other.isArray) +
+    check[String](labelTest(other.path), this.label, other.label) +
+    check[Option[IrNodePrimitive]](valueTest(strict)(this.isXml)(other.path)(rules), this.value, other.value) +
+    check[Option[String]](namespaceTest(other.path), this.ns, other.ns) +
+    check[IrNodeAttributes](attributesTest(strict)(this.isXml)(other.path)(rules), this.attributes, other.attributes)
 
-    val ruleResults = RuleChecks.checkForNode(rules, path, this, other)
+    val ruleResults = RuleChecks.checkForNode(rules, other.path, this, other)
 
-    val childEquality = check[List[IrNode]](childrenTest(strict)(path)(rules)(this, other), this.children, other.children)
+    val childEquality = check[List[IrNode]](childrenTest(strict)(other.path)(rules)(this, other), this.children, other.children)
 
     ruleResults
       .map(_ + childEquality)
@@ -113,34 +112,6 @@ object IrNodeEqualityResult {
       IrNodesEqual
   }
 
-  private def checkPaths(strict: Boolean, path: IrNodePath, a: IrNodePath, b: IrNodePath): IrNodeEqualityResult = {
-    if (strict)
-      if (a === b)
-        IrNodesEqual
-      else
-        IrNodesNotEqual(s"Path '${a.renderAsString}' does not equal '${b.renderAsString}'", path)
-    else if (a =~= b)
-      IrNodesEqual
-    else
-      IrNodesNotEqual(s"Path '${a.renderAsString}' does not equal '${b.renderAsString}'", path)
-  }
-
-  val pathTest: Boolean => Boolean => IrNodePath => (IrNodePath, IrNodePath) => IrNodeEqualityResult =
-    strict => isXml => path => (a, b) => {
-      /*
-      In one highly specific situation, we need to massage what is tested.
-      XML can be accessed like an array using 'field[n]' even if it is not an array.
-      Generally, we only consider array access to elements, but if the index is 0
-      then and the example doc only has one element then it won't be marked as an array
-      and no path matching will succeed. So!
-      If xml and A is some sort of field and B is an array access at 0, modify B and carry on.
-       */
-      if (isXml && a.isField && (b.isArrayIndex && b.giveArrayIndex == 0))
-        checkPaths(strict, path, a, b.parent)
-      else
-        checkPaths(strict, path, a, b)
-    }
-
   implicit private def listOfResultsToResult(l: List[IrNodeEqualityResult]): IrNodeEqualityResult =
     l match {
       case Nil => IrNodesEqual
@@ -181,11 +152,7 @@ object IrNodeEqualityResult {
               // everything correctly, running on the assumption that at this point, the user
               // is relying on rules to validate because frankly all bets for normal comparison
               // are off!
-              val newA =
-                b.indices
-                  .toList
-                  .map(i => a.headOption.map(_.withPath(b(i).path)))
-                  .collect { case Some(s) => s}
+              val newA = b.map(_ => a.headOption).collect { case Some(s) => s}
 
               strictCheckChildren(strict, rules, newA, b)
 
