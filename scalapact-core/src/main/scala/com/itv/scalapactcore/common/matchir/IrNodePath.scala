@@ -205,6 +205,17 @@ sealed trait IrNodePath {
   def split: List[IrNodePath] = IrNodePath.split(this)
 
   def renderAsString: String = IrNodePath.renderAsString(this)
+
+  def lastSegmentLabel: String =
+    split
+      .reverse
+      .headOption
+      .map { s =>
+        if(s.isField || s.isAttribute) s
+        else s.parent
+      }
+      .map(_.renderAsString)
+      .getOrElse(IrNodePathEmpty.name)
 }
 
 case object IrNodePathEmpty extends IrNodePath {

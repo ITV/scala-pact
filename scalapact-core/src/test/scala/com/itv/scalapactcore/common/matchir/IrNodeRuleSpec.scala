@@ -443,6 +443,28 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
       (expected =<>= actual).isEqual shouldEqual false
     }
 
+    it("should be able to check type by wildcard with additional properties") {
+
+      implicit val rules: IrNodeMatchingRules =
+        IrNodeMatchingRules(
+          IrNodeTypeRule(IrNodePathEmpty <~ "myPerson" <*)
+        ).withProcessTracing("check type by wildcard with additional properties")
+
+      val expected: IrNode = MatchIr.fromJSON(
+        """
+          |{"myPerson":{"name":"Any name"}}
+        """.stripMargin
+      ).get
+
+      val actual: IrNode = MatchIr.fromJSON(
+        """
+          |{"myPerson":{"name":39,"age":"39","nationality":"Australian"}}
+        """.stripMargin
+      ).get
+
+      (expected =<>= actual).isEqual shouldEqual false
+    }
+
   }
 
 }

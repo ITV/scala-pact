@@ -15,9 +15,16 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
     check[String](labelTest(other.path), this.label, other.label) +
     check[Option[IrNodePrimitive]](valueTest(strict, this.isXml, other.path, rules), this.value, other.value) +
     check[Option[String]](namespaceTest(other.path), this.ns, other.ns) +
-    check[IrNodeAttributes](attributesTest(strict, this.isXml, bePermissive, other.path, rules), this.attributes, other.attributes)
+    check[IrNodeAttributes](attributesTest(strict, this.isXml, bePermissive, other.path, rules), this.attributes, other.attributes) +
+    check[IrNodePath](pathTest(other.path), this.path, other.path)
 
-    val ruleResults = RuleChecks.checkForNode(rules, other.path, this, other)
+//    println("basic", nodeEquality.renderAsString)
+
+//    println("paths", path.renderAsString, other.path.renderAsString)
+
+    val ruleResults = RuleChecks.checkForNode(rules/*.withProcessTracing("TESTING")*/, other.path, this, other)
+
+//    println("rules", ruleResults.map(_.renderAsString))
 
     val childEquality = check[List[IrNode]](childrenTest(strict, other.path, isXml, bePermissive, rules, this, other), this.children, other.children)
 
@@ -110,6 +117,14 @@ object IrNodeEqualityResult {
 
     case (None, None) =>
       IrNodesEqual
+  }
+
+  val pathTest: IrNodePath => (IrNodePath, IrNodePath) => IrNodeEqualityResult = path => (a, b) => {
+    val segA = a.lastSegmentLabel
+    val segB = b.lastSegmentLabel
+
+    if(segA == segB) IrNodesEqual
+    else IrNodesNotEqual(s"Path node '$segA' did not math '$segB'", path)
   }
 
   implicit private def listOfResultsToResult(l: List[IrNodeEqualityResult]): IrNodeEqualityResult =

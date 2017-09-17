@@ -70,9 +70,12 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
         RuleProcessTracing.log("Checking node level type rule against values...")
 
         val res = (expected.value, actual.value) match {
-          case (Some(e), Some(a)) =>
+          case (Some(e), Some(a)) if expected.path.lastSegmentLabel == actual.path.lastSegmentLabel =>
             if(e.primitiveTypeName == a.primitiveTypeName) List(IrNodesEqual)
             else List(IrNodesNotEqual(s"Primitive type '${e.primitiveTypeName}' did not match actual '${a.primitiveTypeName}'", path))
+
+          case (Some(_), Some(_)) =>
+            List(IrNodesNotEqual(s"Miss aligned values (by path), could not check rule: " + r.renderAsString, path))
 
           case (Some(_), None) =>
             List(IrNodesNotEqual(s"Missing actual value, could not check rule: " + r.renderAsString, path))
