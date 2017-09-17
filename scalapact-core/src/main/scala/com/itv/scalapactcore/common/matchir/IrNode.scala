@@ -133,9 +133,12 @@ object IrNodeEqualityResult {
       case x :: xs => xs.foldLeft(x)(_ + _)
     }
 
-  private def strictCheckChildren(strict: Boolean, bePermissive: Boolean, rules: IrNodeMatchingRules, a: List[IrNode], b: List[IrNode]): IrNodeEqualityResult =
-    a.zip(b).map { p =>
+  private def strictCheckChildren(path: IrNodePath, strict: Boolean, bePermissive: Boolean, rules: IrNodeMatchingRules, a: List[IrNode], b: List[IrNode]): IrNodeEqualityResult =
+    if(a.length != b.length) IrNodesNotEqual(s"Differing number of children, cannot check equality. Expected ${a.length} got ${b.length}", path)
+    else {
+      a.zip(b).map { p =>
         p._1.isEqualTo(p._2, strict, rules, bePermissive)
+      }
     }
 
   private def permissiveCheckChildren(path: IrNodePath, strict: Boolean, bePermissive: Boolean, rules: IrNodeMatchingRules, a: List[IrNode], b: List[IrNode]): IrNodeEqualityResult =
@@ -151,7 +154,7 @@ object IrNodeEqualityResult {
   val childrenTest: (Boolean, IrNodePath, Boolean, Boolean, IrNodeMatchingRules, IrNode, IrNode) => (List[IrNode], List[IrNode]) => IrNodeEqualityResult =
     (strict, path, isXml, bePermissive, rules, parentA, parentB) => (a, b) => {
       if (strict) {
-        if (a.length != b.length && (!bePermissive || (bePermissive && parentA.isArray && !isXml))) {
+        if (a.length < b.length && (!bePermissive || (bePermissive && parentA.isArray && !isXml))) {
           val parentCheck: Option[IrNodeEqualityResult] =
             RuleChecks.checkForNode(
               rules.findMinArrayLengthRule(parentA.path, parentA.isXml),
@@ -169,15 +172,15 @@ object IrNodeEqualityResult {
               // are off!
               val newA = b.map(_ => a.headOption).collect { case Some(s) => s}
 
-              strictCheckChildren(strict, bePermissive, rules, newA, b)
+              strictCheckChildren(path, strict, bePermissive, rules, newA, b)
 
             case _ =>
-              strictCheckChildren(strict, bePermissive, rules, a, b)
+              strictCheckChildren(path, strict, bePermissive, rules, a, b)
           }
 
           parentCheck.map(p => p + childrenCheck).getOrElse(IrNodesNotEqual(s"Differing number of children. Expected ${a.length} got ${b.length}", path))
-        } else if (parentA.isArray) {
-          strictCheckChildren(strict, bePermissive, rules, a, b)
+        } else if (parentA.isArray && a.length == b.length) {
+          strictCheckChildren(path, strict, bePermissive, rules, a, b)
         } else {
           permissiveCheckChildren(path, strict, bePermissive, rules, a, b)
         }
