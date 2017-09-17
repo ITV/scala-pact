@@ -29,7 +29,7 @@ object InteractionMatchers {
       MethodMatching.matchMethods(expected.method, received.method) +
         PathMatching.matchPathsStrict(PathAndQuery(expected.path, expected.query), PathAndQuery(received.path, received.query)) +
         HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
-        BodyMatching.matchBodiesStrict(rules, expected.body, received.body)
+        BodyMatching.matchBodiesStrict(rules, expected.body, received.body, bePermissive = false)
     } else {
       MethodMatching.matchMethods(expected.method, received.method) +
         PathMatching.matchPaths(PathAndQuery(expected.path, expected.query), PathAndQuery(received.path, received.query)) +
@@ -53,7 +53,7 @@ object InteractionMatchers {
     if(strictMatching) {
       StatusMatching.matchStatusCodes(expected.status, received.status) +
         HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
-        BodyMatching.matchBodiesStrict(rules, expected.body, received.body)
+        BodyMatching.matchBodiesStrict(rules, expected.body, received.body, bePermissive = true)
     } else {
       StatusMatching.matchStatusCodes(expected.status, received.status) +
         HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
@@ -299,8 +299,9 @@ object BodyMatching extends GeneralMatcher {
     }
   }
 
-  def matchBodiesStrict(matchingRules: Option[Map[String, MatchingRule]], expected: Option[String], received: Option[String]): MatchOutcome = {
+  def matchBodiesStrict(matchingRules: Option[Map[String, MatchingRule]], expected: Option[String], received: Option[String], bePermissive: Boolean): MatchOutcome = {
     implicit val rules: IrNodeMatchingRules = IrNodeMatchingRules.fromPactRules(matchingRules)
+    implicit val permissivity: IrNodeMatchPermissivity = if(bePermissive) Permissive else NonPermissive
 
     expected match {
       case Some(str) if stringIsJson(str) =>

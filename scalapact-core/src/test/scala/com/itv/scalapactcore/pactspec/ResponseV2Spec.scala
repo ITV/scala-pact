@@ -1,5 +1,6 @@
 package com.itv.scalapactcore.pactspec
 
+import com.itv.scalapactcore.common.matchir.{IrNodeMatchPermissivity, Permissive}
 import com.itv.scalapactcore.pactspec.util.{PactSpecTester, StrictAndNonStrict, StrictOnly}
 
 class ResponseV2Spec extends PactSpecTester {
@@ -31,6 +32,8 @@ class ResponseV2Spec extends PactSpecTester {
 //        )
 //      )
 //    }
+
+    implicit val permissivity: IrNodeMatchPermissivity = Permissive
 
     it("should check the response body specs") {
       testResponseSpecs(

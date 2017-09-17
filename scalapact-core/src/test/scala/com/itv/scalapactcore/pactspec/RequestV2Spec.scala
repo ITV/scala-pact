@@ -1,5 +1,6 @@
 package com.itv.scalapactcore.pactspec
 
+import com.itv.scalapactcore.common.matchir.{IrNodeMatchPermissivity, NonPermissive}
 import com.itv.scalapactcore.pactspec.util.{PactSpecTester, StrictAndNonStrict, StrictOnly}
 
 class RequestV2Spec extends PactSpecTester {
@@ -8,7 +9,7 @@ class RequestV2Spec extends PactSpecTester {
 
   describe("Exercising request V" + pactSpecVersion + " Pact Specification match tests") {
 
-   it("should check the request method specs") {
+    it("should check the request method specs") {
      testRequestSpecs(
        List(
          fetchRequestSpec("/request/method/different method.json")(StrictAndNonStrict),
@@ -16,9 +17,9 @@ class RequestV2Spec extends PactSpecTester {
          fetchRequestSpec("/request/method/method is different case.json")(StrictAndNonStrict)
        )
      )
-   }
+    }
 
-   it("should check the request path specs") {
+    it("should check the request path specs") {
      testRequestSpecs(
        List(
          fetchRequestSpec("/request/path/empty path found when forward slash expected.json")(StrictAndNonStrict),
@@ -29,9 +30,9 @@ class RequestV2Spec extends PactSpecTester {
          fetchRequestSpec("/request/path/unexpected trailing slash in path.json")(StrictAndNonStrict)
        )
      )
-   }
+    }
 
-   it("should check the request query specs") {
+    it("should check the request query specs") {
      testRequestSpecs(
        List(
          fetchRequestSpec("/request/query/different order.json")(StrictAndNonStrict),
@@ -46,9 +47,9 @@ class RequestV2Spec extends PactSpecTester {
          fetchRequestSpec("/request/query/unexpected param.json")(StrictOnly)
        )
      )
-   }
+    }
 
-   it("should check the request header specs") {
+    it("should check the request header specs") {
      testRequestSpecs(
        List(
          fetchRequestSpec("/request/headers/empty headers.json")(StrictAndNonStrict),
@@ -61,7 +62,9 @@ class RequestV2Spec extends PactSpecTester {
          fetchRequestSpec("/request/headers/whitespace after comma different.json")(StrictAndNonStrict)
        )
      )
-   }
+    }
+
+    implicit val permissivity: IrNodeMatchPermissivity = NonPermissive
 
     it("should check the request body specs") {
       testRequestSpecs(

@@ -6,20 +6,20 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
 
   import IrNodeEqualityResult._
 
-  def =~(other: IrNode)(implicit rules: IrNodeMatchingRules): IrNodeEqualityResult = isEqualTo(other, strict = false, rules)
-  def =<>=(other: IrNode)(implicit rules: IrNodeMatchingRules): IrNodeEqualityResult = isEqualTo(other, strict = true, rules)
+  def =~(other: IrNode)(implicit rules: IrNodeMatchingRules): IrNodeEqualityResult = isEqualTo(other, strict = false, rules, bePermissive = false)
+  def =<>=(other: IrNode)(implicit rules: IrNodeMatchingRules, permissive: IrNodeMatchPermissivity): IrNodeEqualityResult = isEqualTo(other, strict = true, rules, bePermissive = permissive.bePermissive)
 
-  def isEqualTo(other: IrNode, strict: Boolean, rules: IrNodeMatchingRules): IrNodeEqualityResult = {
+  def isEqualTo(other: IrNode, strict: Boolean, rules: IrNodeMatchingRules, bePermissive: Boolean): IrNodeEqualityResult = {
 
-    val nodeEquality = check[Boolean](nodeType(other.path)(this.isXml), this.isArray, other.isArray) +
+    val nodeEquality = check[Boolean](nodeType(other.path, this.isXml), this.isArray, other.isArray) +
     check[String](labelTest(other.path), this.label, other.label) +
-    check[Option[IrNodePrimitive]](valueTest(strict)(this.isXml)(other.path)(rules), this.value, other.value) +
+    check[Option[IrNodePrimitive]](valueTest(strict, this.isXml, other.path, rules), this.value, other.value) +
     check[Option[String]](namespaceTest(other.path), this.ns, other.ns) +
-    check[IrNodeAttributes](attributesTest(strict)(this.isXml)(other.path)(rules), this.attributes, other.attributes)
+    check[IrNodeAttributes](attributesTest(strict, this.isXml, other.path, rules), this.attributes, other.attributes)
 
     val ruleResults = RuleChecks.checkForNode(rules, other.path, this, other)
 
-    val childEquality = check[List[IrNode]](childrenTest(strict)(other.path)(rules)(this, other), this.children, other.children)
+    val childEquality = check[List[IrNode]](childrenTest(strict, other.path, bePermissive, rules, this, other), this.children, other.children)
 
     ruleResults
       .map(_ + childEquality)
@@ -48,8 +48,8 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
 
 object IrNodeEqualityResult {
 
-  val nodeType: IrNodePath => Boolean => (Boolean, Boolean) => IrNodeEqualityResult =
-    path => isXml => (a, b) =>
+  val nodeType: (IrNodePath, Boolean) => (Boolean, Boolean) => IrNodeEqualityResult =
+    (path, isXml) => (a, b) =>
       if (isXml) IrNodesEqual
       else {
         val f = (bb: Boolean) => if(bb) "array" else "object"
@@ -63,8 +63,8 @@ object IrNodeEqualityResult {
       if(a == b) IrNodesEqual else IrNodesNotEqual(s"Label '$a' did not match '$b'", path)
     }
 
-  val valueTest: Boolean => Boolean => IrNodePath => IrNodeMatchingRules => (Option[IrNodePrimitive], Option[IrNodePrimitive]) => IrNodeEqualityResult = {
-    strict => isXml => path => rules => (a, b) =>
+  val valueTest: (Boolean, Boolean, IrNodePath, IrNodeMatchingRules) => (Option[IrNodePrimitive], Option[IrNodePrimitive]) => IrNodeEqualityResult = {
+    (strict, isXml, path, rules) => (a, b) =>
         val equality = if (strict) {
           (a, b) match {
             case (Some(v1: IrNodePrimitive), Some(v2: IrNodePrimitive)) =>
@@ -118,23 +118,23 @@ object IrNodeEqualityResult {
       case x :: xs => xs.foldLeft(x)(_ + _)
     }
 
-  private def strictCheckChildren(strict: Boolean, rules: IrNodeMatchingRules, a: List[IrNode], b: List[IrNode]): IrNodeEqualityResult =
+  private def strictCheckChildren(strict: Boolean, bePermissive: Boolean, rules: IrNodeMatchingRules, a: List[IrNode], b: List[IrNode]): IrNodeEqualityResult =
     a.zip(b).map { p =>
-        p._1.isEqualTo(p._2, strict, rules)
+        p._1.isEqualTo(p._2, strict, rules, bePermissive)
     }
 
-  private def permissiveCheckChildren(path: IrNodePath, strict: Boolean, rules: IrNodeMatchingRules, a: List[IrNode], b: List[IrNode]): IrNodeEqualityResult =
+  private def permissiveCheckChildren(path: IrNodePath, strict: Boolean, bePermissive: Boolean, rules: IrNodeMatchingRules, a: List[IrNode], b: List[IrNode]): IrNodeEqualityResult =
     a.map { n1 =>
       b.find { n2 =>
-          n1.isEqualTo(n2, strict, rules).isEqual
+          n1.isEqualTo(n2, strict, rules, bePermissive).isEqual
       } match {
         case Some(_) => IrNodesEqual
         case None => IrNodesNotEqual(s"Could not find match for:\n${n1.renderAsString}", path)
       }
     }
 
-  val childrenTest: Boolean => IrNodePath => IrNodeMatchingRules => (IrNode, IrNode) => (List[IrNode], List[IrNode]) => IrNodeEqualityResult =
-    strict => path => rules => (parentA, parentB) => (a, b) => {
+  val childrenTest: (Boolean, IrNodePath, Boolean, IrNodeMatchingRules, IrNode, IrNode) => (List[IrNode], List[IrNode]) => IrNodeEqualityResult =
+    (strict, path, bePermissive, rules, parentA, parentB) => (a, b) => {
       if (strict) {
         if (a.length != b.length) {
           val parentCheck: Option[IrNodeEqualityResult] =
@@ -154,25 +154,25 @@ object IrNodeEqualityResult {
               // are off!
               val newA = b.map(_ => a.headOption).collect { case Some(s) => s}
 
-              strictCheckChildren(strict, rules, newA, b)
+              strictCheckChildren(strict, bePermissive, rules, newA, b)
 
             case _ =>
-              strictCheckChildren(strict, rules, a, b)
+              strictCheckChildren(strict, bePermissive, rules, a, b)
           }
 
           parentCheck.map(p => p + childrenCheck).getOrElse(IrNodesNotEqual(s"Differing number of children. Expected ${a.length} got ${b.length}", path))
         } else if (parentA.isArray) {
-          strictCheckChildren(strict, rules, a, b)
+          strictCheckChildren(strict, bePermissive, rules, a, b)
         } else {
-          permissiveCheckChildren(path, strict, rules, a, b)
+          permissiveCheckChildren(path, strict, bePermissive, rules, a, b)
         }
       } else {
-        permissiveCheckChildren(path, strict, rules, a, b)
+        permissiveCheckChildren(path, strict, bePermissive, rules, a, b)
       }
     }
 
-  private val checkAttributesTest: IrNodePath => Boolean => IrNodeMatchingRules => (IrNodeAttributes, IrNodeAttributes) => IrNodeEqualityResult =
-    path => isXml => rules => (a, b) =>
+  private val checkAttributesTest: (IrNodePath, Boolean, IrNodeMatchingRules) => (IrNodeAttributes, IrNodeAttributes) => IrNodeEqualityResult =
+    (path, isXml, rules) => (a, b) =>
     a.attributes.toList.map { p =>
       b.attributes.get(p._1) match {
         case None =>
@@ -194,8 +194,8 @@ object IrNodeEqualityResult {
     }
 
 
-  val attributesTest: Boolean => Boolean => IrNodePath => IrNodeMatchingRules => (IrNodeAttributes, IrNodeAttributes) => IrNodeEqualityResult =
-    strict => isXml => path => rules => (a, b) =>
+  val attributesTest: (Boolean, Boolean, IrNodePath, IrNodeMatchingRules) => (IrNodeAttributes, IrNodeAttributes) => IrNodeEqualityResult =
+    (strict, isXml, path, rules) => (a, b) =>
       if(strict) {
         val as = a.attributes.toList
         val bs = b.attributes.toList
@@ -205,10 +205,10 @@ object IrNodeEqualityResult {
         if(asNames.length != bsNames.length) {
           IrNodesNotEqual(s"Differing number of attributes between ['${asNames.mkString(", ")}'] and ['${bsNames.mkString(", ")}']", path)
         } else {
-          checkAttributesTest(path)(isXml)(rules)(a, b)
+          checkAttributesTest(path, isXml, rules)(a, b)
         }
 
-      } else checkAttributesTest(path)(isXml)(rules)(a, b)
+      } else checkAttributesTest(path, isXml, rules)(a, b)
 
 
   def check[A](f: (A, A) => IrNodeEqualityResult, propA: A, propB: A): IrNodeEqualityResult = f(propA, propB)
@@ -380,4 +380,18 @@ object RuleChecks {
         IrNodesEqual
     }
 
+}
+
+sealed trait IrNodeMatchPermissivity {
+  val bePermissive: Boolean
+}
+case object NonPermissive extends IrNodeMatchPermissivity {
+  val bePermissive: Boolean = false
+}
+case object Permissive extends IrNodeMatchPermissivity {
+  val bePermissive: Boolean = true
+}
+
+object IrNodeMatchPermissivity {
+  implicit val defaultPermissivity: IrNodeMatchPermissivity = NonPermissive
 }
