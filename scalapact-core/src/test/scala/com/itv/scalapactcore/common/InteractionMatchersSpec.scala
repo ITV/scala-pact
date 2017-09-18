@@ -19,8 +19,8 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
 
     it("should be able to match status codes") {
 
-      matchStatusCodes(200, 200) shouldEqual true
-      matchStatusCodes(200, 503) shouldEqual false
+      matchStatusCodes(200, 200).isSuccess shouldEqual true
+      matchStatusCodes(200, 503).isSuccess shouldEqual false
 
     }
 
@@ -30,9 +30,9 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
 
     it("should be able to match methods") {
 
-      matchMethods("GET", "GET") shouldEqual true
-      matchMethods("GET", "POST") shouldEqual false
-      matchMethods("GET", "nonsense") shouldEqual false
+      matchMethods("GET", "GET").isSuccess shouldEqual true
+      matchMethods("GET", "POST").isSuccess shouldEqual false
+      matchMethods("GET", "nonsense").isSuccess shouldEqual false
 
     }
 
@@ -45,7 +45,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
       val expected = Map("fish" -> "chips")
       val received = Map("fish" -> "chips")
 
-      matchHeaders(None, expected, received) shouldEqual true
+      matchHeaders(None, expected, received).isSuccess shouldEqual true
 
     }
 
@@ -54,7 +54,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
       val expected = Map("fish" -> "chips")
       val received = Map("fish" -> "peas")
 
-      matchHeaders(None, expected, received) shouldEqual false
+      matchHeaders(None, expected, received).isSuccess shouldEqual false
 
     }
 
@@ -63,7 +63,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
       val expected = Map("fish" -> "chips", "mammal" -> "bear")
       val received = Map("fish" -> "chips", "mammal" -> "bear", "rock" -> "sandstone", "metal" -> "steel")
 
-      matchHeaders(None, expected, received) shouldEqual true
+      matchHeaders(None, expected, received).isSuccess shouldEqual true
 
     }
 
@@ -85,7 +85,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
           )
         )
 
-      matchHeaders(None, expected, received) shouldEqual true
+      matchHeaders(None, expected, received).isSuccess shouldEqual true
 
     }
 
@@ -112,7 +112,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         )
       )
 
-      matchHeaders(None, expected, received) shouldEqual true
+      matchHeaders(None, expected, received).isSuccess shouldEqual true
 
     }
 
@@ -128,7 +128,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         )
       )
 
-      matchHeaders(Option(Map("$.headers.fish" -> MatchingRule("regex", "\\w+", min = None))), expected, received) shouldEqual true
+      matchHeaders(Option(Map("$.headers.fish" -> MatchingRule("regex", "\\w+", min = None))), expected, received).isSuccess shouldEqual true
     }
 
     it("should be able to use regex to match more realistic custom headers") {
@@ -145,8 +145,8 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         )
       )
 
-      matchHeaders(Option(Map("$.headers.X-Trace-Id" -> MatchingRule("regex", "^.{0,38}$", min = None))), expected, received) shouldEqual true
-      matchHeaders(Option(Map("$.headers.X-Trace-Id" -> MatchingRule("regex", "^fish", min = None))), expected, received) shouldEqual false
+      matchHeaders(Option(Map("$.headers.X-Trace-Id" -> MatchingRule("regex", "^.{0,38}$", min = None))), expected, received).isSuccess shouldEqual true
+      matchHeaders(Option(Map("$.headers.X-Trace-Id" -> MatchingRule("regex", "^fish", min = None))), expected, received).isSuccess shouldEqual false
     }
 
     it("should be able to use regex to match some headers out of sequence") {
@@ -163,7 +163,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         )
       )
 
-      matchHeaders(Option(Map("$.headers.fish" -> MatchingRule("regex", "\\w+", min = None))), expected, received) shouldEqual true
+      matchHeaders(Option(Map("$.headers.fish" -> MatchingRule("regex", "\\w+", min = None))), expected, received).isSuccess shouldEqual true
     }
 
   }
@@ -174,11 +174,11 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
 
       val expected = "/foo/bar/hello?id=abc123&name=joey&job=dentist&hobby=skiing"
 
-      matchPaths(PathAndQuery(expected, None), PathAndQuery(expected, None)) shouldEqual true
-      matchPaths(PathAndQuery(expected, None), PathAndQuery("/foo/bar/hello?hobby=skiing&name=joey&id=abc123&job=dentist", None)) shouldEqual true
-      matchPaths(PathAndQuery(expected, None), PathAndQuery("/foo/bar/hello?hobby=skiing&name=joey", "id=abc123&job=dentist")) shouldEqual true
-      matchPaths(PathAndQuery(expected, None), PathAndQuery("/foo/bar/hello?hobby=skiing", None)) shouldEqual false
-      matchPaths(PathAndQuery("/foo/bar/hello", None), PathAndQuery("/foo/bar/hello?hobby=skiing", None)) shouldEqual true // forgiving in what you receive...
+      matchPaths(PathAndQuery(expected, None), PathAndQuery(expected, None)).isSuccess shouldEqual true
+      matchPaths(PathAndQuery(expected, None), PathAndQuery("/foo/bar/hello?hobby=skiing&name=joey&id=abc123&job=dentist", None)).isSuccess shouldEqual true
+      matchPaths(PathAndQuery(expected, None), PathAndQuery("/foo/bar/hello?hobby=skiing&name=joey", "id=abc123&job=dentist")).isSuccess shouldEqual true
+      matchPaths(PathAndQuery(expected, None), PathAndQuery("/foo/bar/hello?hobby=skiing", None)).isSuccess shouldEqual false
+      matchPaths(PathAndQuery("/foo/bar/hello", None), PathAndQuery("/foo/bar/hello?hobby=skiing", None)).isSuccess shouldEqual true // forgiving in what you receive...
 
     }
 
@@ -190,27 +190,27 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
 
       val expected = "hello there!"
 
-      matchBodies(None, expected, expected) shouldEqual true
-      matchBodies(None, expected, "Yo ho!") shouldEqual false
+      matchBodies(None, expected, expected).isSuccess shouldEqual true
+      matchBodies(None, expected, "Yo ho!").isSuccess shouldEqual false
 
     }
 
     it("should be able to handle missing bodies and no expectation of bodies") {
 
       withClue("None expected, none received") {
-        matchBodies(None, None, None) shouldEqual true
+        matchBodies(None, None, None).isSuccess shouldEqual true
       }
 
       withClue("Some expected, none received") {
-        matchBodies(None, Some("hello"), None) shouldEqual false
+        matchBodies(None, Some("hello"), None).isSuccess shouldEqual false
       }
 
       // Forgiving about what we receive
       withClue("None expected, some received") {
-        matchBodies(None, None, Some("hello")) shouldEqual true
+        matchBodies(None, None, Some("hello")).isSuccess shouldEqual true
       }
       withClue("Some expected, some received") {
-        matchBodies(None, Some("hello"), Some("hello")) shouldEqual true
+        matchBodies(None, Some("hello"), Some("hello")).isSuccess shouldEqual true
       }
 
     }
@@ -242,15 +242,15 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         """.stripMargin
 
       withClue("Same json no hal") {
-        matchBodies(None, expected, expected) shouldEqual true
+        matchBodies(None, expected, expected).isSuccess shouldEqual true
       }
 
       withClue("Same json + hal") {
-        matchBodies(None, expected, expected) shouldEqual true
+        matchBodies(None, expected, expected).isSuccess shouldEqual true
       }
 
       withClue("Expected compared to received") {
-        matchBodies(None, expected, received) shouldEqual true
+        matchBodies(None, expected, received).isSuccess shouldEqual true
       }
 
     }
@@ -278,7 +278,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
       )
 
       withClue("Didn't match json body with rule") {
-        matchBodies(rules, expected, received) shouldEqual true
+        matchBodies(rules, expected, received).isSuccess shouldEqual true
       }
 
     }
@@ -300,7 +300,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         </fish-supper>
 
       withClue("Same xml") {
-        matchBodies(None, expected1.toString(), received1.toString()) shouldEqual true
+        matchBodies(None, expected1.toString(), received1.toString()).isSuccess shouldEqual true
       }
 
       val expected2 =
@@ -318,7 +318,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         </fish-supper>
 
       withClue("Different xml") {
-        matchBodies(None, expected2.toString(), received2.toString()) shouldEqual false
+        matchBodies(None, expected2.toString(), received2.toString()).isSuccess shouldEqual false
       }
 
       val expected3 =
@@ -338,7 +338,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         </fish-supper>
 
       withClue("Received xml with additional fields and attributes") {
-        matchBodies(None, expected3.toString(), received3.toString()) shouldEqual true
+        matchBodies(None, expected3.toString(), received3.toString()).isSuccess shouldEqual true
       }
 
       val expected4 =
@@ -358,7 +358,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         </fish-supper>
 
       withClue("Received xml with missing fields and attributes") {
-        matchBodies(None, expected4.toString(), received4.toString()) shouldEqual false
+        matchBodies(None, expected4.toString(), received4.toString()).isSuccess shouldEqual false
       }
 
     }

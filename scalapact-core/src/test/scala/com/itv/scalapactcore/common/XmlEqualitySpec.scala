@@ -26,16 +26,12 @@ class XmlEqualitySpec extends FunSpec with Matchers {
 
     it("should not find equality of a simple unequal example") {
 
-      // Note, the <side> tag *is* equal since the left has less information than the right.
-      val expected = <fish><type>haddock</type><side/></fish>
-      val received = <fish><type>haddock</type><side>chips</side></fish>
-
-      check(expected =~ received)
-
       val expected2 = <fish><type>cod</type><side>chips</side></fish>
       val received2 = <fish><type>cod</type><side/></fish>
 
-      (expected2 =~ received2).isEqual shouldEqual false
+      withClue("Unequal") {
+        (expected2 =~ received2).isEqual shouldEqual false
+      }
 
     }
 
