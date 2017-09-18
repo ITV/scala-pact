@@ -18,7 +18,11 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
     check[IrNodeAttributes](attributesTest(strict, this.isXml, bePermissive, other.path, rules, this, other), this.attributes, other.attributes) +
     check[IrNodePath](pathTest(other.path), this.path, other.path)
 
+//    println(check[String](labelTest(other.path), this.label, other.label).renderAsString)
+
 //    println("Me", this.renderAsString)
+
+//    println("whereami", other.path)
 
 //    println("basic", nodeEquality.renderAsString)
 
@@ -29,6 +33,8 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
 //    println("rules", ruleResults.map(_.renderAsString))
 
     val childEquality = check[List[IrNode]](childrenTest(strict, other.path, isXml, bePermissive, rules, this, other), this.children, other.children)
+
+//    println("kids", childEquality.renderAsString)
 
     ruleResults
       .map(_ + childEquality)
@@ -150,8 +156,16 @@ object IrNodeEqualityResult {
 
   private def permissiveCheckChildren(path: IrNodePath, strict: Boolean, bePermissive: Boolean, rules: IrNodeMatchingRules, a: List[IrNode], b: List[IrNode]): IrNodeEqualityResult =
     a.map { n1 =>
+//      println("<<<", n1.renderAsString)
       b.find { n2 =>
-          n1.isEqualTo(n2, strict, rules, bePermissive).isEqual
+
+//        println("<<<<<<", n1.label, n2.label)
+
+        val res = n1.isEqualTo(n2, strict, rules, bePermissive).isEqual
+
+//        println("==", res)
+
+        res
       } match {
         case Some(_) => IrNodesEqual
         case None => IrNodesNotEqual(s"Could not find match for:\n${n1.renderAsString}", path)
@@ -200,16 +214,30 @@ object IrNodeEqualityResult {
           permissiveCheckChildren(path, strict, bePermissive, rules, a, b)
         }
       } else {
-        println("here", path.renderAsString)
+//        println("here", path.renderAsString)
         val newA = b.map(_ => a.headOption).collect { case Some(s) => s }
 
-        val r = newA.zip(b)
+        val maybeResult: Option[IrNodeEqualityResult] = newA.zip(b)
           .map { p =>
             RuleChecks.checkForNode(rules, p._2.path, p._1, p._2)
           }
-          .collect { case Some(s) => s }.foldLeft[IrNodeEqualityResult](IrNodesEqual)(_ + _)
+          .collect {
+            case Some(d @ IrNodesNotEqual(_)) => d
+          } match {
+            case Nil =>
+              None
 
-        if(r.isEqual) permissiveCheckChildren(path, strict, bePermissive, rules.withProcessTracing("me"), a, b) else r
+            case x :: xs =>
+              Option(xs.foldLeft[IrNodeEqualityResult](x)(_ + _))
+          }
+
+//        println(maybeResult.map(_.renderAsString))
+
+        val equalityResult = permissiveCheckChildren(path, strict, bePermissive, rules/*.withProcessTracing("me")*/, a, b)
+
+//        println(equalityResult.renderAsString)
+
+        maybeResult.getOrElse(equalityResult)
       }
     }
 

@@ -467,4 +467,29 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
 
   }
 
+  describe("permissive matching") {
+
+    it("should be able to spot a missing key") {
+
+      implicit val rules: IrNodeMatchingRules =
+        IrNodeMatchingRules()//.withProcessTracing("be able to spot a missing key")
+
+      val expected: IrNode = MatchIr.fromJSON(
+        """
+          |{"name":"Any name","age":"39"}
+        """.stripMargin
+      ).get
+
+      val actual: IrNode = MatchIr.fromJSON(
+        """
+          |{"name":"Any name"}
+        """.stripMargin
+      ).get
+
+      (expected =~ actual).isEqual shouldEqual false
+
+    }
+
+  }
+
 }
