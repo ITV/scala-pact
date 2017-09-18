@@ -68,9 +68,6 @@ trait PactSpecTester extends FunSpec with Matchers {
       val i = Interaction(None, None, "", InteractionRequest(None, None, None, None, None, None), spec.expected)
 
       mode match {
-//        case NonStrictOnly =>
-//          doResponseMatch(spec, i, strictMatching = false, shouldMatch = spec.`match`, path)
-//          doResponseMatch(spec, i, strictMatching = true, shouldMatch = !spec.`match`, path)
 
         case StrictOnly =>
           doResponseMatch(spec, i, strictMatching = false, shouldMatch = !spec.`match`, path)
@@ -106,7 +103,7 @@ trait PactSpecTester extends FunSpec with Matchers {
 
 sealed trait StrictTestMode
 
-// This should not be a thing.
+// Note to self: This should not be a thing.
 // Strict means 'Pact standard' and non-strict is a relaxing of the rules.
 // There should be no permissive only tests
 //case object NonStrictOnly extends StrictTestMode

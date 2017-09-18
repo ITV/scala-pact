@@ -75,20 +75,20 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
             else List(IrNodesNotEqual(s"Primitive type '${e.primitiveTypeName}' did not match actual '${a.primitiveTypeName}'", path))
 
           case (Some(_), Some(_)) =>
-            List(IrNodesNotEqual(s"Miss aligned values (by path), could not check rule: " + r.renderAsString, path))
+            List(IrNodesNotEqual(s"Miss aligned values (by path '${expected.path.lastSegmentLabel}' and '${actual.path.lastSegmentLabel}'), could not check rule: " + r.renderAsString, path))
 
-          case (Some(_), None) =>
-            List(IrNodesNotEqual(s"Missing actual value, could not check rule: " + r.renderAsString, path))
+          case (Some(v), None) =>
+            List(IrNodesNotEqual(s"Missing actual value (compared to expected '${v.renderAsString}'), could not check rule: " + r.renderAsString, path))
 
-          case (_, Some(_)) =>
-            List(IrNodesNotEqual(s"Missing expected value, could not check rule: " + r.renderAsString, path))
+          case (_, Some(v)) =>
+            List(IrNodesNotEqual(s"Missing expected value (compared to actual '${v.renderAsString}'), could not check rule: " + r.renderAsString, path))
 
           case (_, _) =>
             RuleProcessTracing.log(" ...no values")
             List(IrNodesEqual)
         }
 
-        RuleProcessTracing.log(s"  ...${res.map(p => if(p.isEqual) "success" else "failure").mkString(", ")}")
+        RuleProcessTracing.log(s"  ...${res.map(p => if(p.isEqual) "success" else "failure: " + p.renderAsString).mkString(", ")}")
 
         res
 

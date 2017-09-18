@@ -18,11 +18,13 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
     check[IrNodeAttributes](attributesTest(strict, this.isXml, bePermissive, other.path, rules, this, other), this.attributes, other.attributes) +
     check[IrNodePath](pathTest(other.path), this.path, other.path)
 
+//    println("Me", this.renderAsString)
+
 //    println("basic", nodeEquality.renderAsString)
 
 //    println("paths", path.renderAsString, other.path.renderAsString)
 
-    val ruleResults = RuleChecks.checkForNode(rules/*.withProcessTracing("TESTING")*/, other.path, this, other)
+    val ruleResults = RuleChecks.checkForNode(rules, other.path, this, other)
 
 //    println("rules", ruleResults.map(_.renderAsString))
 
@@ -198,7 +200,16 @@ object IrNodeEqualityResult {
           permissiveCheckChildren(path, strict, bePermissive, rules, a, b)
         }
       } else {
-        permissiveCheckChildren(path, strict, bePermissive, rules, a, b)
+        println("here", path.renderAsString)
+        val newA = b.map(_ => a.headOption).collect { case Some(s) => s }
+
+        val r = newA.zip(b)
+          .map { p =>
+            RuleChecks.checkForNode(rules, p._2.path, p._1, p._2)
+          }
+          .collect { case Some(s) => s }.foldLeft[IrNodeEqualityResult](IrNodesEqual)(_ + _)
+
+        if(r.isEqual) permissiveCheckChildren(path, strict, bePermissive, rules.withProcessTracing("me"), a, b) else r
       }
     }
 
@@ -339,7 +350,7 @@ case class IrNumberNode(value: Double) extends IrNodePrimitive {
   def asString: Option[String] = None
   def asNumber: Option[Double] = Option(value)
   def asBoolean: Option[Boolean] = None
-  def renderAsString: String = value.toString.replaceAll(".0", "")
+  def renderAsString: String = value.toString.replaceAll("\\.0", "")
   def primitiveTypeName: String = "number"
 }
 case class IrBooleanNode(value: Boolean) extends IrNodePrimitive {

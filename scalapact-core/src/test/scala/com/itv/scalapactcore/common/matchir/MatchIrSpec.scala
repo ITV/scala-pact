@@ -211,6 +211,27 @@ class MatchIrSpec extends FunSpec with Matchers {
 
     }
 
+    it("should convert an object with a primitive array") {
+
+      val json: String =
+        """
+          |{"myDates":[20,5,70]}
+        """.stripMargin
+
+      val ir: IrNode =
+        IrNode(
+          MatchIr.rootNodeLabel,
+          IrNode("myDates",
+            IrNode("myDates", IrNumberNode(20)).withPath(IrNodePathEmpty <~ "myDates" <~ 0),
+            IrNode("myDates", IrNumberNode(5)).withPath(IrNodePathEmpty <~ "myDates" <~ 1),
+            IrNode("myDates", IrNumberNode(70)).withPath(IrNodePathEmpty <~ "myDates" <~ 2)
+          ).withPath(IrNodePathEmpty <~ "myDates").markAsArray
+        ).withPath(IrNodePathEmpty)
+
+      check(MatchIr.fromJSON(json).get =<>= ir)
+
+    }
+
     it("should convert a simple top level array") {
 
       val json: String =
