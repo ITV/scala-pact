@@ -129,6 +129,8 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
           res
       }
 
+    } else if(expected.isXml && findForPath(path.parent, expected.isXml).exists(_.isTypeRule)) {
+      List(IrNodesNotEqual(s"Expected XML node type '${expected.label}' was not the same as actual type '${actual.label}'", path))
     } else {
       Nil
     }
