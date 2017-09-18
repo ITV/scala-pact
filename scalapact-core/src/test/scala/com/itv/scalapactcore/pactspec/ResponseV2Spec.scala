@@ -44,10 +44,7 @@ class ResponseV2Spec extends PactSpecTester {
           fetchResponseSpec("/response/body/array at top level with matchers.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/array at top level xml.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/array at top level.json")(StrictAndNonStrict),
-
-          //
-//          fetchResponseSpec("/response/body/array in different order xml.json")(StrictOnly),
-          
+          fetchResponseSpec("/response/body/array in different order xml.json")(StrictOnly),
           fetchResponseSpec("/response/body/array in different order.json")(StrictOnly),
           fetchResponseSpec("/response/body/array with regex matcher xml.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/array with regex matcher.json")(StrictAndNonStrict),

@@ -192,6 +192,8 @@ object IrNodeEqualityResult {
           strictCheckChildren(path, strict, bePermissive, rules, a, b, ignoreLength = true)
         } else if (parentA.isArray && a.length == b.length) {
           strictCheckChildren(path, strict, bePermissive, rules, a, b, ignoreLength = false)
+        } else if(isXml) {
+          strictCheckChildren(path, strict, bePermissive, rules, a, b, ignoreLength = false)
         } else {
           permissiveCheckChildren(path, strict, bePermissive, rules, a, b)
         }
