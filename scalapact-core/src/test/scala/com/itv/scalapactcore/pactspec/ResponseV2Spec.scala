@@ -47,16 +47,19 @@ class ResponseV2Spec extends PactSpecTester {
 
           //
 //          fetchResponseSpec("/response/body/array in different order xml.json")(StrictOnly),
-//          fetchResponseSpec("/response/body/array in different order.json")(StrictOnly),
-//          fetchResponseSpec("/response/body/array with regex matcher xml.json")(StrictAndNonStrict),
-//          fetchResponseSpec("/response/body/array with regex matcher.json")(StrictAndNonStrict),
+          
+          fetchResponseSpec("/response/body/array in different order.json")(StrictOnly),
+          fetchResponseSpec("/response/body/array with regex matcher xml.json")(StrictAndNonStrict),
+          fetchResponseSpec("/response/body/array with regex matcher.json")(StrictAndNonStrict),
+
+          //
 //          fetchResponseSpec("/response/body/array with type matcher mismatch xml.json")(StrictAndNonStrict),
 //          fetchResponseSpec("/response/body/array with type matcher mismatch.json")(StrictAndNonStrict),
-//          fetchResponseSpec("/response/body/array with type matcher xml.json")(StrictAndNonStrict),
-//          fetchResponseSpec("/response/body/array with type matcher.json")(StrictAndNonStrict),
-//          fetchResponseSpec("/response/body/deeply nested objects xml.json")(StrictAndNonStrict),
-//          fetchResponseSpec("/response/body/deeply nested objects.json")(StrictAndNonStrict),
 
+          fetchResponseSpec("/response/body/array with type matcher xml.json")(StrictAndNonStrict),
+          fetchResponseSpec("/response/body/array with type matcher.json")(StrictAndNonStrict),
+          fetchResponseSpec("/response/body/deeply nested objects xml.json")(StrictAndNonStrict),
+          fetchResponseSpec("/response/body/deeply nested objects.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/different value found at index xml.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/different value found at index.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/different value found at key xml.json")(StrictAndNonStrict),
@@ -91,15 +94,9 @@ class ResponseV2Spec extends PactSpecTester {
           fetchResponseSpec("/response/body/null found in array when not null expected.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/number found at key when string expected.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/number found in array when string expected.json")(StrictAndNonStrict),
-
-          //
-//          fetchResponseSpec("/response/body/objects in array first matches xml.json")(StrictOnly),
-
+          fetchResponseSpec("/response/body/objects in array first matches xml.json")(StrictOnly),
           fetchResponseSpec("/response/body/objects in array first matches.json")(StrictOnly),
-
-          //
-//          fetchResponseSpec("/response/body/objects in array no matches xml.json")(StrictOnly),
-
+          fetchResponseSpec("/response/body/objects in array no matches xml.json")(StrictOnly),
           fetchResponseSpec("/response/body/objects in array no matches.json")(StrictOnly),
           fetchResponseSpec("/response/body/objects in array second matches xml.json")(StrictOnly),
           fetchResponseSpec("/response/body/objects in array second matches.json")(StrictOnly),
