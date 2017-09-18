@@ -128,15 +128,15 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
     }
   }
 
-  def findAncestralTypeRule(path: IrNodePath, isXml: Boolean): List[IrNodeRule] = {
+  def findAncestralTypeRule(path: IrNodePath, isXml: Boolean): IrNodeMatchingRules = {
     RuleProcessTracing.log("Finding ancestral type rule")
 
-    val res = (path, findForPath(path.parent, isXml).find(p => p.isTypeRule).toList) match {
+    val res: List[IrNodeRule] = (path, findForPath(path.parent, isXml).find(p => p.isTypeRule).toList) match {
       case (IrNodePathEmpty, l) =>
         l
 
       case (p, Nil) =>
-        findAncestralTypeRule(p.parent, isXml)
+        findAncestralTypeRule(p.parent, isXml).rules
 
       case (_, l) =>
         l
@@ -144,16 +144,17 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
 
     RuleProcessTracing.log(s"findAncestralTypeRule [${path.renderAsString}]: " + res.map(_.renderAsString).mkString(", "))
 
-    res
+    IrNodeMatchingRules(res, withTracing)
   }
 
   def validatePrimitive(path: IrNodePath, expected: IrNodePrimitive, actual: IrNodePrimitive, checkParentTypeRule: Boolean, isXml: Boolean): List[IrNodeEqualityResult] = {
     RuleProcessTracing.log(s"validatePrimitive (checkParentTypeRule=$checkParentTypeRule) at: " + path.renderAsString)
-    val parentTypeRules = if(checkParentTypeRule) findAncestralTypeRule(path, isXml) else Nil
+    val parentTypeRules = if(checkParentTypeRule) findAncestralTypeRule(path, isXml).rules else Nil
 
     (parentTypeRules ++ findForPath(path, isXml)).map {
       case IrNodeTypeRule(_) =>
-        RuleProcessTracing.log("Checking type...")
+        RuleProcessTracing.log(s"Checking type... (${expected.primitiveTypeName} vs ${actual.primitiveTypeName})")
+
         val res = Option {
           if (expected.primitiveTypeName == actual.primitiveTypeName) IrNodesEqual
           else IrNodesNotEqual(s"Primitive type '${expected.primitiveTypeName}' did not match actual '${actual.primitiveTypeName}'", path)

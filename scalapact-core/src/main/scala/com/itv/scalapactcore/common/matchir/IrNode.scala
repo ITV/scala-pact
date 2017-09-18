@@ -13,9 +13,9 @@ case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[
 
     val nodeEquality = check[Boolean](nodeType(other.path, this.isXml), this.isArray, other.isArray) +
     check[String](labelTest(other.path), this.label, other.label) +
-    check[Option[IrNodePrimitive]](valueTest(strict, this.isXml, other.path, rules), this.value, other.value) +
+    check[Option[IrNodePrimitive]](valueTest(strict, this.isXml, other.path, rules, this, other), this.value, other.value) +
     check[Option[String]](namespaceTest(other.path), this.ns, other.ns) +
-    check[IrNodeAttributes](attributesTest(strict, this.isXml, bePermissive, other.path, rules), this.attributes, other.attributes) +
+    check[IrNodeAttributes](attributesTest(strict, this.isXml, bePermissive, other.path, rules, this, other), this.attributes, other.attributes) +
     check[IrNodePath](pathTest(other.path), this.path, other.path)
 
 //    println("basic", nodeEquality.renderAsString)
@@ -70,8 +70,10 @@ object IrNodeEqualityResult {
       if(a == b) IrNodesEqual else IrNodesNotEqual(s"Label '$a' did not match '$b'", path)
     }
 
-  val valueTest: (Boolean, Boolean, IrNodePath, IrNodeMatchingRules) => (Option[IrNodePrimitive], Option[IrNodePrimitive]) => IrNodeEqualityResult = {
-    (strict, isXml, path, rules) => (a, b) =>
+  val valueTest: (Boolean, Boolean, IrNodePath, IrNodeMatchingRules, IrNode, IrNode) => (Option[IrNodePrimitive], Option[IrNodePrimitive]) => IrNodeEqualityResult = {
+    (strict, isXml, path, rules, parentA, parentB) => (a, b) =>
+
+      if(parentA.path.lastSegmentLabel == parentB.path.lastSegmentLabel) {
         val equality = if (strict) {
           (a, b) match {
             case (Some(v1: IrNodePrimitive), Some(v2: IrNodePrimitive)) =>
@@ -102,7 +104,10 @@ object IrNodeEqualityResult {
           }
         }
 
-      RuleChecks.checkForPrimitive(rules, path, a, b, checkParentTypeRule = true, isXml).getOrElse(equality)
+        RuleChecks.checkForPrimitive(rules, path, a, b, checkParentTypeRule = true, isXml).getOrElse(equality)
+      } else {
+        IrNodesEqual
+      }
   }
 
   val namespaceTest: IrNodePath => (Option[String], Option[String]) => IrNodeEqualityResult = path => {
@@ -157,8 +162,8 @@ object IrNodeEqualityResult {
         if (a.length < b.length && (!bePermissive || (bePermissive && parentA.isArray && !isXml))) {
           val parentCheck: Option[IrNodeEqualityResult] =
             RuleChecks.checkForNode(
-              rules.findMinArrayLengthRule(parentA.path, parentA.isXml),
-              parentA.path,
+              rules.findMinArrayLengthRule(path, parentA.isXml),
+              path,
               parentA,
               parentB
             )
@@ -175,10 +180,13 @@ object IrNodeEqualityResult {
               strictCheckChildren(path, strict, bePermissive, rules, newA, b)
 
             case _ =>
-              strictCheckChildren(path, strict, bePermissive, rules, a, b)
+              RuleChecks.checkForNode(rules, path, parentA, parentB)
+                .getOrElse{
+                  strictCheckChildren(path, strict, bePermissive, rules.withProcessTracing, a, b)
+                }
           }
 
-          parentCheck.map(p => p + childrenCheck).getOrElse(IrNodesNotEqual(s"Differing number of children. Expected ${a.length} got ${b.length}", path))
+          parentCheck.map(p => p + childrenCheck).getOrElse(childrenCheck)
         } else if (parentA.isArray && a.length == b.length) {
           strictCheckChildren(path, strict, bePermissive, rules, a, b)
         } else {
@@ -212,8 +220,8 @@ object IrNodeEqualityResult {
     }
 
 
-  val attributesTest: (Boolean, Boolean, Boolean, IrNodePath, IrNodeMatchingRules) => (IrNodeAttributes, IrNodeAttributes) => IrNodeEqualityResult =
-    (strict, isXml, bePermissive, path, rules) => (a, b) =>
+  val attributesTest: (Boolean, Boolean, Boolean, IrNodePath, IrNodeMatchingRules, IrNode, IrNode) => (IrNodeAttributes, IrNodeAttributes) => IrNodeEqualityResult =
+    (strict, isXml, bePermissive, path, rules, parentA, parentB) => (a, b) =>
       if(strict) {
         val as = a.attributes.toList
         val bs = b.attributes.toList
