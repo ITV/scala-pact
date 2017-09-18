@@ -138,8 +138,8 @@ object IrNodeEqualityResult {
       case x :: xs => xs.foldLeft(x)(_ + _)
     }
 
-  private def strictCheckChildren(path: IrNodePath, strict: Boolean, bePermissive: Boolean, rules: IrNodeMatchingRules, a: List[IrNode], b: List[IrNode]): IrNodeEqualityResult =
-    if(a.length != b.length) IrNodesNotEqual(s"Differing number of children, cannot check equality. Expected ${a.length} got ${b.length}", path)
+  private def strictCheckChildren(path: IrNodePath, strict: Boolean, bePermissive: Boolean, rules: IrNodeMatchingRules, a: List[IrNode], b: List[IrNode], ignoreLength: Boolean): IrNodeEqualityResult =
+    if(!ignoreLength && a.length != b.length) IrNodesNotEqual(s"Differing number of children, cannot check equality. Expected ${a.length} got ${b.length}", path)
     else {
       a.zip(b).map { p =>
         p._1.isEqualTo(p._2, strict, rules, bePermissive)
@@ -175,20 +175,23 @@ object IrNodeEqualityResult {
               // everything correctly, running on the assumption that at this point, the user
               // is relying on rules to validate because frankly all bets for normal comparison
               // are off!
-              val newA = b.map(_ => a.headOption).collect { case Some(s) => s}
+              val newA = b.map(_ => a.headOption).collect { case Some(s) => s }
 
-              strictCheckChildren(path, strict, bePermissive, rules, newA, b)
+              strictCheckChildren(path, strict, bePermissive, rules, newA, b, ignoreLength = false)
 
             case _ =>
               RuleChecks.checkForNode(rules, path, parentA, parentB)
-                .getOrElse{
-                  strictCheckChildren(path, strict, bePermissive, rules.withProcessTracing, a, b)
+                .getOrElse {
+                  strictCheckChildren(path, strict, bePermissive, rules, a, b, ignoreLength = false)
                 }
           }
 
           parentCheck.map(p => p + childrenCheck).getOrElse(childrenCheck)
+
+        } else if (a.length < b.length && bePermissive && isXml) {
+          strictCheckChildren(path, strict, bePermissive, rules, a, b, ignoreLength = true)
         } else if (parentA.isArray && a.length == b.length) {
-          strictCheckChildren(path, strict, bePermissive, rules, a, b)
+          strictCheckChildren(path, strict, bePermissive, rules, a, b, ignoreLength = false)
         } else {
           permissiveCheckChildren(path, strict, bePermissive, rules, a, b)
         }
