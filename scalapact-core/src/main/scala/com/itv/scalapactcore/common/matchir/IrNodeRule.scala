@@ -99,7 +99,7 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
 
           val res = (expected.value, actual.value) match {
             case (Some(_), Some(a)) =>
-              if (a.renderAsString.matches(r.regex)) List(IrNodesEqual)
+              if (r.regex.r.findAllIn(a.renderAsString).nonEmpty) List(IrNodesEqual)
               else List(IrNodesNotEqual(s"Regex '${r.regex}' did not match actual '${a.renderAsString}'", path))
 
             case (Some(_), None) =>
