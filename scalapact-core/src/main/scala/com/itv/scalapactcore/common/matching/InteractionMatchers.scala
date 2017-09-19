@@ -15,6 +15,9 @@ object InteractionMatchers {
 
   case class OutcomeAndInteraction(outcome: MatchOutcome, matchingInteraction: Option[Interaction])
 
+  val RequestSubject: String = "request"
+  val ResponseSubject: String = "response"
+
   def renderOutcome(outcome: Option[OutcomeAndInteraction], renderedOriginal: String, subject: String): Either[String, Interaction] = {
     outcome match {
       case None =>
@@ -40,7 +43,7 @@ object InteractionMatchers {
              | ...original
              |$renderedOriginal
              | ...closest match was...
-             |${i.request.renderAsString}
+             |${if(subject == RequestSubject) i.request.renderAsString else i.response.renderAsString }
              | ...Differences
              |${f.renderDifferences}
              """.stripMargin
@@ -70,7 +73,7 @@ object InteractionMatchers {
 
   def matchRequest(strictMatching: Boolean, interactions: List[Interaction], received: InteractionRequest): Either[String, Interaction] =
     if(interactions.isEmpty) Left("No interactions to compare with.")
-    else renderOutcome(matchOrFindClosestRequest(strictMatching, interactions, received), received.renderAsString, "request")
+    else renderOutcome(matchOrFindClosestRequest(strictMatching, interactions, received), received.renderAsString, RequestSubject)
 
   def matchSingleRequest(strictMatching: Boolean, rules: Option[Map[String, MatchingRule]], expected: InteractionRequest, received: InteractionRequest): MatchOutcome = {
     if(strictMatching) {
@@ -108,7 +111,7 @@ object InteractionMatchers {
 
   def matchResponse(strictMatching: Boolean, interactions: List[Interaction]): InteractionResponse => Either[String, Interaction] = received =>
     if(interactions.isEmpty) Left("No interactions to compare with.")
-    else renderOutcome(matchOrFindClosestResponse(strictMatching, interactions, received), received.renderAsString, "response")
+    else renderOutcome(matchOrFindClosestResponse(strictMatching, interactions, received), received.renderAsString, ResponseSubject)
 
   def matchSingleResponse(strictMatching: Boolean, rules: Option[Map[String, MatchingRule]], expected: InteractionResponse, received: InteractionResponse): MatchOutcome =
     if(strictMatching) {
