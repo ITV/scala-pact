@@ -364,7 +364,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
           IrNodeRegexRule("^[a-z][a-z][a-z][0-9][0-9][0-9]$", IrNodePathEmpty <~ "fish" <@ "id"),
           IrNodeRegexRule("haddock|plaice", IrNodePathEmpty <~ "fish" <~ 0 <~ "breeds" <~ 0 <~ "breed"),
           IrNodeRegexRule("haddock|plaice", IrNodePathEmpty <~ "fish" <~ 0 <~ "breeds" <~ 1 <~ "breed")
-        ).withProcessTracing("regex check indexed nodes")
+        )//.withProcessTracing("regex check indexed nodes")
 
       val expected: IrNode = MatchIr.fromXml(
         <fish id="abc123"><breeds><breed>plaice</breed><breed>haddock</breed></breeds></fish>.toString()
@@ -448,7 +448,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
       implicit val rules: IrNodeMatchingRules =
         IrNodeMatchingRules(
           IrNodeTypeRule(IrNodePathEmpty <~ "myPerson" <*)
-        ).withProcessTracing("check type by wildcard with additional properties")
+        )//.withProcessTracing("check type by wildcard with additional properties")
 
       val expected: IrNode = MatchIr.fromJSON(
         """

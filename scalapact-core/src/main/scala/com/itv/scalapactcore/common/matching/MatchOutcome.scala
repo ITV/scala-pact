@@ -39,6 +39,7 @@ case object MatchOutcomeSuccess extends MatchOutcome {
 }
 case class MatchOutcomeFailed(differences: List[String]) extends MatchOutcome {
   val isSuccess: Boolean = false
+  val errorCount: Int = differences.length
 
   def renderDifferences: String = differences.mkString("\n")
 }

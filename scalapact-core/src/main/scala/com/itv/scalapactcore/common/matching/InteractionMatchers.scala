@@ -13,16 +13,59 @@ import scala.xml._
 
 object InteractionMatchers {
 
-  def matchRequest(strictMatching: Boolean, interactions: List[Interaction], received: InteractionRequest): Either[String, Interaction] = {
-    val result = interactions.find { interaction =>
-      matchSingleRequest(strictMatching, interaction.request.matchingRules, interaction.request, received).isSuccess
-    }
+  case class OutcomeAndInteraction(outcome: MatchOutcome, matchingInteraction: Option[Interaction])
 
-    result match {
-      case Some(matching) => Right(matching)
-      case None => Left("No matching request for: " + received.renderAsString)
+  def renderOutcome(outcome: Option[OutcomeAndInteraction], renderedOriginal: String, subject: String): Either[String, Interaction] = {
+    outcome match {
+      case None =>
+        Left("Entirely failed to match, something went horribly wrong.")
+
+      case Some(OutcomeAndInteraction(MatchOutcomeSuccess, None)) =>
+        Left("Match but failed to return interaction, something went horribly wrong.")
+
+      case Some(OutcomeAndInteraction(MatchOutcomeSuccess, Some(interaction))) =>
+        Right(interaction)
+
+      case Some(OutcomeAndInteraction(f @ MatchOutcomeFailed(_), None)) =>
+        Left("Failed to match, closest interaction missing:\n" + f.renderDifferences)
+
+      case Some(OutcomeAndInteraction(f @ MatchOutcomeFailed(_), Some(i))) =>
+        Left(
+          s"""Failed to match $subject
+             | ...original
+             |$renderedOriginal
+             | ...closest match was...
+             |${i.request.renderAsString}
+             | ...Differences
+             |${f.renderDifferences}
+             """.stripMargin
+        )
     }
   }
+
+  private def matchOrFindClosestRequest(strictMatching: Boolean, interactions: List[Interaction], received: InteractionRequest): Option[OutcomeAndInteraction] = {
+    def rec(strict: Boolean, remaining: List[Interaction], actual: InteractionRequest, fails: List[(MatchOutcomeFailed, Interaction)]): Option[OutcomeAndInteraction] = {
+      remaining match {
+        case Nil =>
+          fails.sortBy(_._1.errorCount).headOption.map(f => OutcomeAndInteraction(f._1, Option(f._2)))
+
+        case x :: xs =>
+          matchSingleRequest(strict, x.request.matchingRules, x.request, actual) match {
+            case success @ MatchOutcomeSuccess =>
+              Option(OutcomeAndInteraction(success, Option(x)))
+
+            case failure @ MatchOutcomeFailed(_) =>
+              rec(strict, xs, actual, (failure, x) :: fails)
+          }
+      }
+    }
+
+    rec(strictMatching, interactions, received, Nil)
+  }
+
+  def matchRequest(strictMatching: Boolean, interactions: List[Interaction], received: InteractionRequest): Either[String, Interaction] =
+    if(interactions.isEmpty) Left("No interactions to compare with.")
+    else renderOutcome(matchOrFindClosestRequest(strictMatching, interactions, received), received.renderAsString, "request")
 
   def matchSingleRequest(strictMatching: Boolean, rules: Option[Map[String, MatchingRule]], expected: InteractionRequest, received: InteractionRequest): MatchOutcome = {
     if(strictMatching) {
@@ -38,16 +81,29 @@ object InteractionMatchers {
     }
   }
 
-  def matchResponse(strictMatching: Boolean, interactions: List[Interaction]): InteractionResponse => Either[String, Interaction] = received => {
-    val result = interactions.find { interaction =>
-      matchSingleResponse(strictMatching, interaction.response.matchingRules, interaction.response, received).isSuccess
+  private def matchOrFindClosestResponse(strictMatching: Boolean, interactions: List[Interaction], received: InteractionResponse): Option[OutcomeAndInteraction] = {
+    def rec(strict: Boolean, remaining: List[Interaction], actual: InteractionResponse, fails: List[(MatchOutcomeFailed, Interaction)]): Option[OutcomeAndInteraction] = {
+      remaining match {
+        case Nil =>
+          fails.sortBy(_._1.errorCount).headOption.map(f => OutcomeAndInteraction(f._1, Option(f._2)))
+
+        case x :: xs =>
+          matchSingleResponse(strict, x.request.matchingRules, x.response, actual) match {
+            case success @ MatchOutcomeSuccess =>
+              Option(OutcomeAndInteraction(success, Option(x)))
+
+            case failure @ MatchOutcomeFailed(_) =>
+              rec(strict, xs, actual, (failure, x) :: fails)
+          }
+      }
     }
 
-    result match {
-      case Some(matching) => Right(matching)
-      case None => Left("No matching response for: " + received.renderAsString)
-    }
+    rec(strictMatching, interactions, received, Nil)
   }
+
+  def matchResponse(strictMatching: Boolean, interactions: List[Interaction]): InteractionResponse => Either[String, Interaction] = received =>
+    if(interactions.isEmpty) Left("No interactions to compare with.")
+    else renderOutcome(matchOrFindClosestResponse(strictMatching, interactions, received), received.renderAsString, "response")
 
   def matchSingleResponse(strictMatching: Boolean, rules: Option[Map[String, MatchingRule]], expected: InteractionResponse, received: InteractionResponse): MatchOutcome =
     if(strictMatching) {

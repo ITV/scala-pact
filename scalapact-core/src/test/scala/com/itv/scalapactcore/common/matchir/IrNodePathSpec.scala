@@ -127,9 +127,6 @@ class IrNodePathSpec extends FunSpec with Matchers {
 
       val actual = path.withIndexes
 
-      println("e: [" + expected.map(_.renderAsString).mkString(", ") + "]")
-      println("a: [" + actual.map(_.renderAsString).mkString(", ") + "]")
-
       expected.foreach { p =>
         actual.exists(_ === p) shouldEqual true
       }
