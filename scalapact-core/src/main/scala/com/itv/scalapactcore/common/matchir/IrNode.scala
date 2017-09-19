@@ -328,6 +328,20 @@ case class IrNodesNotEqual(differences: List[IrNodeDiff]) extends IrNodeEquality
   val isEqual: Boolean = false
   val diffCount: Int = differences.length
 
+  def renderDifferencesListWithRules(rules: IrNodeMatchingRules, isXml: Boolean): List[String] =
+    differences.groupBy(_.path.renderAsString).map { k =>
+      val path = k._2.headOption.map(_.path).getOrElse(IrNodePath.empty)
+      val relevantRules = IrNodeMatchingRules(rules.findForPath(path, isXml), RuleProcessTracing.disabled) + rules.findAncestralTypeRule(path, isXml)
+
+      s"""Node at: ${k._1}
+         |  ${k._2.map(_.message).mkString("\n  ")}
+         |
+         |> Rules:
+         |${relevantRules.renderAsString}
+         |
+       """.stripMargin
+    }.toList
+
   def renderDifferencesList: List[String] =
     differences.groupBy(_.path.renderAsString).map { k =>
       s"""Node at: ${k._1}

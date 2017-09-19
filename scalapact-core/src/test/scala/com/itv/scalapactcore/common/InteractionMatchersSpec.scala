@@ -1,8 +1,9 @@
 package com.itv.scalapactcore.common
 
-import com.itv.scalapactcore.MatchingRule
+import com.itv.scalapactcore.{MatchingRule, Pact, ScalaPactReader}
 import com.itv.scalapactcore.common.matching.BodyMatching._
 import com.itv.scalapactcore.common.matching.HeaderMatching._
+import com.itv.scalapactcore.common.matching.InteractionMatchers
 import com.itv.scalapactcore.common.matching.MethodMatching._
 import com.itv.scalapactcore.common.matching.PathMatching._
 import com.itv.scalapactcore.common.matching.StatusMatching._
@@ -361,6 +362,83 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         matchBodies(None, expected4.toString(), received4.toString()).isSuccess shouldEqual false
       }
 
+    }
+
+  }
+
+  describe("a complete match") {
+
+    it("should work") {
+
+      val a: String =
+        """{
+          |  "provider" : {
+          |    "name" : "provider"
+          |  },
+          |  "consumer" : {
+          |    "name" : "consumer"
+          |  },
+          |  "interactions" : [
+          |    {
+          |      "description" : "a simple request",
+          |      "request" : {
+          |        "method" : "GET",
+          |        "path" : "/"
+          |      },
+          |      "response" : {
+          |        "status" : 200,
+          |        "body" : {"message": "Hello"},
+          |        "matchingRules": {
+          |          "$.body.message": {
+          |            "match": "regex",
+          |            "regex": "fish"
+          |          }
+          |        }
+          |      }
+          |    }
+          |  ]
+          |}""".stripMargin
+
+      val b: String =
+        """{
+          |  "provider" : {
+          |    "name" : "provider"
+          |  },
+          |  "consumer" : {
+          |    "name" : "consumer"
+          |  },
+          |  "interactions" : [
+          |    {
+          |      "description" : "a simple request",
+          |      "request" : {
+          |        "method" : "GET",
+          |        "path" : "/"
+          |      },
+          |      "response" : {
+          |        "status" : 200,
+          |        "body" : {"message": "Hello2"},
+          |        "matchingRules": {
+          |          "$.body.message": {
+          |            "match": "regex",
+          |            "regex": "chips"
+          |          }
+          |        }
+          |      }
+          |    }
+          |  ]
+          |}""".stripMargin
+
+      val pactA: Pact = ScalaPactReader.jsonStringToPact(a).toOption.get
+      val pactB: Pact = ScalaPactReader.jsonStringToPact(b).toOption.get
+
+      val res = InteractionMatchers.matchResponse(strictMatching = true, pactA.interactions)(pactB.interactions.head.response)
+
+      res match {
+        case Right(_) => fail("Should not have matched")
+        case Left(msg) =>
+//          println(msg)
+          msg.contains("Failed") shouldEqual true
+      }
     }
 
   }
