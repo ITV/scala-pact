@@ -257,6 +257,7 @@ class ExampleSpec extends FunSpec with Matchers {
                 bodyRegexRule("name", "\\w+")
                 ~> bodyTypeRule("count")
                 ~> bodyArrayMinimumLengthRule("colours", 1)
+                ~> bodyRegexRule("colours[*]", "red|blue")
             )
             .willRespondWith(
               status = 200,

@@ -53,7 +53,7 @@ class StrictExampleSpec extends FunSpec with Matchers {
 
           result.status should equal(598)
           result.headers.get("X-Pact-Admin") shouldEqual Some("Pact Match Failure")
-          result.body.contains("No matching") shouldEqual true
+          result.body.contains("Failed to match") shouldEqual true
 
         }
 
