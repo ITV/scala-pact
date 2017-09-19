@@ -310,7 +310,8 @@ class MatchIrSpec extends FunSpec with Matchers {
           |  ],
           |  "riverbank": {
           |    "grassy": true,
-          |    "flowers": [ "poppies", "daisies", "dandelions" ]
+          |    "flowers": [ "poppies", "daisies", "dandelions" ],
+          |    "error": "here!"
           |  }
           |}
         """.stripMargin
@@ -360,7 +361,8 @@ class MatchIrSpec extends FunSpec with Matchers {
           ).withPath(IrNodePathEmpty <~ "riverbank")
         ).withPath(IrNodePathEmpty)
 
-      check(MatchIr.fromJSON(json).get =<>= expected)
+//      check(MatchIr.fromJSON(json).get =<>= expected)
+      (expected =<>= MatchIr.fromJSON(json).get).isEqual shouldEqual false
 
     }
 

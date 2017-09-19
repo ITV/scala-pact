@@ -123,7 +123,7 @@ object IrNodeEqualityResult {
     val segB = b.lastSegmentLabel
 
     if(segA == segB) IrNodesEqual
-    else IrNodesNotEqual(s"Path node '$segA' did not math '$segB'", path)
+    else IrNodesNotEqual(s"Path node '$segA' did not match '$segB'", path)
   }
 
   implicit private def listOfResultsToResult(l: List[IrNodeEqualityResult]): IrNodeEqualityResult =
@@ -140,14 +140,36 @@ object IrNodeEqualityResult {
       }
     }
 
-  private def permissiveCheckChildren(path: IrNodePath, strict: Boolean, bePermissive: Boolean, rules: IrNodeMatchingRules, a: List[IrNode], b: List[IrNode]): IrNodeEqualityResult =
-    a.map { n1 =>
-      b.find { n2 =>
-        n1.isEqualTo(n2, strict, rules, bePermissive).isEqual
-      } match {
-        case Some(_) => IrNodesEqual
-        case None => IrNodesNotEqual(s"Could not find match for:\n${n1.renderAsString}", path)
+  private def findClosestMatch(expected: IrNode, possibleMatches: List[IrNode], strict: Boolean, rules: IrNodeMatchingRules, bePermissive: Boolean): IrNodeEqualityResult = {
+    def rec(e: IrNode, remaining: List[IrNode], fails: List[IrNodesNotEqual]): IrNodeEqualityResult = {
+      remaining match {
+        case Nil =>
+          fails.sortBy(_.diffCount).headOption match {
+            // Should not happen, types are lying...
+            case None =>
+              IrNodesNotEqual(s"Could not find a match for node", e.path)
+
+            case Some(d) =>
+              d
+          }
+
+        case a :: as =>
+          e.isEqualTo(a, strict, rules, bePermissive) match {
+            case success @ IrNodesEqual =>
+              success
+
+            case failure @ IrNodesNotEqual(_) =>
+              rec(e, as, failure :: fails)
+          }
       }
+    }
+
+    rec(expected, possibleMatches, Nil)
+  }
+
+  private def permissiveCheckChildren(path: IrNodePath, strict: Boolean, bePermissive: Boolean, rules: IrNodeMatchingRules, a: List[IrNode], b: List[IrNode]): IrNodeEqualityResult =
+    a.map { actual =>
+      findClosestMatch(actual, b, strict, rules, bePermissive)
     }
 
   val childrenTest: (Boolean, IrNodePath, Boolean, Boolean, IrNodeMatchingRules, IrNode, IrNode) => (List[IrNode], List[IrNode]) => IrNodeEqualityResult =
@@ -304,9 +326,14 @@ case object IrNodesEqual extends IrNodeEqualityResult {
 }
 case class IrNodesNotEqual(differences: List[IrNodeDiff]) extends IrNodeEqualityResult {
   val isEqual: Boolean = false
+  val diffCount: Int = differences.length
 
   def renderDifferencesList: List[String] =
-    differences.map(d => s"""Node at: ${d.path.renderAsString}\n  ${d.message}""")
+    differences.groupBy(_.path.renderAsString).map { k =>
+      s"""Node at: ${k._1}
+         |  ${k._2.map(_.message).mkString("\n  ")}
+       """.stripMargin
+    }.toList
 
   def renderDifferences: String =
     renderDifferencesList.mkString("\n")
