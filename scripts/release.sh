@@ -25,6 +25,18 @@ fi
 sbt clean update compile
 
 echo ""
+echo ">>> Core"
+sbt core_2_10/test
+sbt core_2_10/publishSigned
+sbt core_2_10/sonatypeRelease
+sbt core_2_11/test
+sbt core_2_11/publishSigned
+sbt core_2_11/sonatypeRelease
+sbt core_2_12/test
+sbt core_2_12/publishSigned
+sbt core_2_12/sonatypeRelease
+
+echo ""
 echo ">>> Plugin"
 sbt plugin/test
 sbt plugin/publishSigned
