@@ -1,12 +1,6 @@
 
 name := "scalapact-scalatest"
 
-// organization := "com.itv"
-
-// version := "2.1.4-SNAPSHOT"
-
-// scalaVersion := "2.12.1"
-
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
 crossScalaVersions := Seq("2.11.8", "2.12.1")

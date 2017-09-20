@@ -6,35 +6,35 @@ lazy val commonSettings = Seq(
 
 lazy val core =
   (project in file("scalapact-core"))
-    .settings(commonSettings: _*)
-    .settings(
-      crossScalaVersions := Seq("2.12.1", "2.11.8", "2.10.6")
-    )
+    .settings(commonSettings: _*).cross
+
+lazy val core_2_10 = core("2.10.6")
+lazy val core_2_11 = core("2.11.8")
+lazy val core_2_12 = core("2.12.1")
 
 lazy val plugin =
   (project in file("scalapact-sbtplugin"))
     .settings(commonSettings: _*)
-    .dependsOn(core)
+    .dependsOn(core_2_10)
     .settings(
       sbtPlugin := true,
-      crossScalaVersions := Seq("2.10.6")
+      scalaVersion := "2.10.6"
     )
 
 lazy val framework =
   (project in file("scalapact-scalatest"))
-    .settings(commonSettings: _*)
-    .dependsOn(core)
-    .settings(
-      crossScalaVersions := Seq("2.12.1", "2.11.8")
-    )
+    .settings(commonSettings: _*).cross
+
+lazy val framework_2_11 = framework("2.11.8").dependsOn(core_2_11)
+lazy val framework_2_12 = framework("2.12.1").dependsOn(core_2_12)
 
 lazy val standalone =
   (project in file("scalapact-standalone-stubber"))
     .settings(commonSettings: _*)
-    .dependsOn(core)
+    .dependsOn(core_2_12)
     .settings(
       name := "scalapact-standalone-stubber",
-      crossScalaVersions := Seq("2.12.1")
+      scalaVersion := "2.12.1"
     )
 
 lazy val docs =
@@ -50,4 +50,4 @@ lazy val docs =
 lazy val scalaPactProject =
   (project in file("."))
     .settings(commonSettings: _*)
-    .aggregate(core, plugin, framework, standalone, docs)
+    .aggregate(core_2_10, core_2_11, core_2_12, plugin, framework_2_11, framework_2_12, standalone, docs)

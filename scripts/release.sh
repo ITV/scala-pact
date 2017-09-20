@@ -12,8 +12,6 @@ print_warning() {
 
 trap print_warning ERR
 
-bash scripts/check-versions.sh
-
 echo -e "Have you run the local tests and are you confident in the build? [y/n] \c"
 read CONFIRM
 
@@ -24,21 +22,22 @@ else
   echo "Ok, here we go..."
 fi
 
+sbt clean update compile
+
 echo ""
-echo ">>> Core"
-cd scalapact-core
-sbt +publishSigned
-sbt sonatypeRelease
-cd ..
+echo ">>> Plugin"
+sbt plugin/test
+sbt plugin/publishSigned
+sbt plugin/sonatypeRelease
 
-echo ">>> SBT Plugin"
-cd scalapact-sbtplugin
-sbt publishSigned
-sbt sonatypeRelease
-cd ..
+echo ""
+echo ">>> Test Framework (2.11)"
+sbt framework_2_11/test
+sbt framework_2_11/publishSigned
+sbt framework_2_11/sonatypeRelease
 
-echo ">>> Test Framework"
-cd scalapact-scalatest
-sbt +publishSigned
-sbt sonatypeRelease
-cd ..
+echo ""
+echo ">>> Test Framework (2.12)"
+sbt framework_2_12/test
+sbt framework_2_12/publishSigned
+sbt framework_2_12/sonatypeRelease

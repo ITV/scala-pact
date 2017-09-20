@@ -1,13 +1,5 @@
 name := "scalapact-core"
 
-// organization := "com.itv"
-
-// version := "2.1.4-SNAPSHOT"
-
-//scalaVersion := "2.12.1"
-
-//crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.1")
-
 // Pinched shamelessly from https://tpolecat.github.io/2014/04/11/scalac-flags.html
 scalacOptions ++= Seq(
 //  "-Yno-imports", // Powerful but boring. Essentially you have to pull in everything... one day.
