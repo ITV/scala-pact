@@ -1,5 +1,7 @@
 package com.itv.scalapactcore
 
+import com.itv.scalapactcore.common.pact._
+
 object PactFileExamples {
 
   val verySimple = Pact(

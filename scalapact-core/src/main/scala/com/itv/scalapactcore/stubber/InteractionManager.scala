@@ -1,8 +1,8 @@
 package com.itv.scalapactcore.stubber
 
 import com.itv.scalapactcore.common.ColourOuput._
+import com.itv.scalapactcore.common.pact.{Interaction, InteractionRequest}
 import com.itv.scalapactcore.common.{Arguments, ConfigAndPacts}
-import com.itv.scalapactcore.{Interaction, InteractionRequest}
 
 class InteractionManager {
 

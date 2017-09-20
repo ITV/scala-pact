@@ -1,9 +1,9 @@
 package com.itv.scalapactcore.verifier
 
-import com.itv.scalapactcore._
 import com.itv.scalapactcore.common.matching.InteractionMatchers._
 import com.itv.scalapactcore.common.ColourOuput._
 import com.itv.scalapactcore.common._
+import com.itv.scalapactcore.common.pact._
 
 import scala.util.Left
 
@@ -165,7 +165,7 @@ object Verifier {
 
     ScalaPactHttp.doRequest(ScalaPactHttp.GET, address, "", Map("Accept" -> "application/json"), None).map {
       case r: SimpleResponse if r.is2xx =>
-        val pact = r.body.map(ScalaPactReader.jsonStringToPact).flatMap {
+        val pact = r.body.map(PactReader.jsonStringToPact).flatMap {
           case Right(p) => Option(p)
           case Left(msg) =>
             println(s"Error: $msg".yellow)

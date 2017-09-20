@@ -2,7 +2,7 @@ package com.itv.scalapactcore.pactspec.util
 
 import argonaut.Argonaut._
 import argonaut.{CodecJson, Json}
-import com.itv.scalapactcore.{InteractionRequest, InteractionResponse, PactImplicits}
+import com.itv.scalapactcore.common.pact.{InteractionRequest, InteractionResponse, Pact}
 
 import scala.io.Source
 import scala.language.implicitConversions
@@ -11,7 +11,7 @@ import scalaz._
 
 object PactSpecLoader {
 
-  import com.itv.scalapactcore.PactImplicits._
+  import Pact._
 
   implicit lazy val RequestSpecCodecJson: CodecJson[RequestSpec] = casecodec4(RequestSpec.apply, RequestSpec.unapply)(
     "match", "comment", "expected", "actual"
@@ -66,11 +66,11 @@ object SpecReader {
   }
 
   val jsonStringToRequestSpec: String => String \/ RequestSpec = json =>
-    jsonStringToSpec[InteractionRequest](json)(PactImplicits.InteractionRequestCodecJson.Decoder)
+    jsonStringToSpec[InteractionRequest](json)(Pact.InteractionRequestCodecJson.Decoder)
       .map { bp => RequestSpec(bp._1, bp._2, bp._3, bp._4) }
 
   val jsonStringToResponseSpec: String => String \/ ResponseSpec = json =>
-    jsonStringToSpec[InteractionResponse](json)(PactImplicits.InteractionResponseCodecJson.Decoder)
+    jsonStringToSpec[InteractionResponse](json)(Pact.InteractionResponseCodecJson.Decoder)
       .map { bp => ResponseSpec(bp._1, bp._2, bp._3, bp._4) }
 
 }

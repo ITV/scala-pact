@@ -1,6 +1,6 @@
 package com.itv.scalapactcore.common
 
-import com.itv.scalapactcore.{InteractionRequest, InteractionResponse}
+import com.itv.scalapactcore.common.pact.{InteractionRequest, InteractionResponse}
 import org.http4s.client.Client
 import org.http4s.client.blaze.{BlazeClientConfig, PooledHttp1Client}
 import org.http4s.headers.{AgentProduct, `User-Agent`}

@@ -4,6 +4,7 @@ import java.util.concurrent.{ExecutorService, Executors}
 
 import com.itv.scalapactcore._
 import com.itv.scalapactcore.common.ColourOuput._
+import com.itv.scalapactcore.common.pact._
 import com.itv.scalapactcore.common.{Arguments, Http4sRequestResponseFactory}
 import org.http4s.dsl._
 import org.http4s.server.Server
@@ -57,15 +58,15 @@ object PactStubService {
           Ok()
 
         case m if m == "GET" && req.pathInfo.startsWith("/interactions") =>
-          val output = ScalaPactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions))
+          val output = PactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions))
           Ok(output)
 
         case m if m == "POST" || m == "PUT" && req.pathInfo.startsWith("/interactions") =>
-          ScalaPactReader.jsonStringToPact(req.bodyAsText.runLog.map(body => Option(body.mkString)).unsafePerformSync.getOrElse("")) match {
+          PactReader.jsonStringToPact(req.bodyAsText.runLog.map(body => Option(body.mkString)).unsafePerformSync.getOrElse("")) match {
             case Right(r) =>
               interactionManager.addInteractions(r.interactions)
 
-              val output = ScalaPactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions))
+              val output = PactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions))
               Ok(output)
 
             case Left(l) =>
@@ -75,7 +76,7 @@ object PactStubService {
         case m if m == "DELETE" && req.pathInfo.startsWith("/interactions") =>
           interactionManager.clearInteractions()
 
-          val output = ScalaPactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions))
+          val output = PactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions))
           Ok(output)
       }
 

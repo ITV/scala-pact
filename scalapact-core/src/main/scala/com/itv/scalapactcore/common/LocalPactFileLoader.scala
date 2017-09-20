@@ -2,9 +2,8 @@ package com.itv.scalapactcore.common
 
 import java.io.File
 
-import com.itv.scalapactcore.{Pact, ScalaPactReader}
-
 import com.itv.scalapactcore.common.ColourOuput._
+import com.itv.scalapactcore.common.pact.{Pact, PactReader}
 
 object LocalPactFileLoader {
 
@@ -56,7 +55,7 @@ object LocalPactFileLoader {
 
   private val deserializeIntoPact: List[String] => List[Pact] = pactJsonStrings => {
     pactJsonStrings.map { json =>
-      ScalaPactReader.jsonStringToPact(json)
+      PactReader.jsonStringToPact(json)
     }.collect { case Right(p) => p }
   }
 

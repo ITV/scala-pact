@@ -7,7 +7,7 @@ import argonaut.Argonaut._
 import com.itv.scalapactcore.common.Helpers
 import com.itv.scalapactcore.common.matching.PathMatching.PathAndQuery
 import com.itv.scalapactcore.common.matchir._
-import com.itv.scalapactcore.{Interaction, InteractionRequest, InteractionResponse, MatchingRule}
+import com.itv.scalapactcore.common.pact.{Interaction, InteractionRequest, InteractionResponse, MatchingRule}
 
 import scala.xml._
 

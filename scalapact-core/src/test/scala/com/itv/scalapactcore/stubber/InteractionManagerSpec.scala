@@ -1,9 +1,9 @@
 package com.itv.scalapactcore.stubber
 
-import com.itv.scalapactcore.{Interaction, InteractionRequest, InteractionResponse, MatchingRule}
+import com.itv.scalapactcore.common.pact.{Interaction, InteractionRequest, InteractionResponse, MatchingRule}
+import org.scalatest.{FunSpec, Matchers}
 
 import scala.language.implicitConversions
-import org.scalatest.{FunSpec, Matchers}
 
 class InteractionManagerSpec extends FunSpec with Matchers {
 

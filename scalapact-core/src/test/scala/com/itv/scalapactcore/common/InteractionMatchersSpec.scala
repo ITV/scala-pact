@@ -1,12 +1,12 @@
 package com.itv.scalapactcore.common
 
-import com.itv.scalapactcore.{MatchingRule, Pact, ScalaPactReader}
 import com.itv.scalapactcore.common.matching.BodyMatching._
 import com.itv.scalapactcore.common.matching.HeaderMatching._
 import com.itv.scalapactcore.common.matching.InteractionMatchers
 import com.itv.scalapactcore.common.matching.MethodMatching._
 import com.itv.scalapactcore.common.matching.PathMatching._
 import com.itv.scalapactcore.common.matching.StatusMatching._
+import com.itv.scalapactcore.common.pact.{MatchingRule, Pact, PactReader}
 import org.scalatest.{FunSpec, Matchers}
 
 import scala.language.implicitConversions
@@ -428,8 +428,8 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
           |  ]
           |}""".stripMargin
 
-      val pactA: Pact = ScalaPactReader.jsonStringToPact(a).toOption.get
-      val pactB: Pact = ScalaPactReader.jsonStringToPact(b).toOption.get
+      val pactA: Pact = PactReader.jsonStringToPact(a).toOption.get
+      val pactB: Pact = PactReader.jsonStringToPact(b).toOption.get
 
       val res = InteractionMatchers.matchResponse(strictMatching = true, pactA.interactions)(pactB.interactions.head.response)
 
