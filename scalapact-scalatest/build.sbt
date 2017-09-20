@@ -1,11 +1,11 @@
 
 name := "scalapact-scalatest"
 
-organization := "com.itv"
+// organization := "com.itv"
 
-version := "2.1.4-SNAPSHOT"
+// version := "2.1.4-SNAPSHOT"
 
-scalaVersion := "2.12.1"
+// scalaVersion := "2.12.1"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
@@ -13,7 +13,7 @@ crossScalaVersions := Seq("2.11.8", "2.12.1")
 
 libraryDependencies <++= version { scalapactVersion =>
   Seq(
-    "com.itv" %% "scalapact-core" % scalapactVersion,
+    // "com.itv" %% "scalapact-core" % scalapactVersion,
     "org.scalaj" %% "scalaj-http" % "2.3.0" % "test",
     "org.scalactic" %% "scalactic" % "3.0.1",
     "org.scalatest" %% "scalatest" % "3.0.1" % "test",

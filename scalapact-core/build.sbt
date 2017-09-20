@@ -1,12 +1,12 @@
 name := "scalapact-core"
 
-organization := "com.itv"
+// organization := "com.itv"
 
-version := "2.1.4-SNAPSHOT"
+// version := "2.1.4-SNAPSHOT"
 
-scalaVersion := "2.12.1"
+//scalaVersion := "2.12.1"
 
-crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.1")
+// crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.1")
 
 // Pinched shamelessly from https://tpolecat.github.io/2014/04/11/scalac-flags.html
 scalacOptions ++= Seq(
