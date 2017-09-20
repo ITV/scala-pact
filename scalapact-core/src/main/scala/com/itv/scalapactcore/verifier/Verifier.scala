@@ -4,11 +4,6 @@ import com.itv.scalapactcore._
 import com.itv.scalapactcore.common.matching.InteractionMatchers._
 import com.itv.scalapactcore.common.ColourOuput._
 import com.itv.scalapactcore.common._
-import argonaut._
-import Argonaut._
-import PactImplicits._
-
-import RightBiasEither._
 
 import scala.util.Left
 
@@ -56,25 +51,17 @@ object Verifier {
 
     val startTime = System.currentTimeMillis().toDouble
 
-    val errorMessage: Interaction => String => String = interaction => message =>
-      s"""No matching response for: '${interaction.description}'
-          |Expected:
-          |${interaction.response.asJson.pretty(PrettyParams.spaces2.copy(dropNullKeys = true))}
-          |Actual:
-          |$message
-          |---
-       """.stripMargin
-
     val pactVerifyResults = pacts.map { pact =>
       PactVerifyResult(
         pact = pact,
         results = pact.interactions.map { interaction =>
 
-          val maybeProviderState = interaction.providerState.map(p => ProviderState(p, PartialFunction(pactVerifySettings.providerStates)))
+          val maybeProviderState =
+            interaction
+              .providerState
+              .map(p => ProviderState(p, PartialFunction(pactVerifySettings.providerStates)))
 
-          val matchResult = (doRequest(arguments, maybeProviderState) andThen attemptMatch(arguments.giveStrictMode, List(interaction)))(interaction.request)
-
-          matchResult.leftMap(errorMessage(interaction))
+          (doRequest(arguments, maybeProviderState) andThen attemptMatch(arguments.giveStrictMode, List(interaction)))(interaction.request)
         }
       )
     }
