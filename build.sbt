@@ -25,7 +25,7 @@ lazy val framework =
     .settings(commonSettings: _*)
     .dependsOn(core)
     .settings(
-      crossScalaVersions := Seq("2.11.8", "2.12.1")
+      crossScalaVersions := Seq("2.12.1", "2.11.8")
     )
 
 lazy val standalone =
