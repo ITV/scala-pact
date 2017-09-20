@@ -3,8 +3,6 @@ package com.itv.scalapactcore.common.pact
 import argonaut.Argonaut._
 import argonaut._
 
-import scalaz.Lens
-
 object Pact {
   implicit lazy val PactCodecJson: CodecJson[Pact] = casecodec3(Pact.apply, Pact.unapply)(
     "provider", "consumer", "interactions"
@@ -30,17 +28,6 @@ object Pact {
     "match", "regex", "min"
   )
 
-  val providerStateReaderLens : Lens[Interaction, Option[String]] = Lens.lensu[Interaction, Option[String]](
-    (interaction, maybeProviderState) => interaction.copy(providerState = maybeProviderState),
-    _.providerState
-  )
-
-  val providerStatePicker : Interaction => Option[String] = interaction => interaction.providerState.orElse(interaction.provider_state)
-
-  val providerStateWriterLens : Lens[Interaction, Option[String]] = Lens.lensu[Interaction, Option[String]](
-    (interaction, maybeProviderState) => interaction.copy(provider_state = maybeProviderState),
-    _.provider_state
-  )
 }
 
 case class Pact(provider: PactActor, consumer: PactActor, interactions: List[Interaction])

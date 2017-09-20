@@ -2,7 +2,6 @@ package com.itv.scalapactcore.common.pact
 
 import argonaut._
 import Argonaut._
-import com.itv.scalapactcore._
 
 object PactReader {
 
@@ -27,8 +26,8 @@ object PactReader {
         provider = bp._1,
         consumer = bp._2,
         interactions = interactions
-          .map(i => Pact.providerStateReaderLens.set(i, Pact.providerStatePicker(i)))
-          .map(i => Pact.providerStateWriterLens.set(i, None) )
+          .map(i => i.copy(providerState = i.providerState.orElse(i.provider_state)))
+          .map(i => i.copy(provider_state = None))
       )
 
     } match {

@@ -7,11 +7,11 @@ crossScalaVersions := Seq("2.11.8", "2.12.1")
 
 libraryDependencies ++= Seq(
   "org.scalaj" %% "scalaj-http" % "2.3.0" % "test",
-  "org.scalactic" %% "scalactic" % "3.0.1",
+  "org.scalactic" %% "scalactic" % "3.0.1" % "test",
   "org.scalatest" %% "scalatest" % "3.0.1" % "test",
   "org.json4s" %% "json4s-native" % "3.5.0" % "test",
   "com.github.tomakehurst" % "wiremock" % "1.56" % "test",
-  "fr.hmil" %% "roshttp" % "2.0.1"
+  "fr.hmil" %% "roshttp" % "2.0.1" % "test"
 )
 
 publishTo := {
