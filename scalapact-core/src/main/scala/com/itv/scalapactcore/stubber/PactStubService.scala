@@ -37,7 +37,7 @@ object PactStubService {
   }
 
   def stopServer: Server => Unit = server => {
-    server.shutdown
+    server.shutdown.unsafePerformSync
   }
 
   private val isAdminCall: Request => Boolean = request =>
