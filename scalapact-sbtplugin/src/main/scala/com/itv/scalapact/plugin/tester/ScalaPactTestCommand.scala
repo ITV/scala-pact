@@ -2,12 +2,12 @@ package com.itv.scalapact.plugin.tester
 
 import java.io.PrintWriter
 
-import com.itv.scalapactcore.{ScalaPactReader, ScalaPactWriter}
+import com.itv.scalapactcore.common.ColourOuput._
+import com.itv.scalapactcore.common.pact.{PactReader, PactWriter}
 import sbt._
 
 import scala.io.Source
 import scala.language.implicitConversions
-import com.itv.scalapactcore.common.ColourOuput._
 
 object ScalaPactTestCommand {
 
@@ -75,7 +75,7 @@ object ScalaPactTestCommand {
             None
         }
         fileContents.flatMap { t =>
-          ScalaPactReader.jsonStringToPact(t) match {
+          PactReader.jsonStringToPact(t) match {
             case Right(r) => Option(r)
             case Left(_) =>
               errorCount += 1
@@ -92,7 +92,7 @@ object ScalaPactTestCommand {
         accumulatedPact.copy(interactions = accumulatedPact.interactions ++ nextPact.interactions)
       }
 
-      ScalaPactContractWriter.writePactContracts(combined.provider.name)(combined.consumer.name)(ScalaPactWriter.pactToJsonString(combined))
+      ScalaPactContractWriter.writePactContracts(combined.provider.name)(combined.consumer.name)(PactWriter.pactToJsonString(combined))
     }
 
     errorCount

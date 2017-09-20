@@ -1,6 +1,7 @@
 package com.itv.scalapact.plugin.verifier
 
 import com.itv.scalapact.plugin.ScalaPactPlugin
+import com.itv.scalapactcore.verifier.ProviderState
 import com.itv.scalapactcore.common.CommandArguments._
 import com.itv.scalapactcore.common.ColourOuput._
 import com.itv.scalapactcore.verifier._
@@ -8,7 +9,7 @@ import sbt._
 
 import scala.language.implicitConversions
 
-import Verifier._
+import com.itv.scalapactcore.verifier.Verifier._
 
 object ScalaPactVerifyCommand {
 

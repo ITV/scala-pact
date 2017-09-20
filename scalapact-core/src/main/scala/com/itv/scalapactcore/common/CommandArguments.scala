@@ -2,7 +2,7 @@ package com.itv.scalapactcore.common
 
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-
+import scala.util.control.NonFatal
 import scala.concurrent.duration._
 
 object CommandArguments {
@@ -41,7 +41,7 @@ object Helpers {
     def rec[A](l: List[A], acc: List[(A, A)]): List[(A, A)] = {
       l match {
         case Nil => acc
-        case x :: Nil => acc
+        case _ :: Nil => acc
         case x :: xs => rec(l.drop(2), (x, xs.head) :: acc)
       }
     }
@@ -53,14 +53,16 @@ object Helpers {
     try {
       Option(s.toInt)
     } catch {
-      case _: Throwable => None
+      case NonFatal(_) =>
+        None
     }
 
   val safeStringToBoolean: String => Option[Boolean] = s =>
     try {
       Option(s.toBoolean)
     } catch {
-      case _: Throwable => None
+      case NonFatal(_) =>
+        None
     }
 
   val urlEncode: String => Either[String, String] = str => {
@@ -75,7 +77,7 @@ object Helpers {
           .replace("%7E", "~")
       )
     } catch {
-      case _: Throwable =>
+      case NonFatal(_) =>
         Left(s"Failed to url encode: $str")
     }
   }

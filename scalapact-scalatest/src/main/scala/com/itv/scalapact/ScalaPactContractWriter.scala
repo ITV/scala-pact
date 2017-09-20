@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets
 
 import com.itv.scalapact.ScalaPactForger.{ScalaPactDescriptionFinal, ScalaPactInteractionFinal, ScalaPactMatchingRule, ScalaPactMatchingRuleArrayMinLength, ScalaPactMatchingRuleRegex, ScalaPactMatchingRuleType}
 import com.itv.scalapactcore._
+import com.itv.scalapactcore.common.pact._
 
 import scala.language.implicitConversions
 
@@ -46,7 +47,7 @@ object ScalaPactContractWriter {
   }
 
   private def producePactJson(pactDescription: ScalaPactDescriptionFinal): String = {
-    ScalaPactWriter.pactToJsonString(
+    PactWriter.pactToJsonString(
       producePactFromDescription(pactDescription)
     )
   }

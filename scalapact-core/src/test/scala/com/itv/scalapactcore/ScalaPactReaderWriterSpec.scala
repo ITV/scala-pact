@@ -6,6 +6,8 @@ import com.itv.scalapactcore.common.pact.{PactReader, PactWriter}
 
 class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
 
+  import EitherWithToOption._
+
   describe("Reading and writing a homogeneous Pact files") {
 
     it("should be able to read Pact files") {
@@ -92,3 +94,21 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
 
 }
 
+object EitherWithToOption {
+
+  import scala.language.implicitConversions
+
+  case class WithToOption[A, B](either: Either[A, B]) {
+    def toOption: Option[B] =
+      either match {
+        case Right(r) =>
+          Some(r)
+
+        case Left(_) =>
+          None
+      }
+  }
+
+  implicit def toWithToOption[A, B](either: Either[A, B]): WithToOption[A, B] =
+    WithToOption(either)
+}

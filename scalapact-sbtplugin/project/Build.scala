@@ -2,7 +2,7 @@ import sbt._
 import Keys._
 
 object Build extends sbt.Build with BuildExtra {
-  lazy val sbtIdea = Project("scalapact-plugin", file("."), settings = mainSettings)
+//  lazy val sbtIdea = Project("scalapact-plugin", file("."), settings = mainSettings)
 
   lazy val mainSettings: Seq[Def.Setting[_]] = Seq(
     sbtPlugin := true,
@@ -10,15 +10,12 @@ object Build extends sbt.Build with BuildExtra {
     name := "scalapact-plugin",
     // version := "2.1.4-SNAPSHOT",
     // sbtVersion in Global := "0.13.13",
-    scalaVersion in Global := "2.10.6",
+//    scalaVersion in Global := "2.10.6",
     scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
-    libraryDependencies <++= version { scalapactVersion =>
-      Seq(
-        // "com.itv" %% "scalapact-core" % scalapactVersion,
-        "org.scalactic" %% "scalactic" % "3.0.1",
-        "org.scalatest" %% "scalatest" % "3.0.1" % "test"
-      )
-    },
+    libraryDependencies ++= Seq(
+      "org.scalactic" %% "scalactic" % "3.0.1",
+      "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+    ),
     publishTo := {
       val nexus = "https://oss.sonatype.org/"
       if (isSnapshot.value)

@@ -24,13 +24,24 @@ object Verifier {
 
       val latestPacts : List[Pact] = versionConsumers.map { consumer =>
 
-        val details: Either[String, ValidatedDetails] = {
-          for {
-            c  <- Helpers.urlEncode(consumer.name)
-            p  <- Helpers.urlEncode(pactVerifySettings.providerName)
-            pb <- PactBrokerAddressValidation.checkPactBrokerAddress(pactVerifySettings.pactBrokerAddress)
-          } yield ValidatedDetails(pb, p, c, consumer.version)
-        }
+        val details: Either[String, ValidatedDetails] =
+          (
+            Helpers.urlEncode(consumer.name),
+            Helpers.urlEncode(pactVerifySettings.providerName),
+            PactBrokerAddressValidation.checkPactBrokerAddress(pactVerifySettings.pactBrokerAddress)
+          ) match {
+            case (Right(c), Right(p), Right(pb)) =>
+              Right(ValidatedDetails(pb, p, c, consumer.version))
+
+            case (Left(e), _, _) =>
+              Left(e)
+
+            case (_, Left(e), _) =>
+              Left(e)
+
+            case (_, _, Left(e)) =>
+              Left(e)
+          }
 
         details match {
           case Left(l) =>
@@ -97,8 +108,14 @@ object Verifier {
     !foundErrors
   }
 
-  private def attemptMatch(strictMatching: Boolean, interactions: List[Interaction]): Either[String, InteractionResponse] => Either[String, Interaction] = requestResult =>
-    requestResult.flatMap(matchResponse(strictMatching, interactions))
+  // NOTE: Can't use flatMap due to scala 2.10.6
+  private def attemptMatch(strictMatching: Boolean, interactions: List[Interaction]): Either[String, InteractionResponse] => Either[String, Interaction] = {
+    case Right(i) =>
+      matchResponse(strictMatching, interactions)(i)
+
+    case Left(s) =>
+      Left(s)
+  }
 
   private def doRequest(arguments: Arguments, maybeProviderState: Option[ProviderState]): InteractionRequest => Either[String, InteractionResponse] = interactionRequest => {
     val baseUrl = s"${arguments.giveProtocol}://" + arguments.giveHost + ":" + arguments.givePort

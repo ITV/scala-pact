@@ -2,7 +2,7 @@ package com.itv.scalapact.plugin.publish
 
 import com.itv.scalapactcore.common.ColourOuput._
 import com.itv.scalapactcore.common._
-import com.itv.scalapactcore.ScalaPactWriter
+import com.itv.scalapactcore.common.pact.PactWriter
 
 object Publisher {
 
@@ -36,7 +36,7 @@ object Publisher {
 
           println(s"Publishing to: $address".yellow)
 
-          ScalaPactHttp.doRequest(ScalaPactHttp.PUT, address, "", Map("Content-Type" -> "application/json"), Option(ScalaPactWriter.pactToJsonString(pact))).unsafePerformSyncAttempt.toEither match {
+          ScalaPactHttp.doRequest(ScalaPactHttp.PUT, address, "", Map("Content-Type" -> "application/json"), Option(PactWriter.pactToJsonString(pact))).unsafePerformSyncAttempt.toEither match {
             case Right(r) if r.is2xx => println("Success".green)
             case Right(r) =>
               println(r)

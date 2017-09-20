@@ -14,6 +14,8 @@ import scala.language.implicitConversions
 //TODO: Deprecate in favour of Pact Spec tests?
 class InteractionMatchersSpec extends FunSpec with Matchers {
 
+  import com.itv.scalapactcore.EitherWithToOption._
+
   implicit def toOption[A](thing: A): Option[A] = Option(thing)
 
   describe("Matching status codes") {
