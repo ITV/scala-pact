@@ -199,7 +199,6 @@ trait PrimitiveConversionFunctions {
       Option(XML.loadString(str))
     } catch {
       case _: Throwable =>
-        println(s"Failed to convert string '$str' to xml".red)
         None
     }
 

@@ -337,8 +337,9 @@ object BodyMatching extends GeneralMatcher {
   def matchBodies(matchingRules: Option[Map[String, MatchingRule]], expected: Option[String], received: Option[String]): MatchOutcome = {
     implicit val rules: IrNodeMatchingRules = IrNodeMatchingRules.fromPactRules(matchingRules)
 
-    expected match {
-      case Some(str) if stringIsJson(str) =>
+    //TODO: We're parse each doc twice! Once to check type (xml vs json) and then again inside MatchIr. Bad for big docs...
+    (expected, received) match {
+      case (Some(ee), Some(rr)) if stringIsJson(ee) && stringIsJson(rr) =>
         val predicate: (String, String) => MatchOutcome = (e, r) =>
           MatchIr.fromJSON(e).flatMap { ee =>
             MatchIr.fromJSON(r).map { rr =>
@@ -348,7 +349,7 @@ object BodyMatching extends GeneralMatcher {
 
         generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Body mismatch"), predicate)
 
-      case Some(str) if stringIsXml(str) =>
+      case (Some(ee), Some(rr)) if stringIsXml(ee) && stringIsXml(rr) =>
         val predicate: (String, String) => MatchOutcome = (e, r) =>
           MatchIr.fromXml(e).flatMap { ee =>
             MatchIr.fromXml(r).map { rr =>
@@ -367,8 +368,9 @@ object BodyMatching extends GeneralMatcher {
     implicit val rules: IrNodeMatchingRules = IrNodeMatchingRules.fromPactRules(matchingRules)
     implicit val permissivity: IrNodeMatchPermissivity = if(bePermissive) Permissive else NonPermissive
 
-    expected match {
-      case Some(str) if stringIsJson(str) =>
+    //TODO: We're parse each doc twice! Once to check type (xml vs json) and then again inside MatchIr. Bad for big docs...
+    (expected, received) match {
+      case (Some(ee), Some(rr)) if stringIsJson(ee) && stringIsJson(rr) =>
         val predicate: (String, String) => MatchOutcome = (e, r) =>
           MatchIr.fromJSON(e).flatMap { ee =>
             MatchIr.fromJSON(r).map { rr =>
@@ -378,7 +380,7 @@ object BodyMatching extends GeneralMatcher {
 
         generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Body mismatch"), predicate)
 
-      case Some(str) if stringIsXml(str) =>
+      case (Some(ee), Some(rr)) if stringIsXml(ee) && stringIsXml(rr) =>
         val predicate: (String, String) => MatchOutcome = (e, r) =>
           MatchIr.fromXml(e).flatMap { ee =>
             MatchIr.fromXml(r).map { rr =>
