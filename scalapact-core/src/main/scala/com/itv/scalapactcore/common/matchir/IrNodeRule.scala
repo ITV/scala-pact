@@ -282,7 +282,7 @@ object IrNodeMatchingRules {
               Right(IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path)))
 
             case (p, r) =>
-              Left("Failed to read rule: " + r.renderAsString + s" for path '$p'")
+              Left("Failed to read rule: " + r.renderAsString + s" for path '${p.toOption.map(_.renderAsString).getOrElse("")}'")
           }
         }
     }
@@ -290,7 +290,7 @@ object IrNodeMatchingRules {
     def rec(remaining: List[Either[String, IrNodeMatchingRules]], errorAcc: List[String], rulesAcc: IrNodeMatchingRules): Either[String, IrNodeMatchingRules] =
       remaining match {
         case Nil if errorAcc.nonEmpty =>
-          Left(errorAcc.mkString("\n"))
+          Left("Pact rule conversion errors:\n" + errorAcc.mkString("\n"))
 
         case Nil =>
           Right(rulesAcc)

@@ -31,13 +31,35 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
           IrNodeRegexRule("cod|haddock", IrNodePathEmpty <~ "fish" <~ "breed"),
           IrNodeMinArrayLengthRule(1, IrNodePathEmpty <~ "fish" <~ "fins")
         )
-      
+
       IrNodeMatchingRules.fromPactRules(pactRules) match {
         case Left(e) =>
           fail(e)
 
         case Right(r) =>
           r shouldEqual expected
+      }
+
+    }
+
+    it("should fail to convert pact matching rules into IrNodeRules elegantly") {
+
+      val pactRules: Option[Map[String, MatchingRule]] = Option {
+        Map(
+          ".fish" -> MatchingRule(Some("foo"), None, None),
+          ".fish.breed" -> MatchingRule(Some("regex"), None, None),
+          ".fish.fins" -> MatchingRule(Some("min"), None, None),
+          ".fish.fins" -> MatchingRule(None, None, None)
+        )
+      }
+
+      IrNodeMatchingRules.fromPactRules(pactRules) match {
+        case Left(e) =>
+          println(e)
+          e.contains("rule") shouldEqual true
+
+        case Right(r) =>
+          fail("Unexpectedly converted the rules...")
       }
 
     }
