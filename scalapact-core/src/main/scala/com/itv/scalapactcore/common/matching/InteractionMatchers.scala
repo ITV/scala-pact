@@ -3,13 +3,10 @@ package com.itv.scalapactcore.common.matching
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
-import argonaut.Argonaut._
 import com.itv.scalapactcore.common.Helpers
 import com.itv.scalapactcore.common.matching.PathMatching.PathAndQuery
 import com.itv.scalapactcore.common.matchir._
 import com.itv.scalapactcore.common.pact.{Interaction, InteractionRequest, InteractionResponse, MatchingRule}
-
-import scala.xml._
 
 object InteractionMatchers {
 
@@ -80,12 +77,12 @@ object InteractionMatchers {
       MethodMatching.matchMethods(expected.method, received.method) +
         PathMatching.matchPathsStrict(PathAndQuery(expected.path, expected.query), PathAndQuery(received.path, received.query)) +
         HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
-        BodyMatching.matchBodiesStrict(rules, expected.body, received.body, bePermissive = false)
+        BodyMatching.matchBodiesStrict(rules, expected.headers, expected.body, received.body, bePermissive = false)
     } else {
       MethodMatching.matchMethods(expected.method, received.method) +
         PathMatching.matchPaths(PathAndQuery(expected.path, expected.query), PathAndQuery(received.path, received.query)) +
         HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
-        BodyMatching.matchBodies(rules, expected.body, received.body)
+        BodyMatching.matchBodies(rules, expected.headers, expected.body, received.body)
     }
   }
 
@@ -117,11 +114,11 @@ object InteractionMatchers {
     if(strictMatching) {
       StatusMatching.matchStatusCodes(expected.status, received.status) +
         HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
-        BodyMatching.matchBodiesStrict(rules, expected.body, received.body, bePermissive = true)
+        BodyMatching.matchBodiesStrict(rules, expected.headers, expected.body, received.body, bePermissive = true)
     } else {
       StatusMatching.matchStatusCodes(expected.status, received.status) +
         HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
-        BodyMatching.matchBodies(rules, expected.body, received.body)
+        BodyMatching.matchBodies(rules, expected.headers, expected.body, received.body)
     }
 
 }
@@ -324,7 +321,6 @@ object HeaderMatching extends GeneralMatcher {
 
 object BodyMatching extends GeneralMatcher {
 
-  // TODO: Remove when we do proper error reporting for matching all the things. Side effect.
   def nodeMatchToMatchResult(irNodeEqualityResult: IrNodeEqualityResult, rules: IrNodeMatchingRules, isXml: Boolean): MatchOutcome =
     irNodeEqualityResult match {
       case IrNodesEqual =>
@@ -334,12 +330,11 @@ object BodyMatching extends GeneralMatcher {
         MatchOutcomeFailed(e.renderDifferencesListWithRules(rules, isXml))
     }
 
-  def matchBodies(matchingRules: Option[Map[String, MatchingRule]], expected: Option[String], received: Option[String]): MatchOutcome = {
+  def matchBodies(matchingRules: Option[Map[String, MatchingRule]], headers: Option[Map[String, String]], expected: Option[String], received: Option[String]): MatchOutcome = {
     implicit val rules: IrNodeMatchingRules = IrNodeMatchingRules.fromPactRules(matchingRules)
 
-    //TODO: We're parse each doc twice! Once to check type (xml vs json) and then again inside MatchIr. Bad for big docs...
     (expected, received) match {
-      case (Some(ee), Some(rr)) if stringIsJson(ee) && stringIsJson(rr) =>
+      case (Some(ee), Some(rr)) if ee.nonEmpty && hasJsonHeader(headers) || stringIsProbablyJson(ee) && stringIsProbablyJson(rr) =>
         val predicate: (String, String) => MatchOutcome = (e, r) =>
           MatchIr.fromJSON(e).flatMap { ee =>
             MatchIr.fromJSON(r).map { rr =>
@@ -349,7 +344,7 @@ object BodyMatching extends GeneralMatcher {
 
         generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Body mismatch"), predicate)
 
-      case (Some(ee), Some(rr)) if stringIsXml(ee) && stringIsXml(rr) =>
+      case (Some(ee), Some(rr)) if ee.nonEmpty && hasXmlHeader(headers) || stringIsProbablyXml(ee) && stringIsProbablyXml(rr) =>
         val predicate: (String, String) => MatchOutcome = (e, r) =>
           MatchIr.fromXml(e).flatMap { ee =>
             MatchIr.fromXml(r).map { rr =>
@@ -364,13 +359,12 @@ object BodyMatching extends GeneralMatcher {
     }
   }
 
-  def matchBodiesStrict(matchingRules: Option[Map[String, MatchingRule]], expected: Option[String], received: Option[String], bePermissive: Boolean): MatchOutcome = {
+  def matchBodiesStrict(matchingRules: Option[Map[String, MatchingRule]], headers: Option[Map[String, String]], expected: Option[String], received: Option[String], bePermissive: Boolean): MatchOutcome = {
     implicit val rules: IrNodeMatchingRules = IrNodeMatchingRules.fromPactRules(matchingRules)
     implicit val permissivity: IrNodeMatchPermissivity = if(bePermissive) Permissive else NonPermissive
 
-    //TODO: We're parse each doc twice! Once to check type (xml vs json) and then again inside MatchIr. Bad for big docs...
     (expected, received) match {
-      case (Some(ee), Some(rr)) if stringIsJson(ee) && stringIsJson(rr) =>
+      case (Some(ee), Some(rr)) if ee.nonEmpty && hasJsonHeader(headers) || stringIsProbablyJson(ee) && stringIsProbablyJson(rr) =>
         val predicate: (String, String) => MatchOutcome = (e, r) =>
           MatchIr.fromJSON(e).flatMap { ee =>
             MatchIr.fromJSON(r).map { rr =>
@@ -380,7 +374,7 @@ object BodyMatching extends GeneralMatcher {
 
         generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Body mismatch"), predicate)
 
-      case (Some(ee), Some(rr)) if stringIsXml(ee) && stringIsXml(rr) =>
+      case (Some(ee), Some(rr)) if ee.nonEmpty && hasXmlHeader(headers) || stringIsProbablyXml(ee) && stringIsProbablyXml(rr) =>
         val predicate: (String, String) => MatchOutcome = (e, r) =>
           MatchIr.fromXml(e).flatMap { ee =>
             MatchIr.fromXml(r).map { rr =>
@@ -395,13 +389,21 @@ object BodyMatching extends GeneralMatcher {
     }
   }
 
-  lazy val stringIsJson: String => Boolean = str => str.parseOption.isDefined
-  lazy val stringIsXml: String => Boolean = str => safeStringToXml(str).isDefined
+  def hasXmlHeader(headers: Option[Map[String, String]]): Boolean =
+    findContentTypeHeader(headers).map(_.toLowerCase.contains("xml")).exists(_ == true)//2.10 compat
 
-  lazy val safeStringToXml: String => Option[Elem] = str =>
-    try {
-      Option(XML.loadString(str))
-    } catch {
-      case _: Throwable => None
-    }
+  def hasJsonHeader(headers: Option[Map[String, String]]): Boolean =
+    findContentTypeHeader(headers).map(_.toLowerCase.contains("json")).exists(_ == true)//2.10 compat
+
+  def findContentTypeHeader(headers: Option[Map[String, String]]): Option[String] =
+    headers.map { hm =>
+      hm.find(p => p._1.toLowerCase == "content-type").map(_._2)
+    }.toList.headOption.flatten
+
+  lazy val stringIsProbablyJson: String => Boolean = str =>
+    ((s: String) => s.nonEmpty && ((s.startsWith("{") && s.endsWith("}")) || (s.startsWith("[") && s.endsWith("]"))))(str.trim)
+
+  lazy val stringIsProbablyXml: String => Boolean = str =>
+    ((s: String) => s.nonEmpty && s.startsWith("<") && s.endsWith(">"))(str.trim)
+
 }

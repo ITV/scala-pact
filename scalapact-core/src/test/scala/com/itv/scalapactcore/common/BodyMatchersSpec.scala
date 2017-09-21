@@ -14,23 +14,23 @@ class BodyMatchersSpec extends FunSpec with Matchers {
 
     it("should do trivial equality testing") {
 
-      matchBodies(None, "hello", "hello").isSuccess shouldEqual true
-      matchBodies(None, "hello", "this").isSuccess shouldEqual false
+      matchBodies(None, None, "hello", "hello").isSuccess shouldEqual true
+      matchBodies(None, None, "hello", "this").isSuccess shouldEqual false
 
     }
 
     it("should handle no body and additional body matching") {
 
       withClue("None, None") {
-        matchBodies(None, None, None).isSuccess shouldEqual true
+        matchBodies(None, None, None, None).isSuccess shouldEqual true
       }
 
       withClue("None, Some") {
-        matchBodies(None, None, "this").isSuccess shouldEqual true
+        matchBodies(None, None, None, "this").isSuccess shouldEqual true
       }
 
       withClue("Some, None") {
-        matchBodies(None, "this", None).isSuccess shouldEqual false
+        matchBodies(None, None, "this", None).isSuccess shouldEqual false
       }
 
     }
