@@ -10,13 +10,13 @@ import scala.concurrent.duration._
 import scala.language.{implicitConversions, postfixOps}
 import scalaz.concurrent.Task
 
-object ScalaPactHttp {
+class ScalaPactHttpClient {
 
   private val maxTotalConnections: Int = 1
 
-  private val client = HttpClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, 3.seconds)
+  def makeClient: Client = HttpClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, 2.seconds)
 
-  def doRequest(method: HttpMethod, baseUrl: String, endPoint: String, headers: Map[String, String], body: Option[String]): Task[SimpleResponse] = {
+  def doRequest(method: HttpMethod, baseUrl: String, endPoint: String, headers: Map[String, String], body: Option[String], client: Client): Task[SimpleResponse] = {
     HttpClientHelper.doRequest(baseUrl, endPoint, method.http4sMethod, headers, body, client)
   }
 
@@ -24,7 +24,7 @@ object ScalaPactHttp {
     HttpClientHelper.doRequest(
       baseUrl = url,
       endPoint = ir.path.getOrElse("") + ir.query.map(s => "?" + s).getOrElse(""),
-      method = maybeMethodToMethod(ir.method).http4sMethod,
+      method = HttpMethod.maybeMethodToMethod(ir.method).http4sMethod,
       headers = ir.headers.getOrElse(Map.empty[String, String]),
       body = ir.body,
       httpClient = HttpClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, clientTimeout)
@@ -38,18 +38,39 @@ object ScalaPactHttp {
     }
   }
 
-  private val maybeMethodToMethod: Option[String] => HttpMethod = maybeMethod =>
-    maybeMethod.map(_.toUpperCase).map {
-      case "GET" => GET
-      case "POST" => POST
-      case "PUT" => PUT
-      case "DELETE" => DELETE
-      case "OPTIONS" => OPTIONS
-    }.getOrElse(GET)
+}
 
-  sealed trait HttpMethod {
-    val http4sMethod: Method
+sealed trait HttpMethod {
+  val http4sMethod: Method
+}
+
+object HttpMethod {
+
+  def apply(method: String): Option[HttpMethod] = {
+    method match {
+      case "GET" =>
+        Option(GET)
+
+      case "POST" =>
+        Option(POST)
+
+      case "PUT" =>
+        Option(PUT)
+
+      case "DELETE" =>
+        Option(DELETE)
+
+      case "OPTIONS" =>
+        Option(OPTIONS)
+
+      case _ =>
+        None
+    }
   }
+
+  val maybeMethodToMethod: Option[String] => HttpMethod = maybeMethod =>
+    maybeMethod.map(_.toUpperCase).flatMap(HttpMethod.apply).getOrElse(GET)
+
   case object GET extends HttpMethod {
     val http4sMethod: Method = Method.GET
   }
@@ -111,6 +132,7 @@ object HttpClientHelper {
       uri <- buildUri(baseUrl, endPoint)
       request <- Http4sRequestResponseFactory.buildRequest(method, uri, headers, body)
       response <- httpClient.fetch[SimpleResponse](request)(extractResponse)
+      _ <- httpClient.shutdown
     } yield response
 
 }

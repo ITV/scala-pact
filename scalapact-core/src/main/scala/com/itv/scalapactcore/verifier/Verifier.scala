@@ -13,6 +13,8 @@ object Verifier {
 
   def verify(pactVerifySettings: PactVerifySettings): Arguments => Boolean = arguments => {
 
+    val client: ScalaPactHttpClient = new ScalaPactHttpClient
+
     val pacts: List[Pact] = if(arguments.localPactPath.isDefined) {
       println(s"Attempting to use local pact files at: '${arguments.localPactPath.getOrElse("<path missing>")}'".white.bold)
       LocalPactFileLoader.loadPactFiles("pacts")(arguments).pacts
@@ -49,7 +51,7 @@ object Verifier {
             None
 
           case Right(v) =>
-            fetchAndReadPact(v.validatedAddress.address + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + v.consumerVersion)
+            fetchAndReadPact(v.validatedAddress.address + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + v.consumerVersion, client)
         }
       }.collect {
         case Some(s) => s
@@ -72,7 +74,7 @@ object Verifier {
               .providerState
               .map(p => ProviderState(p, PartialFunction(pactVerifySettings.providerStates)))
 
-          (doRequest(arguments, maybeProviderState) andThen attemptMatch(arguments.giveStrictMode, List(interaction)))(interaction.request)
+          (doRequest(arguments, maybeProviderState, client) andThen attemptMatch(arguments.giveStrictMode, List(interaction)))(interaction.request)
         }
       )
     }
@@ -117,7 +119,7 @@ object Verifier {
       Left(s)
   }
 
-  private def doRequest(arguments: Arguments, maybeProviderState: Option[ProviderState]): InteractionRequest => Either[String, InteractionResponse] = interactionRequest => {
+  private def doRequest(arguments: Arguments, maybeProviderState: Option[ProviderState], client: ScalaPactHttpClient): InteractionRequest => Either[String, InteractionResponse] = interactionRequest => {
     val baseUrl = s"${arguments.giveProtocol}://" + arguments.giveHost + ":" + arguments.givePort
     val clientTimeout = arguments.giveClientTimeoutInSeconds
 
@@ -159,7 +161,7 @@ object Verifier {
       InteractionRequest.unapply(interactionRequest) match {
         case Some((Some(_), Some(_), _, _, _, _)) =>
 
-          ScalaPactHttp.doInteractionRequest(baseUrl, interactionRequest, clientTimeout)
+          client.doInteractionRequest(baseUrl, interactionRequest, clientTimeout)
             .unsafePerformSyncAttempt
             .leftMap { t =>
               println(s"Error in response: ${t.getMessage}".red)
@@ -177,10 +179,12 @@ object Verifier {
 
   }
 
-  private def fetchAndReadPact(address: String): Option[Pact] = {
+  private def fetchAndReadPact(address: String, client: ScalaPactHttpClient): Option[Pact] = {
     println(s"Attempting to fetch pact from pact broker at: $address".white.bold)
 
-    ScalaPactHttp.doRequest(ScalaPactHttp.GET, address, "", Map("Accept" -> "application/json"), None).map {
+    val httpClient = client.makeClient
+
+    client.doRequest(HttpMethod.GET, address, "", Map("Accept" -> "application/json"), None, httpClient).map {
       case r: SimpleResponse if r.is2xx =>
         val pact = r.body.map(PactReader.jsonStringToPact).flatMap {
           case Right(p) => Option(p)
@@ -198,9 +202,12 @@ object Verifier {
         println(s"Failed to load consumer pact from: $address".red)
         None
     }.unsafePerformSyncAttempt.toEither match {
-      case Right(p) => p
+      case Right(p) =>
+        httpClient.shutdownNow()
+        p
       case Left(e) =>
         println(s"Error: ${e.getMessage}".yellow)
+        httpClient.shutdownNow()
         None
     }
 

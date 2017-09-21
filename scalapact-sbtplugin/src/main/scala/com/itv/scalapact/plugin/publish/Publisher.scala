@@ -8,6 +8,8 @@ object Publisher {
 
   private final case class ValidatedDetails(validatedAddress: String, providerName: String, consumerName: String)
 
+  private val client: ScalaPactHttpClient = new ScalaPactHttpClient
+
   lazy val publishToBroker: String => String => ConfigAndPacts => Unit = pactBrokerAddress => versionToPublishAs => configAndPacts => {
 
     configAndPacts.pacts.foreach { pact =>
@@ -36,7 +38,9 @@ object Publisher {
 
           println(s"Publishing to: $address".yellow)
 
-          ScalaPactHttp.doRequest(ScalaPactHttp.PUT, address, "", Map("Content-Type" -> "application/json"), Option(PactWriter.pactToJsonString(pact))).unsafePerformSyncAttempt.toEither match {
+          val httpClient = client.makeClient
+
+          client.doRequest(HttpMethod.PUT, address, "", Map("Content-Type" -> "application/json"), Option(PactWriter.pactToJsonString(pact)), httpClient).unsafePerformSyncAttempt.toEither match {
             case Right(r) if r.is2xx => println("Success".green)
             case Right(r) =>
               println(r)
@@ -44,6 +48,8 @@ object Publisher {
             case Left(e) =>
               println(s"Failed with error: ${e.getMessage}".red)
           }
+
+          httpClient.shutdownNow()
       }
     }
 

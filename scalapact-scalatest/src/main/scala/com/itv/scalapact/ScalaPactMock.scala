@@ -4,7 +4,7 @@ import java.io.IOException
 import java.net.ServerSocket
 
 import com.itv.scalapact.ScalaPactForger._
-import com.itv.scalapactcore.common.{Arguments, ConfigAndPacts, ScalaPactHttp}
+import com.itv.scalapactcore.common.{Arguments, ConfigAndPacts, HttpMethod, ScalaPactHttpClient}
 import com.itv.scalapactcore.stubber.InteractionManager
 import com.itv.scalapactcore.stubber.PactStubService._
 import org.http4s.server.Server
@@ -53,6 +53,8 @@ object ScalaPactMock {
 
   def runConsumerIntegrationTest[A](strict: Boolean)(pactDescription: ScalaPactDescriptionFinal)(test: ScalaPactMockConfig => A): A = {
 
+    val client: ScalaPactHttpClient = new ScalaPactHttpClient
+
     val interactionManager: InteractionManager = new InteractionManager
 
     val mockConfig = ScalaPactMockConfig("http", "localhost", findFreePort())
@@ -75,12 +77,12 @@ object ScalaPactMock {
 
     println("> ScalaPact stub running at: " + mockConfig.baseUrl)
 
-    waitForServerThenTest(server, mockConfig, test, pactDescription)
+    waitForServerThenTest(server, client, mockConfig, test, pactDescription)
   }
 
-  private def waitForServerThenTest[A](server: Server, mockConfig: ScalaPactMockConfig, test: ScalaPactMockConfig => A, pactDescription: ScalaPactDescriptionFinal): A = {
+  private def waitForServerThenTest[A](server: Server, client: ScalaPactHttpClient, mockConfig: ScalaPactMockConfig, test: ScalaPactMockConfig => A, pactDescription: ScalaPactDescriptionFinal): A = {
     def rec(attemptsRemaining: Int, intervalMillis: Int): A = {
-      if(isStubReady(mockConfig)) {
+      if(isStubReady(mockConfig, client)) {
         val result = configuredTestRunner(pactDescription)(mockConfig)(test)
 
         stopServer(server)
@@ -98,8 +100,12 @@ object ScalaPactMock {
     rec(5, 100)
   }
 
-  private def isStubReady(mockConfig: ScalaPactMockConfig): Boolean =
-    ScalaPactHttp.doRequest(ScalaPactHttp.GET, mockConfig.baseUrl, "/stub/status", Map("X-Pact-Admin" -> "true"), None).unsafePerformSync.is2xx
+  private def isStubReady(mockConfig: ScalaPactMockConfig, client: ScalaPactHttpClient): Boolean = {
+    val httpClient = client.makeClient
+    val res = client.doRequest(HttpMethod.GET, mockConfig.baseUrl, "/stub/status", Map("X-Pact-Admin" -> "true"), None, httpClient).unsafePerformSync.is2xx
+    httpClient.shutdownNow()
+    res
+  }
 
 }
 
