@@ -239,57 +239,70 @@ object IrNodeMatchingRules {
 
   def apply(rules: IrNodeRule*): IrNodeMatchingRules = IrNodeMatchingRules(rules.toList, RuleProcessTracing.disabled)
 
-  //TODO: Fails inline and carries on... not sure how I feel about that.
-  def fromPactRules(rules: Option[Map[String, MatchingRule]]): IrNodeMatchingRules = {
-    val l = rules match {
+  def fromPactRules(rules: Option[Map[String, MatchingRule]]): Either[String, IrNodeMatchingRules] = {
+
+    val l: List[Either[String, IrNodeMatchingRules]] = rules match {
       case None =>
-        List(empty)
+        List(Right(IrNodeMatchingRules.empty))
 
       case Some(ruleMap) =>
         ruleMap.toList.map { pair =>
           (IrNodePath.fromPactPath(pair._1), pair._2) match {
             case (e: PactPathParseFailure, _) =>
-              println(e.errorString)
-              empty
+              Left(e.errorString)
 
             case (PactPathParseSuccess(path), MatchingRule(Some("type"), None, None)) =>
-              IrNodeMatchingRules(IrNodeTypeRule(path))
+              Right(IrNodeMatchingRules(IrNodeTypeRule(path)))
 
             case (PactPathParseSuccess(path), MatchingRule(Some("type"), None, Some(len))) =>
-              IrNodeMatchingRules(IrNodeTypeRule(path)) + IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path))
+              Right(IrNodeMatchingRules(IrNodeTypeRule(path)) + IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path)))
 
             case (PactPathParseSuccess(path), MatchingRule(Some("type"), Some(regex), Some(len))) =>
-              IrNodeMatchingRules(IrNodeTypeRule(path)) + IrNodeMatchingRules(IrNodeRegexRule(regex, path)) + IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path))
+              Right(IrNodeMatchingRules(IrNodeTypeRule(path)) + IrNodeMatchingRules(IrNodeRegexRule(regex, path)) + IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path)))
 
             case (PactPathParseSuccess(path), MatchingRule(Some("regex"), Some(regex), None)) =>
-              IrNodeMatchingRules(IrNodeRegexRule(regex, path))
+              Right(IrNodeMatchingRules(IrNodeRegexRule(regex, path)))
 
             case (PactPathParseSuccess(path), MatchingRule(Some("regex"), Some(regex), Some(len))) =>
-              IrNodeMatchingRules(IrNodeRegexRule(regex, path)) + IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path))
+              Right(IrNodeMatchingRules(IrNodeRegexRule(regex, path)) + IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path)))
 
             case (PactPathParseSuccess(path), MatchingRule(None, Some(regex), None)) =>
-              IrNodeMatchingRules(IrNodeRegexRule(regex, path))
+              Right(IrNodeMatchingRules(IrNodeRegexRule(regex, path)))
 
             case (PactPathParseSuccess(path), MatchingRule(None, Some(regex), Some(len))) =>
-              IrNodeMatchingRules(IrNodeRegexRule(regex, path)) + IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path))
+              Right(IrNodeMatchingRules(IrNodeRegexRule(regex, path)) + IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path)))
 
             case (PactPathParseSuccess(path), MatchingRule(Some("min"), None, Some(len))) =>
-              IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path))
+              Right(IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path)))
 
             case (PactPathParseSuccess(path), MatchingRule(Some("min"), Some(regex), Some(len))) =>
-              IrNodeMatchingRules(IrNodeRegexRule(regex, path)) + IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path))
+              Right(IrNodeMatchingRules(IrNodeRegexRule(regex, path)) + IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path)))
 
             case (PactPathParseSuccess(path), MatchingRule(None, None, Some(len))) =>
-              IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path))
+              Right(IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path)))
 
             case (p, r) =>
-              println("Failed to read rule: " + r.renderAsString + s" for path '$p'")
-              empty
+              Left("Failed to read rule: " + r.renderAsString + s" for path '$p'")
           }
         }
     }
 
-    l.foldLeft(empty)(_ + _)
+    def rec(remaining: List[Either[String, IrNodeMatchingRules]], errorAcc: List[String], rulesAcc: IrNodeMatchingRules): Either[String, IrNodeMatchingRules] =
+      remaining match {
+        case Nil if errorAcc.nonEmpty =>
+          Left(errorAcc.mkString("\n"))
+
+        case Nil =>
+          Right(rulesAcc)
+
+        case Right(x) :: xs =>
+          rec(xs, errorAcc, rulesAcc + x)
+
+        case Left(x) :: xs =>
+          rec(xs, x :: errorAcc, rulesAcc)
+      }
+
+    rec(l, Nil, IrNodeMatchingRules.empty)
   }
 
 }

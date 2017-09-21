@@ -72,19 +72,23 @@ object InteractionMatchers {
     if(interactions.isEmpty) Left("No interactions to compare with.")
     else renderOutcome(matchOrFindClosestRequest(strictMatching, interactions, received), received.renderAsString, RequestSubject)
 
-  def matchSingleRequest(strictMatching: Boolean, rules: Option[Map[String, MatchingRule]], expected: InteractionRequest, received: InteractionRequest): MatchOutcome = {
-    if(strictMatching) {
-      MethodMatching.matchMethods(expected.method, received.method) +
-        PathMatching.matchPathsStrict(PathAndQuery(expected.path, expected.query), PathAndQuery(received.path, received.query)) +
-        HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
-        BodyMatching.matchBodiesStrict(rules, expected.headers, expected.body, received.body, bePermissive = false)
-    } else {
-      MethodMatching.matchMethods(expected.method, received.method) +
-        PathMatching.matchPaths(PathAndQuery(expected.path, expected.query), PathAndQuery(received.path, received.query)) +
-        HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
-        BodyMatching.matchBodies(rules, expected.headers, expected.body, received.body)
+  def matchSingleRequest(strictMatching: Boolean, rules: Option[Map[String, MatchingRule]], expected: InteractionRequest, received: InteractionRequest): MatchOutcome =
+    IrNodeMatchingRules.fromPactRules(rules) match {
+      case Left(e) =>
+        MatchOutcomeFailed(e)
+
+      case Right(r) if strictMatching =>
+        MethodMatching.matchMethods(expected.method, received.method) +
+          PathMatching.matchPathsStrict(PathAndQuery(expected.path, expected.query), PathAndQuery(received.path, received.query)) +
+          HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
+          BodyMatching.matchBodiesStrict(expected.headers, expected.body, received.body, bePermissive = false)(r)
+
+      case Right(r) =>
+        MethodMatching.matchMethods(expected.method, received.method) +
+          PathMatching.matchPaths(PathAndQuery(expected.path, expected.query), PathAndQuery(received.path, received.query)) +
+          HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
+          BodyMatching.matchBodies(expected.headers, expected.body, received.body)(r)
     }
-  }
 
   private def matchOrFindClosestResponse(strictMatching: Boolean, interactions: List[Interaction], received: InteractionResponse): Option[OutcomeAndInteraction] = {
     def rec(strict: Boolean, remaining: List[Interaction], actual: InteractionResponse, fails: List[(MatchOutcomeFailed, Interaction)]): Option[OutcomeAndInteraction] = {
@@ -111,14 +115,19 @@ object InteractionMatchers {
     else renderOutcome(matchOrFindClosestResponse(strictMatching, interactions, received), received.renderAsString, ResponseSubject)
 
   def matchSingleResponse(strictMatching: Boolean, rules: Option[Map[String, MatchingRule]], expected: InteractionResponse, received: InteractionResponse): MatchOutcome =
-    if(strictMatching) {
-      StatusMatching.matchStatusCodes(expected.status, received.status) +
-        HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
-        BodyMatching.matchBodiesStrict(rules, expected.headers, expected.body, received.body, bePermissive = true)
-    } else {
-      StatusMatching.matchStatusCodes(expected.status, received.status) +
-        HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
-        BodyMatching.matchBodies(rules, expected.headers, expected.body, received.body)
+    IrNodeMatchingRules.fromPactRules(rules) match {
+      case Left(e) =>
+        MatchOutcomeFailed(e)
+
+      case Right(r) if strictMatching =>
+        StatusMatching.matchStatusCodes(expected.status, received.status) +
+          HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
+          BodyMatching.matchBodiesStrict(expected.headers, expected.body, received.body, bePermissive = true)(r)
+
+      case Right(r) =>
+        StatusMatching.matchStatusCodes(expected.status, received.status) +
+          HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
+          BodyMatching.matchBodies(expected.headers, expected.body, received.body)(r)
     }
 
 }
@@ -330,9 +339,7 @@ object BodyMatching extends GeneralMatcher {
         MatchOutcomeFailed(e.renderDifferencesListWithRules(rules, isXml))
     }
 
-  def matchBodies(matchingRules: Option[Map[String, MatchingRule]], headers: Option[Map[String, String]], expected: Option[String], received: Option[String]): MatchOutcome = {
-    implicit val rules: IrNodeMatchingRules = IrNodeMatchingRules.fromPactRules(matchingRules)
-
+  def matchBodies(headers: Option[Map[String, String]], expected: Option[String], received: Option[String])(implicit rules: IrNodeMatchingRules): MatchOutcome = {
     (expected, received) match {
       case (Some(ee), Some(rr)) if ee.nonEmpty && hasJsonHeader(headers) || stringIsProbablyJson(ee) && stringIsProbablyJson(rr) =>
         val predicate: (String, String) => MatchOutcome = (e, r) =>
@@ -359,8 +366,7 @@ object BodyMatching extends GeneralMatcher {
     }
   }
 
-  def matchBodiesStrict(matchingRules: Option[Map[String, MatchingRule]], headers: Option[Map[String, String]], expected: Option[String], received: Option[String], bePermissive: Boolean): MatchOutcome = {
-    implicit val rules: IrNodeMatchingRules = IrNodeMatchingRules.fromPactRules(matchingRules)
+  def matchBodiesStrict(headers: Option[Map[String, String]], expected: Option[String], received: Option[String], bePermissive: Boolean)(implicit rules: IrNodeMatchingRules): MatchOutcome = {
     implicit val permissivity: IrNodeMatchPermissivity = if(bePermissive) Permissive else NonPermissive
 
     (expected, received) match {

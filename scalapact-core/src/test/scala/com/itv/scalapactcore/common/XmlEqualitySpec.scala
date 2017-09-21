@@ -68,9 +68,15 @@ class XmlEqualitySpec extends FunSpec with Matchers {
         )
       }
 
-      implicit val irRules: IrNodeMatchingRules = IrNodeMatchingRules.fromPactRules(rules)
+      IrNodeMatchingRules.fromPactRules(rules) match {
+        case Left(e) =>
+          fail(e)
 
-      check(expected =~ received)
+        case Right(r) =>
+          implicit val irRules: IrNodeMatchingRules = r
+          check(expected =~ received)
+      }
+
     }
 
     it("should be able to accept equality with a rule in a simple case with a sub element") {
@@ -83,9 +89,14 @@ class XmlEqualitySpec extends FunSpec with Matchers {
         )
       }
 
-      implicit val irRules: IrNodeMatchingRules = IrNodeMatchingRules.fromPactRules(rules)
+      IrNodeMatchingRules.fromPactRules(rules) match {
+        case Left(e) =>
+          fail(e)
 
-      check(expected =~ received)
+        case Right(r) =>
+          implicit val irRules: IrNodeMatchingRules = r
+          check(expected =~ received)
+      }
     }
 
     it("should be able to handle a more complicated match") {
@@ -97,27 +108,33 @@ class XmlEqualitySpec extends FunSpec with Matchers {
         )
       }
 
-      implicit val irRules: IrNodeMatchingRules = IrNodeMatchingRules.fromPactRules(rules)
+      IrNodeMatchingRules.fromPactRules(rules) match {
+        case Left(e) =>
+          fail(e)
 
-      val expected = <fish><breed>haddock</breed><side>peas</side></fish>
-      val received = <fish><breed>cod</breed><side>chips</side></fish>
-      check(expected =~ received)
+        case Right(r) =>
+          implicit val irRules: IrNodeMatchingRules = r
 
-      val expected2 = <fish><breed>haddock</breed><side>peas</side></fish>
-      val received2 = <fish><breed>1</breed><side>chips</side></fish>
-      (expected2 =~ received2).isEqual shouldEqual false
+          val expected = <fish><breed>haddock</breed><side>peas</side></fish>
+          val received = <fish><breed>cod</breed><side>chips</side></fish>
+          check(expected =~ received)
 
-      val expected3 = <fish><breed>haddock</breed><side>peas</side></fish>
-      val received3 = <fish><breed>cod</breed><side>hamburgers</side></fish>
-      (expected3 =~ received3).isEqual shouldEqual false
+          val expected2 = <fish><breed>haddock</breed><side>peas</side></fish>
+          val received2 = <fish><breed>1</breed><side>chips</side></fish>
+          (expected2 =~ received2).isEqual shouldEqual false
 
-      val expected4 = <fish><breed>haddock</breed><side>peas</side><sauce>ketchup</sauce></fish>
-      val received4 = <fish><breed>cod</breed><side>chips</side><sauce>ketchup</sauce></fish>
-      check(expected4 =~ received4)
+          val expected3 = <fish><breed>haddock</breed><side>peas</side></fish>
+          val received3 = <fish><breed>cod</breed><side>hamburgers</side></fish>
+          (expected3 =~ received3).isEqual shouldEqual false
 
-      val expected5 = <fish><breed>haddock</breed><side>peas</side><sauce>ketchup</sauce></fish>
-      val received5 = <fish><breed>cod</breed><side>chips</side><sauce>brown</sauce></fish>
-      (expected5 =~ received5).isEqual shouldEqual false
+          val expected4 = <fish><breed>haddock</breed><side>peas</side><sauce>ketchup</sauce></fish>
+          val received4 = <fish><breed>cod</breed><side>chips</side><sauce>ketchup</sauce></fish>
+          check(expected4 =~ received4)
+
+          val expected5 = <fish><breed>haddock</breed><side>peas</side><sauce>ketchup</sauce></fish>
+          val received5 = <fish><breed>cod</breed><side>chips</side><sauce>brown</sauce></fish>
+          (expected5 =~ received5).isEqual shouldEqual false
+      }
     }
 
   }

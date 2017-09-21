@@ -31,8 +31,14 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
           IrNodeRegexRule("cod|haddock", IrNodePathEmpty <~ "fish" <~ "breed"),
           IrNodeMinArrayLengthRule(1, IrNodePathEmpty <~ "fish" <~ "fins")
         )
+      
+      IrNodeMatchingRules.fromPactRules(pactRules) match {
+        case Left(e) =>
+          fail(e)
 
-      IrNodeMatchingRules.fromPactRules(pactRules) shouldEqual expected
+        case Right(r) =>
+          r shouldEqual expected
+      }
 
     }
 
@@ -55,7 +61,13 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
           IrNodeTypeRule(IrNodePathEmpty <~ "fish" <@ "id")
         )
 
-      IrNodeMatchingRules.fromPactRules(pactRules) shouldEqual expected
+      IrNodeMatchingRules.fromPactRules(pactRules) match {
+        case Left(e) =>
+          fail(e)
+
+        case Right(r) =>
+          r shouldEqual expected
+      }
 
     }
 
