@@ -42,7 +42,7 @@ sbt "project framework_2_12" update
 sbt "; project framework_2_12; pact-stubber --port 1234" &
 
 echo "...giving the stubber a $COUNTDOWN second head start to warm up..."
-simple_countdown 30
+simple_countdown 45
 
 echo "Verifying..."
 

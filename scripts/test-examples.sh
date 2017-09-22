@@ -24,7 +24,7 @@ cd provider
 sbt run &
 
 echo "..wait a bit for the service to start"
-simple_countdown 15
+simple_countdown 30
 
 sbt "pact-verify --source delivered_pacts/ --host localhost --port 8080 --clientTimeout 2"
 
