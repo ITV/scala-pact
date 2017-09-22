@@ -2,7 +2,6 @@ package com.itv.scalapactcore.stubber
 
 import java.util.concurrent.{ExecutorService, Executors}
 
-import com.itv.scalapactcore._
 import com.itv.scalapactcore.common.ColourOuput._
 import com.itv.scalapactcore.common.pact._
 import com.itv.scalapactcore.common.{Arguments, Http4sRequestResponseFactory}
@@ -19,20 +18,20 @@ object PactStubService {
   private val nThreads: Int = 50
   private val executorService: ExecutorService = Executors.newFixedThreadPool(nThreads)
 
-  def startServer: InteractionManager => Arguments => Unit = interactionManager => config => {
+  def startServer(readPact: String => Either[String, Pact], writePact: Pact => String, interactionManager: InteractionManager, config: Arguments): Unit = {
     println(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort).white.bold)
     println(("Strict matching mode: " + config.giveStrictMode).white.bold)
 
-    runServer(interactionManager)(nThreads)(config).awaitShutdown()
+    runServer(readPact, writePact, interactionManager, nThreads, config).awaitShutdown()
   }
 
-  def runServer: InteractionManager => Int => Arguments => Server = interactionManager => connectionPoolSize => config => {
+  def runServer(readPact: String => Either[String, Pact], writePact: Pact => String, interactionManager: InteractionManager, connectionPoolSize: Int, config: Arguments): Server = {
     BlazeBuilder
       .bindHttp(config.givePort, config.giveHost)
       .withServiceExecutor(executorService)
       .withIdleTimeout(60.seconds)
       .withConnectorPoolSize(connectionPoolSize)
-      .mountService(PactStubService.service(interactionManager)(config.giveStrictMode), "/")
+      .mountService(PactStubService.service(readPact, writePact, interactionManager, config.giveStrictMode), "/")
       .run
   }
 
@@ -43,14 +42,14 @@ object PactStubService {
   private val isAdminCall: Request => Boolean = request =>
       request.headers.get(CaseInsensitiveString("X-Pact-Admin")).exists(h => h.value == "true")
 
-  private val service: InteractionManager => Boolean => HttpService = interactionManager => strictMatching =>
+  private def service(readPact: String => Either[String, Pact], writePact: Pact => String, interactionManager: InteractionManager, strictMatching: Boolean): HttpService =
     HttpService.lift { req =>
-      matchRequestWithResponse(interactionManager, strictMatching)(req)
+      matchRequestWithResponse(readPact, writePact, interactionManager, strictMatching)(req)
     }
 
   private val pactMatchFailureStatus: Status = Status.fromIntAndReason(598, "Pact Match Failure").toOption.getOrElse(InternalServerError)
 
-  private def matchRequestWithResponse(interactionManager: InteractionManager, strictMatching: Boolean)(req: Request): scalaz.concurrent.Task[Response] = {
+  private def matchRequestWithResponse(readPact: String => Either[String, Pact], writePact: Pact => String, interactionManager: InteractionManager, strictMatching: Boolean)(req: Request): scalaz.concurrent.Task[Response] = {
     if(isAdminCall(req)) {
 
       req.method.name.toUpperCase match {
@@ -58,15 +57,15 @@ object PactStubService {
           Ok()
 
         case m if m == "GET" && req.pathInfo.startsWith("/interactions") =>
-          val output = PactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions))
+          val output = writePact(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions))
           Ok(output)
 
         case m if m == "POST" || m == "PUT" && req.pathInfo.startsWith("/interactions") =>
-          PactReader.jsonStringToPact(req.bodyAsText.runLog.map(body => Option(body.mkString)).unsafePerformSync.getOrElse("")) match {
+          readPact(req.bodyAsText.runLog.map(body => Option(body.mkString)).unsafePerformSync.getOrElse("")) match {
             case Right(r) =>
               interactionManager.addInteractions(r.interactions)
 
-              val output = PactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions))
+              val output = writePact(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions))
               Ok(output)
 
             case Left(l) =>
@@ -76,7 +75,7 @@ object PactStubService {
         case m if m == "DELETE" && req.pathInfo.startsWith("/interactions") =>
           interactionManager.clearInteractions()
 
-          val output = PactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions))
+          val output = writePact(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions))
           Ok(output)
       }
 

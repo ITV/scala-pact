@@ -1,10 +1,10 @@
-package com.itv.scalapactcore.pactspec
+package pactspec
 
-import com.itv.scalapactcore.pactspec.util.PactSpecTester
+import pactspec.util.PactSpecTester
 
-class RequestV1_1Spec extends PactSpecTester {
+class RequestV1Spec extends PactSpecTester {
 
-  val pactSpecVersion = "1.1"
+  val pactSpecVersion = "1"
 
 //  describe("Exercising response V" + pactSpecVersion + " Pact Specification match tests") {
 //
@@ -34,16 +34,11 @@ class RequestV1_1Spec extends PactSpecTester {
 //    it("should check the request query specs") {
 //      testRequestSpecs(
 //        List(
-//          fetchRequestSpec("/request/query/different order.json")(NonStrictOnly),
-//          fetchRequestSpec("/request/query/different params.json")(StrictAndNonStrict),
+//          fetchRequestSpec("/request/query/different param order.json")(StrictOnly),
+//          fetchRequestSpec("/request/query/different param values.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/query/matches with equals in the query value.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/query/matches.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/query/missing params.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/query/same parameter different values.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/query/same parameter multiple times in different order.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/query/same parameter multiple times.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/query/trailing ampersand.json")(StrictOnly),
-//          fetchRequestSpec("/request/query/unexpected param.json")(StrictOnly)
+//          fetchRequestSpec("/request/query/trailing amperand.json")(StrictOnly)
 //        )
 //      )
 //    }
@@ -68,19 +63,11 @@ class RequestV1_1Spec extends PactSpecTester {
 //          fetchRequestSpec("/request/body/array in different order.json")(StrictOnly),
 //          fetchRequestSpec("/request/body/different value found at index.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/different value found at key.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/body/empty body no content.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/body/empty body.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/matches.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/body/missing body found when empty expected.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/body/missing body no content type.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/body/missing body.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/missing index.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/missing key.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/body/non body found when empty expected.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/not null found at key when null expected.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/not null found in array when null expected.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/body/null body no content type.json")(StrictAndNonStrict),
-//          fetchRequestSpec("/request/body/null body.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/null found at key where not null expected.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/null found in array when not null expected.json")(StrictAndNonStrict),
 //          fetchRequestSpec("/request/body/number found at key when string expected.json")(StrictAndNonStrict),

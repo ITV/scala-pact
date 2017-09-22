@@ -1,4 +1,4 @@
-package com.itv.scalapactcore.pactspec.util
+package pactspec.util
 
 import com.itv.scalapactcore.common.matching.InteractionMatchers._
 import com.itv.scalapactcore.common.matching.{MatchOutcomeFailed, MatchOutcomeSuccess}

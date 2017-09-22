@@ -1,8 +1,6 @@
-package com.itv.scalapactcore
-
+package com.itv.scalapact.shared
 import org.scalatest.{FunSpec, Matchers}
 import argonaut.JsonParser._
-import com.itv.scalapactcore.common.pact.{PactReader, PactWriter}
 
 class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
 

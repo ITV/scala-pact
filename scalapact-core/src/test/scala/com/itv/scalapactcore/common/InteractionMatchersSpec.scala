@@ -2,19 +2,16 @@ package com.itv.scalapactcore.common
 
 import com.itv.scalapactcore.common.matching.BodyMatching._
 import com.itv.scalapactcore.common.matching.HeaderMatching._
-import com.itv.scalapactcore.common.matching.InteractionMatchers
 import com.itv.scalapactcore.common.matching.MethodMatching._
 import com.itv.scalapactcore.common.matching.PathMatching._
 import com.itv.scalapactcore.common.matching.StatusMatching._
 import com.itv.scalapactcore.common.matchir.IrNodeMatchingRules
-import com.itv.scalapactcore.common.pact.{MatchingRule, Pact, PactReader}
+import com.itv.scalapactcore.common.pact.MatchingRule
 import org.scalatest.{FunSpec, Matchers}
 
 import scala.language.implicitConversions
 
 class InteractionMatchersSpec extends FunSpec with Matchers {
-
-  import com.itv.scalapactcore.EitherWithToOption._
 
   implicit def toOption[A](thing: A): Option[A] = Option(thing)
 
@@ -375,81 +372,81 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
 
   }
 
-  describe("a complete match") {
-
-    it("should work") {
-
-      val a: String =
-        """{
-          |  "provider" : {
-          |    "name" : "provider"
-          |  },
-          |  "consumer" : {
-          |    "name" : "consumer"
-          |  },
-          |  "interactions" : [
-          |    {
-          |      "description" : "a simple request",
-          |      "request" : {
-          |        "method" : "GET",
-          |        "path" : "/"
-          |      },
-          |      "response" : {
-          |        "status" : 200,
-          |        "body" : {"message": "Hello"},
-          |        "matchingRules": {
-          |          "$.body.message": {
-          |            "match": "regex",
-          |            "regex": "fish"
-          |          }
-          |        }
-          |      }
-          |    }
-          |  ]
-          |}""".stripMargin
-
-      val b: String =
-        """{
-          |  "provider" : {
-          |    "name" : "provider"
-          |  },
-          |  "consumer" : {
-          |    "name" : "consumer"
-          |  },
-          |  "interactions" : [
-          |    {
-          |      "description" : "a simple request",
-          |      "request" : {
-          |        "method" : "GET",
-          |        "path" : "/"
-          |      },
-          |      "response" : {
-          |        "status" : 200,
-          |        "body" : {"message": "Hello2"},
-          |        "matchingRules": {
-          |          "$.body.message": {
-          |            "match": "regex",
-          |            "regex": "chips"
-          |          }
-          |        }
-          |      }
-          |    }
-          |  ]
-          |}""".stripMargin
-
-      val pactA: Pact = PactReader.jsonStringToPact(a).toOption.get
-      val pactB: Pact = PactReader.jsonStringToPact(b).toOption.get
-
-      val res = InteractionMatchers.matchResponse(strictMatching = true, pactA.interactions)(pactB.interactions.head.response)
-
-      res match {
-        case Right(_) => fail("Should not have matched")
-        case Left(msg) =>
-//          println(msg)
-          msg.contains("Failed") shouldEqual true
-      }
-    }
-
-  }
+//  describe("a complete match") {
+//
+//    it("should work") {
+//
+//      val a: String =
+//        """{
+//          |  "provider" : {
+//          |    "name" : "provider"
+//          |  },
+//          |  "consumer" : {
+//          |    "name" : "consumer"
+//          |  },
+//          |  "interactions" : [
+//          |    {
+//          |      "description" : "a simple request",
+//          |      "request" : {
+//          |        "method" : "GET",
+//          |        "path" : "/"
+//          |      },
+//          |      "response" : {
+//          |        "status" : 200,
+//          |        "body" : {"message": "Hello"},
+//          |        "matchingRules": {
+//          |          "$.body.message": {
+//          |            "match": "regex",
+//          |            "regex": "fish"
+//          |          }
+//          |        }
+//          |      }
+//          |    }
+//          |  ]
+//          |}""".stripMargin
+//
+//      val b: String =
+//        """{
+//          |  "provider" : {
+//          |    "name" : "provider"
+//          |  },
+//          |  "consumer" : {
+//          |    "name" : "consumer"
+//          |  },
+//          |  "interactions" : [
+//          |    {
+//          |      "description" : "a simple request",
+//          |      "request" : {
+//          |        "method" : "GET",
+//          |        "path" : "/"
+//          |      },
+//          |      "response" : {
+//          |        "status" : 200,
+//          |        "body" : {"message": "Hello2"},
+//          |        "matchingRules": {
+//          |          "$.body.message": {
+//          |            "match": "regex",
+//          |            "regex": "chips"
+//          |          }
+//          |        }
+//          |      }
+//          |    }
+//          |  ]
+//          |}""".stripMargin
+//
+//      val pactA: Pact = PactReader.jsonStringToPact(a).toOption.get
+//      val pactB: Pact = PactReader.jsonStringToPact(b).toOption.get
+//
+//      val res = InteractionMatchers.matchResponse(strictMatching = true, pactA.interactions)(pactB.interactions.head.response)
+//
+//      res match {
+//        case Right(_) => fail("Should not have matched")
+//        case Left(msg) =>
+////          println(msg)
+//          msg.contains("Failed") shouldEqual true
+//      }
+//    }
+//
+//  }
 
 }

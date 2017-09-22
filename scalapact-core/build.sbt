@@ -22,11 +22,11 @@ scalacOptions ++= Seq(
 lazy val http4sVersion = "0.15.0a"
 
 libraryDependencies ++= Seq(
+  "io.argonaut" %% "argonaut" % "6.2",
   "org.scalatest" %% "scalatest" % "3.0.1" % "test",
   "org.http4s" %% "http4s-blaze-server" % http4sVersion,
   "org.http4s" %% "http4s-blaze-client" % http4sVersion,
-  "org.http4s" %% "http4s-dsl"          % http4sVersion,
-  "io.argonaut" %% "argonaut" % "6.2"
+  "org.http4s" %% "http4s-dsl"          % http4sVersion
 )
 
 //wartremoverWarnings ++= Warts.unsafe

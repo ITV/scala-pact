@@ -1,4 +1,4 @@
-package com.itv.scalapactcore
+package com.itv.scalapact.shared
 
 import com.itv.scalapactcore.common.pact._
 

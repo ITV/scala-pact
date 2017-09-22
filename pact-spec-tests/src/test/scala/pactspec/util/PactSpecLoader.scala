@@ -1,7 +1,8 @@
-package com.itv.scalapactcore.pactspec.util
+package pactspec.util
 
 import argonaut.Argonaut._
 import argonaut.{CodecJson, Json}
+import com.itv.scalapact.shared.PactImplicits
 import com.itv.scalapactcore.common.pact.{InteractionRequest, InteractionResponse, Pact}
 
 import scala.io.Source
@@ -10,7 +11,7 @@ import com.itv.scalapactcore.common.RightBiasEither._
 
 object PactSpecLoader {
 
-  import Pact._
+  import com.itv.scalapact.shared.PactImplicits._
 
   implicit lazy val RequestSpecCodecJson: CodecJson[RequestSpec] = casecodec4(RequestSpec.apply, RequestSpec.unapply)(
     "match", "comment", "expected", "actual"
@@ -65,7 +66,7 @@ object SpecReader {
   }
 
   val jsonStringToRequestSpec: String => Either[String, RequestSpec] = json =>
-    jsonStringToSpec[InteractionRequest](json)(Pact.InteractionRequestCodecJson.Decoder) match {
+    jsonStringToSpec[InteractionRequest](json)(PactImplicits.InteractionRequestCodecJson.Decoder) match {
       case Right(bp) =>
         Right(RequestSpec(bp._1, bp._2, bp._3, bp._4))
 
@@ -74,7 +75,7 @@ object SpecReader {
     }
 
   val jsonStringToResponseSpec: String => Either[String, ResponseSpec] = json =>
-    jsonStringToSpec[InteractionResponse](json)(Pact.InteractionResponseCodecJson.Decoder) match {
+    jsonStringToSpec[InteractionResponse](json)(PactImplicits.InteractionResponseCodecJson.Decoder) match {
       case Right(bp) =>
         Right(ResponseSpec(bp._1, bp._2, bp._3, bp._4))
 

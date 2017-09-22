@@ -3,7 +3,7 @@ package com.itv.scalapactcore.common
 import java.io.File
 
 import com.itv.scalapactcore.common.ColourOuput._
-import com.itv.scalapactcore.common.pact.{Pact, PactReader}
+import com.itv.scalapactcore.common.pact.Pact
 
 object LocalPactFileLoader {
 
@@ -53,13 +53,13 @@ object LocalPactFileLoader {
     }
   }
 
-  private val deserializeIntoPact: List[String] => List[Pact] = pactJsonStrings => {
+  private def deserializeIntoPact(readPact: String => Either[String, Pact])(pactJsonStrings: List[String]): List[Pact] = {
     pactJsonStrings.map { json =>
-      PactReader.jsonStringToPact(json)
+      readPact(json)
     }.collect { case Right(p) => p }
   }
 
-  lazy val loadPactFiles: String => Arguments => ConfigAndPacts = defaultLocation => config => {
+  def loadPactFiles: ((String => Either[String, Pact]), String, Arguments) => ConfigAndPacts = (readPact, defaultLocation, config) => {
     // Side effecting, might as well be since the pacts are held statefully /
     // mutably so that they can be updated. The only way around this, I think,
     // would be to start new servers on update? Or some sort of foldp to update
@@ -69,7 +69,7 @@ object LocalPactFileLoader {
 
     val pacts = config.localPactPath.orElse(Option(defaultLocation)) match {
       case Some(path) =>
-        (recursiveJsonLoad andThen deserializeIntoPact) (new File(path))
+        (recursiveJsonLoad andThen deserializeIntoPact(readPact)) (new File(path))
 
       case None => Nil
     }

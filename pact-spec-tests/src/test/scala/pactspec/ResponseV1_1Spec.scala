@@ -1,10 +1,10 @@
-package com.itv.scalapactcore.pactspec
+package pactspec
 
-import com.itv.scalapactcore.pactspec.util.PactSpecTester
+import pactspec.util.PactSpecTester
 
-class ResponseV1Spec extends PactSpecTester {
+class ResponseV1_1Spec extends PactSpecTester {
 
-  val pactSpecVersion = "1"
+  val pactSpecVersion = "1.1"
 
 //  describe("Exercising response V" + pactSpecVersion + " Pact Specification match tests") {
 //
@@ -38,12 +38,20 @@ class ResponseV1Spec extends PactSpecTester {
 //          fetchResponseSpec("/response/body/deeply nested objects.json")(StrictAndNonStrict),
 //          fetchResponseSpec("/response/body/different value found at index.json")(StrictAndNonStrict),
 //          fetchResponseSpec("/response/body/different value found at key.json")(StrictAndNonStrict),
+//          fetchResponseSpec("/response/body/empty body no content.json")(StrictAndNonStrict),
+//          fetchResponseSpec("/response/body/empty body.json")(StrictAndNonStrict),
 //          fetchResponseSpec("/response/body/keys out of order match.json")(StrictAndNonStrict),
 //          fetchResponseSpec("/response/body/matches.json")(StrictAndNonStrict),
+//          fetchResponseSpec("/response/body/missing body found when empty expected.json")(StrictAndNonStrict),
+//          fetchResponseSpec("/response/body/missing body no content type.json")(StrictAndNonStrict),
+//          fetchResponseSpec("/response/body/missing body.json")(StrictAndNonStrict),
 //          fetchResponseSpec("/response/body/missing index.json")(StrictAndNonStrict),
 //          fetchResponseSpec("/response/body/missing key.json")(StrictAndNonStrict),
+//          fetchResponseSpec("/response/body/non body found when empty expected.json")(StrictAndNonStrict),
 //          fetchResponseSpec("/response/body/not null found at key when null expected.json")(StrictAndNonStrict),
 //          fetchResponseSpec("/response/body/not null found in array when null expected.json")(StrictAndNonStrict),
+//          fetchResponseSpec("/response/body/null body no content type.json")(StrictAndNonStrict),
+//          fetchResponseSpec("/response/body/null body.json")(StrictAndNonStrict),
 //          fetchResponseSpec("/response/body/null found at key where not null expected.json")(StrictAndNonStrict),
 //          fetchResponseSpec("/response/body/null found in array when not null expected.json")(StrictAndNonStrict),
 //          fetchResponseSpec("/response/body/number found at key when string expected.json")(StrictAndNonStrict),

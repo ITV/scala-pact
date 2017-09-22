@@ -4,6 +4,7 @@ import java.io.{File, PrintWriter}
 
 import scala.xml.Elem
 
+//TODO: Figure out where this should live.
 object JUnitWriter {
 
   private val simplifyName: String => String = name =>
