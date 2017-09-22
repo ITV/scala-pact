@@ -18,6 +18,8 @@ scalacOptions ++= Seq(
   //  "-Xfuture"
 )
 
+addCommandAlias("quicktest", ";core_2_12/test;argonaut62_2_12/test;pactSpec_2_12/test;plugin/test;standalone/test;framework_2_12/test")
+
 lazy val commonSettings = Seq(
   version := "2.2.0-SNAPSHOT",
   organization := "com.itv"
