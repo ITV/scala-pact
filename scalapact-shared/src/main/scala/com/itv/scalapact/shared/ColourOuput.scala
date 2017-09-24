@@ -1,4 +1,4 @@
-package com.itv.scalapactcore.common
+package com.itv.scalapact.shared
 
 import scala.language.implicitConversions
 

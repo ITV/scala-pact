@@ -1,7 +1,7 @@
 package com.itv.scalapact.plugin.tester
 
 import com.itv.scalapact.shared.{IPactReader, IPactWriter}
-import com.itv.scalapactcore.common.ColourOuput._
+import com.itv.scalapact.shared.ColourOuput._
 import sbt._
 
 import scala.io.Source

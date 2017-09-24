@@ -45,9 +45,35 @@ lazy val core =
   (project in file("scalapact-core"))
     .settings(commonSettings: _*).cross
 
-lazy val core_2_10 = core(scala210).dependsOn(shared_2_10).dependsOn(argonaut62_2_10 % "provided").project
-lazy val core_2_11 = core(scala211).dependsOn(shared_2_11).dependsOn(argonaut62_2_11 % "provided").project
-lazy val core_2_12 = core(scala212).dependsOn(shared_2_12).dependsOn(argonaut62_2_12 % "provided").project
+lazy val core_2_10 = core(scala210)
+  .dependsOn(shared_2_10)
+  .dependsOn(argonaut62_2_10 % "provided")
+  .dependsOn(http4s0150a_2_10 % "provided")
+  .project
+lazy val core_2_11 = core(scala211)
+  .settings(
+    libraryDependencies ++= Seq("org.scala-lang.modules" %% "scala-xml" % "1.0.6")
+  )
+  .dependsOn(shared_2_11)
+  .dependsOn(argonaut62_2_11 % "provided")
+  .dependsOn(http4s0150a_2_11 % "provided")
+  .project
+lazy val core_2_12 = core(scala212)
+  .settings(
+    libraryDependencies ++= Seq("org.scala-lang.modules" %% "scala-xml" % "1.0.6")
+  )
+  .dependsOn(shared_2_12)
+  .dependsOn(argonaut62_2_12 % "provided")
+  .dependsOn(http4s0150a_2_12 % "provided")
+  .project
+
+lazy val http4s0150a =
+  (project in file("scalapact-http4s-0-15-0a"))
+    .settings(commonSettings: _*).cross
+
+lazy val http4s0150a_2_10 = http4s0150a(scala210).dependsOn(shared_2_10)
+lazy val http4s0150a_2_11 = http4s0150a(scala211).dependsOn(shared_2_11)
+lazy val http4s0150a_2_12 = http4s0150a(scala212).dependsOn(shared_2_12)
 
 lazy val argonaut62 =
   (project in file("scalapact-argonaut-6-2"))
@@ -133,6 +159,9 @@ lazy val scalaPactProject =
       framework_2_12,
       standalone,
       docs,
+      http4s0150a_2_10,
+      http4s0150a_2_11,
+      http4s0150a_2_12,
       argonaut61_2_10,
       argonaut61_2_11,
       argonaut62_2_10,

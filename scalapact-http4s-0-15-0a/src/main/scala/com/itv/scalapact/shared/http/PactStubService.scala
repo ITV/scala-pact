@@ -1,15 +1,16 @@
-package com.itv.scalapactcore.stubber
+package com.itv.scalapact.shared.http
 
 import java.util.concurrent.{ExecutorService, Executors}
 
-import com.itv.scalapact.shared.{InteractionRequest, Pact, PactActor, IPactReader, IPactWriter}
-import com.itv.scalapactcore.common.ColourOuput._
-import com.itv.scalapactcore.common.{Arguments, Http4sRequestResponseFactory}
+import com.itv.scalapact.shared._
 import org.http4s.dsl._
 import org.http4s.server.Server
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.util.CaseInsensitiveString
 import org.http4s.{HttpService, Request, Response, Status}
+
+import HeaderImplicitConversions._
+import ColourOuput._
 
 import scala.concurrent.duration._
 
@@ -18,14 +19,14 @@ object PactStubService {
   private val nThreads: Int = 50
   private val executorService: ExecutorService = Executors.newFixedThreadPool(nThreads)
 
-  def startServer(interactionManager: InteractionManager)(implicit pactReader: IPactReader, pactWriter: IPactWriter): Arguments => Unit = config => {
+  def startServer(interactionManager: IInteractionManager)(implicit pactReader: IPactReader, pactWriter: IPactWriter): Arguments => Unit = config => {
     println(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort).white.bold)
     println(("Strict matching mode: " + config.giveStrictMode).white.bold)
 
     runServer(interactionManager, nThreads)(pactReader, pactWriter)(config).awaitShutdown()
   }
 
-  def runServer(interactionManager: InteractionManager, connectionPoolSize: Int)(implicit pactReader: IPactReader, pactWriter: IPactWriter): Arguments => Server = config => {
+  def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int)(implicit pactReader: IPactReader, pactWriter: IPactWriter): Arguments => Server = config => {
     BlazeBuilder
       .bindHttp(config.givePort, config.giveHost)
       .withServiceExecutor(executorService)
@@ -42,14 +43,14 @@ object PactStubService {
   private val isAdminCall: Request => Boolean = request =>
       request.headers.get(CaseInsensitiveString("X-Pact-Admin")).exists(h => h.value == "true")
 
-  private def service(interactionManager: InteractionManager, strictMatching: Boolean)(implicit pactReader: IPactReader, pactWriter: IPactWriter): HttpService =
+  private def service(interactionManager: IInteractionManager, strictMatching: Boolean)(implicit pactReader: IPactReader, pactWriter: IPactWriter): HttpService =
     HttpService.lift { req =>
       matchRequestWithResponse(interactionManager, strictMatching, req)
     }
 
   private val pactMatchFailureStatus: Status = Status.fromIntAndReason(598, "Pact Match Failure").toOption.getOrElse(InternalServerError)
 
-  private def matchRequestWithResponse(interactionManager: InteractionManager, strictMatching: Boolean, req: Request)(implicit pactReader: IPactReader, pactWriter: IPactWriter): scalaz.concurrent.Task[Response] = {
+  private def matchRequestWithResponse(interactionManager: IInteractionManager, strictMatching: Boolean, req: Request)(implicit pactReader: IPactReader, pactWriter: IPactWriter): scalaz.concurrent.Task[Response] = {
     if(isAdminCall(req)) {
 
       req.method.name.toUpperCase match {
@@ -81,8 +82,6 @@ object PactStubService {
 
     }
     else {
-
-      import com.itv.scalapactcore.common.HeaderImplicitConversions._
 
       interactionManager.findMatchingInteraction(
         InteractionRequest(

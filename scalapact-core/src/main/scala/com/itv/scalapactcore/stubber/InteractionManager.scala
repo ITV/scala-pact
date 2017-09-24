@@ -1,10 +1,9 @@
 package com.itv.scalapactcore.stubber
 
-import com.itv.scalapact.shared.{Interaction, InteractionRequest}
-import com.itv.scalapactcore.common.ColourOuput._
-import com.itv.scalapactcore.common.{Arguments, ConfigAndPacts}
+import com.itv.scalapact.shared._
+import ColourOuput._
 
-class InteractionManager {
+class InteractionManager extends IInteractionManager {
 
   import com.itv.scalapactcore.common.matching.InteractionMatchers._
 
@@ -21,7 +20,7 @@ class InteractionManager {
 
   def clearInteractions(): Unit = interactions = List.empty[Interaction]
 
-  lazy val addToInteractionManager: ConfigAndPacts => Arguments = configAndPacts => {
+  def addToInteractionManager: ConfigAndPacts => Arguments = configAndPacts => {
     configAndPacts.pacts.foreach { p =>
       println(("> Adding interactions:\n> - " + p.interactions.mkString("\n> - ")).blue)
       addInteractions(p.interactions)

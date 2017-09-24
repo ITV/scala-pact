@@ -1,19 +1,20 @@
 package com.itv.scalapactcore.verifier
 
-import com.itv.scalapact.shared.{Interaction, InteractionRequest, InteractionResponse, Pact, IPactReader}
+import com.itv.scalapact.shared._
 import com.itv.scalapactcore.common.matching.InteractionMatchers._
-import com.itv.scalapactcore.common.ColourOuput._
+import com.itv.scalapact.shared.ColourOuput._
+import com.itv.scalapact.shared.http.ScalaPactHttpClient
 import com.itv.scalapactcore.common._
 
 import scala.util.Left
+
+import RightBiasEither._
 
 object Verifier {
 
   private final case class ValidatedDetails(validatedAddress: ValidPactBrokerAddress, providerName: String, consumerName: String, consumerVersion: String)
 
   def verify(loadPactFiles: String => Arguments => ConfigAndPacts, pactVerifySettings: PactVerifySettings)(implicit pactReader: IPactReader): Arguments => Boolean = arguments => {
-
-    val client: ScalaPactHttpClient = new ScalaPactHttpClient
 
     val pacts: List[Pact] = if(arguments.localPactPath.isDefined) {
       println(s"Attempting to use local pact files at: '${arguments.localPactPath.getOrElse("<path missing>")}'".white.bold)
@@ -51,7 +52,7 @@ object Verifier {
             None
 
           case Right(v) =>
-            fetchAndReadPact(v.validatedAddress.address + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + v.consumerVersion, client)
+            fetchAndReadPact(v.validatedAddress.address + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + v.consumerVersion)
         }
       }.collect {
         case Some(s) => s
@@ -74,7 +75,7 @@ object Verifier {
               .providerState
               .map(p => ProviderState(p, PartialFunction(pactVerifySettings.providerStates)))
 
-          (doRequest(arguments, maybeProviderState, client) andThen attemptMatch(arguments.giveStrictMode, List(interaction)))(interaction.request)
+          (doRequest(arguments, maybeProviderState) andThen attemptMatch(arguments.giveStrictMode, List(interaction)))(interaction.request)
         }
       )
     }
@@ -119,7 +120,7 @@ object Verifier {
       Left(s)
   }
 
-  private def doRequest(arguments: Arguments, maybeProviderState: Option[ProviderState], client: ScalaPactHttpClient): InteractionRequest => Either[String, InteractionResponse] = interactionRequest => {
+  private def doRequest(arguments: Arguments, maybeProviderState: Option[ProviderState]): InteractionRequest => Either[String, InteractionResponse] = interactionRequest => {
     val baseUrl = s"${arguments.giveProtocol}://" + arguments.giveHost + ":" + arguments.givePort
     val clientTimeout = arguments.giveClientTimeoutInSeconds
 
@@ -161,13 +162,11 @@ object Verifier {
       InteractionRequest.unapply(interactionRequest) match {
         case Some((Some(_), Some(_), _, _, _, _)) =>
 
-          client.doInteractionRequest(baseUrl, interactionRequest, clientTimeout)
-            .unsafePerformSyncAttempt
+          ScalaPactHttpClient.doInteractionRequestSync(baseUrl, interactionRequest, clientTimeout)
             .leftMap { t =>
               println(s"Error in response: ${t.getMessage}".red)
               t.getMessage
             }
-            .toEither
 
         case _ => Left("Invalid request was missing either method or path: " + interactionRequest)
 
@@ -179,12 +178,10 @@ object Verifier {
 
   }
 
-  private def fetchAndReadPact(address: String, client: ScalaPactHttpClient)(implicit pactReader: IPactReader): Option[Pact] = {
+  private def fetchAndReadPact(address: String)(implicit pactReader: IPactReader): Option[Pact] = {
     println(s"Attempting to fetch pact from pact broker at: $address".white.bold)
 
-    val httpClient = client.makeClient
-
-    client.doRequest(HttpMethod.GET, address, "", Map("Accept" -> "application/json"), None, httpClient).map {
+    ScalaPactHttpClient.doRequestSync(HttpMethod.GET, address, "", Map("Accept" -> "application/json"), None).map {
       case r: SimpleResponse if r.is2xx =>
         val pact = r.body.map(pactReader.jsonStringToPact).flatMap {
           case Right(p) => Option(p)
@@ -201,13 +198,11 @@ object Verifier {
       case _ =>
         println(s"Failed to load consumer pact from: $address".red)
         None
-    }.unsafePerformSyncAttempt.toEither match {
+    } match {
       case Right(p) =>
-        httpClient.shutdownNow()
         p
       case Left(e) =>
         println(s"Error: ${e.getMessage}".yellow)
-        httpClient.shutdownNow()
         None
     }
 

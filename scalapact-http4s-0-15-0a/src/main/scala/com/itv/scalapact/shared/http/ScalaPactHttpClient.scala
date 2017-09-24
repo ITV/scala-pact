@@ -1,30 +1,77 @@
-package com.itv.scalapactcore.common
+package com.itv.scalapact.shared.http
 
-import com.itv.scalapact.shared.{InteractionRequest, InteractionResponse}
+import com.itv.scalapact.shared.HttpMethod._
+import com.itv.scalapact.shared._
 import org.http4s.client.Client
 import org.http4s.client.blaze.{BlazeClientConfig, PooledHttp1Client}
 import org.http4s.headers.{AgentProduct, `User-Agent`}
 import org.http4s.{BuildInfo, Method, Response, Uri, _}
 
+import scala.concurrent.{Future, Promise}
 import scala.concurrent.duration._
 import scala.language.{implicitConversions, postfixOps}
 import scalaz.concurrent.Task
 
-class ScalaPactHttpClient {
+object ScalaPactHttpClient extends IScalaPactHttpClient {
+
+  def doRequest(method: HttpMethod, baseUrl: String, endPoint: String, headers: Map[String, String], body: Option[String]): Future[SimpleResponse] =
+    doRequestTask(method, baseUrl, endPoint, headers, body)
+
+  def doInteractionRequest(url: String, ir: InteractionRequest, clientTimeout: Duration): Future[InteractionResponse] =
+    doInteractionRequestTask(url, ir, clientTimeout)
+
+  def doRequestSync(method: HttpMethod, baseUrl: String, endPoint: String, headers: Map[String, String], body: Option[String]): Either[Throwable, SimpleResponse] =
+    doRequestTask(method, baseUrl, endPoint, headers, body).unsafePerformSyncAttempt.toEither
+
+  def doInteractionRequestSync(url: String, ir: InteractionRequest, clientTimeout: Duration): Either[Throwable, InteractionResponse] =
+    doInteractionRequestTask(url, ir, clientTimeout).unsafePerformSyncAttempt.toEither
+
+  private implicit def taskToFuture[A](x: => Task[A]): Future[A] = {
+    import scalaz.{ \/-, -\/ }
+    val p: Promise[A] = Promise()
+
+    x.unsafePerformAsync {
+      case -\/(ex) =>
+        p.failure(ex)
+        ()
+
+      case \/-(r) =>
+        p.success(r)
+        ()
+    }
+    p.future
+  }
+
+  private implicit def httpMethodToMethod(httpMethod: HttpMethod): Method =
+    httpMethod match {
+      case GET =>
+        Method.GET
+
+      case POST =>
+        Method.POST
+
+      case PUT =>
+        Method.PUT
+
+      case DELETE =>
+        Method.DELETE
+
+      case OPTIONS =>
+        Method.OPTIONS
+    }
 
   private val maxTotalConnections: Int = 1
 
-  def makeClient: Client = HttpClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, 2.seconds)
+  private def makeClient: Client = HttpClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, 2.seconds)
 
-  def doRequest(method: HttpMethod, baseUrl: String, endPoint: String, headers: Map[String, String], body: Option[String], client: Client): Task[SimpleResponse] = {
-    HttpClientHelper.doRequest(baseUrl, endPoint, method.http4sMethod, headers, body, client)
-  }
+  private def doRequestTask(method: HttpMethod, baseUrl: String, endPoint: String, headers: Map[String, String], body: Option[String]): Task[SimpleResponse] =
+    HttpClientHelper.doRequest(baseUrl, endPoint, method, headers, body, makeClient)
 
-  def doInteractionRequest(url: String, ir: InteractionRequest, clientTimeout: Duration): Task[InteractionResponse] = {
+  private def doInteractionRequestTask(url: String, ir: InteractionRequest, clientTimeout: Duration): Task[InteractionResponse] =
     HttpClientHelper.doRequest(
       baseUrl = url,
       endPoint = ir.path.getOrElse("") + ir.query.map(s => "?" + s).getOrElse(""),
-      method = HttpMethod.maybeMethodToMethod(ir.method).http4sMethod,
+      method = HttpMethod.maybeMethodToMethod(ir.method),
       headers = ir.headers.getOrElse(Map.empty[String, String]),
       body = ir.body,
       httpClient = HttpClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, clientTimeout)
@@ -36,70 +83,10 @@ class ScalaPactHttpClient {
         matchingRules = None
       )
     }
-  }
 
 }
 
-sealed trait HttpMethod {
-  val http4sMethod: Method
-}
-
-object HttpMethod {
-
-  def apply(method: String): Option[HttpMethod] = {
-    method match {
-      case "GET" =>
-        Option(GET)
-
-      case "POST" =>
-        Option(POST)
-
-      case "PUT" =>
-        Option(PUT)
-
-      case "DELETE" =>
-        Option(DELETE)
-
-      case "OPTIONS" =>
-        Option(OPTIONS)
-
-      case _ =>
-        None
-    }
-  }
-
-  val maybeMethodToMethod: Option[String] => HttpMethod = maybeMethod =>
-    maybeMethod.map(_.toUpperCase).flatMap(HttpMethod.apply).getOrElse(GET)
-
-  case object GET extends HttpMethod {
-    val http4sMethod: Method = Method.GET
-  }
-  case object POST extends HttpMethod {
-    val http4sMethod: Method = Method.POST
-  }
-  case object PUT extends HttpMethod {
-    val http4sMethod: Method = Method.PUT
-  }
-  case object DELETE extends HttpMethod {
-    val http4sMethod: Method = Method.DELETE
-  }
-  case object OPTIONS extends HttpMethod {
-    val http4sMethod: Method = Method.OPTIONS
-  }
-
-}
-
-final case class SimpleResponse(statusCode: Int, headers: Map[String, String], body: Option[String]) {
-  def is2xx: Boolean = statusCode >= 200 && statusCode < 300
-
-  def is3xx: Boolean = statusCode >= 300 && statusCode < 400
-
-  def is4xx: Boolean = statusCode >= 400 && statusCode < 500
-
-  def is5xx: Boolean = statusCode >= 500 && statusCode < 600
-}
-
-object HttpClientHelper {
+private object HttpClientHelper {
 
   private def headersToMap(headers: Headers): Map[String, String] =
     headers.toList

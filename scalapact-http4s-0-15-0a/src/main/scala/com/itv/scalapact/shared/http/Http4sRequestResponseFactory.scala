@@ -1,4 +1,4 @@
-package com.itv.scalapactcore.common
+package com.itv.scalapact.shared.http
 
 import java.nio.charset.StandardCharsets
 

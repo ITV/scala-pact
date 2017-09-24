@@ -1,12 +1,12 @@
 name := "scalapact-core"
 
-lazy val http4sVersion = "0.15.0a"
-
-libraryDependencies ++= Seq(
-  "org.http4s" %% "http4s-blaze-server" % http4sVersion,
-  "org.http4s" %% "http4s-blaze-client" % http4sVersion,
-  "org.http4s" %% "http4s-dsl"          % http4sVersion
-)
+//lazy val http4sVersion = "0.15.0a"
+//
+//libraryDependencies ++= Seq(
+//  "org.http4s" %% "http4s-blaze-server" % http4sVersion,
+//  "org.http4s" %% "http4s-blaze-client" % http4sVersion,
+//  "org.http4s" %% "http4s-dsl"          % http4sVersion
+//)
 
 //wartremoverWarnings ++= Warts.unsafe
 

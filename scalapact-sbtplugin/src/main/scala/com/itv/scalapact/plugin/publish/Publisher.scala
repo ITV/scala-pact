@@ -1,7 +1,7 @@
 package com.itv.scalapact.plugin.publish
 
 import com.itv.scalapact.shared.IPactWriter
-import com.itv.scalapactcore.common.ColourOuput._
+import com.itv.scalapact.shared.ColourOuput._
 import com.itv.scalapactcore.common._
 
 object Publisher {

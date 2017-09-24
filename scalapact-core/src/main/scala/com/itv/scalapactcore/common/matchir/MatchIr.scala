@@ -2,7 +2,7 @@ package com.itv.scalapactcore.common.matchir
 
 import scala.xml.{Elem, XML, Node}
 
-import com.itv.scalapactcore.common.ColourOuput._
+import com.itv.scalapact.shared.ColourOuput._
 
 import argonaut._
 

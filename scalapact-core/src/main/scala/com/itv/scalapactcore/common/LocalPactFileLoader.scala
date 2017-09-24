@@ -2,8 +2,8 @@ package com.itv.scalapactcore.common
 
 import java.io.File
 
-import com.itv.scalapact.shared.{IPactReader, Pact}
-import com.itv.scalapactcore.common.ColourOuput._
+import com.itv.scalapact.shared.{Arguments, ConfigAndPacts, IPactReader, Pact}
+import com.itv.scalapact.shared.ColourOuput._
 
 object LocalPactFileLoader {
 
@@ -78,5 +78,3 @@ object LocalPactFileLoader {
   }
 
 }
-
-case class ConfigAndPacts(arguments: Arguments, pacts: List[Pact])

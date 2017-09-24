@@ -3,7 +3,7 @@ package com.itv.scalapact.plugin.verifier
 import com.itv.scalapact.plugin.ScalaPactPlugin
 import com.itv.scalapactcore.verifier.ProviderState
 import com.itv.scalapactcore.common.CommandArguments._
-import com.itv.scalapactcore.common.ColourOuput._
+import com.itv.scalapact.shared.ColourOuput._
 import com.itv.scalapactcore.common.LocalPactFileLoader
 import com.itv.scalapactcore.verifier._
 import sbt._

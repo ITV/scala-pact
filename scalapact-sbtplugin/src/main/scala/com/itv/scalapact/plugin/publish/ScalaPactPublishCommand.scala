@@ -2,7 +2,7 @@ package com.itv.scalapact.plugin.publish
 
 import com.itv.scalapact.plugin.ScalaPactPlugin
 import com.itv.scalapactcore.common.CommandArguments._
-import com.itv.scalapactcore.common.ColourOuput._
+import com.itv.scalapact.shared.ColourOuput._
 import com.itv.scalapactcore.common.LocalPactFileLoader
 import sbt._
 import com.itv.scalapactcore.common.PactReaderWriter._
