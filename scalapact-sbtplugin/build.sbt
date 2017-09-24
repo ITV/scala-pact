@@ -1,8 +1,5 @@
 
-
 name := "sbt-scalapact"
-
-scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
 
 publishTo := {
   val nexus = "https://oss.sonatype.org/"
@@ -11,10 +8,6 @@ publishTo := {
   else
     Some("releases"  at nexus + "service/local/staging/deploy/maven2")
 }
-
-libraryDependencies ++= Seq(
-  "org.scalatest" %% "scalatest" % "3.0.1" % "test"
-)
 
 publishMavenStyle := true
 publishArtifact in Test := false

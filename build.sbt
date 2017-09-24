@@ -23,7 +23,10 @@ addCommandAlias("quicktest", ";shared_2_12/test;core_2_12/test;argonaut62_2_12/t
 
 lazy val commonSettings = Seq(
   version := "2.2.0-SNAPSHOT",
-  organization := "com.itv"
+  organization := "com.itv",
+  libraryDependencies ++= Seq(
+    "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+  )
 )
 
 val scala210: String = "2.10.6"
@@ -53,6 +56,14 @@ lazy val argonaut62 =
 lazy val argonaut62_2_10 = argonaut62(scala210).dependsOn(shared_2_10)
 lazy val argonaut62_2_11 = argonaut62(scala211).dependsOn(shared_2_11)
 lazy val argonaut62_2_12 = argonaut62(scala212).dependsOn(shared_2_12)
+
+lazy val argonaut61 =
+  (project in file("scalapact-argonaut-6-1"))
+    .settings(commonSettings: _*).cross
+
+lazy val argonaut61_2_10 = argonaut61(scala210).dependsOn(shared_2_10)
+lazy val argonaut61_2_11 = argonaut61(scala211).dependsOn(shared_2_11)
+//lazy val argonaut61_2_12 = argonaut61(scala212).dependsOn(shared_2_12) // No such thing
 
 lazy val pactSpec =
   (project in file("pact-spec-tests"))
@@ -110,6 +121,8 @@ lazy val scalaPactProject =
       framework_2_12,
       standalone,
       docs,
+      argonaut61_2_10,
+      argonaut61_2_11,
       argonaut62_2_10,
       argonaut62_2_11,
       argonaut62_2_12,

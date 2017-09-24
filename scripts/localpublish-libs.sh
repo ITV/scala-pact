@@ -27,6 +27,19 @@ echo ">>> Shared (2.12)"
 crossPublishLocal "shared_2_12"
 
 echo ""
+echo ">>> Argonaut 6.1 (2.10)"
+crossPublishLocal "argonaut61_2_10"
+
+echo ""
+echo ">>> Argonaut 6.1 (2.11)"
+crossPublishLocal "argonaut61_2_11"
+
+#No such thing
+#echo ""
+#echo ">>> Argonaut 6.1 (2.12)"
+#crossPublishLocal "argonaut61_2_12"
+
+echo ""
 echo ">>> Argonaut 6.2 (2.10)"
 crossPublishLocal "argonaut62_2_10"
 

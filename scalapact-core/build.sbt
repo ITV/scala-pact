@@ -1,29 +1,8 @@
 name := "scalapact-core"
 
-// Pinched shamelessly from https://tpolecat.github.io/2014/04/11/scalac-flags.html
-scalacOptions ++= Seq(
-//  "-Yno-imports", // Powerful but boring. Essentially you have to pull in everything... one day.
-  "-deprecation",
-  "-encoding", "UTF-8",       // yes, this is 2 args
-  "-feature",
-  "-language:existentials",
-  "-language:higherKinds",
-  "-language:implicitConversions",
-  "-unchecked"
-//  "-Xfatal-warnings",
-//  "-Xlint",
-//  "-Yno-adapted-args",
-//  "-Ywarn-dead-code",        // N.B. doesn't work well with the ??? hole
-//  "-Ywarn-numeric-widen",
-//  "-Ywarn-value-discard",
-//  "-Xfuture"
-)
-
 lazy val http4sVersion = "0.15.0a"
 
 libraryDependencies ++= Seq(
-//  "com.itv" %% "scalapact-argonaut-6-2" % version.value,
-  "org.scalatest" %% "scalatest" % "3.0.1" % "test",
   "org.http4s" %% "http4s-blaze-server" % http4sVersion,
   "org.http4s" %% "http4s-blaze-client" % http4sVersion,
   "org.http4s" %% "http4s-dsl"          % http4sVersion
