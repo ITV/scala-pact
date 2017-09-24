@@ -10,7 +10,9 @@ CORE_VERSION=$(grep "version :=" build.sbt | sed 's/version :=//g' | sed 's/ //g
 remove_plugin_file
 remove_config_file
 
-echo "addSbtPlugin(\"com.itv\" % \"sbt-scalapact\" % \"$CORE_VERSION\")" > $PLUGIN_FILE
+echo "libraryDependencies += \"com.itv\" %% \"scalapact-argonaut-6-2\" % \"$CORE_VERSION\"" > $PLUGIN_FILE
+echo "" >> $PLUGIN_FILE
+echo "addSbtPlugin(\"com.itv\" % \"sbt-scalapact\" % \"$CORE_VERSION\")" >> $PLUGIN_FILE
 
 cat > $PACT_CONFIG_FILE <<EOL
 import com.itv.scalapact.plugin.ScalaPactPlugin._
