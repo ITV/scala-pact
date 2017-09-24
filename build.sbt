@@ -65,6 +65,18 @@ lazy val argonaut61_2_10 = argonaut61(scala210).dependsOn(shared_2_10)
 lazy val argonaut61_2_11 = argonaut61(scala211).dependsOn(shared_2_11)
 //lazy val argonaut61_2_12 = argonaut61(scala212).dependsOn(shared_2_12) // No such thing
 
+lazy val circe08 =
+  (project in file("scalapact-circe-0-8"))
+    .settings(commonSettings: _*).cross
+
+lazy val circe08_2_10 = circe08(scala210).dependsOn(shared_2_10).settings(
+  addCompilerPlugin(
+    "org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full
+  )
+)
+lazy val circe08_2_11 = circe08(scala211).dependsOn(shared_2_11)
+lazy val circe08_2_12 = circe08(scala212).dependsOn(shared_2_12)
+
 lazy val pactSpec =
   (project in file("pact-spec-tests"))
     .settings(commonSettings: _*).cross
@@ -126,6 +138,9 @@ lazy val scalaPactProject =
       argonaut62_2_10,
       argonaut62_2_11,
       argonaut62_2_12,
+      circe08_2_10,
+      circe08_2_11,
+      circe08_2_12,
       pactSpec_2_10,
       pactSpec_2_11,
       pactSpec_2_12
