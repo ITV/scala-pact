@@ -1,9 +1,9 @@
 package com.itv.scalapactcore.verifier
 
+import com.itv.scalapact.shared.{Interaction, InteractionRequest, InteractionResponse, Pact, IPactReader}
 import com.itv.scalapactcore.common.matching.InteractionMatchers._
 import com.itv.scalapactcore.common.ColourOuput._
 import com.itv.scalapactcore.common._
-import com.itv.scalapactcore.common.pact._
 
 import scala.util.Left
 
@@ -11,13 +11,13 @@ object Verifier {
 
   private final case class ValidatedDetails(validatedAddress: ValidPactBrokerAddress, providerName: String, consumerName: String, consumerVersion: String)
 
-  def verify(loadPactFiles: ((String => Either[String, Pact]), String, Arguments) => ConfigAndPacts, readPact: String => Either[String, Pact], pactVerifySettings: PactVerifySettings): Arguments => Boolean = arguments => {
+  def verify(loadPactFiles: String => Arguments => ConfigAndPacts, pactVerifySettings: PactVerifySettings)(implicit pactReader: IPactReader): Arguments => Boolean = arguments => {
 
     val client: ScalaPactHttpClient = new ScalaPactHttpClient
 
     val pacts: List[Pact] = if(arguments.localPactPath.isDefined) {
       println(s"Attempting to use local pact files at: '${arguments.localPactPath.getOrElse("<path missing>")}'".white.bold)
-      loadPactFiles(readPact, "pacts", arguments).pacts
+      loadPactFiles("pacts")(arguments).pacts
     } else {
 
       val versionConsumers =
@@ -51,7 +51,7 @@ object Verifier {
             None
 
           case Right(v) =>
-            fetchAndReadPact(readPact, v.validatedAddress.address + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + v.consumerVersion, client)
+            fetchAndReadPact(v.validatedAddress.address + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + v.consumerVersion, client)
         }
       }.collect {
         case Some(s) => s
@@ -179,14 +179,14 @@ object Verifier {
 
   }
 
-  private def fetchAndReadPact(readPact: String => Either[String, Pact], address: String, client: ScalaPactHttpClient): Option[Pact] = {
+  private def fetchAndReadPact(address: String, client: ScalaPactHttpClient)(implicit pactReader: IPactReader): Option[Pact] = {
     println(s"Attempting to fetch pact from pact broker at: $address".white.bold)
 
     val httpClient = client.makeClient
 
     client.doRequest(HttpMethod.GET, address, "", Map("Accept" -> "application/json"), None, httpClient).map {
       case r: SimpleResponse if r.is2xx =>
-        val pact = r.body.map(readPact).flatMap {
+        val pact = r.body.map(pactReader.jsonStringToPact).flatMap {
           case Right(p) => Option(p)
           case Left(msg) =>
             println(s"Error: $msg".yellow)

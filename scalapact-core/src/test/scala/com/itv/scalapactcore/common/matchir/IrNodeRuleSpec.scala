@@ -1,6 +1,6 @@
 package com.itv.scalapactcore.common.matchir
 
-import com.itv.scalapactcore.common.pact.MatchingRule
+import com.itv.scalapact.shared.MatchingRule
 import org.scalatest.{FunSpec, Matchers}
 
 import scala.language.postfixOps

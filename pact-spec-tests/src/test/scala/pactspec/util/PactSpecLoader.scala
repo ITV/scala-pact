@@ -2,16 +2,16 @@ package pactspec.util
 
 import argonaut.Argonaut._
 import argonaut.{CodecJson, Json}
-import com.itv.scalapact.shared.PactImplicits
-import com.itv.scalapactcore.common.pact.{InteractionRequest, InteractionResponse, Pact}
+import com.itv.scalapact.shared.{InteractionRequest, InteractionResponse}
 
 import scala.io.Source
 import scala.language.implicitConversions
 import com.itv.scalapactcore.common.RightBiasEither._
+import com.itv.scalapact.shared.pact.PactImplicits
 
 object PactSpecLoader {
 
-  import com.itv.scalapact.shared.PactImplicits._
+  import PactImplicits._
 
   implicit lazy val RequestSpecCodecJson: CodecJson[RequestSpec] = casecodec4(RequestSpec.apply, RequestSpec.unapply)(
     "match", "comment", "expected", "actual"

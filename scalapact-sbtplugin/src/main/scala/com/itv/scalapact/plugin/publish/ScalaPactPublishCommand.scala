@@ -2,9 +2,10 @@ package com.itv.scalapact.plugin.publish
 
 import com.itv.scalapact.plugin.ScalaPactPlugin
 import com.itv.scalapactcore.common.CommandArguments._
-import com.itv.scalapactcore.common.LocalPactFileLoader._
 import com.itv.scalapactcore.common.ColourOuput._
+import com.itv.scalapactcore.common.LocalPactFileLoader
 import sbt._
+import com.itv.scalapactcore.common.PactReaderWriter._
 
 object ScalaPactPublishCommand {
 
@@ -28,13 +29,15 @@ object ScalaPactPublishCommand {
 
     val versionToPublishAs = if(pactContractVersion.isEmpty) projectVersion else pactContractVersion
 
+    val loadPactFiles = LocalPactFileLoader.loadPactFiles
+
     if(versionToPublishAs.contains("SNAPSHOT") && !allowSnapshotPublish) {
       println("Snapshot pact file publishing not permitted".red.bold)
       println("Publishing of pact contracts against snapshot versions is not allowed by default.".yellow)
       println("Pact broker does not cope well with snapshot contracts.".yellow)
       println("To enable this feature, add \"allowSnapshotPublish := true\" to your pact.sbt file.".yellow)
     } else {
-      (parseArguments andThen loadPactFiles("target/pacts") andThen publishToBroker(pactBrokerAddress)(versionToPublishAs)) (args)
+      (parseArguments andThen loadPactFiles("target/pacts") andThen publishToBroker(pactBrokerAddress, versionToPublishAs)) (args)
     }
 
     pactTestedState

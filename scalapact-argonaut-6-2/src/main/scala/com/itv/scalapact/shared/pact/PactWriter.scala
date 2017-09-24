@@ -1,14 +1,14 @@
-package com.itv.scalapact.shared
+package com.itv.scalapact.shared.pact
 
 import argonaut.Argonaut._
 import argonaut._
-import com.itv.scalapactcore.common.pact.Pact
+import com.itv.scalapact.shared.{IPactWriter, Pact}
 
-object PactWriter {
+object PactWriter extends IPactWriter {
 
   import PactImplicits._
 
-  val pactToJsonString: Pact => String = pact => {
+  def pactToJsonString(pact: Pact): String = {
 
     val interactions: JsonArray =
       pact.interactions

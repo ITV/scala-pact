@@ -1,7 +1,7 @@
 package com.itv.scalapactcore.common.matchir
 
+import com.itv.scalapact.shared.MatchingRule
 import com.itv.scalapactcore.common.matchir.PactPathParseResult.{PactPathParseFailure, PactPathParseSuccess}
-import com.itv.scalapactcore.common.pact.MatchingRule
 
 import scala.util.Random
 

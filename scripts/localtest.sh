@@ -6,7 +6,7 @@
 
 set -e
 
-echo "Locally published Scala-Pact"
+echo "Locally test Scala-Pact"
 echo "****************************"
 
 sbt clean update compile

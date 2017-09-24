@@ -5,6 +5,7 @@ import com.itv.scalapactcore.common.CommandArguments._
 import com.itv.scalapactcore.common.LocalPactFileLoader._
 import com.itv.scalapactcore.stubber.InteractionManager
 import com.itv.scalapactcore.stubber.PactStubService._
+import com.itv.scalapactcore.common.PactReaderWriter._
 
 object PactStubber {
 
@@ -16,7 +17,7 @@ object PactStubber {
 
     val interactionManager: InteractionManager = new InteractionManager
 
-    (parseArguments andThen loadPactFiles("pacts") andThen interactionManager.addToInteractionManager andThen startServer(interactionManager))(args)
+    (parseArguments andThen loadPactFiles(pactReader)("pacts") andThen interactionManager.addToInteractionManager andThen startServer(interactionManager)(pactReader, pactWriter))(args)
 
   }
 

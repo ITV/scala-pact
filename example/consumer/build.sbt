@@ -1,3 +1,4 @@
+
 name := "consumer"
 
 organization := "com.example"
@@ -6,7 +7,10 @@ scalaVersion := "2.12.1"
 
 version := "0.0.1"
 
+enablePlugins(com.itv.scalapact.plugin.ScalaPactPlugin)
+
 libraryDependencies ++= Seq(
+  "com.itv" %% "scalapact-argonaut-6-2" % "2.2.0-SNAPSHOT" % "test",
   "com.itv" %% "scalapact-scalatest" % "2.2.0-SNAPSHOT" % "test",
   "org.scalaj" %% "scalaj-http" % "2.3.0",
   "org.slf4j" % "slf4j-simple" % "1.6.4",

@@ -2,7 +2,7 @@ package pactspec.util
 
 import com.itv.scalapactcore.common.matching.InteractionMatchers._
 import com.itv.scalapactcore.common.matching.{MatchOutcomeFailed, MatchOutcomeSuccess}
-import com.itv.scalapactcore.common.pact.{Interaction, InteractionRequest, InteractionResponse}
+import com.itv.scalapact.shared.{Interaction, InteractionRequest, InteractionResponse}
 import org.scalatest.{FunSpec, Matchers}
 
 trait PactSpecTester extends FunSpec with Matchers {

@@ -1,4 +1,4 @@
-package com.itv.scalapactcore.common.pact
+package com.itv.scalapact.shared
 
 case class Pact(provider: PactActor, consumer: PactActor, interactions: List[Interaction])
 case class PactActor(name: String)
@@ -36,4 +36,5 @@ case class InteractionResponse(status: Option[Int], headers: Option[Map[String, 
 case class MatchingRule(`match`: Option[String], regex: Option[String], min: Option[Int]) {
   def renderAsString: String = s"Rule type: '${`match`.getOrElse("<missing>")}'  regex: '${regex.getOrElse("n/a")}'  min: '${min.map(_.toString).getOrElse("n/a")}'"
 }
+
 

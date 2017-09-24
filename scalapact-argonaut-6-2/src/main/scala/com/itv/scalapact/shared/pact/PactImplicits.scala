@@ -1,8 +1,8 @@
-package com.itv.scalapact.shared
+package com.itv.scalapact.shared.pact
 
 import argonaut.Argonaut._
 import argonaut._
-import com.itv.scalapactcore.common.pact._
+import com.itv.scalapact.shared._
 
 object PactImplicits {
   implicit lazy val PactCodecJson: CodecJson[Pact] = casecodec3(Pact.apply, Pact.unapply)(

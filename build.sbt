@@ -18,7 +18,8 @@ scalacOptions ++= Seq(
   //  "-Xfuture"
 )
 
-addCommandAlias("quicktest", ";core_2_12/test;argonaut62_2_12/test;pactSpec_2_12/test;plugin/test;standalone/test;framework_2_12/test")
+addCommandAlias("quickcompile", ";shared_2_12/compile;core_2_12/compile;argonaut62_2_12/compile;pactSpec_2_12/compile;plugin/compile;standalone/compile;framework_2_12/compile")
+addCommandAlias("quicktest", ";shared_2_12/test;core_2_12/test;argonaut62_2_12/test;pactSpec_2_12/test;plugin/test;standalone/test;framework_2_12/test")
 
 lazy val commonSettings = Seq(
   version := "2.2.0-SNAPSHOT",
@@ -29,21 +30,29 @@ val scala210: String = "2.10.6"
 val scala211: String = "2.11.8"
 val scala212: String = "2.12.1"
 
+lazy val shared =
+  (project in file("scalapact-shared"))
+    .settings(commonSettings: _*).cross
+
+lazy val shared_2_10 = shared(scala210)
+lazy val shared_2_11 = shared(scala211)
+lazy val shared_2_12 = shared(scala212)
+
 lazy val core =
   (project in file("scalapact-core"))
     .settings(commonSettings: _*).cross
 
-lazy val core_2_10 = core(scala210)
-lazy val core_2_11 = core(scala211)
-lazy val core_2_12 = core(scala212)
+lazy val core_2_10 = core(scala210).dependsOn(shared_2_10).dependsOn(argonaut62_2_10 % "provided").project
+lazy val core_2_11 = core(scala211).dependsOn(shared_2_11).dependsOn(argonaut62_2_11 % "provided").project
+lazy val core_2_12 = core(scala212).dependsOn(shared_2_12).dependsOn(argonaut62_2_12 % "provided").project
 
 lazy val argonaut62 =
-  (project in file("scalapact-argonaut-6.2"))
+  (project in file("scalapact-argonaut-6-2"))
     .settings(commonSettings: _*).cross
 
-lazy val argonaut62_2_10 = argonaut62(scala210).dependsOn(core_2_10)
-lazy val argonaut62_2_11 = argonaut62(scala211).dependsOn(core_2_11)
-lazy val argonaut62_2_12 = argonaut62(scala212).dependsOn(core_2_12)
+lazy val argonaut62_2_10 = argonaut62(scala210).dependsOn(shared_2_10)
+lazy val argonaut62_2_11 = argonaut62(scala211).dependsOn(shared_2_11)
+lazy val argonaut62_2_12 = argonaut62(scala212).dependsOn(shared_2_12)
 
 lazy val pactSpec =
   (project in file("pact-spec-tests"))
@@ -51,12 +60,12 @@ lazy val pactSpec =
 
 lazy val pactSpec_2_10 = pactSpec(scala210).dependsOn(core_2_10, argonaut62_2_10)
 lazy val pactSpec_2_11 = pactSpec(scala211).dependsOn(core_2_11, argonaut62_2_11)
-lazy val pactSpec_2_12 = pactSpec(scala212).dependsOn(core_2_12, argonaut62_2_12)
+lazy val pactSpec_2_12 = pactSpec(scala212).dependsOn(core_2_12)
 
 lazy val plugin =
   (project in file("scalapact-sbtplugin"))
     .settings(commonSettings: _*)
-    .dependsOn(core_2_10)
+    .dependsOn(core_2_10).dependsOn(argonaut62_2_10 % "provided").project
     .settings(
       sbtPlugin := true,
       scalaVersion := scala210
@@ -64,10 +73,11 @@ lazy val plugin =
 
 lazy val framework =
   (project in file("scalapact-scalatest"))
-    .settings(commonSettings: _*).cross
+    .settings(commonSettings: _*)
+    .cross
 
-lazy val framework_2_11 = framework(scala211).dependsOn(core_2_11)
-lazy val framework_2_12 = framework(scala212).dependsOn(core_2_12)
+lazy val framework_2_11 = framework(scala211).dependsOn(core_2_11).dependsOn(argonaut62_2_11 % "provided").project
+lazy val framework_2_12 = framework(scala212).dependsOn(core_2_12).dependsOn(argonaut62_2_12 % "provided").project
 
 lazy val standalone =
   (project in file("scalapact-standalone-stubber"))

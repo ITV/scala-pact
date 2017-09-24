@@ -1,6 +1,6 @@
 package com.itv.scalapactcore.stubber
 
-import com.itv.scalapactcore.common.pact.{Interaction, InteractionRequest, InteractionResponse, MatchingRule}
+import com.itv.scalapact.shared.{Interaction, InteractionRequest, InteractionResponse, MatchingRule}
 import org.scalatest.{FunSpec, Matchers}
 
 import scala.language.implicitConversions

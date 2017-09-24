@@ -4,8 +4,7 @@ import java.io.{File, PrintWriter}
 import java.nio.charset.StandardCharsets
 
 import com.itv.scalapact.ScalaPactForger.{ScalaPactDescriptionFinal, ScalaPactInteractionFinal, ScalaPactMatchingRule, ScalaPactMatchingRuleArrayMinLength, ScalaPactMatchingRuleRegex, ScalaPactMatchingRuleType}
-import com.itv.scalapactcore._
-import com.itv.scalapactcore.common.pact._
+import com.itv.scalapact.shared.{Interaction, InteractionRequest, InteractionResponse, MatchingRule, Pact, PactActor, IPactWriter}
 
 import scala.language.implicitConversions
 
@@ -14,7 +13,7 @@ object ScalaPactContractWriter {
   private val simplifyName: String => String = name =>
     "[^a-zA-Z0-9-]".r.replaceAllIn(name.replace(" ", "-"), "")
 
-  val writePactContracts: ScalaPactDescriptionFinal => Unit = pactDescription => {
+  def writePactContracts(implicit pactWriter: IPactWriter): ScalaPactDescriptionFinal => Unit = pactDescription => {
     val dirPath = "target/pacts"
     val dirFile = new File(dirPath)
 
@@ -46,13 +45,13 @@ object ScalaPactContractWriter {
     ()
   }
 
-  private def producePactJson(pactDescription: ScalaPactDescriptionFinal): String = {
-    PactWriter.pactToJsonString(
+  private def producePactJson(pactDescription: ScalaPactDescriptionFinal)(implicit pactWriter: IPactWriter): String = {
+    pactWriter.pactToJsonString(
       producePactFromDescription(pactDescription)
     )
   }
 
-  lazy val producePactFromDescription: ScalaPactDescriptionFinal => Pact = pactDescription =>
+  def producePactFromDescription: ScalaPactDescriptionFinal => Pact = pactDescription =>
     Pact(
       provider = PactActor(pactDescription.provider),
       consumer = PactActor(pactDescription.consumer),

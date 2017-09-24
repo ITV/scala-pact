@@ -4,12 +4,13 @@ import com.itv.scalapact.plugin.ScalaPactPlugin
 import com.itv.scalapactcore.verifier.ProviderState
 import com.itv.scalapactcore.common.CommandArguments._
 import com.itv.scalapactcore.common.ColourOuput._
+import com.itv.scalapactcore.common.LocalPactFileLoader
 import com.itv.scalapactcore.verifier._
 import sbt._
 
 import scala.language.implicitConversions
-
 import com.itv.scalapactcore.verifier.Verifier._
+import com.itv.scalapactcore.common.PactReaderWriter._
 
 object ScalaPactVerifyCommand {
 
@@ -38,7 +39,7 @@ object ScalaPactVerifyCommand {
         .map(t => VersionedConsumer(t._1, t._2))
     )
 
-    val successfullyVerified = (parseArguments andThen verify(pactVerifySettings)) (args)
+    val successfullyVerified = (parseArguments andThen verify(LocalPactFileLoader.loadPactFiles, pactVerifySettings)) (args)
 
     if(successfullyVerified) sys.exit(0) else sys.exit(1)
 

@@ -1,6 +1,6 @@
-package com.itv.scalapact.shared
+package com.itv.scalapact.shared.pact
 
-import com.itv.scalapactcore.common.pact._
+import com.itv.scalapact.shared._
 
 object PactFileExamples {
 
@@ -268,4 +268,3 @@ object PactFileExamples {
                                  |  ]
                                  |}""".stripMargin
 }
-

@@ -3,10 +3,10 @@ package com.itv.scalapactcore.common.matching
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
+import com.itv.scalapact.shared.{Interaction, InteractionRequest, InteractionResponse, MatchingRule}
 import com.itv.scalapactcore.common.Helpers
 import com.itv.scalapactcore.common.matching.PathMatching.PathAndQuery
 import com.itv.scalapactcore.common.matchir._
-import com.itv.scalapactcore.common.pact.{Interaction, InteractionRequest, InteractionResponse, MatchingRule}
 
 object InteractionMatchers {
 

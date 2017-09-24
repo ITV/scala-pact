@@ -8,13 +8,14 @@ import com.itv.scalapactcore.common.{Arguments, ConfigAndPacts, HttpMethod, Scal
 import com.itv.scalapactcore.stubber.InteractionManager
 import com.itv.scalapactcore.stubber.PactStubService._
 import org.http4s.server.Server
+import com.itv.scalapactcore.common.PactReaderWriter._
 
 object ScalaPactMock {
 
   private def configuredTestRunner[A](pactDescription: ScalaPactDescriptionFinal)(config: ScalaPactMockConfig)(test: => ScalaPactMockConfig => A): A = {
 
     if(pactDescription.options.writePactFiles) {
-      ScalaPactContractWriter.writePactContracts(pactDescription)
+      ScalaPactContractWriter.writePactContracts(pactWriter)(pactDescription)
     }
 
     test(config)
@@ -73,7 +74,7 @@ object ScalaPactMock {
 
     val connectionPoolSize: Int = 5
 
-    val server = (interactionManager.addToInteractionManager andThen runServer(interactionManager)(connectionPoolSize))(configAndPacts)
+    val server = (interactionManager.addToInteractionManager andThen runServer(interactionManager, connectionPoolSize))(configAndPacts)
 
     println("> ScalaPact stub running at: " + mockConfig.baseUrl)
 

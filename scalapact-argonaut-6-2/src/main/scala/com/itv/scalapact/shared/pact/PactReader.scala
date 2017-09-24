@@ -1,12 +1,12 @@
-package com.itv.scalapact.shared
+package com.itv.scalapact.shared.pact
 
+import argonaut.Argonaut._
 import argonaut._
-import Argonaut._
-import com.itv.scalapactcore.common.pact.{Interaction, Pact, PactActor}
+import com.itv.scalapact.shared._
 
-object PactReader {
+object PactReader extends IPactReader {
 
-  val jsonStringToPact: String => Either[String, Pact] = json => {
+  def jsonStringToPact(json: String): Either[String, Pact] = {
     val brokenPact: Option[(PactActor, PactActor, List[(Option[Interaction], Option[String], Option[String])])] = for {
       provider <- JsonBodySpecialCaseHelper.extractPactActor("provider")(json)
       consumer <- JsonBodySpecialCaseHelper.extractPactActor("consumer")(json)

@@ -1,10 +1,9 @@
 package com.itv.scalapact
 
-import com.itv.scalapactcore.common.Arguments
-import com.itv.scalapactcore.common.Helpers
+import com.itv.scalapactcore.common.{Arguments, Helpers, LocalPactFileLoader}
 import com.itv.scalapactcore.verifier.{PactVerifySettings, Verifier, VersionedConsumer}
-
-import java.io.{File, FileWriter, BufferedWriter}
+import java.io.{BufferedWriter, File, FileWriter}
+import com.itv.scalapactcore.common.PactReaderWriter._
 
 import scala.language.implicitConversions
 
@@ -132,7 +131,9 @@ object ScalaPactVerify {
             )
         }
 
-        if(Verifier.verify(verifySettings)(arguments)) Unit else throw new ScalaPactVerifyFailed
+        val v = Verifier.verify(LocalPactFileLoader.loadPactFiles, verifySettings)
+
+        if(v(arguments)) Unit else throw new ScalaPactVerifyFailed
       }
     }
 

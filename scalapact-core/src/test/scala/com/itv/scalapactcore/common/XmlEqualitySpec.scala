@@ -1,8 +1,8 @@
 package com.itv.scalapactcore.common
 
+import com.itv.scalapact.shared.MatchingRule
 import com.itv.scalapactcore.common.matchir.{IrNodeEqualityResult, IrNodeMatchingRules, IrNodesEqual, IrNodesNotEqual}
 import com.itv.scalapactcore.common.matchir.MatchIrConverters._
-import com.itv.scalapactcore.common.pact.MatchingRule
 import org.scalatest.{FunSpec, Matchers}
 
 class XmlEqualitySpec extends FunSpec with Matchers {

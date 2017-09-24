@@ -9,46 +9,21 @@ set -e
 echo "Locally published Scala-Pact"
 echo "****************************"
 
-sbt clean update compile
+#bash scripts/localpublish-libs.sh
 
-sleep 1
-echo ""
-echo ">>> Core (2.10)"
-sbt core_2_10/test
-sbt core_2_10/publish-local
+function crossPublishLocal {
+    NAME=$1
+    sleep 1
+    echo ""
+    echo ">>> $NAME"
+#    sbt $NAME/clean $NAME/update $NAME/compile $NAME/test $NAME/publish-local
+    sbt $NAME/clean $NAME/update $NAME/compile $NAME/publish-local
+}
 
-sleep 1
-echo ""
-echo ">>> Core (2.11)"
-sbt core_2_11/test
-sbt core_2_11/publish-local
-
-sleep 1
-echo ""
-echo ">>> Core (2.12)"
-sbt core_2_12/test
-sbt core_2_12/publish-local
-
-sleep 1
-echo ""
-echo ">>> Plugin"
-sbt plugin/test
-sbt plugin/publish-local
-
-sleep 1
-echo ""
-echo ">>> Standalone Stubber"
-sbt standalone/test
-sbt standalone/assembly
-
-sleep 1
-echo ""
-echo ">>> Test Framework (2.11)"
-sbt framework_2_11/test
-sbt framework_2_11/publishLocal
-
-sleep 1
-echo ""
-echo ">>> Test Framework (2.12)"
-sbt framework_2_12/test
-sbt framework_2_12/publishLocal
+#crossPublishLocal "core_2_10"
+#crossPublishLocal "core_2_11"
+crossPublishLocal "core_2_12"
+crossPublishLocal "plugin"
+#crossPublishLocal "standalone"
+#crossPublishLocal "framework_2_11"
+crossPublishLocal "framework_2_12"

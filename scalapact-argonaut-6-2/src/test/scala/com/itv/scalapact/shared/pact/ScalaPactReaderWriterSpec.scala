@@ -1,9 +1,11 @@
-package com.itv.scalapact.shared
+package com.itv.scalapact.shared.pact
+
+import argonaut.JsonParser.parse
 import org.scalatest.{FunSpec, Matchers}
-import argonaut.JsonParser._
 
 class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
 
+  //Used by earlier scala versions
   import EitherWithToOption._
 
   describe("Reading and writing a homogeneous Pact files") {
@@ -90,23 +92,4 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
 
   }
 
-}
-
-object EitherWithToOption {
-
-  import scala.language.implicitConversions
-
-  case class WithToOption[A, B](either: Either[A, B]) {
-    def toOption: Option[B] =
-      either match {
-        case Right(r) =>
-          Some(r)
-
-        case Left(_) =>
-          None
-      }
-  }
-
-  implicit def toWithToOption[A, B](either: Either[A, B]): WithToOption[A, B] =
-    WithToOption(either)
 }

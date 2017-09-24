@@ -22,7 +22,7 @@ scalacOptions ++= Seq(
 lazy val http4sVersion = "0.15.0a"
 
 libraryDependencies ++= Seq(
-  "io.argonaut" %% "argonaut" % "6.2",
+//  "com.itv" %% "scalapact-argonaut-6-2" % version.value,
   "org.scalatest" %% "scalatest" % "3.0.1" % "test",
   "org.http4s" %% "http4s-blaze-server" % http4sVersion,
   "org.http4s" %% "http4s-blaze-client" % http4sVersion,

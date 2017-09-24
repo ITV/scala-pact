@@ -1,12 +1,12 @@
 package com.itv.scalapactcore.common
 
+import com.itv.scalapact.shared.MatchingRule
 import com.itv.scalapactcore.common.matching.BodyMatching._
 import com.itv.scalapactcore.common.matching.HeaderMatching._
 import com.itv.scalapactcore.common.matching.MethodMatching._
 import com.itv.scalapactcore.common.matching.PathMatching._
 import com.itv.scalapactcore.common.matching.StatusMatching._
 import com.itv.scalapactcore.common.matchir.IrNodeMatchingRules
-import com.itv.scalapactcore.common.pact.MatchingRule
 import org.scalatest.{FunSpec, Matchers}
 
 import scala.language.implicitConversions

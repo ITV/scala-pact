@@ -1,13 +1,12 @@
 package com.itv.scalapact.plugin.tester
 
-import java.io.PrintWriter
-
+import com.itv.scalapact.shared.{IPactReader, IPactWriter}
 import com.itv.scalapactcore.common.ColourOuput._
-import com.itv.scalapactcore.common.pact.{PactReader, PactWriter}
 import sbt._
 
 import scala.io.Source
 import scala.language.implicitConversions
+import com.itv.scalapactcore.common.PactReaderWriter._
 
 object ScalaPactTestCommand {
 
@@ -56,7 +55,7 @@ object ScalaPactTestCommand {
       testedState
     }
 
-  private def squashPactFiles(name: String, files: List[File]): Int = {
+  private def squashPactFiles(name: String, files: List[File])(implicit pactReader: IPactReader, pactWriter: IPactWriter): Int = {
     //Yuk!
     var errorCount = 0
 
@@ -75,7 +74,7 @@ object ScalaPactTestCommand {
             None
         }
         fileContents.flatMap { t =>
-          PactReader.jsonStringToPact(t) match {
+          pactReader.jsonStringToPact(t) match {
             case Right(r) => Option(r)
             case Left(_) =>
               errorCount += 1
@@ -92,41 +91,10 @@ object ScalaPactTestCommand {
         accumulatedPact.copy(interactions = accumulatedPact.interactions ++ nextPact.interactions)
       }
 
-      ScalaPactContractWriter.writePactContracts(combined.provider.name)(combined.consumer.name)(PactWriter.pactToJsonString(combined))
+      PactContractWriter.writePactContracts(combined.provider.name)(combined.consumer.name)(pactWriter.pactToJsonString(combined))
     }
 
     errorCount
   }
 
-}
-
-object ScalaPactContractWriter {
-
-  private val simplifyName: String => String = name =>
-    "[^a-zA-Z0-9-]".r.replaceAllIn(name.replace(" ", "-"), "")
-
-  val writePactContracts: String => String => String => Unit = provider => consumer => contents => {
-    val dirPath = "target/pacts"
-    val dirFile = new File(dirPath)
-
-    if (!dirFile.exists()) {
-      dirFile.mkdir()
-    }
-
-    val relativePath = dirPath + "/" + simplifyName(consumer) + "_" + simplifyName(provider) + ".json"
-    val file = new File(relativePath)
-
-    if (file.exists()) {
-      file.delete()
-    }
-
-    file.createNewFile()
-
-    new PrintWriter(relativePath) {
-      write(contents)
-      close()
-    }
-
-    ()
-  }
 }
