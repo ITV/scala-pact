@@ -7,7 +7,7 @@ import org.http4s.dsl._
 import org.http4s.server.Server
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.util.CaseInsensitiveString
-import org.http4s.{HttpService, Request, Response, Status}
+import org.http4s.{HttpService, Request, Response}
 
 import HeaderImplicitConversions._
 import ColourOuput._
@@ -46,8 +46,6 @@ object PactStubService {
     HttpService.lift { req =>
       matchRequestWithResponse(interactionManager, strictMatching, req)
     }
-
-  private val pactMatchFailureStatus: Status = Status.fromIntAndReason(598, "Pact Match Failure").toOption.getOrElse(InternalServerError)
 
   private def matchRequestWithResponse(interactionManager: IInteractionManager, strictMatching: Boolean, req: Request)(implicit pactReader: IPactReader, pactWriter: IPactWriter): scalaz.concurrent.Task[Response] = {
     if(isAdminCall(req)) {
@@ -94,21 +92,15 @@ object PactStubService {
         strictMatching = strictMatching
       ) match {
         case Right(ir) =>
-          Status.fromInt(ir.response.status.getOrElse(200)).toEither match {
-            case Right(code) =>
-              Http4sRequestResponseFactory.buildResponse(
-                status = code,
-                headers = ir.response.headers.getOrElse(Map.empty),
-                body = ir.response.body
-              )
-
-            case Left(l) =>
-              InternalServerError(l.sanitized)
-          }
+            Http4sRequestResponseFactory.buildResponse(
+              status = IntAndReason(ir.response.status.getOrElse(200), None),
+              headers = ir.response.headers.getOrElse(Map.empty),
+              body = ir.response.body
+            )
 
         case Left(message) =>
           Http4sRequestResponseFactory.buildResponse(
-            status = pactMatchFailureStatus,
+            status = IntAndReason(598, Some("Pact Match Failure")),
             headers = Map("X-Pact-Admin" -> "Pact Match Failure"),
             body = Option(message)
           )

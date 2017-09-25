@@ -42,24 +42,6 @@ object ScalaPactHttpClient extends IScalaPactHttpClient {
     p.future
   }
 
-  private implicit def httpMethodToMethod(httpMethod: HttpMethod): Method =
-    httpMethod match {
-      case GET =>
-        Method.GET
-
-      case POST =>
-        Method.POST
-
-      case PUT =>
-        Method.PUT
-
-      case DELETE =>
-        Method.DELETE
-
-      case OPTIONS =>
-        Method.OPTIONS
-    }
-
   private val maxTotalConnections: Int = 1
 
   private def makeClient: Client = HttpClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, 2.seconds)
@@ -101,11 +83,6 @@ private object HttpClientHelper {
     customExecutor = None
   )
 
-  private def buildUri(baseUrl: String, endpoint: String): Task[Uri] =
-    Task.fromDisjunction(
-      Uri.fromString(baseUrl + endpoint).leftMap(l => new Exception(l.message))
-    )
-
   private def extractResponse(response: Response): Task[SimpleResponse] =
     response.bodyAsText.runLog[Task, String].map { maybeBody =>
       SimpleResponse(response.status.code, headersToMap(response.headers), Some(maybeBody.mkString))
@@ -114,10 +91,9 @@ private object HttpClientHelper {
   def buildPooledBlazeHttpClient(maxTotalConnections: Int, clientTimeout: Duration): Client =
     PooledHttp1Client(maxTotalConnections, blazeClientConfig(clientTimeout))
 
-  def doRequest(baseUrl: String, endPoint: String, method: Method, headers: Map[String, String], body: Option[String], httpClient: Client): Task[SimpleResponse] =
+  def doRequest(baseUrl: String, endPoint: String, method: HttpMethod, headers: Map[String, String], body: Option[String], httpClient: Client): Task[SimpleResponse] =
     for {
-      uri <- buildUri(baseUrl, endPoint)
-      request <- Http4sRequestResponseFactory.buildRequest(method, uri, headers, body)
+      request <- Http4sRequestResponseFactory.buildRequest(method, baseUrl, endPoint, headers, body)
       response <- httpClient.fetch[SimpleResponse](request)(extractResponse)
       _ <- httpClient.shutdown
     } yield response
