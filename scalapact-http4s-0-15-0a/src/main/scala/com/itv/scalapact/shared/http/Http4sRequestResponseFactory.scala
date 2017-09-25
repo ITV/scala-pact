@@ -2,7 +2,7 @@ package com.itv.scalapact.shared.http
 
 import java.nio.charset.StandardCharsets
 
-import com.itv.scalapact.shared.HttpMethod
+import com.itv.scalapact.shared.{HttpMethod, SimpleRequest}
 import com.itv.scalapact.shared.HttpMethod._
 import org.http4s._
 import scodec.bits.ByteVector
@@ -50,20 +50,20 @@ object Http4sRequestResponseFactory {
         Method.OPTIONS
     }
 
-  def buildRequest(httpMethod: HttpMethod, baseUrl: String, endPoint: String, headers: Map[String, String], body: Option[String]): Task[Request] =
-    buildUri(baseUrl, endPoint).flatMap { uri =>
-      val request = Request(
-        method = httpMethodToMethod(httpMethod),
+  def buildRequest(request: SimpleRequest): Task[Request] =
+    buildUri(request.baseUrl, request.endPoint).flatMap { uri =>
+      val r = Request(
+        method = httpMethodToMethod(request.method),
         uri = uri,
         httpVersion = HttpVersion.`HTTP/1.1`,
-        headers = headers,
+        headers = request.headers,
         body = EmptyBody,
         attributes = AttributeMap.empty
       )
 
-      body.map { b =>
-        request.withBody(b)(EntityEncoder.simple()(stringToByteVector))
-      }.getOrElse(Task(request))
+      request.body.map { b =>
+        r.withBody(b)(EntityEncoder.simple()(stringToByteVector))
+      }.getOrElse(Task(r))
     }
 
 
