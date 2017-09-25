@@ -114,7 +114,10 @@ lazy val pactSpec_2_12 = pactSpec(scala212).dependsOn(core_2_12)
 lazy val plugin =
   (project in file("scalapact-sbtplugin"))
     .settings(commonSettings: _*)
-    .dependsOn(core_2_10).dependsOn(argonaut62_2_10 % "provided").project
+    .dependsOn(core_2_10)
+    .dependsOn(argonaut62_2_10 % "provided")
+    .dependsOn(http4s0150a_2_10 % "provided")
+    .project
     .settings(
       sbtPlugin := true,
       scalaVersion := scala210
@@ -125,13 +128,25 @@ lazy val framework =
     .settings(commonSettings: _*)
     .cross
 
-lazy val framework_2_11 = framework(scala211).dependsOn(core_2_11).dependsOn(argonaut62_2_11 % "provided").project
-lazy val framework_2_12 = framework(scala212).dependsOn(core_2_12).dependsOn(argonaut62_2_12 % "provided").project
+lazy val framework_2_11 =
+  framework(scala211)
+    .dependsOn(core_2_11)
+    .dependsOn(argonaut62_2_11 % "provided")
+    .dependsOn(http4s0150a_2_11 % "provided")
+    .project
+lazy val framework_2_12 =
+  framework(scala212)
+    .dependsOn(core_2_12)
+    .dependsOn(argonaut62_2_12 % "provided")
+    .dependsOn(http4s0150a_2_12 % "provided")
+    .project
 
 lazy val standalone =
   (project in file("scalapact-standalone-stubber"))
     .settings(commonSettings: _*)
     .dependsOn(core_2_12)
+    .dependsOn(argonaut62_2_12)
+    .dependsOn(http4s0150a_2_12)
     .settings(
       name := "scalapact-standalone-stubber",
       scalaVersion := scala212

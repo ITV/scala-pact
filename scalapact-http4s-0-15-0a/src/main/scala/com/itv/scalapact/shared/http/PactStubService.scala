@@ -26,7 +26,7 @@ object PactStubService {
     runServer(interactionManager, nThreads)(pactReader, pactWriter)(config).awaitShutdown()
   }
 
-  def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int)(implicit pactReader: IPactReader, pactWriter: IPactWriter): Arguments => Server = config => {
+  def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int)(implicit pactReader: IPactReader, pactWriter: IPactWriter): Arguments => IPactServer = config => PactServer {
     BlazeBuilder
       .bindHttp(config.givePort, config.giveHost)
       .withServiceExecutor(executorService)
@@ -36,9 +36,8 @@ object PactStubService {
       .run
   }
 
-  def stopServer: Server => Unit = server => {
-    server.shutdown.unsafePerformSync
-  }
+  def stopServer: IPactServer => Unit = server =>
+    server.shutdown()
 
   private val isAdminCall: Request => Boolean = request =>
       request.headers.get(CaseInsensitiveString("X-Pact-Admin")).exists(h => h.value == "true")
@@ -103,7 +102,8 @@ object PactStubService {
                 body = ir.response.body
               )
 
-            case Left(l) => InternalServerError(l.sanitized)
+            case Left(l) =>
+              InternalServerError(l.sanitized)
           }
 
         case Left(message) =>
@@ -116,4 +116,14 @@ object PactStubService {
 
     }
   }
+}
+
+case class PactServer(s: Server) extends IPactServer {
+
+  def awaitShutdown(): Unit =
+    s.awaitShutdown()
+
+  def shutdown(): Unit =
+    s.shutdownNow()
+
 }

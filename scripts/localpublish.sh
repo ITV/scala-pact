@@ -17,7 +17,6 @@ function crossPublishLocal {
     echo ""
     echo ">>> $NAME"
     sbt $NAME/clean $NAME/update $NAME/compile $NAME/test $NAME/publish-local
-#    sbt $NAME/clean $NAME/update $NAME/compile $NAME/publish-local
 }
 
 crossPublishLocal "core_2_10"

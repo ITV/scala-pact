@@ -1,8 +1,10 @@
 package com.itv.scalapact
 
-import com.itv.scalapactcore.common.{Arguments, Helpers, LocalPactFileLoader}
+import com.itv.scalapactcore.common.{Helpers, LocalPactFileLoader}
 import com.itv.scalapactcore.verifier.{PactVerifySettings, Verifier, VersionedConsumer}
 import java.io.{BufferedWriter, File, FileWriter}
+
+import com.itv.scalapact.shared.Arguments
 import com.itv.scalapactcore.common.PactReaderWriter._
 
 import scala.language.implicitConversions

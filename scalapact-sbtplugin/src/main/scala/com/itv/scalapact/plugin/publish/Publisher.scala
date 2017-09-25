@@ -1,14 +1,13 @@
 package com.itv.scalapact.plugin.publish
 
-import com.itv.scalapact.shared.IPactWriter
+import com.itv.scalapact.shared.{ConfigAndPacts, HttpMethod, IPactWriter}
 import com.itv.scalapact.shared.ColourOuput._
+import com.itv.scalapact.shared.http.ScalaPactHttpClient
 import com.itv.scalapactcore.common._
 
 object Publisher {
 
   private final case class ValidatedDetails(validatedAddress: String, providerName: String, consumerName: String)
-
-  private val client: ScalaPactHttpClient = new ScalaPactHttpClient
 
   def publishToBroker(pactBrokerAddress: String, versionToPublishAs: String)(implicit pactWriter: IPactWriter): ConfigAndPacts => Unit = configAndPacts => {
 
@@ -38,9 +37,7 @@ object Publisher {
 
           println(s"Publishing to: $address".yellow)
 
-          val httpClient = client.makeClient
-
-          client.doRequest(HttpMethod.PUT, address, "", Map("Content-Type" -> "application/json"), Option(pactWriter.pactToJsonString(pact)), httpClient).unsafePerformSyncAttempt.toEither match {
+          ScalaPactHttpClient.doRequestSync(HttpMethod.PUT, address, "", Map("Content-Type" -> "application/json"), Option(pactWriter.pactToJsonString(pact))) match {
             case Right(r) if r.is2xx => println("Success".green)
             case Right(r) =>
               println(r)
@@ -48,8 +45,6 @@ object Publisher {
             case Left(e) =>
               println(s"Failed with error: ${e.getMessage}".red)
           }
-
-          httpClient.shutdownNow()
       }
     }
 
