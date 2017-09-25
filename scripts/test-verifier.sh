@@ -12,6 +12,8 @@ remove_config_file
 
 echo "libraryDependencies += \"com.itv\" %% \"scalapact-argonaut-6-2\" % \"$CORE_VERSION\"" > $PLUGIN_FILE
 echo "" >> $PLUGIN_FILE
+echo "libraryDependencies += \"com.itv\" %% \"scalapact-http4s-0-15-0a\" % \"$CORE_VERSION\"" >> $PLUGIN_FILE
+echo "" >> $PLUGIN_FILE
 echo "addSbtPlugin(\"com.itv\" % \"sbt-scalapact\" % \"$CORE_VERSION\")" >> $PLUGIN_FILE
 
 cat > $PACT_CONFIG_FILE <<EOL

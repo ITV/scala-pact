@@ -109,7 +109,7 @@ lazy val pactSpec =
 
 lazy val pactSpec_2_10 = pactSpec(scala210).dependsOn(core_2_10, argonaut62_2_10)
 lazy val pactSpec_2_11 = pactSpec(scala211).dependsOn(core_2_11, argonaut62_2_11)
-lazy val pactSpec_2_12 = pactSpec(scala212).dependsOn(core_2_12)
+lazy val pactSpec_2_12 = pactSpec(scala212).dependsOn(core_2_12, argonaut62_2_12)
 
 lazy val plugin =
   (project in file("scalapact-sbtplugin"))
