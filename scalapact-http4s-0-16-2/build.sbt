@@ -1,4 +1,4 @@
-name := "scalapact-http4s-0-16-0"
+name := "scalapact-http4s-0-16-2"
 
 lazy val http4sVersion = "0.16.2"
 

@@ -1,4 +1,6 @@
 
+import com.itv.scalapact.plugin._
+
 name := "consumer"
 
 organization := "com.example"
@@ -6,6 +8,8 @@ organization := "com.example"
 scalaVersion := "2.12.1"
 
 version := "0.0.1"
+
+enablePlugins(ScalaPactPlugin)
 
 libraryDependencies ++= Seq(
   "com.itv"       %% "scalapact-argonaut-6-2"   % "2.2.0-SNAPSHOT" % "test",
@@ -16,3 +20,5 @@ libraryDependencies ++= Seq(
   "org.json4s"    %% "json4s-native"            % "3.5.0",
   "org.scalatest" %% "scalatest"                % "3.0.1"          % "test"
 )
+
+scalaPactEnv := ScalaPactEnv.default.withPort(8080)

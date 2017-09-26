@@ -9,6 +9,7 @@ import sbt.Keys._
 import sbt.plugins.JvmPlugin
 import sbt.{Def, _}
 
+import scala.concurrent.duration.Duration
 import scala.language.implicitConversions
 
 object ScalaPactPlugin extends AutoPlugin {
@@ -40,8 +41,8 @@ object ScalaPactPlugin extends AutoPlugin {
     val allowSnapshotPublish: SettingKey[Boolean] =
       SettingKey[Boolean]("allowSnapshotPublish", "Flag to permit publishing of snapshot pact files to pact broker. Default is false.")
 
-    val scalaPactSettings: SettingKey[ScalaPactSettings] =
-      SettingKey[ScalaPactSettings]("scalaPactSettings", "Settings used to config the running of tasks and commands")
+    val scalaPactEnv: SettingKey[ScalaPactEnv] =
+      SettingKey[ScalaPactEnv]("scalaPactEnv", "Settings used to config the running of tasks and commands")
 
     // Tasks
     val pactPack: TaskKey[Unit] = taskKey[Unit]("Pack up Pact contract files")
@@ -61,7 +62,7 @@ object ScalaPactPlugin extends AutoPlugin {
     versionedConsumerNames := Seq.empty[(String,String)],
     pactContractVersion := "",
     allowSnapshotPublish := false,
-    scalaPactSettings := ScalaPactSettings.default
+    scalaPactEnv := ScalaPactEnv.default
   )
 
   override lazy val projectSettings = Seq(
@@ -76,9 +77,7 @@ object ScalaPactPlugin extends AutoPlugin {
 
     commands += ScalaPactStubberCommand.pactStubberCommandHyphen,
     commands += ScalaPactStubberCommand.pactStubberCommandCamel
-  ) ++ pactSettings
-
-  override lazy val buildSettings = Seq(
+  ) ++ pactSettings ++ Seq(
     pactPack := pactPackTask.value,
     pactPush := pactPushTask.value,
     pactCheck := pactCheckTask.value,
@@ -93,7 +92,7 @@ object ScalaPactPlugin extends AutoPlugin {
   lazy val pactPushTask: Def.Initialize[Task[Unit]] =
     Def.task {
       ScalaPactPublishCommand.doPactPublish(
-        scalaPactSettings.value,
+        scalaPactEnv.value.toSettings,
         pactBrokerAddress.value,
         version.value,
         pactContractVersion.value,
@@ -104,7 +103,7 @@ object ScalaPactPlugin extends AutoPlugin {
   lazy val pactCheckTask: Def.Initialize[Task[Unit]] =
     Def.task {
       ScalaPactVerifyCommand.doPactVerify(
-        scalaPactSettings.value,
+        scalaPactEnv.value.toSettings,
         providerStates.value,
         providerStateMatcher.value,
         pactBrokerAddress.value,
@@ -118,8 +117,44 @@ object ScalaPactPlugin extends AutoPlugin {
   lazy val pactStubTask: Def.Initialize[Task[Unit]] =
     Def.task {
       ScalaPactStubberCommand.runStubber(
-        scalaPactSettings.value,
+        scalaPactEnv.value.toSettings,
         ScalaPactStubberCommand.interactionManagerInstance
       )
     }
+}
+
+case class ScalaPactEnv(protocol: Option[String], host: Option[String], port: Option[Int], localPactFilePath: Option[String], strictMode: Option[Boolean], clientTimeout: Option[Duration]) {
+
+  def withProtocol(protocol: String): ScalaPactEnv =
+    this.copy(protocol = Option(protocol))
+
+  def withHost(host: String): ScalaPactEnv =
+    this.copy(host = Option(host))
+
+  def withPort(port: Int): ScalaPactEnv =
+    this.copy(port = Option(port))
+
+  def withLocalPactFilePath(path: String): ScalaPactEnv =
+    this.copy(localPactFilePath = Option(path))
+
+  def enableStrictMode: ScalaPactEnv =
+    this.copy(strictMode = Option(true))
+
+  def disableStrictMode: ScalaPactEnv =
+    this.copy(strictMode = Option(false))
+
+  def withClientTimeOut(duration: Duration): ScalaPactEnv =
+    this.copy(clientTimeout = Option(duration))
+
+  def toSettings: ScalaPactSettings =
+    ScalaPactSettings(protocol, host, port, localPactFilePath, strictMode, clientTimeout)
+
+}
+
+object ScalaPactEnv {
+
+  def apply: ScalaPactEnv = default
+
+  def default: ScalaPactEnv = ScalaPactEnv(None, None, None, None, None, None)
+
 }

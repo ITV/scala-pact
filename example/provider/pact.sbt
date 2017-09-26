@@ -1,6 +1,11 @@
 import java.io.PrintWriter
 
-import com.itv.scalapact.plugin.ScalaPactPlugin._
+import com.itv.scalapact.plugin._
+
+scalaPactEnv :=
+  ScalaPactEnv.default
+    .withPort(8080)
+    .withLocalPactFilePath("delivered_pacts/")
 
 // New style
 providerStateMatcher := {
