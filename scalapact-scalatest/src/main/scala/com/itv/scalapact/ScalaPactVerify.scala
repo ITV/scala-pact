@@ -43,7 +43,6 @@ object ScalaPactVerify {
 
         val providerStateFunc = given.flatMap( g => setupProviderState).getOrElse({ _ : String => true})
 
-
         val (verifySettings, arguments) = sourceType match {
           case pactAsJsonString(json) =>
             val tmp = File.createTempFile("tmp_pact_", ".json")
@@ -69,7 +68,8 @@ object ScalaPactVerify {
                 port = port,
                 localPactFilePath = tmp.getAbsolutePath(),
                 strictMode = strict,
-                clientTimeout = Option(clientTimeout)
+                clientTimeout = Option(clientTimeout),
+                outputPath = None
               )
             )
 
@@ -89,7 +89,8 @@ object ScalaPactVerify {
                 port = port,
                 localPactFilePath = path,
                 strictMode = strict,
-                clientTimeout = Option(clientTimeout)
+                clientTimeout = Option(clientTimeout),
+                outputPath = None
               )
             )
 
@@ -109,7 +110,8 @@ object ScalaPactVerify {
                 port = port,
                 localPactFilePath = None,
                 strictMode = strict,
-                clientTimeout = Option(clientTimeout)
+                clientTimeout = Option(clientTimeout),
+                outputPath = None
               )
             )
 
@@ -129,7 +131,8 @@ object ScalaPactVerify {
                 port = port,
                 localPactFilePath = None,
                 strictMode = strict,
-                clientTimeout = Option(clientTimeout)
+                clientTimeout = Option(clientTimeout),
+                outputPath = None
               )
             )
         }
