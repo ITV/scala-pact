@@ -14,6 +14,7 @@ import scalaz.concurrent.Task
 object Http4sRequestResponseFactory {
 
   import HeaderImplicitConversions._
+  import com.itv.scalapact.shared.RightBiasEither._
 
   val stringToByteVector: String => ByteVector = str => ByteVector(str.getBytes(StandardCharsets.UTF_8))
 

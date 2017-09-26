@@ -17,7 +17,7 @@ import scala.concurrent.duration._
 
 object PactStubService {
 
-  private val nThreads: Int = 50
+  private val nThreads: Int = 10
   private val executorService: ExecutorService = Executors.newFixedThreadPool(nThreads)
 
   private implicit val strategy: Strategy = Strategy.fromExecutionContext(ExecutionContext.fromExecutorService(executorService))
@@ -49,8 +49,6 @@ object PactStubService {
     HttpService.lift { req =>
       matchRequestWithResponse(interactionManager, strictMatching, req)
     }
-
-  private val pactMatchFailureStatus: Status = Status.fromIntAndReason(598, "Pact Match Failure").toOption.getOrElse(InternalServerError)
 
   private def matchRequestWithResponse(interactionManager: IInteractionManager, strictMatching: Boolean, req: Request)(implicit pactReader: IPactReader, pactWriter: IPactWriter): Task[Response] = {
     if(isAdminCall(req)) {
@@ -100,7 +98,7 @@ object PactStubService {
           Status.fromInt(ir.response.status.getOrElse(200)) match {
             case Right(code) =>
               Http4sRequestResponseFactory.buildResponse(
-                status = code,
+                status = IntAndReason(ir.response.status.getOrElse(200), None),
                 headers = ir.response.headers.getOrElse(Map.empty),
                 body = ir.response.body
               )
@@ -111,7 +109,7 @@ object PactStubService {
 
         case Left(message) =>
           Http4sRequestResponseFactory.buildResponse(
-            status = pactMatchFailureStatus,
+            status = IntAndReason(598, Some("Pact Match Failure")),
             headers = Map("X-Pact-Admin" -> "Pact Match Failure"),
             body = Option(message)
           )
