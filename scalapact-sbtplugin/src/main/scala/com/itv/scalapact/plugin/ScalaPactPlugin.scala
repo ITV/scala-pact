@@ -26,6 +26,9 @@ object ScalaPactPlugin extends AutoPlugin {
     val pactBrokerAddress: SettingKey[String] =
       SettingKey[String]("pactBrokerAddress", "The base url to publish / pull pact contract files to and from.")
 
+    val providerBrokerPublishMap: SettingKey[Map[String, String]] =
+      SettingKey[Map[String, String]]("providerBrokerPublishMap", "An optional map of this consumer's providers, and alternate pact brokers to publish those contracts to.")
+
     val providerName: SettingKey[String] =
       SettingKey[String]("providerName", "The name of the service to verify")
 
@@ -57,6 +60,7 @@ object ScalaPactPlugin extends AutoPlugin {
     providerStateMatcher := PartialFunction { (_: String) => false },
     providerStates := Seq(),
     pactBrokerAddress := "",
+    providerBrokerPublishMap := Map.empty[String, String],
     providerName := "",
     consumerNames := Seq.empty[String],
     versionedConsumerNames := Seq.empty[(String,String)],
@@ -94,6 +98,7 @@ object ScalaPactPlugin extends AutoPlugin {
       ScalaPactPublishCommand.doPactPublish(
         scalaPactEnv.value.toSettings,
         pactBrokerAddress.value,
+        providerBrokerPublishMap.value,
         version.value,
         pactContractVersion.value,
         allowSnapshotPublish.value
