@@ -29,7 +29,7 @@ object ScalaPactStubberCommand {
   def interactionManagerInstance: InteractionManager = new InteractionManager
 
   def runStubber(scalaPactSettings: ScalaPactSettings, interactionManager: InteractionManager): Unit = {
-    (loadPactFiles(pactReader)("target/pacts") andThen interactionManager.addToInteractionManager andThen startServer(interactionManager)(pactReader, pactWriter))(scalaPactSettings)
+    (loadPactFiles(pactReader)(scalaPactSettings.giveOutputPath) andThen interactionManager.addToInteractionManager andThen startServer(interactionManager)(pactReader, pactWriter))(scalaPactSettings)
   }
 
 }

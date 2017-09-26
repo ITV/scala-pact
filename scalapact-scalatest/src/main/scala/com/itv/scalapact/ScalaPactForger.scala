@@ -1,6 +1,7 @@
 package com.itv.scalapact
 
 import scala.language.implicitConversions
+import scala.util.Properties
 
 object ScalaPactForger {
 
@@ -8,7 +9,7 @@ object ScalaPactForger {
   implicit def rulesToOptionalList(rules: ScalaPactForger.ScalaPactMatchingRules): Option[List[ScalaPactForger.ScalaPactMatchingRule]] =
     Option(rules.rules)
 
-  implicit val options = ScalaPactOptions.DefaultOptions
+  implicit val options: ScalaPactOptions = ScalaPactOptions.DefaultOptions
 
   object forgePact extends ForgePactElements {
     protected val strict: Boolean = false
@@ -132,9 +133,9 @@ object ScalaPactForger {
   case class ScalaPactResponse(status: Int, headers: Map[String, String], body: Option[String], matchingRules: Option[List[ScalaPactMatchingRule]])
 
   object ScalaPactOptions {
-    val DefaultOptions = ScalaPactOptions(writePactFiles = true)
+    val DefaultOptions = ScalaPactOptions(writePactFiles = true, outputPath = Properties.envOrElse("pact.rootDir", "target/pacts"))
   }
-  case class ScalaPactOptions(writePactFiles: Boolean)
+  case class ScalaPactOptions(writePactFiles: Boolean, outputPath: String)
 
   sealed trait ScalaPactMethod {
     val method: String

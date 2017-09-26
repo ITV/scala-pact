@@ -1,6 +1,6 @@
 package com.itv.scalapact.plugin.tester
 
-import com.itv.scalapact.shared.{IPactReader, IPactWriter}
+import com.itv.scalapact.shared.{IPactReader, IPactWriter, ScalaPactSettings}
 import com.itv.scalapact.shared.ColourOuput._
 import sbt._
 
@@ -10,10 +10,10 @@ import com.itv.scalapactcore.common.PactReaderWriter._
 
 object ScalaPactTestCommand {
 
-  lazy val pactTestCommandHyphen: Command = Command.command("pact-test")(pactTest)
-  lazy val pactTestCommandCamel: Command = Command.command("pactTest")(pactTest)
+  lazy val pactTestCommandHyphen: Command = Command.args("pact-test", "<options>")(pactTest)
+  lazy val pactTestCommandCamel: Command = Command.args("pactTest", "<options>")(pactTest)
 
-  private lazy val pactTest: State => State = state => {
+  private lazy val pactTest: (State, Seq[String]) => State = (state, args) => {
 
       println("*************************************".white.bold)
       println("** ScalaPact: Running tests        **".white.bold)
@@ -24,17 +24,17 @@ object ScalaPactTestCommand {
       val cleanState = Command.process("clean", state)
       val testedState = Command.process("test", cleanState)
 
-      doPactPack()
+      doPactPack(ScalaPactSettings.parseArguments(args))
 
       testedState
     }
 
-  def doPactPack(): Unit = {
+  def doPactPack(scalaPactSettings: ScalaPactSettings): Unit = {
     println("*************************************".white.bold)
     println("** ScalaPact: Squashing Pact Files **".white.bold)
     println("*************************************".white.bold)
 
-    val pactDir = new java.io.File("target/pacts")
+    val pactDir = new java.io.File(scalaPactSettings.giveOutputPath)
 
     if (pactDir.exists && pactDir.isDirectory) {
       val files = pactDir.listFiles().toList.filter(f => f.getName.endsWith(".json"))
@@ -47,7 +47,7 @@ object ScalaPactTestCommand {
       }.toList
 
       val errorCount = groupedFileList.map { g =>
-        squashPactFiles(g._1, g._2)
+        squashPactFiles(scalaPactSettings.giveOutputPath, g._1, g._2)
       }.sum
 
       println(("> " + groupedFileList.length + " pacts found:").white.bold)
@@ -55,11 +55,11 @@ object ScalaPactTestCommand {
       println("> " + errorCount + " errors")
 
     } else {
-      println("No Pact files found in 'target/pacts'. Make sure you have Pact CDC tests and have run 'sbt test' or 'sbt pact-test'.".red)
+      println(s"No Pact files found in '${scalaPactSettings.giveOutputPath}'. Make sure you have Pact CDC tests and have run 'sbt test' or 'sbt pact-test'.".red)
     }
   }
 
-  private def squashPactFiles(name: String, files: List[File])(implicit pactReader: IPactReader, pactWriter: IPactWriter): Int = {
+  private def squashPactFiles(outputPath: String, name: String, files: List[File])(implicit pactReader: IPactReader, pactWriter: IPactWriter): Int = {
     //Yuk!
     var errorCount = 0
 
@@ -95,7 +95,7 @@ object ScalaPactTestCommand {
         accumulatedPact.copy(interactions = accumulatedPact.interactions ++ nextPact.interactions)
       }
 
-      PactContractWriter.writePactContracts(combined.provider.name)(combined.consumer.name)(pactWriter.pactToJsonString(combined))
+      PactContractWriter.writePactContracts(outputPath)(combined.provider.name)(combined.consumer.name)(pactWriter.pactToJsonString(combined))
     }
 
     errorCount

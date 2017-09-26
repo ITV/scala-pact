@@ -86,7 +86,7 @@ object ScalaPactPlugin extends AutoPlugin {
 
   lazy val pactPackTask: Def.Initialize[Task[Unit]] =
     Def.task {
-      ScalaPactTestCommand.doPactPack()
+      ScalaPactTestCommand.doPactPack(scalaPactEnv.value.toSettings)
     }
 
   lazy val pactPushTask: Def.Initialize[Task[Unit]] =
@@ -123,7 +123,7 @@ object ScalaPactPlugin extends AutoPlugin {
     }
 }
 
-case class ScalaPactEnv(protocol: Option[String], host: Option[String], port: Option[Int], localPactFilePath: Option[String], strictMode: Option[Boolean], clientTimeout: Option[Duration]) {
+case class ScalaPactEnv(protocol: Option[String], host: Option[String], port: Option[Int], localPactFilePath: Option[String], strictMode: Option[Boolean], clientTimeout: Option[Duration], outputPath: Option[String]) {
 
   def withProtocol(protocol: String): ScalaPactEnv =
     this.copy(protocol = Option(protocol))
@@ -146,8 +146,11 @@ case class ScalaPactEnv(protocol: Option[String], host: Option[String], port: Op
   def withClientTimeOut(duration: Duration): ScalaPactEnv =
     this.copy(clientTimeout = Option(duration))
 
+  def withOutputPath(outputPath: String): ScalaPactEnv =
+    this.copy(outputPath = Option(outputPath))
+
   def toSettings: ScalaPactSettings =
-    ScalaPactSettings(protocol, host, port, localPactFilePath, strictMode, clientTimeout)
+    ScalaPactSettings(protocol, host, port, localPactFilePath, strictMode, clientTimeout, outputPath)
 
 }
 
@@ -155,6 +158,6 @@ object ScalaPactEnv {
 
   def apply: ScalaPactEnv = default
 
-  def default: ScalaPactEnv = ScalaPactEnv(None, None, None, None, None, None)
+  def default: ScalaPactEnv = ScalaPactEnv(None, None, None, None, None, None, None)
 
 }

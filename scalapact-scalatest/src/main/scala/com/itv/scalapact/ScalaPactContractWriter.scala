@@ -13,9 +13,8 @@ object ScalaPactContractWriter {
   private val simplifyName: String => String = name =>
     "[^a-zA-Z0-9-]".r.replaceAllIn(name.replace(" ", "-"), "")
 
-  def writePactContracts(implicit pactWriter: IPactWriter): ScalaPactDescriptionFinal => Unit = pactDescription => {
-    val dirPath = "target/pacts"
-    val dirFile = new File(dirPath)
+  def writePactContracts(outputPath: String)(implicit pactWriter: IPactWriter): ScalaPactDescriptionFinal => Unit = pactDescription => {
+    val dirFile = new File(outputPath)
 
     if (!dirFile.exists()) {
       dirFile.mkdirs()
@@ -28,7 +27,7 @@ object ScalaPactContractWriter {
       .map("%02x".format(_))
       .mkString
 
-    val relativePath = dirPath + "/" + simplifyName(pactDescription.consumer) + "_" + simplifyName(pactDescription.provider) + "_" + sha1 + ".json"
+    val relativePath = outputPath + "/" + simplifyName(pactDescription.consumer) + "_" + simplifyName(pactDescription.provider) + "_" + sha1 + ".json"
     val file = new File(relativePath)
 
     if (file.exists()) {

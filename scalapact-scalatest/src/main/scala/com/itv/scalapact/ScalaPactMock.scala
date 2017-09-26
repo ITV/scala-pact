@@ -17,7 +17,7 @@ object ScalaPactMock {
   private def configuredTestRunner[A](pactDescription: ScalaPactDescriptionFinal)(config: ScalaPactMockConfig)(test: => ScalaPactMockConfig => A): A = {
 
     if(pactDescription.options.writePactFiles) {
-      ScalaPactContractWriter.writePactContracts(pactWriter)(pactDescription)
+      ScalaPactContractWriter.writePactContracts(config.outputPath)(pactWriter)(pactDescription)
     }
 
     test(config)
@@ -58,7 +58,7 @@ object ScalaPactMock {
 
     val interactionManager: InteractionManager = new InteractionManager
 
-    val mockConfig = ScalaPactMockConfig("http", "localhost", findFreePort())
+    val mockConfig = ScalaPactMockConfig("http", "localhost", findFreePort(), pactDescription.options.outputPath)
 
     val configAndPacts: ConfigAndPacts = ConfigAndPacts(
       scalaPactSettings = ScalaPactSettings(
@@ -67,7 +67,8 @@ object ScalaPactMock {
         port = Option(mockConfig.port),
         localPactFilePath = None,
         strictMode = Option(strict),
-        clientTimeout = Option(Duration(2, SECONDS)) // Should never ever take this long. Used to make an http request against the local stub.
+        clientTimeout = Option(Duration(2, SECONDS)), // Should never ever take this long. Used to make an http request against the local stub.
+        outputPath = Option(mockConfig.outputPath)
       ),
       pacts = List(ScalaPactContractWriter.producePactFromDescription(pactDescription))
     )
@@ -113,6 +114,6 @@ object ScalaPactMock {
 
 }
 
-case class ScalaPactMockConfig(protocol: String, host: String, port: Int) {
+case class ScalaPactMockConfig(protocol: String, host: String, port: Int, outputPath: String) {
   val baseUrl: String = protocol + "://" + host + ":" + port
 }
