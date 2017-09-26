@@ -11,18 +11,4 @@ echo "****************************"
 
 bash scripts/localpublish-libs.sh
 
-function crossPublishLocal {
-    NAME=$1
-    sleep 1
-    echo ""
-    echo ">>> $NAME"
-    sbt $NAME/clean $NAME/update $NAME/compile $NAME/test $NAME/publish-local
-}
-
-crossPublishLocal "core_2_10"
-crossPublishLocal "core_2_11"
-crossPublishLocal "core_2_12"
-crossPublishLocal "plugin"
-crossPublishLocal "standalone"
-crossPublishLocal "framework_2_11"
-crossPublishLocal "framework_2_12"
+bash scripts/localpublish-main.sh
