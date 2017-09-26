@@ -4,7 +4,7 @@ import java.io.IOException
 import java.net.ServerSocket
 
 import com.itv.scalapact.ScalaPactForger._
-import com.itv.scalapact.shared.{Arguments, ConfigAndPacts, HttpMethod, IPactServer}
+import com.itv.scalapact.shared._
 import com.itv.scalapactcore.common.PactReaderWriter._
 import com.itv.scalapactcore.stubber.InteractionManager
 import com.itv.scalapact.shared.http.PactStubService._
@@ -100,7 +100,7 @@ object ScalaPactMock {
   }
 
   private def isStubReady(mockConfig: ScalaPactMockConfig): Boolean = {
-    ScalaPactHttpClient.doRequestSync(HttpMethod.GET, mockConfig.baseUrl, "/stub/status", Map("X-Pact-Admin" -> "true"), None) match {
+    ScalaPactHttpClient.doRequestSync(SimpleRequest(mockConfig.baseUrl, "/stub/status", HttpMethod.GET, Map("X-Pact-Admin" -> "true"), None)) match {
       case Left(_) =>
         false
 

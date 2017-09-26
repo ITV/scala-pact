@@ -181,7 +181,7 @@ object Verifier {
   private def fetchAndReadPact(address: String)(implicit pactReader: IPactReader): Option[Pact] = {
     println(s"Attempting to fetch pact from pact broker at: $address".white.bold)
 
-    ScalaPactHttpClient.doRequestSync(HttpMethod.GET, address, "", Map("Accept" -> "application/json"), None).map {
+    ScalaPactHttpClient.doRequestSync(SimpleRequest(address, "", HttpMethod.GET, Map("Accept" -> "application/json"), None)).map {
       case r: SimpleResponse if r.is2xx =>
         val pact = r.body.map(pactReader.jsonStringToPact).flatMap {
           case Right(p) => Option(p)

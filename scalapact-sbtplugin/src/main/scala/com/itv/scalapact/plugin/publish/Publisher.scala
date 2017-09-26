@@ -1,6 +1,6 @@
 package com.itv.scalapact.plugin.publish
 
-import com.itv.scalapact.shared.{ConfigAndPacts, HttpMethod, IPactWriter}
+import com.itv.scalapact.shared.{ConfigAndPacts, HttpMethod, IPactWriter, SimpleRequest}
 import com.itv.scalapact.shared.ColourOuput._
 import com.itv.scalapact.shared.http.ScalaPactHttpClient
 import com.itv.scalapactcore.common._
@@ -37,7 +37,7 @@ object Publisher {
 
           println(s"Publishing to: $address".yellow)
 
-          ScalaPactHttpClient.doRequestSync(HttpMethod.PUT, address, "", Map("Content-Type" -> "application/json"), Option(pactWriter.pactToJsonString(pact))) match {
+          ScalaPactHttpClient.doRequestSync(SimpleRequest(address, "", HttpMethod.PUT, Map("Content-Type" -> "application/json"), Option(pactWriter.pactToJsonString(pact)))) match {
             case Right(r) if r.is2xx => println("Success".green)
             case Right(r) =>
               println(r)

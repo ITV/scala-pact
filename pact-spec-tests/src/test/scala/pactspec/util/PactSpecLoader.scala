@@ -6,7 +6,7 @@ import com.itv.scalapact.shared.{InteractionRequest, InteractionResponse}
 
 import scala.io.Source
 import scala.language.implicitConversions
-import com.itv.scalapactcore.common.RightBiasEither._
+import com.itv.scalapact.shared.RightBiasEither._
 import com.itv.scalapact.shared.pact.PactImplicits
 
 object PactSpecLoader {
