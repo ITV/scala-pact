@@ -22,6 +22,12 @@ object ScalaPactPlugin extends AutoPlugin {
     val versionedConsumerNames = SettingKey[Seq[(String, String)]]("versionedConsumerNames", "The name and pact version numbers of the services that consume the service to verify")
     val pactContractVersion = SettingKey[String]("pactContractVersion", "The version number the pact contract will be published under. If missing or empty, the project version will be used.")
     val allowSnapshotPublish = SettingKey[Boolean]("allowSnapshotPublish", "Flag to permit publishing of snapshot pact files to pact broker. Default is false.")
+
+    // Tasks
+    val pactPack = taskKey[Unit]("Pack up Pact contract files")
+    val pactPush = taskKey[Unit]("Push Pact contract files to Pact Broker")
+    val pactCheck = taskKey[Unit]("Verify service based on consumer requirements")
+    val pactStub = taskKey[Unit]("Run stub service from Pact contract files")
   }
 
   import autoImport._
@@ -40,11 +46,41 @@ object ScalaPactPlugin extends AutoPlugin {
   override lazy val projectSettings = Seq(
     commands += ScalaPactTestCommand.pactTestCommandHyphen,
     commands += ScalaPactTestCommand.pactTestCommandCamel,
+
     commands += ScalaPactPublishCommand.pactPublishCommandHyphen,
     commands += ScalaPactPublishCommand.pactPublishCommandCamel,
+
     commands += ScalaPactVerifyCommand.pactVerifyCommandHyphen,
     commands += ScalaPactVerifyCommand.pactVerifyCommandCamel,
+
     commands += ScalaPactStubberCommand.pactStubberCommandHyphen,
     commands += ScalaPactStubberCommand.pactStubberCommandCamel
   ) ++ pactSettings
+
+  override lazy val buildSettings = Seq(
+    pactPack := pactPackTask.value,
+    pactPush := pactPushTask.value,
+    pactCheck := pactCheckTask.value,
+    pactStub := pactStubTask.value
+  )
+
+  lazy val pactPackTask =
+    Def.task {
+      ScalaPactTestCommand.doPactPack()
+    }
+
+  lazy val pactPushTask =
+    Def.task {
+      ScalaPactPublishCommand.doPactPublish(Seq(), None)
+    }
+
+  lazy val pactCheckTask =
+    Def.task {
+      ScalaPactVerifyCommand.doPactVerify(Seq(), None)
+    }
+
+  lazy val pactStubTask =
+    Def.task {
+      ScalaPactTestCommand.doPactPack()
+    }
 }

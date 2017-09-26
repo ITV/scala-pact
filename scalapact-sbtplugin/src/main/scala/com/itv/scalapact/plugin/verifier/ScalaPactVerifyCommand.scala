@@ -22,28 +22,49 @@ object ScalaPactVerifyCommand {
 
   private lazy val pactVerify: (State, Seq[String]) => State = (state, args) => {
 
+    doPactVerify(args, Option(state))
+
+    state
+  }
+
+  def doPactVerify(args: Seq[String], extractedState: Option[State]): Unit = {
+
     println("*************************************".white.bold)
     println("** ScalaPact: Running Verifier     **".white.bold)
     println("*************************************".white.bold)
 
-    val combinedPactStates = combineProviderStatesIntoTotalFunction(Project.extract(state).get(ScalaPactPlugin.autoImport.providerStates), Project.extract(state).get(ScalaPactPlugin.autoImport.providerStateMatcher))
+    val pactVerifySettings = extractedState.map { state =>
+      val combinedPactStates = combineProviderStatesIntoTotalFunction(Project.extract(state).get(ScalaPactPlugin.autoImport.providerStates), Project.extract(state).get(ScalaPactPlugin.autoImport.providerStateMatcher))
 
-    val pactVerifySettings = PactVerifySettings(
-      providerStates = combinedPactStates,
-      pactBrokerAddress = Project.extract(state).get(ScalaPactPlugin.autoImport.pactBrokerAddress),
-      projectVersion = Project.extract(state).get(Keys.version),
-      providerName = Project.extract(state).get(ScalaPactPlugin.autoImport.providerName),
-      consumerNames = Project.extract(state).get(ScalaPactPlugin.autoImport.consumerNames).toList,
-      versionedConsumerNames =
-        Project.extract(state).get(ScalaPactPlugin.autoImport.versionedConsumerNames).toList
-        .map(t => VersionedConsumer(t._1, t._2))
-    )
+      PactVerifySettings(
+        providerStates = combinedPactStates,
+        pactBrokerAddress = Project.extract(state).get(ScalaPactPlugin.autoImport.pactBrokerAddress),
+        projectVersion = Project.extract(state).get(Keys.version),
+        providerName = Project.extract(state).get(ScalaPactPlugin.autoImport.providerName),
+        consumerNames = Project.extract(state).get(ScalaPactPlugin.autoImport.consumerNames).toList,
+        versionedConsumerNames =
+          Project.extract(state).get(ScalaPactPlugin.autoImport.versionedConsumerNames).toList
+            .map(t => VersionedConsumer(t._1, t._2))
+      )
+    }.getOrElse {
+      val combinedPactStates = combineProviderStatesIntoTotalFunction(ScalaPactPlugin.autoImport.providerStates.value, ScalaPactPlugin.autoImport.providerStateMatcher.value)
+
+      PactVerifySettings(
+        providerStates = combinedPactStates,
+        pactBrokerAddress = ScalaPactPlugin.autoImport.pactBrokerAddress.value,
+        projectVersion = Keys.version.value,
+        providerName = ScalaPactPlugin.autoImport.providerName.value,
+        consumerNames = ScalaPactPlugin.autoImport.consumerNames.value.toList,
+        versionedConsumerNames =
+          ScalaPactPlugin.autoImport.versionedConsumerNames.value.toList
+            .map(t => VersionedConsumer(t._1, t._2))
+      )
+    }
 
     val successfullyVerified = (parseArguments andThen verify(LocalPactFileLoader.loadPactFiles, pactVerifySettings)) (args)
 
-    if(successfullyVerified) sys.exit(0) else sys.exit(1)
+    if (successfullyVerified) sys.exit(0) else sys.exit(1)
 
-    state
   }
 
   def combineProviderStatesIntoTotalFunction(directPactStates: Seq[(String, String => Boolean)], patternMatchedStates: PartialFunction[String, Boolean]): String => Boolean = {

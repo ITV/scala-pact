@@ -24,36 +24,40 @@ object ScalaPactTestCommand {
       val cleanState = Command.process("clean", state)
       val testedState = Command.process("test", cleanState)
 
-      println("*************************************".white.bold)
-      println("** ScalaPact: Squashing Pact Files **".white.bold)
-      println("*************************************".white.bold)
-
-      val pactDir = new java.io.File("target/pacts")
-
-      if (pactDir.exists && pactDir.isDirectory) {
-        val files = pactDir.listFiles().toList.filter(f => f.getName.endsWith(".json"))
-
-        println(("> " + files.length + " files found that could be Pact contracts").white.bold)
-        println(files.map("> - " + _.getName).mkString("\n").white)
-
-        val groupedFileList: List[(String, List[File])] = files.groupBy { f =>
-          f.getName.split("_").take(2).mkString("_")
-        }.toList
-
-        val errorCount = groupedFileList.map { g =>
-          squashPactFiles(g._1, g._2)
-        }.sum
-
-        println(("> " + groupedFileList.length + " pacts found:").white.bold)
-        println(groupedFileList.map(g => "> - " + g._1.replace("_", " -> ") + "\n").mkString)
-        println("> " + errorCount + " errors")
-
-      } else {
-        println("No Pact files found in 'target/pacts'. Make sure you have Pact CDC tests and have run 'sbt test' or 'sbt pact-test'.".red)
-      }
+      doPactPack()
 
       testedState
     }
+
+  def doPactPack(): Unit = {
+    println("*************************************".white.bold)
+    println("** ScalaPact: Squashing Pact Files **".white.bold)
+    println("*************************************".white.bold)
+
+    val pactDir = new java.io.File("target/pacts")
+
+    if (pactDir.exists && pactDir.isDirectory) {
+      val files = pactDir.listFiles().toList.filter(f => f.getName.endsWith(".json"))
+
+      println(("> " + files.length + " files found that could be Pact contracts").white.bold)
+      println(files.map("> - " + _.getName).mkString("\n").white)
+
+      val groupedFileList: List[(String, List[File])] = files.groupBy { f =>
+        f.getName.split("_").take(2).mkString("_")
+      }.toList
+
+      val errorCount = groupedFileList.map { g =>
+        squashPactFiles(g._1, g._2)
+      }.sum
+
+      println(("> " + groupedFileList.length + " pacts found:").white.bold)
+      println(groupedFileList.map(g => "> - " + g._1.replace("_", " -> ") + "\n").mkString)
+      println("> " + errorCount + " errors")
+
+    } else {
+      println("No Pact files found in 'target/pacts'. Make sure you have Pact CDC tests and have run 'sbt test' or 'sbt pact-test'.".red)
+    }
+  }
 
   private def squashPactFiles(name: String, files: List[File])(implicit pactReader: IPactReader, pactWriter: IPactWriter): Int = {
     //Yuk!
@@ -68,7 +72,7 @@ object ScalaPactTestCommand {
 
           contents
         } catch {
-          case e: Throwable =>
+          case _: Throwable =>
             println(("Problem reading Pact file at path: " + file.getCanonicalPath).red)
             errorCount = errorCount + 1
             None

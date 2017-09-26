@@ -13,19 +13,36 @@ object ScalaPactPublishCommand {
   lazy val pactPublishCommandCamel: Command = Command.args("pactPublish", "<options>")(pactVerify)
 
   private lazy val pactVerify: (State, Seq[String]) => State = (state, args) => {
+    val pactTestedState = Command.process("pact-test", state)
 
+    doPactPublish(args, Option(state))
+
+    pactTestedState
+  }
+
+  def doPactPublish(args: Seq[String], extractedState: Option[State]): Unit = {
     import Publisher._
 
     println("*************************************".white.bold)
     println("** ScalaPact: Publishing Contracts **".white.bold)
     println("*************************************".white.bold)
 
-    val pactTestedState = Command.process("pact-test", state)
-
-    val pactBrokerAddress: String = Project.extract(pactTestedState).get(ScalaPactPlugin.autoImport.pactBrokerAddress)
-    val projectVersion: String = Project.extract(pactTestedState).get(Keys.version)
-    val pactContractVersion: String = Project.extract(pactTestedState).get(ScalaPactPlugin.autoImport.pactContractVersion)
-    val allowSnapshotPublish: Boolean = Project.extract(pactTestedState).get(ScalaPactPlugin.autoImport.allowSnapshotPublish)
+    val pactBrokerAddress: String =
+      extractedState.map { pactTestedState =>
+        Project.extract(pactTestedState).get(ScalaPactPlugin.autoImport.pactBrokerAddress)
+      }.getOrElse(ScalaPactPlugin.autoImport.pactBrokerAddress.value)
+    val projectVersion: String =
+      extractedState.map { pactTestedState =>
+        Project.extract(pactTestedState).get(Keys.version)
+      }.getOrElse(Keys.version.value)
+    val pactContractVersion: String =
+      extractedState.map { pactTestedState =>
+        Project.extract(pactTestedState).get(ScalaPactPlugin.autoImport.pactContractVersion)
+      }.getOrElse(ScalaPactPlugin.autoImport.pactContractVersion.value)
+    val allowSnapshotPublish: Boolean =
+      extractedState.map { pactTestedState =>
+        Project.extract(pactTestedState).get(ScalaPactPlugin.autoImport.allowSnapshotPublish)
+      }.getOrElse(ScalaPactPlugin.autoImport.allowSnapshotPublish.value)
 
     val versionToPublishAs = if(pactContractVersion.isEmpty) projectVersion else pactContractVersion
 
@@ -39,7 +56,5 @@ object ScalaPactPublishCommand {
     } else {
       (parseArguments andThen loadPactFiles("target/pacts") andThen publishToBroker(pactBrokerAddress, versionToPublishAs)) (args)
     }
-
-    pactTestedState
   }
 }
