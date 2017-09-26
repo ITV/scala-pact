@@ -38,6 +38,30 @@ echo ""
 echo ">>> Http4s 0.15.0a (2.12)"
 crossPublishLocal "http4s0150a_2_12"
 
+echo ""
+echo ">>> Http4s 0.16.2a (2.10)"
+crossPublishLocal "http4s0162a_2_10"
+
+echo ""
+echo ">>> Http4s 0.16.2a (2.11)"
+crossPublishLocal "http4s0162a_2_11"
+
+echo ""
+echo ">>> Http4s 0.16.2a (2.12)"
+crossPublishLocal "http4s0162a_2_12"
+
+echo ""
+echo ">>> Http4s 0.16.2 (2.10)"
+crossPublishLocal "http4s0162_2_10"
+
+echo ""
+echo ">>> Http4s 0.16.2 (2.11)"
+crossPublishLocal "http4s0162_2_11"
+
+echo ""
+echo ">>> Http4s 0.16.2 (2.12)"
+crossPublishLocal "http4s0162_2_12"
+
 #No such thing
 ##############
 #echo ""

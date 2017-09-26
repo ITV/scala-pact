@@ -75,6 +75,22 @@ lazy val http4s0150a_2_10 = http4s0150a(scala210).dependsOn(shared_2_10)
 lazy val http4s0150a_2_11 = http4s0150a(scala211).dependsOn(shared_2_11)
 lazy val http4s0150a_2_12 = http4s0150a(scala212).dependsOn(shared_2_12)
 
+lazy val http4s0162a =
+  (project in file("scalapact-http4s-0-16-2a"))
+    .settings(commonSettings: _*).cross
+
+lazy val http4s0162a_2_10 = http4s0162a(scala210).dependsOn(shared_2_10)
+lazy val http4s0162a_2_11 = http4s0162a(scala211).dependsOn(shared_2_11)
+lazy val http4s0162a_2_12 = http4s0162a(scala212).dependsOn(shared_2_12)
+
+lazy val http4s0162 =
+  (project in file("scalapact-http4s-0-16-2"))
+    .settings(commonSettings: _*).cross
+
+lazy val http4s0162_2_10 = http4s0162(scala210).dependsOn(shared_2_10)
+lazy val http4s0162_2_11 = http4s0162(scala211).dependsOn(shared_2_11)
+lazy val http4s0162_2_12 = http4s0162(scala212).dependsOn(shared_2_12)
+
 lazy val http4s0170 =
   (project in file("scalapact-http4s-0-17-0"))
     .settings(commonSettings: _*).cross
@@ -185,6 +201,12 @@ lazy val scalaPactProject =
       http4s0150a_2_10,
       http4s0150a_2_11,
       http4s0150a_2_12,
+      http4s0162a_2_10,
+      http4s0162a_2_11,
+      http4s0162a_2_12,
+      http4s0162_2_10,
+      http4s0162_2_11,
+      http4s0162_2_12,
       http4s0170_2_11,
       http4s0170_2_12,
       argonaut61_2_10,
