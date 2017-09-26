@@ -38,6 +38,21 @@ echo ""
 echo ">>> Http4s 0.15.0a (2.12)"
 crossPublishLocal "http4s0150a_2_12"
 
+#No such thing
+##############
+#echo ""
+#echo ">>> Http4s 0.17.0 (2.10)"
+#crossPublishLocal "http4s0170_2_10"
+##############
+
+echo ""
+echo ">>> Http4s 0.17.0 (2.11)"
+crossPublishLocal "http4s0170_2_11"
+
+echo ""
+echo ">>> Http4s 0.17.0 (2.12)"
+crossPublishLocal "http4s0170_2_12"
+
 echo ""
 echo ">>> Argonaut 6.1 (2.10)"
 crossPublishLocal "argonaut61_2_10"
