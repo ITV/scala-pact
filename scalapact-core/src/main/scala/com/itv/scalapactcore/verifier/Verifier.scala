@@ -11,8 +11,6 @@ import RightBiasEither._
 
 object Verifier {
 
-  private final case class ValidatedDetails(validatedAddress: ValidPactBrokerAddress, providerName: String, consumerName: String, consumerVersion: String)
-
   def verify(loadPactFiles: String => ScalaPactSettings => ConfigAndPacts, pactVerifySettings: PactVerifySettings)(implicit pactReader: IPactReader): ScalaPactSettings => Boolean = arguments => {
 
     val pacts: List[Pact] = if(arguments.localPactFilePath.isDefined) {
@@ -25,27 +23,7 @@ object Verifier {
           pactVerifySettings.versionedConsumerNames.map(vc => vc.copy(version = "/version/" + vc.version))
 
       val latestPacts : List[Pact] = versionConsumers.map { consumer =>
-
-        val details: Either[String, ValidatedDetails] =
-          (
-            Helpers.urlEncode(consumer.name),
-            Helpers.urlEncode(pactVerifySettings.providerName),
-            PactBrokerAddressValidation.checkPactBrokerAddress(pactVerifySettings.pactBrokerAddress)
-          ) match {
-            case (Right(c), Right(p), Right(pb)) =>
-              Right(ValidatedDetails(pb, p, c, consumer.version))
-
-            case (Left(e), _, _) =>
-              Left(e)
-
-            case (_, Left(e), _) =>
-              Left(e)
-
-            case (_, _, Left(e)) =>
-              Left(e)
-          }
-
-        details match {
+        ValidatedDetails.buildFrom(consumer.name, pactVerifySettings.providerName, pactVerifySettings.pactBrokerAddress, consumer.version) match {
           case Left(l) =>
             println(l.red)
             None
@@ -216,3 +194,16 @@ class ProviderStateFailure(key: String) extends Exception()
 case class ProviderState(key: String, f: String => Boolean)
 case class VersionedConsumer(name: String, version: String)
 case class PactVerifySettings(providerStates: (String => Boolean), pactBrokerAddress: String, projectVersion: String, providerName: String, consumerNames: List[String], versionedConsumerNames: List[VersionedConsumer])
+
+case class ValidatedDetails(validatedAddress: ValidPactBrokerAddress, providerName: String, consumerName: String, consumerVersion: String)
+
+object ValidatedDetails {
+
+  def buildFrom(consumerName: String, providerName: String, pactBrokerAddress: String, consumerVersion: String): Either[String, ValidatedDetails] =
+    for {
+      consumerName     <- Helpers.urlEncode(consumerName)
+      providerName     <- Helpers.urlEncode(providerName)
+      validatedAddress <- PactBrokerAddressValidation.checkPactBrokerAddress(pactBrokerAddress)
+    } yield ValidatedDetails(validatedAddress, providerName, consumerName, consumerVersion)
+
+}

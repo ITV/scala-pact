@@ -2,27 +2,16 @@ package com.itv.scalapact.plugin.publish
 
 import com.itv.scalapact.shared._
 import com.itv.scalapact.shared.ColourOuput._
-import com.itv.scalapactcore.common._
-
-import RightBiasEither._
+import com.itv.scalapactcore.verifier.ValidatedDetails
 
 object Publisher {
 
-  private final case class ValidatedDetails(validatedAddress: String, providerName: String, consumerName: String)
-
-  def publishToBroker(sendIt: SimpleRequest => Either[Throwable, SimpleResponse], pactBrokerAddress: String, versionToPublishAs: String)(implicit pactWriter: IPactWriter): ConfigAndPacts => List[PublishResult] = configAndPacts => {
-
+  def publishToBroker(sendIt: SimpleRequest => Either[Throwable, SimpleResponse], pactBrokerAddress: String, versionToPublishAs: String)(implicit pactWriter: IPactWriter): ConfigAndPacts => List[PublishResult] = configAndPacts =>
     configAndPacts.pacts.map { pact =>
       publishPact(sendIt, pact, versionToPublishAs) {
-        for {
-          consumerName     <- Helpers.urlEncode(pact.consumer.name)
-          providerName     <- Helpers.urlEncode(pact.provider.name)
-          validatedAddress <- PactBrokerAddressValidation.checkPactBrokerAddress(pactBrokerAddress)
-        } yield ValidatedDetails(validatedAddress.address, providerName, consumerName)
+        ValidatedDetails.buildFrom(pact.consumer.name, pact.provider.name, pactBrokerAddress, "/latest")
       }
     }
-
-  }
 
   def publishPact(sendIt: SimpleRequest => Either[Throwable, SimpleResponse], pact: Pact, versionToPublishAs: String)(details: Either[String, ValidatedDetails])(implicit pactWriter: IPactWriter): PublishResult =
     details match {
