@@ -1,28 +1,9 @@
-package com.itv.scalapactcore.common
+package com.itv.scalapact.shared
 
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
-import com.itv.scalapact.shared.Arguments
-
 import scala.util.control.NonFatal
-import scala.concurrent.duration._
-
-object CommandArguments {
-
-  val parseArguments: Seq[String] => Arguments = args =>
-    (Helpers.pair andThen convertToArguments)(args.toList)
-
-  private lazy val convertToArguments: Map[String, String] => Arguments = argMap =>
-    Arguments(
-      host = argMap.get("--host"),
-      protocol = argMap.get("--protocol"),
-      port = argMap.get("--port").flatMap(Helpers.safeStringToInt),
-      localPactPath = argMap.get("--source"),
-      strictMode = argMap.get("--strict").flatMap(Helpers.safeStringToBoolean),
-      clientTimeout = argMap.get("--clientTimeout").flatMap(Helpers.safeStringToInt)
-    )
-}
 
 object Helpers {
 
@@ -55,6 +36,14 @@ object Helpers {
   val safeStringToInt: String => Option[Int] = s =>
     try {
       Option(s.toInt)
+    } catch {
+      case NonFatal(_) =>
+        None
+    }
+
+  val safeStringToLong: String => Option[Long] = s =>
+    try {
+      Option(s.toLong)
     } catch {
       case NonFatal(_) =>
         None

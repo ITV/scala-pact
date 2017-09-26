@@ -22,14 +22,14 @@ object PactStubService {
 
   private implicit val strategy: Strategy = Strategy.fromExecutionContext(ExecutionContext.fromExecutorService(executorService))
 
-  def startServer(interactionManager: IInteractionManager)(implicit pactReader: IPactReader, pactWriter: IPactWriter): Arguments => Unit = config => {
+  def startServer(interactionManager: IInteractionManager)(implicit pactReader: IPactReader, pactWriter: IPactWriter): ScalaPactSettings => Unit = config => {
     println(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort).white.bold)
     println(("Strict matching mode: " + config.giveStrictMode).white.bold)
 
     runServer(interactionManager, nThreads)(pactReader, pactWriter)(config).awaitShutdown()
   }
 
-  def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int)(implicit pactReader: IPactReader, pactWriter: IPactWriter): Arguments => IPactServer = config => PactServer {
+  def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int)(implicit pactReader: IPactReader, pactWriter: IPactWriter): ScalaPactSettings => IPactServer = config => PactServer {
     BlazeBuilder
       .bindHttp(config.givePort, config.giveHost)
       .withExecutionContext(ExecutionContext.fromExecutorService(executorService))

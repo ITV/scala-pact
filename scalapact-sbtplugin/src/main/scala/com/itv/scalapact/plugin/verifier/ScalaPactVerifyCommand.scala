@@ -2,8 +2,8 @@ package com.itv.scalapact.plugin.verifier
 
 import com.itv.scalapact.plugin.ScalaPactPlugin
 import com.itv.scalapactcore.verifier.ProviderState
-import com.itv.scalapactcore.common.CommandArguments._
 import com.itv.scalapact.shared.ColourOuput._
+import com.itv.scalapact.shared.ScalaPactSettings
 import com.itv.scalapactcore.common.LocalPactFileLoader
 import com.itv.scalapactcore.verifier._
 import sbt._
@@ -22,46 +22,40 @@ object ScalaPactVerifyCommand {
 
   private lazy val pactVerify: (State, Seq[String]) => State = (state, args) => {
 
-    doPactVerify(args, Option(state))
+    doPactVerify(
+      ScalaPactSettings.parseArguments(args),
+      Project.extract(state).get(ScalaPactPlugin.autoImport.providerStates),
+      Project.extract(state).get(ScalaPactPlugin.autoImport.providerStateMatcher),
+      Project.extract(state).get(ScalaPactPlugin.autoImport.pactBrokerAddress),
+      Project.extract(state).get(Keys.version),
+      Project.extract(state).get(ScalaPactPlugin.autoImport.providerName),
+      Project.extract(state).get(ScalaPactPlugin.autoImport.consumerNames),
+      Project.extract(state).get(ScalaPactPlugin.autoImport.versionedConsumerNames)
+    )
 
     state
   }
 
-  def doPactVerify(args: Seq[String], extractedState: Option[State]): Unit = {
+  def doPactVerify(scalaPactSettings: ScalaPactSettings, providerStates: Seq[(String, String => Boolean)], providerStateMatcher: PartialFunction[String, Boolean], pactBrokerAddress: String, projectVersion: String, providerName: String, consumerNames: Seq[String], versionedConsumerNames: Seq[(String, String)]): Unit = {
 
     println("*************************************".white.bold)
     println("** ScalaPact: Running Verifier     **".white.bold)
     println("*************************************".white.bold)
 
-    val pactVerifySettings = extractedState.map { state =>
-      val combinedPactStates = combineProviderStatesIntoTotalFunction(Project.extract(state).get(ScalaPactPlugin.autoImport.providerStates), Project.extract(state).get(ScalaPactPlugin.autoImport.providerStateMatcher))
+    val combinedPactStates = combineProviderStatesIntoTotalFunction(providerStates, providerStateMatcher)
 
-      PactVerifySettings(
-        providerStates = combinedPactStates,
-        pactBrokerAddress = Project.extract(state).get(ScalaPactPlugin.autoImport.pactBrokerAddress),
-        projectVersion = Project.extract(state).get(Keys.version),
-        providerName = Project.extract(state).get(ScalaPactPlugin.autoImport.providerName),
-        consumerNames = Project.extract(state).get(ScalaPactPlugin.autoImport.consumerNames).toList,
-        versionedConsumerNames =
-          Project.extract(state).get(ScalaPactPlugin.autoImport.versionedConsumerNames).toList
-            .map(t => VersionedConsumer(t._1, t._2))
-      )
-    }.getOrElse {
-      val combinedPactStates = combineProviderStatesIntoTotalFunction(ScalaPactPlugin.autoImport.providerStates.value, ScalaPactPlugin.autoImport.providerStateMatcher.value)
+    val pactVerifySettings = PactVerifySettings(
+      combinedPactStates,
+      pactBrokerAddress,
+      projectVersion,
+      providerName,
+      consumerNames.toList,
+      versionedConsumerNames =
+        versionedConsumerNames.toList
+          .map(t => VersionedConsumer(t._1, t._2))
+    )
 
-      PactVerifySettings(
-        providerStates = combinedPactStates,
-        pactBrokerAddress = ScalaPactPlugin.autoImport.pactBrokerAddress.value,
-        projectVersion = Keys.version.value,
-        providerName = ScalaPactPlugin.autoImport.providerName.value,
-        consumerNames = ScalaPactPlugin.autoImport.consumerNames.value.toList,
-        versionedConsumerNames =
-          ScalaPactPlugin.autoImport.versionedConsumerNames.value.toList
-            .map(t => VersionedConsumer(t._1, t._2))
-      )
-    }
-
-    val successfullyVerified = (parseArguments andThen verify(LocalPactFileLoader.loadPactFiles, pactVerifySettings)) (args)
+    val successfullyVerified = verify(LocalPactFileLoader.loadPactFiles, pactVerifySettings)(pactReader)(scalaPactSettings)
 
     if (successfullyVerified) sys.exit(0) else sys.exit(1)
 

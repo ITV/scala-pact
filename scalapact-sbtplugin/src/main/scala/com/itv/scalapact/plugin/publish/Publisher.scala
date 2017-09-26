@@ -1,6 +1,6 @@
 package com.itv.scalapact.plugin.publish
 
-import com.itv.scalapact.shared.{ConfigAndPacts, HttpMethod, IPactWriter, SimpleRequest}
+import com.itv.scalapact.shared._
 import com.itv.scalapact.shared.ColourOuput._
 import com.itv.scalapact.shared.http.ScalaPactHttpClient
 import com.itv.scalapactcore.common._

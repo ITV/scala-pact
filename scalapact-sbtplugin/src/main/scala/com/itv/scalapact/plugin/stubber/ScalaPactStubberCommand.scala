@@ -1,10 +1,10 @@
 package com.itv.scalapact.plugin.stubber
 
 import sbt._
-import com.itv.scalapactcore.common.CommandArguments._
 import com.itv.scalapact.shared.http.PactStubService._
 import com.itv.scalapactcore.stubber.InteractionManager
 import com.itv.scalapact.shared.ColourOuput._
+import com.itv.scalapact.shared.ScalaPactSettings
 import com.itv.scalapactcore.common.LocalPactFileLoader._
 import com.itv.scalapactcore.common.PactReaderWriter._
 
@@ -21,11 +21,15 @@ object ScalaPactStubberCommand {
 
     val pactTestedState = Command.process("pact-test", state)
 
-    val interactionManager: InteractionManager = new InteractionManager
-
-    (parseArguments andThen loadPactFiles(pactReader)("target/pacts") andThen interactionManager.addToInteractionManager andThen startServer(interactionManager)(pactReader, pactWriter))(args)
+    runStubber(ScalaPactSettings.parseArguments(args), interactionManagerInstance)
 
     pactTestedState
+  }
+
+  def interactionManagerInstance: InteractionManager = new InteractionManager
+
+  def runStubber(scalaPactSettings: ScalaPactSettings, interactionManager: InteractionManager): Unit = {
+    (loadPactFiles(pactReader)("target/pacts") andThen interactionManager.addToInteractionManager andThen startServer(interactionManager)(pactReader, pactWriter))(scalaPactSettings)
   }
 
 }

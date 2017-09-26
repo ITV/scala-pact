@@ -10,6 +10,8 @@ import com.itv.scalapactcore.stubber.InteractionManager
 import com.itv.scalapact.shared.http.PactStubService._
 import com.itv.scalapact.shared.http.ScalaPactHttpClient
 
+import scala.concurrent.duration._
+
 object ScalaPactMock {
 
   private def configuredTestRunner[A](pactDescription: ScalaPactDescriptionFinal)(config: ScalaPactMockConfig)(test: => ScalaPactMockConfig => A): A = {
@@ -59,13 +61,13 @@ object ScalaPactMock {
     val mockConfig = ScalaPactMockConfig("http", "localhost", findFreePort())
 
     val configAndPacts: ConfigAndPacts = ConfigAndPacts(
-      arguments = Arguments(
+      scalaPactSettings = ScalaPactSettings(
         host = Option(mockConfig.host),
         protocol = Option(mockConfig.protocol),
         port = Option(mockConfig.port),
-        localPactPath = None,
+        localPactFilePath = None,
         strictMode = Option(strict),
-        clientTimeout = 2 // Should never ever take this long. Used to make an http request against the local stub.
+        clientTimeout = Option(Duration(2, SECONDS)) // Should never ever take this long. Used to make an http request against the local stub.
       ),
       pacts = List(ScalaPactContractWriter.producePactFromDescription(pactDescription))
     )

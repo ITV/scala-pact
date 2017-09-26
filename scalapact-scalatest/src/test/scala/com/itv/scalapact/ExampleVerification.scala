@@ -7,6 +7,8 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import com.itv.scalapact.ScalaPactVerify._
 import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
 
+import scala.concurrent.duration._
+
 class ExampleVerification extends FunSpec with Matchers with BeforeAndAfterAll {
 
   val samplePact = """
@@ -76,7 +78,7 @@ class ExampleVerification extends FunSpec with Matchers with BeforeAndAfterAll {
      verifyPact
        .withPactSource(pactAsJsonString(samplePact))
        .noSetupRequired
-       .runVerificationAgainst(1234, 5)
+       .runVerificationAgainst(1234, 5.seconds)
 
     }
 

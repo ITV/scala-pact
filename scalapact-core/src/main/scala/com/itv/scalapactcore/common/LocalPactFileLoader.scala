@@ -2,7 +2,7 @@ package com.itv.scalapactcore.common
 
 import java.io.File
 
-import com.itv.scalapact.shared.{Arguments, ConfigAndPacts, IPactReader, Pact}
+import com.itv.scalapact.shared.{ConfigAndPacts, IPactReader, Pact, ScalaPactSettings}
 import com.itv.scalapact.shared.ColourOuput._
 
 object LocalPactFileLoader {
@@ -59,15 +59,15 @@ object LocalPactFileLoader {
     }.collect { case Right(p) => p }
   }
 
-  def loadPactFiles(implicit pactReader: IPactReader): String => Arguments => ConfigAndPacts = defaultLocation => config => {
+  def loadPactFiles(implicit pactReader: IPactReader): String => ScalaPactSettings => ConfigAndPacts = defaultLocation => config => {
     // Side effecting, might as well be since the pacts are held statefully /
     // mutably so that they can be updated. The only way around this, I think,
     // would be to start new servers on update? Or some sort of foldp to update
     // the model?
 
-    println(("Looking for pact files in: " + config.localPactPath.orElse(Option(defaultLocation)).getOrElse("")).white.bold)
+    println(("Looking for pact files in: " + config.localPactFilePath.orElse(Option(defaultLocation)).getOrElse("")).white.bold)
 
-    val pacts = config.localPactPath.orElse(Option(defaultLocation)) match {
+    val pacts = config.localPactFilePath.orElse(Option(defaultLocation)) match {
       case Some(path) =>
         (recursiveJsonLoad andThen deserializeIntoPact(pactReader.jsonStringToPact)) (new File(path))
 

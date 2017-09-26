@@ -7,17 +7,16 @@ import com.itv.scalapact.shared.http.ScalaPactHttpClient
 import com.itv.scalapactcore.common._
 
 import scala.util.Left
-
 import RightBiasEither._
 
 object Verifier {
 
   private final case class ValidatedDetails(validatedAddress: ValidPactBrokerAddress, providerName: String, consumerName: String, consumerVersion: String)
 
-  def verify(loadPactFiles: String => Arguments => ConfigAndPacts, pactVerifySettings: PactVerifySettings)(implicit pactReader: IPactReader): Arguments => Boolean = arguments => {
+  def verify(loadPactFiles: String => ScalaPactSettings => ConfigAndPacts, pactVerifySettings: PactVerifySettings)(implicit pactReader: IPactReader): ScalaPactSettings => Boolean = arguments => {
 
-    val pacts: List[Pact] = if(arguments.localPactPath.isDefined) {
-      println(s"Attempting to use local pact files at: '${arguments.localPactPath.getOrElse("<path missing>")}'".white.bold)
+    val pacts: List[Pact] = if(arguments.localPactFilePath.isDefined) {
+      println(s"Attempting to use local pact files at: '${arguments.localPactFilePath.getOrElse("<path missing>")}'".white.bold)
       loadPactFiles("pacts")(arguments).pacts
     } else {
 
@@ -61,7 +60,7 @@ object Verifier {
       latestPacts
     }
 
-    println(s"Verifying against '${arguments.giveHost}' on port '${arguments.givePort}' with a timeout of ${arguments.clientTimeout.getOrElse(1)} second(s).".white.bold)
+    println(s"Verifying against '${arguments.giveHost}' on port '${arguments.givePort}' with a timeout of ${arguments.clientTimeout.map(_.toSeconds.toString).getOrElse("<unspecified>")} second(s).".white.bold)
 
     val startTime = System.currentTimeMillis().toDouble
 
@@ -120,9 +119,9 @@ object Verifier {
       Left(s)
   }
 
-  private def doRequest(arguments: Arguments, maybeProviderState: Option[ProviderState]): InteractionRequest => Either[String, InteractionResponse] = interactionRequest => {
+  private def doRequest(arguments: ScalaPactSettings, maybeProviderState: Option[ProviderState]): InteractionRequest => Either[String, InteractionResponse] = interactionRequest => {
     val baseUrl = s"${arguments.giveProtocol}://" + arguments.giveHost + ":" + arguments.givePort
-    val clientTimeout = arguments.giveClientTimeoutInSeconds
+    val clientTimeout = arguments.giveClientTimeout
 
     try {
 

@@ -2,31 +2,31 @@ package com.itv.scalapact.shared.http
 
 import java.util.concurrent.{ExecutorService, Executors}
 
-import com.itv.scalapact.shared._
+import com.itv.scalapact.shared.{ScalaPactSettings, _}
 import org.http4s.dsl._
 import org.http4s.server.Server
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.util.CaseInsensitiveString
 import org.http4s.{HttpService, Request, Response}
 
+import scala.concurrent.duration._
+
 import HeaderImplicitConversions._
 import ColourOuput._
-
-import scala.concurrent.duration._
 
 object PactStubService {
 
   private val nThreads: Int = 50
   private val executorService: ExecutorService = Executors.newFixedThreadPool(nThreads)
 
-  def startServer(interactionManager: IInteractionManager)(implicit pactReader: IPactReader, pactWriter: IPactWriter): Arguments => Unit = config => {
+  def startServer(interactionManager: IInteractionManager)(implicit pactReader: IPactReader, pactWriter: IPactWriter): ScalaPactSettings => Unit = config => {
     println(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort).white.bold)
     println(("Strict matching mode: " + config.giveStrictMode).white.bold)
 
     runServer(interactionManager, nThreads)(pactReader, pactWriter)(config).awaitShutdown()
   }
 
-  def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int)(implicit pactReader: IPactReader, pactWriter: IPactWriter): Arguments => IPactServer = config => PactServer {
+  def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int)(implicit pactReader: IPactReader, pactWriter: IPactWriter): ScalaPactSettings => IPactServer = config => PactServer {
     BlazeBuilder
       .bindHttp(config.givePort, config.giveHost)
       .withServiceExecutor(executorService)
