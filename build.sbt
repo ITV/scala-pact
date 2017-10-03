@@ -30,8 +30,8 @@ lazy val commonSettings = Seq(
 )
 
 val scala210: String = "2.10.6"
-val scala211: String = "2.11.8"
-val scala212: String = "2.12.1"
+val scala211: String = "2.11.11"
+val scala212: String = "2.12.3"
 
 lazy val shared =
   (project in file("scalapact-shared"))
