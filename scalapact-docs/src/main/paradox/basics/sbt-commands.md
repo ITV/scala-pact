@@ -1,9 +1,14 @@
 # SBT Commands
 
-## pact-test
+Scala-Pact commands are non-composable sbt processes that guarantee correctness at the cost of some duplicate effort.
+
+## Configuration
+Commands pick up their configuration from the plugin's sbt settings, but can in many cases be overridden by command line arguments as detailed below.
+
+## pact-test / pactTest
 You can run the Pact test cases just by executing `sbt test` as normal. Because of the way the library has been written, running the tests will generate a series of Pact JSON files, one for each interaction.
 
-The generated Pact files will be output to your target directory under `<project root>/target/pacts`.
+The generated Pact files will be output to your target directory under `<project root>/target/pacts` by default.
 
 Usually it is desirable to condense the Pact files into one file per consumer / provider pair that contains all of the possible interactions.
 
@@ -13,7 +18,7 @@ Entering `sbt pact-test` will:
 1. Run the tests as normal to generate the Pact files
 1. Squash the Pact files into one per consumer / provider pair
 
-## pact-stubber
+## pact-stubber / pactStubber
 In order to test your service in isolation, you'll need to be able to stub out your service's upstream dependancies. Luckily, you've already defined all the behaviours you expect your provider to exhibit in your CDC Pact tests!
 
 Running `sbt pact-stubber` will re-run your Pact tests and then use the generated Pact files to create a running stub service. The stub will accept requests and deliver the responses you defined in your test cases giving you predictable, maintainable behaviour.
@@ -34,7 +39,7 @@ If you prefer, you can use the stubber dynamically by adding and removing pacts 
 - `POST | PUT /interactions` accepts a Pact JSON string and adds all the interactions to the pool it matches against
 - `DELETE /interactions` Clears all the current interactions so you can start again
 
-## pact-publish
+## pact-publish / pactPublish
 If you plan to use pact testing as part of your CI pipeline you'll probably want to be able to share pact files efficiently between builds. For example a consumer project's build generates a new version of the projects Pact files and they are then used during the providers CI build.
 
 To achieve this we use the Ruby tool called Pact Broker (see below) and the publish command to update the files to it.
@@ -60,7 +65,7 @@ By default, Scala-Pact does not allow you to publish pact files from SNAPSHOT ve
 
 `allowSnapshotPublish := true`
 
-## pact-verify
+## pact-verify / pactVerify
 Once the consumer has defined the contract as CDC tests and exported them to Pact files, they'll deliver them to their provider. The provider then exercises their own API using the Pact files via a verifier.
 
 The verifier is quite a simple idea: load a Pact file, make all the requests and compare all the responses to the expected ones.
