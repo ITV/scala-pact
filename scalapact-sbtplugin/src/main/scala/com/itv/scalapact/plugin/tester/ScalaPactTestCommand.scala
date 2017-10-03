@@ -1,5 +1,6 @@
 package com.itv.scalapact.plugin.tester
 
+import com.itv.scalapact.plugin.ScalaPactPlugin
 import com.itv.scalapact.shared.{IPactReader, IPactWriter, ScalaPactSettings}
 import com.itv.scalapact.shared.ColourOuput._
 import sbt._
@@ -24,7 +25,7 @@ object ScalaPactTestCommand {
       val cleanState = Command.process("clean", state)
       val testedState = Command.process("test", cleanState)
 
-      doPactPack(ScalaPactSettings.parseArguments(args))
+      doPactPack(Project.extract(testedState).get(ScalaPactPlugin.autoImport.scalaPactEnv).toSettings + ScalaPactSettings.parseArguments(args))
 
       testedState
     }

@@ -17,7 +17,7 @@ object ScalaPactPublishCommand {
     val pactTestedState = Command.process("pact-test", state)
 
     doPactPublish(
-      ScalaPactSettings.parseArguments(args),
+      Project.extract(state).get(ScalaPactPlugin.autoImport.scalaPactEnv).toSettings + ScalaPactSettings.parseArguments(args),
       Project.extract(pactTestedState).get(ScalaPactPlugin.autoImport.pactBrokerAddress),
       Project.extract(pactTestedState).get(ScalaPactPlugin.autoImport.providerBrokerPublishMap),
       Project.extract(pactTestedState).get(Keys.version),

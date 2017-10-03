@@ -11,6 +11,9 @@ case class ScalaPactSettings(protocol: Option[String], host: Option[String], por
   val giveClientTimeout: Duration = clientTimeout.getOrElse(Duration(1, SECONDS))
   val giveOutputPath: String = outputPath.getOrElse(Properties.envOrElse("pact.rootDir", "target/pacts"))
 
+  def +(other: ScalaPactSettings): ScalaPactSettings =
+    ScalaPactSettings.append(this, other)
+
   def withProtocol(protocol: String): ScalaPactSettings =
     this.copy(protocol = Option(protocol))
 
@@ -55,6 +58,17 @@ object ScalaPactSettings {
 
   val parseArguments: Seq[String] => ScalaPactSettings = args =>
     (Helpers.pair andThen convertToArguments)(args.toList)
+
+  def append(a: ScalaPactSettings, b: ScalaPactSettings): ScalaPactSettings =
+    ScalaPactSettings(
+      host = b.host.orElse(a.host),
+      protocol = b.protocol.orElse(a.protocol),
+      port = b.port.orElse(a.port),
+      localPactFilePath = b.localPactFilePath.orElse(a.localPactFilePath),
+      strictMode = b.strictMode.orElse(a.strictMode),
+      clientTimeout = b.clientTimeout.orElse(a.clientTimeout),
+      outputPath = b.outputPath.orElse(a.outputPath)
+    )
 
   private lazy val convertToArguments: Map[String, String] => ScalaPactSettings = argMap =>
     ScalaPactSettings(

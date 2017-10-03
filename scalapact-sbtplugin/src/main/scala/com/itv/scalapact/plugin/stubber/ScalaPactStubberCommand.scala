@@ -1,5 +1,6 @@
 package com.itv.scalapact.plugin.stubber
 
+import com.itv.scalapact.plugin.ScalaPactPlugin
 import sbt._
 import com.itv.scalapact.shared.http.PactStubService._
 import com.itv.scalapactcore.stubber.InteractionManager
@@ -21,7 +22,10 @@ object ScalaPactStubberCommand {
 
     val pactTestedState = Command.process("pact-test", state)
 
-    runStubber(ScalaPactSettings.parseArguments(args), interactionManagerInstance)
+    runStubber(
+      Project.extract(state).get(ScalaPactPlugin.autoImport.scalaPactEnv).toSettings + ScalaPactSettings.parseArguments(args),
+      interactionManagerInstance
+    )
 
     pactTestedState
   }

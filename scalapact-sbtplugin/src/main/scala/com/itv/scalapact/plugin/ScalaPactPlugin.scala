@@ -130,6 +130,9 @@ object ScalaPactPlugin extends AutoPlugin {
 
 case class ScalaPactEnv(protocol: Option[String], host: Option[String], port: Option[Int], localPactFilePath: Option[String], strictMode: Option[Boolean], clientTimeout: Option[Duration], outputPath: Option[String]) {
 
+  def +(other: ScalaPactEnv): ScalaPactEnv =
+    ScalaPactEnv.append(this, other)
+
   def withProtocol(protocol: String): ScalaPactEnv =
     this.copy(protocol = Option(protocol))
 
@@ -165,4 +168,14 @@ object ScalaPactEnv {
 
   def default: ScalaPactEnv = ScalaPactEnv(None, None, None, None, None, None, None)
 
+  def append(a: ScalaPactEnv, b: ScalaPactEnv): ScalaPactEnv =
+    ScalaPactEnv(
+      host = b.host.orElse(a.host),
+      protocol = b.protocol.orElse(a.protocol),
+      port = b.port.orElse(a.port),
+      localPactFilePath = b.localPactFilePath.orElse(a.localPactFilePath),
+      strictMode = b.strictMode.orElse(a.strictMode),
+      clientTimeout = b.clientTimeout.orElse(a.clientTimeout),
+      outputPath = b.outputPath.orElse(a.outputPath)
+    )
 }

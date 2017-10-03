@@ -23,7 +23,7 @@ object ScalaPactVerifyCommand {
   private lazy val pactVerify: (State, Seq[String]) => State = (state, args) => {
 
     doPactVerify(
-      ScalaPactSettings.parseArguments(args),
+      Project.extract(state).get(ScalaPactPlugin.autoImport.scalaPactEnv).toSettings + ScalaPactSettings.parseArguments(args),
       Project.extract(state).get(ScalaPactPlugin.autoImport.providerStates),
       Project.extract(state).get(ScalaPactPlugin.autoImport.providerStateMatcher),
       Project.extract(state).get(ScalaPactPlugin.autoImport.pactBrokerAddress),
