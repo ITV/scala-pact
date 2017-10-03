@@ -12,6 +12,8 @@ print_warning() {
 
 trap print_warning ERR
 
+bash scripts/check-versions.sh
+
 echo -e "Have you run the local tests and are you confident in the build? [y/n] \c"
 read CONFIRM
 
@@ -22,34 +24,6 @@ else
   echo "Ok, here we go..."
 fi
 
-sbt clean update compile
+bash release-stage1-libs.sh
 
-echo ""
-echo ">>> Core"
-sbt core_2_10/test
-sbt core_2_10/publishSigned
-sbt core_2_10/sonatypeRelease
-sbt core_2_11/test
-sbt core_2_11/publishSigned
-sbt core_2_11/sonatypeRelease
-sbt core_2_12/test
-sbt core_2_12/publishSigned
-sbt core_2_12/sonatypeRelease
-
-echo ""
-echo ">>> Plugin"
-sbt plugin/test
-sbt plugin/publishSigned
-sbt plugin/sonatypeRelease
-
-echo ""
-echo ">>> Test Framework (2.11)"
-sbt framework_2_11/test
-sbt framework_2_11/publishSigned
-sbt framework_2_11/sonatypeRelease
-
-echo ""
-echo ">>> Test Framework (2.12)"
-sbt framework_2_12/test
-sbt framework_2_12/publishSigned
-sbt framework_2_12/sonatypeRelease
+bash release-stage2-main.sh
