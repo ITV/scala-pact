@@ -29,13 +29,49 @@ lazy val commonSettings = Seq(
   )
 )
 
+lazy val publishSettings = Seq(
+  publishTo := {
+    val nexus = "https://oss.sonatype.org/"
+    if (isSnapshot.value)
+      Some("snapshots" at nexus + "content/repositories/snapshots")
+    else
+      Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+  },
+  publishMavenStyle := true,
+  publishArtifact in Test := false,
+  pomIncludeRepository := { _ => false },
+  pomExtra :=
+    <url>https://github.com/ITV/scala-pact</url>
+      <licenses>
+        <license>
+          <name>ITV-OSS</name>
+          <url>http://itv.com/itv-oss-licence-v1.0</url>
+          <distribution>repo</distribution>
+        </license>
+      </licenses>
+      <scm>
+        <url>git@github.com:itv/scala-pact.git</url>
+        <connection>scm:git:git@github.com:itv/scala-pact.git</connection>
+      </scm>
+      <developers>
+        <developer>
+          <id>davesmith00000</id>
+          <name>David Smith</name>
+          <organization>ITV</organization>
+          <organizationUrl>http://www.itv.com</organizationUrl>
+        </developer>
+      </developers>
+)
+
 val scala210: String = "2.10.6"
 val scala211: String = "2.11.11"
 val scala212: String = "2.12.3"
 
 lazy val shared =
   (project in file("scalapact-shared"))
-    .settings(commonSettings: _*).cross
+    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
+    .cross
 
 lazy val shared_2_10 = shared(scala210)
 lazy val shared_2_11 = shared(scala211)
@@ -43,7 +79,9 @@ lazy val shared_2_12 = shared(scala212)
 
 lazy val core =
   (project in file("scalapact-core"))
-    .settings(commonSettings: _*).cross
+    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
+    .cross
 
 lazy val core_2_10 = core(scala210)
   .dependsOn(shared_2_10)
@@ -69,7 +107,9 @@ lazy val core_2_12 = core(scala212)
 
 lazy val http4s0150a =
   (project in file("scalapact-http4s-0-15-0a"))
-    .settings(commonSettings: _*).cross
+    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
+    .cross
 
 lazy val http4s0150a_2_10 = http4s0150a(scala210).dependsOn(shared_2_10)
 lazy val http4s0150a_2_11 = http4s0150a(scala211).dependsOn(shared_2_11)
@@ -77,7 +117,9 @@ lazy val http4s0150a_2_12 = http4s0150a(scala212).dependsOn(shared_2_12)
 
 lazy val http4s0162a =
   (project in file("scalapact-http4s-0-16-2a"))
-    .settings(commonSettings: _*).cross
+    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
+    .cross
 
 lazy val http4s0162a_2_10 = http4s0162a(scala210).dependsOn(shared_2_10)
 lazy val http4s0162a_2_11 = http4s0162a(scala211).dependsOn(shared_2_11)
@@ -85,7 +127,9 @@ lazy val http4s0162a_2_12 = http4s0162a(scala212).dependsOn(shared_2_12)
 
 lazy val http4s0162 =
   (project in file("scalapact-http4s-0-16-2"))
-    .settings(commonSettings: _*).cross
+    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
+    .cross
 
 lazy val http4s0162_2_10 = http4s0162(scala210).dependsOn(shared_2_10)
 lazy val http4s0162_2_11 = http4s0162(scala211).dependsOn(shared_2_11)
@@ -93,7 +137,9 @@ lazy val http4s0162_2_12 = http4s0162(scala212).dependsOn(shared_2_12)
 
 lazy val http4s0170 =
   (project in file("scalapact-http4s-0-17-0"))
-    .settings(commonSettings: _*).cross
+    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
+    .cross
 
 //lazy val http4s0170_2_10 = http4s0170(scala210).dependsOn(shared_2_10)
 lazy val http4s0170_2_11 = http4s0170(scala211).dependsOn(shared_2_11)
@@ -101,7 +147,9 @@ lazy val http4s0170_2_12 = http4s0170(scala212).dependsOn(shared_2_12)
 
 lazy val argonaut62 =
   (project in file("scalapact-argonaut-6-2"))
-    .settings(commonSettings: _*).cross
+    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
+    .cross
 
 lazy val argonaut62_2_10 = argonaut62(scala210).dependsOn(shared_2_10)
 lazy val argonaut62_2_11 = argonaut62(scala211).dependsOn(shared_2_11)
@@ -109,7 +157,9 @@ lazy val argonaut62_2_12 = argonaut62(scala212).dependsOn(shared_2_12)
 
 lazy val argonaut61 =
   (project in file("scalapact-argonaut-6-1"))
-    .settings(commonSettings: _*).cross
+    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
+    .cross
 
 lazy val argonaut61_2_10 = argonaut61(scala210).dependsOn(shared_2_10)
 lazy val argonaut61_2_11 = argonaut61(scala211).dependsOn(shared_2_11)
@@ -117,7 +167,9 @@ lazy val argonaut61_2_11 = argonaut61(scala211).dependsOn(shared_2_11)
 
 lazy val circe08 =
   (project in file("scalapact-circe-0-8"))
-    .settings(commonSettings: _*).cross
+    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
+    .cross
 
 lazy val circe08_2_10 = circe08(scala210).dependsOn(shared_2_10).settings(
   addCompilerPlugin(
@@ -129,7 +181,8 @@ lazy val circe08_2_12 = circe08(scala212).dependsOn(shared_2_12)
 
 lazy val pactSpec =
   (project in file("pact-spec-tests"))
-    .settings(commonSettings: _*).cross
+    .settings(commonSettings: _*)
+    .cross
 
 lazy val pactSpec_2_10 = pactSpec(scala210).dependsOn(core_2_10, argonaut62_2_10)
 lazy val pactSpec_2_11 = pactSpec(scala211).dependsOn(core_2_11, argonaut62_2_11)
@@ -138,6 +191,7 @@ lazy val pactSpec_2_12 = pactSpec(scala212).dependsOn(core_2_12, argonaut62_2_12
 lazy val plugin =
   (project in file("scalapact-sbtplugin"))
     .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
     .dependsOn(core_2_10)
     .dependsOn(argonaut62_2_10 % "provided")
     .dependsOn(http4s0150a_2_10 % "provided")
@@ -150,6 +204,7 @@ lazy val plugin =
 lazy val framework =
   (project in file("scalapact-scalatest"))
     .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
     .cross
 
 lazy val framework_2_11 =
