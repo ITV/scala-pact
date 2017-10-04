@@ -22,7 +22,7 @@ addCommandAlias("quickcompile", ";shared_2_12/compile;core_2_12/compile;argonaut
 addCommandAlias("quicktest", ";shared_2_12/test;core_2_12/test;argonaut62_2_12/test;pactSpec_2_12/test;plugin/test;standalone/test;framework_2_12/test")
 
 lazy val commonSettings = Seq(
-  version := "2.2.0",
+  version := "2.2.0-RC1",
   organization := "com.itv",
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.0.1" % "test"
@@ -49,10 +49,6 @@ lazy val publishSettings = Seq(
           <distribution>repo</distribution>
         </license>
       </licenses>
-      <scm>
-        <url>git@github.com:itv/scala-pact.git</url>
-        <connection>scm:git:git@github.com:itv/scala-pact.git</connection>
-      </scm>
       <developers>
         <developer>
           <id>davesmith00000</id>

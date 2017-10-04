@@ -14,7 +14,7 @@ function crossPublishReal {
     sleep 1
     echo ""
     echo ">>> $NAME"
-    sbt $NAME/clean $NAME/update $NAME/compile $NAME/test $NAME/publishSigned $NAME/sonatypeRelease
+    sbt $NAME/clean $NAME/update $NAME/compile $NAME/test $NAME/publishSigned sonatypeRelease
 }
 
 crossPublishReal "core_2_10"

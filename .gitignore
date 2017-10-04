@@ -8,6 +8,8 @@ project/target
 .sbt-local
 sbt
 .ensime*
+pgp.sbt
+credentials.sbt
 
 # Misc
 .DS_Store
