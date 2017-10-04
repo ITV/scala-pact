@@ -12,7 +12,44 @@ With thanks to all contributors!
 - [BenParker22]
 - [jtsmith0107]
 - [yasuba]
+- [phil-rice]
 - ...your name here? :-)
+
+Work has been carried out by [davesmith00000] unless otherwise specified.
+
+## 2.2.0 - 2017-10-04
+**Breaking changes.**
+
+With thanks to [yasuba] and [itsDanOades] for assisting with this release.
+
+Highlights:
+- Accepts basic auth for Pact Broker addresses ([phil-rice])
+- Output dir (target/pacts) is now configurable via SBT config and environment variable "pact.rootDir" ([fergusstrange])
+- Publish to multiple provider pact brokers
+- **[BREAKING]** Matching logic completely rewritten (this could break existing tests in one or two cases, but once fixed they will be correct by the Pact Specification)
+- **[BREAKING]** No more dependency conflicts
+  - No external lib dependancies in any of the core libraries.
+  - You must tell Scala-Pact which Http and JSON libraries to use (see setup guide).
+  - JSON support via either Argonaut 6.1, Argonaut 6.2, or Circe 0.8.0
+  - HTTP support via Http4s versions 0.15.0a, 0.16.2, 0.16.2a, or 0.17.0
+  - Example projects use a range of Scala and lib combinations to prove they work (to be expanded)
+- **[BREAKING]** Renamed sbt plugin to sbt-scalapact
+- Composable SBT Tasks (pactPack, packPush, pactStub, and pactCheck)
+- Scala-Pact env config (e.g. port and local dir) is now defined in the build sbt file.
+  - Commands inherit and can override via the usual command line arguments.
+
+Bug fixes:
+- Scala-Pact can now be used reliably inside SBT to avoid constantly starting SBT from cold.
+- Issues with matching rules and how they deal with deep or multiple layers of wildcards have been resolved.
+- Regex matching of values no longer expects an exact match, instead expects to find at least one match.
+
+Other improvements for contributors:
+- Converted to multi-project build
+- Many more modules, improved separation of concerns
+  - Extending support for alternate HTTP and JSON frameworks is now easy.
+- Better build / test scripts include testing cross compilation
+- Simpler project version management
+- Release script improvements
 
 ## 2.1.3 - 2017-03-24
 - Convert SBT plugin to AutoPlugin ([yasuba])
@@ -73,3 +110,5 @@ With thanks to all contributors!
 [BenParker22]: https://github.com/BenParker22
 [jtsmith0107]: https://github.com/jtsmith0107
 [yasuba]: https://github.com/yasuba
+[phil-rice]: https://github.com/phil-rice
+[fergusstrange]: https://github.com/fergusstrange
