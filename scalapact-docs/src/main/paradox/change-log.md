@@ -13,6 +13,7 @@ With thanks to all contributors!
 - [jtsmith0107]
 - [yasuba]
 - [phil-rice]
+- [fergusstrange]
 - ...your name here? :-)
 
 Maintained by [davesmith00000].
