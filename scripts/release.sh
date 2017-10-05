@@ -24,6 +24,12 @@ else
   echo "Ok, here we go..."
 fi
 
+echo ""
+echo "Starting Stage 1 Deploy"
+
 bash release-stage1-libs.sh
+
+echo ""
+echo "Starting Stage 2 Deploy"
 
 bash release-stage2-main.sh
