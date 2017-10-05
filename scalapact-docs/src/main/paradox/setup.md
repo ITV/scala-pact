@@ -1,6 +1,7 @@
 # Setup guide
 
 Scala-Pact is comprised of two parts:
+
 1. The test framework - used for writing CDC tests in ScalaTest
 1. The plugin - used for running Scala-Pact's tasks and commands
 

@@ -24,7 +24,7 @@ Note that one contract file is created per test at this point, meaning you can h
 
 Enter a new task!
 
-3. `sbt pactPack` simply takes all of the generated files and squashes them into one file per consumer <-> provider relationship.
+`sbt pactPack` simply takes all of the generated files and squashes them into one file per consumer <-> provider relationship.
 
 Simple enough, but what if you forget to run `clean` initially? How will `pactPack` know NOT to include out of date pact artefacts? Short answer: It won't!
 
