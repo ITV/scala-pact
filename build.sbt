@@ -22,7 +22,7 @@ addCommandAlias("quickcompile", ";shared_2_12/compile;core_2_12/compile;argonaut
 addCommandAlias("quicktest", ";shared_2_12/test;core_2_12/test;argonaut62_2_12/test;pactSpec_2_12/test;plugin/test;standalone/test;framework_2_12/test")
 
 lazy val commonSettings = Seq(
-  version := "2.2.0-RC1",
+  version := "2.2.0",
   organization := "com.itv",
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.0.1" % "test"
