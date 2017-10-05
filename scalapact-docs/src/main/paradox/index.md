@@ -8,7 +8,7 @@
 * [Articles](articles/index.md)
 * [Example projects](examples/index.md)
 * [Get help](help.md)
-* [Dependancies](project-deps.md)
+* [Dependency Matrix](project-deps.md)
 * [Roadmap](roadmap.md)
 * [Change log](change-log.md)
 * [Contributing](contributing.md)
