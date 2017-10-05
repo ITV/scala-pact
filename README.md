@@ -1,5 +1,5 @@
 # Scala-Pact
-A library for generating Consumer Driven Contract files in Scala projects following the PACT standard using [ScalaTest](http://www.scalatest.org/). Includes supporting tools that use Pact files to verify and stub services.
+A Consumer Driven Contract testing library for Scala and [ScalaTest](http://www.scalatest.org/) that follows the [Pact](https://docs.pact.io/) standard.
 
 Scala-Pact is intended for Scala developers who are looking for a better way to manage the HTTP contracts between their services.
 
@@ -7,7 +7,7 @@ Scala-Pact is intended for Scala developers who are looking for a better way to 
 
 To get started with SBT:
 
-Add the following line to you `build.sbt` file to setup the test framework:
+Add the following lines to your `build.sbt` file to setup the test framework:
 ```scala
 
 import com.itv.scalapact.plugin._
@@ -22,7 +22,7 @@ libraryDependencies ++= Seq(
 )
 ```
 
-Add this line to your `project/plugins.sbt` file to install the plugin:
+Add these lines to your `project/plugins.sbt` file to install the plugin:
 ```scala
 libraryDependencies ++= Seq(
   "com.itv" %% "scalapact-argonaut-6-2"  % "2.2.0",
