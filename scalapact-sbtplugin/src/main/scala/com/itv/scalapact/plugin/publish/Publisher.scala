@@ -19,7 +19,7 @@ object Publisher {
         PublishFailed("Validation error", l)
 
       case Right(v) =>
-        val address = v.validatedAddress + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + "/version/" + versionToPublishAs.replace("-SNAPSHOT", ".x")
+        val address = v.validatedAddress.address + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + "/version/" + versionToPublishAs.replace("-SNAPSHOT", ".x")
 
         val context = s"Publishing '${v.consumerName} -> ${v.providerName}' to:\n > $address".yellow
 
