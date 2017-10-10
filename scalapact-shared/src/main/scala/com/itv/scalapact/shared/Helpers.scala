@@ -7,30 +7,20 @@ import scala.util.control.NonFatal
 
 object Helpers {
 
-  val pair: List[String] => Map[String, String] = list => {
+  def pair[A]: List[A] => Map[A, A] = list =>
+    pairTuples(list).foldLeft(Map.empty[A, A])(_ + _)
+
+  def pairTuples[A]: List[A] => List[(A, A)] = list => {
     @annotation.tailrec
-    def rec[A](l: List[A], acc: List[Map[A, A]]): List[Map[A, A]] = {
+    def rec(l: List[A], acc: List[(A, A)]): List[(A, A)] = {
       l match {
         case Nil => acc
         case _ :: Nil => acc
-        case x :: xs => rec(l.drop(2), Map(x -> xs.head) :: acc)
+        case x :: y :: _ => rec(l.drop(2), (x, y) :: acc)
       }
     }
 
-    rec(list, Nil).foldLeft(Map[String, String]())(_ ++ _)
-  }
-
-  val pairTuples: List[String] => List[(String, String)] = list => {
-    @annotation.tailrec
-    def rec[A](l: List[A], acc: List[(A, A)]): List[(A, A)] = {
-      l match {
-        case Nil => acc
-        case _ :: Nil => acc
-        case x :: xs => rec(l.drop(2), (x, xs.head) :: acc)
-      }
-    }
-
-    rec(list, Nil).foldLeft(List[(String, String)]())((a, b) => b :: a)
+    rec(list, Nil).foldLeft(List[(A, A)]())((a, b) => b :: a)
   }
 
   val safeStringToInt: String => Option[Int] = s =>
