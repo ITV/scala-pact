@@ -8,14 +8,14 @@ scalacOptions ++= Seq(
   "-language:existentials",
   "-language:higherKinds",
   "-language:implicitConversions",
-  "-unchecked"
+  "-unchecked",
   //  "-Xfatal-warnings",
-  //  "-Xlint",
-  //  "-Yno-adapted-args",
-  //  "-Ywarn-dead-code",        // N.B. doesn't work well with the ??? hole
-  //  "-Ywarn-numeric-widen",
-  //  "-Ywarn-value-discard",
-  //  "-Xfuture"
+  "-Xlint",
+  "-Yno-adapted-args",
+  "-Ywarn-dead-code",        // N.B. doesn't work well with the ??? hole
+  "-Ywarn-numeric-widen",
+  "-Ywarn-value-discard",
+  "-Xfuture"
 )
 
 addCommandAlias("quickcompile", ";shared_2_12/compile;core_2_12/compile;argonaut62_2_12/compile;pactSpec_2_12/compile;plugin/compile;standalone/compile;framework_2_12/compile")
