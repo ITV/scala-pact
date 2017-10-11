@@ -5,7 +5,7 @@ import org.http4s.client.Client
 
 import scala.concurrent.duration._
 import scala.concurrent.{Future, Promise}
-import scala.language.{implicitConversions, postfixOps}
+import scala.language.implicitConversions
 import scalaz.concurrent.Task
 
 object ScalaPactHttpClient extends IScalaPactHttpClient {

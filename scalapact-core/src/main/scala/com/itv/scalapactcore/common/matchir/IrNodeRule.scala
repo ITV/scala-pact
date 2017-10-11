@@ -3,6 +3,7 @@ package com.itv.scalapactcore.common.matchir
 import com.itv.scalapact.shared.MatchingRule
 import com.itv.scalapactcore.common.matchir.PactPathParseResult.{PactPathParseFailure, PactPathParseSuccess}
 
+import scala.annotation.tailrec
 import scala.util.Random
 
 case class RuleProcessTracing(enabled: Boolean, id: String, context: Option[String]) {
@@ -287,6 +288,7 @@ object IrNodeMatchingRules {
         }
     }
 
+    @tailrec
     def rec(remaining: List[Either[String, IrNodeMatchingRules]], errorAcc: List[String], rulesAcc: IrNodeMatchingRules): Either[String, IrNodeMatchingRules] =
       remaining match {
         case Nil if errorAcc.nonEmpty =>

@@ -441,8 +441,8 @@ object IrNodePath {
   def renderAsString(path: IrNodePath): String = {
     def rec(irNodePath: IrNodePath, acc: String): String =
       irNodePath match {
-        case p @ IrNodePathEmpty if acc.isEmpty =>
-          p.name
+        case IrNodePathEmpty if acc.isEmpty =>
+          IrNodePathEmpty.name
 
         case IrNodePathEmpty =>
           if(acc.startsWith(".[")) acc.drop(1) else acc
