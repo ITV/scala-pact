@@ -137,7 +137,7 @@ object ScalaPactVerify {
             )
         }
 
-        val v = Verifier.verify(LocalPactFileLoader.loadPactFiles, verifySettings)
+        val v = Verifier.verify(LocalPactFileLoader.loadPactFiles(pactReader)(true), verifySettings)
 
         if(v(arguments)) () else throw new ScalaPactVerifyFailed
       }

@@ -43,7 +43,7 @@ object ScalaPactPublishCommand {
       println("Pact broker does not cope well with snapshot contracts.".yellow)
       println("To enable this feature, add \"allowSnapshotPublish := true\" to your pact.sbt file.".yellow)
     } else {
-      val configAndPactFiles = LocalPactFileLoader.loadPactFiles(pactReader)(scalaPactSettings.giveOutputPath)(scalaPactSettings)
+      val configAndPactFiles = LocalPactFileLoader.loadPactFiles(pactReader)(false)(scalaPactSettings.giveOutputPath)(scalaPactSettings)
 
       // Publish all to main broker
       publishToBroker(ScalaPactHttpClient.doRequestSync, pactBrokerAddress, versionToPublishAs)(pactWriter)(configAndPactFiles).foreach(r => println(r.renderAsString))

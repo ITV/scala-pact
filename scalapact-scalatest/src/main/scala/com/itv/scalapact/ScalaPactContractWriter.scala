@@ -27,7 +27,7 @@ object ScalaPactContractWriter {
       .map("%02x".format(_))
       .mkString
 
-    val relativePath = outputPath + "/" + simplifyName(pactDescription.consumer) + "_" + simplifyName(pactDescription.provider) + "_" + sha1 + ".json"
+    val relativePath = outputPath + "/" + simplifyName(pactDescription.consumer) + "_" + simplifyName(pactDescription.provider) + "_" + sha1 + "_tmp.json"
     val file = new File(relativePath)
 
     if (file.exists()) {

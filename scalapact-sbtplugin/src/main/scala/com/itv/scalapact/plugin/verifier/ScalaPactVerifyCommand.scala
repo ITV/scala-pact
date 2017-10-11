@@ -55,7 +55,7 @@ object ScalaPactVerifyCommand {
           .map(t => VersionedConsumer(t._1, t._2))
     )
 
-    val successfullyVerified = verify(LocalPactFileLoader.loadPactFiles, pactVerifySettings)(pactReader)(scalaPactSettings)
+    val successfullyVerified = verify(LocalPactFileLoader.loadPactFiles(pactReader)(true), pactVerifySettings)(pactReader)(scalaPactSettings)
 
     if (successfullyVerified) sys.exit(0) else sys.exit(1)
 
