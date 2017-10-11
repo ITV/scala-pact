@@ -71,8 +71,8 @@ object ScalaPactVerifyCommand {
       case Nil =>
         patternMatchedStates orElse { case _: String => false }
 
-      case xs: List[PartialFunction[String, Boolean]] =>
-        xs.reduce(_ orElse _) orElse patternMatchedStates orElse { case _: String => false }
+      case x :: xs =>
+        xs.foldLeft(x)(_ orElse _) orElse patternMatchedStates orElse { case _: String => false }
 
     }
   }

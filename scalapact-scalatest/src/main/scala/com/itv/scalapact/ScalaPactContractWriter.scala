@@ -20,7 +20,7 @@ object ScalaPactContractWriter {
       dirFile.mkdirs()
     }
 
-    val string = simplifyName(pactDescription.consumer + pactDescription.provider + pactDescription.interactions.map(_.description).mkString + System.currentTimeMillis())
+    val string = simplifyName(pactDescription.consumer + pactDescription.provider + pactDescription.interactions.map(_.description).mkString + System.currentTimeMillis().toString)
 
     val sha1 = java.security.MessageDigest.getInstance("SHA-1")
       .digest(string.getBytes(StandardCharsets.UTF_8))

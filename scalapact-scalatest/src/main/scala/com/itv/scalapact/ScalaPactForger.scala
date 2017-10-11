@@ -86,7 +86,7 @@ object ScalaPactForger {
   case class ScalaPactInteractionFinal(description: String, providerState: Option[String], request: ScalaPactRequest, response: ScalaPactResponse)
 
   object ScalaPactRequest {
-    val default = ScalaPactRequest(GET, "/", None, Map.empty, None, None)
+    val default: ScalaPactRequest = ScalaPactRequest(GET, "/", None, Map.empty, None, None)
   }
   case class ScalaPactRequest(method: ScalaPactMethod, path: String, query: Option[String], headers: Map[String, String], body: Option[String], matchingRules: Option[List[ScalaPactMatchingRule]])
 
@@ -128,12 +128,12 @@ object ScalaPactForger {
   }
 
   object ScalaPactResponse {
-    val default = ScalaPactResponse(200, Map.empty, None, None)
+    val default: ScalaPactResponse = ScalaPactResponse(200, Map.empty, None, None)
   }
   case class ScalaPactResponse(status: Int, headers: Map[String, String], body: Option[String], matchingRules: Option[List[ScalaPactMatchingRule]])
 
   object ScalaPactOptions {
-    val DefaultOptions = ScalaPactOptions(writePactFiles = true, outputPath = Properties.envOrElse("pact.rootDir", "target/pacts"))
+    val DefaultOptions: ScalaPactOptions = ScalaPactOptions(writePactFiles = true, outputPath = Properties.envOrElse("pact.rootDir", "target/pacts"))
   }
   case class ScalaPactOptions(writePactFiles: Boolean, outputPath: String)
 

@@ -93,8 +93,8 @@ object ScalaPactMock {
       } else if(attemptsRemaining == 0) {
         throw new Exception("Could not connect to stub are: " + mockConfig.baseUrl)
       } else {
-        println(">  ...waiting for stub, attempts remaining: " + attemptsRemaining)
-        Thread.sleep(intervalMillis)
+        println(">  ...waiting for stub, attempts remaining: " + attemptsRemaining.toString)
+        Thread.sleep(intervalMillis.toLong)
         rec(attemptsRemaining - 1, intervalMillis)
       }
     }
@@ -115,5 +115,5 @@ object ScalaPactMock {
 }
 
 case class ScalaPactMockConfig(protocol: String, host: String, port: Int, outputPath: String) {
-  val baseUrl: String = protocol + "://" + host + ":" + port
+  val baseUrl: String = protocol + "://" + host + ":" + port.toString
 }

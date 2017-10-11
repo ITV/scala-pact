@@ -40,7 +40,7 @@ object ScalaPactTestCommand {
     if (pactDir.exists && pactDir.isDirectory) {
       val files = pactDir.listFiles().toList.filter(f => f.getName.endsWith(".json"))
 
-      println(("> " + files.length + " files found that could be Pact contracts").white.bold)
+      println(("> " + files.length.toString + " files found that could be Pact contracts").white.bold)
       println(files.map("> - " + _.getName).mkString("\n").white)
 
       val groupedFileList: List[(String, List[File])] = files.groupBy { f =>
@@ -51,9 +51,9 @@ object ScalaPactTestCommand {
         squashPactFiles(scalaPactSettings.giveOutputPath, g._1, g._2)
       }.sum
 
-      println(("> " + groupedFileList.length + " pacts found:").white.bold)
+      println(("> " + groupedFileList.length.toString + " pacts found:").white.bold)
       println(groupedFileList.map(g => "> - " + g._1.replace("_", " -> ") + "\n").mkString)
-      println("> " + errorCount + " errors")
+      println("> " + errorCount.toString + " errors")
 
     } else {
       println(s"No Pact files found in '${scalaPactSettings.giveOutputPath}'. Make sure you have Pact CDC tests and have run 'sbt test' or 'sbt pact-test'.".red)
@@ -90,13 +90,18 @@ object ScalaPactTestCommand {
         .collect { case Some(s) => s }
     }
 
-    if (pactList.nonEmpty) {
-      val head = pactList.head
-      val combined = pactList.tail.foldLeft(head) { (accumulatedPact, nextPact) =>
-        accumulatedPact.copy(interactions = accumulatedPact.interactions ++ nextPact.interactions)
-      }
+    pactList match {
+      case Nil =>
+        ()
 
-      PactContractWriter.writePactContracts(outputPath)(combined.provider.name)(combined.consumer.name)(pactWriter.pactToJsonString(combined))
+      case x :: xs =>
+        val combined = xs.foldLeft(x) { (accumulatedPact, nextPact) =>
+          accumulatedPact.copy(interactions = accumulatedPact.interactions ++ nextPact.interactions)
+        }
+
+        PactContractWriter.writePactContracts(outputPath)(combined.provider.name)(combined.consumer.name)(pactWriter.pactToJsonString(combined))
+
+        ()
     }
 
     errorCount

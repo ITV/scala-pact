@@ -9,7 +9,7 @@ import com.itv.scalapactcore.common.PactReaderWriter._
 
 object PactStubber {
 
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
 
     println("*************************************".white.bold)
     println("** ScalaPact: Running Stubber      **".white.bold)

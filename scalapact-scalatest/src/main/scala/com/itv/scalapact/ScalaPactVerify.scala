@@ -139,7 +139,7 @@ object ScalaPactVerify {
 
         val v = Verifier.verify(LocalPactFileLoader.loadPactFiles, verifySettings)
 
-        if(v(arguments)) Unit else throw new ScalaPactVerifyFailed
+        if(v(arguments)) () else throw new ScalaPactVerifyFailed
       }
     }
 
