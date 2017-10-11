@@ -56,7 +56,7 @@ object PactWriter extends IPactWriter {
           withResponseBody
         }.collect { case Some(s) => s }
 
-    val json =
+    val json: Option[Json] =
       pact.copy(interactions = Nil)
         .asJson
         .hcursor
@@ -66,7 +66,7 @@ object PactWriter extends IPactWriter {
 
     // I don't believe you can ever see this exception.
     json
-      .getOrElse(throw new Exception("Something went really wrong serialising the following pact into json: " + pact))
+      .getOrElse(throw new Exception("Something went really wrong serialising the following pact into json: " + pact.renderAsString))
       .pretty(Printer.spaces2.copy(dropNullKeys = true))
   }
 

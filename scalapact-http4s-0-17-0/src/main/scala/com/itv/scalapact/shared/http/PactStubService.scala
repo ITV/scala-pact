@@ -23,8 +23,8 @@ object PactStubService {
   private implicit val strategy: Strategy = Strategy.fromExecutionContext(ExecutionContext.fromExecutorService(executorService))
 
   def startServer(interactionManager: IInteractionManager)(implicit pactReader: IPactReader, pactWriter: IPactWriter): ScalaPactSettings => Unit = config => {
-    println(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort).white.bold)
-    println(("Strict matching mode: " + config.giveStrictMode).white.bold)
+    println(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold)
+    println(("Strict matching mode: " + config.giveStrictMode.toString).white.bold)
 
     runServer(interactionManager, nThreads)(pactReader, pactWriter)(config).awaitShutdown()
   }
@@ -86,7 +86,7 @@ object PactStubService {
       interactionManager.findMatchingInteraction(
         InteractionRequest(
           method = Option(req.method.name.toUpperCase),
-          headers = Option(req.headers),
+          headers = req.headers,
           query = if(req.params.isEmpty) None else Option(req.params.toList.map(p => p._1 + "=" + p._2).mkString("&")),
           path = Option(req.pathInfo),
           body = req.bodyAsText.runLog.map(body => Option(body.mkString)).unsafeRun(),

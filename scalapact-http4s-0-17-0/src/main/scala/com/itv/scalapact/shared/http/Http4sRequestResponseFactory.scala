@@ -25,7 +25,7 @@ object Http4sRequestResponseFactory {
   def buildUri(baseUrl: String, endpoint: String): Task[Uri] =
     Uri.fromString(baseUrl + endpoint).leftMap(l => new Exception(l.message))
 
-  def intToStatus(status: IntAndReason): Task[Status] =
+  def intToStatus(status: IntAndReason): ParseResult[Status] =
     status match {
       case IntAndReason(code, Some(reason)) =>
         Status.fromIntAndReason(code, reason)
@@ -69,18 +69,22 @@ object Http4sRequestResponseFactory {
     }
 
   def buildResponse(status: IntAndReason, headers: Map[String, String], body: Option[String])(implicit strategy: Strategy): Task[Response] =
-    intToStatus(status).flatMap { code =>
-      val response = Response(
-        status = code,
-        httpVersion = HttpVersion.`HTTP/1.1`,
-        headers = headers,
-        body = EmptyBody,
-        attributes = AttributeMap.empty
-      )
+    intToStatus(status) match {
+      case Left(l) =>
+        l.toHttpResponse(HttpVersion.`HTTP/1.1`)
 
-      body.map { b =>
-        response.withBody(b)(EntityEncoder.simple()(stringToByteVector))
-      }.getOrElse(Task(response))
+      case Right(code) =>
+        val response = Response(
+          status = code,
+          httpVersion = HttpVersion.`HTTP/1.1`,
+          headers = headers,
+          body = EmptyBody,
+          attributes = AttributeMap.empty
+        )
+
+        body.map { b =>
+          response.withBody(b)(EntityEncoder.simple()(stringToByteVector))
+        }.getOrElse(Task(response))
     }
 
 }

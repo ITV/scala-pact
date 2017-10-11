@@ -56,14 +56,14 @@ object PactWriter extends IPactWriter {
 
     val pactNoInteractionsAsJson = pact.copy(interactions = Nil).asJson
 
-    val json = for {
+    val json: Option[Json] = for {
       interactionsField <- pactNoInteractionsAsJson.cursor.downField("interactions")
       updated <- Option(interactionsField.withFocus(_.withArray(p => interactions)))
     } yield updated.undo
 
     // I don't believe you can ever see this exception.
     json
-      .getOrElse(throw new Exception("Something went really wrong serialising the following pact into json: " + pact))
+      .getOrElse(throw new Exception("Something went really wrong serialising the following pact into json: " + pact.renderAsString))
       .pretty(PrettyParams.spaces2.copy(dropNullKeys = true))
   }
 

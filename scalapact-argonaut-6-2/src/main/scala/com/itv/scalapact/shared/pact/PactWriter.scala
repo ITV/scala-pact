@@ -56,7 +56,7 @@ object PactWriter extends IPactWriter {
 
     val pactNoInteractionsAsJson = pact.copy(interactions = Nil).asJson
 
-    val json = for {
+    val json: Option[Json] = for {
       interactionsField <- pactNoInteractionsAsJson.cursor.downField("interactions")
       updated <- Option(interactionsField.withFocus(_.withArray(p => interactions)))
     } yield updated.undo
