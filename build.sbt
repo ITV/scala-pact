@@ -88,7 +88,8 @@ lazy val commonSettings = Seq(
     Wart.Equals,
     Wart.Recursion,
     Wart.LeakingSealed,
-    Wart.Null
+    Wart.Null,
+    Wart.Var
   )
 )
 

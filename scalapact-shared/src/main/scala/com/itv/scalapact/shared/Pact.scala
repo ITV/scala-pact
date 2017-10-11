@@ -1,8 +1,34 @@
 package com.itv.scalapact.shared
 
-case class Pact(provider: PactActor, consumer: PactActor, interactions: List[Interaction])
-case class PactActor(name: String)
-case class Interaction(provider_state: Option[String], providerState: Option[String], description: String, request: InteractionRequest, response: InteractionResponse)
+case class Pact(provider: PactActor, consumer: PactActor, interactions: List[Interaction]) {
+
+  def renderAsString: String =
+    s"""Pact
+       |  consumer: [${consumer.renderAsString}]
+       |  provider: [${provider.renderAsString}]
+       |  interactions:
+       |${interactions.map(_.renderAsString).mkString("\n")}
+     """.stripMargin
+
+}
+
+case class PactActor(name: String) {
+
+  def renderAsString: String =
+    s"""$name"""
+
+}
+case class Interaction(provider_state: Option[String], providerState: Option[String], description: String, request: InteractionRequest, response: InteractionResponse) {
+
+  def renderAsString: String =
+    s"""Interaction
+      |  providerState: [${providerState.orElse(provider_state).getOrElse("<none>")}]
+      |  description:   [$description]
+      |  ${request.renderAsString}
+      |  ${response.renderAsString}
+    """.stripMargin
+
+}
 case class InteractionRequest(method: Option[String], path: Option[String], query: Option[String], headers: Option[Map[String, String]], body: Option[String], matchingRules: Option[Map[String, MatchingRule]]) {
   def unapply: Option[(Option[String], Option[String], Option[String], Option[Map[String, String]], Option[String])] = Some {
     (method, path, query, headers, body)

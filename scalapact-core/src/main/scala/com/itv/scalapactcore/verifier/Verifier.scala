@@ -145,7 +145,7 @@ object Verifier {
               t.getMessage
             }
 
-        case _ => Left("Invalid request was missing either method or path: " + interactionRequest)
+        case _ => Left("Invalid request was missing either method or path: " + interactionRequest.renderAsString)
 
       }
     } catch {
@@ -168,7 +168,7 @@ object Verifier {
         }
 
         if(pact.isEmpty) {
-          println("Could not convert good response to Pact:\n" + r.body)
+          println("Could not convert good response to Pact:\n" + r.body.getOrElse(""))
           pact
         } else pact
 

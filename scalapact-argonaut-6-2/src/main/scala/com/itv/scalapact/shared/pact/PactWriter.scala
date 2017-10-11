@@ -63,7 +63,7 @@ object PactWriter extends IPactWriter {
 
     // I don't believe you can ever see this exception.
     json
-      .getOrElse(throw new Exception("Something went really wrong serialising the following pact into json: " + pact))
+      .getOrElse(throw new Exception("Something went really wrong serialising the following pact into json: " + pact.renderAsString))
       .pretty(PrettyParams.spaces2.copy(dropNullKeys = true))
   }
 

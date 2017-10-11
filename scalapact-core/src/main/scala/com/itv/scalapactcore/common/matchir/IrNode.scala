@@ -68,7 +68,7 @@ object IrNodeEqualityResult {
     (strict, isXml, path, rules, parentA, parentB) => (a, b) =>
 
       if(parentA.path.lastSegmentLabel == parentB.path.lastSegmentLabel) {
-        val equality = if (strict) {
+        val equality: IrNodeEqualityResult = if (strict) {
           (a, b) match {
             case (Some(v1: IrNodePrimitive), Some(v2: IrNodePrimitive)) =>
               if (v1 == v2) IrNodesEqual else IrNodesNotEqual(s"Value '${v1.renderAsString}' did not match '${v2.renderAsString}'", path)

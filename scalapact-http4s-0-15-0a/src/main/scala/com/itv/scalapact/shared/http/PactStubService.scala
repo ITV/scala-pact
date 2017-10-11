@@ -8,11 +8,11 @@ import org.http4s.server.Server
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.util.CaseInsensitiveString
 import org.http4s.{HttpService, Request, Response}
-
 import HeaderImplicitConversions._
 import ColourOuput._
 
 import scala.concurrent.duration._
+import scalaz.concurrent.Task
 
 object PactStubService {
 
@@ -59,7 +59,7 @@ object PactStubService {
           Ok(output)
 
         case m if m == "POST" || m == "PUT" && req.pathInfo.startsWith("/interactions") =>
-          pactReader.jsonStringToPact(req.bodyAsText.runLog.map(body => Option(body.mkString)).unsafePerformSync.getOrElse("")) match {
+          pactReader.jsonStringToPact(req.bodyAsText.runLog[Task, String].map(body => Option(body.mkString)).unsafePerformSync.getOrElse("")) match {
             case Right(r) =>
               interactionManager.addInteractions(r.interactions)
 
@@ -83,10 +83,10 @@ object PactStubService {
       interactionManager.findMatchingInteraction(
         InteractionRequest(
           method = Option(req.method.name.toUpperCase),
-          headers = Option(req.headers),
+          headers = req.headers,
           query = if(req.params.isEmpty) None else Option(req.params.toList.map(p => p._1 + "=" + p._2).mkString("&")),
           path = Option(req.pathInfo),
-          body = req.bodyAsText.runLog.map(body => Option(body.mkString)).unsafePerformSync,
+          body = req.bodyAsText.runLog[Task, String].map(body => Option(body.mkString)).unsafePerformSync,
           matchingRules = None
         ),
         strictMatching = strictMatching

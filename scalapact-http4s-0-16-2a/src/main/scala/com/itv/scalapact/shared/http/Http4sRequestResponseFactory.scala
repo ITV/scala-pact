@@ -86,11 +86,14 @@ object Http4sRequestResponseFactory {
 }
 
 object HeaderImplicitConversions {
-  implicit def mapToHeaderList(headers: Map[String, String]): Headers =
-    Headers(headers.toList.map(t => Header(t._1, t._2)))
+  implicit def mapToHeaderList(headerMap: Map[String, String]): Headers =
+    Headers(headerMap.toList.map(t => Header(t._1, t._2)))
 
-  implicit def mapToHeaderList(headers: Headers): Map[String, String] =
+  implicit def headerListToMap(headers: Headers): Map[String, String] =
     headers.toList.map(h => Header.unapply(h)).collect { case Some(h) => (h._1.toString, h._2) }.toMap
+
+  implicit def headerListToMaybeMap(headers: Headers): Option[Map[String, String]] =
+    Option(headerListToMap(headers))
 }
 
 case class IntAndReason(code: Int, reason: Option[String])

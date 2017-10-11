@@ -72,7 +72,7 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
         case r @ IrNodeTypeRule(_) =>
           RuleProcessTracing.log("Checking node level type rule against values...")
 
-          val res = (expected.value, actual.value) match {
+          val res: List[IrNodeEqualityResult] = (expected.value, actual.value) match {
             case (Some(e), Some(a)) if expected.path.lastSegmentLabel == actual.path.lastSegmentLabel =>
               if(e.primitiveTypeName == a.primitiveTypeName) List(IrNodesEqual)
               else List(IrNodesNotEqual(s"Primitive type '${e.primitiveTypeName}' did not match actual '${a.primitiveTypeName}'", path))
@@ -98,7 +98,7 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
         case r @ IrNodeRegexRule(_, _) =>
           RuleProcessTracing.log(s"Checking regex on '${actual.value.map(_.renderAsString).getOrElse("<missing>")}'...")
 
-          val res = (expected.value, actual.value) match {
+          val res: List[IrNodeEqualityResult] = (expected.value, actual.value) match {
             case (Some(_), Some(a)) =>
               if (r.regex.r.findAllIn(a.renderAsString).nonEmpty) List(IrNodesEqual)
               else List(IrNodesNotEqual(s"Regex '${r.regex}' did not match actual '${a.renderAsString}'", path))
@@ -120,7 +120,7 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
         case IrNodeMinArrayLengthRule(len, _) =>
           RuleProcessTracing.log("Checking min...")
 
-          val res = List {
+          val res: List[IrNodeEqualityResult] = List {
             if (actual.children.length >= len) IrNodesEqual
             else IrNodesNotEqual(s"Array '${expected.label}' did not meet minimum length requirement of '$len'", path)
           }
@@ -164,7 +164,7 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
       case IrNodeTypeRule(_) =>
         RuleProcessTracing.log(s"Checking type... (${expected.primitiveTypeName} vs ${actual.primitiveTypeName})")
 
-        val res = Option {
+        val res: Option[IrNodeEqualityResult] = Option {
           if (expected.primitiveTypeName == actual.primitiveTypeName) IrNodesEqual
           else IrNodesNotEqual(s"Primitive type '${expected.primitiveTypeName}' did not match actual '${actual.primitiveTypeName}'", path)
         }
@@ -176,7 +176,7 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
       case IrNodeRegexRule(regex, _) if expected.isString && actual.isString =>
         RuleProcessTracing.log(s"Checking regex on String '${actual.asString.getOrElse("")}'...")
 
-        val res = actual.asString.map { str =>
+        val res: Option[IrNodeEqualityResult] = actual.asString.map { str =>
           if (regex.r.findAllIn(str).nonEmpty) IrNodesEqual
           else IrNodesNotEqual(s"String '$str' did not match pattern '$regex'", path)
         }
@@ -188,7 +188,7 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
       case IrNodeRegexRule(regex, p) =>
         RuleProcessTracing.log(s"Checking regex on non-String '${actual.renderAsString}'...")
 
-        val res = Option {
+        val res: Option[IrNodeEqualityResult] = Option {
           val str = actual.renderAsString
 
           if (regex.r.findAllIn(str).nonEmpty) IrNodesEqual
