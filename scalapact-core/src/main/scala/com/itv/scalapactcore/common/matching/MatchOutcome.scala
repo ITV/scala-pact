@@ -2,20 +2,21 @@ package com.itv.scalapactcore.common.matching
 
 sealed trait MatchOutcome {
   val isSuccess: Boolean
+  val score: Int
 
   def append(other: MatchOutcome): MatchOutcome =
     (this, other) match {
       case (MatchOutcomeSuccess, MatchOutcomeSuccess) =>
         MatchOutcomeSuccess
 
-      case (MatchOutcomeSuccess, r @ MatchOutcomeFailed(_)) =>
+      case (MatchOutcomeSuccess, r @ MatchOutcomeFailed(_, _)) =>
         r
 
-      case (l @ MatchOutcomeFailed(_), MatchOutcomeSuccess) =>
+      case (l @ MatchOutcomeFailed(_, _), MatchOutcomeSuccess) =>
         l
 
-      case (MatchOutcomeFailed(diffsA), MatchOutcomeFailed(diffsB)) =>
-        MatchOutcomeFailed(diffsA ++ diffsB)
+      case (MatchOutcomeFailed(diffsA, scoreA), MatchOutcomeFailed(diffsB, scoreB)) =>
+        MatchOutcomeFailed(diffsA ++ diffsB, scoreA + scoreB)
     }
 
   def +(other: MatchOutcome): MatchOutcome = append(other)
@@ -35,9 +36,10 @@ object MatchOutcome {
 }
 
 case object MatchOutcomeSuccess extends MatchOutcome {
+  val score: Int = 0
   val isSuccess: Boolean = true
 }
-case class MatchOutcomeFailed(differences: List[String]) extends MatchOutcome {
+case class MatchOutcomeFailed(differences: List[String], score: Int) extends MatchOutcome {
   val isSuccess: Boolean = false
   val errorCount: Int = differences.length
 
@@ -45,6 +47,6 @@ case class MatchOutcomeFailed(differences: List[String]) extends MatchOutcome {
 }
 
 object MatchOutcomeFailed {
-  def apply(message: String): MatchOutcomeFailed =
-    MatchOutcomeFailed(List(message))
+  def apply(message: String, score: Int): MatchOutcomeFailed =
+    MatchOutcomeFailed(List(message), score)
 }

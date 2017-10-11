@@ -25,7 +25,7 @@ object InteractionMatchers {
       case Some(OutcomeAndInteraction(MatchOutcomeSuccess, Some(interaction))) =>
         Right(interaction)
 
-      case Some(OutcomeAndInteraction(f @ MatchOutcomeFailed(_), None)) =>
+      case Some(OutcomeAndInteraction(f @ MatchOutcomeFailed(_, _), None)) =>
         Left(
           s"""Failed to match (Nothing close found):
             | ...Differences
@@ -33,7 +33,7 @@ object InteractionMatchers {
           """.stripMargin
         )
 
-      case Some(OutcomeAndInteraction(f @ MatchOutcomeFailed(_), Some(i))) =>
+      case Some(OutcomeAndInteraction(f @ MatchOutcomeFailed(_, _), Some(i))) =>
         Left(
           s"""Failed to match $subject
              | ...original
@@ -58,7 +58,7 @@ object InteractionMatchers {
             case success @ MatchOutcomeSuccess =>
               Option(OutcomeAndInteraction(success, Option(x)))
 
-            case failure @ MatchOutcomeFailed(_) =>
+            case failure @ MatchOutcomeFailed(_, _) =>
               rec(strict, xs, actual, (failure, x) :: fails)
           }
       }
@@ -74,7 +74,7 @@ object InteractionMatchers {
   def matchSingleRequest(strictMatching: Boolean, rules: Option[Map[String, MatchingRule]], expected: InteractionRequest, received: InteractionRequest): MatchOutcome =
     IrNodeMatchingRules.fromPactRules(rules) match {
       case Left(e) =>
-        MatchOutcomeFailed(e)
+        MatchOutcomeFailed(e, 100)
 
       case Right(r) if strictMatching =>
         MethodMatching.matchMethods(expected.method, received.method) +
@@ -100,7 +100,7 @@ object InteractionMatchers {
             case success @ MatchOutcomeSuccess =>
               Option(OutcomeAndInteraction(success, Option(x)))
 
-            case failure @ MatchOutcomeFailed(_) =>
+            case failure @ MatchOutcomeFailed(_, _) =>
               rec(strict, xs, actual, (failure, x) :: fails)
           }
       }
@@ -116,7 +116,7 @@ object InteractionMatchers {
   def matchSingleResponse(strictMatching: Boolean, rules: Option[Map[String, MatchingRule]], expected: InteractionResponse, received: InteractionResponse): MatchOutcome =
     IrNodeMatchingRules.fromPactRules(rules) match {
       case Left(e) =>
-        MatchOutcomeFailed(e)
+        MatchOutcomeFailed(e, 100)
 
       case Right(r) if strictMatching =>
         StatusMatching.matchStatusCodes(expected.status, received.status) +
@@ -176,8 +176,8 @@ object StatusMatching extends GeneralMatcher {
       expected,
       received,
       MatchOutcomeSuccess,
-      MatchOutcomeFailed("Status codes did not match"),
-      (e: Int, r: Int) => if(e == r) MatchOutcomeSuccess else MatchOutcomeFailed(s"Status code '$e' did not match '$r'")
+      MatchOutcomeFailed("Status codes did not match", 20),
+      (e: Int, r: Int) => if(e == r) MatchOutcomeSuccess else MatchOutcomeFailed(s"Status code '$e' did not match '$r'", 10)
     )
 
 }
@@ -193,7 +193,7 @@ object PathMatching extends GeneralMatcher {
       }
     }
 
-    if(matches) MatchOutcomeSuccess else MatchOutcomeFailed("Paths do not match")
+    if(matches) MatchOutcomeSuccess else MatchOutcomeFailed("Paths do not match", 20)
   }
 
   def matchPathsStrict(expected: PathAndQuery, received: PathAndQuery): MatchOutcome = {
@@ -203,7 +203,7 @@ object PathMatching extends GeneralMatcher {
       }
     }
 
-    if(matches) MatchOutcomeSuccess else MatchOutcomeFailed("Paths do not match")
+    if(matches) MatchOutcomeSuccess else MatchOutcomeFailed("Paths do not match", 20)
   }
 
   private def matchPathsWithPredicate(expected: PathAndQuery, received: PathAndQuery)(predicate: (PathStructure, PathStructure) => Boolean): Boolean =
@@ -261,8 +261,8 @@ object MethodMatching extends GeneralMatcher {
       expected,
       received,
       MatchOutcomeSuccess,
-      MatchOutcomeFailed("Methods did not match"),
-      (e: String, r: String) => if(e.toUpperCase == r.toUpperCase) MatchOutcomeSuccess else MatchOutcomeFailed(s"Method '${e.toUpperCase}' did not match '${r.toUpperCase}'")
+      MatchOutcomeFailed("Methods did not match", 20),
+      (e: String, r: String) => if(e.toUpperCase == r.toUpperCase) MatchOutcomeSuccess else MatchOutcomeFailed(s"Method '${e.toUpperCase}' did not match '${r.toUpperCase}'", 20)
     )
 
 }
@@ -302,6 +302,7 @@ object HeaderMatching extends GeneralMatcher {
         }
         .getOrElse(Map.empty[String, String])
 
+      //TODO: Count mismatches.
       val withRuleMatchResult: Boolean = expectedHeadersWithMatchingRules.map { header =>
         strippedMatchingRules
           .flatMap { rules => rules.find(p => p._1 == header._1) } // Find the rule that matches the expected header
@@ -315,14 +316,15 @@ object HeaderMatching extends GeneralMatcher {
 
       val noRules = e.map(p => standardise(p)).filterKeys(k => !expectedHeadersWithMatchingRules.contains(k))
 
+      //TODO: Convert to recursion so you can count differences.
       val noRuleMatchResult: Boolean = noRules.map(p => standardise(p))
         .toSet
         .subsetOf(r.map(p => standardise(p)).toSet)
 
-      if(noRuleMatchResult && withRuleMatchResult) MatchOutcomeSuccess else MatchOutcomeFailed("Headers did not match")
+      if(noRuleMatchResult && withRuleMatchResult) MatchOutcomeSuccess else MatchOutcomeFailed("Headers did not match", 20)
     }
 
-    generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Headers did not match"), predicate(matchingRules))
+    generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Headers did not match", 20), predicate(matchingRules))
   }
 
 }
@@ -335,7 +337,7 @@ object BodyMatching extends GeneralMatcher {
         MatchOutcomeSuccess
 
       case e: IrNodesNotEqual =>
-        MatchOutcomeFailed(e.renderDifferencesListWithRules(rules, isXml))
+        MatchOutcomeFailed(e.renderDifferencesListWithRules(rules, isXml), e.differences.length * 2)
     }
 
   def matchBodies(headers: Option[Map[String, String]], expected: Option[String], received: Option[String])(implicit rules: IrNodeMatchingRules): MatchOutcome = {
@@ -346,9 +348,9 @@ object BodyMatching extends GeneralMatcher {
             MatchIr.fromJSON(r).map { rr =>
               nodeMatchToMatchResult(ee =~ rr, rules, isXml = false)
             }
-          }.getOrElse(MatchOutcomeFailed("Failed to parse JSON body"))
+          }.getOrElse(MatchOutcomeFailed("Failed to parse JSON body", 20))
 
-        generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Body mismatch"), predicate)
+        generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Body mismatch", 20), predicate)
 
       case (Some(ee), Some(rr)) if ee.nonEmpty && hasXmlHeader(headers) || stringIsProbablyXml(ee) && stringIsProbablyXml(rr) =>
         val predicate: (String, String) => MatchOutcome = (e, r) =>
@@ -356,12 +358,12 @@ object BodyMatching extends GeneralMatcher {
             MatchIr.fromXml(r).map { rr =>
               nodeMatchToMatchResult(ee =~ rr, rules, isXml = true)
             }
-          }.getOrElse(MatchOutcomeFailed("Failed to parse XML body"))
+          }.getOrElse(MatchOutcomeFailed("Failed to parse XML body", 20))
 
-        generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Body mismatch"), predicate)
+        generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Body mismatch", 20), predicate)
 
       case _ =>
-        generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Body mismatch"), (e: String, r: String) => PlainTextEquality.checkOutcome(e, r))
+        generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Body mismatch", 20), (e: String, r: String) => PlainTextEquality.checkOutcome(e, r))
     }
   }
 
@@ -375,9 +377,9 @@ object BodyMatching extends GeneralMatcher {
             MatchIr.fromJSON(r).map { rr =>
               nodeMatchToMatchResult(ee =<>= rr, rules, isXml = false)
             }
-          }.getOrElse(MatchOutcomeFailed("Failed to parse JSON body"))
+          }.getOrElse(MatchOutcomeFailed("Failed to parse JSON body", 20))
 
-        generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Body mismatch"), predicate)
+        generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Body mismatch", 20), predicate)
 
       case (Some(ee), Some(rr)) if ee.nonEmpty && hasXmlHeader(headers) || stringIsProbablyXml(ee) && stringIsProbablyXml(rr) =>
         val predicate: (String, String) => MatchOutcome = (e, r) =>
@@ -385,12 +387,12 @@ object BodyMatching extends GeneralMatcher {
             MatchIr.fromXml(r).map { rr =>
               nodeMatchToMatchResult(ee =<>= rr, rules, isXml = true)
             }
-          }.getOrElse(MatchOutcomeFailed("Failed to parse XML body"))
+          }.getOrElse(MatchOutcomeFailed("Failed to parse XML body", 20))
 
-        generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Body mismatch"), predicate)
+        generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Body mismatch", 20), predicate)
 
       case _ =>
-        generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Body mismatch"), (e: String, r: String) => PlainTextEquality.checkOutcome(e, r))
+        generalOutcomeMatcher(expected, received, MatchOutcomeSuccess, MatchOutcomeFailed("Body mismatch", 20), (e: String, r: String) => PlainTextEquality.checkOutcome(e, r))
     }
   }
 
