@@ -52,14 +52,16 @@ object Verifier {
               .providerState
               .map(p => ProviderState(p, PartialFunction(pactVerifySettings.providerStates)))
 
-          (doRequest(arguments, maybeProviderState) andThen attemptMatch(arguments.giveStrictMode, List(interaction)))(interaction.request)
+          val result = (doRequest(arguments, maybeProviderState) andThen attemptMatch(arguments.giveStrictMode, List(interaction)))(interaction.request)
+
+          PactVerifyResultInContext(result, interaction.description)
         }
       )
     }
 
     val endTime = System.currentTimeMillis().toDouble
     val testCount = pactVerifyResults.flatMap(_.results).length
-    val failureCount = pactVerifyResults.flatMap(_.results).count(_.isLeft)
+    val failureCount = pactVerifyResults.flatMap(_.results).count(_.result.isLeft)
 
     pactVerifyResults.foreach { result =>
       val content = JUnitXmlBuilder.xml(
@@ -67,9 +69,14 @@ object Verifier {
         tests = testCount,
         failures = failureCount,
         time = endTime - startTime / 1000,
-        testCases = result.results.collect {
-          case Right(r) => JUnitXmlBuilder.testCasePass(r.description)
-          case Left(l) => JUnitXmlBuilder.testCaseFail("Failure", l)
+        testCases = result.results.map { res =>
+          res.result match {
+            case Right(r) =>
+              JUnitXmlBuilder.testCasePass(res.context)
+
+            case Left(l) =>
+              JUnitXmlBuilder.testCaseFail("Failure: " + res.context, l)
+          }
         }
       )
       JUnitWriter.writePactVerifyResults(result.pact.consumer.name)(result.pact.provider.name)(content.toString)
@@ -77,15 +84,18 @@ object Verifier {
 
     pactVerifyResults.foreach { result =>
       println(("Results for pact between " + result.pact.consumer.name + " and " + result.pact.provider.name).white.bold)
-      result.results.foreach {
-        case Right(r) => println((" - [  OK  ] " + r.description).green)
-        case Left(l) => println((" - [FAILED] " + l).red)
+      result.results.foreach { res =>
+        res.result match {
+          case Right(r) =>
+            println((" - [  OK  ] " + res.context).green)
+
+          case Left(l) =>
+            println((" - [FAILED] " + res.context + "\n" + l).red)
+        }
       }
     }
 
-    val foundErrors = pactVerifyResults.flatMap(result => result.results).exists(_.isLeft)
-
-    !foundErrors
+    failureCount == 0
   }
 
   // NOTE: Can't use flatMap due to scala 2.10.6
@@ -187,7 +197,9 @@ object Verifier {
 
 }
 
-case class PactVerifyResult(pact: Pact, results: List[Either[String, Interaction]])
+case class PactVerifyResult(pact: Pact, results: List[PactVerifyResultInContext])
+
+case class PactVerifyResultInContext(result: Either[String, Interaction], context: String)
 
 class ProviderStateFailure(key: String) extends Exception()
 
