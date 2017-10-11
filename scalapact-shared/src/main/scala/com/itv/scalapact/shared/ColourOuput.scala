@@ -9,16 +9,16 @@ object ColourOuput {
   class ColouredString(s: String) {
     import Console._
 
-    def black = BLACK + s + RESET
-    def white = WHITE + s + RESET
-    def red = RED + s + RESET
-    def green = GREEN + s + RESET
-    def yellow = YELLOW + s + RESET
-    def blue = BLUE + s + RESET
-    def magenta = MAGENTA + s + RESET
-    def cyan = CYAN + s + RESET
-    def bold = BOLD + s + RESET
-    def underlined = UNDERLINED + s + RESET
+    def black: String = BLACK + s + RESET
+    def white: String = WHITE + s + RESET
+    def red: String = RED + s + RESET
+    def green: String = GREEN + s + RESET
+    def yellow: String = YELLOW + s + RESET
+    def blue: String = BLUE + s + RESET
+    def magenta: String = MAGENTA + s + RESET
+    def cyan: String = CYAN + s + RESET
+    def bold: String = BOLD + s + RESET
+    def underlined: String = UNDERLINED + s + RESET
   }
 
 }

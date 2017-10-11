@@ -1,6 +1,6 @@
 package com.itv.scalapactcore.common.matchir
 
-import scala.language.{implicitConversions, postfixOps}
+import scala.language.implicitConversions
 
 case class IrNode(label: String, value: Option[IrNodePrimitive], children: List[IrNode], ns: Option[String], attributes: IrNodeAttributes, isArray: Boolean, isXml: Boolean, path: IrNodePath) {
 

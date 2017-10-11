@@ -77,7 +77,12 @@ lazy val commonSettings = Seq(
     "org.scalatest" %% "scalatest" % "3.0.1" % "test"
   ),
   scalacOptions ++= options210,
-  wartremoverWarnings in (Compile, compile) ++= Warts.unsafe
+  wartremoverWarnings in (Compile, compile) ++= Warts.allBut(
+    Wart.Overloading,
+    Wart.FinalCaseClass,
+    Wart.ImplicitConversion,
+    Wart.Nothing
+  )
 )
 
 lazy val publishSettings = Seq(

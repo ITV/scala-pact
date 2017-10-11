@@ -45,7 +45,7 @@ case class ScalaPactSettings(protocol: Option[String], host: Option[String], por
       port.map(p => ("--port", p.toString)),
       localPactFilePath.map(p => ("--source", p)),
       strictMode.map(p => ("--strict", p.toString)),
-      clientTimeout.map(p => ("--clientTimeout", p.toString)),
+      clientTimeout.map(p => ("--clientTimeout", p.toSeconds.toString)),
       outputPath.map(p => ("--out", p))
     ).collect { case Some(s) => s}.toMap
 }
