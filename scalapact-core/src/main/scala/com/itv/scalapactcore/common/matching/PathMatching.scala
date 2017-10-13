@@ -9,7 +9,7 @@ object PathMatching {
 
   case class PathAndQuery(path: Option[String], query: Option[String])
 
-  def matchPaths(expected: PathAndQuery, received: PathAndQuery): MatchOutcome =
+  def matchPaths(expected: PathAndQuery, received: PathAndQuery): MatchOutcome = {
     matchPathsWithPredicate(expected, received) {
       (ex: PathStructure, re: PathStructure) => {
 
@@ -21,6 +21,7 @@ object PathMatching {
 
       }
     }
+  }
 
   def matchPathsStrict(expected: PathAndQuery, received: PathAndQuery): MatchOutcome =
     matchPathsWithPredicate(expected, received) {
@@ -49,18 +50,25 @@ object PathMatching {
 
   private def reconstructPath: PathAndQuery => String = pathAndQuery =>
     pathAndQuery.path.getOrElse("").split('?').toList ++ List(pathAndQuery.query.map(q => URLDecoder.decode(q, StandardCharsets.UTF_8.name())).getOrElse("")) match {
-      case Nil => "/"
-      case x :: xs => List(x, xs.filter(!_.isEmpty).mkString("&")).mkString("?")
+      case Nil =>
+        "/"
+
+      case x :: xs =>
+        List(x, xs.filter(!_.isEmpty).mkString("&")).mkString("?")
     }
 
   private case class PathStructure(path: String, params: List[(String, String)])
 
+  private object PathStructure {
+    def empty: PathStructure = PathStructure("", Nil)
+  }
+
   private def convertToPathStructure: String => Option[PathStructure] = fullPath =>
-    if(fullPath.isEmpty) None
+    if(fullPath.isEmpty) Option(PathStructure.empty)
     else {
       fullPath.split('?').toList match {
         case Nil =>
-          None // should never happen
+          Option(PathStructure.empty) // should never happen
 
         case x :: Nil =>
           Option(PathStructure(x, Nil))
