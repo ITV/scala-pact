@@ -29,11 +29,11 @@ object PathMatching {
         MatchOutcome.fromPredicate(
           ex.path == re.path,
           s"Paths '${ex.path}' and '${re.path}' did not match",
-          25
+          20
         ) + MatchOutcome.fromPredicate(
           ex.params.length == re.params.length,
           s"Paths contained different numbers of parameters. Expected '${ex.params.length}' but got '${re.params.length}'",
-          25
+          5
         ) + equalListsOfParameters(ex.params, re.params)
 
       }
@@ -41,30 +41,36 @@ object PathMatching {
 
   private def matchPathsWithPredicate(expected: PathAndQuery, received: PathAndQuery)(predicate: (PathStructure, PathStructure) => MatchOutcome): MatchOutcome =
     GeneralMatcher.generalMatcher(
-      constructPath(expected).map(toPathStructure), constructPath(received).map(toPathStructure), MatchOutcomeFailed("Paths do not match", 50), predicate
+      (reconstructPath andThen convertToPathStructure)(expected),
+      (reconstructPath andThen convertToPathStructure)(received),
+      MatchOutcomeFailed("Paths do not match", 50),
+      predicate
     )
 
-  private lazy val constructPath: PathAndQuery => Option[String] = pathAndQuery => Option {
+  private def reconstructPath: PathAndQuery => String = pathAndQuery =>
     pathAndQuery.path.getOrElse("").split('?').toList ++ List(pathAndQuery.query.map(q => URLDecoder.decode(q, StandardCharsets.UTF_8.name())).getOrElse("")) match {
       case Nil => "/"
       case x :: xs => List(x, xs.filter(!_.isEmpty).mkString("&")).mkString("?")
     }
-  }
 
-  case class PathStructure(path: String, params: List[(String, String)])
+  private case class PathStructure(path: String, params: List[(String, String)])
 
-  private lazy val toPathStructure: String => PathStructure = fullPath =>
-    if(fullPath.isEmpty) PathStructure("", Nil)
+  private def convertToPathStructure: String => Option[PathStructure] = fullPath =>
+    if(fullPath.isEmpty) None
     else {
       fullPath.split('?').toList match {
         case Nil =>
-          PathStructure("", Nil) //should never happen
+          None // should never happen
+
         case x :: Nil =>
-          PathStructure(x, Nil)
+          Option(PathStructure(x, Nil))
+
         case x :: xs =>
-          PathStructure(
-            path = x,
-            params = Helpers.pairTuples(xs.mkString.split('&').toList.flatMap(p => p.split('=').toList))
+          Option(
+            PathStructure(
+              path = x,
+              params = Helpers.pairTuples(xs.mkString.split('&').toList.flatMap(p => p.split('=').toList))
+            )
           )
       }
     }
