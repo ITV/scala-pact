@@ -35,6 +35,10 @@ object MatchOutcome {
   def indentity: MatchOutcome = MatchOutcomeSuccess
 
   val MaxDrift: Int = 100000
+
+  def fromPredicate(p: => Boolean, failureMessage: String, driftAmount: Int): MatchOutcome =
+    if(p) MatchOutcomeSuccess
+    else MatchOutcomeFailed(failureMessage, driftAmount)
 }
 
 case object MatchOutcomeSuccess extends MatchOutcome {
