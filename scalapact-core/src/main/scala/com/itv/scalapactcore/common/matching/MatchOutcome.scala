@@ -2,7 +2,7 @@ package com.itv.scalapactcore.common.matching
 
 sealed trait MatchOutcome {
   val isSuccess: Boolean
-  val score: Int
+  val drift: Int
 
   def append(other: MatchOutcome): MatchOutcome =
     (this, other) match {
@@ -33,13 +33,15 @@ sealed trait MatchOutcome {
 
 object MatchOutcome {
   def indentity: MatchOutcome = MatchOutcomeSuccess
+
+  val MaxDrift: Int = 100000
 }
 
 case object MatchOutcomeSuccess extends MatchOutcome {
-  val score: Int = 0
+  val drift: Int = 0
   val isSuccess: Boolean = true
 }
-case class MatchOutcomeFailed(differences: List[String], score: Int) extends MatchOutcome {
+case class MatchOutcomeFailed(differences: List[String], drift: Int) extends MatchOutcome {
   val isSuccess: Boolean = false
   val errorCount: Int = differences.length
 
@@ -47,6 +49,9 @@ case class MatchOutcomeFailed(differences: List[String], score: Int) extends Mat
 }
 
 object MatchOutcomeFailed {
-  def apply(message: String, score: Int): MatchOutcomeFailed =
-    MatchOutcomeFailed(List(message), score)
+  def apply(message: String, drift: Int): MatchOutcomeFailed =
+    MatchOutcomeFailed(List(message), drift)
+
+  def apply(message: String): MatchOutcomeFailed =
+    MatchOutcomeFailed(List(message), MatchOutcome.MaxDrift)
 }

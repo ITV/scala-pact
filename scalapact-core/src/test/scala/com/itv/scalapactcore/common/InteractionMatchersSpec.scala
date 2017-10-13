@@ -1,8 +1,11 @@
 package com.itv.scalapactcore.common
 
-import com.itv.scalapact.shared.MatchingRule
+import com.itv.scalapact.shared.pact.PactReader
+import com.itv.scalapact.shared.{MatchingRule, Pact}
 import com.itv.scalapactcore.common.matching.BodyMatching._
 import com.itv.scalapactcore.common.matching.HeaderMatching._
+import com.itv.scalapactcore.common.matching.{InteractionMatchers, MatchOutcomeFailed, MatchOutcomeSuccess}
+import com.itv.scalapactcore.common.matching.InteractionMatchers.OutcomeAndInteraction
 import com.itv.scalapactcore.common.matching.MethodMatching._
 import com.itv.scalapactcore.common.matching.PathMatching._
 import com.itv.scalapactcore.common.matching.StatusMatching._
@@ -372,81 +375,192 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
 
   }
 
-//  describe("a complete match") {
-//
-//    it("should work") {
-//
-//      val a: String =
-//        """{
-//          |  "provider" : {
-//          |    "name" : "provider"
-//          |  },
-//          |  "consumer" : {
-//          |    "name" : "consumer"
-//          |  },
-//          |  "interactions" : [
-//          |    {
-//          |      "description" : "a simple request",
-//          |      "request" : {
-//          |        "method" : "GET",
-//          |        "path" : "/"
-//          |      },
-//          |      "response" : {
-//          |        "status" : 200,
-//          |        "body" : {"message": "Hello"},
-//          |        "matchingRules": {
-//          |          "$.body.message": {
-//          |            "match": "regex",
-//          |            "regex": "fish"
-//          |          }
-//          |        }
-//          |      }
-//          |    }
-//          |  ]
-//          |}""".stripMargin
-//
-//      val b: String =
-//        """{
-//          |  "provider" : {
-//          |    "name" : "provider"
-//          |  },
-//          |  "consumer" : {
-//          |    "name" : "consumer"
-//          |  },
-//          |  "interactions" : [
-//          |    {
-//          |      "description" : "a simple request",
-//          |      "request" : {
-//          |        "method" : "GET",
-//          |        "path" : "/"
-//          |      },
-//          |      "response" : {
-//          |        "status" : 200,
-//          |        "body" : {"message": "Hello2"},
-//          |        "matchingRules": {
-//          |          "$.body.message": {
-//          |            "match": "regex",
-//          |            "regex": "chips"
-//          |          }
-//          |        }
-//          |      }
-//          |    }
-//          |  ]
-//          |}""".stripMargin
-//
-//      val pactA: Pact = PactReader.jsonStringToPact(a).toOption.get
-//      val pactB: Pact = PactReader.jsonStringToPact(b).toOption.get
-//
-//      val res = InteractionMatchers.matchResponse(strictMatching = true, pactA.interactions)(pactB.interactions.head.response)
-//
-//      res match {
-//        case Right(_) => fail("Should not have matched")
-//        case Left(msg) =>
-////          println(msg)
-//          msg.contains("Failed") shouldEqual true
-//      }
-//    }
-//
-//  }
+  describe("Drift AKA Choosing the closest failed match") {
+
+    it("should be able to pick the matching response") {
+
+      val pactExpected: Pact =
+        makePact(
+          makeInteraction(
+            "A",
+            "200",
+            """{"message": "Hello"}"""
+          ),
+          makeInteraction(
+            "B",
+            "404",
+            """{"message": "Hello"}"""
+          )
+        )
+
+      val pactActual: Pact =
+        makePact(
+          makeInteraction(
+            "",
+            "200",
+            """{"message": "Hello"}"""
+          )
+        )
+
+      val res: OutcomeAndInteraction = InteractionMatchers.matchOrFindClosestResponse(true, pactExpected.interactions, pactActual.interactions.head.response).get
+
+      res.closestMatchingInteraction.description shouldEqual "A"
+      res.outcome shouldBe MatchOutcomeSuccess
+
+    }
+
+    it("should pick the last response were there is an equal amount of drift.") {
+
+      val pactExpected: Pact =
+        makePact(
+          makeInteraction(
+            "A",
+            "500",
+            """{"message": "Hello"}"""
+          ),
+          makeInteraction(
+            "B",
+            "404",
+            """{"message": "Hello"}"""
+          )
+        )
+
+      val pactActual: Pact =
+        makePact(
+          makeInteraction(
+            "",
+            "200",
+            """{"message": "Hello"}"""
+          )
+        )
+
+      val res: OutcomeAndInteraction = InteractionMatchers.matchOrFindClosestResponse(true, pactExpected.interactions, pactActual.interactions.head.response).get
+
+      res.closestMatchingInteraction.description shouldEqual "B"
+
+      res.outcome match {
+        case MatchOutcomeSuccess =>
+          fail("Should not have matched")
+
+        case f @ MatchOutcomeFailed(_, drift) =>
+          f.errorCount shouldEqual 1
+          drift shouldEqual 50
+      }
+
+    }
+
+    it("should pick the closest match response were there is an unequal amount of drift. (case 1)") {
+
+      val pactExpected: Pact =
+        makePact(
+          makeInteraction(
+            "A",
+            "500",
+            """{"message": "Hello"}"""
+          ),
+          makeInteraction(
+            "B",
+            "404",
+            """{"message": "Hello2"}"""
+          )
+        )
+
+      val pactActual: Pact =
+        makePact(
+          makeInteraction(
+            "",
+            "200",
+            """{"message": "Hello"}"""
+          )
+        )
+
+      val res: OutcomeAndInteraction = InteractionMatchers.matchOrFindClosestResponse(true, pactExpected.interactions, pactActual.interactions.head.response).get
+
+      res.closestMatchingInteraction.description shouldEqual "A"
+
+      res.outcome match {
+        case MatchOutcomeSuccess =>
+          fail("Should not have matched")
+
+        case f @ MatchOutcomeFailed(_, drift) =>
+          f.errorCount shouldEqual 1
+          drift shouldEqual 50
+      }
+
+    }
+
+    it("should pick the closest match response were there is an unequal amount of drift. (case 2)") {
+
+      val pactExpected: Pact =
+        makePact(
+          makeInteraction(
+            "A",
+            "500",
+            """{"message": "Hello"}"""
+          ),
+          makeInteraction(
+            "B",
+            "200",
+            """{"message": "Hello2"}"""
+          )
+        )
+
+      val pactActual: Pact =
+        makePact(
+          makeInteraction(
+            "",
+            "200",
+            """{"message": "Hello"}"""
+          )
+        )
+
+      val res: OutcomeAndInteraction = InteractionMatchers.matchOrFindClosestResponse(true, pactExpected.interactions, pactActual.interactions.head.response).get
+
+      res.closestMatchingInteraction.description shouldEqual "B"
+
+      res.outcome match {
+        case MatchOutcomeSuccess =>
+          fail("Should not have matched")
+
+        case f @ MatchOutcomeFailed(_, drift) =>
+          f.errorCount shouldEqual 1
+          drift shouldEqual 1
+      }
+
+    }
+
+    def makeInteraction(description: String, status: String, body: String): String = {
+        s"""
+          |    {
+          |      "description" : "$description",
+          |      "request" : {
+          |        "method" : "GET",
+          |        "path" : "/"
+          |      },
+          |      "response" : {
+          |        "status" : $status,
+          |        "body" : $body,
+          |        "matchingRules": {}
+          |      }
+          |    }
+        """.stripMargin
+    }
+
+    def makePact(interactions: String*): Pact = {
+      val json: String =
+        s"""{
+          |  "provider" : {
+          |    "name" : "provider"
+          |  },
+          |  "consumer" : {
+          |    "name" : "consumer"
+          |  },
+          |  "interactions" : [${interactions.toList.mkString(",")}]
+          |}""".stripMargin
+
+      PactReader.jsonStringToPact(json).toOption.get
+    }
+
+  }
 
 }

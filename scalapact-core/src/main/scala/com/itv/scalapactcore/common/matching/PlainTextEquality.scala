@@ -8,6 +8,6 @@ object PlainTextEquality {
 
   //TODO: By how much were the bodies different?
   def checkOutcome(expected: String, received: String): MatchOutcome =
-    if(expected.trim == received.trim) MatchOutcomeSuccess else MatchOutcomeFailed("Plain test bodies did not match", 100)
+    if(expected.trim == received.trim) MatchOutcomeSuccess else MatchOutcomeFailed("Plain test bodies did not match")
 
 }
