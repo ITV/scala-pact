@@ -115,7 +115,13 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         )
       )
 
-      matchHeaders(None, expected, received).isSuccess shouldEqual true
+      matchHeaders(None, expected, received) match {
+        case s @ MatchOutcomeSuccess =>
+          s.isSuccess shouldEqual true
+
+        case f: MatchOutcomeFailed =>
+          fail(f.renderDifferences)
+      }
 
     }
 

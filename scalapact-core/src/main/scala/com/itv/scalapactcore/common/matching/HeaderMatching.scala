@@ -1,65 +1,112 @@
 package com.itv.scalapactcore.common.matching
 
 import com.itv.scalapact.shared.MatchingRule
+import com.itv.scalapactcore.common.matchir._
 
 object HeaderMatching {
 
+  val legalCharSeparators: List[Char] =
+    List('(',')','<','>','@',',',';',':','\\','"','/','[',']','?','=','{','}')
+
+  def trimAllInstancesOfSeparator: Char => String => String = separator => input =>
+    input.split(separator).toList.map(_.trim).mkString(separator.toString)
+
+  def standardiseHeader(input: (String, String)): (String, String) =
+    (input._1.toLowerCase, trimAllSeparators(legalCharSeparators, input._2))
+
+  @annotation.tailrec
+  def trimAllSeparators(separators: List[Char], input: String): String =
+    separators match {
+      case Nil => input
+      case x :: xs => trimAllSeparators(xs, trimAllInstancesOfSeparator(x)(input))
+    }
+
+  def flattenMatchOutcomeList(l: List[MatchOutcome]): MatchOutcome =
+    l match {
+      case Nil =>
+        MatchOutcomeSuccess
+
+      case x :: xs =>
+        xs.foldLeft(x)(_ + _)
+    }
+
   def matchHeaders(matchingRules: Option[Map[String, MatchingRule]], expected: Option[Map[String, String]], received: Option[Map[String, String]]): MatchOutcome = {
 
-    val legalCharSeparators = List('(',')','<','>','@',',',';',':','\\','"','/','[',']','?','=','{','}')
+    val rules = findAndCleanupApplicableMatchingRules(matchingRules)
 
-    val trimAllInstancesOfSeparator: Char => String => String = separator => input =>
-      input.split(separator).toList.map(_.trim).mkString(separator.toString)
+    val predicate: (Map[String, String], Map[String, String]) => MatchOutcome = (e, r) => {
 
-    @annotation.tailrec
-    def trimAllSeparators(separators: List[Char], input: String): String = {
-      separators match {
-        case Nil => input
-        case x :: xs => trimAllSeparators(xs, trimAllInstancesOfSeparator(x)(input))
-      }
-    }
-
-    val predicate: Option[Map[String, MatchingRule]] => (Map[String, String], Map[String, String]) => MatchOutcome = matchingRules => (e, r) => {
-
-      val strippedMatchingRules = matchingRules.map { mmr =>
-        mmr
-          .filter(mr => mr._1.startsWith("$.headers.") && mr._2.`match`.exists(_ == "regex")) //Use exists for 2.10 compat
-          .map(mr => (mr._1.substring("$.headers.".length).toLowerCase, mr._2))
-      }
-
-      def standardise(input: (String, String)): (String, String) = {
-        (input._1.toLowerCase, trimAllSeparators(legalCharSeparators, input._2))
-      }
-
-      val expectedHeadersWithMatchingRules = strippedMatchingRules
-        .map { mr =>
-          e.map(p => standardise(p)).filterKeys(key => mr.exists(p => p._1 == key))
+      val (withRules, withoutRules) =
+        e.partition { p =>
+          rules.exists(mr => mr.exists(r => r._1 == "$.headers." + standardiseHeader(p)._1))
         }
-        .getOrElse(Map.empty[String, String])
 
-      //TODO: Count mismatches.
-      val withRuleMatchResult: Boolean = expectedHeadersWithMatchingRules.map { header =>
-        strippedMatchingRules
-          .flatMap { rules => rules.find(p => p._1 == header._1) } // Find the rule that matches the expected header
-          .flatMap { rule =>
-          rule._2.regex.flatMap { regex =>
-            r.map(h => (h._1.toLowerCase, h._2)).get(header._1).map(rec => rec.matches(regex))
+      val withRuleMatchResult: MatchOutcome = {
+
+        val outcomes = IrNodeMatchingRules.fromPactRules(rules) match {
+          case Left(error) =>
+            List(MatchOutcomeFailed(error))
+
+          case Right(rls) =>
+
+
+            withRules
+              .toList
+              .map(p => standardiseHeader(p))
+              .flatMap { header =>
+                rls.findForPath(IrNodePathEmpty <~ header._1, isXml = false)
+                  .map {
+                    case IrNodeTypeRule(_) =>
+                      MatchOutcomeSuccess
+
+                    case IrNodeRegexRule(regex, _) =>
+                      MatchOutcome.fromPredicate(
+                        regex.r.findAllIn(header._2).nonEmpty,
+                        s"Header '${header._1}' value of '${header._2}' did not match regex requirement for '$regex'",
+                        1
+                      )
+
+                    case IrNodeMinArrayLengthRule(_, _) =>
+                      MatchOutcomeSuccess
+                  }
+              }
+        }
+
+        flattenMatchOutcomeList(outcomes)
+      }
+
+      val noRuleMatchResult: MatchOutcome = {
+        def rec(remaining: List[(String, String)], received: List[(String, String)], acc: List[MatchOutcome]): List[MatchOutcome] =
+          remaining match {
+            case Nil =>
+              acc
+
+            case x :: xs =>
+              rec(
+                xs,
+                received,
+                MatchOutcome.fromPredicate(
+                  received.exists(_ == standardiseHeader(x)), // exists for 2.10 compat
+                  s"Missing header called '${x._1}' with value '${x._2}'",
+                  1
+                ) :: acc
+              )
           }
-        }
-          .getOrElse(true)
-      }.forall(_ == true)
 
-      val noRules = e.map(p => standardise(p)).filterKeys(k => !expectedHeadersWithMatchingRules.contains(k))
+        flattenMatchOutcomeList(rec(withoutRules.toList, r.map(standardiseHeader).toList, Nil))
+      }
 
-      //TODO: Convert to recursion so you can count differences.
-      val noRuleMatchResult: Boolean = noRules.map(p => standardise(p))
-        .toSet
-        .subsetOf(r.map(p => standardise(p)).toSet)
-
-      if(noRuleMatchResult && withRuleMatchResult) MatchOutcomeSuccess else MatchOutcomeFailed("Headers did not match", 50)
+      noRuleMatchResult + withRuleMatchResult
     }
 
-    GeneralMatcher.generalMatcher(expected, received, MatchOutcomeFailed("Headers did not match", 50), predicate(matchingRules))
+    GeneralMatcher.generalMatcher(expected, received, MatchOutcomeFailed("Headers did not match", 50), predicate)
   }
+
+  def findAndCleanupApplicableMatchingRules(matchingRules: Option[Map[String, MatchingRule]]): Option[Map[String, MatchingRule]] =
+    matchingRules.map { mmr =>
+      mmr
+        .filter(mr => mr._1.startsWith("$.headers."))
+        .map(mr => (mr._1.toLowerCase, mr._2))
+    }
 
 }
