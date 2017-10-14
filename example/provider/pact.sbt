@@ -2,10 +2,14 @@ import java.io.PrintWriter
 
 import com.itv.scalapact.plugin._
 
+import scala.concurrent.duration._
+
 scalaPactEnv :=
   ScalaPactEnv.default
     .withPort(8080)
+    .withHost("localhost")
     .withLocalPactFilePath("delivered_pacts/")
+    .withClientTimeOut(2.seconds)
 
 // New style
 providerStateMatcher := {

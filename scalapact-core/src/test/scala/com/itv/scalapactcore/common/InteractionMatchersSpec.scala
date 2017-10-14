@@ -564,7 +564,13 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
           |  "interactions" : [${interactions.toList.mkString(",")}]
           |}""".stripMargin
 
-      PactReader.jsonStringToPact(json).toOption.get
+      PactReader.jsonStringToPact(json) match {
+        case Right(p) =>
+          p
+
+        case Left(s) =>
+          throw new Exception(s)
+      }
     }
 
   }
