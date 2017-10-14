@@ -18,6 +18,14 @@ With thanks to all contributors!
 
 Maintained by [davesmith00000].
 
+## 2.2.1 - 2017-10-14
+- BUGFIX: Pact publishing works again
+- BUGFIX: Client timeout is supplied in seconds but is a duration after that.
+- Added more compiler flags and wart remover
+- Publisher will not publish files ending in tmp.json (protection for pactPush task)
+- Verification failures now show the description for the interaction that failed
+- Finding closest match now done by a points system
+
 ## 2.2.0 - 2017-10-05
 **Breaking changes.**
 

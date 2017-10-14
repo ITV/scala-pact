@@ -12,7 +12,7 @@ libraryDependencies ++= Seq(
   "org.http4s"     %% "http4s-argonaut"          % "0.17.0",
   "org.slf4j"      %  "slf4j-simple"             % "1.6.4",
   "org.scalatest"  %% "scalatest"                % "3.0.1"          % "test",
-  "com.itv"        %% "scalapact-circe-0-8"      % "2.2.1-SNAPSHOT" % "test",
-  "com.itv"        %% "scalapact-http4s-0-17-0"  % "2.2.1-SNAPSHOT" % "test",
-  "com.itv"        %% "scalapact-scalatest"      % "2.2.1-SNAPSHOT" % "test"
+  "com.itv"        %% "scalapact-circe-0-8"      % "2.2.1" % "test",
+  "com.itv"        %% "scalapact-http4s-0-17-0"  % "2.2.1" % "test",
+  "com.itv"        %% "scalapact-scalatest"      % "2.2.1" % "test"
 )
