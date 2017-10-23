@@ -1,7 +1,7 @@
 # The Consumer
 The consumer project owns and generates the Pact contract file.
 
-The Pact contract file is the result of an [integration test](https://github.com/ITV/scala-pact/blob/example-projects/example/consumer/src/test/scala/com/example/consumer/ProviderClientSpec.scala) that tests a [real, albeit crude piece of client code](https://github.com/ITV/scala-pact/blob/example-projects/example/consumer/src/main/scala/com/example/consumer/ProviderClient.scala) against a mock.
+The Pact contract file is the result of an [integration test](https://github.com/ITV/scala-pact/blob/master/example/consumer/src/test/scala/com/example/consumer/ProviderClientSpec.scala) that tests a [real, albeit crude piece of client code](https://github.com/ITV/scala-pact/blob/master/example/consumer/src/main/scala/com/example/consumer/ProviderClient.scala) against a mock.
 
 To run the pact-tests, do the following (assuming you've checked out the project and are in the example directory):
 
