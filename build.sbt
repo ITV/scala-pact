@@ -239,6 +239,15 @@ lazy val circe08_2_10 = circe08(scala210).dependsOn(shared_2_10).settings(
 lazy val circe08_2_11 = circe08(scala211).dependsOn(shared_2_11)
 lazy val circe08_2_12 = circe08(scala212).dependsOn(shared_2_12)
 
+lazy val circe09 =
+  (project in file("scalapact-circe-0-9"))
+    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
+    .cross
+
+lazy val circe09_2_11 = circe09(scala211).dependsOn(shared_2_11)
+lazy val circe09_2_12 = circe09(scala212).dependsOn(shared_2_12)
+
 lazy val pactSpec =
   (project in file("pact-spec-tests"))
     .settings(commonSettings: _*)
@@ -332,6 +341,8 @@ lazy val scalaPactProject =
       circe08_2_10,
       circe08_2_11,
       circe08_2_12,
+      circe09_2_11,
+      circe09_2_12,
       pactSpec_2_10,
       pactSpec_2_11,
       pactSpec_2_12
