@@ -78,6 +78,14 @@ echo ">>> Http4s 0.17.0 (2.12)"
 crossPublishReal "http4s0170_2_12"
 
 echo ""
+echo ">>> Http4s 0.18.0 (2.11)"
+crossPublishReal "http4s0180_2_11"
+
+echo ""
+echo ">>> Http4s 0.18.0 (2.12)"
+crossPublishReal "http4s0180_2_12"
+
+echo ""
 echo ">>> Argonaut 6.1 (2.10)"
 crossPublishReal "argonaut61_2_10"
 
@@ -115,3 +123,11 @@ crossPublishReal "circe08_2_11"
 echo ""
 echo ">>> Circe 0.8.0 (2.12)"
 crossPublishReal "circe08_2_12"
+
+echo ""
+echo ">>> Circe 0.9.0 (2.11)"
+crossPublishReal "circe09_2_11"
+
+echo ""
+echo ">>> Circe 0.9.0 (2.12)"
+crossPublishReal "circe09_2_12"
