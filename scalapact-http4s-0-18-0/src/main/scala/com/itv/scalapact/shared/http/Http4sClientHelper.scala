@@ -37,7 +37,6 @@ object Http4sClientHelper {
   val doRequest: (SimpleRequest, Client[IO]) => IO[SimpleResponse] = (request, httpClient) =>
     for {
       request  <- Http4sRequestResponseFactory.buildRequest(request)
-      //FIXME: this doesn't type check!
       response <- httpClient.fetch[SimpleResponse](request)(extractResponse)
       _        <- httpClient.shutdown
     } yield response
