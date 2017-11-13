@@ -1,19 +1,16 @@
 package com.example.provider
 
+import cats.effect._
+import io.circe.generic.auto._
+import io.circe.syntax._
 import org.http4s._
-import org.http4s.dsl._
-import _root_.argonaut._
-import Argonaut._
-import org.http4s.argonaut._
-
+import org.http4s.circe._
+import org.http4s.dsl.io._
 import org.http4s.util.CaseInsensitiveString
 
 object Provider {
 
-  import ResultResponseImplicits._
-  import TokenResponseImplicits._
-
-  val service: (String => List[String]) => (Int => String) => HttpService = loadPeopleData => genToken => HttpService {
+  val service: (String => List[String]) => (Int => String) => HttpService[IO] = loadPeopleData => genToken => HttpService[IO] {
     case GET -> Root / "results" =>
       Ok(ResultResponse(3, loadPeopleData("people.txt")).asJson)
 
@@ -23,7 +20,7 @@ object Provider {
       val nameHeader = request.headers.get(CaseInsensitiveString("Name")).map(_.value)
 
       (acceptHeader, nameHeader) match {
-        case (Some(accept), Some(name)) =>
+        case (Some(_), Some(_)) =>
           val token = genToken(10)
           Accepted(Token(token).asJson)
 
@@ -40,16 +37,5 @@ object Provider {
 
 }
 
-object ResultResponseImplicits {
-  implicit lazy val resultsCodec: CodecJson[ResultResponse] =
-    casecodec2(ResultResponse.apply, ResultResponse.unapply)("count", "results")
-}
-
 case class ResultResponse(count: Int, results: List[String])
-
-object TokenResponseImplicits {
-  implicit lazy val tokenCodec: CodecJson[Token] =
-    casecodec1(Token.apply, Token.unapply)("token")
-}
-
 case class Token(token: String)

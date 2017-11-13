@@ -1,14 +1,14 @@
 package com.example.provider
 
-import org.scalatest.{FunSpec, Matchers, BeforeAndAfterAll}
+import cats.effect.IO
+import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
 import org.http4s.server.Server
-
 import com.itv.scalapact.ScalaPactVerify._
 
 class VerifyContractsSpec extends FunSpec with Matchers with BeforeAndAfterAll {
 
   // Their are almost certainly nicer ways to do this.
-  var runningService: Option[Server] = None
+  var runningService: Option[Server[IO]] = None
 
   // Before all the tests are run, we start our service, which is the real service
   // code, the only difference is that the core business logic has been replaced
@@ -27,7 +27,7 @@ class VerifyContractsSpec extends FunSpec with Matchers with BeforeAndAfterAll {
 
   // Afterwards we need to remember to shut our service down again.
   override def afterAll(): Unit = {
-    runningService.foreach(AlternateStartupApproach.stopServer)
+    runningService.foreach(p => p.shutdownNow())
   }
 
   describe("Verifying Consumer Contracts") {
