@@ -1,6 +1,7 @@
 package com.itv.scalapact.shared.http
 
 import java.util.concurrent.{ExecutorService, Executors}
+import javax.net.ssl.SSLContext
 
 import com.itv.scalapact.shared._
 import org.http4s.dsl._
@@ -19,20 +20,29 @@ object PactStubService {
   private val nThreads: Int = 50
   private val executorService: ExecutorService = Executors.newFixedThreadPool(nThreads)
 
-  def startServer(interactionManager: IInteractionManager)(implicit pactReader: IPactReader, pactWriter: IPactWriter): ScalaPactSettings => Unit = config => {
+  def startServer(interactionManager: IInteractionManager, sslContextName: Option[String])(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): ScalaPactSettings => Unit = config => {
     println(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold)
     println(("Strict matching mode: " + config.giveStrictMode.toString).white.bold)
 
-    runServer(interactionManager, nThreads)(pactReader, pactWriter)(config).awaitShutdown()
+    runServer(interactionManager, nThreads, sslContextName, config.givePort)(pactReader, pactWriter, sslContextMap)(config).awaitShutdown()
   }
 
-  def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int)(implicit pactReader: IPactReader, pactWriter: IPactWriter): ScalaPactSettings => IPactServer = config => PactServer {
+  implicit class BlazeBuilderPimper(blazeBuilder: BlazeBuilder) {
+    def withOptionalSsl(sslContextName: Option[String])(implicit sslContextMap: SslContextMap): BlazeBuilder = {
+      val ssl = sslContextMap(sslContextName).fold(blazeBuilder)(ssl => throw new RuntimeException("Use of SSl contexts is not supported by this version of HTTP4S"))
+      println(s"withOptionalSsl($ssl)")
+      ssl
+    }
+  }
+
+  def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int, sslContextName: Option[String], port: Int)(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): ScalaPactSettings => IPactServer = config => PactServer {
     BlazeBuilder
-      .bindHttp(config.givePort, config.giveHost)
+      .bindHttp(port, config.giveHost)
       .withServiceExecutor(executorService)
       .withIdleTimeout(60.seconds)
+      .withOptionalSsl(sslContextName)
       .withConnectorPoolSize(connectionPoolSize)
-      .mountService(PactStubService.service(interactionManager, config.giveStrictMode), "/")
+      .mountService(PactStubService.service(interactionManager, config.giveStrictMode, sslContextName), "/")
       .run
   }
 
@@ -40,15 +50,15 @@ object PactStubService {
     server.shutdown()
 
   private val isAdminCall: Request => Boolean = request =>
-      request.headers.get(CaseInsensitiveString("X-Pact-Admin")).exists(h => h.value == "true")
+    request.headers.get(CaseInsensitiveString("X-Pact-Admin")).exists(h => h.value == "true")
 
-  private def service(interactionManager: IInteractionManager, strictMatching: Boolean)(implicit pactReader: IPactReader, pactWriter: IPactWriter): HttpService =
+  private def service(interactionManager: IInteractionManager, strictMatching: Boolean, sslContextName: Option[String])(implicit pactReader: IPactReader, pactWriter: IPactWriter): HttpService =
     HttpService.lift { req =>
-      matchRequestWithResponse(interactionManager, strictMatching, req)
+      matchRequestWithResponse(interactionManager, strictMatching, req, sslContextName)
     }
 
-  private def matchRequestWithResponse(interactionManager: IInteractionManager, strictMatching: Boolean, req: Request)(implicit pactReader: IPactReader, pactWriter: IPactWriter): scalaz.concurrent.Task[Response] = {
-    if(isAdminCall(req)) {
+  private def matchRequestWithResponse(interactionManager: IInteractionManager, strictMatching: Boolean, req: Request, sslContextName: Option[String])(implicit pactReader: IPactReader, pactWriter: IPactWriter): scalaz.concurrent.Task[Response] = {
+    if (isAdminCall(req)) {
 
       req.method.name.toUpperCase match {
         case m if m == "GET" && req.pathInfo.startsWith("/stub/status") =>
@@ -79,12 +89,11 @@ object PactStubService {
 
     }
     else {
-
       interactionManager.findMatchingInteraction(
         InteractionRequest(
           method = Option(req.method.name.toUpperCase),
           headers = req.headers,
-          query = if(req.params.isEmpty) None else Option(req.params.toList.map(p => p._1 + "=" + p._2).mkString("&")),
+          query = if (req.params.isEmpty) None else Option(req.params.toList.map(p => p._1 + "=" + p._2).mkString("&")),
           path = Option(req.pathInfo),
           body = req.bodyAsText.runLog[Task, String].map(body => Option(body.mkString)).unsafePerformSync,
           matchingRules = None
@@ -92,11 +101,11 @@ object PactStubService {
         strictMatching = strictMatching
       ) match {
         case Right(ir) =>
-            Http4sRequestResponseFactory.buildResponse(
-              status = IntAndReason(ir.response.status.getOrElse(200), None),
-              headers = ir.response.headers.getOrElse(Map.empty),
-              body = ir.response.body
-            )
+          Http4sRequestResponseFactory.buildResponse(
+            status = IntAndReason(ir.response.status.getOrElse(200), None),
+            headers = ir.response.headers.getOrElse(Map.empty),
+            body = ir.response.body
+          )
 
         case Left(message) =>
           Http4sRequestResponseFactory.buildResponse(

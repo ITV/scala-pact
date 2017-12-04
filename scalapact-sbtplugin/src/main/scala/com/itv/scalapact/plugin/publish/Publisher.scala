@@ -23,7 +23,7 @@ object Publisher {
 
         val context = s"Publishing '${v.consumerName} -> ${v.providerName}' to:\n > $address".yellow
 
-        sendIt(SimpleRequest(address, "", HttpMethod.PUT, Map("Content-Type" -> "application/json"), Option(pactWriter.pactToJsonString(pact)))) match {
+        sendIt(SimpleRequest(address, "", HttpMethod.PUT, Map("Content-Type" -> "application/json"), Option(pactWriter.pactToJsonString(pact)), sslContextName = None)) match {
           case Right(r) if r.is2xx =>
             PublishSuccess(context)
 

@@ -1,5 +1,7 @@
 package com.itv.scalapact.shared.http
 
+import javax.net.ssl.SSLContext
+
 import com.itv.scalapact.shared.{SimpleRequest, SimpleResponse}
 import org.http4s.{BuildInfo, Response}
 import org.http4s.client.Client
@@ -13,21 +15,22 @@ object Http4sClientHelper {
 
   import HeaderImplicitConversions._
 
-  private def blazeClientConfig(clientTimeout: Duration): BlazeClientConfig = BlazeClientConfig.defaultConfig.copy(
+  private def blazeClientConfig(clientTimeout: Duration, sslContext: Option[SSLContext]): BlazeClientConfig = BlazeClientConfig.defaultConfig.copy(
     requestTimeout = clientTimeout,
     userAgent = Option(`User-Agent`(AgentProduct("scala-pact", Option(BuildInfo.version)))),
     endpointAuthentication = false,
-    customExecutor = None
+    customExecutor = None,
+    sslContext = sslContext
   )
 
   private val extractResponse: Response => Task[SimpleResponse] = r =>
     r.bodyAsText.runLog[Task, String].map(_.mkString).map { b => SimpleResponse(r.status.code, r.headers, Some(b)) }
 
   def defaultClient: Client =
-    buildPooledBlazeHttpClient(1, Duration(1, SECONDS))
+    buildPooledBlazeHttpClient(1, Duration(1, SECONDS), sslContext=None)
 
-  def buildPooledBlazeHttpClient(maxTotalConnections: Int, clientTimeout: Duration): Client =
-    PooledHttp1Client(maxTotalConnections, blazeClientConfig(clientTimeout))
+  def buildPooledBlazeHttpClient(maxTotalConnections: Int, clientTimeout: Duration, sslContext: Option[SSLContext]): Client =
+    PooledHttp1Client(maxTotalConnections, blazeClientConfig(clientTimeout, sslContext ))
 
   val doRequest: (SimpleRequest, Client) => Task[SimpleResponse] = (request, httpClient) =>
     for {

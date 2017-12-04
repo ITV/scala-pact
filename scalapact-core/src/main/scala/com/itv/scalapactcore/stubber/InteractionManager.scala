@@ -10,7 +10,7 @@ class InteractionManager extends IInteractionManager {
   private var interactions = List.empty[Interaction]
 
   def findMatchingInteraction(request: InteractionRequest, strictMatching: Boolean): Either[String, Interaction] =
-    matchRequest(strictMatching, interactions, request)
+    matchRequest(strictMatching, interactions.map(_.withoutSslHeader), request)
 
   def getInteractions: List[Interaction] = interactions
 

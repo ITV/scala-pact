@@ -1,6 +1,6 @@
 package com.itv.scalapact.shared
 
-trait IPactReader {
+trait   IPactReader {
 
   type ReadPactF = String => Either[String, Pact]
 

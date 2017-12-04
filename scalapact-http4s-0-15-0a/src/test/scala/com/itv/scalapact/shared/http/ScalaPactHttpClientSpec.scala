@@ -31,7 +31,7 @@ class ScalaPactHttpClientSpec extends FunSpec with Matchers {
 
       val fakeCaller: (SimpleRequest, Client) => Task[SimpleResponse] = (_, _) => Task.now(SimpleResponse(200))
 
-      val result = ScalaPactHttpClient.doInteractionRequestTask(fakeCaller, "", requestDetails, 1.second).unsafePerformSync
+      val result = ScalaPactHttpClient.doInteractionRequestTask(fakeCaller, "", requestDetails, 1.second, sslContextName = None).unsafePerformSync
 
       result shouldEqual responseDetails
 

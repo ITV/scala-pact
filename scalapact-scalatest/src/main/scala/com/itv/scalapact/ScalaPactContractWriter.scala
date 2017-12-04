@@ -4,7 +4,7 @@ import java.io.{File, PrintWriter}
 import java.nio.charset.StandardCharsets
 
 import com.itv.scalapact.ScalaPactForger.{ScalaPactDescriptionFinal, ScalaPactInteractionFinal, ScalaPactMatchingRule, ScalaPactMatchingRuleArrayMinLength, ScalaPactMatchingRuleRegex, ScalaPactMatchingRuleType}
-import com.itv.scalapact.shared.{Interaction, InteractionRequest, InteractionResponse, MatchingRule, Pact, PactActor, IPactWriter}
+import com.itv.scalapact.shared._
 
 import scala.language.implicitConversions
 
@@ -56,7 +56,7 @@ object ScalaPactContractWriter {
       consumer = PactActor(pactDescription.consumer),
       interactions = pactDescription.interactions.map { convertInteractionsFinalToInteractions }
     )
-
+import com.itv.scalapact.shared.Maps._
   lazy val convertInteractionsFinalToInteractions: ScalaPactInteractionFinal => Interaction = i => {
     val pathAndQuery: (String, String) = i.request.path.split('?').toList ++ List(i.request.query.getOrElse("")) match {
       case Nil => ("/", "")

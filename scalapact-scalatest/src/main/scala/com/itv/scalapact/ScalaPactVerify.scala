@@ -4,7 +4,7 @@ import com.itv.scalapactcore.common.LocalPactFileLoader
 import com.itv.scalapactcore.verifier.{PactVerifySettings, Verifier, VersionedConsumer}
 import java.io.{BufferedWriter, File, FileWriter}
 
-import com.itv.scalapact.shared.{Helpers, ScalaPactSettings}
+import com.itv.scalapact.shared.{Helpers, ScalaPactSettings, SslContextMap}
 import com.itv.scalapactcore.common.PactReaderWriter._
 
 import scala.concurrent.duration._
@@ -15,14 +15,14 @@ object ScalaPactVerify {
 
   object verifyPact {
 
-    def withPactSource(sourceType: PactSourceType): ScalaPactVerifyProviderStates = new ScalaPactVerifyProviderStates(sourceType)
+    def withPactSource(sourceType: PactSourceType)(implicit sslContextMap: SslContextMap): ScalaPactVerifyProviderStates = new ScalaPactVerifyProviderStates(sourceType)
 
-    class ScalaPactVerifyProviderStates(sourceType: PactSourceType) {
+    class ScalaPactVerifyProviderStates(sourceType: PactSourceType) (implicit sslContextMap: SslContextMap){
       def setupProviderState(given: String)(setupProviderState: String => Boolean): ScalaPactVerifyRunner = new ScalaPactVerifyRunner(sourceType, given, setupProviderState)
       def noSetupRequired: ScalaPactVerifyRunner = new ScalaPactVerifyRunner(sourceType, None, None)
     }
 
-    class ScalaPactVerifyRunner(sourceType: PactSourceType, given: Option[String], setupProviderState: Option[String => Boolean]) {
+    class ScalaPactVerifyRunner(sourceType: PactSourceType, given: Option[String], setupProviderState: Option[String => Boolean])(implicit sslContextMap: SslContextMap) {
 
       def runStrictVerificationAgainst(port: Int): Unit = doVerification("http", "localhost", port, VerifyTargetConfig.defaultClientTimeout, strict = true)
       def runStrictVerificationAgainst(port: Int, clientTimeout: Duration): Unit = doVerification("http", "localhost", port, clientTimeout, strict = true)

@@ -1,5 +1,7 @@
 package com.itv.scalapact.shared
 
+import javax.net.ssl.SSLContext
+
 final case class SimpleResponse(statusCode: Int, headers: Map[String, String], body: Option[String]) {
   def is2xx: Boolean = statusCode >= 200 && statusCode < 300
 
@@ -17,14 +19,14 @@ object SimpleResponse {
 
 }
 
-final case class SimpleRequest(baseUrl: String, endPoint: String, method: HttpMethod, headers: Map[String, String], body: Option[String])
+final case class SimpleRequest(baseUrl: String, endPoint: String, method: HttpMethod, headers: Map[String, String], body: Option[String], sslContextName: Option[String])
 
 object SimpleRequest {
 
-  def apply(baseUrl: String, endPoint: String, method: HttpMethod): SimpleRequest =
-    SimpleRequest(baseUrl, endPoint, method, Map.empty[String, String], None)
+  def apply(baseUrl: String, endPoint: String, method: HttpMethod, sslContextName: Option[String]): SimpleRequest =
+    SimpleRequest(baseUrl, endPoint, method, Map.empty[String, String], None, sslContextName)
 
-  def apply(baseUrl: String, endPoint: String, method: HttpMethod, body: String): SimpleRequest =
-    SimpleRequest(baseUrl, endPoint, method, Map.empty[String, String], Option(body))
+  def apply(baseUrl: String, endPoint: String, method: HttpMethod, body: String, sslContextName: Option[String]): SimpleRequest =
+    SimpleRequest(baseUrl, endPoint, method, Map.empty[String, String], Option(body), sslContextName)
 
 }

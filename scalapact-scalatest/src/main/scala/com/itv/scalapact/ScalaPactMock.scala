@@ -2,6 +2,7 @@ package com.itv.scalapact
 
 import java.io.IOException
 import java.net.ServerSocket
+import javax.net.ssl.SSLContext
 
 import com.itv.scalapact.ScalaPactForger._
 import com.itv.scalapact.shared._
@@ -14,10 +15,10 @@ import scala.concurrent.duration._
 
 object ScalaPactMock {
 
-  private def configuredTestRunner[A](pactDescription: ScalaPactDescriptionFinal)(config: ScalaPactMockConfig)(test: => ScalaPactMockConfig => A): A = {
+  private def configuredTestRunner[A](pactDescription: ScalaPactDescriptionFinal)(config: ScalaPactMockConfig)(test: => ScalaPactMockConfig => A)(implicit sslContextMap: SslContextMap): A = {
 
-    if(pactDescription.options.writePactFiles) {
-      ScalaPactContractWriter.writePactContracts(config.outputPath)(pactWriter)(pactDescription)
+    if (pactDescription.options.writePactFiles) {
+      ScalaPactContractWriter.writePactContracts(config.outputPath)(pactWriter)(pactDescription.withHeaderForSsl)
     }
 
     test(config)
@@ -38,7 +39,7 @@ object ScalaPactMock {
         // Ignore IOException on close()
         case _: IOException =>
       }
-    } catch{
+    } catch {
       case _: IOException =>
     } finally {
       if (socket != null) {
@@ -50,16 +51,16 @@ object ScalaPactMock {
       }
     }
 
-    if(port == -1) throw new IllegalStateException("Could not find a free TCP/IP port to start embedded HTTP Server on")
+    if (port == -1) throw new IllegalStateException("Could not find a free TCP/IP port to start embedded HTTP Server on")
     else port
   }
 
-  def runConsumerIntegrationTest[A](strict: Boolean)(pactDescription: ScalaPactDescriptionFinal)(test: ScalaPactMockConfig => A): A = {
+  def runConsumerIntegrationTest[A](strict: Boolean)(pactDescription: ScalaPactDescriptionFinal)(test: ScalaPactMockConfig => A)(implicit sslContextMap: SslContextMap): A = {
 
     val interactionManager: InteractionManager = new InteractionManager
 
-    val mockConfig = ScalaPactMockConfig("http", "localhost", findFreePort(), pactDescription.options.outputPath)
-
+    val protocol = pactDescription.serverSslContextName.fold("http")(_ => "https")
+    val mockConfig = ScalaPactMockConfig(protocol, "localhost", findFreePort(), pactDescription.options.outputPath)
     val configAndPacts: ConfigAndPacts = ConfigAndPacts(
       scalaPactSettings = ScalaPactSettings(
         host = Option(mockConfig.host),
@@ -75,22 +76,22 @@ object ScalaPactMock {
 
     val connectionPoolSize: Int = 5
 
-    val server: IPactServer = (interactionManager.addToInteractionManager andThen runServer(interactionManager, connectionPoolSize))(configAndPacts)
+    val server: IPactServer = (interactionManager.addToInteractionManager andThen runServer(interactionManager, connectionPoolSize, pactDescription.serverSslContextName, configAndPacts.scalaPactSettings.givePort)) (configAndPacts)
 
     println("> ScalaPact stub running at: " + mockConfig.baseUrl)
 
     waitForServerThenTest(server, mockConfig, test, pactDescription)
   }
 
-  private def waitForServerThenTest[A](server: IPactServer, mockConfig: ScalaPactMockConfig, test: ScalaPactMockConfig => A, pactDescription: ScalaPactDescriptionFinal): A = {
+  private def waitForServerThenTest[A](server: IPactServer, mockConfig: ScalaPactMockConfig, test: ScalaPactMockConfig => A, pactDescription: ScalaPactDescriptionFinal)(implicit sslContextMap: SslContextMap): A = {
     def rec(attemptsRemaining: Int, intervalMillis: Int): A = {
-      if(isStubReady(mockConfig)) {
+      if (isStubReady(mockConfig, pactDescription.serverSslContextName)) {
         val result = configuredTestRunner(pactDescription)(mockConfig)(test)
 
         stopServer(server)
 
         result
-      } else if(attemptsRemaining == 0) {
+      } else if (attemptsRemaining == 0) {
         throw new Exception("Could not connect to stub are: " + mockConfig.baseUrl)
       } else {
         println(">  ...waiting for stub, attempts remaining: " + attemptsRemaining.toString)
@@ -102,8 +103,8 @@ object ScalaPactMock {
     rec(5, 100)
   }
 
-  private def isStubReady(mockConfig: ScalaPactMockConfig): Boolean = {
-    ScalaPactHttpClient.doRequestSync(SimpleRequest(mockConfig.baseUrl, "/stub/status", HttpMethod.GET, Map("X-Pact-Admin" -> "true"), None)) match {
+  private def isStubReady(mockConfig: ScalaPactMockConfig, sslContextName: Option[String])(implicit sslContextMap: SslContextMap): Boolean = {
+    ScalaPactHttpClient.doRequestSync(SimpleRequest(mockConfig.baseUrl, "/stub/status", HttpMethod.GET, Map("X-Pact-Admin" -> "true"), None, sslContextName = sslContextName)) match {
       case Left(_) =>
         false
 

@@ -93,6 +93,10 @@ lazy val commonSettings = Seq(
   )
 )
 
+lazy val mockSettings = Seq(
+  libraryDependencies += "org.scalamock" %% "scalamock" % "4.0.0" % Test
+)
+
 lazy val publishSettings = Seq(
   publishTo := {
     val nexus = "https://oss.sonatype.org/"
@@ -199,6 +203,7 @@ lazy val http4s0170 =
   (project in file("scalapact-http4s-0-17-0"))
     .settings(commonSettings: _*)
     .settings(publishSettings: _*)
+    .settings(mockSettings: _*)
     .cross
 
 //lazy val http4s0170_2_10 = http4s0170(scala210).dependsOn(shared_2_10)
@@ -277,7 +282,7 @@ lazy val framework_2_12 =
   framework(scala212)
     .dependsOn(core_2_12)
     .dependsOn(argonaut62_2_12 % "provided")
-    .dependsOn(http4s0150a_2_12 % "provided")
+    .dependsOn(http4s0170_2_12 % "provided")
     .project
 
 lazy val standalone =
@@ -312,6 +317,9 @@ lazy val scalaPactProject =
       framework_2_11,
       framework_2_12,
       standalone,
+      shared_2_10,
+      shared_2_11,
+      shared_2_12,
       docs,
       http4s0150a_2_10,
       http4s0150a_2_11,

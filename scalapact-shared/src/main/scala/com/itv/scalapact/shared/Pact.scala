@@ -1,6 +1,7 @@
 package com.itv.scalapact.shared
 
 case class Pact(provider: PactActor, consumer: PactActor, interactions: List[Interaction]) {
+  def withoutSslHeader = copy(interactions = interactions.map(_.withoutSslHeader))
 
   def renderAsString: String =
     s"""Pact
@@ -18,21 +19,29 @@ case class PactActor(name: String) {
     s"""$name"""
 
 }
+
 case class Interaction(provider_state: Option[String], providerState: Option[String], description: String, request: InteractionRequest, response: InteractionResponse) {
+
+  def withoutSslHeader = copy(request = request.copy(headers = request.headers .map( _ - SslContextMap.sslContextHeaderName)))
 
   def renderAsString: String =
     s"""Interaction
-      |  providerState: [${providerState.orElse(provider_state).getOrElse("<none>")}]
-      |  description:   [$description]
-      |  ${request.renderAsString}
-      |  ${response.renderAsString}
+       |  providerState: [${providerState.orElse(provider_state).getOrElse("<none>")}]
+       |  description:   [$description]
+       |  ${request.renderAsString}
+       |  ${response.renderAsString}
     """.stripMargin
 
 }
+
 case class InteractionRequest(method: Option[String], path: Option[String], query: Option[String], headers: Option[Map[String, String]], body: Option[String], matchingRules: Option[Map[String, MatchingRule]]) {
   def unapply: Option[(Option[String], Option[String], Option[String], Option[Map[String, String]], Option[String])] = Some {
     (method, path, query, headers, body)
   }
+
+  def withoutSslContextHeader: InteractionRequest = copy(headers = headers.map(_ - SslContextMap.sslContextHeaderName))
+
+  def sslContextName: Option[String] = headers.flatMap(_.get(SslContextMap.sslContextHeaderName))
 
   def renderAsString: String =
     s"""Request           [${method.getOrElse("<missing method>")}]
@@ -46,6 +55,7 @@ case class InteractionRequest(method: Option[String], path: Option[String], quer
      """.stripMargin
 
 }
+
 case class InteractionResponse(status: Option[Int], headers: Option[Map[String, String]], body: Option[String], matchingRules: Option[Map[String, MatchingRule]]) {
 
   def renderAsString: String =

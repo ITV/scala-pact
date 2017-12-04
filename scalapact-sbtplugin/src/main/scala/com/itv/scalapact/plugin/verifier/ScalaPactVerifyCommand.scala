@@ -3,7 +3,7 @@ package com.itv.scalapact.plugin.verifier
 import com.itv.scalapact.plugin.ScalaPactPlugin
 import com.itv.scalapactcore.verifier.ProviderState
 import com.itv.scalapact.shared.ColourOuput._
-import com.itv.scalapact.shared.ScalaPactSettings
+import com.itv.scalapact.shared.{ScalaPactSettings, SslContextMap}
 import com.itv.scalapactcore.common.LocalPactFileLoader
 import com.itv.scalapactcore.verifier._
 import sbt._
@@ -55,7 +55,7 @@ object ScalaPactVerifyCommand {
           .map(t => VersionedConsumer(t._1, t._2))
     )
 
-    val successfullyVerified = verify(LocalPactFileLoader.loadPactFiles(pactReader)(true), pactVerifySettings)(pactReader)(scalaPactSettings)
+    val successfullyVerified = verify(LocalPactFileLoader.loadPactFiles(pactReader)(true), pactVerifySettings)(pactReader, new SslContextMap(Map()))(scalaPactSettings)
 
     if (successfullyVerified) sys.exit(0) else sys.exit(1)
 

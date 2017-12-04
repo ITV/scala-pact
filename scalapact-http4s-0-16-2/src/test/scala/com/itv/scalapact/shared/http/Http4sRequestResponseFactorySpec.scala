@@ -17,7 +17,8 @@ class Http4sRequestResponseFactorySpec extends FunSpec with Matchers {
           "Accept" -> "application/json",
           "Content-Type" -> "test/plain"
         ),
-        Some("Greetings!")
+        Some("Greetings!"),
+        sslContextName=None
       )
 
       val request = Http4sRequestResponseFactory.buildRequest(simpleRequest).run

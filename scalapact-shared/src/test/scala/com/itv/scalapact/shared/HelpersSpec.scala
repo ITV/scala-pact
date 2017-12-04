@@ -10,7 +10,6 @@ class HelpersSpec extends FunSpec with Matchers {
 
       Helpers.pair(List(1, 2, 3, 4)) shouldEqual Map(1 -> 2, 3 -> 4)
       Helpers.pair(List("a", "b", "c")) shouldEqual Map("a" -> "b")
-
     }
 
     it("should be able to pair a list into a list of tuples") {
