@@ -4,6 +4,7 @@ import com.itv.scalapact.shared.SslContextMap
 
 import scala.language.implicitConversions
 import scala.util.Properties
+import com.itv.scalapact.shared.Maps._
 
 object ScalaPactForger {
 
@@ -41,7 +42,7 @@ object ScalaPactForger {
         */
       def addInteraction(interaction: ScalaPactInteraction): ScalaPactDescription = new ScalaPactDescription(consumer, provider, sslContextName, interactions ++ List(interaction))
 
-      def addSslContextForServer(name: String) = new ScalaPactDescription(consumer, provider, Some(name), interactions)
+      def addSslContextForServer(name: String): ScalaPactDescription = new ScalaPactDescription(consumer, provider, Some(name), interactions)
 
       def runConsumerTest[A](test: ScalaPactMockConfig => A)(implicit options: ScalaPactOptions, sslContextMap: SslContextMap): A = {
         ScalaPactMock.runConsumerIntegrationTest(strict)(
@@ -66,7 +67,7 @@ object ScalaPactForger {
   class ScalaPactInteraction(description: String, providerState: Option[String], sslContextName: Option[String], request: ScalaPactRequest, response: ScalaPactResponse) {
     def given(state: String): ScalaPactInteraction = new ScalaPactInteraction(description, Option(state), sslContextName, request, response)
 
-    def withSsl(sslContextName: String) = new ScalaPactInteraction(description, providerState, Some(sslContextName), request, response)
+    def withSsl(sslContextName: String): ScalaPactInteraction = new ScalaPactInteraction(description, providerState, Some(sslContextName), request, response)
 
     def uponReceiving(path: String): ScalaPactInteraction = uponReceiving(GET, path, None, Map.empty, None, None)
 
@@ -99,10 +100,8 @@ object ScalaPactForger {
     def finalise: ScalaPactInteractionFinal = ScalaPactInteractionFinal(description, providerState, sslContextName, request, response)
   }
 
-  import com.itv.scalapact.shared.Maps._
-
   case class ScalaPactDescriptionFinal(consumer: String, provider: String, serverSslContextName: Option[String], interactions: List[ScalaPactInteractionFinal], options: ScalaPactOptions) {
-    def withHeaderForSsl = copy(interactions = interactions.map(i => i.copy(request = i.request.copy(headers = i.request.headers addOpt (SslContextMap.sslContextHeaderName -> i.sslContextName)))))
+    def withHeaderForSsl: ScalaPactDescriptionFinal = copy(interactions = interactions.map(i => i.copy(request = i.request.copy(headers = i.request.headers addOpt (SslContextMap.sslContextHeaderName -> i.sslContextName)))))
   }
 
   case class ScalaPactInteractionFinal(description: String, providerState: Option[String], sslContextName: Option[String], request: ScalaPactRequest, response: ScalaPactResponse)

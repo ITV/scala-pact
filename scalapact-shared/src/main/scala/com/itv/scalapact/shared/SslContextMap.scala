@@ -5,22 +5,27 @@ import java.security.KeyStore
 import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
 
 class SslContextMap(map: Map[String, SSLContext]) extends (Option[String] => Option[SSLContext]) {
-  override def apply(optName: Option[String]) = {
-    val result = optName.map(name => map.get(name).getOrElse(throw new SslContextNotFoundException(name, this)))
+  override def apply(optName: Option[String]): Option[SSLContext] = {
+    val result = optName.map(name => map.getOrElse(name, throw new SslContextNotFoundException(name, this)))
+
     println(s"SslContextMap($optName) ==> $result")
-    if (SslContextMap.debugNones) if (optName == None) {
+
+    if (SslContextMap.debugNones && optName.isEmpty) {
       try {
         throw new RuntimeException
       } catch {
         case e: Exception => e.printStackTrace()
       }
     }
+
     result
   }
 
-  def legalValues = map.keys.toList.sorted
+  def legalValues: List[String] =
+    map.keys.toList.sorted
 
-  override def toString() = s"SslContextMap($map)"
+  override def toString() =
+    s"SslContextMap($map)"
 }
 
 class SslContextNotFoundException(name: String, sslContextMap: SslContextMap) extends Exception(s"SslContext [$name] not found. Legal values are [${sslContextMap.legalValues}]")
@@ -28,7 +33,7 @@ class SslContextNotFoundException(name: String, sslContextMap: SslContextMap) ex
 object SslContextMap {
   val sslContextHeaderName: String = "pact-ssl-context"
 
-  var debugNones = false
+  var debugNones: Boolean = false
 
   implicit val defaultEmptyContextMap: SslContextMap = new SslContextMap(Map())
 
@@ -41,6 +46,7 @@ object SslContextMap {
   def makeSslContext(keyStore: String, passphrase: String, trustStore: String, trustPassphrase: String): SSLContext = {
     val ksKeys = KeyStore.getInstance("JKS")
     ksKeys.load(new FileInputStream(keyStore), passphrase.toCharArray)
+
     val ksTrust = KeyStore.getInstance("JKS")
     ksTrust.load(new FileInputStream(trustStore), trustPassphrase.toCharArray)
 
@@ -53,7 +59,7 @@ object SslContextMap {
     tmf.init(ksTrust)
 
     val sslContext = SSLContext.getInstance("TLS")
-    sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null)
+    sslContext.init(kmf.getKeyManagers, tmf.getTrustManagers, null)
     sslContext
   }
 

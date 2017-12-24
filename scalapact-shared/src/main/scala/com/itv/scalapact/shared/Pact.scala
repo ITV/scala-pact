@@ -1,7 +1,7 @@
 package com.itv.scalapact.shared
 
 case class Pact(provider: PactActor, consumer: PactActor, interactions: List[Interaction]) {
-  def withoutSslHeader = copy(interactions = interactions.map(_.withoutSslHeader))
+  def withoutSslHeader: Pact = copy(interactions = interactions.map(_.withoutSslHeader))
 
   def renderAsString: String =
     s"""Pact
@@ -22,7 +22,7 @@ case class PactActor(name: String) {
 
 case class Interaction(provider_state: Option[String], providerState: Option[String], description: String, request: InteractionRequest, response: InteractionResponse) {
 
-  def withoutSslHeader = copy(request = request.copy(headers = request.headers .map( _ - SslContextMap.sslContextHeaderName)))
+  def withoutSslHeader: Interaction = copy(request = request.copy(headers = request.headers .map( _ - SslContextMap.sslContextHeaderName)))
 
   def renderAsString: String =
     s"""Interaction

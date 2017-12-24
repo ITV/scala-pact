@@ -2,14 +2,13 @@ package com.itv.scalapact
 
 import java.io.IOException
 import java.net.ServerSocket
-import javax.net.ssl.SSLContext
 
 import com.itv.scalapact.ScalaPactForger._
 import com.itv.scalapact.shared._
-import com.itv.scalapactcore.common.PactReaderWriter._
-import com.itv.scalapactcore.stubber.InteractionManager
 import com.itv.scalapact.shared.http.PactStubService._
 import com.itv.scalapact.shared.http.ScalaPactHttpClient
+import com.itv.scalapactcore.common.PactReaderWriter._
+import com.itv.scalapactcore.stubber.InteractionManager
 
 import scala.concurrent.duration._
 

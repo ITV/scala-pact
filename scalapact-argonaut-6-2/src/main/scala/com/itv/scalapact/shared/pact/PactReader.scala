@@ -55,12 +55,12 @@ object JsonBodySpecialCaseHelper {
       json.parseOption
         .flatMap { j => (j.hcursor --\ "interactions").focus.flatMap(_.array) }
 
-    val makeOptionalBody: Json => Option[String] = j => j match {
+    val makeOptionalBody: Json => Option[String] = {
       case body: Json if body.isString =>
-        j.string.map(_.toString)
+        body.string.map(_.toString)
 
-      case _ =>
-        Option(j.toString)
+      case body =>
+        Option(body.toString)
     }
 
     interations.map { is =>

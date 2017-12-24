@@ -56,7 +56,7 @@ object ScalaPactContractWriter {
       consumer = PactActor(pactDescription.consumer),
       interactions = pactDescription.interactions.map { convertInteractionsFinalToInteractions }
     )
-import com.itv.scalapact.shared.Maps._
+
   lazy val convertInteractionsFinalToInteractions: ScalaPactInteractionFinal => Interaction = i => {
     val pathAndQuery: (String, String) = i.request.path.split('?').toList ++ List(i.request.query.getOrElse("")) match {
       case Nil => ("/", "")
