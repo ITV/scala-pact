@@ -20,12 +20,12 @@ if [[ $ALL_VERSIONS == $ALL_EXPECTED ]]; then
 else
   echo "Project versions did not match."
   echo "Have you aligned the versions in all the projects? Found:"
-  echo "> core:                  $CORE_VERSION"
-  echo "> consumer:              $CONSUMER_VERSION"
-  echo "> consumer plugin:       $CONSUMER_PLUGIN_VERSION"
+  echo "> core:                  $CORE_VERSION (build.sbt)"
+  echo "> consumer:              $CONSUMER_VERSION (example/consumer/build.sbt)"
+  echo "> consumer plugin:       $CONSUMER_PLUGIN_VERSION (example/consumer/project/plugins.sbt)"
   echo "> provider:              (does not use the test suite!)"
-  echo "> provider plugin:       $PROVIDER_PLUGIN_VERSION"
-  echo "> provider_tests:        $PROVIDER_TESTS_VERSION"
+  echo "> provider plugin:       $PROVIDER_PLUGIN_VERSION (example/provider/project/plugins.sbt)"
+  echo "> provider_tests:        $PROVIDER_TESTS_VERSION (example/provider_tests/build.sbt)"
   echo "> provider_tests plugin: (does not use the plugin!)"
   echo "Exiting, please fix the problem by aligning the versions."
   exit 1
