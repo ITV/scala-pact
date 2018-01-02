@@ -276,7 +276,7 @@ lazy val framework_2_11 =
   framework(scala211)
     .dependsOn(core_2_11)
     .dependsOn(argonaut62_2_11 % "provided")
-    .dependsOn(http4s0150a_2_11 % "provided")
+    .dependsOn(http4s0162a_2_11 % "provided")
     .project
 lazy val framework_2_12 =
   framework(scala212)
