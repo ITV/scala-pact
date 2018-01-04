@@ -89,7 +89,6 @@ object PactStubService {
 
     }
     else {
-
       interactionManager.findMatchingInteraction(
         InteractionRequest(
           method = Option(req.method.name.toUpperCase),
@@ -103,7 +102,7 @@ object PactStubService {
       ) match {
         case Right(ir) =>
           Status.fromInt(ir.response.status.getOrElse(200)) match {
-            case Right(code) =>
+            case Right(_) =>
               Http4sRequestResponseFactory.buildResponse(
                 status = IntAndReason(ir.response.status.getOrElse(200), None),
                 headers = ir.response.headers.getOrElse(Map.empty),
