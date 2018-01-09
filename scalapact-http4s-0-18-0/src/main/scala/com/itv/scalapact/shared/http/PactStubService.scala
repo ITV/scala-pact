@@ -50,8 +50,7 @@ object PactStubService {
   private def service(interactionManager: IInteractionManager, strictMatching: Boolean)(implicit pactReader: IPactReader, pactWriter: IPactWriter): HttpService[IO] = {
     Kleisli[OptIO, Request[IO], Response[IO]](matchRequestWithResponse(interactionManager, strictMatching, _))
   }
-
-
+  
   private def matchRequestWithResponse(interactionManager: IInteractionManager, strictMatching: Boolean, req: Request[IO])
                                       (implicit pactReader: IPactReader, pactWriter: IPactWriter): OptIO[Response[IO]] = {
     val resp = if(isAdminCall(req)) {

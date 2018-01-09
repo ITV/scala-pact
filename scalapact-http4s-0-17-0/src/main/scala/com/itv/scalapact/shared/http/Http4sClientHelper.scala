@@ -20,7 +20,7 @@ object Http4sClientHelper {
 
   private def blazeClientConfig(clientTimeout: Duration, sslContext: Option[SSLContext]): BlazeClientConfig = BlazeClientConfig.defaultConfig.copy(
     requestTimeout = clientTimeout,
-    sslContext=sslContext,
+    sslContext = sslContext,
     userAgent = Option(`User-Agent`(AgentProduct("scala-pact", Option(BuildInfo.version)))),
     checkEndpointIdentification = false
   )
@@ -32,7 +32,7 @@ object Http4sClientHelper {
     buildPooledBlazeHttpClient(1, Duration(1, SECONDS), sslContext = None)
 
   def buildPooledBlazeHttpClient(maxTotalConnections: Int, clientTimeout: Duration, sslContext: Option[SSLContext]): Client =
-    PooledHttp1Client(maxTotalConnections, blazeClientConfig(clientTimeout,sslContext))
+    PooledHttp1Client(maxTotalConnections, blazeClientConfig(clientTimeout, sslContext))
 
   val doRequest: (SimpleRequest, Client) => Task[SimpleResponse] = (request, httpClient) =>
     for {
