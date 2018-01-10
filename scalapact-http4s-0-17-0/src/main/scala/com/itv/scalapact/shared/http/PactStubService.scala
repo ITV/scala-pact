@@ -4,11 +4,11 @@ import java.util.concurrent.{ExecutorService, Executors}
 import javax.net.ssl.SSLContext
 
 import com.itv.scalapact.shared._
-import org.http4s.dsl._
 import org.http4s.server.Server
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.util.CaseInsensitiveString
 import org.http4s.{HttpService, Request, Response, Status}
+import org.http4s.dsl._
 import HeaderImplicitConversions._
 import ColourOuput._
 import fs2.{Strategy, Task}
@@ -27,7 +27,7 @@ object PactStubService {
     println(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold)
     println(("Strict matching mode: " + config.giveStrictMode.toString).white.bold)
 
-    runServer(interactionManager, nThreads, sslContextName,config.givePort)(pactReader, pactWriter, sslContextMap)(config).awaitShutdown()
+    runServer(interactionManager, nThreads, sslContextName, config.givePort)(pactReader, pactWriter, sslContextMap)(config).awaitShutdown()
   }
 
   implicit class BlazeBuilderPimper(blazeBuilder: BlazeBuilder) {

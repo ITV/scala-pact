@@ -1,6 +1,7 @@
 package com.itv.scalapact.shared.http
 
 import java.util.concurrent.Executors
+import javax.net.ssl.SSLContext
 
 import cats.data.{Kleisli, OptionT}
 import cats.effect.IO
@@ -22,20 +23,25 @@ object PactStubService {
   private val nThreads: Int = 10
   implicit val executionContext: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(nThreads))
 
-  def startServer(interactionManager: IInteractionManager)(implicit pactReader: IPactReader, pactWriter: IPactWriter): ScalaPactSettings => Unit = config => {
+  def startServer(interactionManager: IInteractionManager, sslContextName: Option[String])(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): ScalaPactSettings => Unit = config => {
     println(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold)
     println(("Strict matching mode: " + config.giveStrictMode.toString).white.bold)
 
-    runServer(interactionManager, nThreads)(pactReader, pactWriter)(config).awaitShutdown()
+    runServer(interactionManager, nThreads, sslContextName)(pactReader, pactWriter, sslContextMap)(config).awaitShutdown()
   }
 
-  def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int)
-               (implicit pactReader: IPactReader, pactWriter: IPactWriter): ScalaPactSettings => IPactServer = config => PactServer {
+  implicit class BlazeBuilderPimper(blazeBuilder: BlazeBuilder[IO]) {
+    def withOptionalSsl(sslContext: Option[SSLContext]): BlazeBuilder[IO] = sslContext.fold(blazeBuilder)(ssl => blazeBuilder.withSSLContext(ssl))
+  }
+
+  def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int, sslContextName: Option[String])
+               (implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): ScalaPactSettings => IPactServer = config => PactServer {
     BlazeBuilder[IO]
       .bindHttp(config.givePort, config.giveHost)
       .withExecutionContext(executionContext)
       .withIdleTimeout(60.seconds)
       .withConnectorPoolSize(connectionPoolSize)
+      .withOptionalSsl(sslContextName)
       .mountService(PactStubService.service(interactionManager, config.giveStrictMode), "/")
       .start
       .unsafeRunSync()
@@ -50,7 +56,7 @@ object PactStubService {
   private def service(interactionManager: IInteractionManager, strictMatching: Boolean)(implicit pactReader: IPactReader, pactWriter: IPactWriter): HttpService[IO] = {
     Kleisli[OptIO, Request[IO], Response[IO]](matchRequestWithResponse(interactionManager, strictMatching, _))
   }
-  
+
   private def matchRequestWithResponse(interactionManager: IInteractionManager, strictMatching: Boolean, req: Request[IO])
                                       (implicit pactReader: IPactReader, pactWriter: IPactWriter): OptIO[Response[IO]] = {
     val resp = if(isAdminCall(req)) {
@@ -96,7 +102,7 @@ object PactStubService {
       ) match {
         case Right(ir) =>
           Status.fromInt(ir.response.status.getOrElse(200)) match {
-            case Right(code) =>
+            case Right(_) =>
               Http4sRequestResponseFactory.buildResponse(
                 status = IntAndReason(ir.response.status.getOrElse(200), None),
                 headers = ir.response.headers.getOrElse(Map.empty),

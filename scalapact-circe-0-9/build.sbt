@@ -1,6 +1,6 @@
 name := "scalapact-circe-0-9"
 
-val circeVersion = "0.9.0-M1"
+val circeVersion = "0.9.0"
 
 libraryDependencies ++= Seq(
   "io.circe" %% "circe-core",

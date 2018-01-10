@@ -32,7 +32,7 @@ class Http4sClientHelperSpec extends FunSpec with Matchers with BeforeAndAfterAl
   describe("Making an HTTP request") {
 
     it("should be able to make a simple request") {
-      val request = SimpleRequest("http://localhost:1234", "/test", HttpMethod.GET)
+      val request = SimpleRequest("http://localhost:1234", "/test", HttpMethod.GET, None)
       val response = Http4sClientHelper.doRequest(request, Http4sClientHelper.defaultClient).unsafeRunSync()
 
       response.statusCode shouldEqual 200

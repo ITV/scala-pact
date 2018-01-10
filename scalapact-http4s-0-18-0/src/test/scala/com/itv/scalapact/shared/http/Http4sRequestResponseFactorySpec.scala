@@ -5,7 +5,6 @@ import org.scalatest.{FunSpec, Matchers}
 
 
 class Http4sRequestResponseFactorySpec extends FunSpec with Matchers {
-  import scala.concurrent.ExecutionContext.Implicits.global
 
   describe("Creating Http4s requests and responses") {
 
@@ -19,7 +18,8 @@ class Http4sRequestResponseFactorySpec extends FunSpec with Matchers {
           "Accept" -> "application/json",
           "Content-Type" -> "test/plain"
         ),
-        Some("Greetings!")
+        Some("Greetings!"),
+        None
       )
 
       val request = Http4sRequestResponseFactory.buildRequest(simpleRequest).unsafeRunSync()

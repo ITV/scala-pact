@@ -4,7 +4,7 @@ import scala.xml.{Elem, XML, Node}
 
 import com.itv.scalapact.shared.ColourOuput._
 
-import argonaut._
+//import argonaut._
 
 object MatchIrConverters extends XmlConversionFunctions with JsonConversionFunctions with PrimitiveConversionFunctions {
 
