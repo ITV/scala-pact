@@ -1,4 +1,4 @@
-package com.itv.scalapactcore.common.matchir
+package com.itv.scalapact.shared.matchir
 
 import com.itv.scalapact.shared.MatchingRule
 import com.itv.scalapactcore.common.matchir.PactPathParseResult.{PactPathParseFailure, PactPathParseSuccess}

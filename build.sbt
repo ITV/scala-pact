@@ -139,7 +139,13 @@ lazy val shared =
 
 lazy val shared_2_10 = shared(scala210)
 lazy val shared_2_11 = shared(scala211)
+  .settings(
+    libraryDependencies ++= Seq("org.scala-lang.modules" %% "scala-xml" % "1.0.6")
+  )
 lazy val shared_2_12 = shared(scala212)
+  .settings(
+    libraryDependencies ++= Seq("org.scala-lang.modules" %% "scala-xml" % "1.0.6")
+  )
 
 lazy val core =
   (project in file("scalapact-core"))
@@ -149,24 +155,12 @@ lazy val core =
 
 lazy val core_2_10 = core(scala210)
   .dependsOn(shared_2_10)
-  .dependsOn(argonaut62_2_10 % "provided")
-  .dependsOn(http4s0150a_2_10 % "provided")
   .project
 lazy val core_2_11 = core(scala211)
-  .settings(
-    libraryDependencies ++= Seq("org.scala-lang.modules" %% "scala-xml" % "1.0.6")
-  )
   .dependsOn(shared_2_11)
-  .dependsOn(argonaut62_2_11 % "provided")
-  .dependsOn(http4s0150a_2_11 % "provided")
   .project
 lazy val core_2_12 = core(scala212)
-  .settings(
-    libraryDependencies ++= Seq("org.scala-lang.modules" %% "scala-xml" % "1.0.6")
-  )
   .dependsOn(shared_2_12)
-  .dependsOn(argonaut62_2_12 % "provided")
-  .dependsOn(http4s0150a_2_12 % "provided")
   .project
 
 lazy val http4s0150a =

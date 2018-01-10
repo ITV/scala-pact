@@ -4,7 +4,6 @@ import org.scalatest.{FunSpec, Matchers}
 import argonaut._
 import Argonaut._
 import com.itv.scalapactcore.common.matchir.{IrNodeEqualityResult, IrNodesEqual, IrNodesNotEqual}
-import com.itv.scalapactcore.common.matchir.MatchIrConverters._
 
 class JsonEqualitySpec extends FunSpec with Matchers {
 

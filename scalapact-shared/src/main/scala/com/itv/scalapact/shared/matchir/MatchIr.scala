@@ -1,25 +1,11 @@
-package com.itv.scalapactcore.common.matchir
+package com.itv.scalapact.shared.matchir
 
-import scala.xml.{Elem, XML, Node}
-
+import scala.xml.{Elem, Node, XML}
 import com.itv.scalapact.shared.ColourOuput._
+import com.itv.scalapact.shared.IJsonConversionFunctions
+import com.itv.scalapact.shared.json.JsonConversionFunctions
 
-//import argonaut._
-
-object MatchIrConverters extends XmlConversionFunctions with JsonConversionFunctions with PrimitiveConversionFunctions {
-
-  implicit def xmlToIrNode(elem: Elem): IrNode =
-    nodeToIrNode(scala.xml.Utility.trim(elem), IrNodePathEmpty)
-
-
-  implicit def jsonToIrNode(json: Json): IrNode =
-    jsonRootToIrNode(json, IrNodePathEmpty) match {
-      case Some(v) => v
-      case None => IrNode.empty
-    }
-}
-
-object MatchIr extends XmlConversionFunctions with JsonConversionFunctions with PrimitiveConversionFunctions {
+object MatchIr extends XmlConversionFunctions with IJsonConversionFunctions with PrimitiveConversionFunctions {
 
   def fromXml(xmlString: String): Option[IrNode] =
     safeStringToXml(xmlString).map { elem =>
@@ -27,77 +13,7 @@ object MatchIr extends XmlConversionFunctions with JsonConversionFunctions with 
     }
 
   def fromJSON(jsonString: String): Option[IrNode] =
-    Parse.parseOption(jsonString).flatMap { json =>
-      jsonRootToIrNode(json, IrNodePathEmpty)
-    }
-
-}
-
-trait JsonConversionFunctions {
-
-  val rootNodeLabel = "(--root node--)"
-  val unnamedNodeLabel = "(--node has no label--)"
-
-  protected def jsonToIrNode(label: String, json: Json, pathToParent: IrNodePath): IrNode = {
-    json match {
-      case j: Json if j.isArray =>
-        IrNode(label, jsonArrayToIrNodeList(label, j, pathToParent)).withPath(pathToParent)
-          .markAsArray
-
-      case j: Json if j.isObject =>
-        IrNode(label, jsonObjectToIrNodeList(j, pathToParent)).withPath(pathToParent)
-
-      case j: Json if j.isNull =>
-        IrNode(label, IrNullNode).withPath(pathToParent)
-
-      case j: Json if j.isNumber =>
-        IrNode(label, j.number.flatMap(_.toDouble).map(d => IrNumberNode(d))).withPath(pathToParent)
-
-      case j: Json if j.isBool =>
-        IrNode(label, j.bool.map(IrBooleanNode)).withPath(pathToParent)
-
-      case j: Json if j.isString =>
-        IrNode(label, j.string.map(IrStringNode)).withPath(pathToParent)
-    }
-
-  }
-
-  protected def jsonObjectToIrNodeList(json: Json, pathToParent: IrNodePath): List[IrNode] = {
-    json
-      .objectFieldsOrEmpty
-      .map(l => if (l.isEmpty) unnamedNodeLabel else l)
-      .map { l =>
-        json.field(l).map {
-          q => jsonToIrNode(l, q, pathToParent <~ l)
-        }
-      }
-      .collect { case Some(s) => s }
-  }
-
-  protected def jsonArrayToIrNodeList(parentLabel: String, json: Json, pathToParent: IrNodePath): List[IrNode] = {
-    json.arrayOrEmpty.zipWithIndex
-      .map(j => jsonToIrNode(parentLabel, j._1, pathToParent <~ j._2))
-  }
-
-  protected def jsonRootToIrNode(json: Json, initialPath: IrNodePath): Option[IrNode] =
-    json match {
-      case j: Json if j.isArray =>
-        Option(
-          IrNode(rootNodeLabel, jsonArrayToIrNodeList(unnamedNodeLabel, j, initialPath))
-            .withPath(initialPath)
-            .markAsArray
-        )
-
-      case j: Json if j.isObject =>
-        Option(
-          IrNode(rootNodeLabel, jsonObjectToIrNodeList(j, initialPath))
-            .withPath(initialPath)
-        )
-
-      case _ =>
-        println("JSON was not an object or an array".red)
-        None
-    }
+    JsonConversionFunctions.fromJSON(jsonString)
 
 }
 

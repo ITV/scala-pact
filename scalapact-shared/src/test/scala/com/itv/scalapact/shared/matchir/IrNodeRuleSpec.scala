@@ -1,4 +1,4 @@
-package com.itv.scalapactcore.common.matchir
+package com.itv.scalapact.shared.matchir
 
 import com.itv.scalapact.shared.MatchingRule
 import org.scalatest.{FunSpec, Matchers}
@@ -58,7 +58,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
           println(e)
           e.contains("rule") shouldEqual true
 
-        case Right(r) =>
+        case Right(_) =>
           fail("Unexpectedly converted the rules...")
       }
 

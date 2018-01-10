@@ -1,4 +1,4 @@
-package com.itv.scalapactcore.common.matchir
+package com.itv.scalapact.shared.matchir
 
 import org.scalatest.{FunSpec, Matchers}
 
@@ -154,7 +154,7 @@ class MatchIrSpec extends FunSpec with Matchers {
         """.stripMargin
 
       val ir: IrNode =
-        IrNode(MatchIr.rootNodeLabel, IrNode("fish").withPath(IrNodePathEmpty <~ "fish"))
+        IrNode(MatchIrConstants.rootNodeLabel, IrNode("fish").withPath(IrNodePathEmpty <~ "fish"))
 
       check(MatchIr.fromJSON(json).get =<>= ir)
     }
@@ -172,7 +172,7 @@ class MatchIrSpec extends FunSpec with Matchers {
 
       val ir: IrNode =
         IrNode(
-          MatchIr.rootNodeLabel,
+          MatchIrConstants.rootNodeLabel,
           IrNode(
             "fish",
             IrNode(
@@ -195,7 +195,7 @@ class MatchIrSpec extends FunSpec with Matchers {
 
       val ir: IrNode =
         IrNode(
-          MatchIr.rootNodeLabel,
+          MatchIrConstants.rootNodeLabel,
           IrNode("myDates",
             IrNode("myDates", IrNumberNode(20)).withPath(IrNodePathEmpty <~ "myDates" <~ 0),
             IrNode("myDates", IrNumberNode(5)).withPath(IrNodePathEmpty <~ "myDates" <~ 1),
@@ -216,10 +216,10 @@ class MatchIrSpec extends FunSpec with Matchers {
 
       val ir: IrNode =
         IrNode(
-          MatchIr.rootNodeLabel,
-          IrNode(MatchIr.unnamedNodeLabel, IrNumberNode(1)).withPath(IrNodePathEmpty <~ 0),
-          IrNode(MatchIr.unnamedNodeLabel, IrNumberNode(2)).withPath(IrNodePathEmpty <~ 1),
-          IrNode(MatchIr.unnamedNodeLabel, IrNumberNode(3)).withPath(IrNodePathEmpty <~ 2)
+          MatchIrConstants.rootNodeLabel,
+          IrNode(MatchIrConstants.unnamedNodeLabel, IrNumberNode(1)).withPath(IrNodePathEmpty <~ 0),
+          IrNode(MatchIrConstants.unnamedNodeLabel, IrNumberNode(2)).withPath(IrNodePathEmpty <~ 1),
+          IrNode(MatchIrConstants.unnamedNodeLabel, IrNumberNode(3)).withPath(IrNodePathEmpty <~ 2)
         ).withPath(IrNodePathEmpty).markAsArray
 
       check(MatchIr.fromJSON(json).get =<>= ir)
@@ -245,16 +245,16 @@ class MatchIrSpec extends FunSpec with Matchers {
         """.stripMargin
 
       val ir: IrNode =
-        IrNode(MatchIr.rootNodeLabel,
+        IrNode(MatchIrConstants.rootNodeLabel,
           IrNode(
-            MatchIr.unnamedNodeLabel,
+            MatchIrConstants.unnamedNodeLabel,
             IrNode(
               "fish",
               IrNode("breed", IrStringNode("cod")).withPath(IrNodePathEmpty <~ 0 <~ "fish" <~ "breed")
             ).withPath(IrNodePathEmpty <~ 0 <~ "fish")
           ).withPath(IrNodePathEmpty <~ 0),
           IrNode(
-            MatchIr.unnamedNodeLabel,
+            MatchIrConstants.unnamedNodeLabel,
             IrNode(
               "fish",
               IrNode("breed", IrStringNode("haddock")).withPath(IrNodePathEmpty <~ 1 <~ "fish" <~ "breed")
@@ -294,7 +294,7 @@ class MatchIrSpec extends FunSpec with Matchers {
       val expected: IrNode =
 
         IrNode(
-          MatchIr.rootNodeLabel,
+          MatchIrConstants.rootNodeLabel,
           IrNode(
             "river",
             IrNode(
