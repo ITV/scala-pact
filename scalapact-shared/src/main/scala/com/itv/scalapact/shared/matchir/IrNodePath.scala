@@ -448,7 +448,7 @@ object IrNodePath {
           if(acc.startsWith(".[")) acc.drop(1) else acc
 
         case IrNodePathField(fieldName, parentNode) =>
-          if(fieldName != MatchIr.unnamedNodeLabel && fieldName != MatchIr.rootNodeLabel)
+          if(fieldName != MatchIrConstants.unnamedNodeLabel && fieldName != MatchIrConstants.rootNodeLabel)
             rec(parentNode, s".$fieldName$acc")
           else
             rec(parentNode, s".$acc")
