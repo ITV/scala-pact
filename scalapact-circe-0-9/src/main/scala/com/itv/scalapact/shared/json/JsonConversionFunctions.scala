@@ -9,6 +9,15 @@ import com.itv.scalapact.shared.ColourOuput._
 
 object JsonConversionFunctions extends IJsonConversionFunctions {
 
+  // Adds toOption method for scala 2.11
+  implicit class EitherWithToOption[A, B](e: Either[A, B]) {
+    def toOption: Option[B] =
+      e match {
+        case Left(_) => None
+        case Right(b) => Some(b)
+      }
+  }
+
   def fromJSON(jsonString: String): Option[IrNode] =
     parse(jsonString).toOption.flatMap { json =>
       jsonRootToIrNode(json, IrNodePathEmpty)

@@ -1,7 +1,7 @@
 package com.itv.scalapactcore.common.matching
 
 import com.itv.scalapact.shared.MatchingRule
-import com.itv.scalapactcore.common.matchir._
+import com.itv.scalapact.shared.matchir._
 
 object HeaderMatching {
 

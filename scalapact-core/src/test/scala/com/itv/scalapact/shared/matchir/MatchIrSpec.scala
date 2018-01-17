@@ -1,5 +1,6 @@
 package com.itv.scalapact.shared.matchir
 
+import com.itv.scalapact.shared.json.JsonConversionFunctions
 import org.scalatest.{FunSpec, Matchers}
 
 class MatchIrSpec extends FunSpec with Matchers {
@@ -19,7 +20,7 @@ class MatchIrSpec extends FunSpec with Matchers {
       val ir: IrNode =
         IrNode("fish").withPath(IrNodePathEmpty <~ "fish").markAsXml
 
-      check(MatchIr.fromXml(xml).get =<>= ir)
+      check(MatchIr.fromXmlString(xml).get =<>= ir)
 
     }
 
@@ -36,7 +37,7 @@ class MatchIrSpec extends FunSpec with Matchers {
           )
         ).withPath(IrNodePathEmpty <~ "fish").markAsArray.markAsXml
 
-      val expected = MatchIr.fromXml(xml).get
+      val expected = MatchIr.fromXmlString(xml).get
 
       expected.isArray shouldEqual true
 
@@ -58,7 +59,7 @@ class MatchIrSpec extends FunSpec with Matchers {
           )
         ).withPath(IrNodePathEmpty <~ "fish").markAsXml
 
-      val expected = MatchIr.fromXml(xml).get
+      val expected = MatchIr.fromXmlString(xml).get
 
       expected.isArray shouldEqual false
 
@@ -79,7 +80,7 @@ class MatchIrSpec extends FunSpec with Matchers {
             .withPath(IrNodePathEmpty <~ "animals" <~ "alligator").markAsXml
         ).withPath(IrNodePathEmpty <~ "animals").markAsXml
 
-      check(MatchIr.fromXml(xml).get =<>= ir)
+      check(MatchIr.fromXmlString(xml).get =<>= ir)
 
     }
 
@@ -90,7 +91,7 @@ class MatchIrSpec extends FunSpec with Matchers {
       val ir: IrNode =
         IrNode("fish", IrStringNode("haddock")).withPath(IrNodePathEmpty <~ "fish").markAsXml
 
-      check(MatchIr.fromXml(xml).get =<>= ir)
+      check(MatchIr.fromXmlString(xml).get =<>= ir)
 
     }
 
@@ -104,7 +105,7 @@ class MatchIrSpec extends FunSpec with Matchers {
           .withPath(IrNodePathEmpty <~ "fish")
           .markAsXml
 
-      check(MatchIr.fromXml(xml).get =<>= ir)
+      check(MatchIr.fromXmlString(xml).get =<>= ir)
 
     }
 
@@ -126,7 +127,7 @@ class MatchIrSpec extends FunSpec with Matchers {
           .withPath(IrNodePathEmpty <~ "fish")
           .markAsXml
 
-      check(MatchIr.fromXml(xml).get =<>= ir)
+      check(MatchIr.fromXmlString(xml).get =<>= ir)
 
     }
 
@@ -137,7 +138,7 @@ class MatchIrSpec extends FunSpec with Matchers {
       val ir: IrNode =
         IrNode("fish", IrNode("breed", IrStringNode("cod")).withPath(IrNodePathEmpty <~ "fish" <~ "breed").markAsXml).withPath(IrNodePathEmpty <~ "fish").markAsXml
 
-      check(MatchIr.fromXml(xml).get =<>= ir)
+      check(MatchIr.fromXmlString(xml).get =<>= ir)
 
     }
 
@@ -156,7 +157,7 @@ class MatchIrSpec extends FunSpec with Matchers {
       val ir: IrNode =
         IrNode(MatchIrConstants.rootNodeLabel, IrNode("fish").withPath(IrNodePathEmpty <~ "fish"))
 
-      check(MatchIr.fromJSON(json).get =<>= ir)
+      check(MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(json).get =<>= ir)
     }
 
     it("should be able to convert two nested nodes and a value") {
@@ -182,7 +183,7 @@ class MatchIrSpec extends FunSpec with Matchers {
           ).withPath(IrNodePathEmpty <~ "fish")
         ).withPath(IrNodePathEmpty)
 
-      check(MatchIr.fromJSON(json).get =<>= ir)
+      check(MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(json).get =<>= ir)
 
     }
 
@@ -203,7 +204,7 @@ class MatchIrSpec extends FunSpec with Matchers {
           ).withPath(IrNodePathEmpty <~ "myDates").markAsArray
         ).withPath(IrNodePathEmpty)
 
-      check(MatchIr.fromJSON(json).get =<>= ir)
+      check(MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(json).get =<>= ir)
 
     }
 
@@ -222,7 +223,7 @@ class MatchIrSpec extends FunSpec with Matchers {
           IrNode(MatchIrConstants.unnamedNodeLabel, IrNumberNode(3)).withPath(IrNodePathEmpty <~ 2)
         ).withPath(IrNodePathEmpty).markAsArray
 
-      check(MatchIr.fromJSON(json).get =<>= ir)
+      check(MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(json).get =<>= ir)
 
     }
 
@@ -262,7 +263,7 @@ class MatchIrSpec extends FunSpec with Matchers {
           ).withPath(IrNodePathEmpty <~ 1)
         ).withPath(IrNodePathEmpty).markAsArray
 
-      check(MatchIr.fromJSON(json).get =<>= ir)
+      check(MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(json).get =<>= ir)
 
     }
 
@@ -337,7 +338,7 @@ class MatchIrSpec extends FunSpec with Matchers {
         ).withPath(IrNodePathEmpty)
 
 //      check(MatchIr.fromJSON(json).get =<>= expected)
-      (expected =<>= MatchIr.fromJSON(json).get).isEqual shouldEqual false
+      (expected =<>= MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(json).get).isEqual shouldEqual false
 
     }
 

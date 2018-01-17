@@ -3,9 +3,13 @@ package com.itv.scalapactcore.common
 import org.scalatest.{FunSpec, Matchers}
 import argonaut._
 import Argonaut._
-import com.itv.scalapactcore.common.matchir.{IrNodeEqualityResult, IrNodesEqual, IrNodesNotEqual}
+import com.itv.scalapact.shared.json.JsonConversionFunctions
+import com.itv.scalapact.shared.matchir._
 
 class JsonEqualitySpec extends FunSpec with Matchers {
+
+  implicit def elemToNode(json: Json): IrNode =
+    MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(json.toString()).get
 
   def check(res: IrNodeEqualityResult): Unit =
     res match {

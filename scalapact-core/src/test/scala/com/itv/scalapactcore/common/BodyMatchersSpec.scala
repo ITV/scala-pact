@@ -1,6 +1,6 @@
 package com.itv.scalapactcore.common
 
-import com.itv.scalapactcore.common.matchir.IrNodeMatchingRules
+import com.itv.scalapact.shared.matchir.IrNodeMatchingRules
 import org.scalatest.{FunSpec, Matchers}
 
 import scala.language.implicitConversions

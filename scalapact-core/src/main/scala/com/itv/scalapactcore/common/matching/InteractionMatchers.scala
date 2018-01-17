@@ -1,8 +1,8 @@
 package com.itv.scalapactcore.common.matching
 
 import com.itv.scalapact.shared._
+import com.itv.scalapact.shared.matchir.IrNodeMatchingRules
 import com.itv.scalapactcore.common.matching.PathMatching.PathAndQuery
-import com.itv.scalapactcore.common.matchir._
 
 object InteractionMatchers {
 

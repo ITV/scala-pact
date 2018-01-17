@@ -1,6 +1,7 @@
 package com.itv.scalapact.shared.matchir
 
 import com.itv.scalapact.shared.MatchingRule
+import com.itv.scalapact.shared.json.JsonConversionFunctions
 import org.scalatest.{FunSpec, Matchers}
 
 import scala.language.postfixOps
@@ -100,7 +101,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
     // Here for completeness, but no rule is needed to check this.
     it("should be able to compare node types") {
 
-      val expected: IrNode = MatchIr.fromJSON(
+      val expected: IrNode = MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(
         """
           |{
           |  "fish": {}
@@ -108,7 +109,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
         """.stripMargin
       ).get
 
-      val actual: IrNode = MatchIr.fromJSON(
+      val actual: IrNode = MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(
         """
           |{
           |  "fish": []
@@ -127,7 +128,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
           IrNodeTypeRule(IrNodePathEmpty <~ "fish")
         )
 
-      val expected: IrNode = MatchIr.fromJSON(
+      val expected: IrNode = MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(
         """
           |{
           |  "fish": "cod"
@@ -135,7 +136,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
         """.stripMargin
       ).get
 
-      val actual: IrNode = MatchIr.fromJSON(
+      val actual: IrNode = MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(
         """
           |{
           |  "fish": "haddock"
@@ -155,7 +156,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
           IrNodeRegexRule("\\[\\]", IrNodePathEmpty <~ "fish")
         )
 
-      val expected: IrNode = MatchIr.fromJSON(
+      val expected: IrNode = MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(
         """
           |{
           |  "fish": {}
@@ -163,7 +164,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
         """.stripMargin
       ).get
 
-      val actual: IrNode = MatchIr.fromJSON(
+      val actual: IrNode = MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(
         """
           |{
           |  "fish": []
@@ -181,7 +182,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
           IrNodeRegexRule("cod|haddock", IrNodePathEmpty <~ "fish")
         )
 
-      val expected: IrNode = MatchIr.fromJSON(
+      val expected: IrNode = MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(
         """
           |{
           |  "fish": "cod"
@@ -189,7 +190,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
         """.stripMargin
       ).get
 
-      val actual: IrNode = MatchIr.fromJSON(
+      val actual: IrNode = MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(
         """
           |{
           |  "fish": "haddock"
@@ -208,7 +209,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
           IrNodeRegexRule("[0-9]", IrNodePathEmpty <~ "count")
         )//.withProcessTracing("validate a non-string node primitive using regex")
 
-      val expected: IrNode = MatchIr.fromJSON(
+      val expected: IrNode = MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(
         """
           |{
           |  "count": 4
@@ -216,7 +217,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
         """.stripMargin
       ).get
 
-      val actual: IrNode = MatchIr.fromJSON(
+      val actual: IrNode = MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(
         """
           |{
           |  "count": 5
@@ -237,7 +238,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
           IrNodeTypeRule(IrNodePathEmpty <~ "fish" <~ "*" <~ "id")
         )
 
-      val expected: IrNode = MatchIr.fromJSON(
+      val expected: IrNode = MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(
         """
           |{
           |  "fish": [{"id":1}, {"id":2}, {"id":3}]
@@ -245,7 +246,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
         """.stripMargin
       ).get
 
-      val actual: IrNode = MatchIr.fromJSON(
+      val actual: IrNode = MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(
         """
           |{
           |  "fish": [{"id":27}]
@@ -257,7 +258,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
         check(expected =<>= actual)
       }
 
-      val expected2: IrNode = MatchIr.fromJSON(
+      val expected2: IrNode = MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(
         """
           |{
           |  "fish": [1,2,3]
@@ -265,7 +266,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
         """.stripMargin
       ).get
 
-      val actual2: IrNode = MatchIr.fromJSON(
+      val actual2: IrNode = MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(
         """
           |{
           |  "fish": [27]
@@ -286,7 +287,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
           IrNodeMinArrayLengthRule(1, IrNodePathEmpty <~ "fish")
         )
 
-      val expected: IrNode = MatchIr.fromJSON(
+      val expected: IrNode = MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(
         """
           |{
           |  "fish": "cod"
@@ -294,7 +295,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
         """.stripMargin
       ).get
 
-      val actual: IrNode = MatchIr.fromJSON(
+      val actual: IrNode = MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(
         """
           |{
           |  "fish": 1
@@ -315,11 +316,11 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
           IrNodeRegexRule("cod|haddock", IrNodePathEmpty <~ "fish" <~ "breed")
         )
 
-      val expected: IrNode = MatchIr.fromXml(
+      val expected: IrNode = MatchIr.fromXmlString(
         <fish><breed>cod</breed></fish>.toString()
       ).get
 
-      val actual: IrNode = MatchIr.fromXml(
+      val actual: IrNode = MatchIr.fromXmlString(
         <fish><breed>cod</breed></fish>.toString()
       ).get
 
@@ -334,11 +335,11 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
           IrNodeRegexRule("abc123|def456", IrNodePathEmpty <~ "fish" <~ "breed" <@ "id")
         )
 
-      val expected: IrNode = MatchIr.fromXml(
+      val expected: IrNode = MatchIr.fromXmlString(
         <fish><breed id="abc123">cod</breed></fish>.toString()
       ).get
 
-      val actual: IrNode = MatchIr.fromXml(
+      val actual: IrNode = MatchIr.fromXmlString(
         <fish><breed id="def456">cod</breed></fish>.toString()
       ).get
 
@@ -353,11 +354,11 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
           IrNodeRegexRule("cod|haddock", IrNodePathEmpty <~ "fish" <~ "breed" text)
         )
 
-      val expected: IrNode = MatchIr.fromXml(
+      val expected: IrNode = MatchIr.fromXmlString(
         <fish><breed>cod</breed></fish>.toString()
       ).get
 
-      val actual: IrNode = MatchIr.fromXml(
+      val actual: IrNode = MatchIr.fromXmlString(
         <fish><breed>haddock</breed></fish>.toString()
       ).get
 
@@ -379,11 +380,11 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
           IrNodeTypeRule(IrNodePathEmpty <~ "fish" <~ "breed" <~ 1)
         )//.withProcessTracing("should be able to compare node types")
 
-      val expected: IrNode = MatchIr.fromXml(
+      val expected: IrNode = MatchIr.fromXmlString(
         <fish><breed id="abc123">cod</breed></fish>.toString()
       ).get
 
-      val actual: IrNode = MatchIr.fromXml(
+      val actual: IrNode = MatchIr.fromXmlString(
         <fish><breed id="def456">haddock</breed><breed id="ghi789">plaice</breed></fish>.toString()
       ).get
 
@@ -400,11 +401,11 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
           IrNodeRegexRule("haddock|plaice", IrNodePathEmpty <~ "fish" <~ 0 <~ "breeds" <~ 1 <~ "breed")
         )//.withProcessTracing("regex check indexed nodes")
 
-      val expected: IrNode = MatchIr.fromXml(
+      val expected: IrNode = MatchIr.fromXmlString(
         <fish id="abc123"><breeds><breed>plaice</breed><breed>haddock</breed></breeds></fish>.toString()
       ).get
 
-      val actual: IrNode = MatchIr.fromXml(
+      val actual: IrNode = MatchIr.fromXmlString(
         <fish id="def456"><breeds><breed>haddock</breed><breed>plaice</breed></breeds></fish>.toString()
       ).get
 
@@ -421,7 +422,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
           IrNodeTypeRule(IrNodePathEmpty <~ "fish" <~ "*" <*)
         )
 
-      val expected: IrNode = MatchIr.fromJSON(
+      val expected: IrNode = MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(
         """
           |{
           |  "fish": [
@@ -431,7 +432,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
         """.stripMargin
       ).get
 
-      val actual: IrNode = MatchIr.fromJSON(
+      val actual: IrNode = MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(
         """
           |{
           |  "fish": [
@@ -453,7 +454,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
           IrNodeRegexRule("\\d+", IrNodePathEmpty <~ "fish" <~ "*" <~ "name")
         )//.withProcessTracing("should be able to check regex by wildcard")
 
-      val expected: IrNode = MatchIr.fromJSON(
+      val expected: IrNode = MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(
         """
           |{
           |  "fish": [
@@ -463,7 +464,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
         """.stripMargin
       ).get
 
-      val actual: IrNode = MatchIr.fromJSON(
+      val actual: IrNode = MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(
         """
           |{
           |  "fish": [
@@ -484,13 +485,13 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
           IrNodeTypeRule(IrNodePathEmpty <~ "myPerson" <*)
         )//.withProcessTracing("check type by wildcard with additional properties")
 
-      val expected: IrNode = MatchIr.fromJSON(
+      val expected: IrNode = MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(
         """
           |{"myPerson":{"name":"Any name"}}
         """.stripMargin
       ).get
 
-      val actual: IrNode = MatchIr.fromJSON(
+      val actual: IrNode = MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(
         """
           |{"myPerson":{"name":39,"age":"39","nationality":"Australian"}}
         """.stripMargin
@@ -508,13 +509,13 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
       implicit val rules: IrNodeMatchingRules =
         IrNodeMatchingRules()//.withProcessTracing("be able to spot a missing key")
 
-      val expected: IrNode = MatchIr.fromJSON(
+      val expected: IrNode = MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(
         """
           |{"name":"Any name","age":"39"}
         """.stripMargin
       ).get
 
-      val actual: IrNode = MatchIr.fromJSON(
+      val actual: IrNode = MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(
         """
           |{"name":"Any name"}
         """.stripMargin

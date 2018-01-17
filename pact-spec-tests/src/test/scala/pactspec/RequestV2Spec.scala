@@ -1,6 +1,6 @@
 package pactspec
 
-import com.itv.scalapactcore.common.matchir.{IrNodeMatchPermissivity, NonPermissive}
+import com.itv.scalapact.shared.matchir.{IrNodeMatchPermissivity, NonPermissive}
 import pactspec.util.{PactSpecTester, StrictAndNonStrict, StrictOnly}
 
 class RequestV2Spec extends PactSpecTester {

@@ -2,18 +2,19 @@ package com.itv.scalapact.shared.matchir
 
 import scala.xml.{Elem, Node, XML}
 import com.itv.scalapact.shared.ColourOuput._
-import com.itv.scalapact.shared.IJsonConversionFunctions
-import com.itv.scalapact.shared.json.JsonConversionFunctions
 
-object MatchIr extends XmlConversionFunctions with IJsonConversionFunctions with PrimitiveConversionFunctions {
+object MatchIr extends XmlConversionFunctions with PrimitiveConversionFunctions {
 
-  def fromXml(xmlString: String): Option[IrNode] =
-    safeStringToXml(xmlString).map { elem =>
-      nodeToIrNode(scala.xml.Utility.trim(elem), IrNodePathEmpty)
+  def fromXmlString(xmlString: String): Option[IrNode] =
+    safeStringToXml(xmlString).flatMap(fromXml)
+
+  def fromXml(xml: Elem): Option[IrNode] =
+    Option {
+      nodeToIrNode(scala.xml.Utility.trim(xml), IrNodePathEmpty)
     }
 
-  def fromJSON(jsonString: String): Option[IrNode] =
-    JsonConversionFunctions.fromJSON(jsonString)
+  def fromJSON(fromJson: String => Option[IrNode])(jsonString: String): Option[IrNode] =
+    fromJson(jsonString)
 
 }
 

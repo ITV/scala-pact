@@ -149,7 +149,6 @@ object Verifier {
       InteractionRequest.unapply(interactionRequest) match {
         case Some((Some(_), Some(_), _, _, _, _)) =>
 
-
           ScalaPactHttpClient.doInteractionRequestSync(baseUrl, interactionRequest.withoutSslContextHeader, clientTimeout, interactionRequest.sslContextName)
             .leftMap { t =>
               println(s"Error in response: ${t.getMessage}".red)
@@ -167,7 +166,9 @@ object Verifier {
   }
 
   private def fetchAndReadPact(address: String)(implicit pactReader: IPactReader, sslContextMap: SslContextMap): Option[Pact] = {
+
     println(s"Attempting to fetch pact from pact broker at: $address".white.bold)
+
     ScalaPactHttpClient.doRequestSync(SimpleRequest(address, "", HttpMethod.GET, Map("Accept" -> "application/json"), None, sslContextName = None)).map {
       case r: SimpleResponse if r.is2xx =>
         val pact = r.body.map(pactReader.jsonStringToPact).flatMap {

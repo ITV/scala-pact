@@ -1,6 +1,7 @@
 package com.itv.scalapactcore.common.matching
 
-import com.itv.scalapactcore.common.matchir._
+import com.itv.scalapact.shared.matchir._
+import com.itv.scalapact.shared.json.JsonConversionFunctions
 
 object BodyMatching {
 
@@ -17,8 +18,8 @@ object BodyMatching {
     (expected, received) match {
       case (Some(ee), Some(rr)) if ee.nonEmpty && hasJsonHeader(headers) || stringIsProbablyJson(ee) && stringIsProbablyJson(rr) =>
         val predicate: (String, String) => MatchOutcome = (e, r) =>
-          MatchIr.fromJSON(e).flatMap { ee =>
-            MatchIr.fromJSON(r).map { rr =>
+          MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(e).flatMap { ee =>
+            MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(r).map { rr =>
               nodeMatchToMatchResult(ee =~ rr, rules, isXml = false)
             }
           }.getOrElse(MatchOutcomeFailed("Failed to parse JSON body", 50))
@@ -27,8 +28,8 @@ object BodyMatching {
 
       case (Some(ee), Some(rr)) if ee.nonEmpty && hasXmlHeader(headers) || stringIsProbablyXml(ee) && stringIsProbablyXml(rr) =>
         val predicate: (String, String) => MatchOutcome = (e, r) =>
-          MatchIr.fromXml(e).flatMap { ee =>
-            MatchIr.fromXml(r).map { rr =>
+          MatchIr.fromXmlString(e).flatMap { ee =>
+            MatchIr.fromXmlString(r).map { rr =>
               nodeMatchToMatchResult(ee =~ rr, rules, isXml = true)
             }
           }.getOrElse(MatchOutcomeFailed("Failed to parse XML body", 50))
@@ -46,8 +47,8 @@ object BodyMatching {
     (expected, received) match {
       case (Some(ee), Some(rr)) if ee.nonEmpty && hasJsonHeader(headers) || stringIsProbablyJson(ee) && stringIsProbablyJson(rr) =>
         val predicate: (String, String) => MatchOutcome = (e, r) =>
-          MatchIr.fromJSON(e).flatMap { ee =>
-            MatchIr.fromJSON(r).map { rr =>
+          MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(e).flatMap { ee =>
+            MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(r).map { rr =>
               nodeMatchToMatchResult(ee =<>= rr, rules, isXml = false)
             }
           }.getOrElse(MatchOutcomeFailed("Failed to parse JSON body", 50))
@@ -56,8 +57,8 @@ object BodyMatching {
 
       case (Some(ee), Some(rr)) if ee.nonEmpty && hasXmlHeader(headers) || stringIsProbablyXml(ee) && stringIsProbablyXml(rr) =>
         val predicate: (String, String) => MatchOutcome = (e, r) =>
-          MatchIr.fromXml(e).flatMap { ee =>
-            MatchIr.fromXml(r).map { rr =>
+          MatchIr.fromXmlString(e).flatMap { ee =>
+            MatchIr.fromXmlString(r).map { rr =>
               nodeMatchToMatchResult(ee =<>= rr, rules, isXml = true)
             }
           }.getOrElse(MatchOutcomeFailed("Failed to parse XML body", 50))

@@ -1,11 +1,15 @@
 package com.itv.scalapactcore.common
 
 import com.itv.scalapact.shared.MatchingRule
-import com.itv.scalapactcore.common.matchir.{IrNodeEqualityResult, IrNodeMatchingRules, IrNodesEqual, IrNodesNotEqual}
-import com.itv.scalapactcore.common.matchir.MatchIrConverters._
+import com.itv.scalapact.shared.matchir._
 import org.scalatest.{FunSpec, Matchers}
 
+import scala.xml.Elem
+
 class XmlEqualitySpec extends FunSpec with Matchers {
+
+  implicit def elemToNode(elem: Elem): IrNode =
+    MatchIr.fromXml(elem).get
 
   def check(res: IrNodeEqualityResult): Unit =
     res match {

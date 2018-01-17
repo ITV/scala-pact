@@ -11,6 +11,7 @@ import com.itv.scalapactcore.common.PactReaderWriter._
 import com.itv.scalapactcore.stubber.InteractionManager
 
 import scala.concurrent.duration._
+import scala.util.{Failure, Success, Try}
 
 object ScalaPactMock {
 
@@ -24,7 +25,7 @@ object ScalaPactMock {
   }
 
   // Ported from a Java gist
-  private def findFreePort(): Int = {
+  private def findFreePort(): Try[Int] = Try {
     val socket: ServerSocket = new ServerSocket(0)
     var port = -1
 
@@ -54,12 +55,20 @@ object ScalaPactMock {
     else port
   }
 
+  private def findFreePortRetry(attempts: Int): Int = {
+    findFreePort() match {
+      case Success(port) => port
+      case Failure(_) if attempts > 0 => findFreePortRetry(attempts - 1)
+      case Failure(e) => throw e
+    }
+  }
+
   def runConsumerIntegrationTest[A](strict: Boolean)(pactDescription: ScalaPactDescriptionFinal)(test: ScalaPactMockConfig => A)(implicit sslContextMap: SslContextMap): A = {
 
     val interactionManager: InteractionManager = new InteractionManager
 
     val protocol = pactDescription.serverSslContextName.fold("http")(_ => "https")
-    val mockConfig = ScalaPactMockConfig(protocol, "localhost", findFreePort(), pactDescription.options.outputPath)
+    val mockConfig = ScalaPactMockConfig(protocol, "localhost", findFreePortRetry(3), pactDescription.options.outputPath)
     val configAndPacts: ConfigAndPacts = ConfigAndPacts(
       scalaPactSettings = ScalaPactSettings(
         host = Option(mockConfig.host),

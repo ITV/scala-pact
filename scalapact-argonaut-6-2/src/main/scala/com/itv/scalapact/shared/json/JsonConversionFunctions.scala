@@ -26,7 +26,7 @@ object JsonConversionFunctions extends IJsonConversionFunctions {
         IrNode(label, IrNullNode).withPath(pathToParent)
 
       case j: Json if j.isNumber =>
-        IrNode(label, j.number.map(_.toDouble).map(d => IrNumberNode(d))).withPath(pathToParent)
+        IrNode(label, j.number.flatMap(_.toDouble).map(d => IrNumberNode(d))).withPath(pathToParent)
 
       case j: Json if j.isBool =>
         IrNode(label, j.bool.map(IrBooleanNode)).withPath(pathToParent)
