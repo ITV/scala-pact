@@ -22,7 +22,7 @@ object Provider {
       (acceptHeader, nameHeader) match {
         case (Some(_), Some(_)) =>
           val token = genToken(10)
-          Accepted(Token(token).asJson)
+          Accepted(Token(token).asJson).replaceAllHeaders(Header("Content-Type", "application/json; charset=UTF-8"))
 
         case (Some(_), None) =>
           BadRequest("Missing name header")
