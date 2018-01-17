@@ -15,9 +15,16 @@ With thanks to all contributors!
 - [phil-rice]
 - [fergusstrange]
 - [cjwebb]
+- [benivf]
+- [afiore]
 - ...your name here? :-)
 
 Maintained by [davesmith00000].
+
+## 2.2.2 - 2018-01-17
+- SSL support added! ([phil-rice])
+- Http4s 0.18.0-M8 milestone release support added ([benivf], [afiore])
+- Circe 0.9 support added
 
 ## 2.2.1 - 2017-10-14
 - BUGFIX: Pact publishing works again
@@ -126,3 +133,5 @@ Other improvements for contributors:
 [phil-rice]: https://github.com/phil-rice
 [fergusstrange]: https://github.com/fergusstrange
 [cjwebb]: https://github.com/cjwebb
+[benivf]: https://github.com/benivf
+[afiore]: https://github.com/afiore
