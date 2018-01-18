@@ -25,6 +25,7 @@ Maintained by [davesmith00000].
 - SSL support added! ([phil-rice])
 - Http4s 0.18.0-M8 milestone release support added ([benivf], [afiore])
 - Circe 0.9 support added
+- BUGFIX: Nasty lingering argonaut hard dependency has been removed.
 
 ## 2.2.1 - 2017-10-14
 - BUGFIX: Pact publishing works again
