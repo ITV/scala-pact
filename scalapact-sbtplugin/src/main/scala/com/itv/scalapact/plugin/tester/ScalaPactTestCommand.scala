@@ -12,24 +12,24 @@ import com.itv.scalapact.shared.PactLogger
 
 object ScalaPactTestCommand {
 
-  lazy val pactTestCommandHyphen: Command = Command.args("pact-test", "<options>")(pactTest)
-  lazy val pactTestCommandCamel: Command = Command.args("pactTest", "<options>")(pactTest)
-
-  private lazy val pactTest: (State, Seq[String]) => State = (state, args) => {
-
-      PactLogger.message("*************************************".white.bold)
-      PactLogger.message("** ScalaPact: Running tests        **".white.bold)
-      PactLogger.message("*************************************".white.bold)
-
-      PactLogger.message("> ScalaPact running: clean + test commands first")
-
-      val cleanState = Command.process("clean", state)
-      val testedState = Command.process("test", cleanState)
-
-      doPactPack(Project.extract(testedState).get(ScalaPactPlugin.autoImport.scalaPactEnv).toSettings + ScalaPactSettings.parseArguments(args))
-
-      testedState
-    }
+//  lazy val pactTestCommandHyphen: Command = Command.args("pact-test", "<options>")(pactTest)
+//  lazy val pactTestCommandCamel: Command = Command.args("pactTest", "<options>")(pactTest)
+//
+//  private lazy val pactTest: (State, Seq[String]) => State = (state, args) => {
+//
+//      PactLogger.message("*************************************".white.bold)
+//      PactLogger.message("** ScalaPact: Running tests        **".white.bold)
+//      PactLogger.message("*************************************".white.bold)
+//
+//      PactLogger.message("> ScalaPact running: clean + test commands first")
+//
+//      val cleanState = Command.process("clean", state)
+//      val testedState = Command.process("test", cleanState)
+//
+//      doPactPack(Project.extract(testedState).get(ScalaPactPlugin.autoImport.scalaPactEnv).toSettings + ScalaPactSettings.parseArguments(args))
+//
+//      testedState
+//    }
 
   def doPactPack(scalaPactSettings: ScalaPactSettings): Unit = {
     PactLogger.message("*************************************".white.bold)

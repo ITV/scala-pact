@@ -12,24 +12,25 @@ import com.itv.scalapact.shared.PactLogger
 
 object ScalaPactStubberCommand {
 
-  lazy val pactStubberCommandHyphen: Command = Command.args("pact-stubber", "<options>")(pactStubber)
-  lazy val pactStubberCommandCamel: Command = Command.args("pactStubber", "<options>")(pactStubber)
+//  lazy val pactStubberCommandHyphen: Command = Command.args("pact-stubber", "<options>")(pactStubber)
+//  lazy val pactStubberCommandCamel: Command = Command.args("pactStubber", "<options>")(pactStubber)
+//
+//  private lazy val pactStubber: (State, Seq[String]) => State = (state, args) => {
+//
+//    PactLogger.message("*************************************".white.bold)
+//    PactLogger.message("** ScalaPact: Running Stubber      **".white.bold)
+//    PactLogger.message("*************************************".white.bold)
+//
+//    val pactTestedState = Command.process("pact-test", state)
+//
+//    runStubber(
+//      Project.extract(state).get(ScalaPactPlugin.autoImport.scalaPactEnv).toSettings + ScalaPactSettings.parseArguments(args),
+//      interactionManagerInstance
+//    )
+//
+//    pactTestedState
+//  }
 
-  private lazy val pactStubber: (State, Seq[String]) => State = (state, args) => {
-
-    PactLogger.message("*************************************".white.bold)
-    PactLogger.message("** ScalaPact: Running Stubber      **".white.bold)
-    PactLogger.message("*************************************".white.bold)
-
-    val pactTestedState = Command.process("pact-test", state)
-
-    runStubber(
-      Project.extract(state).get(ScalaPactPlugin.autoImport.scalaPactEnv).toSettings + ScalaPactSettings.parseArguments(args),
-      interactionManagerInstance
-    )
-
-    pactTestedState
-  }
 
   def interactionManagerInstance: InteractionManager = new InteractionManager
 

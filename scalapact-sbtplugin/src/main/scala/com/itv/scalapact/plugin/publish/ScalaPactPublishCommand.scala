@@ -11,23 +11,23 @@ import com.itv.scalapact.shared.PactLogger
 
 object ScalaPactPublishCommand {
 
-  lazy val pactPublishCommandHyphen: Command = Command.args("pact-publish", "<options>")(pactVerify)
-  lazy val pactPublishCommandCamel: Command = Command.args("pactPublish", "<options>")(pactVerify)
-
-  private lazy val pactVerify: (State, Seq[String]) => State = (state, args) => {
-    val pactTestedState = Command.process("pact-test", state)
-
-    doPactPublish(
-      Project.extract(state).get(ScalaPactPlugin.autoImport.scalaPactEnv).toSettings + ScalaPactSettings.parseArguments(args),
-      Project.extract(pactTestedState).get(ScalaPactPlugin.autoImport.pactBrokerAddress),
-      Project.extract(pactTestedState).get(ScalaPactPlugin.autoImport.providerBrokerPublishMap),
-      Project.extract(pactTestedState).get(Keys.version),
-      Project.extract(pactTestedState).get(ScalaPactPlugin.autoImport.pactContractVersion),
-      Project.extract(pactTestedState).get(ScalaPactPlugin.autoImport.allowSnapshotPublish)
-    )
-
-    pactTestedState
-  }
+//  lazy val pactPublishCommandHyphen: Command = Command.args("pact-publish", "<options>")(pactVerify)
+//  lazy val pactPublishCommandCamel: Command = Command.args("pactPublish", "<options>")(pactVerify)
+//
+//  private lazy val pactVerify: (State, Seq[String]) => State = (state, args) => {
+//    val pactTestedState = Command.process("pact-test", state)
+//
+//    doPactPublish(
+//      Project.extract(state).get(ScalaPactPlugin.autoImport.scalaPactEnv).toSettings + ScalaPactSettings.parseArguments(args),
+//      Project.extract(pactTestedState).get(ScalaPactPlugin.autoImport.pactBrokerAddress),
+//      Project.extract(pactTestedState).get(ScalaPactPlugin.autoImport.providerBrokerPublishMap),
+//      Project.extract(pactTestedState).get(Keys.version),
+//      Project.extract(pactTestedState).get(ScalaPactPlugin.autoImport.pactContractVersion),
+//      Project.extract(pactTestedState).get(ScalaPactPlugin.autoImport.allowSnapshotPublish)
+//    )
+//
+//    pactTestedState
+//  }
 
   def doPactPublish(scalaPactSettings: ScalaPactSettings, pactBrokerAddress: String, providerBrokerPublishMap: Map[String, String], projectVersion: String, pactContractVersion: String, allowSnapshotPublish: Boolean): Unit = {
     import Publisher._

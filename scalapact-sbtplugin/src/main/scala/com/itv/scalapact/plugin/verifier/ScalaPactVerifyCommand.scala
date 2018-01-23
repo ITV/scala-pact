@@ -15,27 +15,27 @@ import com.itv.scalapact.shared.PactLogger
 
 object ScalaPactVerifyCommand {
 
-  lazy val pactVerifyCommandHyphen: Command = Command.args("pact-verify", "<options>")(pactVerify)
-  lazy val pactVerifyCommandCamel: Command = Command.args("pactVerify", "<options>")(pactVerify)
-
-  implicit def pStateConversion(ps: Seq[(String, String => Boolean)]): List[ProviderState] =
-    ps.toList.map(p => ProviderState(p._1, p._2))
-
-  private lazy val pactVerify: (State, Seq[String]) => State = (state, args) => {
-
-    doPactVerify(
-      Project.extract(state).get(ScalaPactPlugin.autoImport.scalaPactEnv).toSettings + ScalaPactSettings.parseArguments(args),
-      Project.extract(state).get(ScalaPactPlugin.autoImport.providerStates),
-      Project.extract(state).get(ScalaPactPlugin.autoImport.providerStateMatcher),
-      Project.extract(state).get(ScalaPactPlugin.autoImport.pactBrokerAddress),
-      Project.extract(state).get(Keys.version),
-      Project.extract(state).get(ScalaPactPlugin.autoImport.providerName),
-      Project.extract(state).get(ScalaPactPlugin.autoImport.consumerNames),
-      Project.extract(state).get(ScalaPactPlugin.autoImport.versionedConsumerNames)
-    )
-
-    state
-  }
+//  lazy val pactVerifyCommandHyphen: Command = Command.args("pact-verify", "<options>")(pactVerify)
+//  lazy val pactVerifyCommandCamel: Command = Command.args("pactVerify", "<options>")(pactVerify)
+//
+//  implicit def pStateConversion(ps: Seq[(String, String => Boolean)]): List[ProviderState] =
+//    ps.toList.map(p => ProviderState(p._1, p._2))
+//
+//  private lazy val pactVerify: (State, Seq[String]) => State = (state, args) => {
+//
+//    doPactVerify(
+//      Project.extract(state).get(ScalaPactPlugin.autoImport.scalaPactEnv).toSettings + ScalaPactSettings.parseArguments(args),
+//      Project.extract(state).get(ScalaPactPlugin.autoImport.providerStates),
+//      Project.extract(state).get(ScalaPactPlugin.autoImport.providerStateMatcher),
+//      Project.extract(state).get(ScalaPactPlugin.autoImport.pactBrokerAddress),
+//      Project.extract(state).get(Keys.version),
+//      Project.extract(state).get(ScalaPactPlugin.autoImport.providerName),
+//      Project.extract(state).get(ScalaPactPlugin.autoImport.consumerNames),
+//      Project.extract(state).get(ScalaPactPlugin.autoImport.versionedConsumerNames)
+//    )
+//
+//    state
+//  }
 
   def doPactVerify(scalaPactSettings: ScalaPactSettings, providerStates: Seq[(String, String => Boolean)], providerStateMatcher: PartialFunction[String, Boolean], pactBrokerAddress: String, projectVersion: String, providerName: String, consumerNames: Seq[String], versionedConsumerNames: Seq[(String, String)]): Unit = {
 

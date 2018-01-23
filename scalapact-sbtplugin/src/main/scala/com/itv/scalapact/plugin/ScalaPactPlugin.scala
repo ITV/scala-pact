@@ -70,17 +70,17 @@ object ScalaPactPlugin extends AutoPlugin {
   )
 
   override lazy val projectSettings = Seq(
-    commands += ScalaPactTestCommand.pactTestCommandHyphen,
-    commands += ScalaPactTestCommand.pactTestCommandCamel,
-
-    commands += ScalaPactPublishCommand.pactPublishCommandHyphen,
-    commands += ScalaPactPublishCommand.pactPublishCommandCamel,
-
-    commands += ScalaPactVerifyCommand.pactVerifyCommandHyphen,
-    commands += ScalaPactVerifyCommand.pactVerifyCommandCamel,
-
-    commands += ScalaPactStubberCommand.pactStubberCommandHyphen,
-    commands += ScalaPactStubberCommand.pactStubberCommandCamel
+//    commands += ScalaPactTestCommand.pactTestCommandHyphen,
+//    commands += ScalaPactTestCommand.pactTestCommandCamel,
+//
+//    commands += ScalaPactPublishCommand.pactPublishCommandHyphen,
+//    commands += ScalaPactPublishCommand.pactPublishCommandCamel,
+//
+//    commands += ScalaPactVerifyCommand.pactVerifyCommandHyphen,
+//    commands += ScalaPactVerifyCommand.pactVerifyCommandCamel,
+//
+//    commands += ScalaPactStubberCommand.pactStubberCommandHyphen,
+//    commands += ScalaPactStubberCommand.pactStubberCommandCamel
   ) ++ pactSettings ++ Seq(
     pactPack := pactPackTask.value,
     pactPush := pactPushTask.value,

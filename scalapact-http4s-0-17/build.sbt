@@ -1,6 +1,6 @@
-name := "scalapact-http4s-0-15-0a"
+name := "scalapact-http4s-0-17"
 
-lazy val http4sVersion = "0.15.16a"
+lazy val http4sVersion = "0.17.6"
 
 libraryDependencies ++= Seq(
   "org.http4s" %% "http4s-blaze-server" % http4sVersion,

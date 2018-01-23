@@ -14,13 +14,10 @@ function crossPublishLocal {
     sleep 1
     echo ""
     echo ">>> $NAME"
-    sbt $NAME/clean $NAME/update $NAME/compile $NAME/test $NAME/publish-local
+    sbt $NAME/clean $NAME/update +$NAME/compile +$NAME/test +$NAME/publishLocal
 }
 
-crossPublishLocal "core_2_10"
-crossPublishLocal "core_2_11"
-crossPublishLocal "core_2_12"
+crossPublishLocal "core"
 crossPublishLocal "plugin"
 crossPublishLocal "standalone"
-crossPublishLocal "framework_2_11"
-crossPublishLocal "framework_2_12"
+crossPublishLocal "framework"
