@@ -9,7 +9,7 @@ class SslContextMap(map: Map[String, SSLContext]) extends (Option[String] => Opt
   override def apply(optName: Option[String]): Option[SSLContext] = {
     val result = optName.map(name => map.getOrElse(name, throw new SslContextNotFoundException(name, this)))
 
-    PactLogger.message(s"SslContextMap($optName) ==> $result")
+    PactLogger.debug(s"SslContextMap($optName) ==> $result")
 
     if (SslContextMap.debugNones && optName.isEmpty) {
       try {
