@@ -3,6 +3,7 @@ package com.itv.scalapact.shared
 import java.io.FileInputStream
 import java.security.KeyStore
 import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
+import com.itv.scalapact.shared.PactLogger
 
 class SslContextMap(map: Map[String, SSLContext]) extends (Option[String] => Option[SSLContext]) {
   override def apply(optName: Option[String]): Option[SSLContext] = {
