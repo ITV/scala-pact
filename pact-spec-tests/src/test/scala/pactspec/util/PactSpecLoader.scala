@@ -8,6 +8,7 @@ import scala.io.Source
 import scala.language.implicitConversions
 import com.itv.scalapact.shared.RightBiasEither._
 import com.itv.scalapact.shared.pact.PactImplicits
+import com.itv.scalapact.shared.PactLogger
 
 object PactSpecLoader {
 
@@ -32,7 +33,7 @@ object PactSpecLoader {
     SpecReader.jsonStringToRequestSpec(json) match {
       case Right(r) => Option(r)
       case Left(l) =>
-        println(s"Error reading json: $l\n$json")
+        PactLogger.error(s"Error reading json: $l\n$json")
         None
     }
 
@@ -40,7 +41,7 @@ object PactSpecLoader {
     SpecReader.jsonStringToResponseSpec(json) match {
       case Right(r) => Option(r)
       case Left(l) =>
-        println(s"Error reading json: $l\n$json")
+        PactLogger.error(s"Error reading json: $l\n$json")
         None
     }
 
@@ -106,12 +107,12 @@ object JsonBodySpecialCaseHelper {
 
       case Some((None, _)) =>
         val msg = s"Could not convert request to Json object: $json"
-        println(msg)
+        PactLogger.error(msg)
         Left(msg)
 
       case None =>
         val msg = s"Problem splitting request from body in: $json"
-        println(msg)
+        PactLogger.error(msg)
         Left(msg)
     }
   }

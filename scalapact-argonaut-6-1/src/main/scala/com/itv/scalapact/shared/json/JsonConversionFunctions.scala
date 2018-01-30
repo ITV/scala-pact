@@ -5,6 +5,7 @@ import com.itv.scalapact.shared.IJsonConversionFunctions
 import com.itv.scalapact.shared.matchir._
 import com.itv.scalapact.shared.matchir.MatchIrConstants.{rootNodeLabel, unnamedNodeLabel}
 import com.itv.scalapact.shared.ColourOuput._
+import com.itv.scalapact.shared.PactLogger
 
 object JsonConversionFunctions extends IJsonConversionFunctions {
 
@@ -70,7 +71,7 @@ object JsonConversionFunctions extends IJsonConversionFunctions {
         )
 
       case _ =>
-        println("JSON was not an object or an array".red)
+        PactLogger.error("JSON was not an object or an array".red)
         None
     }
 

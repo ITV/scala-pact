@@ -2,6 +2,7 @@ package com.itv.scalapact.shared.matchir
 
 import scala.xml.{Elem, Node, XML}
 import com.itv.scalapact.shared.ColourOuput._
+import com.itv.scalapact.shared.PactLogger
 
 object MatchIr extends XmlConversionFunctions with PrimitiveConversionFunctions {
 
@@ -98,7 +99,7 @@ trait PrimitiveConversionFunctions {
       Option(str.toDouble)
     } catch {
       case _: Throwable =>
-        println(s"Failed to convert string '$str' to number (double)".red)
+        PactLogger.error(s"Failed to convert string '$str' to number (double)".red)
         None
     }
 
@@ -107,7 +108,7 @@ trait PrimitiveConversionFunctions {
       Option(str.toBoolean)
     } catch {
       case _: Throwable =>
-        println(s"Failed to convert string '$str' to boolean".red)
+        PactLogger.error(s"Failed to convert string '$str' to boolean".red)
         None
     }
 

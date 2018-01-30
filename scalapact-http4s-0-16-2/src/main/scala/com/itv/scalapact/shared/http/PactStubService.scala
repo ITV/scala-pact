@@ -15,6 +15,7 @@ import org.http4s.blaze.channel
 
 import scala.concurrent.duration._
 import scalaz.concurrent.Task
+import com.itv.scalapact.shared.PactLogger
 
 object PactStubService {
 
@@ -22,8 +23,8 @@ object PactStubService {
   private val executorService: ExecutorService = Executors.newFixedThreadPool(nThreads)
 
   def startServer(interactionManager: IInteractionManager, sslContextName: Option[String])(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): ScalaPactSettings => Unit = config => {
-    println(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold)
-    println(("Strict matching mode: " + config.giveStrictMode.toString).white.bold)
+    PactLogger.message(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold)
+    PactLogger.message(("Strict matching mode: " + config.giveStrictMode.toString).white.bold)
 
     runServer(interactionManager, nThreads,sslContextName, config.givePort)(pactReader, pactWriter,sslContextMap)(config).awaitShutdown()
   }

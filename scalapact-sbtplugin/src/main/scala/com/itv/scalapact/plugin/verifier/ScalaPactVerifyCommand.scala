@@ -11,6 +11,7 @@ import sbt._
 import scala.language.implicitConversions
 import com.itv.scalapactcore.verifier.Verifier._
 import com.itv.scalapactcore.common.PactReaderWriter._
+import com.itv.scalapact.shared.PactLogger
 
 object ScalaPactVerifyCommand {
 
@@ -38,9 +39,9 @@ object ScalaPactVerifyCommand {
 
   def doPactVerify(scalaPactSettings: ScalaPactSettings, providerStates: Seq[(String, String => Boolean)], providerStateMatcher: PartialFunction[String, Boolean], pactBrokerAddress: String, projectVersion: String, providerName: String, consumerNames: Seq[String], versionedConsumerNames: Seq[(String, String)]): Unit = {
 
-    println("*************************************".white.bold)
-    println("** ScalaPact: Running Verifier     **".white.bold)
-    println("*************************************".white.bold)
+    PactLogger.message("*************************************".white.bold)
+    PactLogger.message("** ScalaPact: Running Verifier     **".white.bold)
+    PactLogger.message("*************************************".white.bold)
 
     val combinedPactStates = combineProviderStatesIntoTotalFunction(providerStates, providerStateMatcher)
 

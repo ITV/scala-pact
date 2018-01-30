@@ -15,6 +15,7 @@ import fs2.{Strategy, Task}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
+import com.itv.scalapact.shared.PactLogger
 
 object PactStubService {
 
@@ -24,8 +25,8 @@ object PactStubService {
   private implicit val strategy: Strategy = Strategy.fromExecutionContext(ExecutionContext.fromExecutorService(executorService))
 
   def startServer(interactionManager: IInteractionManager, sslContextName: Option[String])(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): ScalaPactSettings => Unit = config => {
-    println(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold)
-    println(("Strict matching mode: " + config.giveStrictMode.toString).white.bold)
+    PactLogger.message(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold)
+    PactLogger.message(("Strict matching mode: " + config.giveStrictMode.toString).white.bold)
 
     runServer(interactionManager, nThreads, sslContextName, config.givePort)(pactReader, pactWriter, sslContextMap)(config).awaitShutdown()
   }
@@ -35,7 +36,7 @@ object PactStubService {
   }
 
   def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int, sslContextName: Option[String], port: Int)(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): ScalaPactSettings => IPactServer = config => PactServer {
-   println(s"runServer($port)")
+    PactLogger.message(s"runServer($port)")
     BlazeBuilder
       .bindHttp(port, config.giveHost)
       .withExecutionContext(ExecutionContext.fromExecutorService(executorService))
