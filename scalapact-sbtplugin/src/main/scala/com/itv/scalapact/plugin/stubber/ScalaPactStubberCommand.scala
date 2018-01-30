@@ -8,6 +8,7 @@ import com.itv.scalapact.shared.ColourOuput._
 import com.itv.scalapact.shared.{ScalaPactSettings, SslContextMap}
 import com.itv.scalapactcore.common.LocalPactFileLoader._
 import com.itv.scalapactcore.common.PactReaderWriter._
+import com.itv.scalapact.shared.PactLogger
 
 object ScalaPactStubberCommand {
 
@@ -16,9 +17,9 @@ object ScalaPactStubberCommand {
 
   private lazy val pactStubber: (State, Seq[String]) => State = (state, args) => {
 
-    println("*************************************".white.bold)
-    println("** ScalaPact: Running Stubber      **".white.bold)
-    println("*************************************".white.bold)
+    PactLogger.message("*************************************".white.bold)
+    PactLogger.message("** ScalaPact: Running Stubber      **".white.bold)
+    PactLogger.message("*************************************".white.bold)
 
     val pactTestedState = Command.process("pact-test", state)
 

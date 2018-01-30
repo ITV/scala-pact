@@ -16,6 +16,7 @@ import org.http4s.{HttpService, Request, Response, Status}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
+import com.itv.scalapact.shared.PactLogger
 
 object PactStubService {
   type OptIO[A] = OptionT[IO, A]
@@ -24,8 +25,8 @@ object PactStubService {
   implicit val executionContext: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(nThreads))
 
   def startServer(interactionManager: IInteractionManager, sslContextName: Option[String])(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): ScalaPactSettings => Unit = config => {
-    println(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold)
-    println(("Strict matching mode: " + config.giveStrictMode.toString).white.bold)
+    PactLogger.message(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold)
+    PactLogger.message(("Strict matching mode: " + config.giveStrictMode.toString).white.bold)
 
     runServer(interactionManager, nThreads, sslContextName, config.givePort)(pactReader, pactWriter, sslContextMap)(config).awaitShutdown()
   }

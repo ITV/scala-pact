@@ -2,6 +2,7 @@ package com.itv.scalapactcore.stubber
 
 import com.itv.scalapact.shared._
 import ColourOuput._
+import com.itv.scalapact.shared.PactLogger
 
 class InteractionManager extends IInteractionManager {
 
@@ -22,7 +23,7 @@ class InteractionManager extends IInteractionManager {
 
   def addToInteractionManager: ConfigAndPacts => ScalaPactSettings = configAndPacts => {
     configAndPacts.pacts.foreach { p =>
-      println(("> Adding interactions:\n> - " + p.interactions.mkString("\n> - ")).blue)
+      PactLogger.debug(("> Adding interactions:\n> - " + p.interactions.mkString("\n> - ")).blue)
       addInteractions(p.interactions)
     }
 

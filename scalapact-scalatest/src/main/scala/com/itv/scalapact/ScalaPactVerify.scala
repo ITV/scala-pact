@@ -9,6 +9,7 @@ import com.itv.scalapactcore.common.PactReaderWriter._
 
 import scala.concurrent.duration._
 import scala.language.implicitConversions
+import com.itv.scalapact.shared.PactLogger
 
 object ScalaPactVerify {
   implicit def toOption[A](a: A): Option[A] = Option(a)
@@ -175,7 +176,7 @@ object ScalaPactVerify {
         VerifyTargetConfig(protocol, host, Helpers.safeStringToInt(port).getOrElse(80), clientTimeout)
       } catch {
         case e: Throwable =>
-          println("Could not parse url '" + url + "', expected something like: http://localhost:80 (must specify the port!)")
+          PactLogger.error("Could not parse url '" + url + "', expected something like: http://localhost:80 (must specify the port!)")
           None
       }
     }

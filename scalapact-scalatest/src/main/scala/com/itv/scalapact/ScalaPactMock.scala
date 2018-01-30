@@ -12,6 +12,7 @@ import com.itv.scalapactcore.stubber.InteractionManager
 
 import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
+import com.itv.scalapact.shared.PactLogger
 
 object ScalaPactMock {
 
@@ -86,7 +87,7 @@ object ScalaPactMock {
 
     val server: IPactServer = (interactionManager.addToInteractionManager andThen runServer(interactionManager, connectionPoolSize, pactDescription.serverSslContextName, configAndPacts.scalaPactSettings.givePort)) (configAndPacts)
 
-    println("> ScalaPact stub running at: " + mockConfig.baseUrl)
+    PactLogger.message("> ScalaPact stub running at: " + mockConfig.baseUrl)
 
     waitForServerThenTest(server, mockConfig, test, pactDescription)
   }
@@ -102,7 +103,7 @@ object ScalaPactMock {
       } else if (attemptsRemaining == 0) {
         throw new Exception("Could not connect to stub are: " + mockConfig.baseUrl)
       } else {
-        println(">  ...waiting for stub, attempts remaining: " + attemptsRemaining.toString)
+        PactLogger.message(">  ...waiting for stub, attempts remaining: " + attemptsRemaining.toString)
         Thread.sleep(intervalMillis.toLong)
         rec(attemptsRemaining - 1, intervalMillis)
       }
