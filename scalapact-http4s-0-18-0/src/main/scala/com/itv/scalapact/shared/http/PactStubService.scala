@@ -27,14 +27,14 @@ object PactStubService {
     println(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold)
     println(("Strict matching mode: " + config.giveStrictMode.toString).white.bold)
 
-    runServer(interactionManager, nThreads, sslContextName)(pactReader, pactWriter, sslContextMap)(config).awaitShutdown()
+    runServer(interactionManager, nThreads, sslContextName, config.givePort)(pactReader, pactWriter, sslContextMap)(config).awaitShutdown()
   }
 
   implicit class BlazeBuilderPimper(blazeBuilder: BlazeBuilder[IO]) {
     def withOptionalSsl(sslContext: Option[SSLContext]): BlazeBuilder[IO] = sslContext.fold(blazeBuilder)(ssl => blazeBuilder.withSSLContext(ssl))
   }
 
-  def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int, sslContextName: Option[String])
+  def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int, sslContextName: Option[String], port: Int)
                (implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): ScalaPactSettings => IPactServer = config => PactServer {
     BlazeBuilder[IO]
       .bindHttp(config.givePort, config.giveHost)
