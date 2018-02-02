@@ -46,3 +46,5 @@ tags
 
 # stub media file archive
 test-video-assets*
+/repositories-truststore.jks
+/repositories

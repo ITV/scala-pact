@@ -13,7 +13,7 @@ import com.itv.scalapact.shared.PactLogger
 object Verifier {
 
   def verify(loadPactFiles: String => ScalaPactSettings => ConfigAndPacts, pactVerifySettings: PactVerifySettings)(implicit pactReader: IPactReader, sslContextMap: SslContextMap): ScalaPactSettings => Boolean = arguments => {
-
+    PactLogger.message(s"In verify $arguments and $sslContextMap")
     val pacts: List[Pact] = if (arguments.localPactFilePath.isDefined) {
       PactLogger.message(s"Attempting to use local pact files at: '${arguments.localPactFilePath.getOrElse("<path missing>")}'".white.bold)
       loadPactFiles("pacts")(arguments).pacts
@@ -43,7 +43,9 @@ object Verifier {
 
     val startTime = System.currentTimeMillis().toDouble
 
+    PactLogger.message(s"Pacts ${pacts.size}")
     val pactVerifyResults = pacts.map { pact =>
+      PactLogger.message(s"Pact $pact")
       PactVerifyResult(
         pact = pact,
         results = pact.interactions.map { interaction =>
@@ -63,7 +65,7 @@ object Verifier {
     val endTime = System.currentTimeMillis().toDouble
     val testCount = pactVerifyResults.flatMap(_.results).length
     val failureCount = pactVerifyResults.flatMap(_.results).count(_.result.isLeft)
-
+    PactLogger.message(s"Finished tests: $testCount failures: $failureCount")
     pactVerifyResults.foreach { result =>
       val content = JUnitXmlBuilder.xml(
         name = result.pact.consumer.name + " - " + result.pact.provider.name,
@@ -80,7 +82,9 @@ object Verifier {
           }
         }
       )
+      PactLogger.message(s"About to writePactVerifyResults")
       JUnitWriter.writePactVerifyResults(result.pact.consumer.name)(result.pact.provider.name)(content.toString)
+      PactLogger.message(s"Finished writePactVerifyResults")
     }
 
     pactVerifyResults.foreach { result =>
@@ -111,7 +115,7 @@ object Verifier {
   private def doRequest(arguments: ScalaPactSettings, maybeProviderState: Option[ProviderState])(implicit sslContextMap: SslContextMap): InteractionRequest => Either[String, InteractionResponse] = interactionRequest => {
     val baseUrl = s"${arguments.giveProtocol}://" + arguments.giveHost + ":" + arguments.givePort.toString
     val clientTimeout = arguments.giveClientTimeout
-
+    PactLogger.message(s"About to DoRequestion $baseUrl")
     try {
 
       maybeProviderState match {

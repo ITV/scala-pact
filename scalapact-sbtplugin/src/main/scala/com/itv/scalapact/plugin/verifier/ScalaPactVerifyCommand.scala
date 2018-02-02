@@ -31,13 +31,16 @@ object ScalaPactVerifyCommand {
       Project.extract(state).get(Keys.version),
       Project.extract(state).get(ScalaPactPlugin.autoImport.providerName),
       Project.extract(state).get(ScalaPactPlugin.autoImport.consumerNames),
-      Project.extract(state).get(ScalaPactPlugin.autoImport.versionedConsumerNames)
+      Project.extract(state).get(ScalaPactPlugin.autoImport.versionedConsumerNames),
+      Project.extract(state).get(ScalaPactPlugin.autoImport.scalaPactSslMap)
     )
 
     state
   }
 
-  def doPactVerify(scalaPactSettings: ScalaPactSettings, providerStates: Seq[(String, String => Boolean)], providerStateMatcher: PartialFunction[String, Boolean], pactBrokerAddress: String, projectVersion: String, providerName: String, consumerNames: Seq[String], versionedConsumerNames: Seq[(String, String)]): Unit = {
+  def doPactVerify(scalaPactSettings: ScalaPactSettings, providerStates: Seq[(String, String => Boolean)], providerStateMatcher: PartialFunction[String, Boolean], pactBrokerAddress: String, projectVersion: String, providerName: String, consumerNames: Seq[String], versionedConsumerNames: Seq[(String, String)], sslContextMap: SslContextMap): Unit = {
+    PactLogger.message(s"sslContext in doPactVerify $sslContextMap")
+    PactLogger.message("")
 
     PactLogger.message("*************************************".white.bold)
     PactLogger.message("** ScalaPact: Running Verifier     **".white.bold)
@@ -56,7 +59,9 @@ object ScalaPactVerifyCommand {
           .map(t => VersionedConsumer(t._1, t._2))
     )
 
-    val successfullyVerified = verify(LocalPactFileLoader.loadPactFiles(pactReader)(true), pactVerifySettings)(pactReader, new SslContextMap(Map()))(scalaPactSettings)
+    PactLogger.message(s"about to verify $sslContextMap")
+    val successfullyVerified = verify(LocalPactFileLoader.loadPactFiles(pactReader)(true), pactVerifySettings)(pactReader, sslContextMap)(scalaPactSettings)
+    PactLogger.message(s"Exiting with  $successfullyVerified")
 
     if (successfullyVerified) sys.exit(0) else sys.exit(1)
 
@@ -64,8 +69,9 @@ object ScalaPactVerifyCommand {
 
   def combineProviderStatesIntoTotalFunction(directPactStates: Seq[(String, String => Boolean)], patternMatchedStates: PartialFunction[String, Boolean]): String => Boolean = {
     val l = directPactStates
-      .map { ps =>
-        { case s: String if s == ps._1 => ps._2(ps._1) }: PartialFunction[String, Boolean]
+      .map { ps => {
+        case s: String if s == ps._1 => ps._2(ps._1)
+      }: PartialFunction[String, Boolean]
       }
 
     l match {

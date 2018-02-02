@@ -38,6 +38,10 @@ object SslContextMap {
 
   implicit val defaultEmptyContextMap: SslContextMap = new SslContextMap(Map())
 
+  def apply(specs: (String, (String, String, String, String))*): SslContextMap =
+    new SslContextMap(specs.toMap.mapValues((makeSslContext _).tupled))
+
+
   def apply[T](simpleRequest: SimpleRequest)(fn: Option[SSLContext] => SimpleRequest => T)(implicit sslContextMap: SslContextMap): T = {
     val sslContext = sslContextMap(simpleRequest.sslContextName)
     val newRequest = simpleRequest.copy(headers = simpleRequest.headers - sslContextHeaderName)
@@ -45,12 +49,14 @@ object SslContextMap {
   }
 
   def makeSslContext(keyStore: String, passphrase: String, trustStore: String, trustPassphrase: String): SSLContext = {
-    val ksKeys = KeyStore.getInstance("JKS")
-    ksKeys.load(new FileInputStream(keyStore), passphrase.toCharArray)
-
+    val ksKeys: KeyStore = KeyStore.getInstance("JKS")
     val ksTrust = KeyStore.getInstance("JKS")
-    ksTrust.load(new FileInputStream(trustStore), trustPassphrase.toCharArray)
-
+    def load(keyStore: KeyStore, store: String,password: String)= try{
+      val inputStream = new FileInputStream(store)
+      keyStore.load(inputStream, passphrase.toCharArray)
+    } catch {case e: Exception => throw new IllegalArgumentException(s"Cannot load store at location [$store]", e)}
+    load(ksKeys, keyStore, passphrase)
+    load(ksTrust, keyStore, passphrase)
     // KeyManagers decide which key material to use
     val kmf = KeyManagerFactory.getInstance("SunX509")
     kmf.init(ksKeys, passphrase.toCharArray)

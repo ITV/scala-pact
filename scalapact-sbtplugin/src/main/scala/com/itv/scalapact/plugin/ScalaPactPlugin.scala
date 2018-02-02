@@ -4,7 +4,7 @@ import com.itv.scalapact.plugin.publish.ScalaPactPublishCommand
 import com.itv.scalapact.plugin.stubber.ScalaPactStubberCommand
 import com.itv.scalapact.plugin.tester.ScalaPactTestCommand
 import com.itv.scalapact.plugin.verifier.ScalaPactVerifyCommand
-import com.itv.scalapact.shared.ScalaPactSettings
+import com.itv.scalapact.shared.{ScalaPactSettings, SslContextMap}
 import sbt.Keys._
 import sbt.plugins.JvmPlugin
 import sbt.{Def, _}
@@ -47,6 +47,9 @@ object ScalaPactPlugin extends AutoPlugin {
     val scalaPactEnv: SettingKey[ScalaPactEnv] =
       SettingKey[ScalaPactEnv]("scalaPactEnv", "Settings used to config the running of tasks and commands")
 
+    val scalaPactSslMap: SettingKey[SslContextMap] =
+      SettingKey[SslContextMap]("sslContextMap", "the context map used to allow the verifier to use ssl contexts with it's queries")
+
     // Tasks
     val pactPack: TaskKey[Unit] = taskKey[Unit]("Pack up Pact contract files")
     val pactPush: TaskKey[Unit] = taskKey[Unit]("Push Pact contract files to Pact Broker")
@@ -63,10 +66,11 @@ object ScalaPactPlugin extends AutoPlugin {
     providerBrokerPublishMap := Map.empty[String, String],
     providerName := "",
     consumerNames := Seq.empty[String],
-    versionedConsumerNames := Seq.empty[(String,String)],
+    versionedConsumerNames := Seq.empty[(String, String)],
     pactContractVersion := "",
     allowSnapshotPublish := false,
-    scalaPactEnv := ScalaPactEnv.default
+    scalaPactEnv := ScalaPactEnv.default,
+    scalaPactSslMap := SslContextMap.defaultEmptyContextMap
   )
 
   override lazy val projectSettings = Seq(
@@ -115,7 +119,8 @@ object ScalaPactPlugin extends AutoPlugin {
         version.value,
         providerName.value,
         consumerNames.value,
-        versionedConsumerNames.value
+        versionedConsumerNames.value,
+        scalaPactSslMap.value
       )
     }
 
@@ -126,6 +131,7 @@ object ScalaPactPlugin extends AutoPlugin {
         ScalaPactStubberCommand.interactionManagerInstance
       )
     }
+
 }
 
 case class ScalaPactEnv(protocol: Option[String], host: Option[String], port: Option[Int], localPactFilePath: Option[String], strictMode: Option[Boolean], clientTimeout: Option[Duration], outputPath: Option[String]) {
