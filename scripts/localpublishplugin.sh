@@ -14,7 +14,8 @@ function crossPublishLocal {
     NAME=$1
     sbt $NAME/clean $NAME/update $NAME/compile $NAME/publish-local
 }
-crossPublishLocal "plugin"
-crossPublishLocal "standalone"
-crossPublishLocal "core_2_10"
-crossPublishLocal "shared_2_10"
+crossPublishLocal "complexStubber"
+#crossPublishLocal "plugin"
+#crossPublishLocal "standalone"
+#crossPublishLocal "core_2_10"
+#crossPublishLocal "shared_2_10"

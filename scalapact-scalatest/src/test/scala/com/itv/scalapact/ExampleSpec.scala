@@ -14,6 +14,8 @@ import org.scalatest.{FunSpec, Matchers}
 import scala.language.implicitConversions
 import scala.xml.XML
 import scalaj.http.{Http, HttpRequest}
+import ScalaPactForger.{headerRegexRule, _}
+import com.itv.scalapact.shared.{SSLContextData,SslContextMap}
 
 class ExampleSpec extends FunSpec with Matchers {
 
@@ -50,7 +52,7 @@ class ExampleSpec extends FunSpec with Matchers {
       val endPoint = "/hello"
 
       val base = new File("ssl").getAbsoluteFile
-      implicit val sslMap = new SslContextMap(Map("default" -> SslContextMap.makeSslContext(s"$base/client.jks", "password", s"$base/clienttrust.jks", "password")))
+      implicit val sslMap = new SslContextMap(Map("default" -> SSLContextData(s"$base/client.jks", "password", s"$base/clienttrust.jks", "password")))
 
       forgePact
         .between("My Consumer")
@@ -63,7 +65,7 @@ class ExampleSpec extends FunSpec with Matchers {
             .willRespondWith(200, "Hello there!")
         )
         .runConsumerTest { mockConfig =>
-          val sslContext = sslMap(Some("default")).getOrElse(fail)
+          val sslContext = sslMap.getContext("default")
           val f = HttpsURLConnection.getDefaultSSLSocketFactory
           try {
             HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory)

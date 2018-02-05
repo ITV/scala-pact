@@ -29,6 +29,17 @@ class ScalaPactHttpClientSpec extends FunSpec with Matchers with MockFactory {
     matchingRules = None
   )
 
+
+  val someSslContext = mock[SSLContext]
+  val data = SSLContextData("some", "unused", "data", "")
+  implicit val sSLContextDataToSslContext = new SSLContextDataToSslContext {
+    override def apply(v1: SSLContextData): SSLContext = {
+      if (v1 != data) fail()
+      someSslContext
+    }
+  }
+  implicit val sslContextMap = new SslContextMap(Map("someSslName" -> data))
+
   describe("Making an interaction request") {
 
     it("should be able to make and interaction request and get an interaction response") {
@@ -38,12 +49,9 @@ class ScalaPactHttpClientSpec extends FunSpec with Matchers with MockFactory {
     }
 
     it("should pass the SSL context to the client builder") {
-
-      val sslContext = mock[SSLContext]
-      implicit val sslContextMap = new SslContextMap(Map("someSSLName" -> sslContext))
       val client = "the client"
       val fakeCaller: (SimpleRequest, String) => Task[SimpleResponse] = (sr, actualClient) => {
-        sr shouldBe SimpleRequest("", "/foo", HttpMethod.GET, Some("someSSLName"))
+        sr shouldBe SimpleRequest("", "/foo", HttpMethod.GET, Some("someSslName"))
         actualClient shouldBe client
         Task.now(SimpleResponse(200))
       }
@@ -51,7 +59,7 @@ class ScalaPactHttpClientSpec extends FunSpec with Matchers with MockFactory {
       val result = new ScalaPactHttpClient[String] {
         override def buildClient = new BuildClient[String] {
           override def apply(maxTotalConntections: Int, clientTimeout: Duration, actualSslContext: Option[SSLContext]): String = {
-            actualSslContext shouldBe Some(sslContext)
+            actualSslContext shouldBe Some(someSslContext)
             clientTimeout shouldBe 1.second
             maxTotalConntections shouldBe 1
             client
@@ -60,7 +68,7 @@ class ScalaPactHttpClientSpec extends FunSpec with Matchers with MockFactory {
 
 
         override def doRequest = ???
-      }.doInteractionRequestTask(fakeCaller, "", requestDetails, 1.second, sslContextName = Some("someSSLName")).unsafeRun()
+      }.doInteractionRequestTask(fakeCaller, "", requestDetails, 1.second, sslContextName = Some("someSslName")).unsafeRun()
 
       result shouldEqual responseDetails
 

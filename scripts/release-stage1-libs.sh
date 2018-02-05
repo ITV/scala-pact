@@ -26,6 +26,8 @@ echo ""
 echo ">>> Shared (2.12)"
 crossPublishReal "shared_2_12"
 
+
+
 echo ""
 echo ">>> Http4s 0.15.0a (2.10)"
 crossPublishReal "http4s0150a_2_10"

@@ -72,7 +72,7 @@ object ScalaPactSettings {
       outputPath = b.outputPath.orElse(a.outputPath)
     )
 
-  private lazy val convertToArguments: Map[String, String] => ScalaPactSettings = argMap =>
+   lazy val convertToArguments: Map[String, String] => ScalaPactSettings = argMap =>
     ScalaPactSettings(
       host = argMap.get("--host"),
       protocol = argMap.get("--protocol"),

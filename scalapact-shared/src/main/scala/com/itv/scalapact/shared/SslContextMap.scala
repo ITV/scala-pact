@@ -3,30 +3,55 @@ package com.itv.scalapact.shared
 import java.io.FileInputStream
 import java.security.KeyStore
 import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
-import com.itv.scalapact.shared.PactLogger
 
-class SslContextMap(map: Map[String, SSLContext]) extends (Option[String] => Option[SSLContext]) {
-  override def apply(optName: Option[String]): Option[SSLContext] = {
-    val result = optName.map(name => map.getOrElse(name, throw new SslContextNotFoundException(name, this)))
+import scala.collection.concurrent.TrieMap
 
-    PactLogger.debug(s"SslContextMap($optName) ==> $result")
+case class SSLContextData(keyStore: String, passphrase: String, trustStore: String, trustPassphrase: String)
 
-    if (SslContextMap.debugNones && optName.isEmpty) {
-      try {
-        throw new RuntimeException
+trait SSLContextDataToSslContext extends (SSLContextData => SSLContext)
+
+object SSLContextDataToSslContext{
+  implicit object Default extends SSLContextDataToSslContext {
+    override def apply(data: SSLContextData): SSLContext = {
+      import data._
+      val ksKeys: KeyStore = KeyStore.getInstance("JKS")
+      val ksTrust = KeyStore.getInstance("JKS")
+      def load(keyStore: KeyStore, store: String, password: String) = try {
+        val inputStream = new FileInputStream(store)
+        keyStore.load(inputStream, passphrase.toCharArray)
       } catch {
-        case e: Exception => e.printStackTrace()
+        case e: Exception => throw new IllegalArgumentException(s"Cannot load store at location [$store]", e)
       }
-    }
+      load(ksKeys, keyStore, passphrase)
+      load(ksTrust, keyStore, passphrase)
+      // KeyManagers decide which key material to use
+      val kmf = KeyManagerFactory.getInstance("SunX509")
+      kmf.init(ksKeys, passphrase.toCharArray)
 
-    result
+      // TrustManagers decide whether to allow connections
+      val tmf = TrustManagerFactory.getInstance("SunX509")
+      tmf.init(ksTrust)
+
+      val sslContext = SSLContext.getInstance("TLS")
+      sslContext.init(kmf.getKeyManagers, tmf.getTrustManagers, null)
+      sslContext
+    }
+  }
+}
+
+class SslContextMap(dataMap: Map[String, SSLContextData])(implicit sSLContextDataToSslContext: SSLContextDataToSslContext) {
+
+  private val sslContextCache = new TrieMap[String, SSLContext]
+
+  def getContext: String => SSLContext = { name =>
+    val data = dataMap.getOrElse(name, throw new SslContextNotFoundException(name, this))
+    sslContextCache.getOrElseUpdate(name, sSLContextDataToSslContext(data))
   }
 
-  def legalValues: List[String] =
-    map.keys.toList.sorted
+  def legalValues: List[String] = dataMap.keys.toList.sorted
 
   override def toString() =
-    s"SslContextMap($map)"
+    s"SslContextMap($dataMap)"
 }
 
 class SslContextNotFoundException(name: String, sslContextMap: SslContextMap) extends Exception(s"SslContext [$name] not found. Legal values are [${sslContextMap.legalValues}]")
@@ -39,35 +64,13 @@ object SslContextMap {
   implicit val defaultEmptyContextMap: SslContextMap = new SslContextMap(Map())
 
   def apply(specs: (String, (String, String, String, String))*): SslContextMap =
-    new SslContextMap(specs.toMap.mapValues((makeSslContext _).tupled))
+    new SslContextMap(specs.toMap.mapValues[SSLContextData]((SSLContextData.apply _).tupled))
 
 
   def apply[T](simpleRequest: SimpleRequest)(fn: Option[SSLContext] => SimpleRequest => T)(implicit sslContextMap: SslContextMap): T = {
-    val sslContext = sslContextMap(simpleRequest.sslContextName)
+    val optSslContext = simpleRequest.sslContextName.map(sslContextMap.getContext)
     val newRequest = simpleRequest.copy(headers = simpleRequest.headers - sslContextHeaderName)
-    fn(sslContext)(newRequest)
-  }
-
-  def makeSslContext(keyStore: String, passphrase: String, trustStore: String, trustPassphrase: String): SSLContext = {
-    val ksKeys: KeyStore = KeyStore.getInstance("JKS")
-    val ksTrust = KeyStore.getInstance("JKS")
-    def load(keyStore: KeyStore, store: String,password: String)= try{
-      val inputStream = new FileInputStream(store)
-      keyStore.load(inputStream, passphrase.toCharArray)
-    } catch {case e: Exception => throw new IllegalArgumentException(s"Cannot load store at location [$store]", e)}
-    load(ksKeys, keyStore, passphrase)
-    load(ksTrust, keyStore, passphrase)
-    // KeyManagers decide which key material to use
-    val kmf = KeyManagerFactory.getInstance("SunX509")
-    kmf.init(ksKeys, passphrase.toCharArray)
-
-    // TrustManagers decide whether to allow connections
-    val tmf = TrustManagerFactory.getInstance("SunX509")
-    tmf.init(ksTrust)
-
-    val sslContext = SSLContext.getInstance("TLS")
-    sslContext.init(kmf.getKeyManagers, tmf.getTrustManagers, null)
-    sslContext
+    fn(optSslContext)(newRequest)
   }
 
 }

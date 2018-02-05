@@ -5,7 +5,7 @@ import java.text.MessageFormat
 import java.util.ResourceBundle
 import javax.net.ssl.SSLContext
 
-import com.itv.scalapact.shared.SslContextMap
+import com.itv.scalapact.shared.{PactLogger, SSLContextData, SslContextMap}
 import com.typesafe.config.Config
 
 import scala.collection.JavaConverters._
@@ -20,8 +20,8 @@ trait FromConfigWithKey[T] {
 
 object FromConfig {
 
-  implicit object FromConfigForSslContext extends FromConfig[SSLContext] {
-    override def apply(config: Config): SSLContext = SslContextMap.makeSslContext(config.getString("keystore"), config.getString("keystore-password"), config.getString("truststore"), config.getString("truststore-password"))
+  implicit object FromConfigForSslContext extends FromConfig[SSLContextData] {
+    override def apply(config: Config): SSLContextData = SSLContextData(config.getString("keystore"), config.getString("keystore-password"), config.getString("truststore"), config.getString("truststore-password"))
   }
 
 }
@@ -50,21 +50,26 @@ object MessageFormatData extends Pimpers {
     override def apply(v1: (L, M, R)): Seq[String] = mfl(v1._1) ++ mfm(v1._2) ++ mfr(v1._3)
   }
 
-  implicit def messageFormatDataForSeq[T] = new MessageFormatData[Seq[T]] {
+  implicit def messageFormatDataForSeq[T]: MessageFormatData[Seq[T]]  = new MessageFormatData[Seq[T]] {
     override def apply(v1: Seq[T]): Seq[String] = Seq(v1.size.toString)
   }
+
+  implicit object messageFormatDataForFile extends MessageFormatData[File] {
+    override def apply(v1: File): Seq[String] = Seq(v1.getAbsolutePath)
+  }
+
 }
 
 trait Pimpers {
 
   implicit class AnyPimper[T](t: T) {
-    def ==>[T1](fn: T => T1) = fn(t)
+    def ==>[T1](fn: T => T1): T1 = fn(t)
 
   }
 
   implicit class StringPimper(s: String)(implicit resources: ResourceBundle) {
-    def fromBundle[T](t: T)(implicit messageFormatData: MessageFormatData[T]) = MessageFormat.format(resources.getString(s), messageFormatData(t): _*)
-    def printlnFromBundle[T: MessageFormatData](t: T) = println(fromBundle(t))
+    def fromBundle[T](t: T)(implicit messageFormatData: MessageFormatData[T]): String = MessageFormat.format(resources.getString(s), messageFormatData(t): _*)
+    def printlnFromBundle[T: MessageFormatData](t: T)(implicit pactLogger: PactLogger): Unit = pactLogger.message(fromBundle(t))
   }
 
   implicit class FnPimper[From, To](fn: From => To) {
@@ -103,7 +108,7 @@ trait Pimpers {
   implicit class SeqEitherPimper[L, R](seq: Seq[Either[L, R]]) {
     def issues: Seq[L] = seq.collect { case Left(l) => l }
     def values: Seq[R] = seq.collect { case Right(r) => r }
-    def handleErrors(implicit errorStrategy: ErrorStrategy[L, R]) = errorStrategy(seq)
+    def handleErrors(implicit errorStrategy: ErrorStrategy[L, R]): Seq[R] = errorStrategy(seq)
   }
 
 

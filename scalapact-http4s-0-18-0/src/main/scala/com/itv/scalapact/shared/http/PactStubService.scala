@@ -31,8 +31,9 @@ object PactStubService {
     runServer(interactionManager, nThreads, sslContextName, config.givePort)(pactReader, pactWriter, sslContextMap)(config).awaitShutdown()
   }
 
-  implicit class BlazeBuilderPimper(blazeBuilder: BlazeBuilder[IO]) {
-    def withOptionalSsl(sslContext: Option[SSLContext]): BlazeBuilder[IO] = sslContext.fold(blazeBuilder)(ssl => blazeBuilder.withSSLContext(ssl))
+  implicit class BlazeBuilderPimper(blazeBuilder: BlazeBuilder[IO]) (implicit sslContextMap: SslContextMap){
+    def withOptionalSsl(sslContextName: Option[String]): BlazeBuilder[IO] =
+      sslContextName.fold(blazeBuilder)(ssl => blazeBuilder.withSSLContext(sslContextMap.getContext(ssl)))
   }
 
   def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int, sslContextName: Option[String], port: Int)

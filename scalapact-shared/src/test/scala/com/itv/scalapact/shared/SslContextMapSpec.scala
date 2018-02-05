@@ -7,10 +7,17 @@ import org.scalatest.{FunSpec, Matchers}
 
 class SslContextMapSpec extends FunSpec with Matchers {
 
-  describe("SslContextMap.apply method") {
+  describe("SslContextMap.getContext method") {
 
     val someSslContext = SSLContext.getDefault
-    implicit val sslContextMap = new SslContextMap(Map("someSslName" -> someSslContext))
+    val data = SSLContextData("some", "unused", "data", "")
+    implicit val sSLContextDataToSslContext = new SSLContextDataToSslContext {
+      override def apply(v1: SSLContextData): SSLContext = {
+        if (v1 != data) fail()
+        someSslContext
+      }
+    }
+    implicit val sslContextMap = new SslContextMap(Map("someSslName" -> data))
 
     val headersWithoutSslContextHeaderName = Map("a" -> "someA")
     val requestWithNoSslContext = SimpleRequest("http://localhost:1234", "/test", HttpMethod.GET, None)

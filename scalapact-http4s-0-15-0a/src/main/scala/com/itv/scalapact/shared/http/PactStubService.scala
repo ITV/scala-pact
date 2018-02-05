@@ -30,8 +30,8 @@ object PactStubService {
 
   implicit class BlazeBuilderPimper(blazeBuilder: BlazeBuilder) {
     def withOptionalSsl(sslContextName: Option[String])(implicit sslContextMap: SslContextMap): BlazeBuilder = {
-      val ssl = sslContextMap(sslContextName).fold(blazeBuilder)(ssl => throw new RuntimeException("Use of SSl contexts is not supported by this version of HTTP4S"))
-      PactLogger.message(s"withOptionalSsl($ssl)")
+//      blazeBuilder.withSSL()
+      val ssl = sslContextName.fold(blazeBuilder)(_ => throw new RuntimeException("Use of SSl contexts is not supported by this version of HTTP4S"))
       ssl
     }
   }
