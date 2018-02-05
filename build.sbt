@@ -285,7 +285,7 @@ lazy val plugin =
     .settings(publishSettings: _*)
     .dependsOn(core_2_10)
     .dependsOn(argonaut62_2_10 % "provided")
-    .dependsOn(http4s0162_2_10 % "provided")
+    .dependsOn(http4s0150a_2_10 % "provided")
     .dependsOn(complexStubber % "provided")
     .project
     .settings(
@@ -317,7 +317,7 @@ lazy val standalone =
     .settings(commonSettings: _*)
     .dependsOn(complexStubber)
     .dependsOn(argonaut62_2_10)
-    .dependsOn(http4s0162_2_10)
+    .dependsOn(http4s0150a_2_10 )
     .settings(
       name := "scalapact-standalone-stubber",
       scalaVersion := scala210
@@ -328,7 +328,7 @@ lazy val complexStubber =
     .settings(complexStubberSettings: _*)
     .dependsOn(core_2_10)
     .dependsOn(argonaut62_2_10)
-    .dependsOn(http4s0162_2_10)
+    .dependsOn(http4s0150a_2_10 )
     .settings(
       name := "scalapact-complex-stubber",
       scalaVersion := scala210

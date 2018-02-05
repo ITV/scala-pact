@@ -5,7 +5,7 @@ import javax.net.ssl.SSLContext
 
 import com.itv.scalapact.shared._
 import org.http4s.dsl._
-import org.http4s.server.Server
+import org.http4s.server.{SSLSupport, Server}
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.util.CaseInsensitiveString
 import org.http4s.{HttpService, Request, Response}
@@ -30,9 +30,13 @@ object PactStubService {
 
   implicit class BlazeBuilderPimper(blazeBuilder: BlazeBuilder) {
     def withOptionalSsl(sslContextName: Option[String])(implicit sslContextMap: SslContextMap): BlazeBuilder = {
-//      blazeBuilder.withSSL()
-      val ssl = sslContextName.fold(blazeBuilder)(_ => throw new RuntimeException("Use of SSl contexts is not supported by this version of HTTP4S"))
-      ssl
+      sslContextName.fold(blazeBuilder) {
+        name =>
+          val data = sslContextMap.getData(name)
+          val key = SSLSupport.StoreInfo(data.keyStore, data.passphrase)
+          val trust = SSLSupport.StoreInfo(data.trustStore, data.trustPassphrase)
+          blazeBuilder.withSSL(key, "", "https", Some(trust), sslContextMap.getClientAuth(name))
+      }
     }
   }
 

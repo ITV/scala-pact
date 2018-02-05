@@ -21,7 +21,13 @@ trait FromConfigWithKey[T] {
 object FromConfig {
 
   implicit object FromConfigForSslContext extends FromConfig[SSLContextData] {
-    override def apply(config: Config): SSLContextData = SSLContextData(config.getString("keystore"), config.getString("keystore-password"), config.getString("truststore"), config.getString("truststore-password"))
+    override def apply(config: Config): SSLContextData = SSLContextData(
+      keyManagerFactoryPassword = config.getString("keymanager-factory-passphrase"),
+      keyStore = config.getString("keystore"),
+      passphrase = config.getString("keystore-password"),
+      trustStore = config.getString("truststore"),
+      trustPassphrase = config.getString("truststore-password"),
+      clientAuth = config.getBoolean("client-auth"))
   }
 
 }
@@ -50,7 +56,7 @@ object MessageFormatData extends Pimpers {
     override def apply(v1: (L, M, R)): Seq[String] = mfl(v1._1) ++ mfm(v1._2) ++ mfr(v1._3)
   }
 
-  implicit def messageFormatDataForSeq[T]: MessageFormatData[Seq[T]]  = new MessageFormatData[Seq[T]] {
+  implicit def messageFormatDataForSeq[T]: MessageFormatData[Seq[T]] = new MessageFormatData[Seq[T]] {
     override def apply(v1: Seq[T]): Seq[String] = Seq(v1.size.toString)
   }
 

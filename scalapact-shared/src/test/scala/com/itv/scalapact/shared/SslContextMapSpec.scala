@@ -10,7 +10,7 @@ class SslContextMapSpec extends FunSpec with Matchers {
   describe("SslContextMap.getContext method") {
 
     val someSslContext = SSLContext.getDefault
-    val data = SSLContextData("some", "unused", "data", "")
+    val data = SSLContextData("some", "unused", "data", "", "", false)
     implicit val sSLContextDataToSslContext = new SSLContextDataToSslContext {
       override def apply(v1: SSLContextData): SSLContext = {
         if (v1 != data) fail()

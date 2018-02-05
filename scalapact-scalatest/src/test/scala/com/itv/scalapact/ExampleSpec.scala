@@ -52,7 +52,7 @@ class ExampleSpec extends FunSpec with Matchers {
       val endPoint = "/hello"
 
       val base = new File("ssl").getAbsoluteFile
-      implicit val sslMap = new SslContextMap(Map("default" -> SSLContextData(s"$base/client.jks", "password", s"$base/clienttrust.jks", "password")))
+      implicit val sslMap = new SslContextMap(Map("default" -> SSLContextData("password", s"$base/client.jks", "password", s"$base/clienttrust.jks", "password", false)))
 
       forgePact
         .between("My Consumer")
@@ -69,7 +69,7 @@ class ExampleSpec extends FunSpec with Matchers {
           val f = HttpsURLConnection.getDefaultSSLSocketFactory
           try {
             HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory)
-            val url = new URL(mockConfig.baseUrl +endPoint)
+            val url = new URL(mockConfig.baseUrl + endPoint)
             mockConfig.protocol shouldBe "https"
             mockConfig.baseUrl should startWith("https")
             val con = url.openConnection.asInstanceOf[HttpURLConnection]

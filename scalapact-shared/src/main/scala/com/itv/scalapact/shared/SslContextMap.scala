@@ -6,11 +6,12 @@ import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
 
 import scala.collection.concurrent.TrieMap
 
-case class SSLContextData(keyStore: String, passphrase: String, trustStore: String, trustPassphrase: String)
+case class SSLContextData(keyManagerFactoryPassword: String, keyStore: String, passphrase: String, trustStore: String, trustPassphrase: String, clientAuth: Boolean)
 
 trait SSLContextDataToSslContext extends (SSLContextData => SSLContext)
 
-object SSLContextDataToSslContext{
+object SSLContextDataToSslContext {
+
   implicit object Default extends SSLContextDataToSslContext {
     override def apply(data: SSLContextData): SSLContext = {
       import data._
@@ -23,10 +24,10 @@ object SSLContextDataToSslContext{
         case e: Exception => throw new IllegalArgumentException(s"Cannot load store at location [$store]", e)
       }
       load(ksKeys, keyStore, passphrase)
-      load(ksTrust, keyStore, passphrase)
+      load(ksTrust, keyStore, trustPassphrase)
       // KeyManagers decide which key material to use
       val kmf = KeyManagerFactory.getInstance("SunX509")
-      kmf.init(ksKeys, passphrase.toCharArray)
+      kmf.init(ksKeys, keyManagerFactoryPassword.toCharArray)
 
       // TrustManagers decide whether to allow connections
       val tmf = TrustManagerFactory.getInstance("SunX509")
@@ -37,21 +38,20 @@ object SSLContextDataToSslContext{
       sslContext
     }
   }
+
 }
 
 class SslContextMap(dataMap: Map[String, SSLContextData])(implicit sSLContextDataToSslContext: SSLContextDataToSslContext) {
 
   private val sslContextCache = new TrieMap[String, SSLContext]
 
-  def getContext: String => SSLContext = { name =>
-    val data = dataMap.getOrElse(name, throw new SslContextNotFoundException(name, this))
-    sslContextCache.getOrElseUpdate(name, sSLContextDataToSslContext(data))
-  }
+  def getContext: String => SSLContext = { name => sslContextCache.getOrElseUpdate(name, sSLContextDataToSslContext(getData(name))) }
+  def getClientAuth: String => Boolean = getData andThen (_.clientAuth)
+  def getData: String => SSLContextData = { name => dataMap.getOrElse(name, throw new SslContextNotFoundException(name, this)) }
 
   def legalValues: List[String] = dataMap.keys.toList.sorted
 
-  override def toString() =
-    s"SslContextMap($dataMap)"
+  override def toString() = s"SslContextMap($dataMap)"
 }
 
 class SslContextNotFoundException(name: String, sslContextMap: SslContextMap) extends Exception(s"SslContext [$name] not found. Legal values are [${sslContextMap.legalValues}]")
@@ -63,7 +63,7 @@ object SslContextMap {
 
   implicit val defaultEmptyContextMap: SslContextMap = new SslContextMap(Map())
 
-  def apply(specs: (String, (String, String, String, String))*): SslContextMap =
+  def apply(specs: (String, (String, String, String, String, String, Boolean))*): SslContextMap =
     new SslContextMap(specs.toMap.mapValues[SSLContextData]((SSLContextData.apply _).tupled))
 
 
