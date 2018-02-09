@@ -6,7 +6,7 @@ import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
 
 import scala.collection.concurrent.TrieMap
 
-case class SSLContextData(keyManagerFactoryPassword: String, keyStore: String, passphrase: String, trustStore: String, trustPassphrase: String, clientAuth: Boolean)
+case class SSLContextData(keyManagerFactoryPassword: String, keyStore: String, passphrase: String, trustStore: String, trustPassphrase: String)
 
 trait SSLContextDataToSslContext extends (SSLContextData => SSLContext)
 
@@ -41,12 +41,14 @@ object SSLContextDataToSslContext {
 
 }
 
+case class ContextNameAndClientAuth(name: String, clientAuth: Boolean)
+
 class SslContextMap(dataMap: Map[String, SSLContextData])(implicit sSLContextDataToSslContext: SSLContextDataToSslContext) {
 
   private val sslContextCache = new TrieMap[String, SSLContext]
 
   def getContext: String => SSLContext = { name => sslContextCache.getOrElseUpdate(name, sSLContextDataToSslContext(getData(name))) }
-  def getClientAuth: String => Boolean = getData andThen (_.clientAuth)
+
   def getData: String => SSLContextData = { name => dataMap.getOrElse(name, throw new SslContextNotFoundException(name, this)) }
 
   def legalValues: List[String] = dataMap.keys.toList.sorted
@@ -63,7 +65,7 @@ object SslContextMap {
 
   implicit val defaultEmptyContextMap: SslContextMap = new SslContextMap(Map())
 
-  def apply(specs: (String, (String, String, String, String, String, Boolean))*): SslContextMap =
+  def apply(specs: (String, (String, String, String, String, String))*): SslContextMap =
     new SslContextMap(specs.toMap.mapValues[SSLContextData]((SSLContextData.apply _).tupled))
 
 

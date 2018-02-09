@@ -11,7 +11,7 @@ echo "******************"
 
 function crossPublishLocal {
     NAME=$1
-    sbt $NAME/clean $NAME/update $NAME/compile $NAME/test $NAME/publish-local
+    sbt $NAME/clean $NAME/update $NAME/compile $NAME/test $NAME/publish-local $NAME/publishM2
 }
 
 echo ""

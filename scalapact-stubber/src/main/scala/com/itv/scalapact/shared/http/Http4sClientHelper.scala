@@ -15,28 +15,28 @@ object Http4sClientHelper {
 
   import HeaderImplicitConversions._
 
-  private def blazeClientConfig(clientTimeout: Duration, sslContext: Option[SSLContext]): BlazeClientConfig = BlazeClientConfig.defaultConfig.copy(
-    requestTimeout = clientTimeout,
-    userAgent = Option(`User-Agent`(AgentProduct("scala-pact", Option(BuildInfo.version)))),
-    endpointAuthentication = false,
-    customExecutor = None,
-    sslContext = sslContext
-  )
+  private def blazeClientConfig(clientTimeout: Duration, sslContext: Option[SSLContext]): BlazeClientConfig =
+    BlazeClientConfig.defaultConfig.copy(
+      requestTimeout = clientTimeout,
+      userAgent = Option(`User-Agent`(AgentProduct("scala-pact", Option(BuildInfo.version)))),
+      customExecutor = None,
+      sslContext = sslContext
+    )
 
   private val extractResponse: Response => Task[SimpleResponse] = r =>
     r.bodyAsText.runLog[Task, String].map(_.mkString).map { b => SimpleResponse(r.status.code, r.headers, Some(b)) }
 
   def defaultClient: Client =
-    buildPooledBlazeHttpClient(1, Duration(1, SECONDS), sslContext=None)
+    buildPooledBlazeHttpClient(1, Duration(1, SECONDS), sslContext = None)
 
   def buildPooledBlazeHttpClient(maxTotalConnections: Int, clientTimeout: Duration, sslContext: Option[SSLContext]): Client =
-    PooledHttp1Client(maxTotalConnections, blazeClientConfig(clientTimeout, sslContext ))
+    PooledHttp1Client(maxTotalConnections, blazeClientConfig(clientTimeout, sslContext))
 
   val doRequest: (SimpleRequest, Client) => Task[SimpleResponse] = (request, httpClient) =>
     for {
-      request  <- Http4sRequestResponseFactory.buildRequest(request)
+      request <- Http4sRequestResponseFactory.buildRequest(request)
       response <- httpClient.fetch[SimpleResponse](request)(extractResponse)
-      _        <- httpClient.shutdown
+      _ <- httpClient.shutdown
     } yield response
 
 }

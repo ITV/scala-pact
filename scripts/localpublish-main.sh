@@ -14,7 +14,7 @@ function crossPublishLocal {
     sleep 1
     echo ""
     echo ">>> $NAME"
-    sbt $NAME/clean $NAME/update $NAME/compile $NAME/test $NAME/publish-local
+    sbt $NAME/clean $NAME/update $NAME/compile $NAME/test $NAME/publish-local  $NAME/publishM2
 }
 
 crossPublishLocal "core_2_10"
@@ -22,6 +22,7 @@ crossPublishLocal "core_2_11"
 crossPublishLocal "core_2_12"
 crossPublishLocal "plugin"
 crossPublishLocal "standalone"
-crossPublishLocal "complexStubber"
+crossPublishLocal "scalapact-stubber_2_10"
+crossPublishLocal "scalapact-stubber_2_11"
 crossPublishLocal "framework_2_11"
 crossPublishLocal "framework_2_12"

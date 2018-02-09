@@ -17,18 +17,17 @@ object PactStubber {
   def main(args: Array[String]): Unit = {
 
     val argMap = Helpers.pair apply args.toList
-    println(argMap)
     argMap.get("--file") match {
       case Some(fileName) =>
         implicit val resources: ResourceBundle = ResourceBundle.getBundle("messages")
         implicit val executorService: ExecutorService = Executors.newFixedThreadPool(10)
-        new ConfigBasedStubber(new File(fileName)).waitForever()
+         ConfigBasedStubber(new File(fileName)).waitForever()
       case None =>
         PactLogger.message("*************************************".white.bold)
         PactLogger.message("** ScalaPact: Running Stubber      **".white.bold)
         PactLogger.message("*************************************".white.bold)
         val interactionManager: InteractionManager = new InteractionManager
-        (ScalaPactSettings.convertToArguments andThen loadPactFiles(pactReader)(true)("pacts") andThen interactionManager.addToInteractionManager andThen startServer(interactionManager, sslContextName = None)(pactReader, pactWriter, implicitly[SslContextMap])) (argMap)
+        (ScalaPactSettings.convertToArguments andThen loadPactFiles(pactReader)(true)("pacts") andThen interactionManager.addToInteractionManager andThen startServer(interactionManager, optContextNameAndClientAuth = None)(pactReader, pactWriter, implicitly[SslContextMap])) (argMap)
     }
   }
 

@@ -3,9 +3,8 @@ package com.ing.pact.stubber
 import java.io.{File, FileFilter}
 import java.text.MessageFormat
 import java.util.ResourceBundle
-import javax.net.ssl.SSLContext
 
-import com.itv.scalapact.shared.{PactLogger, SSLContextData, SslContextMap}
+import com.itv.scalapact.shared.{PactLogger, SSLContextData}
 import com.typesafe.config.Config
 
 import scala.collection.JavaConverters._
@@ -26,8 +25,7 @@ object FromConfig {
       keyStore = config.getString("keystore"),
       passphrase = config.getString("keystore-password"),
       trustStore = config.getString("truststore"),
-      trustPassphrase = config.getString("truststore-password"),
-      clientAuth = config.getBoolean("client-auth"))
+      trustPassphrase = config.getString("truststore-password"))
   }
 
 }
@@ -117,17 +115,22 @@ trait Pimpers {
     def handleErrors(implicit errorStrategy: ErrorStrategy[L, R]): Seq[R] = errorStrategy(seq)
   }
 
+  implicit class FilePimper(file: File) {
+    def listFilesInDirectory(filenameFilter: FileFilter): Seq[File] = {
+      if (!file.isDirectory) throw new IllegalArgumentException(s"Filename ${file.getAbsolutePath} isn't a directory")
+      file.listFiles(filenameFilter).toList
+    }
+  }
 
   implicit class ConfigPimper(config: Config) {
     def get[A](name: String)(implicit fromConfig: FromConfig[A]): A = fromConfig(config.getConfig(name))
     def getOption[A](name: String)(implicit fromConfig: FromConfig[A]): Option[A] = if (config.hasPath(name)) Some(fromConfig(config.getConfig(name))) else None
     def mapList[A](name: String)(implicit fromConfig: FromConfigWithKey[A]): List[A] = config.getObject(name).keySet().asScala.toList.sorted.map(key => fromConfig(key, config.getConfig(name).getConfig(key)))
-    def getFiles(name: String)(filenameFilter: FileFilter): List[File] = {
+    def getFiles(name: String)(filenameFilter: FileFilter): Seq[File] = {
       val fileName = config.getString(name)
       if (fileName == null) throw new NullPointerException(s"Cannot load file $name")
       val directory = new File(fileName)
-      if (!directory.isDirectory) throw new IllegalArgumentException(s"Filename $name is $fileName and that isn't a directory")
-      directory.listFiles(filenameFilter).toList
+      directory.listFilesInDirectory(filenameFilter)
     }
   }
 

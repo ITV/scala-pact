@@ -39,14 +39,13 @@ object ScalaPactStubberCommand {
     }
 
     val argMap = Map("--runTests" -> "false") ++ (Helpers.pair apply args.toList)
-    println(s"ArgMap is $argMap args are $args")
 
     val pactTestedState: State = if (argMap.getBoolean("--runTests")) Command.process("pact-test", state) else state
     argMap get "--file" match {
       case Some(fileName) =>
         implicit val resources: ResourceBundle = ResourceBundle.getBundle("messages")
         implicit val executorService: ExecutorService = Executors.newFixedThreadPool(10)
-        new ConfigBasedStubber(new File(fileName)).waitForever()
+        ConfigBasedStubber(new File(fileName)).waitForever()
       case None =>
         runStubber(
           Project.extract(state).get(ScalaPactPlugin.autoImport.scalaPactEnv).toSettings + ScalaPactSettings.convertToArguments(argMap),
@@ -60,7 +59,7 @@ object ScalaPactStubberCommand {
   def interactionManagerInstance: InteractionManager = new InteractionManager
 
   def runStubber(scalaPactSettings: ScalaPactSettings, interactionManager: InteractionManager): Unit = {
-    (loadPactFiles(pactReader)(true)(scalaPactSettings.giveOutputPath) andThen interactionManager.addToInteractionManager andThen startServer(interactionManager, sslContextName = None)(pactReader, pactWriter, implicitly[SslContextMap])) (scalaPactSettings)
+    (loadPactFiles(pactReader)(true)(scalaPactSettings.giveOutputPath) andThen interactionManager.addToInteractionManager andThen startServer(interactionManager, optContextNameAndClientAuth = None)(pactReader, pactWriter, implicitly[SslContextMap])) (scalaPactSettings)
   }
 
 }

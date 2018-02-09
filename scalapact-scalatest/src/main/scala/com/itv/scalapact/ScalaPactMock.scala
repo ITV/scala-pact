@@ -68,7 +68,7 @@ object ScalaPactMock {
 
     val interactionManager: InteractionManager = new InteractionManager
 
-    val protocol = pactDescription.serverSslContextName.fold("http")(_ => "https")
+    val protocol = pactDescription.optContextNameAndClientAuth.fold("http")(_ => "https")
     val mockConfig = ScalaPactMockConfig(protocol, "localhost", findFreePortRetry(3), pactDescription.options.outputPath)
     val configAndPacts: ConfigAndPacts = ConfigAndPacts(
       scalaPactSettings = ScalaPactSettings(
@@ -85,7 +85,7 @@ object ScalaPactMock {
 
     val connectionPoolSize: Int = 5
 
-    val server: IPactServer = (interactionManager.addToInteractionManager andThen runServer(interactionManager, connectionPoolSize, pactDescription.serverSslContextName, configAndPacts.scalaPactSettings.givePort)) (configAndPacts)
+    val server: IPactServer = (interactionManager.addToInteractionManager andThen runServer(interactionManager, connectionPoolSize, pactDescription.optContextNameAndClientAuth, configAndPacts.scalaPactSettings.givePort)) (configAndPacts)
 
     PactLogger.message("> ScalaPact stub running at: " + mockConfig.baseUrl)
 
@@ -94,7 +94,7 @@ object ScalaPactMock {
 
   private def waitForServerThenTest[A](server: IPactServer, mockConfig: ScalaPactMockConfig, test: ScalaPactMockConfig => A, pactDescription: ScalaPactDescriptionFinal)(implicit sslContextMap: SslContextMap): A = {
     def rec(attemptsRemaining: Int, intervalMillis: Int): A = {
-      if (isStubReady(mockConfig, pactDescription.serverSslContextName)) {
+      if (isStubReady(mockConfig, pactDescription.optContextNameAndClientAuth.map(_.name))) {
         val result = configuredTestRunner(pactDescription)(mockConfig)(test)
 
         stopServer(server)

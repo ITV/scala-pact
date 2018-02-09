@@ -79,10 +79,15 @@ trait ServiceMaker {
 
     }
   }
-  def service(interactionManager: IInteractionManager, strictMatching: Boolean)(implicit pactReader: IPactReader, pactWriter: IPactWriter): HttpService =
-    HttpService.lift { req =>
-      matchRequestWithResponse(interactionManager, strictMatching, req)
+  def service(interactionManager: IInteractionManager, strictMatching: Boolean)(implicit pactReader: IPactReader, pactWriter: IPactWriter): HttpService = {
+    try {
+      HttpService.lift { req =>
+        matchRequestWithResponse(interactionManager, strictMatching, req)
+      }
+    } catch {
+      case e: Throwable => e.printStackTrace(); throw e
     }
+  }
 
 
 }

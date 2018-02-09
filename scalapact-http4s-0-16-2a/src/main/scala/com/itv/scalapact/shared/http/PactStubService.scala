@@ -22,23 +22,23 @@ object PactStubService {
   private val nThreads: Int = 50
   private val executorService: ExecutorService = Executors.newFixedThreadPool(nThreads)
 
-  def startServer(interactionManager: IInteractionManager, sslContextName: Option[String])(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): ScalaPactSettings => Unit = config => {
+  def startServer(interactionManager: IInteractionManager,optContextNameAndClientAuth: Option[ContextNameAndClientAuth])(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): ScalaPactSettings => Unit = config => {
     PactLogger.message(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold)
     PactLogger.message(("Strict matching mode: " + config.giveStrictMode.toString).white.bold)
 
-    runServer(interactionManager, nThreads, sslContextName, config.givePort)(pactReader, pactWriter,sslContextMap)(config).awaitShutdown()
+    runServer(interactionManager, nThreads, optContextNameAndClientAuth, config.givePort)(pactReader, pactWriter,sslContextMap)(config).awaitShutdown()
   }
 
   implicit class BlazeBuilderPimper(blazeBuilder: BlazeBuilder)(implicit sslContextMap: SslContextMap) {
-    def withOptionalSsl(sslContextName: Option[String]): BlazeBuilder = sslContextName.fold(blazeBuilder)(ssl => blazeBuilder.withSSLContext(sslContextMap.getContext(ssl), sslContextMap.getClientAuth(ssl)))
+    def withOptionalSsl(sslContextName: Option[ContextNameAndClientAuth]): BlazeBuilder = sslContextName.fold(blazeBuilder)(ssl => blazeBuilder.withSSLContext(sslContextMap.getContext(ssl.name), ssl.clientAuth))
   }
 
-  def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int, sslContextName: Option[String], port: Int)(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): ScalaPactSettings => IPactServer = config => PactServer {
+  def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int, optContextNameAndClientAuth: Option[ContextNameAndClientAuth], port: Int)(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): ScalaPactSettings => IPactServer = config => PactServer {
     BlazeBuilder
       .bindHttp(port, config.giveHost)
       .withServiceExecutor(executorService)
       .withIdleTimeout(60.seconds)
-      .withOptionalSsl(sslContextName)
+      .withOptionalSsl(optContextNameAndClientAuth)
       .withConnectorPoolSize(connectionPoolSize)
       .mountService(PactStubService.service(interactionManager, config.giveStrictMode), "/")
       .run
@@ -87,7 +87,6 @@ object PactStubService {
 
     }
     else {
-
       interactionManager.findMatchingInteraction(
         InteractionRequest(
           method = Option(req.method.name.toUpperCase),

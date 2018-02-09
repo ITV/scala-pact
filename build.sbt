@@ -284,9 +284,9 @@ lazy val plugin =
     .settings(commonSettings: _*)
     .settings(publishSettings: _*)
     .dependsOn(core_2_10)
+    .dependsOn(scalapactStubber_2_10)
     .dependsOn(argonaut62_2_10 % "provided")
-    .dependsOn(http4s0150a_2_10 % "provided")
-    .dependsOn(complexStubber % "provided")
+    .dependsOn(http4s0162a_2_10 % "provided")
     .project
     .settings(
       sbtPlugin := true,
@@ -305,6 +305,7 @@ lazy val framework_2_11 =
     .dependsOn(argonaut62_2_11 % "provided")
     .dependsOn(http4s0162a_2_11 % "provided")
     .project
+
 lazy val framework_2_12 =
   framework(scala212)
     .dependsOn(core_2_12)
@@ -315,24 +316,33 @@ lazy val framework_2_12 =
 lazy val standalone =
   (project in file("scalapact-standalone-stubber"))
     .settings(commonSettings: _*)
-    .dependsOn(complexStubber)
+    .dependsOn(scalapactStubber_2_10)
     .dependsOn(argonaut62_2_10)
-    .dependsOn(http4s0150a_2_10 )
+    .dependsOn(http4s0162a_2_10)
     .settings(
       name := "scalapact-standalone-stubber",
       scalaVersion := scala210
     )
 
-lazy val complexStubber =
-  (project in file("scalapact-complex-stubber"))
+lazy val scalapactStubber =
+  (project in file("scalapact-stubber"))
     .settings(complexStubberSettings: _*)
+    .cross
+
+
+lazy val scalapactStubber_2_10 =
+  scalapactStubber(scala210)
     .dependsOn(core_2_10)
     .dependsOn(argonaut62_2_10)
-    .dependsOn(http4s0150a_2_10 )
-    .settings(
-      name := "scalapact-complex-stubber",
-      scalaVersion := scala210
-    )
+    .dependsOn(http4s0162a_2_10)
+    .project
+
+lazy val scalapactStubber_2_11 =
+  scalapactStubber(scala211)
+    .dependsOn(core_2_11)
+    .dependsOn(argonaut62_2_11)
+    .dependsOn(http4s0162a_2_11)
+    .project
 
 lazy val docs =
   (project in file("scalapact-docs"))
@@ -358,6 +368,8 @@ lazy val scalaPactProject =
       shared_2_10,
       shared_2_11,
       shared_2_12,
+      scalapactStubber_2_10,
+      scalapactStubber_2_11,
       docs,
       http4s0150a_2_10,
       http4s0150a_2_11,

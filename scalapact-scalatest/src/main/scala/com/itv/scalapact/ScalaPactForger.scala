@@ -1,6 +1,6 @@
 package com.itv.scalapact
 
-import com.itv.scalapact.shared.SslContextMap
+import com.itv.scalapact.shared.{ContextNameAndClientAuth, SslContextMap}
 
 import scala.language.implicitConversions
 import scala.util.Properties
@@ -32,7 +32,7 @@ object ScalaPactForger {
       def and(provider: String): ScalaPactDescription = new ScalaPactDescription(consumer, provider, None, Nil)
     }
 
-    class ScalaPactDescription(consumer: String, provider: String, sslContextName: Option[String], interactions: List[ScalaPactInteraction]) {
+    class ScalaPactDescription(consumer: String, provider: String,  optContextNameAndClientAuth: Option[ContextNameAndClientAuth], interactions: List[ScalaPactInteraction]) {
 
       /**
         * Adds interactions to the Pact. Interactions should be created using the helper object 'interaction'
@@ -40,16 +40,16 @@ object ScalaPactForger {
         * @param interaction [ScalaPactInteraction] definition
         * @return [ScalaPactDescription] to allow the builder to continue
         */
-      def addInteraction(interaction: ScalaPactInteraction): ScalaPactDescription = new ScalaPactDescription(consumer, provider, sslContextName, interactions ++ List(interaction))
+      def addInteraction(interaction: ScalaPactInteraction): ScalaPactDescription = new ScalaPactDescription(consumer, provider, optContextNameAndClientAuth, interactions ++ List(interaction))
 
-      def addSslContextForServer(name: String): ScalaPactDescription = new ScalaPactDescription(consumer, provider, Some(name), interactions)
+      def addSslContextForServer(name: String, clientAuth: Boolean): ScalaPactDescription = new ScalaPactDescription(consumer, provider, Some(ContextNameAndClientAuth(name, clientAuth)), interactions)
 
       def runConsumerTest[A](test: ScalaPactMockConfig => A)(implicit options: ScalaPactOptions, sslContextMap: SslContextMap): A = {
         ScalaPactMock.runConsumerIntegrationTest(strict)(
           ScalaPactDescriptionFinal(
             consumer,
             provider,
-            sslContextName,
+            optContextNameAndClientAuth,
             interactions.map(i => i.finalise),
             options
           )
@@ -64,10 +64,10 @@ object ScalaPactForger {
     def description(message: String): ScalaPactInteraction = new ScalaPactInteraction(message, None, None, ScalaPactRequest.default, ScalaPactResponse.default)
   }
 
-  class ScalaPactInteraction(description: String, providerState: Option[String], sslContextName: Option[String], request: ScalaPactRequest, response: ScalaPactResponse) {
-    def given(state: String): ScalaPactInteraction = new ScalaPactInteraction(description, Option(state), sslContextName, request, response)
+  class ScalaPactInteraction(description: String, providerState: Option[String], optContextNameAndClientAuth: Option[ContextNameAndClientAuth], request: ScalaPactRequest, response: ScalaPactResponse) {
+    def given(state: String): ScalaPactInteraction = new ScalaPactInteraction(description, Option(state), optContextNameAndClientAuth, request, response)
 
-    def withSsl(sslContextName: String): ScalaPactInteraction = new ScalaPactInteraction(description, providerState, Some(sslContextName), request, response)
+    def withSsl(sslContextName: String, clientAuth: Boolean): ScalaPactInteraction = new ScalaPactInteraction(description, providerState, Some(ContextNameAndClientAuth(sslContextName, clientAuth)), request, response)
 
     def uponReceiving(path: String): ScalaPactInteraction = uponReceiving(GET, path, None, Map.empty, None, None)
 
@@ -78,7 +78,7 @@ object ScalaPactForger {
     def uponReceiving(method: ScalaPactMethod, path: String, query: Option[String], headers: Map[String, String], body: Option[String], matchingRules: Option[List[ScalaPactMatchingRule]]): ScalaPactInteraction = new ScalaPactInteraction(
       description,
       providerState,
-      sslContextName,
+      optContextNameAndClientAuth,
       ScalaPactRequest(method, path, query, headers, body, matchingRules),
       response
     )
@@ -92,19 +92,19 @@ object ScalaPactForger {
     def willRespondWith(status: Int, headers: Map[String, String], body: Option[String], matchingRules: Option[List[ScalaPactMatchingRule]]): ScalaPactInteraction = new ScalaPactInteraction(
       description,
       providerState,
-      sslContextName,
+      optContextNameAndClientAuth,
       request,
       ScalaPactResponse(status, headers, body, matchingRules)
     )
 
-    def finalise: ScalaPactInteractionFinal = ScalaPactInteractionFinal(description, providerState, sslContextName, request, response)
+    def finalise: ScalaPactInteractionFinal = ScalaPactInteractionFinal(description, providerState, optContextNameAndClientAuth, request, response)
   }
 
-  case class ScalaPactDescriptionFinal(consumer: String, provider: String, serverSslContextName: Option[String], interactions: List[ScalaPactInteractionFinal], options: ScalaPactOptions) {
-    def withHeaderForSsl: ScalaPactDescriptionFinal = copy(interactions = interactions.map(i => i.copy(request = i.request.copy(headers = i.request.headers addOpt (SslContextMap.sslContextHeaderName -> i.sslContextName)))))
+  case class ScalaPactDescriptionFinal(consumer: String, provider: String, optContextNameAndClientAuth: Option[ContextNameAndClientAuth], interactions: List[ScalaPactInteractionFinal], options: ScalaPactOptions) {
+    def withHeaderForSsl: ScalaPactDescriptionFinal = copy(interactions = interactions.map(i => i.copy(request = i.request.copy(headers = i.request.headers addOpt (SslContextMap.sslContextHeaderName -> i.optContextNameAndClientAuth.map(_.name))))))
   }
 
-  case class ScalaPactInteractionFinal(description: String, providerState: Option[String], sslContextName: Option[String], request: ScalaPactRequest, response: ScalaPactResponse)
+  case class ScalaPactInteractionFinal(description: String, providerState: Option[String], optContextNameAndClientAuth: Option[ContextNameAndClientAuth], request: ScalaPactRequest, response: ScalaPactResponse)
 
   object ScalaPactRequest {
     val default: ScalaPactRequest = ScalaPactRequest(GET, "/", None, Map.empty, None, None)

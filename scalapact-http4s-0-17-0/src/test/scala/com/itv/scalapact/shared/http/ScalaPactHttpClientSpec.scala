@@ -31,7 +31,7 @@ class ScalaPactHttpClientSpec extends FunSpec with Matchers with MockFactory {
 
 
   val someSslContext = mock[SSLContext]
-  val data = SSLContextData("some", "unused", "data", "", "", false)
+  val data = SSLContextData("some", "unused", "data", "", "")
   implicit val sSLContextDataToSslContext = new SSLContextDataToSslContext {
     override def apply(v1: SSLContextData): SSLContext = {
       if (v1 != data) fail()
