@@ -8,6 +8,21 @@ import scala.collection.concurrent.TrieMap
 
 case class SSLContextData(keyManagerFactoryPassword: String, keyStore: String, passphrase: String, trustStore: String, trustPassphrase: String)
 
+object SSLContextData {
+  private var keyStore = "javax.net.ssl.keyStore"
+  private var keyStorePass = "javax.net.ssl.keyStorePassword"
+  private var truststore = "javax.net.ssl.trustStore"
+  private var trustStorePassword = "javax.net.ssl.trustStorePassword"
+
+  private def get(key: String) = {
+    val result = System.getProperty(key)
+    if (result == null) throw new NullPointerException(s"System property [$key] is null")
+    result
+  };
+  def fromSystemProperties(): SSLContextData = SSLContextData(get(keyStorePass), get(keyStore), get(keyStorePass), get(truststore), get(trustStorePassword))
+
+}
+
 trait SSLContextDataToSslContext extends (SSLContextData => SSLContext)
 
 object SSLContextDataToSslContext {

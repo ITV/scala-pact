@@ -3,6 +3,7 @@ package com.ing.pact.stubber
 import java.io.{File, FileFilter}
 import java.util.ResourceBundle
 import java.util.concurrent.{ExecutorService, Executors}
+import javax.net.ssl.SSLContext
 
 import com.itv.scalapact.shared._
 import com.itv.scalapact.shared.http.PactStubService._
@@ -28,6 +29,10 @@ object ServerSpec extends Pimpers {
     override def accept(pathname: File): Boolean = pathname.getName.endsWith(".json")
   }
   def makePactFiles(directoryName: String) = new File(directoryName).listFilesInDirectory(jsonFileNameFilter)
+
+  def forHttpValidation(name: String, port: Int, directoryName: String, strict: Boolean) = ServerSpec(name, port, "localhost", strict, None, makePactFiles(directoryName), true, false)
+  def forHttpsValidation(name: String, port: Int, directoryName: String, strict: Boolean, sslContext: SSLContextData, clientAuth: Boolean) = ServerSpec(name, port, "localhost", strict, Some(sslContext), makePactFiles(directoryName), true, clientAuth)
+
 
   implicit object FromConfigForServerSpec extends FromConfigWithKey[ServerSpec] {
 
@@ -92,7 +97,10 @@ object ServerSpecAndPacts extends Pimpers {
 object ConfigBasedStubber {
   def apply(configfile: File)(implicit resources: ResourceBundle, executorService: ExecutorService) = new ConfigBasedStubber(ServerSpec(configfile))
   def apply(serverSpec: ServerSpec)(implicit resources: ResourceBundle, executorService: ExecutorService) = new ConfigBasedStubber(Seq(serverSpec))
+  def apply(serverSpec1: ServerSpec, serverSpec2: ServerSpec)(implicit resources: ResourceBundle, executorService: ExecutorService) = new ConfigBasedStubber(Seq(serverSpec1, serverSpec2))
+  def apply(serverSpec1: ServerSpec, serverSpec2: ServerSpec, serverSpec3: ServerSpec)(implicit resources: ResourceBundle, executorService: ExecutorService) = new ConfigBasedStubber(Seq(serverSpec1, serverSpec2, serverSpec3))
 }
+
 
 class ConfigBasedStubber(specs: Seq[ServerSpec])(implicit val resources: ResourceBundle, executorService: ExecutorService) extends Pimpers {
   "header.running".printlnFromBundle(specs.mkString("\n"))
@@ -110,7 +118,9 @@ class ConfigBasedStubber(specs: Seq[ServerSpec])(implicit val resources: Resourc
   def handleErrors(seq: Seq[Either[String, Pact]])(implicit spec: ServerSpec) = seq.handleErrors
   def printServerStarting(pacts: Seq[Pact])(implicit spec: ServerSpec) = pacts.ifNotEmpty("message.loading.server".printlnFromBundle((spec, pacts))) //.foreach { pact => pact.interactions.foreach { i => "message.pact.summary".printlnFromBundle(i.request) } }
 
-  specs mapWith { implicit spec => ServerSpec.loadPacts ===> handleErrors =^> printServerStarting ===> spec.toBlaizeServer }
+  val servers = (specs mapWith { implicit spec => ServerSpec.loadPacts ===> handleErrors =^> printServerStarting ===> spec.toBlaizeServer }).flatten
+
+  def shutdown = servers.foreach(_.shutdownNow())
 
   def waitForever() = {
     while (true)
