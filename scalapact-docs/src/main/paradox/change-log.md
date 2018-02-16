@@ -23,6 +23,7 @@ Maintained by [davesmith00000].
 
 ## 2.2.3 - ?
 - Update to stable Http4s 0.18 ([benivf)
+- BUGFIX: Http4s interface incompatibility issue corrected ([afiore])
 
 ## 2.2.2 - 2018-01-17
 - SSL support added! ([phil-rice])
