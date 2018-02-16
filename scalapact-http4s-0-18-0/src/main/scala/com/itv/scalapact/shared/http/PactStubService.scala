@@ -37,7 +37,7 @@ object PactStubService {
   def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int, sslContextName: Option[String], port: Int)
                (implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): ScalaPactSettings => IPactServer = config => PactServer {
     BlazeBuilder[IO]
-      .bindHttp(config.givePort, config.giveHost)
+      .bindHttp(port, config.giveHost)
       .withExecutionContext(executionContext)
       .withIdleTimeout(60.seconds)
       .withConnectorPoolSize(connectionPoolSize)
