@@ -21,6 +21,9 @@ With thanks to all contributors!
 
 Maintained by [davesmith00000].
 
+## 2.2.3 - ?
+- Update to stable Http4s 0.18 ([benivf)
+
 ## 2.2.2 - 2018-01-17
 - SSL support added! ([phil-rice])
 - Http4s 0.18.0-M8 milestone release support added ([benivf], [afiore])
