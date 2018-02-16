@@ -23,7 +23,7 @@ object PactSpecLoader {
   )
 
   def fromResource(version: String, path: String): String = {
-    //println("Loading spec: " + s"/pact-specification-version-$version/testcases$path")
+    //PactLogger.message("Loading spec: " + s"/pact-specification-version-$version/testcases$path")
     Source.fromURL(getClass.getResource(s"/pact-specification-version-$version/testcases$path"))
       .getLines()
       .mkString("\n")

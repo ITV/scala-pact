@@ -17,7 +17,7 @@ object RuleProcessTracing {
 
   def log(message: String)(implicit ruleProcessTracing: RuleProcessTracing): Unit =
     if(ruleProcessTracing.enabled)
-      println(s"""  [${ruleProcessTracing.id}] ${ruleProcessTracing.context.map(ctx => s"[$ctx] ").getOrElse("")}$message""")
+      PactLogger.message(s"""  [${ruleProcessTracing.id}] ${ruleProcessTracing.context.map(ctx => s"[$ctx] ").getOrElse("")}$message""")
     else
       ()
 }
