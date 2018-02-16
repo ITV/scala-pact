@@ -8,9 +8,9 @@ scalaVersion := "2.11.8"
 
 libraryDependencies ++=
   Seq(
-    "org.http4s"    %% "http4s-blaze-server" % "0.18.0-M8",
-    "org.http4s"    %% "http4s-dsl" % "0.18.0-M8",
-    "org.http4s"    %% "http4s-circe" % "0.18.0-M8",
+    "org.http4s"    %% "http4s-blaze-server" % "0.18.0",
+    "org.http4s"    %% "http4s-dsl" % "0.18.0",
+    "org.http4s"    %% "http4s-circe" % "0.18.0",
     "org.slf4j"     % "slf4j-simple" % "1.6.4",
     "org.scalatest" %% "scalatest" % "3.0.1" % "test",
     "com.itv"       %% "scalapact-circe-0-9" % "2.2.3-SNAPSHOT" % "test",
