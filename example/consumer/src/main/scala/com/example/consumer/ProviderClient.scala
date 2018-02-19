@@ -4,7 +4,6 @@ import org.json4s.DefaultFormats
 import org.json4s.native.JsonParser._
 
 import scalaj.http.{Http, HttpResponse}
-import com.itv.scalapact.shared.PactLogger
 
 object ProviderClient {
 
@@ -25,11 +24,11 @@ object ProviderClient {
       .headers(("Accept", "application/json"), ("Name", name))
       .asString match {
         case r: HttpResponse[String] if r.is2xx =>
-          PactLogger.debug(">> " + r)
+          println(">> " + r)
           parse(r.body).extractOpt[Token]
 
         case r: HttpResponse[String] =>
-          PactLogger.debug("<< " + r)
+          println("<< " + r)
           None
       }
   }
