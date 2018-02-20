@@ -21,9 +21,10 @@ With thanks to all contributors!
 
 Maintained by [davesmith00000].
 
-## 2.2.3 - ?
-- Update to stable Http4s 0.18 ([benivf)
+## 2.2.3 - 2018-02-19
+- Update to stable Http4s 0.18 ([benivf])
 - BUGFIX: Http4s interface incompatibility issue corrected ([afiore])
+- Work to improve pact logging levels ([phil-rice])
 
 ## 2.2.2 - 2018-01-17
 - SSL support added! ([phil-rice])
