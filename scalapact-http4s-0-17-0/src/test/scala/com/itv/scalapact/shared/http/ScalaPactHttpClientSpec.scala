@@ -5,13 +5,12 @@ import javax.net.ssl.SSLContext
 import com.itv.scalapact.shared._
 import fs2.Task
 import org.http4s.client.Client
-import org.scalamock.scalatest.MockFactory
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
 
 import scala.concurrent.duration._
 
-class ScalaPactHttpClientSpec extends FunSpec with Matchers with MockFactory {
+class ScalaPactHttpClientSpec extends FunSpec with Matchers with MockitoSugar {
 
   val requestDetails = InteractionRequest(
     method = Some("GET"),

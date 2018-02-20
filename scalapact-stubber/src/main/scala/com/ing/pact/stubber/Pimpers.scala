@@ -17,7 +17,16 @@ trait FromConfigWithKey[T] {
   def apply(name: String, config: Config): T
 }
 
+object FromConfigWithKey {
+
+  implicit object FromConfigWithKeyForString extends FromConfigWithKey[String] {
+    override def apply(name: String, config: Config): String = config.getString(name);
+  }
+
+}
+
 object FromConfig {
+
 
   implicit object FromConfigForSslContext extends FromConfig[SSLContextData] {
     override def apply(config: Config): SSLContextData = SSLContextData(
@@ -124,7 +133,8 @@ trait Pimpers {
 
   implicit class ConfigPimper(config: Config) {
     def get[A](name: String)(implicit fromConfig: FromConfig[A]): A = fromConfig(config.getConfig(name))
-    def getOption[A](name: String)(implicit fromConfig: FromConfig[A]): Option[A] = if (config.hasPath(name)) Some(fromConfig(config.getConfig(name))) else None
+    def getOption[A](name: String)(implicit fromConfig: FromConfigWithKey[A]): Option[A] = config.hasPath(name).toOption(fromConfig(name, config))
+    def getOptionalObject[A](name: String)(implicit fromConfig: FromConfig[A]): Option[A] = if (config.hasPath(name)) Some(fromConfig(config.getConfig(name))) else None
     def mapList[A](name: String)(implicit fromConfig: FromConfigWithKey[A]): List[A] = config.getObject(name).keySet().asScala.toList.sorted.map(key => fromConfig(key, config.getConfig(name).getConfig(key)))
     def getFiles(name: String)(filenameFilter: FileFilter): Seq[File] = {
       val fileName = config.getString(name)

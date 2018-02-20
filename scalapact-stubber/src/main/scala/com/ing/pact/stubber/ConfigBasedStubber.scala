@@ -18,7 +18,7 @@ import scala.concurrent.duration._
 import scala.io.Source
 import scalaz.concurrent.Task
 
-case class ServerSpec(name: String, port: Int, host: String, strict: Boolean, sslContextData: Option[SSLContextData], pacts: Seq[File], errorsAbort: Boolean, clientAuth: Boolean) {
+case class ServerSpec(name: String, providerName: Option[String], port: Int, host: String, strict: Boolean, sslContextData: Option[SSLContextData], pacts: Seq[File], errorsAbort: Boolean, clientAuth: Boolean) {
   def singleContextMap = sslContextData.fold(SslContextMap.defaultEmptyContextMap)(data => new SslContextMap(Map(name -> data)))
 
 }
@@ -30,8 +30,8 @@ object ServerSpec extends Pimpers {
   }
   def makePactFiles(directoryName: String) = new File(directoryName).listFilesInDirectory(jsonFileNameFilter)
 
-  def forHttpValidation(name: String, port: Int, directoryName: String, strict: Boolean) = ServerSpec(name, port, "localhost", strict, None, makePactFiles(directoryName), true, false)
-  def forHttpsValidation(name: String, port: Int, directoryName: String, strict: Boolean, sslContext: SSLContextData, clientAuth: Boolean) = ServerSpec(name, port, "localhost", strict, Some(sslContext), makePactFiles(directoryName), true, clientAuth)
+  def forHttpValidation(name: String, port: Int, directoryName: String, provider: Option[String], strict: Boolean) = ServerSpec(name, provider, port, "localhost", strict, None, makePactFiles(directoryName), true, false)
+  def forHttpsValidation(name: String, port: Int, directoryName: String, provider: Option[String], strict: Boolean, sslContext: SSLContextData, clientAuth: Boolean) = ServerSpec(name, provider, port, "localhost", strict, Some(sslContext), makePactFiles(directoryName), true, clientAuth)
 
 
   implicit object FromConfigForServerSpec extends FromConfigWithKey[ServerSpec] {
@@ -41,21 +41,27 @@ object ServerSpec extends Pimpers {
         port = config.getInt("port"),
         host = if (config.hasPath("host")) config.getString("host") else "localhost",
         strict = false,
-        sslContextData = config.getOption[SSLContextData]("ssl-context"),
+        sslContextData = config.getOptionalObject[SSLContextData]("ssl-context"),
         pacts = config.getFiles("directory")(jsonFileNameFilter),
         errorsAbort = config.getBoolean("errorsAbort"),
+        providerName = config.getOption[String]("provider"),
         clientAuth = config.hasPath("client-auth") && config.getBoolean("client-auth")
       )
     }
 
   }
 
+  def interactionManager(pacts: Seq[Pact], providerName: Option[String], interactionManager: InteractionManager = new InteractionManager) = {
+    def canUse(t: Pact) = providerName.fold(true)(pn => pn == t.provider.name);
+    pacts.foldLeft(interactionManager) { case (im, t) if canUse(t) => t.interactions ==> im.addInteractions; im; case (im, _) => im }
+  }
+
+
   implicit class ServerSpecPimper(spec: ServerSpec)(implicit executorService: ExecutorService) {
     def toBlaizeServer(pacts: Seq[Pact]): Option[Server] = {
       pacts.nonEmpty.toOption {
         implicit val sslContextMap = spec.singleContextMap
-        val interactionManager = pacts.foldLeft(new InteractionManager) { (im, t) => t.interactions ==> im.addInteractions; im }
-        val service = ServiceMaker.service(interactionManager, spec.strict)
+        val service = ServiceMaker.service(interactionManager(pacts, spec.providerName), spec.strict)
         val result = BlazeBuilder
           .bindHttp(spec.port, spec.host).
           withServiceExecutor(executorService)

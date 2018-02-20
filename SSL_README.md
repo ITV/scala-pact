@@ -54,6 +54,10 @@ This is requires the use of a unit test at the moment. For example:
 This code will load the JSON file. If the interaction has a  `pact-ssl-context` it will use that 
 header to select an SSL context from the SslContextMap that is in scope.
 
+
+# SSL and stubbing
+ See the readme in the project scala-pact stubber
+
 # KNOWN ISSUES
 
 ## Pact Verifier doesn't currently verify SSL
