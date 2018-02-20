@@ -1,7 +1,6 @@
 
 // Pinched shamelessly from https://tpolecat.github.io/2014/04/11/scalac-flags.html
 val options211 = Seq(
-  //  "-Yno-imports", // Powerful but boring. Essentially you have to pull in everything... one day.
   "-deprecation",
   "-encoding", "UTF-8",       // yes, this is 2 args
   "-feature",
@@ -9,7 +8,6 @@ val options211 = Seq(
   "-language:higherKinds",
   "-language:implicitConversions",
   "-unchecked",
-//    "-Xfatal-warnings",
   "-Xlint",
   "-Yno-adapted-args",
   "-Ywarn-dead-code",        // N.B. doesn't work well with the ??? hole
@@ -82,6 +80,7 @@ addCommandAlias("quicktest", ";shared/test;core/test;argonaut62/test;http4s016a/
 lazy val commonSettings = Seq(
   version := "2.3.0-SNAPSHOT",
   organization := "com.itv",
+  scalaVersion := scala212,
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.0.1" % "test"
   ),
