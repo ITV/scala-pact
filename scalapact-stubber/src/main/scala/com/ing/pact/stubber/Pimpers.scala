@@ -82,7 +82,7 @@ trait Pimpers {
 
   implicit class StringPimper(s: String)(implicit resources: ResourceBundle) {
     def fromBundle[T](t: T)(implicit messageFormatData: MessageFormatData[T]): String = MessageFormat.format(resources.getString(s), messageFormatData(t): _*)
-    def printlnFromBundle[T: MessageFormatData](t: T)(implicit pactLogger: PactLogger): Unit = pactLogger.message(fromBundle(t))
+    def printlnFromBundle[T: MessageFormatData](t: T): Unit = PactLogger.message(fromBundle(t))
   }
 
   implicit class FnPimper[From, To](fn: From => To) {
