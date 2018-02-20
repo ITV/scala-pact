@@ -13,7 +13,7 @@ object LocalPactFileLoader {
     def rec(files: List[File], acc: List[String]): List[String] = {
       files match {
         case Nil =>
-          if (acc.isEmpty) {
+          if(acc.isEmpty) {
             PactLogger.warn("WARNING: No pact files found.".yellow)
             acc
           } else {
@@ -82,7 +82,7 @@ object LocalPactFileLoader {
 
       case None => Nil
     }
-    PactLogger.message(s"Pacts are $pacts")
+
     ConfigAndPacts(config, pacts)
   }
 

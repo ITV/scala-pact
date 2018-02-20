@@ -66,7 +66,7 @@ object ScalaPactPlugin extends AutoPlugin {
     providerBrokerPublishMap := Map.empty[String, String],
     providerName := "",
     consumerNames := Seq.empty[String],
-    versionedConsumerNames := Seq.empty[(String, String)],
+    versionedConsumerNames := Seq.empty[(String,String)],
     pactContractVersion := "",
     allowSnapshotPublish := false,
     scalaPactEnv := ScalaPactEnv.default,
@@ -131,7 +131,6 @@ object ScalaPactPlugin extends AutoPlugin {
         ScalaPactStubberCommand.interactionManagerInstance
       )
     }
-
 }
 
 case class ScalaPactEnv(protocol: Option[String], host: Option[String], port: Option[Int], localPactFilePath: Option[String], strictMode: Option[Boolean], clientTimeout: Option[Duration], outputPath: Option[String]) {
