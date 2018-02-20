@@ -344,6 +344,13 @@ lazy val scalapactStubber_2_11 =
     .dependsOn(http4s0162a_2_11)
     .project
 
+lazy val scalapactStubber_2_12 =
+  scalapactStubber(scala212)
+    .dependsOn(core_2_12)
+    .dependsOn(argonaut62_2_12)
+    .dependsOn(http4s0162a_2_12)
+    .project
+
 lazy val docs =
   (project in file("scalapact-docs"))
     .settings(commonSettings: _*)

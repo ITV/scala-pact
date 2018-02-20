@@ -14,10 +14,12 @@ function crossPublishLocal {
     NAME=$1
     sbt $NAME/clean $NAME/update $NAME/compile $NAME/publish-local  $NAME/publishM2
 }
-crossPublishLocal "scalapactStubber_2_11"
-crossPublishLocal "scalapactStubber_2_10"
-crossPublishLocal "plugin"
-crossPublishLocal "standalone"
-crossPublishLocal "core_2_10"
-crossPublishLocal "shared_2_10"
-crossPublishLocal "shared_2_11"
+#crossPublishLocal "scalapactStubber_2_12"
+#crossPublishLocal "scalapactStubber_2_11"
+#crossPublishLocal "scalapactStubber_2_10"
+#crossPublishLocal "plugin"
+#crossPublishLocal "standalone"
+#crossPublishLocal "core_2_10"
+#crossPublishLocal "shared_2_10"
+#crossPublishLocal "shared_2_11"
+crossPublishLocal "shared_2_12"

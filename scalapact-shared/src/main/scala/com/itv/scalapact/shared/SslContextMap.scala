@@ -27,31 +27,33 @@ trait SSLContextDataToSslContext extends (SSLContextData => SSLContext)
 
 object SSLContextDataToSslContext {
 
-  implicit object Default extends SSLContextDataToSslContext {
-    override def apply(data: SSLContextData): SSLContext = {
-      import data._
-      val ksKeys: KeyStore = KeyStore.getInstance("JKS")
-      val ksTrust = KeyStore.getInstance("JKS")
-      def load(keyStore: KeyStore, store: String, password: String) = try {
-        val inputStream = new FileInputStream(store)
-        keyStore.load(inputStream, passphrase.toCharArray)
-      } catch {
-        case e: Exception => throw new IllegalArgumentException(s"Cannot load store at location [$store]", e)
-      }
-      load(ksKeys, keyStore, passphrase)
-      load(ksTrust, keyStore, trustPassphrase)
-      // KeyManagers decide which key material to use
-      val kmf = KeyManagerFactory.getInstance("SunX509")
-      kmf.init(ksKeys, keyManagerFactoryPassword.toCharArray)
-
-      // TrustManagers decide whether to allow connections
-      val tmf = TrustManagerFactory.getInstance("SunX509")
-      tmf.init(ksTrust)
-
-      val sslContext = SSLContext.getInstance("TLS")
-      sslContext.init(kmf.getKeyManagers, tmf.getTrustManagers, null)
-      sslContext
+  def getSslContext(data: SSLContextData): SSLContext = {
+    import data._
+    val ksKeys: KeyStore = KeyStore.getInstance("JKS")
+    val ksTrust = KeyStore.getInstance("JKS")
+    def load(keyStore: KeyStore, store: String, password: String) = try {
+      val inputStream = new FileInputStream(store)
+      keyStore.load(inputStream, passphrase.toCharArray)
+    } catch {
+      case e: Exception => throw new IllegalArgumentException(s"Cannot load store at location [$store]", e)
     }
+    load(ksKeys, keyStore, passphrase)
+    load(ksTrust, keyStore, trustPassphrase)
+    // KeyManagers decide which key material to use
+    val kmf = KeyManagerFactory.getInstance("SunX509")
+    kmf.init(ksKeys, keyManagerFactoryPassword.toCharArray)
+
+    // TrustManagers decide whether to allow connections
+    val tmf = TrustManagerFactory.getInstance("SunX509")
+    tmf.init(ksTrust)
+
+    val sslContext = SSLContext.getInstance("TLS")
+    sslContext.init(kmf.getKeyManagers, tmf.getTrustManagers, null)
+    sslContext
+  }
+
+  implicit object Default extends SSLContextDataToSslContext {
+    override def apply(data: SSLContextData): SSLContext = getSslContext(data)
   }
 
 }
