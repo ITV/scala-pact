@@ -5,6 +5,7 @@ import com.itv.scalapact.shared.json.JsonConversionFunctions
 import org.scalatest.{FunSpec, Matchers}
 
 import scala.language.postfixOps
+import com.itv.scalapact.shared.PactLogger
 
 class IrNodeRuleSpec extends FunSpec with Matchers {
 
@@ -56,7 +57,7 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
 
       IrNodeMatchingRules.fromPactRules(pactRules) match {
         case Left(e) =>
-          println(e)
+          PactLogger.error(e)
           e.contains("rule") shouldEqual true
 
         case Right(_) =>

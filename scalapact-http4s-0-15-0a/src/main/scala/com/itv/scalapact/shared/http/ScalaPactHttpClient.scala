@@ -7,6 +7,8 @@ import scala.concurrent.duration._
 import scala.concurrent.{Future, Promise}
 import scala.language.implicitConversions
 import scalaz.concurrent.Task
+import com.itv.scalapact.shared.PactLogger
+
 
 object ScalaPactHttpClient extends IScalaPactHttpClient {
 
@@ -43,7 +45,7 @@ object ScalaPactHttpClient extends IScalaPactHttpClient {
   def doRequestTask(performRequest: (SimpleRequest, Client) => Task[SimpleResponse], simpleRequest: SimpleRequest)(implicit sslContextMap: SslContextMap): Task[SimpleResponse] =
     SslContextMap(simpleRequest) { sslContext =>
       simpleRequestWithoutFakeheader =>
-        println(s"doRequestTask${simpleRequest} ==> ${simpleRequestWithoutFakeheader}")
+        PactLogger.debug(s"doRequestTask${simpleRequest} ==> ${simpleRequestWithoutFakeheader}")
         performRequest(simpleRequestWithoutFakeheader, Http4sClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, 2.seconds, sslContext))
     }
 
@@ -51,7 +53,7 @@ object ScalaPactHttpClient extends IScalaPactHttpClient {
     SslContextMap(SimpleRequest(url, ir.path.getOrElse("") + ir.query.map(q => s"?$q").getOrElse(""), HttpMethod.maybeMethodToMethod(ir.method), ir.headers.getOrElse(Map.empty[String, String]), ir.body, sslContextName)) {
       sslContext =>
         simpleRequestWithoutFakeheader =>
-          println(s"doInteractionRequestTask  ${simpleRequestWithoutFakeheader}")
+          PactLogger.debug(s"doInteractionRequestTask  ${simpleRequestWithoutFakeheader}")
           performRequest(simpleRequestWithoutFakeheader,
             Http4sClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, clientTimeout, sslContext)
           ).map { r =>

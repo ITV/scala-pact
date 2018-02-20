@@ -16,6 +16,7 @@ import org.http4s.{HttpService, Request, Response, Status}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
+import com.itv.scalapact.shared.PactLogger
 
 object PactStubService {
   type OptIO[A] = OptionT[IO, A]
@@ -24,20 +25,20 @@ object PactStubService {
   implicit val executionContext: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(nThreads))
 
   def startServer(interactionManager: IInteractionManager, sslContextName: Option[String])(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): ScalaPactSettings => Unit = config => {
-    println(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold)
-    println(("Strict matching mode: " + config.giveStrictMode.toString).white.bold)
+    PactLogger.message(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold)
+    PactLogger.message(("Strict matching mode: " + config.giveStrictMode.toString).white.bold)
 
-    runServer(interactionManager, nThreads, sslContextName)(pactReader, pactWriter, sslContextMap)(config).awaitShutdown()
+    runServer(interactionManager, nThreads, sslContextName, config.givePort)(pactReader, pactWriter, sslContextMap)(config).awaitShutdown()
   }
 
   implicit class BlazeBuilderPimper(blazeBuilder: BlazeBuilder[IO]) {
     def withOptionalSsl(sslContext: Option[SSLContext]): BlazeBuilder[IO] = sslContext.fold(blazeBuilder)(ssl => blazeBuilder.withSSLContext(ssl))
   }
 
-  def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int, sslContextName: Option[String])
+  def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int, sslContextName: Option[String], port: Int)
                (implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): ScalaPactSettings => IPactServer = config => PactServer {
     BlazeBuilder[IO]
-      .bindHttp(config.givePort, config.giveHost)
+      .bindHttp(port, config.giveHost)
       .withExecutionContext(executionContext)
       .withIdleTimeout(60.seconds)
       .withConnectorPoolSize(connectionPoolSize)

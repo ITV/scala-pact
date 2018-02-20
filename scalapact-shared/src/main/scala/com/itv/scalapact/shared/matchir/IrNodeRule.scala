@@ -5,6 +5,7 @@ import com.itv.scalapact.shared.matchir.PactPathParseResult.{PactPathParseFailur
 
 import scala.annotation.tailrec
 import scala.util.Random
+import com.itv.scalapact.shared.PactLogger
 
 case class RuleProcessTracing(enabled: Boolean, id: String, context: Option[String]) {
   def withContext(ctx: String): RuleProcessTracing = this.copy(context = Option(ctx))
@@ -16,7 +17,7 @@ object RuleProcessTracing {
 
   def log(message: String)(implicit ruleProcessTracing: RuleProcessTracing): Unit =
     if(ruleProcessTracing.enabled)
-      println(s"""  [${ruleProcessTracing.id}] ${ruleProcessTracing.context.map(ctx => s"[$ctx] ").getOrElse("")}$message""")
+      PactLogger.message(s"""  [${ruleProcessTracing.id}] ${ruleProcessTracing.context.map(ctx => s"[$ctx] ").getOrElse("")}$message""")
     else
       ()
 }

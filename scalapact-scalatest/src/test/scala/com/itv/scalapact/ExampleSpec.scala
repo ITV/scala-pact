@@ -1,19 +1,19 @@
 package com.itv.scalapact
 
 import java.io.File
-import java.net.{HttpURLConnection, URL, URLConnection}
+import java.net.{HttpURLConnection, URL}
 import javax.net.ssl.HttpsURLConnection
 
-import scala.language.implicitConversions
+import com.itv.scalapact.ScalaPactForger.{headerRegexRule, _}
+import com.itv.scalapact.shared.SslContextMap
 import org.json4s.DefaultFormats
 import org.json4s.native.JsonParser._
 import org.json4s.native.Serialization._
 import org.scalatest.{FunSpec, Matchers}
 
+import scala.language.implicitConversions
 import scala.xml.XML
 import scalaj.http.{Http, HttpRequest}
-import ScalaPactForger.{headerRegexRule, _}
-import com.itv.scalapact.shared.SslContextMap
 
 class ExampleSpec extends FunSpec with Matchers {
 

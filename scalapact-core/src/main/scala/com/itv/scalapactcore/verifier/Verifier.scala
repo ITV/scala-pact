@@ -8,13 +8,14 @@ import com.itv.scalapactcore.common._
 
 import scala.util.Left
 import RightBiasEither._
+import com.itv.scalapact.shared.PactLogger
 
 object Verifier {
 
   def verify(loadPactFiles: String => ScalaPactSettings => ConfigAndPacts, pactVerifySettings: PactVerifySettings)(implicit pactReader: IPactReader, sslContextMap: SslContextMap): ScalaPactSettings => Boolean = arguments => {
 
     val pacts: List[Pact] = if (arguments.localPactFilePath.isDefined) {
-      println(s"Attempting to use local pact files at: '${arguments.localPactFilePath.getOrElse("<path missing>")}'".white.bold)
+      PactLogger.message(s"Attempting to use local pact files at: '${arguments.localPactFilePath.getOrElse("<path missing>")}'".white.bold)
       loadPactFiles("pacts")(arguments).pacts
     } else {
 
@@ -25,7 +26,7 @@ object Verifier {
       val latestPacts: List[Pact] = versionConsumers.map { consumer =>
         ValidatedDetails.buildFrom(consumer.name, pactVerifySettings.providerName, pactVerifySettings.pactBrokerAddress, consumer.version) match {
           case Left(l) =>
-            println(l.red)
+            PactLogger.error(l.red)
             None
 
           case Right(v) =>
@@ -38,7 +39,7 @@ object Verifier {
       latestPacts
     }
 
-    println(s"Verifying against '${arguments.giveHost}' on port '${arguments.givePort}' with a timeout of ${arguments.clientTimeout.map(_.toSeconds.toString).getOrElse("<unspecified>")} second(s).".white.bold)
+    PactLogger.message(s"Verifying against '${arguments.giveHost}' on port '${arguments.givePort}' with a timeout of ${arguments.clientTimeout.map(_.toSeconds.toString).getOrElse("<unspecified>")} second(s).".white.bold)
 
     val startTime = System.currentTimeMillis().toDouble
 
@@ -83,14 +84,14 @@ object Verifier {
     }
 
     pactVerifyResults.foreach { result =>
-      println(("Results for pact between " + result.pact.consumer.name + " and " + result.pact.provider.name).white.bold)
+      PactLogger.message(("Results for pact between " + result.pact.consumer.name + " and " + result.pact.provider.name).white.bold)
       result.results.foreach { res =>
         res.result match {
           case Right(r) =>
-            println((" - [  OK  ] " + res.context).green)
+            PactLogger.message((" - [  OK  ] " + res.context).green)
 
           case Left(l) =>
-            println((" - [FAILED] " + res.context + "\n" + l).red)
+            PactLogger.error((" - [FAILED] " + res.context + "\n" + l).red)
         }
       }
     }
@@ -115,17 +116,17 @@ object Verifier {
 
       maybeProviderState match {
         case Some(ps) =>
-          println("--------------------".yellow.bold)
-          println(s"Attempting to run provider state: ${ps.key}".yellow.bold)
+          PactLogger.message("--------------------".yellow.bold)
+          PactLogger.message(s"Attempting to run provider state: ${ps.key}".yellow.bold)
 
           val success = ps.f(ps.key)
 
           if (success)
-            println(s"Provider state ran successfully".yellow.bold)
+            PactLogger.message(s"Provider state ran successfully".yellow.bold)
           else
-            println(s"Provider state run failed".red.bold)
+            PactLogger.error(s"Provider state run failed".red.bold)
 
-          println("--------------------".yellow.bold)
+          PactLogger.message("--------------------".yellow.bold)
 
           if (!success) {
             throw new ProviderStateFailure(ps.key)
@@ -138,9 +139,9 @@ object Verifier {
     } catch {
       case t: Throwable =>
         if (maybeProviderState.isDefined) {
-          println(s"Error executing unknown provider state function with key: ${maybeProviderState.map(_.key).getOrElse("<missing key>")}".red)
+          PactLogger.error(s"Error executing unknown provider state function with key: ${maybeProviderState.map(_.key).getOrElse("<missing key>")}".red)
         } else {
-          println("Error executing unknown provider state function!".red)
+          PactLogger.error("Error executing unknown provider state function!".red)
         }
         throw t
     }
@@ -151,7 +152,7 @@ object Verifier {
 
           ScalaPactHttpClient.doInteractionRequestSync(baseUrl, interactionRequest.withoutSslContextHeader, clientTimeout, interactionRequest.sslContextName)
             .leftMap { t =>
-              println(s"Error in response: ${t.getMessage}".red)
+              PactLogger.error(s"Error in response: ${t.getMessage}".red)
               t.getMessage
             }
 
@@ -167,30 +168,30 @@ object Verifier {
 
   private def fetchAndReadPact(address: String)(implicit pactReader: IPactReader, sslContextMap: SslContextMap): Option[Pact] = {
 
-    println(s"Attempting to fetch pact from pact broker at: $address".white.bold)
+    PactLogger.message(s"Attempting to fetch pact from pact broker at: $address".white.bold)
 
     ScalaPactHttpClient.doRequestSync(SimpleRequest(address, "", HttpMethod.GET, Map("Accept" -> "application/json"), None, sslContextName = None)).map {
       case r: SimpleResponse if r.is2xx =>
         val pact = r.body.map(pactReader.jsonStringToPact).flatMap {
           case Right(p) => Option(p)
           case Left(msg) =>
-            println(s"Error: $msg".yellow)
+            PactLogger.error(s"Error: $msg".yellow)
             None
         }
 
         if (pact.isEmpty) {
-          println("Could not convert good response to Pact:\n" + r.body.getOrElse(""))
+          PactLogger.error("Could not convert good response to Pact:\n" + r.body.getOrElse(""))
           pact
         } else pact
 
       case _ =>
-        println(s"Failed to load consumer pact from: $address".red)
+        PactLogger.error(s"Failed to load consumer pact from: $address".red)
         None
     } match {
       case Right(p) =>
         p
       case Left(e) =>
-        println(s"Error: ${e.getMessage}".yellow)
+        PactLogger.error(s"Error: ${e.getMessage}".yellow)
         None
     }
 
