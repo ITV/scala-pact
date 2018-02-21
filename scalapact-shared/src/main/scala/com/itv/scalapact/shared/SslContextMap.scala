@@ -82,6 +82,9 @@ object SslContextMap {
 
   implicit val defaultEmptyContextMap: SslContextMap = new SslContextMap(Map())
 
+  def fromSystemProperties(name: String): SslContextMap = new SslContextMap(Map(name -> SSLContextData.fromSystemProperties()))
+
+
   def apply(specs: (String, (String, String, String, String, String))*): SslContextMap =
     new SslContextMap(specs.toMap.mapValues[SSLContextData]((SSLContextData.apply _).tupled))
 

@@ -30,8 +30,11 @@ object ServerSpec extends Pimpers {
   }
   def makePactFiles(directoryName: String) = new File(directoryName).listFilesInDirectory(jsonFileNameFilter)
 
-  def forHttpValidation(name: String, port: Int, directoryName: String, provider: Option[String], strict: Boolean) = ServerSpec(name, provider, port, "localhost", strict, None, makePactFiles(directoryName), true, false)
-  def forHttpsValidation(name: String, port: Int, directoryName: String, provider: Option[String], strict: Boolean, sslContext: SSLContextData, clientAuth: Boolean) = ServerSpec(name, provider, port, "localhost", strict, Some(sslContext), makePactFiles(directoryName), true, clientAuth)
+  def forHttpValidation(name: String, port: Int, directoryName: String, provider: String, strict: Boolean) = ServerSpec(name, Some(provider), port, "localhost", strict, None, makePactFiles(directoryName), true, false)
+  def forHttpValidation(name: String, port: Int, directoryName: String,  strict: Boolean) = ServerSpec(name, None, port, "localhost", strict, None, makePactFiles(directoryName), true, false)
+
+  def forHttpsValidation(name: String, port: Int, directoryName: String, provider: String, strict: Boolean, sslContext: SSLContextData, clientAuth: Boolean) = ServerSpec(name, Some(provider), port, "localhost", strict, Some(sslContext), makePactFiles(directoryName), true, clientAuth)
+  def forHttpsValidation(name: String, port: Int, directoryName: String, strict: Boolean, sslContext: SSLContextData, clientAuth: Boolean) = ServerSpec(name, None, port, "localhost", strict, Some(sslContext), makePactFiles(directoryName), true, clientAuth)
 
 
   implicit object FromConfigForServerSpec extends FromConfigWithKey[ServerSpec] {
