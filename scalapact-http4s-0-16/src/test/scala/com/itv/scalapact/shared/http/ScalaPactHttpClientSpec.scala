@@ -1,7 +1,6 @@
 package com.itv.scalapact.shared.http
 
 import com.itv.scalapact.shared._
-import org.http4s.client.Client
 import org.scalatest.{FunSpec, Matchers}
 
 import scala.concurrent.duration._
@@ -29,9 +28,9 @@ class ScalaPactHttpClientSpec extends FunSpec with Matchers {
         matchingRules = None
       )
 
-      val fakeCaller: (SimpleRequest, Client) => Task[SimpleResponse] = (_, _) => Task.now(SimpleResponse(200))
+      implicit val fakeCaller: SimpleRequest => Task[SimpleResponse] = _ => Task.now(SimpleResponse(200))
 
-      val result = ScalaPactHttpClient.doInteractionRequestTask(fakeCaller, "", requestDetails, 1.second, sslContextName = None).run
+      val result = ScalaPactHttpClient.doInteractionRequest("", requestDetails, 1.second, sslContextName = None).run
 
       result shouldEqual responseDetails
 

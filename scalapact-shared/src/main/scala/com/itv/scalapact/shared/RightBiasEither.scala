@@ -27,6 +27,6 @@ object RightBiasEither {
         case Left(aa) => Left(f(aa))
       }
     }
-    
+
   }
 }

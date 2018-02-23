@@ -28,7 +28,7 @@ object Http4sClientHelper {
   def buildPooledBlazeHttpClient(maxTotalConnections: Int, clientTimeout: Duration): Client =
     PooledHttp1Client(maxTotalConnections, blazeClientConfig(clientTimeout))
 
-  val doRequest: (SimpleRequest, Client) => Task[SimpleResponse] = (request, httpClient) =>
+  val doRequest: Client => SimpleRequest => Task[SimpleResponse] = httpClient => request =>
     for {
       request  <- Http4sRequestResponseFactory.buildRequest(request)
       response <- httpClient.fetch[SimpleResponse](request)(extractResponse)

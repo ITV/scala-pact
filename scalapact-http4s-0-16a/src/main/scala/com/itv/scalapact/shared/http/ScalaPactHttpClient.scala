@@ -4,34 +4,17 @@ import com.itv.scalapact.shared._
 import org.http4s.client.Client
 
 import scala.concurrent.duration._
-import scala.concurrent.{Future, Promise}
 import scala.language.implicitConversions
 import scalaz.concurrent.Task
 
-object ScalaPactHttpClient extends IScalaPactHttpClient {
-
-  implicit def taskToFuture[A](x: => Task[A]): Future[A] = {
-    import scalaz.{-\/, \/-}
-    val p: Promise[A] = Promise()
-
-    x.unsafePerformAsync {
-      case -\/(ex) =>
-        p.failure(ex)
-        ()
-
-      case \/-(r) =>
-        p.success(r)
-        ()
-    }
-    p.future
-  }
+object ScalaPactHttpClient extends IScalaPactHttpClient[Task] {
 
   val maxTotalConnections: Int = 1
 
-  def doRequest(simpleRequest: SimpleRequest)(implicit sslContextMap: SslContextMap): Future[SimpleResponse] =
+  def doRequest(simpleRequest: SimpleRequest)(implicit sslContextMap: SslContextMap): Task[SimpleResponse] =
     doRequestTask(Http4sClientHelper.doRequest, simpleRequest)
 
-  def doInteractionRequest(url: String, ir: InteractionRequest, clientTimeout: Duration,sslContextName: Option[String])(implicit sslContextMap: SslContextMap): Future[InteractionResponse] =
+  def doInteractionRequest(url: String, ir: InteractionRequest, clientTimeout: Duration,sslContextName: Option[String])(implicit sslContextMap: SslContextMap): Task[InteractionResponse] =
     doInteractionRequestTask(Http4sClientHelper.doRequest, url, ir, clientTimeout, sslContextName)
 
   def doRequestSync(simpleRequest: SimpleRequest)(implicit sslContextMap: SslContextMap): Either[Throwable, SimpleResponse] =

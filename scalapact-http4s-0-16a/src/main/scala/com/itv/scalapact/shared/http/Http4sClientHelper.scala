@@ -28,7 +28,7 @@ object Http4sClientHelper {
   def defaultClient: Client =
     buildPooledBlazeHttpClient(1, Duration(1, SECONDS), sslContext = None)
 
-  def buildPooledBlazeHttpClient(maxTotalConnections: Int, clientTimeout: Duration,sslContext: Option[SSLContext]): Client =
+  def buildPooledBlazeHttpClient(maxTotalConnections: Int, clientTimeout: Duration, sslContext: Option[SSLContext]): Client =
     PooledHttp1Client(maxTotalConnections, blazeClientConfig(clientTimeout, sslContext))
 
   val doRequest: (SimpleRequest, Client) => Task[SimpleResponse] = (request, httpClient) =>

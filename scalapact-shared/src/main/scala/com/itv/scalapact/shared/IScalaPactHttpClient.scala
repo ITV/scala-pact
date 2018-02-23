@@ -1,15 +1,19 @@
 package com.itv.scalapact.shared
 
-import scala.concurrent.Future
 import scala.concurrent.duration.Duration
 
-trait IScalaPactHttpClient {
+trait IScalaPactHttpClient[F[_]] {
 
-  def doRequest(simpleRequest: SimpleRequest)(implicit sslContextMap: SslContextMap): Future[SimpleResponse]
+  type Caller = SimpleRequest => F[SimpleResponse]
 
-  def doInteractionRequest(url: String, ir: InteractionRequest, clientTimeout: Duration, sslContextName: Option[String])(implicit sslContextMap: SslContextMap): Future[InteractionResponse]
+  implicit val caller: Caller
 
-  def doRequestSync(simpleRequest: SimpleRequest)(implicit sslContextMap: SslContextMap): Either[Throwable, SimpleResponse]
+  def doRequest(simpleRequest: SimpleRequest)(implicit sslContextMap: SslContextMap, caller: Caller): F[SimpleResponse]
 
-  def doInteractionRequestSync(url: String, ir: InteractionRequest, clientTimeout: Duration, sslContextName: Option[String])(implicit sslContextMap: SslContextMap): Either[Throwable, InteractionResponse]
+  def doInteractionRequest(url: String, ir: InteractionRequest, clientTimeout: Duration, sslContextName: Option[String])(implicit sslContextMap: SslContextMap, caller: Caller): F[InteractionResponse]
+
+  def doRequestSync(simpleRequest: SimpleRequest)(implicit sslContextMap: SslContextMap, caller: Caller): Either[Throwable, SimpleResponse]
+
+  def doInteractionRequestSync(url: String, ir: InteractionRequest, clientTimeout: Duration, sslContextName: Option[String])(implicit sslContextMap: SslContextMap, caller: Caller): Either[Throwable, InteractionResponse]
+
 }

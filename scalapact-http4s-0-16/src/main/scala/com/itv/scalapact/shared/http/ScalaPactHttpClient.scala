@@ -1,52 +1,23 @@
 package com.itv.scalapact.shared.http
 
-import com.itv.scalapact.shared._
-import org.http4s.client.Client
+import com.itv.scalapact.shared.{SimpleRequest, _}
 
 import scala.concurrent.duration._
-import scala.concurrent.{Future, Promise}
 import scala.language.{implicitConversions, postfixOps}
 import scalaz.concurrent.Task
 
-object ScalaPactHttpClient extends IScalaPactHttpClient {
+object ScalaPactHttpClient extends IScalaPactHttpClient[Task] {
 
-  implicit def taskToFuture[A](x: => Task[A]): Future[A] = {
-    import scalaz.{-\/, \/-}
-    val p: Promise[A] = Promise()
+  private val maxTotalConnections: Int = 1
 
-    x.attemptRun match {
-      case -\/(ex) =>
-        p.failure(ex)
-        ()
+  implicit val caller: Caller = Http4sClientHelper.doRequest(Http4sClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, 2.seconds))
 
-      case \/-(r) =>
-        p.success(r)
-        ()
-    }
-    p.future
-  }
+  def doRequest(simpleRequest: SimpleRequest)(implicit sslContextMap: SslContextMap, caller: Caller): Task[SimpleResponse] =
+    caller(simpleRequest)
 
-  val maxTotalConnections: Int = 1
-
-  def doRequest(simpleRequest: SimpleRequest)(implicit sslContextMap: SslContextMap): Future[SimpleResponse] =
-    doRequestTask(Http4sClientHelper.doRequest, simpleRequest)
-
-  def doInteractionRequest(url: String, ir: InteractionRequest, clientTimeout: Duration, sslContextName: Option[String])(implicit sslContextMap: SslContextMap): Future[InteractionResponse] =
-    doInteractionRequestTask(Http4sClientHelper.doRequest, url, ir, clientTimeout, sslContextName)
-
-  def doRequestSync(simpleRequest: SimpleRequest)(implicit sslContextMap: SslContextMap): Either[Throwable, SimpleResponse] =
-    doRequestTask(Http4sClientHelper.doRequest, simpleRequest).attemptRun.toEither
-
-  def doInteractionRequestSync(url: String, ir: InteractionRequest, clientTimeout: Duration, sslContextName: Option[String])(implicit sslContextMap: SslContextMap): Either[Throwable, InteractionResponse] =
-    doInteractionRequestTask(Http4sClientHelper.doRequest, url, ir, clientTimeout,sslContextName).attemptRun.toEither
-
-  def doRequestTask(performRequest: (SimpleRequest, Client) => Task[SimpleResponse], simpleRequest: SimpleRequest)(implicit sslContextMap: SslContextMap): Task[SimpleResponse] =
-    performRequest(simpleRequest, Http4sClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, 2.seconds))
-
-  def doInteractionRequestTask(performRequest: (SimpleRequest, Client) => Task[SimpleResponse], url: String, ir: InteractionRequest, clientTimeout: Duration, sslContextName: Option[String])(implicit sslContextMap: SslContextMap): Task[InteractionResponse] =
-    performRequest(
-      SimpleRequest( url, ir.path.getOrElse("") + ir.query.map(q => s"?$q").getOrElse(""), HttpMethod.maybeMethodToMethod(ir.method), ir.headers.getOrElse(Map.empty[String, String]), ir.body, sslContextName),
-      Http4sClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, clientTimeout)
+  def doInteractionRequest(url: String, ir: InteractionRequest, clientTimeout: Duration, sslContextName: Option[String])(implicit sslContextMap: SslContextMap, caller: Caller): Task[InteractionResponse] =
+    caller(
+      SimpleRequest(url, ir.path.getOrElse("") + ir.query.map(q => s"?$q").getOrElse(""), HttpMethod.maybeMethodToMethod(ir.method), ir.headers.getOrElse(Map.empty[String, String]), ir.body, sslContextName),
     ).map { r =>
       InteractionResponse(
         status = Option(r.statusCode),
@@ -55,5 +26,11 @@ object ScalaPactHttpClient extends IScalaPactHttpClient {
         matchingRules = None
       )
     }
+
+  def doRequestSync(simpleRequest: SimpleRequest)(implicit sslContextMap: SslContextMap, caller: Caller): Either[Throwable, SimpleResponse] =
+    doRequest(simpleRequest).attemptRun.toEither
+
+  def doInteractionRequestSync(url: String, ir: InteractionRequest, clientTimeout: Duration, sslContextName: Option[String])(implicit sslContextMap: SslContextMap, caller: Caller): Either[Throwable, InteractionResponse] =
+    doInteractionRequest(url, ir, clientTimeout,sslContextName).attemptRun.toEither
 
 }
