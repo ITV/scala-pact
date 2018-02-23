@@ -67,13 +67,13 @@ object JsonBodySpecialCaseHelper {
       is.map { i =>
         val minusRequestBody =
           (i.hcursor --\ "request" --\ "body").delete.undo match {
-            case ok @ Some(s) => ok
+            case ok @ Some(_) => ok
             case None => Option(i)
           }
 
         val minusResponseBody = minusRequestBody.flatMap { ii =>
           (ii.hcursor --\ "response" --\ "body").delete.undo match {
-            case ok@Some(s) => ok
+            case ok@Some(_) => ok
             case None => minusRequestBody // There wasn't a body, but there was still an interaction.
           }
         }

@@ -35,7 +35,7 @@ object PactWriter extends IPactWriter {
               updated <- Option(bodyField.set(requestBody))
             } yield updated.undo
           } match {
-            case ok @ Some(s) => ok
+            case ok @ Some(_) => ok
             case None => Option(bodilessInteraction) // There wasn't a body, but there was still an interaction.
           }
 
@@ -47,7 +47,7 @@ object PactWriter extends IPactWriter {
               updated <- Option(bodyField.set(responseBody))
             } yield updated.undo
           } match {
-            case ok @ Some(s) => ok
+            case ok @ Some(_) => ok
             case None => withRequestBody // There wasn't a body, but there was still an interaction.
           }
 
@@ -58,7 +58,7 @@ object PactWriter extends IPactWriter {
 
     val json: Option[Json] = for {
       interactionsField <- pactNoInteractionsAsJson.cursor.downField("interactions")
-      updated <- Option(interactionsField.withFocus(_.withArray(p => interactions)))
+      updated <- Option(interactionsField.withFocus(_.withArray(_ => interactions)))
     } yield updated.undo
 
     // I don't believe you can ever see this exception.

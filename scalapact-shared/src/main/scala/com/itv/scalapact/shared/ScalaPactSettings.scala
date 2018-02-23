@@ -1,7 +1,5 @@
 package com.itv.scalapact.shared
 
-import javax.net.ssl.SSLContext
-
 import scala.concurrent.duration.{Duration, SECONDS}
 import scala.util.Properties
 

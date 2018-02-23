@@ -7,7 +7,7 @@ object RightBiasEither {
 
   class RightBiasEither[AA, BB](e: Either[AA, BB]) {
 
-    def flatMap[CC](f: BB => Either[AA, CC]): Either[AA, CC] = {
+    def bind[CC](f: BB => Either[AA, CC]): Either[AA, CC] = {
       e match {
         case Right(bb) => f(bb)
         case Left(aa) => Left(aa)
@@ -27,11 +27,6 @@ object RightBiasEither {
         case Left(aa) => Left(f(aa))
       }
     }
-
-    def |@|[CC, DD, EE](x: Either[AA, DD])(f: (BB, DD) => CC): Either[AA, CC] = {
-      e.flatMap { ee =>
-        x.map { xx => f(ee, xx) }
-      }
-    }
+    
   }
 }

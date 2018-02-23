@@ -8,9 +8,6 @@ import com.itv.scalapact.shared._
 
 object PactReader extends IPactReader {
 
-  // Used by old Scala versions
-  import EitherWithToOption._
-
   def jsonStringToPact(json: String): Either[String, Pact] = {
     val brokenPact: Option[(PactActor, PactActor, List[(Option[Interaction], Option[String], Option[String])])] = for {
       provider <- JsonBodySpecialCaseHelper.extractPactActor("provider")(json)
@@ -46,29 +43,28 @@ object PactReader extends IPactReader {
 
 object JsonBodySpecialCaseHelper {
 
-  // Used by old Scala versions
   import EitherWithToOption._
 
   val extractPactActor: String => String => Option[PactActor] = field => json =>
-    parse(json).toOption
+    parse(json).asOption
       .flatMap { j => j.hcursor.downField(field).focus }
-      .flatMap(p => p.as[PactActor].toOption)
+      .flatMap(p => p.as[PactActor].asOption)
 
   val extractInteractions: String => Option[List[(Option[Interaction], Option[String], Option[String])]] = json => {
 
-    val interations =
-      parse(json).toOption
+    val interactions =
+      parse(json).asOption
         .flatMap { j => j.hcursor.downField("interactions").focus.flatMap(p => p.asArray.map(_.toList)) }
 
-    val makeOptionalBody: Json => Option[String] = j => j match {
+    val makeOptionalBody: Json => Option[String] = {
       case body: Json if body.isString =>
-        j.asString
+        body.asString
 
-      case _ =>
-        Option(j.pretty(Printer.spaces2.copy(dropNullKeys = true)))
+      case body =>
+        Option(body.pretty(Printer.spaces2.copy(dropNullKeys = true)))
     }
 
-    interations.map { is =>
+    interactions.map { is =>
       is.map { i =>
         val minusRequestBody =
           i.hcursor.downField("request").downField("body").delete.top match {
@@ -89,7 +85,7 @@ object JsonBodySpecialCaseHelper {
         val responseBody = i.hcursor.downField("response").downField("body").focus
           .flatMap { makeOptionalBody }
 
-        (minusResponseBody.flatMap(p => p.as[Interaction].toOption), requestBody, responseBody)
+        (minusResponseBody.flatMap(p => p.as[Interaction].asOption), requestBody, responseBody)
       }
     }
   }

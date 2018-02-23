@@ -5,7 +5,7 @@ import org.http4s.client.Client
 
 import scala.concurrent.duration._
 import scala.concurrent.{Future, Promise}
-import scala.language.{implicitConversions, postfixOps}
+import scala.language.implicitConversions
 import scalaz.concurrent.Task
 
 object ScalaPactHttpClient extends IScalaPactHttpClient {
@@ -45,7 +45,7 @@ object ScalaPactHttpClient extends IScalaPactHttpClient {
 
   def doInteractionRequestTask(performRequest: (SimpleRequest, Client) => Task[SimpleResponse], url: String, ir: InteractionRequest, clientTimeout: Duration, sslContextName: Option[String])(implicit sslContextMap: SslContextMap): Task[InteractionResponse] =
     SslContextMap(SimpleRequest(url, ir.path.getOrElse("") + ir.query.map(q => s"?$q").getOrElse(""), HttpMethod.maybeMethodToMethod(ir.method), ir.headers.getOrElse(Map.empty[String, String]), ir.body,sslContextName)) {
-      (sslContext => simpleRequestWithoutFakeHeader => performRequest(
+      sslContext => simpleRequestWithoutFakeHeader => performRequest(
         simpleRequestWithoutFakeHeader,
         Http4sClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, clientTimeout, sslContext)
       ).map { r =>
@@ -55,7 +55,7 @@ object ScalaPactHttpClient extends IScalaPactHttpClient {
           body = r.body,
           matchingRules = None
         )
-      })
+      }
     }
 
 }

@@ -1,7 +1,5 @@
 package com.itv.scalapact.shared
 
-import javax.net.ssl.SSLContext
-
 final case class SimpleResponse(statusCode: Int, headers: Map[String, String], body: Option[String]) {
   def is2xx: Boolean = statusCode >= 200 && statusCode < 300
 
@@ -15,7 +13,7 @@ final case class SimpleResponse(statusCode: Int, headers: Map[String, String], b
 object SimpleResponse {
 
   def apply(status: Int): SimpleResponse =
-    SimpleResponse(200, Map.empty[String, String], None)
+    SimpleResponse(status, Map.empty[String, String], None)
 
 }
 

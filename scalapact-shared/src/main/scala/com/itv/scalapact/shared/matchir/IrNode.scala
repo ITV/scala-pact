@@ -167,7 +167,7 @@ object IrNodeEqualityResult {
     rec(expected, possibleMatches, Nil)
   }
 
-  private def permissiveCheckChildren(path: IrNodePath, strict: Boolean, bePermissive: Boolean, rules: IrNodeMatchingRules, a: List[IrNode], b: List[IrNode]): IrNodeEqualityResult =
+  private def permissiveCheckChildren(strict: Boolean, bePermissive: Boolean, rules: IrNodeMatchingRules, a: List[IrNode], b: List[IrNode]): IrNodeEqualityResult =
     a.map { actual =>
       findClosestMatch(actual, b, strict, rules, bePermissive)
     }
@@ -230,7 +230,7 @@ object IrNodeEqualityResult {
         } else if(isXml) {
           strictCheckChildren(path, strict, bePermissive, rules, a, b, ignoreLength = false)
         } else {
-          permissiveCheckChildren(path, strict, bePermissive, rules, a, b)
+          permissiveCheckChildren(strict, bePermissive, rules, a, b)
         }
       } else {
         val newA = b.map(_ => a.headOption).collect { case Some(s) => s }
@@ -249,7 +249,7 @@ object IrNodeEqualityResult {
               Option(xs.foldLeft[IrNodeEqualityResult](x)(_ + _))
           }
 
-        val equalityResult = permissiveCheckChildren(path, strict, bePermissive, rules, a, b)
+        val equalityResult = permissiveCheckChildren(strict, bePermissive, rules, a, b)
 
         maybeResult.getOrElse(equalityResult)
       }

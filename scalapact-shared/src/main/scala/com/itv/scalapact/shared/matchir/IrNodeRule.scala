@@ -186,7 +186,7 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
 
         res
 
-      case IrNodeRegexRule(regex, p) =>
+      case IrNodeRegexRule(regex, _) =>
         RuleProcessTracing.log(s"Checking regex on non-String '${actual.renderAsString}'...")
 
         val res: Option[IrNodeEqualityResult] = Option {

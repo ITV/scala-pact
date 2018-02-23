@@ -2,11 +2,11 @@ package com.itv.scalapact.shared.http
 
 import javax.net.ssl.SSLContext
 
-import com.itv.scalapact.shared.{SimpleRequest, SimpleResponse, SslContextMap}
-import org.http4s.{BuildInfo, Response}
+import com.itv.scalapact.shared.{SimpleRequest, SimpleResponse}
 import org.http4s.client.Client
 import org.http4s.client.blaze.{BlazeClientConfig, PooledHttp1Client}
 import org.http4s.headers.{AgentProduct, `User-Agent`}
+import org.http4s.{BuildInfo, Response}
 
 import scala.concurrent.duration._
 import scalaz.concurrent.Task
