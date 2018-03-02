@@ -25,7 +25,7 @@ echo ""
 echo ">>> Pact Spec Tests 6.2 (2.12)"
 sbt pactSpec_2_12/clean pactSpec_2_12/update pactSpec_2_12/compile pactSpec_2_12/test
 
-echo ""
+echo ""l
 echo ">>> Plugin"
 sbt plugin/clean plugin/update plugin/compile plugin/test
 

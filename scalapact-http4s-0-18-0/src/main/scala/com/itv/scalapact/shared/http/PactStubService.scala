@@ -36,7 +36,7 @@ object PactStubService {
       optContextNameAndClientAuth.fold(blazeBuilder)(ssl => blazeBuilder.withSSLContext(sslContextMap.getContext(ssl.name), ssl.clientAuth))
   }
 
-  def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int, optContextNameAndClientAuth: Option[String], port: Int)
+  def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int, optContextNameAndClientAuth: Option[ContextNameAndClientAuth], port: Int)
                (implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): ScalaPactSettings => IPactServer = config => PactServer {
     BlazeBuilder[IO]
       .bindHttp(port, config.giveHost)
