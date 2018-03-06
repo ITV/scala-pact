@@ -12,7 +12,7 @@ sbt pact-test
 
 You should now be able to see a file in the `consumer/target/pacts/` directory called `Consumer_Provider.json`. This is your Pact file that describes the behaviour you expect fro the Provider service.
 
-##Stubbing
+## Stubbing
 If you wanted to, you could now run a stub version of the Provider service, again from the `consumer` directory, by simply entering `sbt pact-stubber` on the command line and the service would start on port `1234`.
 
 Try it, you should be able to go hit [the results end point in your browser](http://localhost:1234/results).
