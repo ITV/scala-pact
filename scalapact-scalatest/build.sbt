@@ -7,3 +7,7 @@ libraryDependencies ++= Seq(
   "com.github.tomakehurst" % "wiremock" % "1.56" % "test",
   "fr.hmil" %% "roshttp" % "2.0.1" % "test"
 )
+
+mappings in (Compile, packageBin) ~= {
+  _.filterNot { case (_, fileName) => fileName == "logback.xml" || fileName == "log4j.properties" }
+}
