@@ -18,6 +18,7 @@ With thanks to all contributors!
 - [benivf]
 - [afiore]
 - [pgordon9]
+- [gcvt]
 - ...your name here? :-)
 
 Maintained by [davesmith00000].
@@ -26,6 +27,7 @@ Maintained by [davesmith00000].
 - Documentation corrections ([pgordon9])
 - Exclude logback.xml and log4j.properties from published jar ([cjwebb])
 - Documentation corrections ([cjwebb])
+- Bugfix: http client in 0-18 ignoring clientTimeout ([gcvt])
 
 ## 2.2.3 - 2018-02-19
 - Update to stable Http4s 0.18 ([benivf])
@@ -148,3 +150,4 @@ Other improvements for contributors:
 [benivf]: https://github.com/benivf
 [afiore]: https://github.com/afiore
 [pgordon9]: https://github.com/pgordon9
+[gcvt]: https://github.com/gcvt
