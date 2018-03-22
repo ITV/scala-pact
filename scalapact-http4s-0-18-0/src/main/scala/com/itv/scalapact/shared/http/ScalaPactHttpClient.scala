@@ -35,7 +35,7 @@ object ScalaPactHttpClient extends IScalaPactHttpClient {
         simpleRequestWithoutFakeheader =>
           performRequest(
             simpleRequestWithoutFakeheader,
-            Http4sClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, 2.seconds, sslContext)
+            Http4sClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, clientTimeout, sslContext)
           ).map { r =>
             InteractionResponse(
               status = Option(r.statusCode),
