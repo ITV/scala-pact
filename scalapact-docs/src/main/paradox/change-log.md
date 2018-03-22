@@ -17,9 +17,15 @@ With thanks to all contributors!
 - [cjwebb]
 - [benivf]
 - [afiore]
+- [pgordon9]
 - ...your name here? :-)
 
 Maintained by [davesmith00000].
+
+## 2.2.4 - ???
+- Documentation corrections ([pgordon9])
+- Exclude logback.xml and log4j.properties from published jar ([cjwebb])
+- Documentation corrections ([cjwebb])
 
 ## 2.2.3 - 2018-02-19
 - Update to stable Http4s 0.18 ([benivf])
@@ -141,3 +147,4 @@ Other improvements for contributors:
 [cjwebb]: https://github.com/cjwebb
 [benivf]: https://github.com/benivf
 [afiore]: https://github.com/afiore
+[pgordon9]: https://github.com/pgordon9
