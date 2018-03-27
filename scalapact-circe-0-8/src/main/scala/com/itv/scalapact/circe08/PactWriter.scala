@@ -12,26 +12,27 @@ class PactWriter extends IPactWriter {
   // Used by old Scala versions
   import EitherWithToOption._
 
+  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   def pactToJsonString(pact: Pact): String = {
 
     val interactions: Vector[Json] =
       pact.interactions.toVector
         .map { i =>
 
-          val maybeRequestBody = i.request.body.flatMap { rb =>
-            parse(rb).toOption.orElse(Option(Json.fromString(rb)))
+          val maybeRequestBody: Option[Json] = i.request.body.flatMap { rb =>
+            parse(rb).asOption.orElse(Option(Json.fromString(rb)))
           }
 
-          val maybeResponseBody = i.response.body.flatMap { rb =>
-           parse(rb).toOption.orElse(Option(Json.fromString(rb)))
+          val maybeResponseBody: Option[Json] = i.response.body.flatMap { rb =>
+           parse(rb).asOption.orElse(Option(Json.fromString(rb)))
           }
 
-          val bodilessInteraction = i.copy(
+          val bodilessInteraction: Json = i.copy(
             request = i.request.copy(body = None),
             response = i.response.copy(body = None)
           ).asJson
 
-          val withRequestBody = {
+          val withRequestBody: Option[Json] = {
             for {
               requestBody <- maybeRequestBody
               bodyField = bodilessInteraction.hcursor.downField("request").downField("body")
@@ -42,7 +43,7 @@ class PactWriter extends IPactWriter {
             case None => Option(bodilessInteraction) // There wasn't a body, but there was still an interaction.
           }
 
-          val withResponseBody = {
+          val withResponseBody: Option[Json] = {
             maybeResponseBody.map { responseBody =>
               withRequestBody
                 .flatMap { j =>

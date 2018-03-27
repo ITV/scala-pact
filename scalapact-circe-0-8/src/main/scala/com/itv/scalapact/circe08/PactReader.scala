@@ -49,11 +49,13 @@ object JsonBodySpecialCaseHelper {
 
   import EitherWithToOption._
 
+  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   val extractPactActor: String => String => Option[PactActor] = field => json =>
     parse(json).asOption
       .flatMap { j => j.hcursor.downField(field).focus }
       .flatMap(p => p.as[PactActor].asOption)
 
+  @SuppressWarnings(Array("org.wartremover.warts.PublicInference", "org.wartremover.warts.Any"))
   val extractInteractions: String => Option[List[(Option[Interaction], Option[String], Option[String])]] = json => {
 
     val interactions =

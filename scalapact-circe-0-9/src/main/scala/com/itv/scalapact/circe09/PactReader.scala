@@ -9,9 +9,6 @@ import com.itv.scalapact.shared.typeclasses.IPactReader
 
 class PactReader extends IPactReader {
 
-  // Used by old Scala versions
-  import EitherWithToOption._
-
   def fromJSON(jsonString: String): Option[IrNode] =
     JsonConversionFunctions.fromJSON(jsonString)
 
@@ -53,23 +50,25 @@ object JsonBodySpecialCaseHelper {
   // Used by old Scala versions
   import EitherWithToOption._
 
+  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   val extractPactActor: String => String => Option[PactActor] = field => json =>
-    parse(json).toOption
+    parse(json).asOption
       .flatMap { j => j.hcursor.downField(field).focus }
-      .flatMap(p => p.as[PactActor].toOption)
+      .flatMap(p => p.as[PactActor].asOption)
 
+  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   val extractInteractions: String => Option[List[(Option[Interaction], Option[String], Option[String])]] = json => {
 
     val interations =
-      parse(json).toOption
+      parse(json).asOption
         .flatMap { j => j.hcursor.downField("interactions").focus.flatMap(p => p.asArray.map(_.toList)) }
 
-    val makeOptionalBody: Json => Option[String] = j => j match {
+    val makeOptionalBody: Json => Option[String] = {
       case body: Json if body.isString =>
-        j.asString
+        body.asString
 
-      case _ =>
-        Option(j.pretty(Printer.spaces2.copy(dropNullValues = true)))
+      case body =>
+        Option(body.pretty(Printer.spaces2.copy(dropNullValues = true)))
     }
 
     interations.map { is =>
@@ -93,7 +92,7 @@ object JsonBodySpecialCaseHelper {
         val responseBody = i.hcursor.downField("response").downField("body").focus
           .flatMap { makeOptionalBody }
 
-        (minusResponseBody.flatMap(p => p.as[Interaction].toOption), requestBody, responseBody)
+        (minusResponseBody.flatMap(p => p.as[Interaction].asOption), requestBody, responseBody)
       }
     }
   }

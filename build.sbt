@@ -164,30 +164,30 @@ lazy val http4s016a =
     .dependsOn(shared)
     .settings(compilerOptionsGeneral: _*)
 
-lazy val http4s016 =
-  (project in file("scalapact-http4s-0-16"))
-    .settings(commonSettings: _*)
-    .settings(publishSettings: _*)
-    .settings(crossScalaVersions := Seq(scala211, scala212))
-    .dependsOn(shared)
-    .settings(compilerOptionsGeneral: _*)
+//lazy val http4s016 =
+//  (project in file("scalapact-http4s-0-16"))
+//    .settings(commonSettings: _*)
+//    .settings(publishSettings: _*)
+//    .settings(crossScalaVersions := Seq(scala211, scala212))
+//    .dependsOn(shared)
+//    .settings(compilerOptionsGeneral: _*)
 
-lazy val http4s017 =
-  (project in file("scalapact-http4s-0-17"))
-    .settings(commonSettings: _*)
-    .settings(publishSettings: _*)
-    .settings(mockSettings: _*)
-    .settings(crossScalaVersions := Seq(scala211, scala212))
-    .dependsOn(shared)
-    .settings(compilerOptionsGeneral: _*)
-
-lazy val http4s018 =
-  (project in file("scalapact-http4s-0-18"))
-    .settings(commonSettings: _*)
-    .settings(publishSettings: _*)
-    .settings(crossScalaVersions := Seq(scala211, scala212))
-    .dependsOn(shared)
-    .settings(compilerOptionsGeneral: _*)
+//lazy val http4s017 =
+//  (project in file("scalapact-http4s-0-17"))
+//    .settings(commonSettings: _*)
+//    .settings(publishSettings: _*)
+//    .settings(mockSettings: _*)
+//    .settings(crossScalaVersions := Seq(scala211, scala212))
+//    .dependsOn(shared)
+//    .settings(compilerOptionsGeneral: _*)
+//
+//lazy val http4s018 =
+//  (project in file("scalapact-http4s-0-18"))
+//    .settings(commonSettings: _*)
+//    .settings(publishSettings: _*)
+//    .settings(crossScalaVersions := Seq(scala211, scala212))
+//    .dependsOn(shared)
+//    .settings(compilerOptionsGeneral: _*)
 
 lazy val argonaut62 =
   (project in file("scalapact-argonaut-6-2"))
@@ -230,7 +230,7 @@ lazy val plugin =
     )
     .dependsOn(core)
     .dependsOn(argonaut62)
-    .dependsOn(http4s017)
+    .dependsOn(http4s016a)
     .settings(compilerOptionsGeneral: _*)
 
 lazy val framework =
@@ -239,7 +239,7 @@ lazy val framework =
     .settings(publishSettings: _*)
     .settings(crossScalaVersions := Seq(scala211, scala212))
     .dependsOn(core)
-    .dependsOn(http4s017 % "provided")
+    .dependsOn(http4s016a % "provided")
     .settings(compilerOptionsGeneral: _*)
 
 lazy val standalone =
@@ -251,7 +251,7 @@ lazy val standalone =
     )
     .dependsOn(core)
     .dependsOn(argonaut62)
-    .dependsOn(http4s017)
+    .dependsOn(http4s016a)
     .settings(compilerOptionsGeneral: _*)
 
 lazy val docs =
@@ -268,18 +268,18 @@ lazy val scalaPactProject =
   (project in file("."))
     .settings(commonSettings: _*)
     .aggregate(
-      core.project,
-      plugin.project,
-      framework.project,
-      standalone.project,
-      shared.project,
-      docs.project,
-      http4s016a.project,
-      http4s016.project,
-      http4s017.project,
-      http4s018.project,
-      argonaut62.project,
-      circe08.project,
-      circe09.project,
-      pactSpec.project
+      core,
+      plugin,
+      framework,
+      standalone,
+      shared,
+      docs,
+      http4s016a,
+//      http4s016,
+//      http4s017,
+//      http4s018,
+      argonaut62,
+      circe08,
+      circe09,
+      pactSpec
     )

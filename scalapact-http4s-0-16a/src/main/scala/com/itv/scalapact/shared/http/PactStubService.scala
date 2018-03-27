@@ -121,7 +121,7 @@ object PactStubService {
 case class PactServer(s: Server) extends IPactServer {
 
   def awaitShutdown(): Unit =
-    s.awaitShutdown()
+    s.shutdown.unsafePerformSync
 
   def shutdown(): Unit =
     s.shutdownNow()

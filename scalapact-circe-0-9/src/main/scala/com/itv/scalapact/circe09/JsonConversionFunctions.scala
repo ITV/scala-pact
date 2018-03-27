@@ -10,17 +10,10 @@ import com.itv.scalapact.shared.PactLogger
 
 object JsonConversionFunctions extends IJsonConversionFunctions {
 
-  // Adds toOption method for scala 2.11
-  implicit class EitherWithToOption[A, B](e: Either[A, B]) {
-    def toOption: Option[B] =
-      e match {
-        case Left(_) => None
-        case Right(b) => Some(b)
-      }
-  }
+  import EitherWithToOption._
 
   def fromJSON(jsonString: String): Option[IrNode] =
-    parse(jsonString).toOption.flatMap { json =>
+    parse(jsonString).asOption.flatMap { json =>
       jsonRootToIrNode(json, IrNodePathEmpty)
     }
 
@@ -49,7 +42,7 @@ object JsonConversionFunctions extends IJsonConversionFunctions {
   }
 
   def jsonObjectToIrNodeList(json: Json, pathToParent: IrNodePath): List[IrNode] = {
-    json.hcursor.fieldSet.map(_.toList).getOrElse(Nil)
+    json.hcursor.keys.map(_.toSet).map(_.toList).getOrElse(Nil)
       .map(l => if (l.isEmpty) unnamedNodeLabel else l)
       .map { l =>
         json.hcursor.downField(l).focus.map {
