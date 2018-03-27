@@ -1,5 +1,6 @@
 package com.itv.scalapact.shared.pact
 
+import com.itv.scalapact.argonaut62.JsonBodySpecialCaseHelper
 import com.itv.scalapact.shared._
 import org.scalatest.{FunSpec, Matchers}
 

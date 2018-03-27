@@ -2,6 +2,7 @@ package com.itv.scalapactcore.common.matching
 
 import com.itv.scalapact.shared._
 import com.itv.scalapact.shared.matchir.IrNodeMatchingRules
+import com.itv.scalapact.shared.typeclasses.IPactReader
 import com.itv.scalapactcore.common.matching.PathMatching.PathAndQuery
 
 object InteractionMatchers {
@@ -33,7 +34,7 @@ object InteractionMatchers {
     }
   }
 
-  def matchOrFindClosestRequest(strictMatching: Boolean, interactions: List[Interaction], received: InteractionRequest): Option[OutcomeAndInteraction] = {
+  def matchOrFindClosestRequest(strictMatching: Boolean, interactions: List[Interaction], received: InteractionRequest)(implicit pactReader: IPactReader): Option[OutcomeAndInteraction] = {
     def rec(strict: Boolean, remaining: List[Interaction], actual: InteractionRequest, fails: List[(MatchOutcomeFailed, Interaction)]): Option[OutcomeAndInteraction] = {
       remaining match {
         case Nil =>
@@ -53,11 +54,11 @@ object InteractionMatchers {
     rec(strictMatching, interactions, received, Nil)
   }
 
-  def matchRequest(strictMatching: Boolean, interactions: List[Interaction], received: InteractionRequest): Either[String, Interaction] =
+  def matchRequest(strictMatching: Boolean, interactions: List[Interaction], received: InteractionRequest)(implicit pactReader: IPactReader): Either[String, Interaction] =
     if(interactions.isEmpty) Left("No interactions to compare with.")
     else renderOutcome(matchOrFindClosestRequest(strictMatching, interactions, received), received.renderAsString, RequestSubject)
 
-  def matchSingleRequest(strictMatching: Boolean, rules: Option[Map[String, MatchingRule]], expected: InteractionRequest, received: InteractionRequest): MatchOutcome =
+  def matchSingleRequest(strictMatching: Boolean, rules: Option[Map[String, MatchingRule]], expected: InteractionRequest, received: InteractionRequest)(implicit pactReader: IPactReader): MatchOutcome =
     IrNodeMatchingRules.fromPactRules(rules) match {
       case Left(e) =>
         MatchOutcomeFailed(e)
@@ -66,16 +67,16 @@ object InteractionMatchers {
         MethodMatching.matchMethods(expected.method, received.method) +
           PathMatching.matchPathsStrict(PathAndQuery(expected.path, expected.query), PathAndQuery(received.path, received.query)) +
           HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
-          BodyMatching.matchBodiesStrict(expected.headers, expected.body, received.body, bePermissive = false)(r)
+          BodyMatching.matchBodiesStrict(expected.headers, expected.body, received.body, bePermissive = false)(r, pactReader)
 
       case Right(r) =>
         MethodMatching.matchMethods(expected.method, received.method) +
           PathMatching.matchPaths(PathAndQuery(expected.path, expected.query), PathAndQuery(received.path, received.query)) +
           HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
-          BodyMatching.matchBodies(expected.headers, expected.body, received.body)(r)
+          BodyMatching.matchBodies(expected.headers, expected.body, received.body)(r, pactReader)
     }
 
-  def matchOrFindClosestResponse(strictMatching: Boolean, interactions: List[Interaction], received: InteractionResponse): Option[OutcomeAndInteraction] = {
+  def matchOrFindClosestResponse(strictMatching: Boolean, interactions: List[Interaction], received: InteractionResponse)(implicit pactReader: IPactReader): Option[OutcomeAndInteraction] = {
     def rec(strict: Boolean, remaining: List[Interaction], actual: InteractionResponse, fails: List[(MatchOutcomeFailed, Interaction)]): Option[OutcomeAndInteraction] = {
       remaining match {
         case Nil =>
@@ -95,11 +96,11 @@ object InteractionMatchers {
     rec(strictMatching, interactions, received, Nil)
   }
 
-  def matchResponse(strictMatching: Boolean, interactions: List[Interaction]): InteractionResponse => Either[String, Interaction] = received =>
+  def matchResponse(strictMatching: Boolean, interactions: List[Interaction])(implicit pactReader: IPactReader): InteractionResponse => Either[String, Interaction] = received =>
     if(interactions.isEmpty) Left("No interactions to compare with.")
     else renderOutcome(matchOrFindClosestResponse(strictMatching, interactions, received), received.renderAsString, ResponseSubject)
 
-  def matchSingleResponse(strictMatching: Boolean, rules: Option[Map[String, MatchingRule]], expected: InteractionResponse, received: InteractionResponse): MatchOutcome =
+  def matchSingleResponse(strictMatching: Boolean, rules: Option[Map[String, MatchingRule]], expected: InteractionResponse, received: InteractionResponse)(implicit pactReader: IPactReader): MatchOutcome =
     IrNodeMatchingRules.fromPactRules(rules) match {
       case Left(e) =>
         MatchOutcomeFailed(e)
@@ -107,12 +108,12 @@ object InteractionMatchers {
       case Right(r) if strictMatching =>
         StatusMatching.matchStatusCodes(expected.status, received.status) +
           HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
-          BodyMatching.matchBodiesStrict(expected.headers, expected.body, received.body, bePermissive = true)(r)
+          BodyMatching.matchBodiesStrict(expected.headers, expected.body, received.body, bePermissive = true)(r, pactReader)
 
       case Right(r) =>
         StatusMatching.matchStatusCodes(expected.status, received.status) +
           HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
-          BodyMatching.matchBodies(expected.headers, expected.body, received.body)(r)
+          BodyMatching.matchBodies(expected.headers, expected.body, received.body)(r, pactReader)
     }
 
 }

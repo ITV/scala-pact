@@ -2,12 +2,12 @@ package pactspec.util
 
 import argonaut.Argonaut._
 import argonaut.{CodecJson, Json}
+import com.itv.scalapact.argonaut62.PactImplicits
 import com.itv.scalapact.shared.{InteractionRequest, InteractionResponse}
 
 import scala.io.Source
 import scala.language.implicitConversions
 import com.itv.scalapact.shared.RightBiasEither._
-import com.itv.scalapact.shared.pact.PactImplicits
 import com.itv.scalapact.shared.PactLogger
 
 object PactSpecLoader {

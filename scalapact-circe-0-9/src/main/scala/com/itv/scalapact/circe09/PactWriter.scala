@@ -1,6 +1,7 @@
-package com.itv.scalapact.shared.pact
+package com.itv.scalapact.circe09
 
-import com.itv.scalapact.shared.{IPactWriter, Pact}
+import com.itv.scalapact.shared.Pact
+import com.itv.scalapact.shared.typeclasses.IPactWriter
 import io.circe._
 import io.circe.parser._
 import io.circe.syntax._

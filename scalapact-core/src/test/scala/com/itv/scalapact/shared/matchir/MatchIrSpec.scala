@@ -1,6 +1,6 @@
 package com.itv.scalapact.shared.matchir
 
-import com.itv.scalapact.shared.json.JsonConversionFunctions
+import com.itv.scalapact.argonaut62.JsonConversionFunctions
 import org.scalatest.{FunSpec, Matchers}
 
 class MatchIrSpec extends FunSpec with Matchers {

@@ -3,7 +3,7 @@ package com.itv.scalapactcore.common
 import org.scalatest.{FunSpec, Matchers}
 import argonaut._
 import Argonaut._
-import com.itv.scalapact.shared.json.JsonConversionFunctions
+import com.itv.scalapact.argonaut62.JsonConversionFunctions
 import com.itv.scalapact.shared.matchir._
 
 class JsonEqualitySpec extends FunSpec with Matchers {

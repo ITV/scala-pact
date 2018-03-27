@@ -1,15 +1,19 @@
-package com.itv.scalapact.shared.pact
+package com.itv.scalapact.circe09
 
 import io.circe._
 import io.circe.parser._
 import io.circe.generic.auto._
-
 import com.itv.scalapact.shared._
+import com.itv.scalapact.shared.matchir.IrNode
+import com.itv.scalapact.shared.typeclasses.IPactReader
 
-object PactReader extends IPactReader {
+class PactReader extends IPactReader {
 
   // Used by old Scala versions
   import EitherWithToOption._
+
+  def fromJSON(jsonString: String): Option[IrNode] =
+    JsonConversionFunctions.fromJSON(jsonString)
 
   def jsonStringToPact(json: String): Either[String, Pact] = {
     val brokenPact: Option[(PactActor, PactActor, List[(Option[Interaction], Option[String], Option[String])])] = for {

@@ -3,16 +3,15 @@ package com.itv.scalapactcore.verifier
 import com.itv.scalapact.shared._
 import com.itv.scalapactcore.common.matching.InteractionMatchers._
 import com.itv.scalapact.shared.ColourOuput._
-import com.itv.scalapact.shared.http.ScalaPactHttpClient
 import com.itv.scalapactcore.common._
 
 import scala.util.Left
-import RightBiasEither._
 import com.itv.scalapact.shared.PactLogger
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IScalaPactHttpClient}
 
 object Verifier {
 
-  def verify(loadPactFiles: String => ScalaPactSettings => ConfigAndPacts, pactVerifySettings: PactVerifySettings)(implicit pactReader: IPactReader, sslContextMap: SslContextMap): ScalaPactSettings => Boolean = arguments => {
+  def verify[F[_]](loadPactFiles: String => ScalaPactSettings => ConfigAndPacts, pactVerifySettings: PactVerifySettings)(implicit pactReader: IPactReader, sslContextMap: SslContextMap, httpClient: IScalaPactHttpClient[F]): ScalaPactSettings => Boolean = arguments => {
 
     val pacts: List[Pact] = if (arguments.localPactFilePath.isDefined) {
       PactLogger.message(s"Attempting to use local pact files at: '${arguments.localPactFilePath.getOrElse("<path missing>")}'".white.bold)
@@ -51,7 +50,7 @@ object Verifier {
           val maybeProviderState =
             interaction
               .providerState
-              .map(p => ProviderState(p, PartialFunction(pactVerifySettings.providerStates)))
+              .map(p => ProviderState(p, pactVerifySettings.providerStates))
 
           val result = (doRequest(arguments, maybeProviderState) andThen attemptMatch(arguments.giveStrictMode, List(interaction))) (interaction.request)
 
@@ -72,7 +71,7 @@ object Verifier {
         time = endTime - startTime / 1000,
         testCases = result.results.map { res =>
           res.result match {
-            case Right(r) =>
+            case Right(_) =>
               JUnitXmlBuilder.testCasePass(res.context)
 
             case Left(l) =>
@@ -87,7 +86,7 @@ object Verifier {
       PactLogger.message(("Results for pact between " + result.pact.consumer.name + " and " + result.pact.provider.name).white.bold)
       result.results.foreach { res =>
         res.result match {
-          case Right(r) =>
+          case Right(_) =>
             PactLogger.message((" - [  OK  ] " + res.context).green)
 
           case Left(l) =>
@@ -99,16 +98,15 @@ object Verifier {
     failureCount == 0
   }
 
-  // NOTE: Can't use flatMap due to scala 2.10.6
-  private def attemptMatch(strictMatching: Boolean, interactions: List[Interaction]): Either[String, InteractionResponse] => Either[String, Interaction] = {
+  private def attemptMatch(strictMatching: Boolean, interactions: List[Interaction])(implicit pactReader: IPactReader): Either[String, InteractionResponse] => Either[String, Interaction] = {
     case Right(i) =>
-      matchResponse(strictMatching, interactions)(i)
+      matchResponse(strictMatching, interactions)(pactReader)(i)
 
     case Left(s) =>
       Left(s)
   }
 
-  private def doRequest(arguments: ScalaPactSettings, maybeProviderState: Option[ProviderState])(implicit sslContextMap: SslContextMap): InteractionRequest => Either[String, InteractionResponse] = interactionRequest => {
+  private def doRequest[F[_]](arguments: ScalaPactSettings, maybeProviderState: Option[ProviderState])(implicit sslContextMap: SslContextMap, httpClient: IScalaPactHttpClient[F]): InteractionRequest => Either[String, InteractionResponse] = interactionRequest => {
     val baseUrl = s"${arguments.giveProtocol}://" + arguments.giveHost + ":" + arguments.givePort.toString
     val clientTimeout = arguments.giveClientTimeout
 
@@ -129,7 +127,7 @@ object Verifier {
           PactLogger.message("--------------------".yellow.bold)
 
           if (!success) {
-            throw new ProviderStateFailure(ps.key)
+            throw ProviderStateFailure(ps.key)
           }
 
         case None =>
@@ -150,11 +148,13 @@ object Verifier {
       InteractionRequest.unapply(interactionRequest) match {
         case Some((Some(_), Some(_), _, _, _, _)) =>
 
-          ScalaPactHttpClient.doInteractionRequestSync(baseUrl, interactionRequest.withoutSslContextHeader, clientTimeout, interactionRequest.sslContextName)
-            .leftMap { t =>
-              PactLogger.error(s"Error in response: ${t.getMessage}".red)
-              t.getMessage
-            }
+          httpClient.doInteractionRequestSync(baseUrl, interactionRequest.withoutSslContextHeader, clientTimeout, interactionRequest.sslContextName) match {
+            case Left(e) =>
+              PactLogger.error(s"Error in response: ${e.getMessage}".red)
+              Left(e.getMessage)
+            case Right(r) =>
+              Right(r)
+          }
 
         case _ => Left("Invalid request was missing either method or path: " + interactionRequest.renderAsString)
 
@@ -166,11 +166,11 @@ object Verifier {
 
   }
 
-  private def fetchAndReadPact(address: String)(implicit pactReader: IPactReader, sslContextMap: SslContextMap): Option[Pact] = {
+  private def fetchAndReadPact[F[_]](address: String)(implicit pactReader: IPactReader, sslContextMap: SslContextMap, httpClient: IScalaPactHttpClient[F]): Option[Pact] = {
 
     PactLogger.message(s"Attempting to fetch pact from pact broker at: $address".white.bold)
 
-    ScalaPactHttpClient.doRequestSync(SimpleRequest(address, "", HttpMethod.GET, Map("Accept" -> "application/json"), None, sslContextName = None)).map {
+    httpClient.doRequestSync(SimpleRequest(address, "", HttpMethod.GET, Map("Accept" -> "application/json"), None, sslContextName = None)).map {
       case r: SimpleResponse if r.is2xx =>
         val pact = r.body.map(pactReader.jsonStringToPact).flatMap {
           case Right(p) => Option(p)
@@ -203,7 +203,7 @@ case class PactVerifyResult(pact: Pact, results: List[PactVerifyResultInContext]
 
 case class PactVerifyResultInContext(result: Either[String, Interaction], context: String)
 
-class ProviderStateFailure(key: String) extends Exception()
+case class ProviderStateFailure(key: String) extends Exception()
 
 case class ProviderState(key: String, f: String => Boolean)
 

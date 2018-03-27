@@ -1,8 +1,10 @@
 package com.itv.scalapact.shared
 
+import com.itv.scalapact.shared.typeclasses.IPactReader
+
 trait IInteractionManager {
 
-  def findMatchingInteraction(request: InteractionRequest, strictMatching: Boolean): Either[String, Interaction]
+  def findMatchingInteraction(request: InteractionRequest, strictMatching: Boolean)(implicit pactReader: IPactReader): Either[String, Interaction]
 
   def getInteractions: List[Interaction]
 

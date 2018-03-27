@@ -1,10 +1,11 @@
-package com.itv.scalapact.shared.pact
+package com.itv.scalapact.argonaut62
 
 import argonaut.Argonaut._
 import argonaut._
-import com.itv.scalapact.shared.{IPactWriter, Pact}
+import com.itv.scalapact.shared.Pact
+import com.itv.scalapact.shared.typeclasses.IPactWriter
 
-object PactWriter extends IPactWriter {
+class PactWriter extends IPactWriter {
 
   import PactImplicits._
 

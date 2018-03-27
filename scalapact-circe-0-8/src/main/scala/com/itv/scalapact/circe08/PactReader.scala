@@ -1,12 +1,16 @@
-package com.itv.scalapact.shared.pact
-
-import io.circe._
-import io.circe.parser._
-import io.circe.generic.auto._
+package com.itv.scalapact.circe08
 
 import com.itv.scalapact.shared._
+import com.itv.scalapact.shared.matchir.IrNode
+import com.itv.scalapact.shared.typeclasses.IPactReader
+import io.circe._
+import io.circe.generic.auto._
+import io.circe.parser._
 
-object PactReader extends IPactReader {
+class PactReader extends IPactReader {
+
+  def fromJSON(jsonString: String): Option[IrNode] =
+    JsonConversionFunctions.fromJSON(jsonString)
 
   def jsonStringToPact(json: String): Either[String, Pact] = {
     val brokenPact: Option[(PactActor, PactActor, List[(Option[Interaction], Option[String], Option[String])])] = for {

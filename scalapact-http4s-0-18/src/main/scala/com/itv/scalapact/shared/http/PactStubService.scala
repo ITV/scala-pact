@@ -1,8 +1,8 @@
 package com.itv.scalapact.shared.http
 
 import java.util.concurrent.Executors
-import javax.net.ssl.SSLContext
 
+import javax.net.ssl.SSLContext
 import cats.data.{Kleisli, OptionT}
 import cats.effect.IO
 import com.itv.scalapact.shared.ColourOuput._
@@ -17,6 +17,7 @@ import org.http4s.{HttpService, Request, Response, Status}
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import com.itv.scalapact.shared.PactLogger
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactServer, IPactWriter}
 
 object PactStubService {
   type OptIO[A] = OptionT[IO, A]

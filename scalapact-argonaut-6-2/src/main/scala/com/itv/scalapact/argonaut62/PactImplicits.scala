@@ -1,4 +1,4 @@
-package com.itv.scalapact.shared.pact
+package com.itv.scalapact.argonaut62
 
 import argonaut.Argonaut._
 import argonaut._

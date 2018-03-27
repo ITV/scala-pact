@@ -1,8 +1,8 @@
 package com.itv.scalapact.shared.http
 
 import java.util.concurrent.{ExecutorService, Executors}
-import javax.net.ssl.SSLContext
 
+import javax.net.ssl.SSLContext
 import com.itv.scalapact.shared._
 import org.http4s.server.Server
 import org.http4s.server.blaze.BlazeBuilder
@@ -16,6 +16,7 @@ import fs2.{Strategy, Task}
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import com.itv.scalapact.shared.PactLogger
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactServer, IPactWriter}
 
 object PactStubService {
 

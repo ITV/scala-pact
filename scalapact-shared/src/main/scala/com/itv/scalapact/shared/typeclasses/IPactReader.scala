@@ -1,6 +1,8 @@
-package com.itv.scalapact.shared
+package com.itv.scalapact.shared.typeclasses
 
-trait IPactReader {
+import com.itv.scalapact.shared.{IJsonConversionFunctions, Pact}
+
+trait IPactReader extends IJsonConversionFunctions {
 
   type ReadPactF = String => Either[String, Pact]
 

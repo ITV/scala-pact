@@ -1,12 +1,13 @@
-package com.itv.scalapact.shared.pact
+package com.itv.scalapact.circe08
 
-import com.itv.scalapact.shared.{IPactWriter, Pact}
+import com.itv.scalapact.shared.Pact
+import com.itv.scalapact.shared.typeclasses.IPactWriter
 import io.circe._
 import io.circe.parser._
 import io.circe.syntax._
 import io.circe.generic.auto._
 
-object PactWriter extends IPactWriter {
+class PactWriter extends IPactWriter {
 
   // Used by old Scala versions
   import EitherWithToOption._

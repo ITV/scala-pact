@@ -1,10 +1,10 @@
 package com.itv.scalapact.shared.http
 
 import com.itv.scalapact.shared._
+import com.itv.scalapact.shared.typeclasses.IScalaPactHttpClient
 import org.http4s.client.Client
 
 import scala.concurrent.duration._
-import scala.language.implicitConversions
 import scalaz.concurrent.Task
 
 object ScalaPactHttpClient extends IScalaPactHttpClient[Task] {

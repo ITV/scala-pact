@@ -13,6 +13,7 @@ import com.itv.scalapactcore.stubber.InteractionManager
 import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 import com.itv.scalapact.shared.PactLogger
+import com.itv.scalapact.shared.typeclasses.IPactServer
 
 object ScalaPactMock {
 

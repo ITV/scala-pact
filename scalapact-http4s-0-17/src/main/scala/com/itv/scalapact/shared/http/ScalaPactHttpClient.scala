@@ -1,7 +1,7 @@
 package com.itv.scalapact.shared.http
 
+import com.itv.scalapact.shared.typeclasses.IScalaPactHttpClient
 import javax.net.ssl.SSLContext
-
 import com.itv.scalapact.shared.{SimpleRequest, _}
 import fs2.{Strategy, Task}
 import org.http4s.client.Client

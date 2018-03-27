@@ -1,4 +1,6 @@
-package com.itv.scalapact.shared
+package com.itv.scalapact.shared.typeclasses
+
+import com.itv.scalapact.shared.Pact
 
 trait IPactWriter {
 

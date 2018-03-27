@@ -3,6 +3,7 @@ package com.itv.scalapactcore.stubber
 import com.itv.scalapact.shared._
 import ColourOuput._
 import com.itv.scalapact.shared.PactLogger
+import com.itv.scalapact.shared.typeclasses.IPactReader
 
 class InteractionManager extends IInteractionManager {
 
@@ -10,7 +11,7 @@ class InteractionManager extends IInteractionManager {
 
   private var interactions = List.empty[Interaction]
 
-  def findMatchingInteraction(request: InteractionRequest, strictMatching: Boolean): Either[String, Interaction] =
+  def findMatchingInteraction(request: InteractionRequest, strictMatching: Boolean)(implicit pactReader: IPactReader): Either[String, Interaction] =
     matchRequest(strictMatching, interactions.map(_.withoutSslHeader), request)
 
   def getInteractions: List[Interaction] = interactions

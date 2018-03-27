@@ -2,6 +2,7 @@ package com.itv.scalapact.shared.http
 
 import cats.effect.IO
 import com.itv.scalapact.shared._
+import com.itv.scalapact.shared.typeclasses.IScalaPactHttpClient
 import org.http4s.client.Client
 
 import scala.concurrent.duration._

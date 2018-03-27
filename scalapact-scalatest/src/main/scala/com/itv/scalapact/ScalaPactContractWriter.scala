@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets
 
 import com.itv.scalapact.ScalaPactForger.{ScalaPactDescriptionFinal, ScalaPactInteractionFinal, ScalaPactMatchingRule, ScalaPactMatchingRuleArrayMinLength, ScalaPactMatchingRuleRegex, ScalaPactMatchingRuleType}
 import com.itv.scalapact.shared._
+import com.itv.scalapact.shared.typeclasses.IPactWriter
 
 import scala.language.implicitConversions
 

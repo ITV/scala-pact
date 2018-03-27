@@ -1,11 +1,10 @@
-package com.itv.scalapact.shared.json
+package com.itv.scalapact.argonaut62
 
 import argonaut._
-import com.itv.scalapact.shared.IJsonConversionFunctions
-import com.itv.scalapact.shared.matchir._
-import com.itv.scalapact.shared.matchir.MatchIrConstants.{rootNodeLabel, unnamedNodeLabel}
 import com.itv.scalapact.shared.ColourOuput._
-import com.itv.scalapact.shared.PactLogger
+import com.itv.scalapact.shared.{IJsonConversionFunctions, PactLogger}
+import com.itv.scalapact.shared.matchir.MatchIrConstants.{rootNodeLabel, unnamedNodeLabel}
+import com.itv.scalapact.shared.matchir._
 
 object JsonConversionFunctions extends IJsonConversionFunctions {
 

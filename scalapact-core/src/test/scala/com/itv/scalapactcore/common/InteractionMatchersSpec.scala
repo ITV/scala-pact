@@ -1,7 +1,7 @@
 package com.itv.scalapactcore.common
 
+import com.itv.scalapact.argonaut62.PactReader
 import com.itv.scalapact.shared.matchir.IrNodeMatchingRules
-import com.itv.scalapact.shared.pact.PactReader
 import com.itv.scalapact.shared.{MatchingRule, Pact}
 import com.itv.scalapactcore.common.matching.BodyMatching._
 import com.itv.scalapactcore.common.matching.HeaderMatching._

@@ -154,8 +154,6 @@ lazy val core =
     .settings(publishSettings: _*)
     .settings(crossScalaVersions := Seq(scala211, scala212))
     .dependsOn(shared)
-    .dependsOn(argonaut62)
-    .dependsOn(http4s016a)
     .settings(compilerOptionsGeneral: _*)
 
 lazy val http4s016a =
@@ -231,8 +229,8 @@ lazy val plugin =
       scalaVersion := scala212
     )
     .dependsOn(core)
-    .dependsOn(argonaut62 % "provided")
-    .dependsOn(http4s017 % "provided")
+    .dependsOn(argonaut62)
+    .dependsOn(http4s017)
     .settings(compilerOptionsGeneral: _*)
 
 lazy val framework =
@@ -241,7 +239,6 @@ lazy val framework =
     .settings(publishSettings: _*)
     .settings(crossScalaVersions := Seq(scala211, scala212))
     .dependsOn(core)
-    .dependsOn(argonaut62 % "provided")
     .dependsOn(http4s017 % "provided")
     .settings(compilerOptionsGeneral: _*)
 
@@ -253,8 +250,8 @@ lazy val standalone =
       scalaVersion := scala212
     )
     .dependsOn(core)
-    .dependsOn(argonaut62 % "provided")
-    .dependsOn(http4s017 % "provided")
+    .dependsOn(argonaut62)
+    .dependsOn(http4s017)
     .settings(compilerOptionsGeneral: _*)
 
 lazy val docs =

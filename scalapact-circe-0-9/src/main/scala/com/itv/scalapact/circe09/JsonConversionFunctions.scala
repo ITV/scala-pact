@@ -1,4 +1,4 @@
-package com.itv.scalapact.shared.json
+package com.itv.scalapact.circe09
 
 import io.circe._
 import io.circe.parser._

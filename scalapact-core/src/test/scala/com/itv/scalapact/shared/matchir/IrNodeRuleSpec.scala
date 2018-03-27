@@ -1,7 +1,7 @@
 package com.itv.scalapact.shared.matchir
 
+import com.itv.scalapact.argonaut62.JsonConversionFunctions
 import com.itv.scalapact.shared.MatchingRule
-import com.itv.scalapact.shared.json.JsonConversionFunctions
 import org.scalatest.{FunSpec, Matchers}
 
 import scala.language.postfixOps

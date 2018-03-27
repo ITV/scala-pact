@@ -1,4 +1,4 @@
-package com.itv.scalapact.shared.pact
+package com.itv.scalapact.circe08
 
 object EitherWithToOption {
   implicit class WithAsOption[A, B](either: Either[A, B]) {

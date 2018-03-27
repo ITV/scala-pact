@@ -1,7 +1,6 @@
 package com.itv.scalapact.plugin.tester
 
-import com.itv.scalapact.plugin.ScalaPactPlugin
-import com.itv.scalapact.shared.{IPactReader, IPactWriter, ScalaPactSettings}
+import com.itv.scalapact.shared.ScalaPactSettings
 import com.itv.scalapact.shared.ColourOuput._
 import sbt._
 
@@ -9,27 +8,9 @@ import scala.io.Source
 import scala.language.implicitConversions
 import com.itv.scalapactcore.common.PactReaderWriter._
 import com.itv.scalapact.shared.PactLogger
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter}
 
 object ScalaPactTestCommand {
-
-//  lazy val pactTestCommandHyphen: Command = Command.args("pact-test", "<options>")(pactTest)
-//  lazy val pactTestCommandCamel: Command = Command.args("pactTest", "<options>")(pactTest)
-//
-//  private lazy val pactTest: (State, Seq[String]) => State = (state, args) => {
-//
-//      PactLogger.message("*************************************".white.bold)
-//      PactLogger.message("** ScalaPact: Running tests        **".white.bold)
-//      PactLogger.message("*************************************".white.bold)
-//
-//      PactLogger.message("> ScalaPact running: clean + test commands first")
-//
-//      val cleanState = Command.process("clean", state)
-//      val testedState = Command.process("test", cleanState)
-//
-//      doPactPack(Project.extract(testedState).get(ScalaPactPlugin.autoImport.scalaPactEnv).toSettings + ScalaPactSettings.parseArguments(args))
-//
-//      testedState
-//    }
 
   def doPactPack(scalaPactSettings: ScalaPactSettings): Unit = {
     PactLogger.message("*************************************".white.bold)

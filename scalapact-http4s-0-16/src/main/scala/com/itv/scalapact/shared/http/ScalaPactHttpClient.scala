@@ -1,5 +1,6 @@
 package com.itv.scalapact.shared.http
 
+import com.itv.scalapact.shared.typeclasses.IScalaPactHttpClient
 import com.itv.scalapact.shared.{SimpleRequest, _}
 
 import scala.concurrent.duration._

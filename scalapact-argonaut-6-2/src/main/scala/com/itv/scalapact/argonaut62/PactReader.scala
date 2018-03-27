@@ -1,10 +1,15 @@
-package com.itv.scalapact.shared.pact
+package com.itv.scalapact.argonaut62
 
 import argonaut.Argonaut._
 import argonaut._
 import com.itv.scalapact.shared._
+import com.itv.scalapact.shared.matchir.IrNode
+import com.itv.scalapact.shared.typeclasses.IPactReader
 
-object PactReader extends IPactReader {
+class PactReader extends IPactReader {
+
+  def fromJSON(jsonString: String): Option[IrNode] =
+    JsonConversionFunctions.fromJSON(jsonString)
 
   def jsonStringToPact(json: String): Either[String, Pact] = {
     val brokenPact: Option[(PactActor, PactActor, List[(Option[Interaction], Option[String], Option[String])])] = for {
