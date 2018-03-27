@@ -5,8 +5,6 @@ import com.itv.scalapact.shared.ColourOuput._
 import sbt._
 
 import scala.io.Source
-import scala.language.implicitConversions
-import com.itv.scalapactcore.common.PactReaderWriter._
 import com.itv.scalapact.shared.PactLogger
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter}
 

@@ -5,11 +5,10 @@ import com.itv.scalapactcore.verifier.{PactVerifySettings, Verifier, VersionedCo
 import java.io.{BufferedWriter, File, FileWriter}
 
 import com.itv.scalapact.shared.{Helpers, ScalaPactSettings, SslContextMap}
-import com.itv.scalapactcore.common.PactReaderWriter._
 
 import scala.concurrent.duration._
-import scala.language.implicitConversions
 import com.itv.scalapact.shared.PactLogger
+import com.itv.scalapact.shared.typeclasses.IPactReader
 
 object ScalaPactVerify {
   implicit def toOption[A](a: A): Option[A] = Option(a)
@@ -25,22 +24,22 @@ object ScalaPactVerify {
 
     class ScalaPactVerifyRunner(sourceType: PactSourceType, given: Option[String], setupProviderState: Option[String => Boolean])(implicit sslContextMap: SslContextMap) {
 
-      def runStrictVerificationAgainst(port: Int): Unit = doVerification("http", "localhost", port, VerifyTargetConfig.defaultClientTimeout, strict = true)
-      def runStrictVerificationAgainst(port: Int, clientTimeout: Duration): Unit = doVerification("http", "localhost", port, clientTimeout, strict = true)
-      def runStrictVerificationAgainst(host: String, port: Int): Unit = doVerification("http", host, port, VerifyTargetConfig.defaultClientTimeout, strict = true)
-      def runStrictVerificationAgainst(host: String, port: Int, clientTimeout: Duration): Unit = doVerification("http", host, port, clientTimeout, strict = true)
-      def runStrictVerificationAgainst(protocol: String, host: String, port: Int): Unit = doVerification(protocol, host, port, VerifyTargetConfig.defaultClientTimeout, strict = true)
-      def runStrictVerificationAgainst(target: VerifyTargetConfig): Unit = doVerification(target.protocol, target.host, target.port, target.clientTimeout, strict = true)
+      def runStrictVerificationAgainst(port: Int)(implicit pactReader: IPactReader): Unit = doVerification("http", "localhost", port, VerifyTargetConfig.defaultClientTimeout, strict = true)
+      def runStrictVerificationAgainst(port: Int, clientTimeout: Duration)(implicit pactReader: IPactReader): Unit = doVerification("http", "localhost", port, clientTimeout, strict = true)
+      def runStrictVerificationAgainst(host: String, port: Int)(implicit pactReader: IPactReader): Unit = doVerification("http", host, port, VerifyTargetConfig.defaultClientTimeout, strict = true)
+      def runStrictVerificationAgainst(host: String, port: Int, clientTimeout: Duration)(implicit pactReader: IPactReader): Unit = doVerification("http", host, port, clientTimeout, strict = true)
+      def runStrictVerificationAgainst(protocol: String, host: String, port: Int)(implicit pactReader: IPactReader): Unit = doVerification(protocol, host, port, VerifyTargetConfig.defaultClientTimeout, strict = true)
+      def runStrictVerificationAgainst(target: VerifyTargetConfig)(implicit pactReader: IPactReader): Unit = doVerification(target.protocol, target.host, target.port, target.clientTimeout, strict = true)
 
-      def runVerificationAgainst(port: Int): Unit = doVerification("http", "localhost", port, VerifyTargetConfig.defaultClientTimeout, strict = false)
-      def runVerificationAgainst(port: Int, clientTimeout: Duration): Unit = doVerification("http", "localhost", port, clientTimeout, strict = false)
-      def runVerificationAgainst(host: String, port: Int): Unit = doVerification("http", host, port, VerifyTargetConfig.defaultClientTimeout, strict = false)
-      def runVerificationAgainst(host: String, port: Int, clientTimeout: Duration): Unit = doVerification("http", host, port, clientTimeout, strict = false)
-      def runVerificationAgainst(protocol: String, host: String, port: Int): Unit = doVerification(protocol, host, port, VerifyTargetConfig.defaultClientTimeout, strict = false)
-      def runVerificationAgainst(protocol: String, host: String, port: Int, clientTimeout: Duration): Unit = doVerification(protocol, host, port, clientTimeout, strict = false)
-      def runVerificationAgainst(target: VerifyTargetConfig): Unit = doVerification(target.protocol, target.host, target.port, target.clientTimeout, strict = false)
+      def runVerificationAgainst(port: Int)(implicit pactReader: IPactReader): Unit = doVerification("http", "localhost", port, VerifyTargetConfig.defaultClientTimeout, strict = false)
+      def runVerificationAgainst(port: Int, clientTimeout: Duration)(implicit pactReader: IPactReader): Unit = doVerification("http", "localhost", port, clientTimeout, strict = false)
+      def runVerificationAgainst(host: String, port: Int)(implicit pactReader: IPactReader): Unit = doVerification("http", host, port, VerifyTargetConfig.defaultClientTimeout, strict = false)
+      def runVerificationAgainst(host: String, port: Int, clientTimeout: Duration)(implicit pactReader: IPactReader): Unit = doVerification("http", host, port, clientTimeout, strict = false)
+      def runVerificationAgainst(protocol: String, host: String, port: Int)(implicit pactReader: IPactReader): Unit = doVerification(protocol, host, port, VerifyTargetConfig.defaultClientTimeout, strict = false)
+      def runVerificationAgainst(protocol: String, host: String, port: Int, clientTimeout: Duration)(implicit pactReader: IPactReader): Unit = doVerification(protocol, host, port, clientTimeout, strict = false)
+      def runVerificationAgainst(target: VerifyTargetConfig)(implicit pactReader: IPactReader): Unit = doVerification(target.protocol, target.host, target.port, target.clientTimeout, strict = false)
 
-      private def doVerification(protocol: String, host: String, port: Int, clientTimeout: Duration, strict: Boolean): Unit = {
+      private def doVerification(protocol: String, host: String, port: Int, clientTimeout: Duration, strict: Boolean)(implicit pactReader: IPactReader): Unit = {
 
         val providerStateFunc = given.flatMap( g => setupProviderState).getOrElse({ _ : String => true})
 

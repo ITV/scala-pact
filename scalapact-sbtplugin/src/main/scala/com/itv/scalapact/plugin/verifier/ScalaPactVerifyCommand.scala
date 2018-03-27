@@ -1,43 +1,16 @@
 package com.itv.scalapact.plugin.verifier
 
-import com.itv.scalapact.plugin.ScalaPactPlugin
-import com.itv.scalapactcore.verifier.ProviderState
 import com.itv.scalapact.shared.ColourOuput._
 import com.itv.scalapact.shared.{ScalaPactSettings, SslContextMap}
 import com.itv.scalapactcore.common.LocalPactFileLoader
 import com.itv.scalapactcore.verifier._
-import sbt._
-
-import scala.language.implicitConversions
 import com.itv.scalapactcore.verifier.Verifier._
-import com.itv.scalapactcore.common.PactReaderWriter._
 import com.itv.scalapact.shared.PactLogger
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IScalaPactHttpClient}
 
 object ScalaPactVerifyCommand {
 
-//  lazy val pactVerifyCommandHyphen: Command = Command.args("pact-verify", "<options>")(pactVerify)
-//  lazy val pactVerifyCommandCamel: Command = Command.args("pactVerify", "<options>")(pactVerify)
-//
-//  implicit def pStateConversion(ps: Seq[(String, String => Boolean)]): List[ProviderState] =
-//    ps.toList.map(p => ProviderState(p._1, p._2))
-//
-//  private lazy val pactVerify: (State, Seq[String]) => State = (state, args) => {
-//
-//    doPactVerify(
-//      Project.extract(state).get(ScalaPactPlugin.autoImport.scalaPactEnv).toSettings + ScalaPactSettings.parseArguments(args),
-//      Project.extract(state).get(ScalaPactPlugin.autoImport.providerStates),
-//      Project.extract(state).get(ScalaPactPlugin.autoImport.providerStateMatcher),
-//      Project.extract(state).get(ScalaPactPlugin.autoImport.pactBrokerAddress),
-//      Project.extract(state).get(Keys.version),
-//      Project.extract(state).get(ScalaPactPlugin.autoImport.providerName),
-//      Project.extract(state).get(ScalaPactPlugin.autoImport.consumerNames),
-//      Project.extract(state).get(ScalaPactPlugin.autoImport.versionedConsumerNames)
-//    )
-//
-//    state
-//  }
-
-  def doPactVerify(scalaPactSettings: ScalaPactSettings, providerStates: Seq[(String, String => Boolean)], providerStateMatcher: PartialFunction[String, Boolean], pactBrokerAddress: String, projectVersion: String, providerName: String, consumerNames: Seq[String], versionedConsumerNames: Seq[(String, String)]): Unit = {
+  def doPactVerify[F[_]](scalaPactSettings: ScalaPactSettings, providerStates: Seq[(String, String => Boolean)], providerStateMatcher: PartialFunction[String, Boolean], pactBrokerAddress: String, projectVersion: String, providerName: String, consumerNames: Seq[String], versionedConsumerNames: Seq[(String, String)])(implicit pactReader: IPactReader, httpClient: IScalaPactHttpClient[F]): Unit = {
 
     PactLogger.message("*************************************".white.bold)
     PactLogger.message("** ScalaPact: Running Verifier     **".white.bold)
@@ -56,7 +29,7 @@ object ScalaPactVerifyCommand {
           .map(t => VersionedConsumer(t._1, t._2))
     )
 
-    val successfullyVerified = verify(LocalPactFileLoader.loadPactFiles(pactReader)(true), pactVerifySettings)(pactReader, new SslContextMap(Map()))(scalaPactSettings)
+    val successfullyVerified = verify(LocalPactFileLoader.loadPactFiles(pactReader)(true), pactVerifySettings)(pactReader, new SslContextMap(Map()), httpClient)(scalaPactSettings)
 
     if (successfullyVerified) sys.exit(0) else sys.exit(1)
 

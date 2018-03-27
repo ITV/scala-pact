@@ -1,4 +1,4 @@
-package com.itv.scalapact.shared.http
+package com.itv.scalapact.http4s16a
 
 import com.itv.scalapact.shared._
 import com.itv.scalapact.shared.typeclasses.IScalaPactHttpClient
@@ -7,7 +7,7 @@ import org.http4s.client.Client
 import scala.concurrent.duration._
 import scalaz.concurrent.Task
 
-object ScalaPactHttpClient extends IScalaPactHttpClient[Task] {
+class ScalaPactHttpClient extends IScalaPactHttpClient[Task] {
 
   val maxTotalConnections: Int = 1
 

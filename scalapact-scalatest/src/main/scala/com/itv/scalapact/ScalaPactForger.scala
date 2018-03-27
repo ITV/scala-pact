@@ -5,6 +5,7 @@ import com.itv.scalapact.shared.SslContextMap
 import scala.language.implicitConversions
 import scala.util.Properties
 import com.itv.scalapact.shared.Maps._
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter}
 
 object ScalaPactForger {
 
@@ -44,7 +45,7 @@ object ScalaPactForger {
 
       def addSslContextForServer(name: String): ScalaPactDescription = new ScalaPactDescription(consumer, provider, Some(name), interactions)
 
-      def runConsumerTest[A](test: ScalaPactMockConfig => A)(implicit options: ScalaPactOptions, sslContextMap: SslContextMap): A = {
+      def runConsumerTest[A](test: ScalaPactMockConfig => A)(implicit options: ScalaPactOptions, sslContextMap: SslContextMap, pactReader: IPactReader, pactWriter: IPactWriter): A = {
         ScalaPactMock.runConsumerIntegrationTest(strict)(
           ScalaPactDescriptionFinal(
             consumer,

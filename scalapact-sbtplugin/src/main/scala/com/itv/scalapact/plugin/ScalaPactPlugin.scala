@@ -1,5 +1,7 @@
 package com.itv.scalapact.plugin
 
+import com.itv.scalapact.argonaut62._
+import com.itv.scalapact.http4s16a._
 import com.itv.scalapact.plugin.publish.ScalaPactPublishCommand
 import com.itv.scalapact.plugin.stubber.ScalaPactStubberCommand
 import com.itv.scalapact.plugin.tester.ScalaPactTestCommand
@@ -10,7 +12,6 @@ import sbt.plugins.JvmPlugin
 import sbt.{Def, _}
 
 import scala.concurrent.duration.Duration
-import scala.language.implicitConversions
 
 object ScalaPactPlugin extends AutoPlugin {
   override def requires: JvmPlugin.type = plugins.JvmPlugin
@@ -56,8 +57,10 @@ object ScalaPactPlugin extends AutoPlugin {
 
   import autoImport._
 
+  private val pf: PartialFunction[String, Boolean] = { (_: String) => false }
+
   private val pactSettings = Seq(
-    providerStateMatcher := PartialFunction { (_: String) => false },
+    providerStateMatcher := pf,
     providerStates := Seq(),
     pactBrokerAddress := "",
     providerBrokerPublishMap := Map.empty[String, String],
@@ -69,13 +72,13 @@ object ScalaPactPlugin extends AutoPlugin {
     scalaPactEnv := ScalaPactEnv.default
   )
 
-  override lazy val projectSettings = Seq(
-  ) ++ pactSettings ++ Seq(
-    pactPack := pactPackTask.value,
-    pactPush := pactPushTask.value,
-    pactCheck := pactCheckTask.value,
-    pactStub := pactStubTask.value
-  )
+  override lazy val projectSettings: Seq[Def.Setting[_ >: Boolean with PartialFunction[String, Boolean] with ScalaPactEnv with Map[String, String] with Seq[(String, String)] with Seq[String] with Seq[(String, String => Boolean)] with String with Task[Unit]]] =
+    pactSettings ++ Seq(
+      pactPack := pactPackTask.value,
+      pactPush := pactPushTask.value,
+      pactCheck := pactCheckTask.value,
+      pactStub := pactStubTask.value
+    )
 
   lazy val pactPackTask: Def.Initialize[Task[Unit]] =
     Def.task {

@@ -1,35 +1,14 @@
 package com.itv.scalapact.plugin.publish
 
-import com.itv.scalapact.plugin.ScalaPactPlugin
 import com.itv.scalapact.shared.ColourOuput._
 import com.itv.scalapact.shared.http.ScalaPactHttpClient
-import com.itv.scalapact.shared.{ConfigAndPacts, ScalaPactSettings}
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter}
+import com.itv.scalapact.shared.{ConfigAndPacts, PactLogger, ScalaPactSettings}
 import com.itv.scalapactcore.common.LocalPactFileLoader
-import sbt._
-import com.itv.scalapactcore.common.PactReaderWriter._
-import com.itv.scalapact.shared.PactLogger
 
 object ScalaPactPublishCommand {
 
-//  lazy val pactPublishCommandHyphen: Command = Command.args("pact-publish", "<options>")(pactVerify)
-//  lazy val pactPublishCommandCamel: Command = Command.args("pactPublish", "<options>")(pactVerify)
-//
-//  private lazy val pactVerify: (State, Seq[String]) => State = (state, args) => {
-//    val pactTestedState = Command.process("pact-test", state)
-//
-//    doPactPublish(
-//      Project.extract(state).get(ScalaPactPlugin.autoImport.scalaPactEnv).toSettings + ScalaPactSettings.parseArguments(args),
-//      Project.extract(pactTestedState).get(ScalaPactPlugin.autoImport.pactBrokerAddress),
-//      Project.extract(pactTestedState).get(ScalaPactPlugin.autoImport.providerBrokerPublishMap),
-//      Project.extract(pactTestedState).get(Keys.version),
-//      Project.extract(pactTestedState).get(ScalaPactPlugin.autoImport.pactContractVersion),
-//      Project.extract(pactTestedState).get(ScalaPactPlugin.autoImport.allowSnapshotPublish)
-//    )
-//
-//    pactTestedState
-//  }
-
-  def doPactPublish(scalaPactSettings: ScalaPactSettings, pactBrokerAddress: String, providerBrokerPublishMap: Map[String, String], projectVersion: String, pactContractVersion: String, allowSnapshotPublish: Boolean): Unit = {
+  def doPactPublish(scalaPactSettings: ScalaPactSettings, pactBrokerAddress: String, providerBrokerPublishMap: Map[String, String], projectVersion: String, pactContractVersion: String, allowSnapshotPublish: Boolean)(implicit pactReader: IPactReader, pactWriter: IPactWriter): Unit = {
     import Publisher._
 
     PactLogger.message("*************************************".white.bold)
