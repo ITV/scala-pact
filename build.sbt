@@ -82,7 +82,7 @@ lazy val commonSettings = Seq(
   organization := "com.itv",
   scalaVersion := scala212,
   libraryDependencies ++= Seq(
-    "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+    "org.scalatest" %% "scalatest" % "3.0.5" % "test"
   ),
   wartremoverWarnings in (Compile, compile) ++= Warts.allBut(
     Wart.Overloading,
@@ -136,7 +136,7 @@ lazy val publishSettings = Seq(
 )
 
 val scala211: String = "2.11.11"
-val scala212: String = "2.12.4"
+val scala212: String = "2.12.5"
 
 lazy val shared =
   (project in file("scalapact-shared"))
