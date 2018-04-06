@@ -1,9 +1,12 @@
-package com.itv.scalapact.shared.pact
+package com.itv.scalapact.argonaut62
 
 import argonaut.JsonParser.parse
 import org.scalatest.{FunSpec, Matchers}
 
 class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
+
+  val pactReader = new PactReader
+  val pactWriter = new PactWriter
 
   //Used by earlier scala versions
   import EitherWithToOption._
@@ -11,49 +14,49 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
   describe("Reading and writing a homogeneous Pact files") {
 
     it("should be able to read Pact files") {
-      val pactEither = PactReader.jsonStringToPact(PactFileExamples.simpleAsString)
+      val pactEither = pactReader.jsonStringToPact(PactFileExamples.simpleAsString)
 
       pactEither.right.get shouldEqual PactFileExamples.simple
     }
 
     it("should be able to read Pact files using the old provider state key") {
-      val pactEither = PactReader.jsonStringToPact(PactFileExamples.simpleOldProviderStateAsString)
+      val pactEither = pactReader.jsonStringToPact(PactFileExamples.simpleOldProviderStateAsString)
 
       pactEither.right.get shouldEqual PactFileExamples.simple
     }
 
     it("should be able to write Pact files") {
 
-      val written = PactWriter.pactToJsonString(PactFileExamples.simple)
+      val written = pactWriter.pactToJsonString(PactFileExamples.simple)
 
       val expected = PactFileExamples.simpleAsString
 
-      parse(written).toOption.get shouldEqual parse(expected).toOption.get
+      parse(written).asOption.get shouldEqual parse(expected).asOption.get
     }
 
     it("should be able to eat it's own dog food") {
 
-      val json = PactWriter.pactToJsonString(PactFileExamples.simple)
+      val json = pactWriter.pactToJsonString(PactFileExamples.simple)
 
-      val pact = PactReader.jsonStringToPact(json).right.get
+      val pact = pactReader.jsonStringToPact(json).right.get
 
-      val `reJson'd` = parse(PactWriter.pactToJsonString(pact)).toOption.get
+      val `reJson'd` = parse(pactWriter.pactToJsonString(pact)).asOption.get
 
-      `reJson'd` shouldEqual parse(PactFileExamples.simpleAsString).toOption.get
+      `reJson'd` shouldEqual parse(PactFileExamples.simpleAsString).asOption.get
 
       pact shouldEqual PactFileExamples.simple
 
     }
 
     it("should be able to read ruby format json") {
-      val pactEither = PactReader.jsonStringToPact(PactFileExamples.simpleAsString)
+      val pactEither = pactReader.jsonStringToPact(PactFileExamples.simpleAsString)
 
       pactEither.right.get shouldEqual PactFileExamples.simple
     }
 
     it("should be able to write a pact file in ruby format") {
 
-      val written = PactWriter.pactToJsonString(PactFileExamples.simple)
+      val written = pactWriter.pactToJsonString(PactFileExamples.simple)
 
       val expected = PactFileExamples.simpleAsString
 
@@ -63,31 +66,31 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
 
     it("should be able to eat it's own dog food with no body") {
 
-      val json = PactWriter.pactToJsonString(PactFileExamples.verySimple)
+      val json = pactWriter.pactToJsonString(PactFileExamples.verySimple)
 
-      val pact = PactReader.jsonStringToPact(json).right.get
+      val pact = pactReader.jsonStringToPact(json).right.get
 
-      val `reJson'd` = parse(PactWriter.pactToJsonString(pact)).toOption.get
+      val `reJson'd` = parse(pactWriter.pactToJsonString(pact)).asOption.get
 
-      `reJson'd` shouldEqual parse(PactFileExamples.verySimpleAsString).toOption.get
+      `reJson'd` shouldEqual parse(PactFileExamples.verySimpleAsString).asOption.get
 
       pact shouldEqual PactFileExamples.verySimple
 
     }
 
     it("should be able to read ruby format json with no body") {
-      val pactEither = PactReader.jsonStringToPact(PactFileExamples.verySimpleAsString)
+      val pactEither = pactReader.jsonStringToPact(PactFileExamples.verySimpleAsString)
 
       pactEither.right.get shouldEqual PactFileExamples.verySimple
     }
 
     it("should be able to write a pact file in ruby format with no body") {
 
-      val written = PactWriter.pactToJsonString(PactFileExamples.verySimple)
+      val written = pactWriter.pactToJsonString(PactFileExamples.verySimple)
 
       val expected = PactFileExamples.verySimpleAsString
 
-      parse(written).toOption.get shouldEqual parse(expected).toOption.get
+      parse(written).asOption.get shouldEqual parse(expected).asOption.get
     }
 
   }

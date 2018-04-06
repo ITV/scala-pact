@@ -1,4 +1,4 @@
-package com.itv.scalapact.shared.pact
+package com.itv.scalapact.circe09
 
 import com.itv.scalapact.shared._
 import org.scalatest.{FunSpec, Matchers}

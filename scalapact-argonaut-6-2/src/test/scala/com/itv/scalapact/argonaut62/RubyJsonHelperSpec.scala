@@ -1,4 +1,4 @@
-package com.itv.scalapact.shared.pact
+package com.itv.scalapact.argonaut62
 
 import com.itv.scalapact.argonaut62.JsonBodySpecialCaseHelper
 import com.itv.scalapact.shared._

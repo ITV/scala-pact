@@ -1,4 +1,4 @@
-package com.itv.scalapact.shared.pact
+package com.itv.scalapact.argonaut62
 
 import com.itv.scalapact.shared._
 
@@ -77,14 +77,7 @@ object PactFileExamples {
         response = InteractionResponse(
           status = Option(200),
           headers = Option(Map("Content-Type" -> "application/json")),
-          body = Option(
-            """{
-              |  "fish" : [
-              |    "cod",
-              |    "haddock",
-              |    "flying"
-              |  ]
-              |}""".stripMargin),
+          body = Option("""{"fish":["cod","haddock","flying"]}"""),
           matchingRules = Option(
             Map(
               "$.headers.Accept" -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
@@ -108,14 +101,7 @@ object PactFileExamples {
         response = InteractionResponse(
           status = Option(200),
           headers = Option(Map("Content-Type" -> "application/json")),
-          body = Option(
-            """{
-              |  "chips" : true,
-              |  "fish" : [
-              |    "cod",
-              |    "haddock"
-              |  ]
-              |}""".stripMargin),
+          body = Option("""{"chips":true,"fish":["cod","haddock"]}"""),
           matchingRules = None
         )
       )
@@ -131,16 +117,10 @@ object PactFileExamples {
                          |  },
                          |  "interactions" : [
                          |    {
-                         |      "providerState" : "a simple state",
-                         |      "description" : "a simple request",
                          |      "request" : {
                          |        "method" : "GET",
-                         |        "path" : "/fetch-json",
-                         |        "query" : "fish=chips",
-                         |        "headers" : {
-                         |          "Content-Type" : "text/plain"
-                         |        },
                          |        "body" : "fish",
+                         |        "path" : "/fetch-json",
                          |        "matchingRules" : {
                          |          "$.headers.Accept" : {
                          |            "match" : "regex",
@@ -149,8 +129,13 @@ object PactFileExamples {
                          |          "$.headers.Content-Length" : {
                          |            "match" : "type"
                          |          }
+                         |        },
+                         |        "query" : "fish=chips",
+                         |        "headers" : {
+                         |          "Content-Type" : "text/plain"
                          |        }
                          |      },
+                         |      "description" : "a simple request",
                          |      "response" : {
                          |        "status" : 200,
                          |        "headers" : {
@@ -172,19 +157,19 @@ object PactFileExamples {
                          |            "match" : "type"
                          |          }
                          |        }
-                         |      }
+                         |      },
+                         |      "providerState" : "a simple state"
                          |    },
                          |    {
-                         |      "providerState" : "a simple state 2",
-                         |      "description" : "a simple request 2",
                          |      "request" : {
                          |        "method" : "GET",
+                         |        "body" : "fish",
                          |        "path" : "/fetch-json2",
                          |        "headers" : {
                          |          "Content-Type" : "text/plain"
-                         |        },
-                         |        "body" : "fish"
+                         |        }
                          |      },
+                         |      "description" : "a simple request 2",
                          |      "response" : {
                          |        "status" : 200,
                          |        "headers" : {
@@ -197,7 +182,8 @@ object PactFileExamples {
                          |            "haddock"
                          |          ]
                          |        }
-                         |      }
+                         |      },
+                         |      "providerState" : "a simple state 2"
                          |    }
                          |  ]
                          |}""".stripMargin
@@ -211,16 +197,10 @@ object PactFileExamples {
                                  |  },
                                  |  "interactions" : [
                                  |    {
-                                 |      "provider_state" : "a simple state",
-                                 |      "description" : "a simple request",
                                  |      "request" : {
                                  |        "method" : "GET",
-                                 |        "path" : "/fetch-json",
                                  |        "body" : "fish",
-                                 |        "query" : "fish=chips",
-                                 |        "headers" : {
-                                 |          "Content-Type" : "text/plain"
-                                 |        },
+                                 |        "path" : "/fetch-json",
                                  |        "matchingRules" : {
                                  |          "$.headers.Accept" : {
                                  |            "match" : "regex",
@@ -229,8 +209,13 @@ object PactFileExamples {
                                  |          "$.headers.Content-Length" : {
                                  |            "match" : "type"
                                  |          }
+                                 |        },
+                                 |        "query" : "fish=chips",
+                                 |        "headers" : {
+                                 |          "Content-Type" : "text/plain"
                                  |        }
                                  |      },
+                                 |      "description" : "a simple request",
                                  |      "response" : {
                                  |        "status" : 200,
                                  |        "headers" : {
@@ -252,19 +237,19 @@ object PactFileExamples {
                                  |            "match" : "type"
                                  |          }
                                  |        }
-                                 |      }
+                                 |      },
+                                 |      "provider_state" : "a simple state"
                                  |    },
                                  |    {
-                                 |      "provider_state" : "a simple state 2",
-                                 |      "description" : "a simple request 2",
                                  |      "request" : {
                                  |        "method" : "GET",
-                                 |        "path" : "/fetch-json2",
                                  |        "body" : "fish",
+                                 |        "path" : "/fetch-json2",
                                  |        "headers" : {
                                  |          "Content-Type" : "text/plain"
                                  |        }
                                  |      },
+                                 |      "description" : "a simple request 2",
                                  |      "response" : {
                                  |        "status" : 200,
                                  |        "headers" : {
@@ -277,7 +262,8 @@ object PactFileExamples {
                                  |            "haddock"
                                  |          ]
                                  |        }
-                                 |      }
+                                 |      },
+                                 |      "provider_state" : "a simple state 2"
                                  |    }
                                  |  ]
                                  |}""".stripMargin

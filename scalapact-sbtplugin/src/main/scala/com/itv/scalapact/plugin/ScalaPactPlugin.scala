@@ -81,7 +81,7 @@ object ScalaPactPlugin extends AutoPlugin {
       pactCheck := pactCheckTask.value,
       pactStub := pactStubTask.value
     )
-  
+
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   lazy val pactPackTask: Def.Initialize[Task[Unit]] =
     Def.task {
