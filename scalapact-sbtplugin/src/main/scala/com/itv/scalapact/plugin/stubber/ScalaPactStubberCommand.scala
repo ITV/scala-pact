@@ -3,7 +3,7 @@ package com.itv.scalapact.plugin.stubber
 import com.itv.scalapact.shared.ScalaPactSettings
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter}
 import com.itv.scalapactcore.common.LocalPactFileLoader._
-import com.itv.scalapactcore.stubber.InteractionManager
+import com.itv.scalapactcore.common.stubber.InteractionManager
 
 object ScalaPactStubberCommand {
 

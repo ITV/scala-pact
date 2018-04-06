@@ -8,6 +8,9 @@ import org.scalatest.{FunSpec, Matchers}
  **/
 class StrictExampleSpec extends FunSpec with Matchers {
 
+  import com.itv.scalapact.argonaut62._
+  import com.itv.scalapact.http4s16a._
+
   describe("Example of a strict CDC Integration test") {
 
     it("Should be able to perform a strict match") {

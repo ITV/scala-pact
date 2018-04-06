@@ -1,4 +1,4 @@
-package com.itv.scalapact.shared.http
+package com.itv.scalapact.http4s16a
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock

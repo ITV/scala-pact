@@ -5,7 +5,7 @@ import java.net.ServerSocket
 
 import com.itv.scalapact.ScalaPactForger._
 import com.itv.scalapact.shared._
-import com.itv.scalapactcore.stubber.InteractionManager
+import com.itv.scalapactcore.common.stubber.InteractionManager
 
 import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}

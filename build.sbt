@@ -213,13 +213,6 @@ lazy val circe09 =
     .dependsOn(shared)
     .settings(compilerOptionsGeneral: _*)
 
-lazy val pactSpec =
-  (project in file("pact-spec-tests"))
-    .settings(commonSettings: _*)
-    .settings(crossScalaVersions := Seq(scala211, scala212))
-    .dependsOn(core)
-    .dependsOn(argonaut62)
-
 lazy val plugin =
   (project in file("scalapact-sbtplugin"))
     .settings(commonSettings: _*)
@@ -238,6 +231,12 @@ lazy val framework =
     .settings(commonSettings: _*)
     .settings(publishSettings: _*)
     .settings(crossScalaVersions := Seq(scala211, scala212))
+    .settings(
+      name := "scalapact-scalatest",
+      mappings in (Compile, packageBin) ~= {
+        _.filterNot { case (_, fileName) => fileName == "logback.xml" || fileName == "log4j.properties" }
+      }
+    )
     .dependsOn(core)
     .dependsOn(http4s016a % "provided")
     .settings(compilerOptionsGeneral: _*)
@@ -254,6 +253,29 @@ lazy val standalone =
     .dependsOn(http4s016a)
     .settings(compilerOptionsGeneral: _*)
 
+lazy val pactSpec =
+  (project in file("pact-spec-tests"))
+    .settings(commonSettings: _*)
+    .settings(crossScalaVersions := Seq(scala211, scala212))
+    .dependsOn(core)
+    .dependsOn(argonaut62)
+
+lazy val testsWithDeps =
+  (project in file("tests-with-deps"))
+    .settings(commonSettings: _*)
+    .settings(crossScalaVersions := Seq(scala211, scala212)).
+    settings(
+      libraryDependencies ++= Seq(
+        "org.scalaj" %% "scalaj-http" % "2.3.0" % "test",
+        "org.json4s" %% "json4s-native" % "3.5.0" % "test",
+        "com.github.tomakehurst" % "wiremock" % "1.56" % "test",
+        "fr.hmil" %% "roshttp" % "2.0.1" % "test"
+      )
+    )
+    .dependsOn(framework)
+    .dependsOn(argonaut62)
+    .dependsOn(http4s016a)
+
 lazy val docs =
   (project in file("scalapact-docs"))
     .settings(commonSettings: _*)
@@ -267,19 +289,8 @@ lazy val docs =
 lazy val scalaPactProject =
   (project in file("."))
     .settings(commonSettings: _*)
-    .aggregate(
-      core,
-      plugin,
-      framework,
-      standalone,
-      shared,
-      docs,
-      http4s016a,
-//      http4s016,
-//      http4s017,
-//      http4s018,
-      argonaut62,
-      circe08,
-      circe09,
-      pactSpec
-    )
+    .aggregate(shared, core, plugin, framework, standalone)
+    .aggregate(http4s016a/*, http4s016, http4s017, http4s018*/)
+    .aggregate(argonaut62, circe08, circe09)
+    .aggregate(docs)
+    .aggregate(pactSpec, testsWithDeps)

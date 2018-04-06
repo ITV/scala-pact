@@ -219,7 +219,7 @@ sealed trait IrNodePath {
 }
 
 case object IrNodePathEmpty extends IrNodePath {
-  val name: String = "."
+  def name: String = "."
   val parent: IrNodePath = IrNodePathEmpty
   def isEmpty: Boolean = true
   def isField: Boolean = false

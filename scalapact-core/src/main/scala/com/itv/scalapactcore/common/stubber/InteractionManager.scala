@@ -1,4 +1,4 @@
-package com.itv.scalapactcore.stubber
+package com.itv.scalapactcore.common.stubber
 
 import com.itv.scalapact.shared._
 import ColourOuput._

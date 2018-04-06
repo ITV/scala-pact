@@ -1,15 +1,15 @@
 package com.itv.scalapactcore.common
 
-import com.itv.scalapact.argonaut62.PactReader
+import com.itv.scalapact.argonaut62.pactReaderInstance
 import com.itv.scalapact.shared.matchir.IrNodeMatchingRules
 import com.itv.scalapact.shared.{MatchingRule, Pact}
 import com.itv.scalapactcore.common.matching.BodyMatching._
 import com.itv.scalapactcore.common.matching.HeaderMatching._
-import com.itv.scalapactcore.common.matching.{InteractionMatchers, MatchOutcomeFailed, MatchOutcomeSuccess}
 import com.itv.scalapactcore.common.matching.InteractionMatchers.OutcomeAndInteraction
 import com.itv.scalapactcore.common.matching.MethodMatching._
 import com.itv.scalapactcore.common.matching.PathMatching._
 import com.itv.scalapactcore.common.matching.StatusMatching._
+import com.itv.scalapactcore.common.matching.{InteractionMatchers, MatchOutcomeFailed, MatchOutcomeSuccess}
 import org.scalatest.{FunSpec, Matchers}
 
 import scala.language.implicitConversions
@@ -199,27 +199,27 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
 
       val expected = "hello there!"
 
-      matchBodies(None, expected, expected)(IrNodeMatchingRules.empty).isSuccess shouldEqual true
-      matchBodies(None, expected, "Yo ho!")(IrNodeMatchingRules.empty).isSuccess shouldEqual false
+      matchBodies(None, expected, expected)(IrNodeMatchingRules.empty, pactReaderInstance).isSuccess shouldEqual true
+      matchBodies(None, expected, "Yo ho!")(IrNodeMatchingRules.empty, pactReaderInstance).isSuccess shouldEqual false
 
     }
 
     it("should be able to handle missing bodies and no expectation of bodies") {
 
       withClue("None expected, none received") {
-        matchBodies(None, None, None)(IrNodeMatchingRules.empty).isSuccess shouldEqual true
+        matchBodies(None, None, None)(IrNodeMatchingRules.empty, pactReaderInstance).isSuccess shouldEqual true
       }
 
       withClue("Some expected, none received") {
-        matchBodies(None, Some("hello"), None)(IrNodeMatchingRules.empty).isSuccess shouldEqual false
+        matchBodies(None, Some("hello"), None)(IrNodeMatchingRules.empty, pactReaderInstance).isSuccess shouldEqual false
       }
 
       // Forgiving about what we receive
       withClue("None expected, some received") {
-        matchBodies(None, None, Some("hello"))(IrNodeMatchingRules.empty).isSuccess shouldEqual true
+        matchBodies(None, None, Some("hello"))(IrNodeMatchingRules.empty, pactReaderInstance).isSuccess shouldEqual true
       }
       withClue("Some expected, some received") {
-        matchBodies(None, Some("hello"), Some("hello"))(IrNodeMatchingRules.empty).isSuccess shouldEqual true
+        matchBodies(None, Some("hello"), Some("hello"))(IrNodeMatchingRules.empty, pactReaderInstance).isSuccess shouldEqual true
       }
 
     }
@@ -251,15 +251,15 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         """.stripMargin
 
       withClue("Same json no hal") {
-        matchBodies(None, expected, expected)(IrNodeMatchingRules.empty).isSuccess shouldEqual true
+        matchBodies(None, expected, expected)(IrNodeMatchingRules.empty, pactReaderInstance).isSuccess shouldEqual true
       }
 
       withClue("Same json + hal") {
-        matchBodies(None, expected, expected)(IrNodeMatchingRules.empty).isSuccess shouldEqual true
+        matchBodies(None, expected, expected)(IrNodeMatchingRules.empty, pactReaderInstance).isSuccess shouldEqual true
       }
 
       withClue("Expected compared to received") {
-        matchBodies(None, expected, received)(IrNodeMatchingRules.empty).isSuccess shouldEqual true
+        matchBodies(None, expected, received)(IrNodeMatchingRules.empty, pactReaderInstance).isSuccess shouldEqual true
       }
 
     }
@@ -292,7 +292,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
 
         case Right(r) =>
           withClue("Didn't match json body with rule") {
-            matchBodies(None, expected, received)(r).isSuccess shouldEqual true
+            matchBodies(None, expected, received)(r, pactReaderInstance).isSuccess shouldEqual true
           }
       }
 
@@ -316,7 +316,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         </fish-supper>
 
       withClue("Same xml") {
-        matchBodies(None, expected1.toString(), received1.toString())(IrNodeMatchingRules.empty).isSuccess shouldEqual true
+        matchBodies(None, expected1.toString(), received1.toString())(IrNodeMatchingRules.empty, pactReaderInstance).isSuccess shouldEqual true
       }
 
       val expected2 =
@@ -334,7 +334,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         </fish-supper>
 
       withClue("Different xml") {
-        matchBodies(None, expected2.toString(), received2.toString())(IrNodeMatchingRules.empty).isSuccess shouldEqual false
+        matchBodies(None, expected2.toString(), received2.toString())(IrNodeMatchingRules.empty, pactReaderInstance).isSuccess shouldEqual false
       }
 
       val expected3 =
@@ -354,7 +354,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         </fish-supper>
 
       withClue("Received xml with additional fields and attributes") {
-        matchBodies(None, expected3.toString(), received3.toString())(IrNodeMatchingRules.empty).isSuccess shouldEqual true
+        matchBodies(None, expected3.toString(), received3.toString())(IrNodeMatchingRules.empty, pactReaderInstance).isSuccess shouldEqual true
       }
 
       val expected4 =
@@ -374,7 +374,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
         </fish-supper>
 
       withClue("Received xml with missing fields and attributes") {
-        matchBodies(None, expected4.toString(), received4.toString())(IrNodeMatchingRules.empty).isSuccess shouldEqual false
+        matchBodies(None, expected4.toString(), received4.toString())(IrNodeMatchingRules.empty, pactReaderInstance).isSuccess shouldEqual false
       }
 
     }
@@ -564,7 +564,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
           |  "interactions" : [${interactions.toList.mkString(",")}]
           |}""".stripMargin
 
-      PactReader.jsonStringToPact(json) match {
+      pactReaderInstance.jsonStringToPact(json) match {
         case Right(p) =>
           p
 

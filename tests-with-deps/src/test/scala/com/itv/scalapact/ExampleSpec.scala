@@ -17,7 +17,10 @@ import scalaj.http.{Http, HttpRequest}
 
 class ExampleSpec extends FunSpec with Matchers {
 
-  private implicit val formats = DefaultFormats
+  import com.itv.scalapact.argonaut62._
+  import com.itv.scalapact.http4s16a._
+
+  private implicit val formats: DefaultFormats.type = DefaultFormats
 
   describe("Example CDC Integration tests") {
 

@@ -7,6 +7,8 @@ import org.scalatest.{FunSpec, Matchers}
 
 trait PactSpecTester extends FunSpec with Matchers {
 
+  import com.itv.scalapact.argonaut62._
+
   val pactSpecVersion: String
 
   val fileNameFromPath: String => String = path =>
