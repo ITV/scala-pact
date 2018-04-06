@@ -10,7 +10,7 @@ import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter}
 
 object ScalaPactTestCommand {
 
-  def doPactPack(scalaPactSettings: ScalaPactSettings): Unit = {
+  def doPactPack(scalaPactSettings: ScalaPactSettings)(implicit pactReader: IPactReader, pactWriter: IPactWriter): Unit = {
     PactLogger.message("*************************************".white.bold)
     PactLogger.message("** ScalaPact: Squashing Pact Files **".white.bold)
     PactLogger.message("*************************************".white.bold)
@@ -28,7 +28,7 @@ object ScalaPactTestCommand {
       }.toList
 
       val errorCount = groupedFileList.map { g =>
-        squashPactFiles(scalaPactSettings.giveOutputPath, g._1, g._2)
+        squashPactFiles(scalaPactSettings.giveOutputPath, g._2)
       }.sum
 
       PactLogger.message(("> " + groupedFileList.length.toString + " pacts found:").white.bold)
@@ -40,7 +40,7 @@ object ScalaPactTestCommand {
     }
   }
 
-  private def squashPactFiles(outputPath: String, name: String, files: List[File])(implicit pactReader: IPactReader, pactWriter: IPactWriter): Int = {
+  private def squashPactFiles(outputPath: String, files: List[File])(implicit pactReader: IPactReader, pactWriter: IPactWriter): Int = {
     //Yuk!
     var errorCount = 0
 

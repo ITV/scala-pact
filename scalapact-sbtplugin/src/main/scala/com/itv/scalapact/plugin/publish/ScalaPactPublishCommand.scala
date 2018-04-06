@@ -1,14 +1,13 @@
 package com.itv.scalapact.plugin.publish
 
 import com.itv.scalapact.shared.ColourOuput._
-import com.itv.scalapact.shared.http.ScalaPactHttpClient
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter}
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClient}
 import com.itv.scalapact.shared.{ConfigAndPacts, PactLogger, ScalaPactSettings}
 import com.itv.scalapactcore.common.LocalPactFileLoader
 
 object ScalaPactPublishCommand {
 
-  def doPactPublish(scalaPactSettings: ScalaPactSettings, pactBrokerAddress: String, providerBrokerPublishMap: Map[String, String], projectVersion: String, pactContractVersion: String, allowSnapshotPublish: Boolean)(implicit pactReader: IPactReader, pactWriter: IPactWriter): Unit = {
+  def doPactPublish[F[_]](scalaPactSettings: ScalaPactSettings, pactBrokerAddress: String, providerBrokerPublishMap: Map[String, String], projectVersion: String, pactContractVersion: String, allowSnapshotPublish: Boolean)(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F]): Unit = {
     import Publisher._
 
     PactLogger.message("*************************************".white.bold)
@@ -26,12 +25,12 @@ object ScalaPactPublishCommand {
       val configAndPactFiles = LocalPactFileLoader.loadPactFiles(pactReader)(false)(scalaPactSettings.giveOutputPath)(scalaPactSettings)
 
       // Publish all to main broker
-      publishToBroker(ScalaPactHttpClient.doRequestSync, pactBrokerAddress, versionToPublishAs)(pactWriter)(configAndPactFiles).foreach(r => PactLogger.message(r.renderAsString))
+      publishToBroker(httpClient.doRequestSync, pactBrokerAddress, versionToPublishAs)(pactWriter)(configAndPactFiles).foreach(r => PactLogger.message(r.renderAsString))
 
       // Publish to other specified brokers
       configAndPactFiles.pacts.foreach { pactContract =>
         providerBrokerPublishMap.get(pactContract.provider.name).foreach { broker =>
-          publishToBroker(ScalaPactHttpClient.doRequestSync, broker, versionToPublishAs)(pactWriter)(ConfigAndPacts(scalaPactSettings, List(pactContract))).foreach(r => PactLogger.message(r.renderAsString))
+          publishToBroker(httpClient.doRequestSync, broker, versionToPublishAs)(pactWriter)(ConfigAndPacts(scalaPactSettings, List(pactContract))).foreach(r => PactLogger.message(r.renderAsString))
         }
       }
 

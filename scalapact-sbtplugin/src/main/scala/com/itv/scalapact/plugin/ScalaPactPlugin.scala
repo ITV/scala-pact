@@ -57,8 +57,9 @@ object ScalaPactPlugin extends AutoPlugin {
 
   import autoImport._
 
-  private val pf: PartialFunction[String, Boolean] = { (_: String) => false }
+  private val pf: PartialFunction[String, Boolean] = { case (_: String) => false }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   private val pactSettings = Seq(
     providerStateMatcher := pf,
     providerStates := Seq(),
@@ -72,6 +73,7 @@ object ScalaPactPlugin extends AutoPlugin {
     scalaPactEnv := ScalaPactEnv.default
   )
 
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   override lazy val projectSettings: Seq[Def.Setting[_ >: Boolean with PartialFunction[String, Boolean] with ScalaPactEnv with Map[String, String] with Seq[(String, String)] with Seq[String] with Seq[(String, String => Boolean)] with String with Task[Unit]]] =
     pactSettings ++ Seq(
       pactPack := pactPackTask.value,
@@ -79,12 +81,14 @@ object ScalaPactPlugin extends AutoPlugin {
       pactCheck := pactCheckTask.value,
       pactStub := pactStubTask.value
     )
-
+  
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   lazy val pactPackTask: Def.Initialize[Task[Unit]] =
     Def.task {
       ScalaPactTestCommand.doPactPack(scalaPactEnv.value.toSettings)
     }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   lazy val pactPushTask: Def.Initialize[Task[Unit]] =
     Def.task {
       ScalaPactPublishCommand.doPactPublish(
@@ -97,6 +101,7 @@ object ScalaPactPlugin extends AutoPlugin {
       )
     }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   lazy val pactCheckTask: Def.Initialize[Task[Unit]] =
     Def.task {
       ScalaPactVerifyCommand.doPactVerify(
@@ -111,6 +116,7 @@ object ScalaPactPlugin extends AutoPlugin {
       )
     }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   lazy val pactStubTask: Def.Initialize[Task[Unit]] =
     Def.task {
       ScalaPactStubberCommand.runStubber(

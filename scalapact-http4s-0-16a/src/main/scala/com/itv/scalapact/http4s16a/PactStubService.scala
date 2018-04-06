@@ -15,25 +15,26 @@ import HeaderImplicitConversions._
 import ColourOuput._
 import scalaz.concurrent.Task
 import com.itv.scalapact.shared.PactLogger
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactServer, IPactWriter}
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter}
 
 object PactStubService {
 
-  private val nThreads: Int = 50
+  val nThreads: Int = 50
   private val executorService: ExecutorService = Executors.newFixedThreadPool(nThreads)
 
   def startServer(interactionManager: IInteractionManager, sslContextName: Option[String])(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): ScalaPactSettings => Unit = config => {
     PactLogger.message(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold)
     PactLogger.message(("Strict matching mode: " + config.giveStrictMode.toString).white.bold)
 
-    runServer(interactionManager, nThreads, sslContextName, config.givePort)(pactReader, pactWriter,sslContextMap)(config).awaitShutdown()
+    runServer(interactionManager, nThreads, sslContextName, config.givePort)(pactReader, pactWriter,sslContextMap)(config)
+    ()
   }
 
   implicit class BlazeBuilderPimper(blazeBuilder: BlazeBuilder) {
     def withOptionalSsl(sslContext: Option[SSLContext]): BlazeBuilder = sslContext.fold(blazeBuilder)(ssl => blazeBuilder.withSSLContext(ssl))
   }
 
-  def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int, sslContextName: Option[String], port: Int)(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): ScalaPactSettings => IPactServer = config => PactServer {
+  def createServer(interactionManager: IInteractionManager, connectionPoolSize: Int, sslContextName: Option[String], port: Int, config: ScalaPactSettings)(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): BlazeBuilder = {
     BlazeBuilder
       .bindHttp(port, config.giveHost)
       .withServiceExecutor(executorService)
@@ -41,10 +42,16 @@ object PactStubService {
       .withOptionalSsl(sslContextName)
       .withConnectorPoolSize(connectionPoolSize)
       .mountService(PactStubService.service(interactionManager, config.giveStrictMode), "/")
-      .run
   }
 
-  def stopServer: IPactServer => Unit = server =>
+  def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int, sslContextName: Option[String], port: Int)(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): ScalaPactSettings => Server = config => {
+    PactLogger.message(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold)
+    PactLogger.message(("Strict matching mode: " + config.giveStrictMode.toString).white.bold)
+
+    createServer(interactionManager, connectionPoolSize, sslContextName, port, config).run
+  }
+
+  def stopServer: IPactStubber => Unit = server =>
     server.shutdown()
 
   private val isAdminCall: Request => Boolean = request =>
@@ -118,12 +125,32 @@ object PactStubService {
   }
 }
 
-case class PactServer(s: Server) extends IPactServer {
+class PactServer extends IPactStubber {
+
+  private var instance: Option[Server] = None
+  private def blazeBuilder(scalaPactSettings: ScalaPactSettings, interactionManager: IInteractionManager, connectionPoolSize: Int, sslContextName: Option[String], port: Int)(implicit pactReader: IPactReader, pactWriter: IPactWriter): BlazeBuilder =
+    PactStubService.createServer(
+      interactionManager,
+      connectionPoolSize,
+      sslContextName,
+      port,
+      scalaPactSettings
+    )
+
+  def startServer(interactionManager: IInteractionManager, connectionPoolSize: Int, sslContextName: Option[String], port: Int)(implicit pactReader: IPactReader, pactWriter: IPactWriter): ScalaPactSettings => IPactStubber = scalaPactSettings =>
+    instance match {
+      case Some(_) =>
+        this
+
+      case None =>
+        instance = Some(blazeBuilder(scalaPactSettings, interactionManager, connectionPoolSize, sslContextName, port).run)
+        this
+    }
 
   def awaitShutdown(): Unit =
-    s.shutdown.unsafePerformSync
+    instance.foreach(_.shutdown.unsafePerformSync)
 
   def shutdown(): Unit =
-    s.shutdownNow()
+    instance.foreach(_.shutdownNow())
 
 }

@@ -5,17 +5,16 @@ import java.net.ServerSocket
 
 import com.itv.scalapact.ScalaPactForger._
 import com.itv.scalapact.shared._
-import com.itv.scalapact.shared.http.PactStubService._
 import com.itv.scalapactcore.stubber.InteractionManager
 
 import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 import com.itv.scalapact.shared.PactLogger
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactServer, IPactWriter, IScalaPactHttpClient}
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter, IScalaPactHttpClient}
 
 object ScalaPactMock {
 
-  private def configuredTestRunner[A](pactDescription: ScalaPactDescriptionFinal)(config: ScalaPactMockConfig)(test: => ScalaPactMockConfig => A)(implicit sslContextMap: SslContextMap, pactWriter: IPactWriter): A = {
+  private def configuredTestRunner[A](pactDescription: ScalaPactDescriptionFinal)(config: ScalaPactMockConfig)(test: => ScalaPactMockConfig => A)(implicit pactWriter: IPactWriter): A = {
 
     if (pactDescription.options.writePactFiles) {
       ScalaPactContractWriter.writePactContracts(config.outputPath)(pactWriter)(pactDescription.withHeaderForSsl)
@@ -63,7 +62,7 @@ object ScalaPactMock {
     }
   }
 
-  def runConsumerIntegrationTest[F[_], A](strict: Boolean)(pactDescription: ScalaPactDescriptionFinal)(test: ScalaPactMockConfig => A)(implicit sslContextMap: SslContextMap, pactReader: IPactReader, pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F]): A = {
+  def runConsumerIntegrationTest[F[_], A](strict: Boolean)(pactDescription: ScalaPactDescriptionFinal)(test: ScalaPactMockConfig => A)(implicit sslContextMap: SslContextMap, pactReader: IPactReader, pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F], pactStubber: IPactStubber): A = {
 
     val interactionManager: InteractionManager = new InteractionManager
 
@@ -84,19 +83,22 @@ object ScalaPactMock {
 
     val connectionPoolSize: Int = 5
 
-    val server: IPactServer = (interactionManager.addToInteractionManager andThen runServer(interactionManager, connectionPoolSize, pactDescription.serverSslContextName, configAndPacts.scalaPactSettings.givePort)) (configAndPacts)
+    val startStub: ScalaPactSettings => IPactStubber =
+      pactStubber.startServer(interactionManager, connectionPoolSize, pactDescription.serverSslContextName, configAndPacts.scalaPactSettings.givePort)
+
+    val server: IPactStubber = (interactionManager.addToInteractionManager andThen startStub) (configAndPacts)
 
     PactLogger.message("> ScalaPact stub running at: " + mockConfig.baseUrl)
 
     waitForServerThenTest(server, mockConfig, test, pactDescription)
   }
 
-  private def waitForServerThenTest[F[_], A](server: IPactServer, mockConfig: ScalaPactMockConfig, test: ScalaPactMockConfig => A, pactDescription: ScalaPactDescriptionFinal)(implicit sslContextMap: SslContextMap, pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F]): A = {
+  private def waitForServerThenTest[F[_], A](server: IPactStubber, mockConfig: ScalaPactMockConfig, test: ScalaPactMockConfig => A, pactDescription: ScalaPactDescriptionFinal)(implicit sslContextMap: SslContextMap, pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F]): A = {
     def rec(attemptsRemaining: Int, intervalMillis: Int): A = {
       if (isStubReady(mockConfig, pactDescription.serverSslContextName)) {
         val result = configuredTestRunner(pactDescription)(mockConfig)(test)
 
-        stopServer(server)
+        server.shutdown()
 
         result
       } else if (attemptsRemaining == 0) {

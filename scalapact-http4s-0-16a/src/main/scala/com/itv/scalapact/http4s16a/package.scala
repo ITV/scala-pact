@@ -1,13 +1,13 @@
 package com.itv.scalapact
 
-import com.itv.scalapact.shared.typeclasses.IScalaPactHttpClient
+import com.itv.scalapact.shared.typeclasses.{IPactStubber, IScalaPactHttpClient}
 import scalaz.concurrent.Task
 
 package object http4s16a {
 
-//  implicit val serverInstance: IPactServer =
-//    new PactServer(PactStubService.runServer())
+  implicit val serverInstance: IPactStubber =
+    new PactServer
 
-  implicit val pactWriterInstance: IScalaPactHttpClient[Task] =
+  implicit val scalaPactHttpClient: IScalaPactHttpClient[Task] =
     new ScalaPactHttpClient
 }
