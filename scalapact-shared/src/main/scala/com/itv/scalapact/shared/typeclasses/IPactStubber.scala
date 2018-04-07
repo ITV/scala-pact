@@ -4,7 +4,7 @@ import com.itv.scalapact.shared.{IInteractionManager, ScalaPactSettings}
 
 trait IPactStubber {
 
-  def startServer(interactionManager: IInteractionManager, connectionPoolSize: Int, sslContextName: Option[String], port: Int)(implicit pactReader: IPactReader, pactWriter: IPactWriter): ScalaPactSettings => IPactStubber
+  def startServer(interactionManager: IInteractionManager, connectionPoolSize: Int, sslContextName: Option[String], port: Option[Int])(implicit pactReader: IPactReader, pactWriter: IPactWriter): ScalaPactSettings => IPactStubber
 
   def awaitShutdown(): Unit
 

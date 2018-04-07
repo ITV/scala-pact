@@ -66,8 +66,12 @@ object ScalaPactMock {
 
     val interactionManager: InteractionManager = new InteractionManager
 
-    val protocol = pactDescription.serverSslContextName.fold("http")(_ => "https")
-    val mockConfig = ScalaPactMockConfig(protocol, "localhost", findFreePortRetry(3), pactDescription.options.outputPath)
+    val mockConfig = ScalaPactMockConfig(
+      pactDescription.serverSslContextName.fold("http")(_ => "https"),
+      "localhost",
+      findFreePortRetry(3),
+      pactDescription.options.outputPath)
+
     val configAndPacts: ConfigAndPacts = ConfigAndPacts(
       scalaPactSettings = ScalaPactSettings(
         host = Option(mockConfig.host),
@@ -81,10 +85,8 @@ object ScalaPactMock {
       pacts = List(ScalaPactContractWriter.producePactFromDescription(pactDescription))
     )
 
-    val connectionPoolSize: Int = 5
-
     val startStub: ScalaPactSettings => IPactStubber =
-      pactStubber.startServer(interactionManager, connectionPoolSize, pactDescription.serverSslContextName, configAndPacts.scalaPactSettings.givePort)
+      pactStubber.startServer(interactionManager, 5, pactDescription.serverSslContextName, None)
 
     val server: IPactStubber = (interactionManager.addToInteractionManager andThen startStub) (configAndPacts)
 

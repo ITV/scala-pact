@@ -1,12 +1,11 @@
 package com.itv.standalonestubber
 
 import com.itv.scalapact.argonaut62.{pactReaderInstance, pactWriterInstance}
+import com.itv.scalapact.http4s16a.serverInstance
 import com.itv.scalapact.shared.ColourOuput._
-import com.itv.scalapact.shared.{ScalaPactSettings, SslContextMap}
+import com.itv.scalapact.shared.{PactLogger, ScalaPactSettings}
 import com.itv.scalapactcore.common.LocalPactFileLoader._
 import com.itv.scalapactcore.common.stubber.InteractionManager
-import com.itv.scalapact.http4s16a.PactStubService._
-import com.itv.scalapact.shared.PactLogger
 
 object PactStubber {
 
@@ -18,8 +17,9 @@ object PactStubber {
 
     val interactionManager: InteractionManager = new InteractionManager
 
-    (ScalaPactSettings.parseArguments andThen loadPactFiles(pactReaderInstance)(true)("pacts") andThen interactionManager.addToInteractionManager andThen startServer(interactionManager, sslContextName = None)(pactReaderInstance, pactWriterInstance, implicitly[SslContextMap]))(args)
+    (ScalaPactSettings.parseArguments andThen loadPactFiles(pactReaderInstance)(true)("pacts") andThen interactionManager.addToInteractionManager andThen serverInstance.startServer(interactionManager, 5, sslContextName = None, port = None)(pactReaderInstance, pactWriterInstance))(args)
 
+    ()
   }
 
 }
