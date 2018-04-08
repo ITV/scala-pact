@@ -74,8 +74,8 @@ lazy val compilerOptionsGeneral =
     }
   )
 
-addCommandAlias("quickcompile", ";shared/compile;core/compile;argonaut62/compile;http4s016a/compile;pactSpec/compile;plugin/compile;standalone/compile;framework/compile")
-addCommandAlias("quicktest", ";shared/test;core/test;argonaut62/test;http4s016a/test;pactSpec/test;plugin/test;standalone/test;framework/test")
+addCommandAlias("quickcompile", ";shared/compile;core/compile;argonaut62/compile;http4s016a/compile;pactSpec/compile;plugin/compile;standalone/compile;framework/compile;testsWithDeps/compile")
+addCommandAlias("quicktest", ";shared/test;core/test;argonaut62/test;http4s016a/test;pactSpec/test;plugin/test;standalone/test;framework/test;testsWithDeps/test")
 
 lazy val commonSettings = Seq(
   version := "2.3.0-SNAPSHOT",
@@ -214,7 +214,7 @@ lazy val circe09 =
     .settings(compilerOptionsGeneral: _*)
 
 lazy val plugin =
-  (project in file("scalapact-sbtplugin"))
+  (project in file("sbt-scalapact"))
     .settings(commonSettings: _*)
     .settings(publishSettings: _*)
     .settings(

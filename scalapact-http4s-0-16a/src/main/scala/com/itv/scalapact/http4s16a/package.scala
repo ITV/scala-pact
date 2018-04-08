@@ -9,5 +9,5 @@ package object http4s16a {
     new PactServer
 
   implicit val scalaPactHttpClient: IScalaPactHttpClient[Task] =
-    new ScalaPactHttpClient
+    new ScalaPactHttpClient(Http4sClientHelper.doRequest)
 }

@@ -11,7 +11,7 @@ import org.http4s.{BuildInfo, Response}
 import scala.concurrent.duration._
 import scalaz.concurrent.Task
 
-class Http4sClientHelper {
+object Http4sClientHelper {
 
   import HeaderImplicitConversions._
 
