@@ -114,7 +114,7 @@ class PactServer extends IPactStubber {
 
   private var instance: Option[Server] = None
 
-  private def blazeBuilder(scalaPactSettings: ScalaPactSettings, interactionManager: IInteractionManager, connectionPoolSize: Int, sslContextName: Option[String], port: Option[Int])(implicit pactReader: IPactReader, pactWriter: IPactWriter): BlazeBuilder =
+  private def blazeBuilder(scalaPactSettings: ScalaPactSettings, interactionManager: IInteractionManager, connectionPoolSize: Int, sslContextName: Option[String], port: Option[Int])(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): BlazeBuilder =
     PactStubService.createServer(
       interactionManager,
       connectionPoolSize,
@@ -123,7 +123,7 @@ class PactServer extends IPactStubber {
       scalaPactSettings
     )
 
-  def startServer(interactionManager: IInteractionManager, connectionPoolSize: Int, sslContextName: Option[String], port: Option[Int])(implicit pactReader: IPactReader, pactWriter: IPactWriter): ScalaPactSettings => IPactStubber = scalaPactSettings =>
+  def startServer(interactionManager: IInteractionManager, connectionPoolSize: Int, sslContextName: Option[String], port: Option[Int])(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): ScalaPactSettings => IPactStubber = scalaPactSettings =>
     instance match {
       case Some(_) =>
         this
