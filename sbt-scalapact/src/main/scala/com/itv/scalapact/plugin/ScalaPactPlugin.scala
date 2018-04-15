@@ -61,6 +61,18 @@ object ScalaPactPlugin extends AutoPlugin {
     val pactPush: TaskKey[Unit]  = taskKey[Unit]("Push Pact contract files to Pact Broker")
     val pactCheck: TaskKey[Unit] = taskKey[Unit]("Verify service based on consumer requirements")
     val pactStub: TaskKey[Unit]  = taskKey[Unit]("Run stub service from Pact contract files")
+
+    addCommandAlias("pact-test", ";clean;test;pactPack")
+    addCommandAlias("pactTest", ";clean;test;pactPack")
+
+    addCommandAlias("pact-stubber", ";clean;test;pactPack;pactStub")
+    addCommandAlias("pactStubber", ";clean;test;pactPack;pactStub")
+
+    addCommandAlias("pact-publish", ";clean;test;pactPack;pactPush")
+    addCommandAlias("pactPublish", ";clean;test;pactPack;pactPush")
+
+    addCommandAlias("pact-verify", ";pactCheck")
+    addCommandAlias("pactVerify", ";pactCheck")
   }
 
   import autoImport._
