@@ -10,6 +10,7 @@ import com.itv.scalapact.shared.ScalaPactSettings
 import sbt.Keys._
 import sbt.plugins.JvmPlugin
 import sbt.{Def, _}
+import complete.DefaultParsers._
 
 import scala.concurrent.duration.Duration
 
@@ -57,10 +58,10 @@ object ScalaPactPlugin extends AutoPlugin {
       SettingKey[ScalaPactEnv]("scalaPactEnv", "Settings used to config the running of tasks and commands")
 
     // Tasks
-    val pactPack: TaskKey[Unit]  = taskKey[Unit]("Pack up Pact contract files")
-    val pactPush: TaskKey[Unit]  = taskKey[Unit]("Push Pact contract files to Pact Broker")
-    val pactCheck: TaskKey[Unit] = taskKey[Unit]("Verify service based on consumer requirements")
-    val pactStub: TaskKey[Unit]  = taskKey[Unit]("Run stub service from Pact contract files")
+    val pactPack: TaskKey[Unit]   = taskKey[Unit]("Pack up Pact contract files")
+    val pactPush: InputKey[Unit]  = inputKey[Unit]("Push Pact contract files to Pact Broker")
+    val pactCheck: InputKey[Unit] = inputKey[Unit]("Verify service based on consumer requirements")
+    val pactStub: InputKey[Unit]  = inputKey[Unit]("Run stub service from Pact contract files")
 
     addCommandAlias("pact-test", ";clean;test;pactPack")
     addCommandAlias("pactTest", ";clean;test;pactPack")
@@ -111,10 +112,10 @@ object ScalaPactPlugin extends AutoPlugin {
     }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  lazy val pactPushTask: Def.Initialize[Task[Unit]] =
-    Def.task {
+  lazy val pactPushTask: Def.Initialize[InputTask[Unit]] =
+    Def.inputTask {
       ScalaPactPublishCommand.doPactPublish(
-        scalaPactEnv.value.toSettings,
+        scalaPactEnv.value.toSettings + ScalaPactSettings.parseArguments(spaceDelimited("<arg>").parsed),
         pactBrokerAddress.value,
         providerBrokerPublishMap.value,
         version.value,
@@ -124,10 +125,10 @@ object ScalaPactPlugin extends AutoPlugin {
     }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  lazy val pactCheckTask: Def.Initialize[Task[Unit]] =
-    Def.task {
+  lazy val pactCheckTask: Def.Initialize[InputTask[Unit]] =
+    Def.inputTask {
       ScalaPactVerifyCommand.doPactVerify(
-        scalaPactEnv.value.toSettings,
+        scalaPactEnv.value.toSettings + ScalaPactSettings.parseArguments(spaceDelimited("<arg>").parsed),
         providerStates.value,
         providerStateMatcher.value,
         pactBrokerAddress.value,
@@ -139,10 +140,10 @@ object ScalaPactPlugin extends AutoPlugin {
     }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  lazy val pactStubTask: Def.Initialize[Task[Unit]] =
-    Def.task {
+  lazy val pactStubTask: Def.Initialize[InputTask[Unit]] =
+    Def.inputTask {
       ScalaPactStubberCommand.runStubber(
-        scalaPactEnv.value.toSettings,
+        scalaPactEnv.value.toSettings + ScalaPactSettings.parseArguments(spaceDelimited("<arg>").parsed),
         ScalaPactStubberCommand.interactionManagerInstance
       )
     }
