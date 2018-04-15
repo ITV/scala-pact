@@ -6,7 +6,7 @@ import cats.data.{Kleisli, OptionT}
 import cats.effect.IO
 import com.itv.scalapact.http4s18.impl.HeaderImplicitConversions._
 import com.itv.scalapact.shared.ColourOuput._
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter}
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter}
 import com.itv.scalapact.shared.{PactLogger, _}
 import javax.net.ssl.SSLContext
 import org.http4s.dsl.io._
@@ -147,7 +147,50 @@ object PactStubService {
   }
 }
 
-case class PactServer(s: Server[IO]) extends IPactServer {
-  def awaitShutdown(): Unit = s.awaitShutdown()
-  def shutdown(): Unit      = s.shutdownNow()
+class PactServer extends IPactStubber {
+
+  private var instance: Option[IO[Server[IO]]] = None
+
+  private def blazeBuilder(scalaPactSettings: ScalaPactSettings,
+                           interactionManager: IInteractionManager,
+                           connectionPoolSize: Int,
+                           sslContextName: Option[String],
+                           port: Option[Int])(implicit pactReader: IPactReader,
+                                              pactWriter: IPactWriter,
+                                              sslContextMap: SslContextMap): BlazeBuilder[IO] =
+    PactStubService.createServer(
+      interactionManager,
+      connectionPoolSize,
+      sslContextName,
+      port,
+      scalaPactSettings
+    )
+
+  def startServer(interactionManager: IInteractionManager,
+                  connectionPoolSize: Int,
+                  sslContextName: Option[String],
+                  port: Option[Int])(implicit pactReader: IPactReader,
+                                     pactWriter: IPactWriter,
+                                     sslContextMap: SslContextMap): ScalaPactSettings => IPactStubber =
+    scalaPactSettings =>
+      instance match {
+        case Some(_) =>
+          this
+
+        case None =>
+          instance = Option(
+            blazeBuilder(scalaPactSettings, interactionManager, connectionPoolSize, sslContextName, port).start
+          )
+          this
+    }
+
+  def awaitShutdown(): Unit =
+    instance.foreach(_.unsafeRunSync().shutdown.unsafeRunSync())
+
+  def shutdown(): Unit = {
+    instance.foreach(_.unsafeRunSync().shutdown.unsafeRunSync())
+    instance = None
+    ()
+  }
+
 }
