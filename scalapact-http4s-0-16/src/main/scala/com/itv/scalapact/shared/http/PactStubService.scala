@@ -20,44 +20,58 @@ import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactServer, IPactWrit
 
 object PactStubService {
 
-  private val nThreads: Int = 50
+  private val nThreads: Int                    = 50
   private val executorService: ExecutorService = Executors.newFixedThreadPool(nThreads)
 
-  def startServer(interactionManager: IInteractionManager, sslContextName: Option[String])(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): ScalaPactSettings => Unit = config => {
-    PactLogger.message(("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold)
+  def startServer(interactionManager: IInteractionManager, sslContextName: Option[String])(
+      implicit pactReader: IPactReader,
+      pactWriter: IPactWriter,
+      sslContextMap: SslContextMap): ScalaPactSettings => Unit = config => {
+    PactLogger.message(
+      ("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold)
     PactLogger.message(("Strict matching mode: " + config.giveStrictMode.toString).white.bold)
 
-    runServer(interactionManager, nThreads,sslContextName, config.givePort)(pactReader, pactWriter,sslContextMap)(config).awaitShutdown()
+    runServer(interactionManager, nThreads, sslContextName, config.givePort)(pactReader, pactWriter, sslContextMap)(
+      config).awaitShutdown()
   }
 
   implicit class BlazeBuilderPimper(blazeBuilder: BlazeBuilder) {
-    def withOptionalSsl(sslContext: Option[SSLContext]): BlazeBuilder = sslContext.fold(blazeBuilder)(ssl => blazeBuilder.withSSLContext(ssl))
+    def withOptionalSsl(sslContext: Option[SSLContext]): BlazeBuilder =
+      sslContext.fold(blazeBuilder)(ssl => blazeBuilder.withSSLContext(ssl))
   }
 
-  def runServer(interactionManager: IInteractionManager, connectionPoolSize: Int, sslContextName: Option[String], port: Int)(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): ScalaPactSettings => IPactServer = config => PactServer {
-    BlazeBuilder
-      .bindHttp(port, config.giveHost)
-      .withServiceExecutor(executorService)
-      .withIdleTimeout(60.seconds)
-      .withOptionalSsl(sslContextName)
-      .withConnectorPoolSize(connectionPoolSize)
-      .mountService(PactStubService.service(interactionManager, config.giveStrictMode), "/")
-      .run
-  }
+  def runServer(interactionManager: IInteractionManager,
+                connectionPoolSize: Int,
+                sslContextName: Option[String],
+                port: Int)(implicit pactReader: IPactReader,
+                           pactWriter: IPactWriter,
+                           sslContextMap: SslContextMap): ScalaPactSettings => IPactServer =
+    config =>
+      PactServer {
+        BlazeBuilder
+          .bindHttp(port, config.giveHost)
+          .withServiceExecutor(executorService)
+          .withIdleTimeout(60.seconds)
+          .withOptionalSsl(sslContextName)
+          .withConnectorPoolSize(connectionPoolSize)
+          .mountService(PactStubService.service(interactionManager, config.giveStrictMode), "/")
+          .run
+    }
 
-
-  def stopServer: IPactServer => Unit = server =>
-    server.shutdown()
+  def stopServer: IPactServer => Unit = server => server.shutdown()
 
   private val isAdminCall: Request => Boolean = request =>
     request.headers.get(CaseInsensitiveString("X-Pact-Admin")).exists(h => h.value == "true")
 
-  private def service(interactionManager: IInteractionManager, strictMatching: Boolean)(implicit pactReader: IPactReader, pactWriter: IPactWriter): HttpService =
+  private def service(interactionManager: IInteractionManager,
+                      strictMatching: Boolean)(implicit pactReader: IPactReader, pactWriter: IPactWriter): HttpService =
     HttpService.lift { req =>
       matchRequestWithResponse(interactionManager, strictMatching, req)
     }
 
-  private def matchRequestWithResponse(interactionManager: IInteractionManager, strictMatching: Boolean, req: Request)(implicit pactReader: IPactReader, pactWriter: IPactWriter): scalaz.concurrent.Task[Response] = {
+  private def matchRequestWithResponse(interactionManager: IInteractionManager, strictMatching: Boolean, req: Request)(
+      implicit pactReader: IPactReader,
+      pactWriter: IPactWriter): scalaz.concurrent.Task[Response] =
     if (isAdminCall(req)) {
 
       req.method.name.toUpperCase match {
@@ -65,15 +79,18 @@ object PactStubService {
           Ok()
 
         case m if m == "GET" && req.pathInfo.startsWith("/interactions") =>
-          val output = pactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions))
+          val output =
+            pactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions))
           Ok(output)
 
         case m if m == "POST" || m == "PUT" && req.pathInfo.startsWith("/interactions") =>
-          pactReader.jsonStringToPact(req.bodyAsText.runLog[Task, String].map(body => Option(body.mkString)).run.getOrElse("")) match {
+          pactReader.jsonStringToPact(
+            req.bodyAsText.runLog[Task, String].map(body => Option(body.mkString)).run.getOrElse("")) match {
             case Right(r) =>
               interactionManager.addInteractions(r.interactions)
 
-              val output = pactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions))
+              val output =
+                pactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions))
               Ok(output)
 
             case Left(l) =>
@@ -83,12 +100,12 @@ object PactStubService {
         case m if m == "DELETE" && req.pathInfo.startsWith("/interactions") =>
           interactionManager.clearInteractions()
 
-          val output = pactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions))
+          val output =
+            pactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions))
           Ok(output)
       }
 
-    }
-    else {
+    } else {
 
       interactionManager.findMatchingInteraction(
         InteractionRequest(
@@ -117,7 +134,6 @@ object PactStubService {
       }
 
     }
-  }
 }
 
 case class PactServer(s: Server) extends IPactServer {

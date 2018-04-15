@@ -6,16 +6,15 @@ import scala.util.Random
 
 object BusinessLogic {
 
-  def loadPeople(peopleFile: String): List[String] = {
-    Source.fromFile(new File(peopleFile).toURI)
+  def loadPeople(peopleFile: String): List[String] =
+    Source
+      .fromFile(new File(peopleFile).toURI)
       .getLines
       .mkString
       .split(',')
       .toList
-  }
 
-  def generateToken(requiredLength: Int): String = {
+  def generateToken(requiredLength: Int): String =
     Random.alphanumeric.take(requiredLength).mkString
-  }
 
 }

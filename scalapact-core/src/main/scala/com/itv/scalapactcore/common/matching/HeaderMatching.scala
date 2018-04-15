@@ -6,10 +6,10 @@ import com.itv.scalapact.shared.matchir._
 object HeaderMatching {
 
   val legalCharSeparators: List[Char] =
-    List('(',')','<','>','@',',',';',':','\\','"','/','[',']','?','=','{','}')
+    List('(', ')', '<', '>', '@', ',', ';', ':', '\\', '"', '/', '[', ']', '?', '=', '{', '}')
 
-  def trimAllInstancesOfSeparator: Char => String => String = separator => input =>
-    input.split(separator).toList.map(_.trim).mkString(separator.toString)
+  def trimAllInstancesOfSeparator: Char => String => String =
+    separator => input => input.split(separator).toList.map(_.trim).mkString(separator.toString)
 
   def standardiseHeader(input: (String, String)): (String, String) =
     (input._1.toLowerCase, trimAllSeparators(legalCharSeparators, input._2))
@@ -17,7 +17,7 @@ object HeaderMatching {
   @annotation.tailrec
   def trimAllSeparators(separators: List[Char], input: String): String =
     separators match {
-      case Nil => input
+      case Nil     => input
       case x :: xs => trimAllSeparators(xs, trimAllInstancesOfSeparator(x)(input))
     }
 
@@ -30,7 +30,9 @@ object HeaderMatching {
         xs.foldLeft(x)(_ + _)
     }
 
-  def matchHeaders(matchingRules: Option[Map[String, MatchingRule]], expected: Option[Map[String, String]], received: Option[Map[String, String]]): MatchOutcome = {
+  def matchHeaders(matchingRules: Option[Map[String, MatchingRule]],
+                   expected: Option[Map[String, String]],
+                   received: Option[Map[String, String]]): MatchOutcome = {
 
     val rules = findAndCleanupApplicableMatchingRules(matchingRules)
 
@@ -48,13 +50,11 @@ object HeaderMatching {
             List(MatchOutcomeFailed(error))
 
           case Right(rls) =>
-
-
-            withRules
-              .toList
+            withRules.toList
               .map(p => standardiseHeader(p))
               .flatMap { header =>
-                rls.findForPath(IrNodePathEmpty <~ header._1, isXml = false)
+                rls
+                  .findForPath(IrNodePathEmpty <~ header._1, isXml = false)
                   .map {
                     case IrNodeTypeRule(_) =>
                       MatchOutcomeSuccess
@@ -76,7 +76,9 @@ object HeaderMatching {
       }
 
       val noRuleMatchResult: MatchOutcome = {
-        def rec(remaining: List[(String, String)], received: List[(String, String)], acc: List[MatchOutcome]): List[MatchOutcome] =
+        def rec(remaining: List[(String, String)],
+                received: List[(String, String)],
+                acc: List[MatchOutcome]): List[MatchOutcome] =
           remaining match {
             case Nil =>
               acc
@@ -102,7 +104,8 @@ object HeaderMatching {
     GeneralMatcher.generalMatcher(expected, received, MatchOutcomeFailed("Headers did not match", 50), predicate)
   }
 
-  def findAndCleanupApplicableMatchingRules(matchingRules: Option[Map[String, MatchingRule]]): Option[Map[String, MatchingRule]] =
+  def findAndCleanupApplicableMatchingRules(
+      matchingRules: Option[Map[String, MatchingRule]]): Option[Map[String, MatchingRule]] =
     matchingRules.map { mmr =>
       mmr
         .filter(mr => mr._1.startsWith("$.headers."))

@@ -61,12 +61,14 @@ object Http4sRequestResponseFactory {
         attributes = AttributeMap.empty
       )
 
-      request.body.map { b =>
-        implicit val enc: EntityEncoder[IO, String] =
-          EntityEncoder.simple[IO, String]()(stringToByteVector)
+      request.body
+        .map { b =>
+          implicit val enc: EntityEncoder[IO, String] =
+            EntityEncoder.simple[IO, String]()(stringToByteVector)
 
-        r.withBody(b)
-      }.getOrElse(IO(r))
+          r.withBody(b)
+        }
+        .getOrElse(IO(r))
     }
 
   def buildResponse(status: IntAndReason, headers: Map[String, String], body: Option[String]): IO[Response[IO]] =
@@ -83,11 +85,13 @@ object Http4sRequestResponseFactory {
           attributes = AttributeMap.empty
         )
 
-        body.map { b =>
-          implicit val enc: EntityEncoder[IO, String] =
-            EntityEncoder.simple[IO, String]()(stringToByteVector)
-          response.withBody(b)
-        }.getOrElse(IO(response))
+        body
+          .map { b =>
+            implicit val enc: EntityEncoder[IO, String] =
+              EntityEncoder.simple[IO, String]()(stringToByteVector)
+            response.withBody(b)
+          }
+          .getOrElse(IO(response))
     }
 
 }

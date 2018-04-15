@@ -69,7 +69,7 @@ object PactFileExamples {
           body = Option("""fish"""),
           matchingRules = Option(
             Map(
-              "$.headers.Accept" -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
+              "$.headers.Accept"         -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
               "$.headers.Content-Length" -> MatchingRule(`match` = Option("type"), regex = None, min = None)
             )
           )
@@ -80,7 +80,7 @@ object PactFileExamples {
           body = Option("""{"fish":["cod","haddock","flying"]}"""),
           matchingRules = Option(
             Map(
-              "$.headers.Accept" -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
+              "$.headers.Accept"         -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
               "$.headers.Content-Length" -> MatchingRule(`match` = Option("type"), regex = None, min = None)
             )
           )

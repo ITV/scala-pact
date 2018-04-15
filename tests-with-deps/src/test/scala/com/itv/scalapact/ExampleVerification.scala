@@ -69,19 +69,17 @@ class ExampleVerification extends FunSpec with Matchers with BeforeAndAfterAll {
     )
   }
 
-
-  override def afterAll(): Unit = {
+  override def afterAll(): Unit =
     wireMockServer.stop()
-  }
 
   describe("Verification of pacts using provider tests") {
 
     it("should be able to verify a simple contract") {
 
-     verifyPact
-       .withPactSource(pactAsJsonString(samplePact))
-       .noSetupRequired
-       .runVerificationAgainst(1234, 5.seconds)
+      verifyPact
+        .withPactSource(pactAsJsonString(samplePact))
+        .noSetupRequired
+        .runVerificationAgainst(1234, 5.seconds)
 
     }
 

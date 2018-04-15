@@ -9,4 +9,3 @@ libraryDependencies ++= Seq(
 //  "org.log4s"  %% "log4s"               % "1.3.3" force(),
   "com.github.tomakehurst" % "wiremock" % "1.56" % "test"
 )
-

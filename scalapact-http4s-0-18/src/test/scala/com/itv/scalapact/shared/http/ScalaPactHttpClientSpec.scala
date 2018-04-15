@@ -31,7 +31,8 @@ class ScalaPactHttpClientSpec extends FunSpec with Matchers {
 
       val fakeCaller: (SimpleRequest, Client[IO]) => IO[SimpleResponse] = (_, _) => IO.pure(SimpleResponse(200))
 
-      val result = ScalaPactHttpClient.doInteractionRequestIO(fakeCaller, "", requestDetails, 1.second, None).unsafeRunSync()
+      val result =
+        ScalaPactHttpClient.doInteractionRequestIO(fakeCaller, "", requestDetails, 1.second, None).unsafeRunSync()
 
       result shouldEqual responseDetails
     }

@@ -61,11 +61,12 @@ object Http4sRequestResponseFactory {
         attributes = AttributeMap.empty
       )
 
-      request.body.map { b =>
-        r.withBody(b)(EntityEncoder.simple()(stringToByteVector))
-      }.getOrElse(Task(r))
+      request.body
+        .map { b =>
+          r.withBody(b)(EntityEncoder.simple()(stringToByteVector))
+        }
+        .getOrElse(Task(r))
     }
-
 
   def buildResponse(status: IntAndReason, headers: Map[String, String], body: Option[String]): Task[Response] =
     intToStatus(status).flatMap { code =>
@@ -77,9 +78,11 @@ object Http4sRequestResponseFactory {
         attributes = AttributeMap.empty
       )
 
-      body.map { b =>
-        response.withBody(b)(EntityEncoder.simple()(stringToByteVector))
-      }.getOrElse(Task(response))
+      body
+        .map { b =>
+          response.withBody(b)(EntityEncoder.simple()(stringToByteVector))
+        }
+        .getOrElse(Task(response))
     }
 
 }

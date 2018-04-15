@@ -22,9 +22,8 @@ object Provider {
       Ok(ResultResponse(3, loadPeople).asJson)
 
     case request @ GET -> Root / "auth_token" =>
-
       val acceptHeader = request.headers.get(CaseInsensitiveString("Accept")).map(_.value)
-      val nameHeader = request.headers.get(CaseInsensitiveString("Name")).map(_.value)
+      val nameHeader   = request.headers.get(CaseInsensitiveString("Name")).map(_.value)
 
       (acceptHeader, nameHeader) match {
         case (Some(accept), Some(name)) =>
@@ -43,7 +42,8 @@ object Provider {
   }
 
   def loadPeople: List[String] =
-    Source.fromFile(new File("people.txt").toURI)
+    Source
+      .fromFile(new File("people.txt").toURI)
       .getLines
       .mkString
       .split(',')

@@ -7,24 +7,36 @@ import com.itv.scalapactcore.verifier.ValidatedDetails
 
 object Publisher {
 
-  def publishToBroker(sendIt: SimpleRequest => Either[Throwable, SimpleResponse], pactBrokerAddress: String, versionToPublishAs: String)(implicit pactWriter: IPactWriter): ConfigAndPacts => List[PublishResult] = configAndPacts =>
-    configAndPacts.pacts.map { pact =>
-      publishPact(sendIt, pact, versionToPublishAs) {
-        ValidatedDetails.buildFrom(pact.consumer.name, pact.provider.name, pactBrokerAddress, "/latest")
-      }
+  def publishToBroker(
+      sendIt: SimpleRequest => Either[Throwable, SimpleResponse],
+      pactBrokerAddress: String,
+      versionToPublishAs: String)(implicit pactWriter: IPactWriter): ConfigAndPacts => List[PublishResult] =
+    configAndPacts =>
+      configAndPacts.pacts.map { pact =>
+        publishPact(sendIt, pact, versionToPublishAs) {
+          ValidatedDetails.buildFrom(pact.consumer.name, pact.provider.name, pactBrokerAddress, "/latest")
+        }
     }
 
-  def publishPact(sendIt: SimpleRequest => Either[Throwable, SimpleResponse], pact: Pact, versionToPublishAs: String)(details: Either[String, ValidatedDetails])(implicit pactWriter: IPactWriter): PublishResult =
+  def publishPact(sendIt: SimpleRequest => Either[Throwable, SimpleResponse], pact: Pact, versionToPublishAs: String)(
+      details: Either[String, ValidatedDetails])(implicit pactWriter: IPactWriter): PublishResult =
     details match {
       case Left(l) =>
         PublishFailed("Validation error", l)
 
       case Right(v) =>
-        val address = v.validatedAddress.address + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + "/version/" + versionToPublishAs.replace("-SNAPSHOT", ".x")
+        val address = v.validatedAddress.address + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + "/version/" + versionToPublishAs
+          .replace("-SNAPSHOT", ".x")
 
         val context = s"Publishing '${v.consumerName} -> ${v.providerName}' to:\n > $address".yellow
 
-        sendIt(SimpleRequest(address, "", HttpMethod.PUT, Map("Content-Type" -> "application/json"), Option(pactWriter.pactToJsonString(pact)), sslContextName = None)) match {
+        sendIt(
+          SimpleRequest(address,
+                        "",
+                        HttpMethod.PUT,
+                        Map("Content-Type" -> "application/json"),
+                        Option(pactWriter.pactToJsonString(pact)),
+                        sslContextName = None)) match {
           case Right(r) if r.is2xx =>
             PublishSuccess(context)
 

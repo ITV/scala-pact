@@ -9,13 +9,15 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
 
     it("should be able to extract the provider") {
 
-      JsonBodySpecialCaseHelper.extractPactActor("provider")(PactFileExamples.simpleAsString) shouldEqual Some(PactActor("provider"))
+      JsonBodySpecialCaseHelper.extractPactActor("provider")(PactFileExamples.simpleAsString) shouldEqual Some(
+        PactActor("provider"))
 
     }
 
     it("should be able to extract the consumer") {
 
-      JsonBodySpecialCaseHelper.extractPactActor("consumer")(PactFileExamples.simpleAsString) shouldEqual Some(PactActor("consumer"))
+      JsonBodySpecialCaseHelper.extractPactActor("consumer")(PactFileExamples.simpleAsString) shouldEqual Some(
+        PactActor("consumer"))
 
     }
 
@@ -33,7 +35,7 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
           body = None,
           matchingRules = Option(
             Map(
-              "$.headers.Accept" -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
+              "$.headers.Accept"         -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
               "$.headers.Content-Length" -> MatchingRule(`match` = Option("type"), regex = None, min = None)
             )
           )
@@ -44,15 +46,14 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
           body = None,
           matchingRules = Option(
             Map(
-              "$.headers.Accept" -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
+              "$.headers.Accept"         -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
               "$.headers.Content-Length" -> MatchingRule(`match` = Option("type"), regex = None, min = None)
             )
           )
         )
       )
-      val interaction1RequestBody = Option("fish")
-      val interaction1ResponseBody = Option(
-        """{
+      val interaction1RequestBody  = Option("fish")
+      val interaction1ResponseBody = Option("""{
           |  "fish" : [
           |    "cod",
           |    "haddock",
@@ -79,9 +80,8 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
           matchingRules = None
         )
       )
-      val interaction2RequestBody = Option("fish")
-      val interaction2ResponseBody = Option(
-        """{
+      val interaction2RequestBody  = Option("fish")
+      val interaction2ResponseBody = Option("""{
           |  "chips" : true,
           |  "fish" : [
           |    "cod",

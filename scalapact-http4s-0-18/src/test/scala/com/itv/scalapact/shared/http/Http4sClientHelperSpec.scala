@@ -25,14 +25,13 @@ class Http4sClientHelperSpec extends FunSpec with Matchers with BeforeAndAfterAl
 
   }
 
-  override def afterAll(): Unit = {
+  override def afterAll(): Unit =
     wireMockServer.stop()
-  }
 
   describe("Making an HTTP request") {
 
     it("should be able to make a simple request") {
-      val request = SimpleRequest("http://localhost:1234", "/test", HttpMethod.GET, None)
+      val request  = SimpleRequest("http://localhost:1234", "/test", HttpMethod.GET, None)
       val response = Http4sClientHelper.doRequest(request, Http4sClientHelper.defaultClient).unsafeRunSync()
 
       response.statusCode shouldEqual 200

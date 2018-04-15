@@ -13,13 +13,12 @@ class PactReader extends IPactReader {
 
   def jsonStringToPact(json: String): Either[String, Pact] = {
     val brokenPact: Option[(PactActor, PactActor, List[(Option[Interaction], Option[String], Option[String])])] = for {
-      provider <- JsonBodySpecialCaseHelper.extractPactActor("provider")(json)
-      consumer <- JsonBodySpecialCaseHelper.extractPactActor("consumer")(json)
+      provider     <- JsonBodySpecialCaseHelper.extractPactActor("provider")(json)
+      consumer     <- JsonBodySpecialCaseHelper.extractPactActor("consumer")(json)
       interactions <- JsonBodySpecialCaseHelper.extractInteractions(json)
     } yield (provider, consumer, interactions)
 
     brokenPact.map { bp =>
-
       val interactions = bp._3.collect {
         case (Some(i), r1, r2) =>
           i.copy(
@@ -38,7 +37,7 @@ class PactReader extends IPactReader {
 
     } match {
       case Some(pact) => Right(pact)
-      case None => Left(s"Could not read pact from json: $json")
+      case None       => Left(s"Could not read pact from json: $json")
     }
   }
 
@@ -48,17 +47,21 @@ object JsonBodySpecialCaseHelper {
 
   import PactImplicits._
 
-  val extractPactActor: String => String => Option[PactActor] = field => json =>
-    json
-      .parseOption
-      .flatMap { j => (j.hcursor --\ field).focus }
-      .flatMap(p => p.toString.decodeOption[PactActor])
+  val extractPactActor: String => String => Option[PactActor] = field =>
+    json =>
+      json.parseOption
+        .flatMap { j =>
+          (j.hcursor --\ field).focus
+        }
+        .flatMap(p => p.toString.decodeOption[PactActor])
 
   val extractInteractions: String => Option[List[(Option[Interaction], Option[String], Option[String])]] = json => {
 
     val interations =
       json.parseOption
-        .flatMap { j => (j.hcursor --\ "interactions").focus.flatMap(_.array) }
+        .flatMap { j =>
+          (j.hcursor --\ "interactions").focus.flatMap(_.array)
+        }
 
     val makeOptionalBody: Json => Option[String] = {
       case body: Json if body.isString =>
@@ -73,13 +76,13 @@ object JsonBodySpecialCaseHelper {
         val minusRequestBody =
           (i.hcursor --\ "request" --\ "body").delete.undo match {
             case ok @ Some(_) => ok
-            case None => Option(i)
+            case None         => Option(i)
           }
 
         val minusResponseBody = minusRequestBody.flatMap { ii =>
           (ii.hcursor --\ "response" --\ "body").delete.undo match {
-            case ok@Some(_) => ok
-            case None => minusRequestBody // There wasn't a body, but there was still an interaction.
+            case ok @ Some(_) => ok
+            case None         => minusRequestBody // There wasn't a body, but there was still an interaction.
           }
         }
 

@@ -16,7 +16,7 @@ class ProviderClientSpec extends FunSpec with Matchers {
 
   describe("Connecting to the Provider service") {
 
-    it("should be able to fetch results"){
+    it("should be able to fetch results") {
 
       val people = List("Bob", "Fred", "Harry")
 
@@ -38,7 +38,6 @@ class ProviderClientSpec extends FunSpec with Matchers {
             .willRespondWith(200, body)
         )
         .runConsumerTest { mockConfig =>
-
           val results = ProviderClient.fetchResults(mockConfig.baseUrl)
 
           results.isDefined shouldEqual true
@@ -62,16 +61,15 @@ class ProviderClientSpec extends FunSpec with Matchers {
               query = None,
               headers = Map("Accept" -> "application/json", "Name" -> "Bob"),
               body = None,
-              matchingRules =
-                // When stubbing (during this test or externally), we don't mind
+              matchingRules = // When stubbing (during this test or externally), we don't mind
                 // what the name is, as long as it only contains letters.
                 headerRegexRule("Name", "^([a-zA-Z]+)$")
-            ).willRespondWith(
+            )
+            .willRespondWith(
               status = 202,
               headers = Map("Content-Type" -> "application/json; charset=UTF-8"),
               body = """{"token":"abcABC123"}""",
-              matchingRules =
-                // When verifying externally, we don't mind what is in the token
+              matchingRules = // When verifying externally, we don't mind what is in the token
                 // as long as it contains a token field with an alphanumeric
                 // value
                 bodyRegexRule("token", "^([a-zA-Z0-9]+)$")

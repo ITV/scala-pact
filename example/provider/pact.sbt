@@ -14,7 +14,6 @@ scalaPactEnv :=
 // New style
 providerStateMatcher := {
   case "Results: Bob, Fred, Harry" =>
-
     val peopleFile = new File("people.txt")
     peopleFile.createNewFile()
     peopleFile.setWritable(true)

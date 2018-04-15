@@ -25,9 +25,8 @@ class Http4sClientHelperSpec extends FunSpec with Matchers with BeforeAndAfterAl
 
   }
 
-  override def afterAll(): Unit = {
+  override def afterAll(): Unit =
     wireMockServer.stop()
-  }
 
   describe("Making an HTTP request") {
 

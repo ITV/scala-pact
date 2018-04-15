@@ -16,19 +16,16 @@ class VerifyContractsSpec extends FunSpec with Matchers with BeforeAndAfterAll {
   override def beforeAll(): Unit = {
 
     // The underscore here just denotes "whatever I'm not using the value anyway.."
-    val mockLoadPeopleFunc: String => List[String] = _ =>
-      List("Bob", "Fred", "Harry")
+    val mockLoadPeopleFunc: String => List[String] = _ => List("Bob", "Fred", "Harry")
 
-    val mockGenTokenFunc: Int => String = _ =>
-      "abcABC123"
+    val mockGenTokenFunc: Int => String = _ => "abcABC123"
 
     runningService = Some(AlternateStartupApproach.startServer(mockLoadPeopleFunc, mockGenTokenFunc))
   }
 
   // Afterwards we need to remember to shut our service down again.
-  override def afterAll(): Unit = {
+  override def afterAll(): Unit =
     runningService.foreach(p => p.shutdownNow())
-  }
 
   describe("Verifying Consumer Contracts") {
 

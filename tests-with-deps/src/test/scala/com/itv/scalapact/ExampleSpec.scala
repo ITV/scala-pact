@@ -38,7 +38,6 @@ class ExampleSpec extends FunSpec with Matchers {
             .willRespondWith(200, "Hello there!")
         )
         .runConsumerTest { mockConfig =>
-
           val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint, Map.empty)
 
           result.status should equal(200)
@@ -53,7 +52,9 @@ class ExampleSpec extends FunSpec with Matchers {
       val endPoint = "/hello"
 
       val base = new File("ssl").getAbsoluteFile
-      implicit val sslMap: SslContextMap = new SslContextMap(Map("default" -> SslContextMap.makeSslContext(s"$base/client.jks", "password", s"$base/clienttrust.jks", "password")))
+      implicit val sslMap: SslContextMap = new SslContextMap(
+        Map("default" -> SslContextMap
+          .makeSslContext(s"$base/client.jks", "password", s"$base/clienttrust.jks", "password")))
 
       forgePact
         .between("My Consumer")
@@ -67,10 +68,10 @@ class ExampleSpec extends FunSpec with Matchers {
         )
         .runConsumerTest { mockConfig =>
           val sslContext = sslMap(Some("default")).getOrElse(fail)
-          val f = HttpsURLConnection.getDefaultSSLSocketFactory
+          val f          = HttpsURLConnection.getDefaultSSLSocketFactory
           try {
             HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory)
-            val url = new URL(mockConfig.baseUrl +endPoint)
+            val url = new URL(mockConfig.baseUrl + endPoint)
             mockConfig.protocol shouldBe "https"
             mockConfig.baseUrl should startWith("https")
             val con = url.openConnection.asInstanceOf[HttpURLConnection]
@@ -87,7 +88,6 @@ class ExampleSpec extends FunSpec with Matchers {
 
     }
 
-
     it("Should be able to create a contract for a GET request with query params") {
 
       val endPoint = "/hello?location=london"
@@ -102,7 +102,6 @@ class ExampleSpec extends FunSpec with Matchers {
             .willRespondWith(200, "Hello there!")
         )
         .runConsumerTest { mockConfig =>
-
           val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint + "&id=1&name=joe", Map.empty)
 
           result.status should equal(200)
@@ -126,7 +125,6 @@ class ExampleSpec extends FunSpec with Matchers {
             .willRespondWith(200, "Hello there!")
         )
         .runConsumerTest { mockConfig =>
-
           val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint, Map("fish" -> "chips"))
 
           result.status should equal(200)
@@ -152,7 +150,6 @@ class ExampleSpec extends FunSpec with Matchers {
             .willRespondWith(200, Map("Content-Type" -> "application/json"), write(data), None)
         )
         .runConsumerTest { mockConfig =>
-
           val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint, Map())
 
           withClue("Status mismatch") {
@@ -193,7 +190,6 @@ class ExampleSpec extends FunSpec with Matchers {
             .willRespondWith(400, Map("Content-Type" -> "text/xml"), responseXml.toString(), None)
         )
         .runConsumerTest { mockConfig =>
-
           val result = SimpleClient.doPostRequest(mockConfig.baseUrl, endPoint, headers, write(requestData))
 
           withClue("Status mismatch") {
@@ -227,7 +223,6 @@ class ExampleSpec extends FunSpec with Matchers {
             .willRespondWith(200, "ID: 1234 Exists")
         )
         .runConsumerTest { mockConfig =>
-
           val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint, Map.empty)
 
           result.status should equal(200)
@@ -265,7 +260,6 @@ class ExampleSpec extends FunSpec with Matchers {
             )
         )
         .runConsumerTest { mockConfig =>
-
           val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint, Map("fish" -> "peas", "sauce" -> "mayo"))
 
           result.status should equal(200)
@@ -279,8 +273,10 @@ class ExampleSpec extends FunSpec with Matchers {
 
       val endPoint = "/body-match"
 
-      val json: String => Int => List[String] => String = name => count => colours => {
-        s"""
+      val json: String => Int => List[String] => String = name =>
+        count =>
+          colours => {
+            s"""
            |{
            |  "name" : "$name",
            |  "count" : $count,
@@ -315,8 +311,8 @@ class ExampleSpec extends FunSpec with Matchers {
             )
         )
         .runConsumerTest { mockConfig =>
-
-          val result = SimpleClient.doPostRequest(mockConfig.baseUrl, endPoint, Map.empty, json("Sally")(5)(List("red")))
+          val result =
+            SimpleClient.doPostRequest(mockConfig.baseUrl, endPoint, Map.empty, json("Sally")(5)(List("red")))
 
           result.status should equal(200)
           result.body should equal("Success")
@@ -324,7 +320,6 @@ class ExampleSpec extends FunSpec with Matchers {
         }
 
     }
-
 
   }
 }
@@ -339,7 +334,9 @@ case class Person(name: String, age: Int, location: String, hobbies: List[String
 object SimpleClient {
 
   implicit def convertHeaders(headers: Map[String, IndexedSeq[String]]): Map[String, String] =
-    headers.map { h => (h._1, h._2.headOption.getOrElse("")) }
+    headers.map { h =>
+      (h._1, h._2.headOption.getOrElse(""))
+    }
 
   def doGetRequest(baseUrl: String, endPoint: String, headers: Map[String, String]): SimpleResponse = {
     val request = Http(baseUrl + endPoint).headers(headers)
@@ -355,7 +352,7 @@ object SimpleClient {
     doRequest(request)
   }
 
-  def doRequest(request: HttpRequest): SimpleResponse = {
+  def doRequest(request: HttpRequest): SimpleResponse =
     try {
       val response = request.asString
 
@@ -369,9 +366,7 @@ object SimpleClient {
       case e: Throwable =>
         SimpleResponse(500, Map(), e.getMessage)
     }
-  }
 
   case class SimpleResponse(status: Int, headers: Map[String, String], body: String)
 
 }
-

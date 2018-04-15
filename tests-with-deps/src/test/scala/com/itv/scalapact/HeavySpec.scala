@@ -11,19 +11,18 @@ class HeavySpec extends FunSpec with Matchers {
 
   def makeEndPoints(name: String, count: Int): List[String] = (0 until count).toList.map(i => s"/$name/_$i")
 
-  def generatePactAndTestIt(endPoint: String): Unit = {
+  def generatePactAndTestIt(endPoint: String): Unit =
     forgePact
-      .between("heavy-consumer").and("heavy-provider")
+      .between("heavy-consumer")
+      .and("heavy-provider")
       .addInteraction(interaction.description("load").uponReceiving(endPoint).willRespondWith(200))
       .runConsumerTest { config =>
-
         val response = SimpleClient.doGetRequest(config.baseUrl, endPoint, Map())
 
         withClue("Failing response: " + response) {
           response.status shouldEqual 200
         }
       }
-  }
 
   describe("Running many pacts") {
 

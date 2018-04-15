@@ -37,17 +37,17 @@ object MatchOutcome {
   val MaxDrift: Int = 100000
 
   def fromPredicate(p: => Boolean, failureMessage: String, driftAmount: Int): MatchOutcome =
-    if(p) MatchOutcomeSuccess
+    if (p) MatchOutcomeSuccess
     else MatchOutcomeFailed(failureMessage, driftAmount)
 }
 
 case object MatchOutcomeSuccess extends MatchOutcome {
-  val drift: Int = 0
+  val drift: Int         = 0
   val isSuccess: Boolean = true
 }
 case class MatchOutcomeFailed(differences: List[String], drift: Int) extends MatchOutcome {
   val isSuccess: Boolean = false
-  val errorCount: Int = differences.length
+  val errorCount: Int    = differences.length
 
   def renderDifferences: String = differences.mkString("\n")
 }

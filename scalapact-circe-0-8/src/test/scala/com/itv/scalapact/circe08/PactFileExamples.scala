@@ -69,7 +69,7 @@ object PactFileExamples {
           body = Option("""fish"""),
           matchingRules = Option(
             Map(
-              "$.headers.Accept" -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
+              "$.headers.Accept"         -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
               "$.headers.Content-Length" -> MatchingRule(`match` = Option("type"), regex = None, min = None)
             )
           )
@@ -77,8 +77,7 @@ object PactFileExamples {
         response = InteractionResponse(
           status = Option(200),
           headers = Option(Map("Content-Type" -> "application/json")),
-          body = Option(
-            """{
+          body = Option("""{
               |  "fish" : [
               |    "cod",
               |    "haddock",
@@ -87,7 +86,7 @@ object PactFileExamples {
               |}""".stripMargin),
           matchingRules = Option(
             Map(
-              "$.headers.Accept" -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
+              "$.headers.Accept"         -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
               "$.headers.Content-Length" -> MatchingRule(`match` = Option("type"), regex = None, min = None)
             )
           )
@@ -108,8 +107,7 @@ object PactFileExamples {
         response = InteractionResponse(
           status = Option(200),
           headers = Option(Map("Content-Type" -> "application/json")),
-          body = Option(
-            """{
+          body = Option("""{
               |  "chips" : true,
               |  "fish" : [
               |    "cod",

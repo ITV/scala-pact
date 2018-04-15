@@ -10,7 +10,8 @@ import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter}
 
 object ScalaPactTestCommand {
 
-  def doPactPack(scalaPactSettings: ScalaPactSettings)(implicit pactReader: IPactReader, pactWriter: IPactWriter): Unit = {
+  def doPactPack(scalaPactSettings: ScalaPactSettings)(implicit pactReader: IPactReader,
+                                                       pactWriter: IPactWriter): Unit = {
     PactLogger.message("*************************************".white.bold)
     PactLogger.message("** ScalaPact: Squashing Pact Files **".white.bold)
     PactLogger.message("*************************************".white.bold)
@@ -36,37 +37,40 @@ object ScalaPactTestCommand {
       PactLogger.message("> " + errorCount.toString + " errors")
 
     } else {
-      PactLogger.error(s"No Pact files found in '${scalaPactSettings.giveOutputPath}'. Make sure you have Pact CDC tests and have run 'sbt test' or 'sbt pact-test'.".red)
+      PactLogger.error(
+        s"No Pact files found in '${scalaPactSettings.giveOutputPath}'. Make sure you have Pact CDC tests and have run 'sbt test' or 'sbt pact-test'.".red)
     }
   }
 
-  private def squashPactFiles(outputPath: String, files: List[File])(implicit pactReader: IPactReader, pactWriter: IPactWriter): Int = {
+  private def squashPactFiles(outputPath: String, files: List[File])(implicit pactReader: IPactReader,
+                                                                     pactWriter: IPactWriter): Int = {
     //Yuk!
     var errorCount = 0
 
     val pactList = {
-      files.map { file =>
-        val fileContents = try {
-          val contents = Option(Source.fromFile(file).getLines().mkString)
+      files
+        .map { file =>
+          val fileContents = try {
+            val contents = Option(Source.fromFile(file).getLines().mkString)
 
-          file.delete()
+            file.delete()
 
-          contents
-        } catch {
-          case _: Throwable =>
-            PactLogger.message(("Problem reading Pact file at path: " + file.getCanonicalPath).red)
-            errorCount = errorCount + 1
-            None
-        }
-        fileContents.flatMap { t =>
-          pactReader.jsonStringToPact(t) match {
-            case Right(r) => Option(r)
-            case Left(_) =>
-              errorCount += 1
+            contents
+          } catch {
+            case _: Throwable =>
+              PactLogger.message(("Problem reading Pact file at path: " + file.getCanonicalPath).red)
+              errorCount = errorCount + 1
               None
           }
+          fileContents.flatMap { t =>
+            pactReader.jsonStringToPact(t) match {
+              case Right(r) => Option(r)
+              case Left(_) =>
+                errorCount += 1
+                None
+            }
+          }
         }
-      }
         .collect { case Some(s) => s }
     }
 
@@ -79,7 +83,8 @@ object ScalaPactTestCommand {
           accumulatedPact.copy(interactions = accumulatedPact.interactions ++ nextPact.interactions)
         }
 
-        PactContractWriter.writePactContracts(outputPath)(combined.provider.name)(combined.consumer.name)(pactWriter.pactToJsonString(combined))
+        PactContractWriter.writePactContracts(outputPath)(combined.provider.name)(combined.consumer.name)(
+          pactWriter.pactToJsonString(combined))
 
         ()
     }

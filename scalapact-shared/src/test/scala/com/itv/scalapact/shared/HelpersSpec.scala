@@ -8,7 +8,7 @@ class HelpersSpec extends FunSpec with Matchers {
 
     it("should be able to pair a list into a Map") {
 
-      Helpers.pair(List(1, 2, 3, 4)) shouldEqual Map(1 -> 2, 3 -> 4)
+      Helpers.pair(List(1, 2, 3, 4)) shouldEqual Map(1      -> 2, 3 -> 4)
       Helpers.pair(List("a", "b", "c")) shouldEqual Map("a" -> "b")
     }
 

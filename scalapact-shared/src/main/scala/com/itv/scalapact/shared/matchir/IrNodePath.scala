@@ -79,7 +79,8 @@ object PactPath {
     rec(pactPath, IrNodePathEmpty)
   }
 
-  private lazy val safeStringToInt: String => Option[Int] = str => try { Option(str.toInt) } catch { case _: Throwable => None }
+  private lazy val safeStringToInt: String => Option[Int] = str =>
+    try { Option(str.toInt) } catch { case _: Throwable => None }
 
 }
 
@@ -107,7 +108,8 @@ sealed trait PactPathParseResult {
 
 object PactPathParseResult {
   case class PactPathParseSuccess(irNodePath: IrNodePath) extends PactPathParseResult
-  case class PactPathParseFailure(original: String, lookingAt: String, specificError: Option[String]) extends PactPathParseResult {
+  case class PactPathParseFailure(original: String, lookingAt: String, specificError: Option[String])
+      extends PactPathParseResult {
     def errorString: String =
       s"${specificError.getOrElse("Failed to parse PactPath")}. Was looking at '$lookingAt' in '$original'"
   }
@@ -115,23 +117,24 @@ object PactPathParseResult {
 
 object PactPathPatterns {
   // Prefixes
-  val dollarPrefix: Regex ="""^(\$.body|\$.headers)(.*)$""".r
+  val dollarPrefix: Regex = """^(\$.body|\$.headers)(.*)$""".r
 
   // Fields
-  val fieldNamePrefix: Regex ="""^(\.|\[[\'|\"])(.*)$""".r
-  val fieldName: Regex = """^([a-zA-Z0-9:\-_]+)(.*)$""".r // TODO: This is very limited, technically any escaped string is valid
+  val fieldNamePrefix: Regex = """^(\.|\[[\'|\"])(.*)$""".r
+  val fieldName
+    : Regex                  = """^([a-zA-Z0-9:\-_]+)(.*)$""".r // TODO: This is very limited, technically any escaped string is valid
   val fieldNameSuffix: Regex = """^([\'|\"]\])(.*)$""".r
 
   // Arrays
-  val arrayAnyElement: Regex = """^(\[\*\])(.*)$""".r
+  val arrayAnyElement: Regex     = """^(\[\*\])(.*)$""".r
   val arrayElementAtIndex: Regex = """^\[(\d+)\](.*)$""".r
 
   // Xml addons
   val xmlAttributeName: Regex = """^@([a-zA-Z0-9:\-_]+)(.*)$""".r
-  val xmlTextElement: Regex = """^#([a-zA-Z0-9:\-_]+)(.*)$""".r
+  val xmlTextElement: Regex   = """^#([a-zA-Z0-9:\-_]+)(.*)$""".r
 
   // Suffixes
-  val anyField: Regex ="""^(\*)(.*)$""".r
+  val anyField: Regex = """^(\*)(.*)$""".r
 }
 
 sealed trait IrNodePath {
@@ -147,7 +150,7 @@ sealed trait IrNodePath {
   def giveArrayIndex: Int
 
   def <~(fieldName: String): IrNodePath =
-    if(fieldName == "*") IrNodePathArrayAnyElement(this) else IrNodePathField(fieldName, this)
+    if (fieldName == "*") IrNodePathArrayAnyElement(this) else IrNodePathField(fieldName, this)
 
   def <~(arrayIndex: Int): IrNodePath = IrNodePathArrayElement(arrayIndex, this)
 
@@ -160,7 +163,7 @@ sealed trait IrNodePath {
   def =~=(other: IrNodePath): Boolean = isEqualTo(other, strict = false)
   def ===(other: IrNodePath): Boolean = isEqualTo(other, strict = true)
 
-  def noText: IrNodePath = if(this.isTextElement) this.parent else this
+  def noText: IrNodePath = if (this.isTextElement) this.parent else this
 
   def ++(other: IrNodePath): IrNodePath = append(other)
 
@@ -207,11 +210,9 @@ sealed trait IrNodePath {
   def renderAsString: String = IrNodePath.renderAsString(this)
 
   def lastSegmentLabel: String =
-    split
-      .reverse
-      .headOption
+    split.reverse.headOption
       .map { s =>
-        if(s.isField || s.isAttribute) s
+        if (s.isField || s.isAttribute) s
         else s.parent
       }
       .map(_.renderAsString)
@@ -219,77 +220,77 @@ sealed trait IrNodePath {
 }
 
 case object IrNodePathEmpty extends IrNodePath {
-  def name: String = "."
-  val parent: IrNodePath = IrNodePathEmpty
-  def isEmpty: Boolean = true
-  def isField: Boolean = false
-  def isArrayIndex: Boolean = false
+  def name: String             = "."
+  val parent: IrNodePath       = IrNodePathEmpty
+  def isEmpty: Boolean         = true
+  def isField: Boolean         = false
+  def isArrayIndex: Boolean    = false
   def isArrayWildcard: Boolean = false
-  def isAttribute: Boolean = false
-  def isTextElement: Boolean = false
-  def isAnyField: Boolean = false
-  def giveArrayIndex: Int = 0
+  def isAttribute: Boolean     = false
+  def isTextElement: Boolean   = false
+  def isAnyField: Boolean      = false
+  def giveArrayIndex: Int      = 0
 }
 case class IrNodePathField(fieldName: String, parent: IrNodePath) extends IrNodePath {
-  def isEmpty: Boolean = false
-  def isField: Boolean = true
-  def isArrayIndex: Boolean = false
+  def isEmpty: Boolean         = false
+  def isField: Boolean         = true
+  def isArrayIndex: Boolean    = false
   def isArrayWildcard: Boolean = false
-  def isAttribute: Boolean = false
-  def isTextElement: Boolean = false
-  def isAnyField: Boolean = false
-  def giveArrayIndex: Int = 0
+  def isAttribute: Boolean     = false
+  def isTextElement: Boolean   = false
+  def isAnyField: Boolean      = false
+  def giveArrayIndex: Int      = 0
 }
 case class IrNodePathArrayElement(index: Int, parent: IrNodePath) extends IrNodePath {
-  def isEmpty: Boolean = false
-  def isField: Boolean = false
-  def isArrayIndex: Boolean = true
+  def isEmpty: Boolean         = false
+  def isField: Boolean         = false
+  def isArrayIndex: Boolean    = true
   def isArrayWildcard: Boolean = false
-  def isAttribute: Boolean = false
-  def isTextElement: Boolean = false
-  def isAnyField: Boolean = false
-  def giveArrayIndex: Int = index
+  def isAttribute: Boolean     = false
+  def isTextElement: Boolean   = false
+  def isAnyField: Boolean      = false
+  def giveArrayIndex: Int      = index
 }
 case class IrNodePathArrayAnyElement(parent: IrNodePath) extends IrNodePath {
-  def isEmpty: Boolean = false
-  def isField: Boolean = false
-  def isArrayIndex: Boolean = false
+  def isEmpty: Boolean         = false
+  def isField: Boolean         = false
+  def isArrayIndex: Boolean    = false
   def isArrayWildcard: Boolean = true
-  def isAttribute: Boolean = false
-  def isTextElement: Boolean = false
-  def isAnyField: Boolean = false
-  def giveArrayIndex: Int = 0
+  def isAttribute: Boolean     = false
+  def isTextElement: Boolean   = false
+  def isAnyField: Boolean      = false
+  def giveArrayIndex: Int      = 0
 }
 case class IrNodePathFieldAttribute(attributeName: String, parent: IrNodePath) extends IrNodePath {
-  def isEmpty: Boolean = false
-  def isField: Boolean = false
-  def isArrayIndex: Boolean = false
+  def isEmpty: Boolean         = false
+  def isField: Boolean         = false
+  def isArrayIndex: Boolean    = false
   def isArrayWildcard: Boolean = false
-  def isAttribute: Boolean = true
-  def isTextElement: Boolean = false
-  def isAnyField: Boolean = false
-  def giveArrayIndex: Int = 0
+  def isAttribute: Boolean     = true
+  def isTextElement: Boolean   = false
+  def isAnyField: Boolean      = false
+  def giveArrayIndex: Int      = 0
 }
 case class IrNodePathTextElement(parent: IrNodePath) extends IrNodePath {
-  def isEmpty: Boolean = false
-  def isField: Boolean = false
-  def isArrayIndex: Boolean = false
+  def isEmpty: Boolean         = false
+  def isField: Boolean         = false
+  def isArrayIndex: Boolean    = false
   def isArrayWildcard: Boolean = false
-  def isAttribute: Boolean = false
-  def isTextElement: Boolean = true
-  def isAnyField: Boolean = false
-  def giveArrayIndex: Int = 0
+  def isAttribute: Boolean     = false
+  def isTextElement: Boolean   = true
+  def isAnyField: Boolean      = false
+  def giveArrayIndex: Int      = 0
 }
 
 case class IrNodePathAnyField(parent: IrNodePath) extends IrNodePath {
-  def isEmpty: Boolean = false
-  def isField: Boolean = false
-  def isArrayIndex: Boolean = false
+  def isEmpty: Boolean         = false
+  def isField: Boolean         = false
+  def isArrayIndex: Boolean    = false
   def isArrayWildcard: Boolean = false
-  def isAttribute: Boolean = false
-  def isTextElement: Boolean = false
-  def isAnyField: Boolean = true
-  def giveArrayIndex: Int = 0
+  def isAttribute: Boolean     = false
+  def isTextElement: Boolean   = false
+  def isAnyField: Boolean      = true
+  def giveArrayIndex: Int      = 0
 }
 
 object IrNodePath {
@@ -301,7 +302,7 @@ object IrNodePath {
   def invert(path: IrNodePath): IrNodePath =
     IrNodePath.combine(path.split.reverse)
 
-  def withParent(path: IrNodePath, newParent: IrNodePath): IrNodePath = {
+  def withParent(path: IrNodePath, newParent: IrNodePath): IrNodePath =
     path match {
       case IrNodePathEmpty =>
         path
@@ -324,7 +325,6 @@ object IrNodePath {
       case seg @ IrNodePathAnyField(_) =>
         seg.copy(parent = newParent)
     }
-  }
 
   def append(pathA: IrNodePath, pathB: IrNodePath): IrNodePath =
     pathB.withParentAtRoot(pathA)
@@ -339,7 +339,8 @@ object IrNodePath {
         case (IrNodePathField(fieldNameA, parentA), IrNodePathField(fieldNameB, parentB)) if fieldNameA == fieldNameB =>
           rec(parentA, parentB)
 
-        case (IrNodePathArrayElement(indexA, parentA), IrNodePathArrayElement(indexB, parentB)) if strict && indexA == indexB =>
+        case (IrNodePathArrayElement(indexA, parentA), IrNodePathArrayElement(indexB, parentB))
+            if strict && indexA == indexB =>
           rec(parentA, parentB)
 
         case (IrNodePathArrayElement(_, parentA), IrNodePathArrayElement(_, parentB)) if !strict =>
@@ -351,7 +352,8 @@ object IrNodePath {
         case (IrNodePathArrayAnyElement(parentA), IrNodePathArrayElement(_, parentB)) =>
           rec(parentA, parentB)
 
-        case (IrNodePathFieldAttribute(attributeNameA, parentA), IrNodePathFieldAttribute(attributeNameB, parentB)) if attributeNameA == attributeNameB =>
+        case (IrNodePathFieldAttribute(attributeNameA, parentA), IrNodePathFieldAttribute(attributeNameB, parentB))
+            if attributeNameA == attributeNameB =>
           rec(parentA, parentB)
 
         case (IrNodePathTextElement(parentA), IrNodePathTextElement(parentB)) =>
@@ -380,12 +382,12 @@ object IrNodePath {
           acc
 
         case x :: xs if x.isField =>
-          val p = indexPathSoFar ++ (x <~ 0)
+          val p    = indexPathSoFar ++ (x <~ 0)
           val next = p ++ IrNodePath.combine(xs)
           rec(xs, p, next :: acc)
 
         case x :: xs =>
-          val p = indexPathSoFar ++ x
+          val p    = indexPathSoFar ++ x
           val next = p ++ IrNodePath.combine(xs)
           rec(xs, p, if (acc.exists(_ === next)) acc else next :: acc)
       }
@@ -403,11 +405,12 @@ object IrNodePath {
 
       }
 
-    deduplicate(rec(path.invert.split, IrNodePath.empty, Nil).map(_.invert) ++ rec(path.split, IrNodePath.empty, Nil), Nil)
+    deduplicate(rec(path.invert.split, IrNodePath.empty, Nil).map(_.invert) ++ rec(path.split, IrNodePath.empty, Nil),
+                Nil)
   }
 
   def split(path: IrNodePath): List[IrNodePath] = {
-    def rec(p: IrNodePath, acc: List[IrNodePath]): List[IrNodePath] = {
+    def rec(p: IrNodePath, acc: List[IrNodePath]): List[IrNodePath] =
       p match {
         case IrNodePathEmpty =>
           acc
@@ -430,7 +433,6 @@ object IrNodePath {
         case seg @ IrNodePathAnyField(_) =>
           rec(p.parent.parent, seg.withParent(seg.parent.withParent(IrNodePath.empty)) :: acc)
       }
-    }
 
     rec(path, Nil)
   }
@@ -445,10 +447,10 @@ object IrNodePath {
           IrNodePathEmpty.name
 
         case IrNodePathEmpty =>
-          if(acc.startsWith(".[")) acc.drop(1) else acc
+          if (acc.startsWith(".[")) acc.drop(1) else acc
 
         case IrNodePathField(fieldName, parentNode) =>
-          if(fieldName != MatchIrConstants.unnamedNodeLabel && fieldName != MatchIrConstants.rootNodeLabel)
+          if (fieldName != MatchIrConstants.unnamedNodeLabel && fieldName != MatchIrConstants.rootNodeLabel)
             rec(parentNode, s".$fieldName$acc")
           else
             rec(parentNode, s".$acc")

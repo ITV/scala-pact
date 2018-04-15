@@ -13,7 +13,7 @@ import scala.concurrent.duration._
 import scala.concurrent.Await
 
 /**
- * Strict and non-strict pacts cannot be mixed.
+  * Strict and non-strict pacts cannot be mixed.
  **/
 class ChunkedRequestsSpec extends FunSpec with Matchers {
 
@@ -48,7 +48,6 @@ class ChunkedRequestsSpec extends FunSpec with Matchers {
             )
         )
         .runConsumerTest { mockConfig =>
-
           val request =
             HttpRequest(mockConfig.baseUrl + endPoint)
               .withBackendConfig(
@@ -80,7 +79,10 @@ class ChunkedRequestsSpec extends FunSpec with Matchers {
               method = POST,
               path = endPoint,
               query = None,
-              headers = Map("SOAPAction" -> "process", "Accept" -> "text/xml", "Content-Type" -> "text/xml; charset=utf-8", "User-Agent" -> "scala-pact-test"),
+              headers = Map("SOAPAction"   -> "process",
+                            "Accept"       -> "text/xml",
+                            "Content-Type" -> "text/xml; charset=utf-8",
+                            "User-Agent"   -> "scala-pact-test"),
               body = xml,
               matchingRules = None
             )
@@ -92,7 +94,6 @@ class ChunkedRequestsSpec extends FunSpec with Matchers {
             )
         )
         .runConsumerTest { mockConfig =>
-
           val request =
             HttpRequest()
               .withBackendConfig(BackendConfig(
@@ -100,7 +101,10 @@ class ChunkedRequestsSpec extends FunSpec with Matchers {
               ))
               .withURL(mockConfig.baseUrl)
               .withPath(endPoint)
-              .withHeaders("SOAPAction" -> "process", "Accept" -> "text/xml", "Content-Type" -> "text/xml", "User-Agent" -> "scala-pact-test")
+              .withHeaders("SOAPAction"   -> "process",
+                           "Accept"       -> "text/xml",
+                           "Content-Type" -> "text/xml",
+                           "User-Agent"   -> "scala-pact-test")
               .withMethod(fr.hmil.roshttp.Method.POST)
               .withBody(XmlBody(xml))
 
@@ -212,7 +216,7 @@ class ChunkedRequestsSpec extends FunSpec with Matchers {
 
 }
 
-class XmlBody private(text: String, charset: String) extends BulkBodyPart {
+class XmlBody private (text: String, charset: String) extends BulkBodyPart {
 
   override def contentType: String = "text/xml; charset=" + charset
 

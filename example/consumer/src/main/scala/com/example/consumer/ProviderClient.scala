@@ -9,7 +9,7 @@ object ProviderClient {
 
   private implicit val formats = DefaultFormats
 
-  def fetchResults(baseUrl: String): Option[Results] = {
+  def fetchResults(baseUrl: String): Option[Results] =
     Http(baseUrl + "/results").asString match {
       case r: HttpResponse[String] if r.is2xx =>
         parse(r.body).extractOpt[Results]
@@ -17,21 +17,19 @@ object ProviderClient {
       case _ =>
         None
     }
-  }
 
-  def fetchAuthToken(host: String, port: Int, name: String): Option[Token] = {
+  def fetchAuthToken(host: String, port: Int, name: String): Option[Token] =
     Http("http://" + host + ":" + port + "/auth_token?name=" + name)
       .headers(("Accept", "application/json"), ("Name", name))
       .asString match {
-        case r: HttpResponse[String] if r.is2xx =>
-          println(">> " + r)
-          parse(r.body).extractOpt[Token]
+      case r: HttpResponse[String] if r.is2xx =>
+        println(">> " + r)
+        parse(r.body).extractOpt[Token]
 
-        case r: HttpResponse[String] =>
-          println("<< " + r)
-          None
-      }
-  }
+      case r: HttpResponse[String] =>
+        println("<< " + r)
+        None
+    }
 
 }
 

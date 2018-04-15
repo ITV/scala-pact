@@ -20,7 +20,9 @@ object Http4sClientHelper {
   )
 
   private val extractResponse: Response => Task[SimpleResponse] = r =>
-    r.bodyAsText.runLog[Task, String].map(_.mkString).map { b => SimpleResponse(r.status.code, r.headers, Some(b)) }
+    r.bodyAsText.runLog[Task, String].map(_.mkString).map { b =>
+      SimpleResponse(r.status.code, r.headers, Some(b))
+  }
 
   def defaultClient: Client =
     buildPooledBlazeHttpClient(1, Duration(1, SECONDS))
@@ -28,11 +30,12 @@ object Http4sClientHelper {
   def buildPooledBlazeHttpClient(maxTotalConnections: Int, clientTimeout: Duration): Client =
     PooledHttp1Client(maxTotalConnections, blazeClientConfig(clientTimeout))
 
-  val doRequest: Client => SimpleRequest => Task[SimpleResponse] = httpClient => request =>
-    for {
-      request  <- Http4sRequestResponseFactory.buildRequest(request)
-      response <- httpClient.fetch[SimpleResponse](request)(extractResponse)
-      _        <- httpClient.shutdown
-    } yield response
+  val doRequest: Client => SimpleRequest => Task[SimpleResponse] = httpClient =>
+    request =>
+      for {
+        request  <- Http4sRequestResponseFactory.buildRequest(request)
+        response <- httpClient.fetch[SimpleResponse](request)(extractResponse)
+        _        <- httpClient.shutdown
+      } yield response
 
 }

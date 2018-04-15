@@ -13,11 +13,13 @@ case class RuleProcessTracing(enabled: Boolean, id: String, context: Option[Stri
 
 object RuleProcessTracing {
   val disabled: RuleProcessTracing = RuleProcessTracing(enabled = false, id = "", context = None)
-  def enabled: RuleProcessTracing = RuleProcessTracing(enabled = true, id = Random.alphanumeric.take(5).mkString, context = None)
+  def enabled: RuleProcessTracing =
+    RuleProcessTracing(enabled = true, id = Random.alphanumeric.take(5).mkString, context = None)
 
   def log(message: String)(implicit ruleProcessTracing: RuleProcessTracing): Unit =
-    if(ruleProcessTracing.enabled)
-      PactLogger.message(s"""  [${ruleProcessTracing.id}] ${ruleProcessTracing.context.map(ctx => s"[$ctx] ").getOrElse("")}$message""")
+    if (ruleProcessTracing.enabled)
+      PactLogger.message(
+        s"""  [${ruleProcessTracing.id}] ${ruleProcessTracing.context.map(ctx => s"[$ctx] ").getOrElse("")}$message""")
     else
       ()
 }
@@ -30,25 +32,25 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
     IrNodeMatchingRules(rules ++ other.rules, withTracing)
 
   def withProcessTracing: IrNodeMatchingRules = this.copy(withTracing = RuleProcessTracing.enabled)
-  def withProcessTracing(context: String): IrNodeMatchingRules = this.copy(withTracing = RuleProcessTracing.enabled.withContext(context))
+  def withProcessTracing(context: String): IrNodeMatchingRules =
+    this.copy(withTracing = RuleProcessTracing.enabled.withContext(context))
 
   def findForPath(path: IrNodePath, isXml: Boolean): List[IrNodeRule] = {
     val res =
-      if(isXml) {
+      if (isXml) {
         rules.filter(_.path.noText === path.noText) match {
           case Nil =>
             val unmodifiedPathRules = path.withIndexes.flatMap { indexedPath =>
               rules.filter(_.path.noText === indexedPath.noText)
             }
 
-            if(path.isArrayWildcard || path.isArrayIndex)  {
+            if (path.isArrayWildcard || path.isArrayIndex) {
               val minusArray = path.parent.withIndexes.flatMap { indexedPath =>
                 rules.filter(_.path.noText === indexedPath.noText)
               }
 
               unmodifiedPathRules ++ minusArray
-            }
-            else {
+            } else {
               unmodifiedPathRules
             }
 
@@ -67,7 +69,7 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
   def validateNode(path: IrNodePath, expected: IrNode, actual: IrNode): List[IrNodeEqualityResult] = {
     RuleProcessTracing.log("validateNode at: " + path.renderAsString)
 
-    if(expected.path.lastSegmentLabel == actual.path.lastSegmentLabel) {
+    if (expected.path.lastSegmentLabel == actual.path.lastSegmentLabel) {
 
       findForPath(path, expected.isXml).flatMap {
         case r @ IrNodeTypeRule(_) =>
@@ -75,24 +77,39 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
 
           val res: List[IrNodeEqualityResult] = (expected.value, actual.value) match {
             case (Some(e), Some(a)) if expected.path.lastSegmentLabel == actual.path.lastSegmentLabel =>
-              if(e.primitiveTypeName == a.primitiveTypeName) List(IrNodesEqual)
-              else List(IrNodesNotEqual(s"Primitive type '${e.primitiveTypeName}' did not match actual '${a.primitiveTypeName}'", path))
+              if (e.primitiveTypeName == a.primitiveTypeName) List(IrNodesEqual)
+              else
+                List(
+                  IrNodesNotEqual(
+                    s"Primitive type '${e.primitiveTypeName}' did not match actual '${a.primitiveTypeName}'",
+                    path))
 
             case (Some(_), Some(_)) =>
-              List(IrNodesNotEqual(s"Miss aligned values (by path '${expected.path.lastSegmentLabel}' and '${actual.path.lastSegmentLabel}'), could not check rule: " + r.renderAsString, path))
+              List(
+                IrNodesNotEqual(
+                  s"Miss aligned values (by path '${expected.path.lastSegmentLabel}' and '${actual.path.lastSegmentLabel}'), could not check rule: " + r.renderAsString,
+                  path
+                ))
 
             case (Some(v), None) =>
-              List(IrNodesNotEqual(s"Missing actual value (compared to expected '${v.renderAsString}'), could not check rule: " + r.renderAsString, path))
+              List(
+                IrNodesNotEqual(
+                  s"Missing actual value (compared to expected '${v.renderAsString}'), could not check rule: " + r.renderAsString,
+                  path))
 
             case (_, Some(v)) =>
-              List(IrNodesNotEqual(s"Missing expected value (compared to actual '${v.renderAsString}'), could not check rule: " + r.renderAsString, path))
+              List(
+                IrNodesNotEqual(
+                  s"Missing expected value (compared to actual '${v.renderAsString}'), could not check rule: " + r.renderAsString,
+                  path))
 
             case (_, _) =>
               RuleProcessTracing.log(" ...no values")
               List(IrNodesEqual)
           }
 
-          RuleProcessTracing.log(s"  ...${res.map(p => if(p.isEqual) "success" else "failure: " + p.renderAsString).mkString(", ")}")
+          RuleProcessTracing.log(
+            s"  ...${res.map(p => if (p.isEqual) "success" else "failure: " + p.renderAsString).mkString(", ")}")
 
           res
 
@@ -114,7 +131,7 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
               Nil
           }
 
-          RuleProcessTracing.log(s"  ...${res.map(p => if(p.isEqual) "success" else "failure").mkString(", ")}")
+          RuleProcessTracing.log(s"  ...${res.map(p => if (p.isEqual) "success" else "failure").mkString(", ")}")
 
           res
 
@@ -126,13 +143,15 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
             else IrNodesNotEqual(s"Array '${expected.label}' did not meet minimum length requirement of '$len'", path)
           }
 
-          RuleProcessTracing.log(s"  ...${res.map(p => if(p.isEqual) "success" else "failure").mkString(", ")}")
+          RuleProcessTracing.log(s"  ...${res.map(p => if (p.isEqual) "success" else "failure").mkString(", ")}")
 
           res
       }
 
-    } else if(expected.isXml && findForPath(path.parent, expected.isXml).exists(_.isTypeRule)) {
-      List(IrNodesNotEqual(s"Expected XML node type '${expected.label}' was not the same as actual type '${actual.label}'", path))
+    } else if (expected.isXml && findForPath(path.parent, expected.isXml).exists(_.isTypeRule)) {
+      List(
+        IrNodesNotEqual(s"Expected XML node type '${expected.label}' was not the same as actual type '${actual.label}'",
+                        path))
     } else {
       Nil
     }
@@ -152,63 +171,73 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
         l
     }
 
-    RuleProcessTracing.log(s"findAncestralTypeRule [${path.renderAsString}]: " + res.map(_.renderAsString).mkString(", "))
+    RuleProcessTracing.log(
+      s"findAncestralTypeRule [${path.renderAsString}]: " + res.map(_.renderAsString).mkString(", "))
 
     IrNodeMatchingRules(res, withTracing)
   }
 
-  def validatePrimitive(path: IrNodePath, expected: IrNodePrimitive, actual: IrNodePrimitive, checkParentTypeRule: Boolean, isXml: Boolean): List[IrNodeEqualityResult] = {
+  def validatePrimitive(path: IrNodePath,
+                        expected: IrNodePrimitive,
+                        actual: IrNodePrimitive,
+                        checkParentTypeRule: Boolean,
+                        isXml: Boolean): List[IrNodeEqualityResult] = {
     RuleProcessTracing.log(s"validatePrimitive (checkParentTypeRule=$checkParentTypeRule) at: " + path.renderAsString)
-    val parentTypeRules = if(checkParentTypeRule) findAncestralTypeRule(path, isXml).rules else Nil
+    val parentTypeRules = if (checkParentTypeRule) findAncestralTypeRule(path, isXml).rules else Nil
 
-    (parentTypeRules ++ findForPath(path, isXml)).map {
-      case IrNodeTypeRule(_) =>
-        RuleProcessTracing.log(s"Checking type... (${expected.primitiveTypeName} vs ${actual.primitiveTypeName})")
+    (parentTypeRules ++ findForPath(path, isXml))
+      .map {
+        case IrNodeTypeRule(_) =>
+          RuleProcessTracing.log(s"Checking type... (${expected.primitiveTypeName} vs ${actual.primitiveTypeName})")
 
-        val res: Option[IrNodeEqualityResult] = Option {
-          if (expected.primitiveTypeName == actual.primitiveTypeName) IrNodesEqual
-          else IrNodesNotEqual(s"Primitive type '${expected.primitiveTypeName}' did not match actual '${actual.primitiveTypeName}'", path)
-        }
+          val res: Option[IrNodeEqualityResult] = Option {
+            if (expected.primitiveTypeName == actual.primitiveTypeName) IrNodesEqual
+            else
+              IrNodesNotEqual(
+                s"Primitive type '${expected.primitiveTypeName}' did not match actual '${actual.primitiveTypeName}'",
+                path)
+          }
 
-        RuleProcessTracing.log(s"  ...${res.map(p => if(p.isEqual) "success" else "failure").getOrElse("n/a")}")
+          RuleProcessTracing.log(s"  ...${res.map(p => if (p.isEqual) "success" else "failure").getOrElse("n/a")}")
 
-        res
+          res
 
-      case IrNodeRegexRule(regex, _) if expected.isString && actual.isString =>
-        RuleProcessTracing.log(s"Checking regex on String '${actual.asString.getOrElse("")}'...")
+        case IrNodeRegexRule(regex, _) if expected.isString && actual.isString =>
+          RuleProcessTracing.log(s"Checking regex on String '${actual.asString.getOrElse("")}'...")
 
-        val res: Option[IrNodeEqualityResult] = actual.asString.map { str =>
-          if (regex.r.findAllIn(str).nonEmpty) IrNodesEqual
-          else IrNodesNotEqual(s"String '$str' did not match pattern '$regex'", path)
-        }
+          val res: Option[IrNodeEqualityResult] = actual.asString.map { str =>
+            if (regex.r.findAllIn(str).nonEmpty) IrNodesEqual
+            else IrNodesNotEqual(s"String '$str' did not match pattern '$regex'", path)
+          }
 
-        RuleProcessTracing.log(s"  ...${res.map(p => if(p.isEqual) "success" else "failure").getOrElse("n/a")}")
+          RuleProcessTracing.log(s"  ...${res.map(p => if (p.isEqual) "success" else "failure").getOrElse("n/a")}")
 
-        res
+          res
 
-      case IrNodeRegexRule(regex, _) =>
-        RuleProcessTracing.log(s"Checking regex on non-String '${actual.renderAsString}'...")
+        case IrNodeRegexRule(regex, _) =>
+          RuleProcessTracing.log(s"Checking regex on non-String '${actual.renderAsString}'...")
 
-        val res: Option[IrNodeEqualityResult] = Option {
-          val str = actual.renderAsString
+          val res: Option[IrNodeEqualityResult] = Option {
+            val str = actual.renderAsString
 
-          if (regex.r.findAllIn(str).nonEmpty) IrNodesEqual
-          else IrNodesNotEqual(s"Non-String value '$str' was checked but did not match pattern '$regex'", path)
-        }
+            if (regex.r.findAllIn(str).nonEmpty) IrNodesEqual
+            else IrNodesNotEqual(s"Non-String value '$str' was checked but did not match pattern '$regex'", path)
+          }
 
-        RuleProcessTracing.log(s"  ...${res.map(p => if(p.isEqual) "success" else "failure").getOrElse("n/a")}")
+          RuleProcessTracing.log(s"  ...${res.map(p => if (p.isEqual) "success" else "failure").getOrElse("n/a")}")
 
-        res
+          res
 
-      case IrNodeMinArrayLengthRule(_, _) =>
-        RuleProcessTracing.log("Checking min... (does nothing on primitives)")
-        RuleProcessTracing.log(s"  ...n/a")
-        None
+        case IrNodeMinArrayLengthRule(_, _) =>
+          RuleProcessTracing.log("Checking min... (does nothing on primitives)")
+          RuleProcessTracing.log(s"  ...n/a")
+          None
 
-      case _ =>
-        RuleProcessTracing.log("Checking failed, unexpected condition met.")
-        None
-    }.collect { case Some(s) => s }
+        case _ =>
+          RuleProcessTracing.log("Checking failed, unexpected condition met.")
+          None
+      }
+      .collect { case Some(s) => s }
   }
 
   def findMinArrayLengthRule(path: IrNodePath, isXml: Boolean): IrNodeMatchingRules = {
@@ -222,7 +251,8 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
         Nil
     }
 
-    RuleProcessTracing.log(s"findMinArrayLengthRule [${path.renderAsString}]: " + res.map(_.renderAsString).mkString(", "))
+    RuleProcessTracing.log(
+      s"findMinArrayLengthRule [${path.renderAsString}]: " + res.map(_.renderAsString).mkString(", "))
 
     IrNodeMatchingRules(res, withTracing)
   }
@@ -257,40 +287,52 @@ object IrNodeMatchingRules {
               Right(IrNodeMatchingRules(IrNodeTypeRule(path)))
 
             case (PactPathParseSuccess(path), MatchingRule(Some("type"), None, Some(len))) =>
-              Right(IrNodeMatchingRules(IrNodeTypeRule(path)) + IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path)))
+              Right(
+                IrNodeMatchingRules(IrNodeTypeRule(path)) + IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path)))
 
             case (PactPathParseSuccess(path), MatchingRule(Some("type"), Some(regex), Some(len))) =>
-              Right(IrNodeMatchingRules(IrNodeTypeRule(path)) + IrNodeMatchingRules(IrNodeRegexRule(regex, path)) + IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path)))
+              Right(
+                IrNodeMatchingRules(IrNodeTypeRule(path)) + IrNodeMatchingRules(IrNodeRegexRule(regex, path)) + IrNodeMatchingRules(
+                  IrNodeMinArrayLengthRule(len, path)))
 
             case (PactPathParseSuccess(path), MatchingRule(Some("regex"), Some(regex), None)) =>
               Right(IrNodeMatchingRules(IrNodeRegexRule(regex, path)))
 
             case (PactPathParseSuccess(path), MatchingRule(Some("regex"), Some(regex), Some(len))) =>
-              Right(IrNodeMatchingRules(IrNodeRegexRule(regex, path)) + IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path)))
+              Right(
+                IrNodeMatchingRules(IrNodeRegexRule(regex, path)) + IrNodeMatchingRules(
+                  IrNodeMinArrayLengthRule(len, path)))
 
             case (PactPathParseSuccess(path), MatchingRule(None, Some(regex), None)) =>
               Right(IrNodeMatchingRules(IrNodeRegexRule(regex, path)))
 
             case (PactPathParseSuccess(path), MatchingRule(None, Some(regex), Some(len))) =>
-              Right(IrNodeMatchingRules(IrNodeRegexRule(regex, path)) + IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path)))
+              Right(
+                IrNodeMatchingRules(IrNodeRegexRule(regex, path)) + IrNodeMatchingRules(
+                  IrNodeMinArrayLengthRule(len, path)))
 
             case (PactPathParseSuccess(path), MatchingRule(Some("min"), None, Some(len))) =>
               Right(IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path)))
 
             case (PactPathParseSuccess(path), MatchingRule(Some("min"), Some(regex), Some(len))) =>
-              Right(IrNodeMatchingRules(IrNodeRegexRule(regex, path)) + IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path)))
+              Right(
+                IrNodeMatchingRules(IrNodeRegexRule(regex, path)) + IrNodeMatchingRules(
+                  IrNodeMinArrayLengthRule(len, path)))
 
             case (PactPathParseSuccess(path), MatchingRule(None, None, Some(len))) =>
               Right(IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path)))
 
             case (p, r) =>
-              Left("Failed to read rule: " + r.renderAsString + s" for path '${p.toOption.map(_.renderAsString).getOrElse("")}'")
+              Left(
+                "Failed to read rule: " + r.renderAsString + s" for path '${p.toOption.map(_.renderAsString).getOrElse("")}'")
           }
         }
     }
 
     @tailrec
-    def rec(remaining: List[Either[String, IrNodeMatchingRules]], errorAcc: List[String], rulesAcc: IrNodeMatchingRules): Either[String, IrNodeMatchingRules] =
+    def rec(remaining: List[Either[String, IrNodeMatchingRules]],
+            errorAcc: List[String],
+            rulesAcc: IrNodeMatchingRules): Either[String, IrNodeMatchingRules] =
       remaining match {
         case Nil if errorAcc.nonEmpty =>
           Left("Pact rule conversion errors:\n" + errorAcc.mkString("\n"))
@@ -331,17 +373,17 @@ sealed trait IrNodeRule {
 
 }
 case class IrNodeTypeRule(path: IrNodePath) extends IrNodeRule {
-  def isTypeRule: Boolean = true
-  def isRegexRule: Boolean = false
+  def isTypeRule: Boolean           = true
+  def isRegexRule: Boolean          = false
   def isMinArrayLengthRule: Boolean = false
 }
 case class IrNodeRegexRule(regex: String, path: IrNodePath) extends IrNodeRule {
-  def isTypeRule: Boolean = false
-  def isRegexRule: Boolean = true
+  def isTypeRule: Boolean           = false
+  def isRegexRule: Boolean          = true
   def isMinArrayLengthRule: Boolean = false
 }
 case class IrNodeMinArrayLengthRule(length: Int, path: IrNodePath) extends IrNodeRule {
-  def isTypeRule: Boolean = false
-  def isRegexRule: Boolean = false
+  def isTypeRule: Boolean           = false
+  def isRegexRule: Boolean          = false
   def isMinArrayLengthRule: Boolean = true
 }

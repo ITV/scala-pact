@@ -26,7 +26,8 @@ class ResponseV2Spec extends PactSpecTester {
           fetchResponseSpec("/response/headers/header value is different case.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/headers/matches with regex.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/headers/matches.json")(StrictAndNonStrict),
-          fetchResponseSpec("/response/headers/order of comma separated header values different.json")(StrictAndNonStrict),
+          fetchResponseSpec("/response/headers/order of comma separated header values different.json")(
+            StrictAndNonStrict),
           fetchResponseSpec("/response/headers/unexpected header found.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/headers/whitespace after comma different.json")(StrictAndNonStrict)
         )
@@ -39,7 +40,8 @@ class ResponseV2Spec extends PactSpecTester {
       testResponseSpecs(
         List(
           fetchResponseSpec("/response/body/additional property with type matcher.json")(StrictAndNonStrict),
-          fetchResponseSpec("/response/body/additional property with type matcher that does not match.json")(StrictAndNonStrict),
+          fetchResponseSpec("/response/body/additional property with type matcher that does not match.json")(
+            StrictAndNonStrict),
           fetchResponseSpec("/response/body/array at top level with matchers xml.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/array at top level with matchers.json")(StrictAndNonStrict),
           fetchResponseSpec("/response/body/array at top level xml.json")(StrictAndNonStrict),

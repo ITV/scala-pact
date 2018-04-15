@@ -18,23 +18,30 @@ object Http4sClientHelper {
   import HeaderImplicitConversions._
   import com.itv.scalapact.shared.RightBiasEither._
 
-  private[http] implicit val executionContext: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(2))
+  private[http] implicit val executionContext: ExecutionContext =
+    ExecutionContext.fromExecutor(Executors.newFixedThreadPool(2))
 
-  private def blazeClientConfig(clientTimeout: Duration, sslContext: Option[SSLContext]): BlazeClientConfig = BlazeClientConfig.defaultConfig.copy(
-    requestTimeout = clientTimeout,
-    sslContext = sslContext,
-    userAgent = Option(`User-Agent`(AgentProduct("scala-pact", Option(BuildInfo.version)))),
-    checkEndpointIdentification = false
-  )
+  private def blazeClientConfig(clientTimeout: Duration, sslContext: Option[SSLContext]): BlazeClientConfig =
+    BlazeClientConfig.defaultConfig.copy(
+      requestTimeout = clientTimeout,
+      sslContext = sslContext,
+      userAgent = Option(`User-Agent`(AgentProduct("scala-pact", Option(BuildInfo.version)))),
+      checkEndpointIdentification = false
+    )
 
   private val extractResponse: Response[IO] => IO[SimpleResponse] = r =>
-    r.bodyAsText.runLog.map(_.mkString).map { b => SimpleResponse(r.status.code, r.headers, Some(b)) }
+    r.bodyAsText.runLog.map(_.mkString).map { b =>
+      SimpleResponse(r.status.code, r.headers, Some(b))
+  }
 
   def defaultClient: Client[IO] =
     buildPooledBlazeHttpClient(1, Duration(1, SECONDS), None)
 
-  def buildPooledBlazeHttpClient(maxTotalConnections: Int, clientTimeout: Duration, sslContext: Option[SSLContext]): Client[IO] =
-    PooledHttp1Client[IO](maxTotalConnections = maxTotalConnections, config = blazeClientConfig(clientTimeout, sslContext))
+  def buildPooledBlazeHttpClient(maxTotalConnections: Int,
+                                 clientTimeout: Duration,
+                                 sslContext: Option[SSLContext]): Client[IO] =
+    PooledHttp1Client[IO](maxTotalConnections = maxTotalConnections,
+                          config = blazeClientConfig(clientTimeout, sslContext))
 
   val doRequest: (SimpleRequest, Client[IO]) => IO[SimpleResponse] = (request, httpClient) =>
     for {

@@ -62,15 +62,15 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         headers = Option(
           Map(
             "Upgrade-Insecure-Requests" -> "1",
-            "Connection" -> "keep-alive",
-            "Accept" -> "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-            "Cache-Control" -> "max-age=0",
-            "Accept-Language" -> "en-US,en;q=0.8",
-            "Accept-Encoding" -> "gzip",
-            "deflate" -> "",
-            "sdch" -> "",
-            "User-Agent" -> "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36",
-            "Host" -> "localhost:1234"
+            "Connection"                -> "keep-alive",
+            "Accept"                    -> "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Cache-Control"             -> "max-age=0",
+            "Accept-Language"           -> "en-US,en;q=0.8",
+            "Accept-Encoding"           -> "gzip",
+            "deflate"                   -> "",
+            "sdch"                      -> "",
+            "User-Agent"                -> "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36",
+            "Host"                      -> "localhost:1234"
           )
         ),
         path = "/foo",
@@ -165,7 +165,8 @@ class InteractionManagerSpec extends FunSpec with Matchers {
 
       val requestDetails = InteractionRequest(
         method = "GET",
-        headers = Map("Content-Type" -> "text/plain; charset=uft-8", "Content-Length" -> "0", "Accept" -> "application/json"),
+        headers =
+          Map("Content-Type" -> "text/plain; charset=uft-8", "Content-Length" -> "0", "Accept" -> "application/json"),
         path = "/foo",
         query = None,
         body = None,
@@ -206,7 +207,7 @@ class InteractionManagerSpec extends FunSpec with Matchers {
       val requestDetails2 = InteractionRequest(
         method = "GET",
         headers = Map(
-          "Accept" -> "application/vnd.itv.oas.variant.v1+json",
+          "Accept"     -> "application/vnd.itv.oas.variant.v1+json",
           "X-Trace-Id" -> "7656163a-eefb-49f8-9fac-b20b33dfb51B"
         ),
         path = "/foo",
@@ -222,7 +223,7 @@ class InteractionManagerSpec extends FunSpec with Matchers {
         request = InteractionRequest(
           method = "GET",
           headers = Map(
-            "Accept" -> "application/vnd.itv.oas.variant.v1+json",
+            "Accept"     -> "application/vnd.itv.oas.variant.v1+json",
             "X-Trace-Id" -> "7656163a-eefb-49f8-9fac-b20b33dfb51b"
           ),
           path = "/foo",
@@ -372,24 +373,39 @@ class InteractionManagerSpec extends FunSpec with Matchers {
       interactionManager.addInteraction(interaction)
 
       withClue("goodRequestDetails1") {
-        interactionManager.findMatchingInteraction(goodRequestDetails1, strictMatching = false).right.isDefined shouldEqual true
+        interactionManager
+          .findMatchingInteraction(goodRequestDetails1, strictMatching = false)
+          .right
+          .isDefined shouldEqual true
       }
 
       withClue("goodRequestDetails2") {
-        interactionManager.findMatchingInteraction(goodRequestDetails2, strictMatching = false).right.isDefined shouldEqual true
+        interactionManager
+          .findMatchingInteraction(goodRequestDetails2, strictMatching = false)
+          .right
+          .isDefined shouldEqual true
       }
 
       withClue("goodRequestDetails3") {
-        interactionManager.findMatchingInteraction(goodRequestDetails3, strictMatching = false).right.isDefined shouldEqual true
+        interactionManager
+          .findMatchingInteraction(goodRequestDetails3, strictMatching = false)
+          .right
+          .isDefined shouldEqual true
       }
 
       withClue("goodRequestDetails4") {
-        interactionManager.findMatchingInteraction(goodRequestDetails4, strictMatching = false).right.isDefined shouldEqual true
+        interactionManager
+          .findMatchingInteraction(goodRequestDetails4, strictMatching = false)
+          .right
+          .isDefined shouldEqual true
       }
 
       withClue("badRequestDetails1") {
         //Forgiving in what you receive...
-        interactionManager.findMatchingInteraction(badRequestDetails1, strictMatching = false).right.isDefined shouldEqual true
+        interactionManager
+          .findMatchingInteraction(badRequestDetails1, strictMatching = false)
+          .right
+          .isDefined shouldEqual true
       }
 
     }

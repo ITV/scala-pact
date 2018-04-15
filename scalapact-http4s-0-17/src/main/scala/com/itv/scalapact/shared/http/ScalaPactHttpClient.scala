@@ -54,34 +54,56 @@ trait ScalaPactHttpClient[Client] extends IScalaPactHttpClient {
   def doRequest(simpleRequest: SimpleRequest)(implicit sslContextMap: SslContextMap): Future[SimpleResponse] =
     doRequestTask(doRequest, simpleRequest)
 
-  def doInteractionRequest(url: String, ir: InteractionRequest, clientTimeout: Duration, sslContextName: Option[String])(implicit sslContextMap: SslContextMap): Future[InteractionResponse] =
+  def doInteractionRequest(
+      url: String,
+      ir: InteractionRequest,
+      clientTimeout: Duration,
+      sslContextName: Option[String])(implicit sslContextMap: SslContextMap): Future[InteractionResponse] =
     doInteractionRequestTask(doRequest, url, ir, clientTimeout, sslContextName: Option[String])
 
-  def doRequestSync(simpleRequest: SimpleRequest)(implicit sslContextMap: SslContextMap): Either[Throwable, SimpleResponse] =
+  def doRequestSync(simpleRequest: SimpleRequest)(
+      implicit sslContextMap: SslContextMap): Either[Throwable, SimpleResponse] =
     doRequestTask(doRequest, simpleRequest).unsafeAttemptRun()
 
-  def doInteractionRequestSync(url: String, ir: InteractionRequest, clientTimeout: Duration, sslContextName: Option[String])(implicit sslContextMap: SslContextMap): Either[Throwable, InteractionResponse] =
+  def doInteractionRequestSync(
+      url: String,
+      ir: InteractionRequest,
+      clientTimeout: Duration,
+      sslContextName: Option[String])(implicit sslContextMap: SslContextMap): Either[Throwable, InteractionResponse] =
     doInteractionRequestTask(doRequest, url, ir, clientTimeout, sslContextName).unsafeAttemptRun()
 
-  def doRequestTask(performRequest: (SimpleRequest, Client) => Task[SimpleResponse], simpleRequest: SimpleRequest)(implicit sslContextMap: SslContextMap): Task[SimpleResponse] =
-    SslContextMap(simpleRequest)(sslContext => simpleRequestWithoutFakeheader => performRequest(simpleRequestWithoutFakeheader, buildClient(maxTotalConnections, 2.seconds, sslContext)))
+  def doRequestTask(performRequest: (SimpleRequest, Client) => Task[SimpleResponse], simpleRequest: SimpleRequest)(
+      implicit sslContextMap: SslContextMap): Task[SimpleResponse] =
+    SslContextMap(simpleRequest)(sslContext =>
+      simpleRequestWithoutFakeheader =>
+        performRequest(simpleRequestWithoutFakeheader, buildClient(maxTotalConnections, 2.seconds, sslContext)))
 
-
-  def doInteractionRequestTask(performRequest: (SimpleRequest, Client) => Task[SimpleResponse], url: String, ir: InteractionRequest, clientTimeout: Duration, sslContextName: Option[String])(implicit sslContextMap: SslContextMap): Task[InteractionResponse] =
-    SslContextMap(SimpleRequest(url, ir.path.getOrElse("") + ir.query.map(q => s"?$q").getOrElse(""), HttpMethod.maybeMethodToMethod(ir.method), ir.headers.getOrElse(Map.empty[String, String]), ir.body, sslContextName)) {
-      sslContext =>
-        simpleRequestWithoutFakeheader =>
-          performRequest(
-            simpleRequestWithoutFakeheader,
-            buildClient(maxTotalConnections, clientTimeout, sslContext)
-          ).map { r =>
-            InteractionResponse(
-              status = Option(r.statusCode),
-              headers = if (r.headers.isEmpty) None else Option(r.headers.map(p => p._1 -> p._2.mkString)),
-              body = r.body,
-              matchingRules = None
-            )
-          }
+  def doInteractionRequestTask(
+      performRequest: (SimpleRequest, Client) => Task[SimpleResponse],
+      url: String,
+      ir: InteractionRequest,
+      clientTimeout: Duration,
+      sslContextName: Option[String])(implicit sslContextMap: SslContextMap): Task[InteractionResponse] =
+    SslContextMap(
+      SimpleRequest(
+        url,
+        ir.path.getOrElse("") + ir.query.map(q => s"?$q").getOrElse(""),
+        HttpMethod.maybeMethodToMethod(ir.method),
+        ir.headers.getOrElse(Map.empty[String, String]),
+        ir.body,
+        sslContextName
+      )) { sslContext => simpleRequestWithoutFakeheader =>
+      performRequest(
+        simpleRequestWithoutFakeheader,
+        buildClient(maxTotalConnections, clientTimeout, sslContext)
+      ).map { r =>
+        InteractionResponse(
+          status = Option(r.statusCode),
+          headers = if (r.headers.isEmpty) None else Option(r.headers.map(p => p._1 -> p._2.mkString)),
+          body = r.body,
+          matchingRules = None
+        )
+      }
     }
 
 }

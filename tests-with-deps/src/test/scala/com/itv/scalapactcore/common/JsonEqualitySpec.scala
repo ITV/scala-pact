@@ -15,7 +15,7 @@ class JsonEqualitySpec extends FunSpec with Matchers {
 
   def check(res: IrNodeEqualityResult): Unit =
     res match {
-      case p @ IrNodesEqual => p shouldEqual IrNodesEqual
+      case p @ IrNodesEqual   => p shouldEqual IrNodesEqual
       case e: IrNodesNotEqual => fail(e.renderDifferences)
     }
 
@@ -61,7 +61,6 @@ class JsonEqualitySpec extends FunSpec with Matchers {
       val b = """[{"name":"joe","age":23}]"""
 
       (a.parseOption.get =~ b.parseOption.get).isEqual shouldEqual false
-
 
       val c = """{"id":"123"}"""
       val d = """{"id":123}"""
@@ -162,4 +161,3 @@ class JsonEqualitySpec extends FunSpec with Matchers {
   }
 
 }
-

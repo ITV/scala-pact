@@ -13,11 +13,10 @@ object JsonConversionFunctions extends IJsonConversionFunctions {
       jsonRootToIrNode(json, IrNodePathEmpty)
     }
 
-  def jsonToIrNode(label: String, json: Json, pathToParent: IrNodePath): IrNode = {
+  def jsonToIrNode(label: String, json: Json, pathToParent: IrNodePath): IrNode =
     json match {
       case j: Json if j.isArray =>
-        IrNode(label, jsonArrayToIrNodeList(label, j, pathToParent)).withPath(pathToParent)
-          .markAsArray
+        IrNode(label, jsonArrayToIrNodeList(label, j, pathToParent)).withPath(pathToParent).markAsArray
 
       case j: Json if j.isObject =>
         IrNode(label, jsonObjectToIrNodeList(j, pathToParent)).withPath(pathToParent)
@@ -35,24 +34,19 @@ object JsonConversionFunctions extends IJsonConversionFunctions {
         IrNode(label, j.string.map(IrStringNode)).withPath(pathToParent)
     }
 
-  }
-
-  def jsonObjectToIrNodeList(json: Json, pathToParent: IrNodePath): List[IrNode] = {
-    json
-      .objectFieldsOrEmpty
+  def jsonObjectToIrNodeList(json: Json, pathToParent: IrNodePath): List[IrNode] =
+    json.objectFieldsOrEmpty
       .map(l => if (l.isEmpty) unnamedNodeLabel else l)
       .map { l =>
-        json.field(l).map {
-          q => jsonToIrNode(l, q, pathToParent <~ l)
+        json.field(l).map { q =>
+          jsonToIrNode(l, q, pathToParent <~ l)
         }
       }
       .collect { case Some(s) => s }
-  }
 
-  def jsonArrayToIrNodeList(parentLabel: String, json: Json, pathToParent: IrNodePath): List[IrNode] = {
+  def jsonArrayToIrNodeList(parentLabel: String, json: Json, pathToParent: IrNodePath): List[IrNode] =
     json.arrayOrEmpty.zipWithIndex
       .map(j => jsonToIrNode(parentLabel, j._1, pathToParent <~ j._2))
-  }
 
   def jsonRootToIrNode(json: Json, initialPath: IrNodePath): Option[IrNode] =
     json match {

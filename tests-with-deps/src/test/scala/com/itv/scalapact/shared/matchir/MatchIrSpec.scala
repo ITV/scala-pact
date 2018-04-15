@@ -7,7 +7,7 @@ class MatchIrSpec extends FunSpec with Matchers {
 
   def check(res: IrNodeEqualityResult): Unit =
     res match {
-      case p @ IrNodesEqual => p shouldEqual IrNodesEqual
+      case p @ IrNodesEqual   => p shouldEqual IrNodesEqual
       case e: IrNodesNotEqual => fail(e.renderDifferences)
     }
 
@@ -72,12 +72,15 @@ class MatchIrSpec extends FunSpec with Matchers {
       val xml: String = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><animals><alligator name=\"Mary\"/></animals>"
 
       val ir: IrNode =
-        IrNode("animals",
+        IrNode(
+          "animals",
           IrNode("alligator")
             .withAttributes(
-              IrNodeAttributes(Map("name" -> IrNodeAttribute(IrStringNode("Mary"), IrNodePathEmpty <~ "animals" <~ "alligator" <@ "name")))
+              IrNodeAttributes(Map(
+                "name" -> IrNodeAttribute(IrStringNode("Mary"), IrNodePathEmpty <~ "animals" <~ "alligator" <@ "name")))
             )
-            .withPath(IrNodePathEmpty <~ "animals" <~ "alligator").markAsXml
+            .withPath(IrNodePathEmpty <~ "animals" <~ "alligator")
+            .markAsXml
         ).withPath(IrNodePathEmpty <~ "animals").markAsXml
 
       check(MatchIr.fromXmlString(xml).get =<>= ir)
@@ -118,9 +121,9 @@ class MatchIrSpec extends FunSpec with Matchers {
           .withAttributes(
             IrNodeAttributes(
               Map(
-                "id" -> IrNodeAttribute(IrNumberNode(3), IrNodePathEmpty <~ "fish" <@ "id"),
+                "id"          -> IrNodeAttribute(IrNumberNode(3), IrNodePathEmpty <~ "fish" <@ "id"),
                 "description" -> IrNodeAttribute(IrStringNode("A fish"), IrNodePathEmpty <~ "fish" <@ "description"),
-                "endangered" -> IrNodeAttribute(IrBooleanNode(false), IrNodePathEmpty <~ "fish" <@ "endangered")
+                "endangered"  -> IrNodeAttribute(IrBooleanNode(false), IrNodePathEmpty <~ "fish" <@ "endangered")
               )
             )
           )
@@ -136,7 +139,9 @@ class MatchIrSpec extends FunSpec with Matchers {
       val xml: String = <fish><breed>cod</breed></fish>.toString()
 
       val ir: IrNode =
-        IrNode("fish", IrNode("breed", IrStringNode("cod")).withPath(IrNodePathEmpty <~ "fish" <~ "breed").markAsXml).withPath(IrNodePathEmpty <~ "fish").markAsXml
+        IrNode("fish", IrNode("breed", IrStringNode("cod")).withPath(IrNodePathEmpty <~ "fish" <~ "breed").markAsXml)
+          .withPath(IrNodePathEmpty <~ "fish")
+          .markAsXml
 
       check(MatchIr.fromXmlString(xml).get =<>= ir)
 
@@ -197,7 +202,8 @@ class MatchIrSpec extends FunSpec with Matchers {
       val ir: IrNode =
         IrNode(
           MatchIrConstants.rootNodeLabel,
-          IrNode("myDates",
+          IrNode(
+            "myDates",
             IrNode("myDates", IrNumberNode(20)).withPath(IrNodePathEmpty <~ "myDates" <~ 0),
             IrNode("myDates", IrNumberNode(5)).withPath(IrNodePathEmpty <~ "myDates" <~ 1),
             IrNode("myDates", IrNumberNode(70)).withPath(IrNodePathEmpty <~ "myDates" <~ 2)
@@ -246,7 +252,8 @@ class MatchIrSpec extends FunSpec with Matchers {
         """.stripMargin
 
       val ir: IrNode =
-        IrNode(MatchIrConstants.rootNodeLabel,
+        IrNode(
+          MatchIrConstants.rootNodeLabel,
           IrNode(
             MatchIrConstants.unnamedNodeLabel,
             IrNode(
@@ -293,7 +300,6 @@ class MatchIrSpec extends FunSpec with Matchers {
         """.stripMargin
 
       val expected: IrNode =
-
         IrNode(
           MatchIrConstants.rootNodeLabel,
           IrNode(

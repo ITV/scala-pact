@@ -46,7 +46,8 @@ class XmlEqualitySpec extends FunSpec with Matchers {
     it("should find equality when the right contains the left example") {
 
       val expected = <ns:fish battered="true"><type sustainable="false">cod</type><side>chips</side></ns:fish>
-      val received = <ns:fish battered="true"><type sustainable="false" oceananic="true">cod</type><side>chips</side><sauce>ketchup</sauce></ns:fish>
+      val received =
+        <ns:fish battered="true"><type sustainable="false" oceananic="true">cod</type><side>chips</side><sauce>ketchup</sauce></ns:fish>
 
       check(expected =~ received)
 
@@ -112,7 +113,7 @@ class XmlEqualitySpec extends FunSpec with Matchers {
       val rules: Option[Map[String, MatchingRule]] = Option {
         Map(
           ".fish.breed" -> MatchingRule(Option("type"), None, None),
-          ".fish.side" -> MatchingRule(Option("regex"), Some("peas|chips"), None)
+          ".fish.side"  -> MatchingRule(Option("regex"), Some("peas|chips"), None)
         )
       }
 

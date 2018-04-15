@@ -19,7 +19,7 @@ class Http4sRequestResponseFactorySpec extends FunSpec with Matchers {
         "/foo",
         HttpMethod.POST,
         Map(
-          "Accept" -> "application/json",
+          "Accept"       -> "application/json",
           "Content-Type" -> "test/plain"
         ),
         Some("Greetings!"),
@@ -36,13 +36,15 @@ class Http4sRequestResponseFactorySpec extends FunSpec with Matchers {
 
     it("should be able to manufacture a good response") {
 
-      val response = Http4sRequestResponseFactory.buildResponse(
-        IntAndReason(404, Some("Not Found")),
-        Map(
-          "Content-Type" -> "test/plain"
-        ),
-        Some("Missing")
-      ).unsafeRun()
+      val response = Http4sRequestResponseFactory
+        .buildResponse(
+          IntAndReason(404, Some("Not Found")),
+          Map(
+            "Content-Type" -> "test/plain"
+          ),
+          Some("Missing")
+        )
+        .unsafeRun()
 
       response.status.code shouldEqual 404
       response.bodyAsText.runLog.unsafeRun().mkString shouldEqual "Missing"

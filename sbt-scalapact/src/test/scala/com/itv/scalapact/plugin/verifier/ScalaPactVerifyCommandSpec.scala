@@ -27,7 +27,8 @@ class ScalaPactVerifyCommandSpec extends FunSpec with Matchers {
           true
       }
 
-      val combined = ScalaPactVerifyCommand.combineProviderStatesIntoTotalFunction(directPactStates, patternMatchedStates)
+      val combined =
+        ScalaPactVerifyCommand.combineProviderStatesIntoTotalFunction(directPactStates, patternMatchedStates)
 
       withClue("With key: abc") {
         result = ""
@@ -66,7 +67,8 @@ class ScalaPactVerifyCommandSpec extends FunSpec with Matchers {
 
       val patternMatchedStates: PartialFunction[String, Boolean] = { case (_: String) => false }
 
-      val combined = ScalaPactVerifyCommand.combineProviderStatesIntoTotalFunction(directPactStates, patternMatchedStates)
+      val combined =
+        ScalaPactVerifyCommand.combineProviderStatesIntoTotalFunction(directPactStates, patternMatchedStates)
 
       withClue("With key: abc") {
         result = ""
@@ -95,7 +97,8 @@ class ScalaPactVerifyCommandSpec extends FunSpec with Matchers {
           true
       }
 
-      val combined = ScalaPactVerifyCommand.combineProviderStatesIntoTotalFunction(directPactStates, patternMatchedStates)
+      val combined =
+        ScalaPactVerifyCommand.combineProviderStatesIntoTotalFunction(directPactStates, patternMatchedStates)
 
       withClue("With key: def") {
         result = ""
@@ -116,10 +119,11 @@ class ScalaPactVerifyCommandSpec extends FunSpec with Matchers {
       // We perform a side effect just to prove the function is being called.
       var result = ""
 
-      val directPactStates: Seq[(String, String => Boolean)] = Seq()
+      val directPactStates: Seq[(String, String => Boolean)]     = Seq()
       val patternMatchedStates: PartialFunction[String, Boolean] = { case (_: String) => false }
 
-      val combined = ScalaPactVerifyCommand.combineProviderStatesIntoTotalFunction(directPactStates, patternMatchedStates)
+      val combined =
+        ScalaPactVerifyCommand.combineProviderStatesIntoTotalFunction(directPactStates, patternMatchedStates)
 
       withClue("With key: fish") {
         result = ""

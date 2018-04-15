@@ -15,11 +15,12 @@ import scala.concurrent.duration.Duration
 
 object ScalaPactPlugin extends AutoPlugin {
   override def requires: JvmPlugin.type = plugins.JvmPlugin
-  override def trigger: PluginTrigger = allRequirements
+  override def trigger: PluginTrigger   = allRequirements
 
   object autoImport {
     val providerStateMatcher: SettingKey[PartialFunction[String, Boolean]] =
-      SettingKey[PartialFunction[String, Boolean]]("provider-state-matcher", "Alternative partial function for provider state setup")
+      SettingKey[PartialFunction[String, Boolean]]("provider-state-matcher",
+                                                   "Alternative partial function for provider state setup")
 
     val providerStates: SettingKey[Seq[(String, (String) => Boolean)]] =
       SettingKey[Seq[(String, String => Boolean)]]("provider-states", "A list of provider state setup functions")
@@ -28,7 +29,9 @@ object ScalaPactPlugin extends AutoPlugin {
       SettingKey[String]("pactBrokerAddress", "The base url to publish / pull pact contract files to and from.")
 
     val providerBrokerPublishMap: SettingKey[Map[String, String]] =
-      SettingKey[Map[String, String]]("providerBrokerPublishMap", "An optional map of this consumer's providers, and alternate pact brokers to publish those contracts to.")
+      SettingKey[Map[String, String]](
+        "providerBrokerPublishMap",
+        "An optional map of this consumer's providers, and alternate pact brokers to publish those contracts to.")
 
     val providerName: SettingKey[String] =
       SettingKey[String]("providerName", "The name of the service to verify")
@@ -37,22 +40,27 @@ object ScalaPactPlugin extends AutoPlugin {
       SettingKey[Seq[String]]("consumerNames", "The names of the services that consume the service to verify")
 
     val versionedConsumerNames: SettingKey[Seq[(String, String)]] =
-      SettingKey[Seq[(String, String)]]("versionedConsumerNames", "The name and pact version numbers of the services that consume the service to verify")
+      SettingKey[Seq[(String, String)]](
+        "versionedConsumerNames",
+        "The name and pact version numbers of the services that consume the service to verify")
 
     val pactContractVersion: SettingKey[String] =
-      SettingKey[String]("pactContractVersion", "The version number the pact contract will be published under. If missing or empty, the project version will be used.")
+      SettingKey[String](
+        "pactContractVersion",
+        "The version number the pact contract will be published under. If missing or empty, the project version will be used.")
 
     val allowSnapshotPublish: SettingKey[Boolean] =
-      SettingKey[Boolean]("allowSnapshotPublish", "Flag to permit publishing of snapshot pact files to pact broker. Default is false.")
+      SettingKey[Boolean]("allowSnapshotPublish",
+                          "Flag to permit publishing of snapshot pact files to pact broker. Default is false.")
 
     val scalaPactEnv: SettingKey[ScalaPactEnv] =
       SettingKey[ScalaPactEnv]("scalaPactEnv", "Settings used to config the running of tasks and commands")
 
     // Tasks
-    val pactPack: TaskKey[Unit] = taskKey[Unit]("Pack up Pact contract files")
-    val pactPush: TaskKey[Unit] = taskKey[Unit]("Push Pact contract files to Pact Broker")
+    val pactPack: TaskKey[Unit]  = taskKey[Unit]("Pack up Pact contract files")
+    val pactPush: TaskKey[Unit]  = taskKey[Unit]("Push Pact contract files to Pact Broker")
     val pactCheck: TaskKey[Unit] = taskKey[Unit]("Verify service based on consumer requirements")
-    val pactStub: TaskKey[Unit] = taskKey[Unit]("Run stub service from Pact contract files")
+    val pactStub: TaskKey[Unit]  = taskKey[Unit]("Run stub service from Pact contract files")
   }
 
   import autoImport._
@@ -67,14 +75,16 @@ object ScalaPactPlugin extends AutoPlugin {
     providerBrokerPublishMap := Map.empty[String, String],
     providerName := "",
     consumerNames := Seq.empty[String],
-    versionedConsumerNames := Seq.empty[(String,String)],
+    versionedConsumerNames := Seq.empty[(String, String)],
     pactContractVersion := "",
     allowSnapshotPublish := false,
     scalaPactEnv := ScalaPactEnv.default
   )
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  override lazy val projectSettings: Seq[Def.Setting[_ >: Boolean with PartialFunction[String, Boolean] with ScalaPactEnv with Map[String, String] with Seq[(String, String)] with Seq[String] with Seq[(String, String => Boolean)] with String with Task[Unit]]] =
+  override lazy val projectSettings: Seq[
+    Def.Setting[_ >: Boolean with PartialFunction[String, Boolean] with ScalaPactEnv with Map[String, String] with Seq[
+      (String, String)] with Seq[String] with Seq[(String, String => Boolean)] with String with Task[Unit]]] =
     pactSettings ++ Seq(
       pactPack := pactPackTask.value,
       pactPush := pactPushTask.value,
@@ -126,7 +136,13 @@ object ScalaPactPlugin extends AutoPlugin {
     }
 }
 
-case class ScalaPactEnv(protocol: Option[String], host: Option[String], port: Option[Int], localPactFilePath: Option[String], strictMode: Option[Boolean], clientTimeout: Option[Duration], outputPath: Option[String]) {
+case class ScalaPactEnv(protocol: Option[String],
+                        host: Option[String],
+                        port: Option[Int],
+                        localPactFilePath: Option[String],
+                        strictMode: Option[Boolean],
+                        clientTimeout: Option[Duration],
+                        outputPath: Option[String]) {
 
   def +(other: ScalaPactEnv): ScalaPactEnv =
     ScalaPactEnv.append(this, other)

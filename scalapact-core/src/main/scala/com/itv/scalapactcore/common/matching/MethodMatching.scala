@@ -7,7 +7,9 @@ object MethodMatching {
       expected,
       received,
       MatchOutcomeFailed("Methods did not match", 50),
-      (e: String, r: String) => if(e.toUpperCase == r.toUpperCase) MatchOutcomeSuccess else MatchOutcomeFailed(s"Method '${e.toUpperCase}' did not match '${r.toUpperCase}'", 50)
+      (e: String, r: String) =>
+        if (e.toUpperCase == r.toUpperCase) MatchOutcomeSuccess
+        else MatchOutcomeFailed(s"Method '${e.toUpperCase}' did not match '${r.toUpperCase}'", 50)
     )
 
 }

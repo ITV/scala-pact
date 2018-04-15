@@ -52,12 +52,12 @@ class IrNodePathSpec extends FunSpec with Matchers {
     it("should be able to return a path to it's parent") {
 
       (IrNodePathEmpty <~ "fish" <~ "chips").parent === (IrNodePathEmpty <~ "fish") shouldEqual true
-      (IrNodePathEmpty <~ "fish" <~ 2 <~ "chips").parent ===  (IrNodePathEmpty <~ "fish" <~ 2) shouldEqual true
-      (IrNodePathEmpty <~ "fish" <~ "chips" <~ 2).parent ===  (IrNodePathEmpty <~ "fish" <~ "chips") shouldEqual true
-      (IrNodePathEmpty <~ "fish" <~ "*" <~ "chips").parent ===  (IrNodePathEmpty <~ "fish" <~ "*") shouldEqual true
-      (IrNodePathEmpty <~ "fish" <~ "chips" <~ "*").parent ===  (IrNodePathEmpty <~ "fish" <~ "chips") shouldEqual true
-      (IrNodePathEmpty <~ "fish" <~ "chips" <@ "ketchup").parent ===  (IrNodePathEmpty <~ "fish" <~ "chips") shouldEqual true
-      (IrNodePathEmpty <~ "fish" <~ "chips" text).parent ===  (IrNodePathEmpty <~ "fish" <~ "chips") shouldEqual true
+      (IrNodePathEmpty <~ "fish" <~ 2 <~ "chips").parent === (IrNodePathEmpty <~ "fish" <~ 2) shouldEqual true
+      (IrNodePathEmpty <~ "fish" <~ "chips" <~ 2).parent === (IrNodePathEmpty <~ "fish" <~ "chips") shouldEqual true
+      (IrNodePathEmpty <~ "fish" <~ "*" <~ "chips").parent === (IrNodePathEmpty <~ "fish" <~ "*") shouldEqual true
+      (IrNodePathEmpty <~ "fish" <~ "chips" <~ "*").parent === (IrNodePathEmpty <~ "fish" <~ "chips") shouldEqual true
+      (IrNodePathEmpty <~ "fish" <~ "chips" <@ "ketchup").parent === (IrNodePathEmpty <~ "fish" <~ "chips") shouldEqual true
+      (IrNodePathEmpty <~ "fish" <~ "chips" text).parent === (IrNodePathEmpty <~ "fish" <~ "chips") shouldEqual true
 
     }
 
@@ -200,7 +200,6 @@ class IrNodePathSpec extends FunSpec with Matchers {
 
       PactPath.fromPactPath(jsonPathA) match {
         case PactPathParseSuccess(irNodePath) =>
-
           withClue("Created paths are equal") {
             irNodePath === expected shouldEqual true
           }
@@ -225,7 +224,6 @@ class IrNodePathSpec extends FunSpec with Matchers {
 
       PactPath.fromPactPath(jsonPath) match {
         case PactPathParseSuccess(irNodePath) =>
-
           withClue("Created paths are equal") {
             irNodePath === expected shouldEqual true
           }
@@ -310,7 +308,8 @@ class IrNodePathSpec extends FunSpec with Matchers {
 
     it("should check equality with wildcards") {
 
-      (IrNodePath.fromPactPath("$.body.animals[*].children[*].*").toEither, IrNodePath.fromPactPath("$.body.animals[0].children[0].age").toEither) match {
+      (IrNodePath.fromPactPath("$.body.animals[*].children[*].*").toEither,
+       IrNodePath.fromPactPath("$.body.animals[0].children[0].age").toEither) match {
         case (Right(rulePath), Right(nodePath)) =>
           rulePath === nodePath shouldEqual true
         case (Left(e), _) =>

@@ -7,7 +7,7 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
 
   val pactReader = new PactReader
   val pactWriter = new PactWriter
-  
+
   //Used by earlier scala versions
   import EitherWithToOption._
 
