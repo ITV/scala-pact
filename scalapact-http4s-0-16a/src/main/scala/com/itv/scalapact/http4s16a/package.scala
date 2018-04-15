@@ -1,5 +1,6 @@
 package com.itv.scalapact
 
+import com.itv.scalapact.http4s16a.impl.{Http4sClientHelper, PactServer, ScalaPactHttpClient}
 import com.itv.scalapact.shared.typeclasses.{IPactStubber, IScalaPactHttpClient}
 import scalaz.concurrent.Task
 
