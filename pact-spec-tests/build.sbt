@@ -1,1 +1,0 @@
-name := "pact-spec-tests"

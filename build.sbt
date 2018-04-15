@@ -151,6 +151,7 @@ lazy val shared =
     .settings(commonSettings: _*)
     .settings(publishSettings: _*)
     .settings(
+      name := "scalapact-shared",
       crossScalaVersions := Seq(scala211, scala212),
       libraryDependencies ++= Seq("org.scala-lang.modules" %% "scala-xml" % "1.0.6")
     )
@@ -160,7 +161,10 @@ lazy val core =
   (project in file("scalapact-core"))
     .settings(commonSettings: _*)
     .settings(publishSettings: _*)
-    .settings(crossScalaVersions := Seq(scala211, scala212))
+    .settings(
+      name := "scalapact-core",
+      crossScalaVersions := Seq(scala211, scala212)
+    )
     .dependsOn(shared)
     .settings(compilerOptionsGeneral: _*)
 
@@ -168,7 +172,16 @@ lazy val http4s016a =
   (project in file("scalapact-http4s-0-16a"))
     .settings(commonSettings: _*)
     .settings(publishSettings: _*)
-    .settings(crossScalaVersions := Seq(scala211, scala212))
+    .settings(
+      name := "scalapact-http4s-0-16a",
+      libraryDependencies ++= Seq(
+        "org.http4s"             %% "http4s-blaze-server" % "0.16.6a",
+        "org.http4s"             %% "http4s-blaze-client" % "0.16.6a",
+        "org.http4s"             %% "http4s-dsl"          % "0.16.6a",
+        "com.github.tomakehurst" % "wiremock"             % "1.56" % "test"
+      ),
+      crossScalaVersions := Seq(scala211, scala212)
+    )
     .dependsOn(shared)
     .settings(compilerOptionsGeneral: _*)
 
@@ -176,7 +189,16 @@ lazy val http4s016a =
 //  (project in file("scalapact-http4s-0-16"))
 //    .settings(commonSettings: _*)
 //    .settings(publishSettings: _*)
-//    .settings(crossScalaVersions := Seq(scala211, scala212))
+//    .settings(
+//      name := "scalapact-http4s-0-16",
+//      libraryDependencies ++= Seq(
+//        "org.http4s"             %% "http4s-blaze-server" % "0.16.6",
+//        "org.http4s"             %% "http4s-blaze-client" % "0.16.6",
+//        "org.http4s"             %% "http4s-dsl"          % "0.16.6",
+//        "com.github.tomakehurst" % "wiremock"             % "1.56" % "test"
+//      ),
+//      crossScalaVersions := Seq(scala211, scala212)
+//    )
 //    .dependsOn(shared)
 //    .settings(compilerOptionsGeneral: _*)
 
@@ -185,15 +207,33 @@ lazy val http4s016a =
 //    .settings(commonSettings: _*)
 //    .settings(publishSettings: _*)
 //    .settings(mockSettings: _*)
-//    .settings(crossScalaVersions := Seq(scala211, scala212))
+//    .settings(
+//      name := "scalapact-http4s-0-17",
+//      libraryDependencies ++= Seq(
+//        "org.http4s"             %% "http4s-blaze-server" % "0.17.6",
+//        "org.http4s"             %% "http4s-blaze-client" % "0.17.6",
+//        "org.http4s"             %% "http4s-dsl"          % "0.17.6",
+//        "com.github.tomakehurst" % "wiremock"             % "1.56" % "test"
+//      ),
+//      crossScalaVersions := Seq(scala211, scala212)
+//    )
 //    .dependsOn(shared)
 //    .settings(compilerOptionsGeneral: _*)
-//
+
 //lazy val http4s018 =
 //  (project in file("scalapact-http4s-0-18"))
 //    .settings(commonSettings: _*)
 //    .settings(publishSettings: _*)
-//    .settings(crossScalaVersions := Seq(scala211, scala212))
+//    .settings(
+//      name := "scalapact-http4s-0-18",
+//      libraryDependencies ++= Seq(
+//        "org.http4s" %% "http4s-blaze-server" % "0.18.8",
+//        "org.http4s" %% "http4s-blaze-client" % "0.18.8",
+//        "org.http4s" %% "http4s-dsl"          % "0.18.8",
+//        "com.github.tomakehurst" % "wiremock" % "1.56" % "test"
+//      ),
+//      crossScalaVersions := Seq(scala211, scala212)
+//    )
 //    .dependsOn(shared)
 //    .settings(compilerOptionsGeneral: _*)
 
@@ -201,7 +241,13 @@ lazy val argonaut62 =
   (project in file("scalapact-argonaut-6-2"))
     .settings(commonSettings: _*)
     .settings(publishSettings: _*)
-    .settings(crossScalaVersions := Seq(scala211, scala212))
+    .settings(
+      name := "scalapact-argonaut-6-2",
+      libraryDependencies ++= Seq(
+        "io.argonaut" %% "argonaut" % "6.2"
+      ),
+      crossScalaVersions := Seq(scala211, scala212)
+    )
     .dependsOn(shared)
     .settings(compilerOptionsGeneral: _*)
 
@@ -209,7 +255,15 @@ lazy val circe08 =
   (project in file("scalapact-circe-0-8"))
     .settings(commonSettings: _*)
     .settings(publishSettings: _*)
-    .settings(crossScalaVersions := Seq(scala211, scala212))
+    .settings(
+      name := "scalapact-circe-0-8",
+      libraryDependencies ++= Seq(
+        "io.circe" %% "circe-core",
+        "io.circe" %% "circe-generic",
+        "io.circe" %% "circe-parser"
+      ).map(_ % "0.8.0"),
+      crossScalaVersions := Seq(scala211, scala212)
+    )
     .dependsOn(shared)
     .settings(compilerOptionsGeneral: _*)
 
@@ -217,7 +271,15 @@ lazy val circe09 =
   (project in file("scalapact-circe-0-9"))
     .settings(commonSettings: _*)
     .settings(publishSettings: _*)
-    .settings(crossScalaVersions := Seq(scala211, scala212))
+    .settings(
+      name := "scalapact-circe-0-9",
+      libraryDependencies ++= Seq(
+        "io.circe" %% "circe-core",
+        "io.circe" %% "circe-generic",
+        "io.circe" %% "circe-parser"
+      ).map(_ % "0.9.0"),
+      crossScalaVersions := Seq(scala211, scala212)
+    )
     .dependsOn(shared)
     .settings(compilerOptionsGeneral: _*)
 
@@ -226,6 +288,7 @@ lazy val plugin =
     .settings(commonSettings: _*)
     .settings(publishSettings: _*)
     .settings(
+      name := "sbt-scalapact",
       sbtPlugin := true,
       scalaVersion := scala212
     )
@@ -264,7 +327,10 @@ lazy val standalone =
 lazy val pactSpec =
   (project in file("pact-spec-tests"))
     .settings(commonSettings: _*)
-    .settings(crossScalaVersions := Seq(scala211, scala212))
+    .settings(
+      name := "pact-spec-tests",
+      crossScalaVersions := Seq(scala211, scala212)
+    )
     .dependsOn(core)
     .dependsOn(argonaut62)
 
@@ -288,10 +354,14 @@ lazy val docs =
   (project in file("scalapact-docs"))
     .settings(commonSettings: _*)
     .enablePlugins(ParadoxPlugin)
+    .enablePlugins(ParadoxSitePlugin)
+    .enablePlugins(GhpagesPlugin)
     .settings(
-      name := "Scala-Pact Docs",
       crossScalaVersions := Seq(scala212),
-      paradoxTheme := Some(builtinParadoxTheme("generic"))
+      paradoxTheme := Some(builtinParadoxTheme("generic")),
+      name := "scalapact-docs",
+      git.remoteRepo := "git@github.com:ITV/scala-pact.git",
+      sourceDirectory in Paradox := sourceDirectory.value / "main" / "paradox"
     )
 
 lazy val scalaPactProject =
