@@ -147,7 +147,7 @@ object PactStubService {
 
 class PactServer extends IPactStubber {
 
-  private var instance: Option[IO[Server[IO]]] = None
+  private var instance: Option[Server[IO]] = None
 
   private def blazeBuilder(scalaPactSettings: ScalaPactSettings,
                            interactionManager: IInteractionManager,
@@ -178,15 +178,16 @@ class PactServer extends IPactStubber {
         case None =>
           instance = Option(
             blazeBuilder(scalaPactSettings, interactionManager, connectionPoolSize, sslContextName, port).start
+              .unsafeRunSync()
           )
           this
     }
 
   def awaitShutdown(): Unit =
-    instance.foreach(_.unsafeRunSync().shutdown.unsafeRunSync())
+    instance.foreach(_.shutdown.unsafeRunSync())
 
   def shutdown(): Unit = {
-    instance.foreach(_.unsafeRunSync().shutdown.unsafeRunSync())
+    instance.foreach(_.shutdown.unsafeRunSync())
     instance = None
     ()
   }
