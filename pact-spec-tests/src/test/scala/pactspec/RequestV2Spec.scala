@@ -58,7 +58,8 @@ class RequestV2Spec extends PactSpecTester {
           fetchRequestSpec("/request/headers/matches with regex.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/headers/matches.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/headers/order of comma separated header values different.json")(
-            StrictAndNonStrict),
+            StrictAndNonStrict
+          ),
           fetchRequestSpec("/request/headers/unexpected header found.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/headers/whitespace after comma different.json")(StrictAndNonStrict)
         )
@@ -77,18 +78,22 @@ class RequestV2Spec extends PactSpecTester {
           fetchRequestSpec("/request/body/array size less than required xml.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/body/array size less than required.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/body/array with at least one element matching by example xml.json")(
-            StrictAndNonStrict),
+            StrictAndNonStrict
+          ),
           fetchRequestSpec("/request/body/array with at least one element matching by example.json")(
-            StrictAndNonStrict),
+            StrictAndNonStrict
+          ),
           fetchRequestSpec("/request/body/array with at least one element not matching example type.json")(StrictOnly),
           fetchRequestSpec("/request/body/array with nested array that does not match.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/body/array with nested array that matches.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/body/array with regular expression in element xml.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/body/array with regular expression in element.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/body/array with regular expression that does not match in element xml.json")(
-            StrictOnly),
+            StrictOnly
+          ),
           fetchRequestSpec("/request/body/array with regular expression that does not match in element.json")(
-            StrictOnly),
+            StrictOnly
+          ),
           fetchRequestSpec("/request/body/different value found at index xml.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/body/different value found at index.json")(StrictAndNonStrict),
           fetchRequestSpec("/request/body/different value found at key xml.json")(StrictAndNonStrict),

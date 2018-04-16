@@ -89,7 +89,8 @@ object IrNodeEqualityResult {
 
   val valueTest: (Boolean, Boolean, IrNodePath, IrNodeMatchingRules, IrNode, IrNode) => (
       Option[IrNodePrimitive],
-      Option[IrNodePrimitive]) => IrNodeEqualityResult = { (strict, isXml, path, rules, parentA, parentB) => (a, b) =>
+      Option[IrNodePrimitive]
+  ) => IrNodeEqualityResult = { (strict, isXml, path, rules, parentA, parentB) => (a, b) =>
     if (parentA.path.lastSegmentLabel == parentB.path.lastSegmentLabel) {
       val equality: IrNodeEqualityResult = if (strict) {
         (a, b) match {
@@ -215,7 +216,8 @@ object IrNodeEqualityResult {
 
   val childrenTest: (Boolean, IrNodePath, Boolean, Boolean, IrNodeMatchingRules, IrNode, IrNode) => (
       List[IrNode],
-      List[IrNode]) => IrNodeEqualityResult =
+      List[IrNode]
+  ) => IrNodeEqualityResult =
     (strict, path, isXml, bePermissive, rules, parentA, parentB) =>
       (a, b) => {
         if (strict) {
@@ -323,16 +325,20 @@ object IrNodeEqualityResult {
                     checkParentTypeRule = true,
                     isXml
                   )
-                  .getOrElse(IrNodesNotEqual(
-                    s"Attribute value for '${p._1}' of '${p._2.value.renderAsString}' does not equal '${v.value.renderAsString}'",
-                    path))
+                  .getOrElse(
+                    IrNodesNotEqual(
+                      s"Attribute value for '${p._1}' of '${p._2.value.renderAsString}' does not equal '${v.value.renderAsString}'",
+                      path
+                    )
+                  )
               }
           }
     }
 
   val attributesTest: (Boolean, Boolean, Boolean, IrNodePath, IrNodeMatchingRules, IrNode, IrNode) => (
       IrNodeAttributes,
-      IrNodeAttributes) => IrNodeEqualityResult =
+      IrNodeAttributes
+  ) => IrNodeEqualityResult =
     (strict, isXml, bePermissive, path, rules, parentA, parentB) =>
       (a, b) =>
         if (strict) {
@@ -344,7 +350,8 @@ object IrNodeEqualityResult {
           if (asNames.length != bsNames.length && !bePermissive) {
             IrNodesNotEqual(
               s"Differing number of attributes between ['${asNames.mkString(", ")}'] and ['${bsNames.mkString(", ")}']",
-              path)
+              path
+            )
           } else {
             checkAttributesTest(path, isXml, rules)(a, b)
           }

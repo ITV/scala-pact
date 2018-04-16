@@ -36,7 +36,8 @@ object InteractionMatchers {
     }
 
   def matchOrFindClosestRequest(strictMatching: Boolean, interactions: List[Interaction], received: InteractionRequest)(
-      implicit pactReader: IPactReader): Option[OutcomeAndInteraction] = {
+      implicit pactReader: IPactReader
+  ): Option[OutcomeAndInteraction] = {
     def rec(strict: Boolean,
             remaining: List[Interaction],
             actual: InteractionRequest,
@@ -59,7 +60,8 @@ object InteractionMatchers {
   }
 
   def matchRequest(strictMatching: Boolean, interactions: List[Interaction], received: InteractionRequest)(
-      implicit pactReader: IPactReader): Either[String, Interaction] =
+      implicit pactReader: IPactReader
+  ): Either[String, Interaction] =
     if (interactions.isEmpty) Left("No interactions to compare with.")
     else
       renderOutcome(matchOrFindClosestRequest(strictMatching, interactions, received),
@@ -81,7 +83,8 @@ object InteractionMatchers {
           HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
           BodyMatching.matchBodiesStrict(expected.headers, expected.body, received.body, bePermissive = false)(
             r,
-            pactReader)
+            pactReader
+          )
 
       case Right(r) =>
         MethodMatching.matchMethods(expected.method, received.method) +
@@ -94,7 +97,8 @@ object InteractionMatchers {
   def matchOrFindClosestResponse(
       strictMatching: Boolean,
       interactions: List[Interaction],
-      received: InteractionResponse)(implicit pactReader: IPactReader): Option[OutcomeAndInteraction] = {
+      received: InteractionResponse
+  )(implicit pactReader: IPactReader): Option[OutcomeAndInteraction] = {
     def rec(strict: Boolean,
             remaining: List[Interaction],
             actual: InteractionResponse,
@@ -117,7 +121,8 @@ object InteractionMatchers {
   }
 
   def matchResponse(strictMatching: Boolean, interactions: List[Interaction])(
-      implicit pactReader: IPactReader): InteractionResponse => Either[String, Interaction] =
+      implicit pactReader: IPactReader
+  ): InteractionResponse => Either[String, Interaction] =
     received =>
       if (interactions.isEmpty) Left("No interactions to compare with.")
       else
@@ -138,7 +143,8 @@ object InteractionMatchers {
           HeaderMatching.matchHeaders(rules, expected.headers, received.headers) +
           BodyMatching.matchBodiesStrict(expected.headers, expected.body, received.body, bePermissive = true)(
             r,
-            pactReader)
+            pactReader
+          )
 
       case Right(r) =>
         StatusMatching.matchStatusCodes(expected.status, received.status) +

@@ -31,7 +31,8 @@ object ScalaPactContractWriter {
       val string = simplifyName(
         pactDescription.consumer + pactDescription.provider + pactDescription.interactions
           .map(_.description)
-          .mkString + System.currentTimeMillis().toString)
+          .mkString + System.currentTimeMillis().toString
+      )
 
       val sha1 = java.security.MessageDigest
         .getInstance("SHA-1")
@@ -40,7 +41,8 @@ object ScalaPactContractWriter {
         .mkString
 
       val relativePath = outputPath + "/" + simplifyName(pactDescription.consumer) + "_" + simplifyName(
-        pactDescription.provider) + "_" + sha1 + "_tmp.json"
+        pactDescription.provider
+      ) + "_" + sha1 + "_tmp.json"
       val file = new File(relativePath)
 
       if (file.exists()) {
@@ -98,7 +100,8 @@ object ScalaPactContractWriter {
   }
 
   implicit private def convertMatchingRules(
-      rules: Option[List[ScalaPactMatchingRule]]): Option[Map[String, MatchingRule]] =
+      rules: Option[List[ScalaPactMatchingRule]]
+  ): Option[Map[String, MatchingRule]] =
     rules.map { rs =>
       rs.map {
           case ScalaPactMatchingRuleType(key) =>

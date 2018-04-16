@@ -53,8 +53,11 @@ class ExampleSpec extends FunSpec with Matchers {
 
       val base = new File("ssl").getAbsoluteFile
       implicit val sslMap: SslContextMap = new SslContextMap(
-        Map("default" -> SslContextMap
-          .makeSslContext(s"$base/client.jks", "password", s"$base/clienttrust.jks", "password")))
+        Map(
+          "default" -> SslContextMap
+            .makeSslContext(s"$base/client.jks", "password", s"$base/clienttrust.jks", "password")
+        )
+      )
 
       forgePact
         .between("My Consumer")

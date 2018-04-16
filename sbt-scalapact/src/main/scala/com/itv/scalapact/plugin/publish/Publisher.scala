@@ -10,7 +10,8 @@ object Publisher {
   def publishToBroker(
       sendIt: SimpleRequest => Either[Throwable, SimpleResponse],
       pactBrokerAddress: String,
-      versionToPublishAs: String)(implicit pactWriter: IPactWriter): ConfigAndPacts => List[PublishResult] =
+      versionToPublishAs: String
+  )(implicit pactWriter: IPactWriter): ConfigAndPacts => List[PublishResult] =
     configAndPacts =>
       configAndPacts.pacts.map { pact =>
         publishPact(sendIt, pact, versionToPublishAs) {
@@ -19,7 +20,8 @@ object Publisher {
     }
 
   def publishPact(sendIt: SimpleRequest => Either[Throwable, SimpleResponse], pact: Pact, versionToPublishAs: String)(
-      details: Either[String, ValidatedDetails])(implicit pactWriter: IPactWriter): PublishResult =
+      details: Either[String, ValidatedDetails]
+  )(implicit pactWriter: IPactWriter): PublishResult =
     details match {
       case Left(l) =>
         PublishFailed("Validation error", l)
@@ -36,7 +38,8 @@ object Publisher {
                         HttpMethod.PUT,
                         Map("Content-Type" -> "application/json"),
                         Option(pactWriter.pactToJsonString(pact)),
-                        sslContextName = None)) match {
+                        sslContextName = None)
+        ) match {
           case Right(r) if r.is2xx =>
             PublishSuccess(context)
 

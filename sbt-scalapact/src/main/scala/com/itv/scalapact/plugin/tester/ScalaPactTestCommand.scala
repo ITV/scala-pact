@@ -38,7 +38,8 @@ object ScalaPactTestCommand {
 
     } else {
       PactLogger.error(
-        s"No Pact files found in '${scalaPactSettings.giveOutputPath}'. Make sure you have Pact CDC tests and have run 'sbt test' or 'sbt pact-test'.".red)
+        s"No Pact files found in '${scalaPactSettings.giveOutputPath}'. Make sure you have Pact CDC tests and have run 'sbt test' or 'sbt pact-test'.".red
+      )
     }
   }
 
@@ -84,7 +85,8 @@ object ScalaPactTestCommand {
         }
 
         PactContractWriter.writePactContracts(outputPath)(combined.provider.name)(combined.consumer.name)(
-          pactWriter.pactToJsonString(combined))
+          pactWriter.pactToJsonString(combined)
+        )
 
         ()
     }

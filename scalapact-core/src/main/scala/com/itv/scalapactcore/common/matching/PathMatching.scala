@@ -40,7 +40,8 @@ object PathMatching {
     }
 
   private def matchPathsWithPredicate(expected: PathAndQuery, received: PathAndQuery)(
-      predicate: (PathStructure, PathStructure) => MatchOutcome): MatchOutcome =
+      predicate: (PathStructure, PathStructure) => MatchOutcome
+  ): MatchOutcome =
     GeneralMatcher.generalMatcher(
       (reconstructPath andThen convertToPathStructure)(expected),
       (reconstructPath andThen convertToPathStructure)(received),
@@ -51,7 +52,8 @@ object PathMatching {
   private def reconstructPath: PathAndQuery => String =
     pathAndQuery =>
       pathAndQuery.path.getOrElse("").split('?').toList ++ List(
-        pathAndQuery.query.map(q => URLDecoder.decode(q, StandardCharsets.UTF_8.name())).getOrElse("")) match {
+        pathAndQuery.query.map(q => URLDecoder.decode(q, StandardCharsets.UTF_8.name())).getOrElse("")
+      ) match {
         case Nil =>
           "/"
 

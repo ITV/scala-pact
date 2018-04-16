@@ -19,7 +19,8 @@ object RuleProcessTracing {
   def log(message: String)(implicit ruleProcessTracing: RuleProcessTracing): Unit =
     if (ruleProcessTracing.enabled)
       PactLogger.message(
-        s"""  [${ruleProcessTracing.id}] ${ruleProcessTracing.context.map(ctx => s"[$ctx] ").getOrElse("")}$message""")
+        s"""  [${ruleProcessTracing.id}] ${ruleProcessTracing.context.map(ctx => s"[$ctx] ").getOrElse("")}$message"""
+      )
     else
       ()
 }
@@ -82,26 +83,33 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
                 List(
                   IrNodesNotEqual(
                     s"Primitive type '${e.primitiveTypeName}' did not match actual '${a.primitiveTypeName}'",
-                    path))
+                    path
+                  )
+                )
 
             case (Some(_), Some(_)) =>
               List(
                 IrNodesNotEqual(
                   s"Miss aligned values (by path '${expected.path.lastSegmentLabel}' and '${actual.path.lastSegmentLabel}'), could not check rule: " + r.renderAsString,
                   path
-                ))
+                )
+              )
 
             case (Some(v), None) =>
               List(
                 IrNodesNotEqual(
                   s"Missing actual value (compared to expected '${v.renderAsString}'), could not check rule: " + r.renderAsString,
-                  path))
+                  path
+                )
+              )
 
             case (_, Some(v)) =>
               List(
                 IrNodesNotEqual(
                   s"Missing expected value (compared to actual '${v.renderAsString}'), could not check rule: " + r.renderAsString,
-                  path))
+                  path
+                )
+              )
 
             case (_, _) =>
               RuleProcessTracing.log(" ...no values")
@@ -109,7 +117,8 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
           }
 
           RuleProcessTracing.log(
-            s"  ...${res.map(p => if (p.isEqual) "success" else "failure: " + p.renderAsString).mkString(", ")}")
+            s"  ...${res.map(p => if (p.isEqual) "success" else "failure: " + p.renderAsString).mkString(", ")}"
+          )
 
           res
 
@@ -151,7 +160,8 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
     } else if (expected.isXml && findForPath(path.parent, expected.isXml).exists(_.isTypeRule)) {
       List(
         IrNodesNotEqual(s"Expected XML node type '${expected.label}' was not the same as actual type '${actual.label}'",
-                        path))
+                        path)
+      )
     } else {
       Nil
     }
@@ -172,7 +182,8 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
     }
 
     RuleProcessTracing.log(
-      s"findAncestralTypeRule [${path.renderAsString}]: " + res.map(_.renderAsString).mkString(", "))
+      s"findAncestralTypeRule [${path.renderAsString}]: " + res.map(_.renderAsString).mkString(", ")
+    )
 
     IrNodeMatchingRules(res, withTracing)
   }
@@ -195,7 +206,8 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
             else
               IrNodesNotEqual(
                 s"Primitive type '${expected.primitiveTypeName}' did not match actual '${actual.primitiveTypeName}'",
-                path)
+                path
+              )
           }
 
           RuleProcessTracing.log(s"  ...${res.map(p => if (p.isEqual) "success" else "failure").getOrElse("n/a")}")
@@ -252,7 +264,8 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
     }
 
     RuleProcessTracing.log(
-      s"findMinArrayLengthRule [${path.renderAsString}]: " + res.map(_.renderAsString).mkString(", "))
+      s"findMinArrayLengthRule [${path.renderAsString}]: " + res.map(_.renderAsString).mkString(", ")
+    )
 
     IrNodeMatchingRules(res, withTracing)
   }
@@ -288,12 +301,15 @@ object IrNodeMatchingRules {
 
             case (PactPathParseSuccess(path), MatchingRule(Some("type"), None, Some(len))) =>
               Right(
-                IrNodeMatchingRules(IrNodeTypeRule(path)) + IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path)))
+                IrNodeMatchingRules(IrNodeTypeRule(path)) + IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path))
+              )
 
             case (PactPathParseSuccess(path), MatchingRule(Some("type"), Some(regex), Some(len))) =>
               Right(
                 IrNodeMatchingRules(IrNodeTypeRule(path)) + IrNodeMatchingRules(IrNodeRegexRule(regex, path)) + IrNodeMatchingRules(
-                  IrNodeMinArrayLengthRule(len, path)))
+                  IrNodeMinArrayLengthRule(len, path)
+                )
+              )
 
             case (PactPathParseSuccess(path), MatchingRule(Some("regex"), Some(regex), None)) =>
               Right(IrNodeMatchingRules(IrNodeRegexRule(regex, path)))
@@ -301,7 +317,9 @@ object IrNodeMatchingRules {
             case (PactPathParseSuccess(path), MatchingRule(Some("regex"), Some(regex), Some(len))) =>
               Right(
                 IrNodeMatchingRules(IrNodeRegexRule(regex, path)) + IrNodeMatchingRules(
-                  IrNodeMinArrayLengthRule(len, path)))
+                  IrNodeMinArrayLengthRule(len, path)
+                )
+              )
 
             case (PactPathParseSuccess(path), MatchingRule(None, Some(regex), None)) =>
               Right(IrNodeMatchingRules(IrNodeRegexRule(regex, path)))
@@ -309,7 +327,9 @@ object IrNodeMatchingRules {
             case (PactPathParseSuccess(path), MatchingRule(None, Some(regex), Some(len))) =>
               Right(
                 IrNodeMatchingRules(IrNodeRegexRule(regex, path)) + IrNodeMatchingRules(
-                  IrNodeMinArrayLengthRule(len, path)))
+                  IrNodeMinArrayLengthRule(len, path)
+                )
+              )
 
             case (PactPathParseSuccess(path), MatchingRule(Some("min"), None, Some(len))) =>
               Right(IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path)))
@@ -317,14 +337,17 @@ object IrNodeMatchingRules {
             case (PactPathParseSuccess(path), MatchingRule(Some("min"), Some(regex), Some(len))) =>
               Right(
                 IrNodeMatchingRules(IrNodeRegexRule(regex, path)) + IrNodeMatchingRules(
-                  IrNodeMinArrayLengthRule(len, path)))
+                  IrNodeMinArrayLengthRule(len, path)
+                )
+              )
 
             case (PactPathParseSuccess(path), MatchingRule(None, None, Some(len))) =>
               Right(IrNodeMatchingRules(IrNodeMinArrayLengthRule(len, path)))
 
             case (p, r) =>
               Left(
-                "Failed to read rule: " + r.renderAsString + s" for path '${p.toOption.map(_.renderAsString).getOrElse("")}'")
+                "Failed to read rule: " + r.renderAsString + s" for path '${p.toOption.map(_.renderAsString).getOrElse("")}'"
+              )
           }
         }
     }

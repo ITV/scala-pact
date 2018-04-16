@@ -18,7 +18,8 @@ class ScalaPactVerifySpec extends FunSpec with Matchers {
         "https",
         "localhost",
         1234,
-        2.seconds)
+        2.seconds
+      )
       VerifyTargetConfig.fromUrl("fish") shouldEqual None
 
     }

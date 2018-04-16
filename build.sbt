@@ -81,7 +81,8 @@ addCommandAlias(
 )
 addCommandAlias(
   "quicktest",
-  ";shared/test;core/test;argonaut62/test;http4s016a/test;pactSpec/test;plugin/test;standalone/test;framework/test;testsWithDeps/test")
+  ";shared/test;core/test;argonaut62/test;http4s016a/test;pactSpec/test;plugin/test;standalone/test;framework/test;testsWithDeps/test"
+)
 
 lazy val commonSettings = Seq(
   version := "2.3.0-SNAPSHOT",
@@ -210,10 +211,10 @@ lazy val http4s018 =
     .settings(
       name := "scalapact-http4s-0-18",
       libraryDependencies ++= Seq(
-        "org.http4s" %% "http4s-blaze-server" % "0.18.8",
-        "org.http4s" %% "http4s-blaze-client" % "0.18.8",
-        "org.http4s" %% "http4s-dsl"          % "0.18.8",
-        "com.github.tomakehurst" % "wiremock" % "1.56" % "test"
+        "org.http4s"             %% "http4s-blaze-server" % "0.18.8",
+        "org.http4s"             %% "http4s-blaze-client" % "0.18.8",
+        "org.http4s"             %% "http4s-dsl"          % "0.18.8",
+        "com.github.tomakehurst" % "wiremock"             % "1.56" % "test"
       ),
       crossScalaVersions := Seq(scala211, scala212)
     )

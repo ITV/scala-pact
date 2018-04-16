@@ -10,15 +10,16 @@ import com.itv.scalapact.shared.typeclasses.{IPactReader, IScalaPactHttpClient}
 
 object ScalaPactVerifyCommand {
 
-  def doPactVerify[F[_]](scalaPactSettings: ScalaPactSettings,
-                         providerStates: Seq[(String, String => Boolean)],
-                         providerStateMatcher: PartialFunction[String, Boolean],
-                         pactBrokerAddress: String,
-                         projectVersion: String,
-                         providerName: String,
-                         consumerNames: Seq[String],
-                         versionedConsumerNames: Seq[(String, String)])(implicit pactReader: IPactReader,
-                                                                        httpClient: IScalaPactHttpClient[F]): Unit = {
+  def doPactVerify[F[_]](
+      scalaPactSettings: ScalaPactSettings,
+      providerStates: Seq[(String, String => Boolean)],
+      providerStateMatcher: PartialFunction[String, Boolean],
+      pactBrokerAddress: String,
+      projectVersion: String,
+      providerName: String,
+      consumerNames: Seq[String],
+      versionedConsumerNames: Seq[(String, String)]
+  )(implicit pactReader: IPactReader, httpClient: IScalaPactHttpClient[F]): Unit = {
 
     PactLogger.message("*************************************".white.bold)
     PactLogger.message("** ScalaPact: Running Verifier     **".white.bold)
@@ -47,7 +48,8 @@ object ScalaPactVerifyCommand {
 
   def combineProviderStatesIntoTotalFunction(
       directPactStates: Seq[(String, String => Boolean)],
-      patternMatchedStates: PartialFunction[String, Boolean]): String => Boolean = {
+      patternMatchedStates: PartialFunction[String, Boolean]
+  ): String => Boolean = {
     val l = directPactStates
       .map { ps =>
         { case s: String if s == ps._1 => ps._2(ps._1) }: PartialFunction[String, Boolean]

@@ -38,8 +38,9 @@ object SslContextMap {
 
   implicit val defaultEmptyContextMap: SslContextMap = new SslContextMap(Map())
 
-  def apply[T](simpleRequest: SimpleRequest)(fn: Option[SSLContext] => SimpleRequest => T)(
-      implicit sslContextMap: SslContextMap): T = {
+  def apply[T](
+      simpleRequest: SimpleRequest
+  )(fn: Option[SSLContext] => SimpleRequest => T)(implicit sslContextMap: SslContextMap): T = {
     val sslContext = sslContextMap(simpleRequest.sslContextName)
     val newRequest = simpleRequest.copy(headers = simpleRequest.headers - sslContextHeaderName)
     fn(sslContext)(newRequest)

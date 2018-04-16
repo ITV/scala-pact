@@ -7,14 +7,14 @@ import com.itv.scalapactcore.common.LocalPactFileLoader
 
 object ScalaPactPublishCommand {
 
-  def doPactPublish[F[_]](scalaPactSettings: ScalaPactSettings,
-                          pactBrokerAddress: String,
-                          providerBrokerPublishMap: Map[String, String],
-                          projectVersion: String,
-                          pactContractVersion: String,
-                          allowSnapshotPublish: Boolean)(implicit pactReader: IPactReader,
-                                                         pactWriter: IPactWriter,
-                                                         httpClient: IScalaPactHttpClient[F]): Unit = {
+  def doPactPublish[F[_]](
+      scalaPactSettings: ScalaPactSettings,
+      pactBrokerAddress: String,
+      providerBrokerPublishMap: Map[String, String],
+      projectVersion: String,
+      pactContractVersion: String,
+      allowSnapshotPublish: Boolean
+  )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F]): Unit = {
     import Publisher._
 
     PactLogger.message("*************************************".white.bold)
@@ -40,7 +40,8 @@ object ScalaPactPublishCommand {
       configAndPactFiles.pacts.foreach { pactContract =>
         providerBrokerPublishMap.get(pactContract.provider.name).foreach { broker =>
           publishToBroker(httpClient.doRequestSync, broker, versionToPublishAs)(pactWriter)(
-            ConfigAndPacts(scalaPactSettings, List(pactContract))).foreach(r => PactLogger.message(r.renderAsString))
+            ConfigAndPacts(scalaPactSettings, List(pactContract))
+          ).foreach(r => PactLogger.message(r.renderAsString))
         }
       }
 

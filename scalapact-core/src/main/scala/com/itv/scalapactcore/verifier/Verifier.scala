@@ -11,15 +11,17 @@ import com.itv.scalapact.shared.typeclasses.{IPactReader, IScalaPactHttpClient}
 
 object Verifier {
 
-  def verify[F[_]](loadPactFiles: String => ScalaPactSettings => ConfigAndPacts,
-                   pactVerifySettings: PactVerifySettings)(
-      implicit pactReader: IPactReader,
-      sslContextMap: SslContextMap,
-      httpClient: IScalaPactHttpClient[F]): ScalaPactSettings => Boolean = arguments => {
+  def verify[F[_]](
+      loadPactFiles: String => ScalaPactSettings => ConfigAndPacts,
+      pactVerifySettings: PactVerifySettings
+  )(implicit pactReader: IPactReader,
+    sslContextMap: SslContextMap,
+    httpClient: IScalaPactHttpClient[F]): ScalaPactSettings => Boolean = arguments => {
 
     val pacts: List[Pact] = if (arguments.localPactFilePath.isDefined) {
       PactLogger.message(
-        s"Attempting to use local pact files at: '${arguments.localPactFilePath.getOrElse("<path missing>")}'".white.bold)
+        s"Attempting to use local pact files at: '${arguments.localPactFilePath.getOrElse("<path missing>")}'".white.bold
+      )
       loadPactFiles("pacts")(arguments).pacts
     } else {
 
@@ -39,7 +41,8 @@ object Verifier {
 
             case Right(v) =>
               fetchAndReadPact(
-                v.validatedAddress.address + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + v.consumerVersion)
+                v.validatedAddress.address + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + v.consumerVersion
+              )
           }
         }
         .collect {
@@ -52,7 +55,8 @@ object Verifier {
     PactLogger.message(
       s"Verifying against '${arguments.giveHost}' on port '${arguments.givePort}' with a timeout of ${arguments.clientTimeout
         .map(_.toSeconds.toString)
-        .getOrElse("<unspecified>")} second(s).".white.bold)
+        .getOrElse("<unspecified>")} second(s).".white.bold
+    )
 
     val startTime = System.currentTimeMillis().toDouble
 
@@ -98,7 +102,8 @@ object Verifier {
 
     pactVerifyResults.foreach { result =>
       PactLogger.message(
-        ("Results for pact between " + result.pact.consumer.name + " and " + result.pact.provider.name).white.bold)
+        ("Results for pact between " + result.pact.consumer.name + " and " + result.pact.provider.name).white.bold
+      )
       result.results.foreach { res =>
         res.result match {
           case Right(_) =>
@@ -114,7 +119,8 @@ object Verifier {
   }
 
   private def attemptMatch(strictMatching: Boolean, interactions: List[Interaction])(
-      implicit pactReader: IPactReader): Either[String, InteractionResponse] => Either[String, Interaction] = {
+      implicit pactReader: IPactReader
+  ): Either[String, InteractionResponse] => Either[String, Interaction] = {
     case Right(i) =>
       matchResponse(strictMatching, interactions)(pactReader)(i)
 
@@ -124,7 +130,8 @@ object Verifier {
 
   private def doRequest[F[_]](arguments: ScalaPactSettings, maybeProviderState: Option[ProviderState])(
       implicit sslContextMap: SslContextMap,
-      httpClient: IScalaPactHttpClient[F]): InteractionRequest => Either[String, InteractionResponse] =
+      httpClient: IScalaPactHttpClient[F]
+  ): InteractionRequest => Either[String, InteractionResponse] =
     interactionRequest => {
       val baseUrl       = s"${arguments.giveProtocol}://" + arguments.giveHost + ":" + arguments.givePort.toString
       val clientTimeout = arguments.giveClientTimeout
@@ -157,7 +164,8 @@ object Verifier {
         case t: Throwable =>
           if (maybeProviderState.isDefined) {
             PactLogger.error(
-              s"Error executing unknown provider state function with key: ${maybeProviderState.map(_.key).getOrElse("<missing key>")}".red)
+              s"Error executing unknown provider state function with key: ${maybeProviderState.map(_.key).getOrElse("<missing key>")}".red
+            )
           } else {
             PactLogger.error("Error executing unknown provider state function!".red)
           }
@@ -196,7 +204,8 @@ object Verifier {
 
     httpClient
       .doRequestSync(
-        SimpleRequest(address, "", HttpMethod.GET, Map("Accept" -> "application/json"), None, sslContextName = None))
+        SimpleRequest(address, "", HttpMethod.GET, Map("Accept" -> "application/json"), None, sslContextName = None)
+      )
       .map {
         case r: SimpleResponse if r.is2xx =>
           val pact = r.body.map(pactReader.jsonStringToPact).flatMap {

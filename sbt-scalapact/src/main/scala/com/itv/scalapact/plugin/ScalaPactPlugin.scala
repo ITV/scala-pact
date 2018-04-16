@@ -32,7 +32,8 @@ object ScalaPactPlugin extends AutoPlugin {
     val providerBrokerPublishMap: SettingKey[Map[String, String]] =
       SettingKey[Map[String, String]](
         "providerBrokerPublishMap",
-        "An optional map of this consumer's providers, and alternate pact brokers to publish those contracts to.")
+        "An optional map of this consumer's providers, and alternate pact brokers to publish those contracts to."
+      )
 
     val providerName: SettingKey[String] =
       SettingKey[String]("providerName", "The name of the service to verify")
@@ -43,12 +44,14 @@ object ScalaPactPlugin extends AutoPlugin {
     val versionedConsumerNames: SettingKey[Seq[(String, String)]] =
       SettingKey[Seq[(String, String)]](
         "versionedConsumerNames",
-        "The name and pact version numbers of the services that consume the service to verify")
+        "The name and pact version numbers of the services that consume the service to verify"
+      )
 
     val pactContractVersion: SettingKey[String] =
       SettingKey[String](
         "pactContractVersion",
-        "The version number the pact contract will be published under. If missing or empty, the project version will be used.")
+        "The version number the pact contract will be published under. If missing or empty, the project version will be used."
+      )
 
     val allowSnapshotPublish: SettingKey[Boolean] =
       SettingKey[Boolean]("allowSnapshotPublish",
@@ -98,8 +101,9 @@ object ScalaPactPlugin extends AutoPlugin {
   override lazy val projectSettings: Seq[Def.Setting[
     _ >: Seq[(String, String => Boolean)] with Seq[(String, String)] with Boolean with ScalaPactEnv with Map[
       String,
-      String] with String with Seq[String] with PartialFunction[String, Boolean] with Task[Unit] with InputTask[
-      Unit]]] =
+      String
+    ] with String with Seq[String] with PartialFunction[String, Boolean] with Task[Unit] with InputTask[Unit]
+  ]] =
     pactSettings ++ Seq(
       pactPack := pactPackTask.value
     ) ++ Seq(

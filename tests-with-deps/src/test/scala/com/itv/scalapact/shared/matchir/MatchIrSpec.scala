@@ -76,8 +76,11 @@ class MatchIrSpec extends FunSpec with Matchers {
           "animals",
           IrNode("alligator")
             .withAttributes(
-              IrNodeAttributes(Map(
-                "name" -> IrNodeAttribute(IrStringNode("Mary"), IrNodePathEmpty <~ "animals" <~ "alligator" <@ "name")))
+              IrNodeAttributes(
+                Map(
+                  "name" -> IrNodeAttribute(IrStringNode("Mary"), IrNodePathEmpty <~ "animals" <~ "alligator" <@ "name")
+                )
+              )
             )
             .withPath(IrNodePathEmpty <~ "animals" <~ "alligator")
             .markAsXml

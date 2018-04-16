@@ -21,7 +21,8 @@ object PactStubber {
       .startServer(interactionManager, 5, sslContextName = None, port = None)(
         pactReaderInstance,
         pactWriterInstance,
-        SslContextMap.defaultEmptyContextMap))(args)
+        SslContextMap.defaultEmptyContextMap
+      ))(args)
 
     ()
   }

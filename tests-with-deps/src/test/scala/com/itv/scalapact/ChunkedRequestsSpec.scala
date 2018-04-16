@@ -96,9 +96,11 @@ class ChunkedRequestsSpec extends FunSpec with Matchers {
         .runConsumerTest { mockConfig =>
           val request =
             HttpRequest()
-              .withBackendConfig(BackendConfig(
-                allowChunkedRequestBody = true
-              ))
+              .withBackendConfig(
+                BackendConfig(
+                  allowChunkedRequestBody = true
+                )
+              )
               .withURL(mockConfig.baseUrl)
               .withPath(endPoint)
               .withHeaders("SOAPAction"   -> "process",

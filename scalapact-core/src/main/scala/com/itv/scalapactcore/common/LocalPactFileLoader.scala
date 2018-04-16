@@ -82,12 +82,14 @@ object LocalPactFileLoader {
           PactLogger.debug(
             ("Looking for pact files in: " + config.localPactFilePath
               .orElse(Option(defaultLocation))
-              .getOrElse("")).white.bold)
+              .getOrElse("")).white.bold
+          )
 
           val pacts = config.localPactFilePath.orElse(Option(defaultLocation)) match {
             case Some(path) =>
               (recursiveJsonLoad(allowTmpFiles) andThen deserializeIntoPact(pactReader.jsonStringToPact))(
-                new File(path))
+                new File(path)
+              )
 
             case None => Nil
           }

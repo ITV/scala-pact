@@ -10,14 +10,16 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
     it("should be able to extract the provider") {
 
       JsonBodySpecialCaseHelper.extractPactActor("provider")(PactFileExamples.simpleAsString) shouldEqual Some(
-        PactActor("provider"))
+        PactActor("provider")
+      )
 
     }
 
     it("should be able to extract the consumer") {
 
       JsonBodySpecialCaseHelper.extractPactActor("consumer")(PactFileExamples.simpleAsString) shouldEqual Some(
-        PactActor("consumer"))
+        PactActor("consumer")
+      )
 
     }
 

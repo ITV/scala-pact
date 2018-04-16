@@ -12,15 +12,18 @@ trait IScalaPactHttpClient[F[_]] {
       url: String,
       ir: InteractionRequest,
       clientTimeout: Duration,
-      sslContextName: Option[String])(implicit sslContextMap: SslContextMap): F[InteractionResponse]
+      sslContextName: Option[String]
+  )(implicit sslContextMap: SslContextMap): F[InteractionResponse]
 
   def doRequestSync(simpleRequest: SimpleRequest)(
-      implicit sslContextMap: SslContextMap): Either[Throwable, SimpleResponse]
+      implicit sslContextMap: SslContextMap
+  ): Either[Throwable, SimpleResponse]
 
   def doInteractionRequestSync(
       url: String,
       ir: InteractionRequest,
       clientTimeout: Duration,
-      sslContextName: Option[String])(implicit sslContextMap: SslContextMap): Either[Throwable, InteractionResponse]
+      sslContextName: Option[String]
+  )(implicit sslContextMap: SslContextMap): Either[Throwable, InteractionResponse]
 
 }

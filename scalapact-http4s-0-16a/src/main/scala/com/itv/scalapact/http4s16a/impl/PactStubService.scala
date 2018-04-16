@@ -23,13 +23,13 @@ private object PactStubService {
       sslContext.fold(blazeBuilder)(ssl => blazeBuilder.withSSLContext(ssl))
   }
 
-  def createServer(interactionManager: IInteractionManager,
-                   connectionPoolSize: Int,
-                   sslContextName: Option[String],
-                   port: Option[Int],
-                   config: ScalaPactSettings)(implicit pactReader: IPactReader,
-                                              pactWriter: IPactWriter,
-                                              sslContextMap: SslContextMap): BlazeBuilder =
+  def createServer(
+      interactionManager: IInteractionManager,
+      connectionPoolSize: Int,
+      sslContextName: Option[String],
+      port: Option[Int],
+      config: ScalaPactSettings
+  )(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): BlazeBuilder =
     BlazeBuilder
       .bindHttp(port.getOrElse(config.givePort), config.giveHost)
       .withServiceExecutor(Executors.newFixedThreadPool(2))
@@ -45,7 +45,8 @@ private object PactStubService {
                                      pactWriter: IPactWriter,
                                      sslContextMap: SslContextMap): ScalaPactSettings => Server = config => {
     PactLogger.message(
-      ("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold)
+      ("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold
+    )
     PactLogger.message(("Strict matching mode: " + config.giveStrictMode.toString).white.bold)
 
     createServer(interactionManager, connectionPoolSize, sslContextName, port, config).run
@@ -62,7 +63,8 @@ private object PactStubService {
 
   private def matchRequestWithResponse(interactionManager: IInteractionManager, strictMatching: Boolean, req: Request)(
       implicit pactReader: IPactReader,
-      pactWriter: IPactWriter): Task[Response] =
+      pactWriter: IPactWriter
+  ): Task[Response] =
     if (isAdminCall(req)) {
 
       req.method.name.toUpperCase match {
@@ -80,7 +82,8 @@ private object PactStubService {
               .runLog[Task, String]
               .map(body => Option(body.mkString))
               .unsafePerformSync
-              .getOrElse("")) match {
+              .getOrElse("")
+          ) match {
             case Right(r) =>
               interactionManager.addInteractions(r.interactions)
 
@@ -135,13 +138,13 @@ class PactServer extends IPactStubber {
 
   private var instance: Option[Server] = None
 
-  private def blazeBuilder(scalaPactSettings: ScalaPactSettings,
-                           interactionManager: IInteractionManager,
-                           connectionPoolSize: Int,
-                           sslContextName: Option[String],
-                           port: Option[Int])(implicit pactReader: IPactReader,
-                                              pactWriter: IPactWriter,
-                                              sslContextMap: SslContextMap): BlazeBuilder =
+  private def blazeBuilder(
+      scalaPactSettings: ScalaPactSettings,
+      interactionManager: IInteractionManager,
+      connectionPoolSize: Int,
+      sslContextName: Option[String],
+      port: Option[Int]
+  )(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): BlazeBuilder =
     PactStubService.createServer(
       interactionManager,
       connectionPoolSize,
@@ -163,7 +166,8 @@ class PactServer extends IPactStubber {
 
         case None =>
           instance = Option(
-            blazeBuilder(scalaPactSettings, interactionManager, connectionPoolSize, sslContextName, port).run)
+            blazeBuilder(scalaPactSettings, interactionManager, connectionPoolSize, sslContextName, port).run
+          )
           this
     }
 

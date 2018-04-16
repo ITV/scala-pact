@@ -57,7 +57,8 @@ trait PactSpecTester extends FunSpec with Matchers {
                             strictMatching,
                             spec.actual.renderAsString,
                             spec.expected.renderAsString,
-                            ""))
+                            "")
+          )
 
       case e: MatchOutcomeFailed =>
         // Failed to match
@@ -69,7 +70,8 @@ trait PactSpecTester extends FunSpec with Matchers {
                             strictMatching,
                             spec.actual.renderAsString,
                             spec.expected.renderAsString,
-                            e.renderDifferences))
+                            e.renderDifferences)
+          )
         else 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
     }
 
@@ -118,7 +120,8 @@ trait PactSpecTester extends FunSpec with Matchers {
                             strictMatching,
                             spec.actual.renderAsString,
                             spec.expected.renderAsString,
-                            ""))
+                            "")
+          )
 
       case e: MatchOutcomeFailed =>
         // Failed to match
@@ -130,7 +133,8 @@ trait PactSpecTester extends FunSpec with Matchers {
                             strictMatching,
                             spec.actual.renderAsString,
                             spec.expected.renderAsString,
-                            e.renderDifferences))
+                            e.renderDifferences)
+          )
         else 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
     }
 

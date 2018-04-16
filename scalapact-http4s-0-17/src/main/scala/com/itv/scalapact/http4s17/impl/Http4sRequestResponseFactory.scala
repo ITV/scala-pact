@@ -71,7 +71,8 @@ object Http4sRequestResponseFactory {
     }
 
   def buildResponse(status: IntAndReason, headers: Map[String, String], body: Option[String])(
-      implicit strategy: Strategy): Task[Response] =
+      implicit strategy: Strategy
+  ): Task[Response] =
     intToStatus(status) match {
       case Left(l) =>
         l.toHttpResponse(HttpVersion.`HTTP/1.1`)

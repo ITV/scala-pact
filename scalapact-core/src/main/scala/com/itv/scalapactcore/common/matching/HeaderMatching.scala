@@ -105,7 +105,8 @@ object HeaderMatching {
   }
 
   def findAndCleanupApplicableMatchingRules(
-      matchingRules: Option[Map[String, MatchingRule]]): Option[Map[String, MatchingRule]] =
+      matchingRules: Option[Map[String, MatchingRule]]
+  ): Option[Map[String, MatchingRule]] =
     matchingRules.map { mmr =>
       mmr
         .filter(mr => mr._1.startsWith("$.headers."))

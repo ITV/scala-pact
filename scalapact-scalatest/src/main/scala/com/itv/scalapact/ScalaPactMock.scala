@@ -14,8 +14,9 @@ import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWri
 
 object ScalaPactMock {
 
-  private def configuredTestRunner[A](pactDescription: ScalaPactDescriptionFinal)(config: ScalaPactMockConfig)(
-      test: => ScalaPactMockConfig => A)(implicit pactWriter: IPactWriter): A = {
+  private def configuredTestRunner[A](
+      pactDescription: ScalaPactDescriptionFinal
+  )(config: ScalaPactMockConfig)(test: => ScalaPactMockConfig => A)(implicit pactWriter: IPactWriter): A = {
 
     if (pactDescription.options.writePactFiles) {
       ScalaPactContractWriter.writePactContracts(config.outputPath)(pactWriter)(pactDescription.withHeaderForSsl)
@@ -63,12 +64,13 @@ object ScalaPactMock {
       case Failure(e)                 => throw e
     }
 
-  def runConsumerIntegrationTest[F[_], A](strict: Boolean)(pactDescription: ScalaPactDescriptionFinal)(
-      test: ScalaPactMockConfig => A)(implicit sslContextMap: SslContextMap,
-                                      pactReader: IPactReader,
-                                      pactWriter: IPactWriter,
-                                      httpClient: IScalaPactHttpClient[F],
-                                      pactStubber: IPactStubber): A = {
+  def runConsumerIntegrationTest[F[_], A](
+      strict: Boolean
+  )(pactDescription: ScalaPactDescriptionFinal)(test: ScalaPactMockConfig => A)(implicit sslContextMap: SslContextMap,
+                                                                                pactReader: IPactReader,
+                                                                                pactWriter: IPactWriter,
+                                                                                httpClient: IScalaPactHttpClient[F],
+                                                                                pactStubber: IPactStubber): A = {
 
     val interactionManager: InteractionManager = new InteractionManager
 
@@ -100,13 +102,12 @@ object ScalaPactMock {
     waitForServerThenTest(server, mockConfig, test, pactDescription)
   }
 
-  private def waitForServerThenTest[F[_], A](server: IPactStubber,
-                                             mockConfig: ScalaPactMockConfig,
-                                             test: ScalaPactMockConfig => A,
-                                             pactDescription: ScalaPactDescriptionFinal)(
-      implicit sslContextMap: SslContextMap,
-      pactWriter: IPactWriter,
-      httpClient: IScalaPactHttpClient[F]): A = {
+  private def waitForServerThenTest[F[_], A](
+      server: IPactStubber,
+      mockConfig: ScalaPactMockConfig,
+      test: ScalaPactMockConfig => A,
+      pactDescription: ScalaPactDescriptionFinal
+  )(implicit sslContextMap: SslContextMap, pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F]): A = {
     def rec(attemptsRemaining: Int, intervalMillis: Int): A =
       if (isStubReady(mockConfig, pactDescription.serverSslContextName)) {
         val result = configuredTestRunner(pactDescription)(mockConfig)(test)
@@ -125,16 +126,18 @@ object ScalaPactMock {
     rec(5, 100)
   }
 
-  private def isStubReady[F[_]](mockConfig: ScalaPactMockConfig, sslContextName: Option[String])(
-      implicit sslContextMap: SslContextMap,
-      httpClient: IScalaPactHttpClient[F]): Boolean =
+  private def isStubReady[F[_]](
+      mockConfig: ScalaPactMockConfig,
+      sslContextName: Option[String]
+  )(implicit sslContextMap: SslContextMap, httpClient: IScalaPactHttpClient[F]): Boolean =
     httpClient.doRequestSync(
       SimpleRequest(mockConfig.baseUrl,
                     "/stub/status",
                     HttpMethod.GET,
                     Map("X-Pact-Admin" -> "true"),
                     None,
-                    sslContextName = sslContextName)) match {
+                    sslContextName = sslContextName)
+    ) match {
       case Left(_) =>
         false
 

@@ -18,7 +18,8 @@ object BodyMatching {
 
   def matchBodies(headers: Option[Map[String, String]], expected: Option[String], received: Option[String])(
       implicit rules: IrNodeMatchingRules,
-      pactReader: IPactReader): MatchOutcome =
+      pactReader: IPactReader
+  ): MatchOutcome =
     (expected, received) match {
       case (Some(ee), Some(rr))
           if ee.nonEmpty && hasJsonHeader(headers) || stringIsProbablyJson(ee) && stringIsProbablyJson(rr) =>
@@ -59,7 +60,8 @@ object BodyMatching {
       headers: Option[Map[String, String]],
       expected: Option[String],
       received: Option[String],
-      bePermissive: Boolean)(implicit rules: IrNodeMatchingRules, pactReader: IPactReader): MatchOutcome = {
+      bePermissive: Boolean
+  )(implicit rules: IrNodeMatchingRules, pactReader: IPactReader): MatchOutcome = {
     implicit val permissivity: IrNodeMatchPermissivity = if (bePermissive) Permissive else NonPermissive
 
     (expected, received) match {
@@ -116,7 +118,8 @@ object BodyMatching {
 
   lazy val stringIsProbablyJson: String => Boolean = str =>
     ((s: String) => s.nonEmpty && ((s.startsWith("{") && s.endsWith("}")) || (s.startsWith("[") && s.endsWith("]"))))(
-      str.trim)
+      str.trim
+  )
 
   lazy val stringIsProbablyXml: String => Boolean = str =>
     ((s: String) => s.nonEmpty && s.startsWith("<") && s.endsWith(">"))(str.trim)

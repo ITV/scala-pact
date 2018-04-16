@@ -12,7 +12,8 @@ object ScalaPactForger {
   implicit def toOption[A](a: A): Option[A] = Option(a)
 
   implicit def rulesToOptionalList(
-      rules: ScalaPactForger.ScalaPactMatchingRules): Option[List[ScalaPactForger.ScalaPactMatchingRule]] =
+      rules: ScalaPactForger.ScalaPactMatchingRules
+  ): Option[List[ScalaPactForger.ScalaPactMatchingRule]] =
     Option(rules.rules)
 
   implicit val options: ScalaPactOptions = ScalaPactOptions.DefaultOptions
@@ -140,9 +141,14 @@ object ScalaPactForger {
                                        options: ScalaPactOptions) {
     def withHeaderForSsl: ScalaPactDescriptionFinal =
       copy(
-        interactions = interactions.map(i =>
-          i.copy(request = i.request.copy(
-            headers = i.request.headers addOpt (SslContextMap.sslContextHeaderName -> i.sslContextName)))))
+        interactions = interactions.map(
+          i =>
+            i.copy(
+              request = i.request
+                .copy(headers = i.request.headers addOpt (SslContextMap.sslContextHeaderName -> i.sslContextName))
+          )
+        )
+      )
   }
 
   case class ScalaPactInteractionFinal(description: String,

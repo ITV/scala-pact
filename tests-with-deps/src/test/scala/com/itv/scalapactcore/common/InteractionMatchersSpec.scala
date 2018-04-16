@@ -190,10 +190,12 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
       matchPaths(PathAndQuery(expected, None), PathAndQuery(expected, None)).isSuccess shouldEqual true
       matchPaths(
         PathAndQuery(expected, None),
-        PathAndQuery("/foo/bar/hello?hobby=skiing&name=joey&id=abc123&job=dentist", None)).isSuccess shouldEqual true
+        PathAndQuery("/foo/bar/hello?hobby=skiing&name=joey&id=abc123&job=dentist", None)
+      ).isSuccess shouldEqual true
       matchPaths(
         PathAndQuery(expected, None),
-        PathAndQuery("/foo/bar/hello?hobby=skiing&name=joey", "id=abc123&job=dentist")).isSuccess shouldEqual true
+        PathAndQuery("/foo/bar/hello?hobby=skiing&name=joey", "id=abc123&job=dentist")
+      ).isSuccess shouldEqual true
       matchPaths(PathAndQuery(expected, None), PathAndQuery("/foo/bar/hello?hobby=skiing", None)).isSuccess shouldEqual false
       matchPaths(PathAndQuery("/foo/bar/hello", None), PathAndQuery("/foo/bar/hello?hobby=skiing", None)).isSuccess shouldEqual true // forgiving in what you receive...
 
