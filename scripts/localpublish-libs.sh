@@ -23,15 +23,11 @@ echo ">>> Http4s 0.16.xa"
 crossPublishLocal "http4s016a"
 
 echo ""
-echo ">>> Http4s 0.16.x"
-crossPublishLocal "http4s016"
-
-echo ""
-echo ">>> Http4s 0.17.0"
+echo ">>> Http4s 0.17.x"
 crossPublishLocal "http4s017"
 
 echo ""
-echo ">>> Http4s 0.18.0"
+echo ">>> Http4s 0.18.x"
 crossPublishLocal "http4s018"
 
 echo ""
@@ -39,9 +35,9 @@ echo ">>> Argonaut 6.2"
 crossPublishLocal "argonaut62"
 
 echo ""
-echo ">>> Circe 0.8.0"
+echo ">>> Circe 0.8.x"
 crossPublishLocal "circe08"
 
 echo ""
-echo ">>> Circe 0.9.0"
+echo ">>> Circe 0.9.x"
 crossPublishLocal "circe09"
