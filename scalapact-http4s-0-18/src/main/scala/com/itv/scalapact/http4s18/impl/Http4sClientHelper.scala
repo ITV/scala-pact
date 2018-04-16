@@ -1,52 +1,49 @@
 package com.itv.scalapact.http4s18.impl
 
-import java.util.concurrent.Executors
-
 import cats.effect.IO
 import com.itv.scalapact.shared.{SimpleRequest, SimpleResponse}
 import javax.net.ssl.SSLContext
 import org.http4s._
 import org.http4s.client.Client
-import org.http4s.client.blaze.{BlazeClientConfig, PooledHttp1Client}
+import org.http4s.client.blaze.{BlazeClientConfig, Http1Client}
 import org.http4s.headers.{AgentProduct, `User-Agent`}
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 object Http4sClientHelper {
 
   import HeaderImplicitConversions._
 
-  private[http] implicit val executionContext: ExecutionContext =
-    ExecutionContext.fromExecutor(Executors.newFixedThreadPool(2))
-
-  private def blazeClientConfig(clientTimeout: Duration, sslContext: Option[SSLContext]): BlazeClientConfig =
+  private def blazeClientConfig(clientTimeout: Duration,
+                                sslContext: Option[SSLContext],
+                                maxTotalConnections: Int): BlazeClientConfig =
     BlazeClientConfig.defaultConfig.copy(
       requestTimeout = clientTimeout,
       sslContext = sslContext,
       userAgent = Option(`User-Agent`(AgentProduct("scala-pact", Option(BuildInfo.version)))),
-      checkEndpointIdentification = false
+      checkEndpointIdentification = false,
+      maxTotalConnections = maxTotalConnections
     )
 
   private val extractResponse: Response[IO] => IO[SimpleResponse] = r =>
-    r.bodyAsText.runLog.map(_.mkString).map { b =>
+    r.bodyAsText.compile.toVector.map(_.mkString).map { b =>
       SimpleResponse(r.status.code, r.headers, Some(b))
   }
 
-  def defaultClient: Client[IO] =
+  def defaultClient: IO[Client[IO]] =
     buildPooledBlazeHttpClient(1, Duration(1, SECONDS), None)
 
   def buildPooledBlazeHttpClient(maxTotalConnections: Int,
                                  clientTimeout: Duration,
-                                 sslContext: Option[SSLContext]): Client[IO] =
-    PooledHttp1Client[IO](maxTotalConnections = maxTotalConnections,
-                          config = blazeClientConfig(clientTimeout, sslContext))
+                                 sslContext: Option[SSLContext]): IO[Client[IO]] =
+    Http1Client[IO](config = blazeClientConfig(clientTimeout, sslContext, maxTotalConnections))
 
-  val doRequest: (SimpleRequest, Client[IO]) => IO[SimpleResponse] = (request, httpClient) =>
+  def doRequest(request: SimpleRequest, httpClient: IO[Client[IO]]): IO[SimpleResponse] =
     for {
       request  <- Http4sRequestResponseFactory.buildRequest(request)
-      response <- httpClient.fetch[SimpleResponse](request)(extractResponse)
-      _        <- httpClient.shutdown
+      client   <- httpClient
+      response <- client.fetch[SimpleResponse](request)(extractResponse)
+      _        <- client.shutdown
     } yield response
 
 }

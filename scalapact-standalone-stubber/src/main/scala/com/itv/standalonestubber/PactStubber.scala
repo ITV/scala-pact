@@ -1,7 +1,7 @@
 package com.itv.standalonestubber
 
-import com.itv.scalapact.argonaut62.{pactReaderInstance, pactWriterInstance}
-import com.itv.scalapact.http4s16a.serverInstance
+import com.itv.scalapact.circe09.{pactReaderInstance, pactWriterInstance}
+import com.itv.scalapact.http4s18.serverInstance
 import com.itv.scalapact.shared.ColourOuput._
 import com.itv.scalapact.shared.{PactLogger, ScalaPactSettings, SslContextMap}
 import com.itv.scalapactcore.common.LocalPactFileLoader._

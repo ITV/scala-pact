@@ -11,8 +11,8 @@ import scala.concurrent.duration._
 
 class ExampleVerification extends FunSpec with Matchers with BeforeAndAfterAll {
 
-  import com.itv.scalapact.argonaut62._
-  import com.itv.scalapact.http4s16a._
+  import com.itv.scalapact.circe09._
+  import com.itv.scalapact.http4s18._
 
   val samplePact = """
   {

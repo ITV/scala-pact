@@ -292,7 +292,6 @@ lazy val framework =
       }
     )
     .dependsOn(core)
-    .dependsOn(http4s018 % "provided")
     .settings(compilerOptionsGeneral: _*)
 
 lazy val standalone =
@@ -315,7 +314,7 @@ lazy val pactSpec =
       crossScalaVersions := Seq(scala211, scala212)
     )
     .dependsOn(core)
-    .dependsOn(circe09)
+    .dependsOn(argonaut62)
 
 lazy val testsWithDeps =
   (project in file("tests-with-deps"))

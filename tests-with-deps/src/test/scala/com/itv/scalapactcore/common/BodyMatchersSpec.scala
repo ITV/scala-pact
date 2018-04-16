@@ -1,6 +1,6 @@
 package com.itv.scalapactcore.common
 
-import com.itv.scalapact.argonaut62._
+import com.itv.scalapact.circe09._
 import com.itv.scalapact.shared.matchir.IrNodeMatchingRules
 import org.scalatest.{FunSpec, Matchers}
 

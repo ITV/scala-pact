@@ -1,7 +1,7 @@
 package com.itv.scalapact.plugin
 
-import com.itv.scalapact.argonaut62._
-import com.itv.scalapact.http4s16a._
+import com.itv.scalapact.circe09._
+import com.itv.scalapact.http4s18._
 import com.itv.scalapact.plugin.publish.ScalaPactPublishCommand
 import com.itv.scalapact.plugin.stubber.ScalaPactStubberCommand
 import com.itv.scalapact.plugin.tester.ScalaPactTestCommand
@@ -95,14 +95,17 @@ object ScalaPactPlugin extends AutoPlugin {
   )
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  override lazy val projectSettings: Seq[
-    Def.Setting[_ >: Boolean with PartialFunction[String, Boolean] with ScalaPactEnv with Map[String, String] with Seq[
-      (String, String)] with Seq[String] with Seq[(String, String => Boolean)] with String with Task[Unit]]] =
+  override lazy val projectSettings: Seq[Def.Setting[
+    _ >: Seq[(String, String => Boolean)] with Seq[(String, String)] with Boolean with ScalaPactEnv with Map[
+      String,
+      String] with String with Seq[String] with PartialFunction[String, Boolean] with Task[Unit] with InputTask[
+      Unit]]] =
     pactSettings ++ Seq(
-      pactPack := pactPackTask.value,
-      pactPush := pactPushTask.value,
-      pactCheck := pactCheckTask.value,
-      pactStub := pactStubTask.value
+      pactPack := pactPackTask.value
+    ) ++ Seq(
+      pactPush := pactPushTask.evaluated,
+      pactCheck := pactCheckTask.evaluated,
+      pactStub := pactStubTask.evaluated
     )
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))

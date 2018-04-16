@@ -17,8 +17,8 @@ import scala.concurrent.Await
  **/
 class ChunkedRequestsSpec extends FunSpec with Matchers {
 
-  import com.itv.scalapact.argonaut62._
-  import com.itv.scalapact.http4s16a._
+  import com.itv.scalapact.circe09._
+  import com.itv.scalapact.http4s18._
 
   describe("Supporting clients that send chunked request bodies") {
 

@@ -6,7 +6,6 @@ import fs2.Task
 import org.http4s.client.Client
 
 import scala.concurrent.duration._
-import scala.language.{implicitConversions, postfixOps}
 
 class ScalaPactHttpClient(fetcher: (SimpleRequest, Client) => Task[SimpleResponse]) extends IScalaPactHttpClient[Task] {
 
@@ -35,11 +34,10 @@ class ScalaPactHttpClient(fetcher: (SimpleRequest, Client) => Task[SimpleRespons
 
   def doRequestTask(performRequest: (SimpleRequest, Client) => Task[SimpleResponse], simpleRequest: SimpleRequest)(
       implicit sslContextMap: SslContextMap): Task[SimpleResponse] =
-    SslContextMap(simpleRequest)(
-      sslContext =>
-        simpleRequestWithoutFakeHeader =>
-          performRequest(simpleRequestWithoutFakeHeader,
-                         Http4sClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, 2.seconds, sslContext)))
+    SslContextMap(simpleRequest) { sslContext => simpleRequestWithoutFakeHeader =>
+      performRequest(simpleRequestWithoutFakeHeader,
+                     Http4sClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, 2.seconds, sslContext))
+    }
 
   def doInteractionRequestTask(
       performRequest: (SimpleRequest, Client) => Task[SimpleResponse],

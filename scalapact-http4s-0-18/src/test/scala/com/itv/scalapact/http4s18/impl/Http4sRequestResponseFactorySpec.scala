@@ -1,6 +1,5 @@
-package com.itv.scalapact.shared.http
+package com.itv.scalapact.http4s18.impl
 
-import com.itv.scalapact.http4s18.impl.{Http4sRequestResponseFactory, IntAndReason}
 import com.itv.scalapact.shared.{HttpMethod, SimpleRequest}
 import org.scalatest.{FunSpec, Matchers}
 
@@ -26,7 +25,7 @@ class Http4sRequestResponseFactorySpec extends FunSpec with Matchers {
 
       request.method.name shouldEqual "POST"
       request.pathInfo.contains("foo") shouldEqual true
-      request.bodyAsText.runLog.unsafeRunSync().mkString shouldEqual "Greetings!"
+      request.bodyAsText.compile.toVector.unsafeRunSync().mkString shouldEqual "Greetings!"
 
     }
 
@@ -43,7 +42,7 @@ class Http4sRequestResponseFactorySpec extends FunSpec with Matchers {
         .unsafeRunSync()
 
       response.status.code shouldEqual 404
-      response.bodyAsText.runLog.unsafeRunSync().mkString shouldEqual "Missing"
+      response.bodyAsText.compile.toVector.unsafeRunSync().mkString shouldEqual "Missing"
 
     }
 

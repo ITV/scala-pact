@@ -4,7 +4,7 @@ import com.itv.scalapact.shared.{Interaction, InteractionRequest, InteractionRes
 import com.itv.scalapactcore.common.stubber.InteractionManager
 import org.scalatest.{FunSpec, Matchers}
 
-import com.itv.scalapact.argonaut62._
+import com.itv.scalapact.circe09._
 
 import scala.language.implicitConversions
 

@@ -6,7 +6,7 @@ import org.scalatest.{FunSpec, Matchers}
 
 class Http4sRequestResponseFactorySpec extends FunSpec with Matchers {
 
-  implicit val strategy: Strategy = Http4sClientHelper.strategy
+  implicit val strategy: Strategy = fs2.Strategy.fromFixedDaemonPool(1, threadName = "strategy")
 
   describe("Creating Http4s requests and responses") {
 

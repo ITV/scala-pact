@@ -14,8 +14,6 @@ object Http4sClientHelper {
 
   import HeaderImplicitConversions._
 
-  private[http] implicit val strategy: Strategy = fs2.Strategy.fromFixedDaemonPool(2, threadName = "strategy")
-
   private def blazeClientConfig(clientTimeout: Duration, sslContext: Option[SSLContext]): BlazeClientConfig =
     BlazeClientConfig.defaultConfig.copy(
       requestTimeout = clientTimeout,
@@ -37,11 +35,14 @@ object Http4sClientHelper {
                                  sslContext: Option[SSLContext]): Client =
     PooledHttp1Client(maxTotalConnections, blazeClientConfig(clientTimeout, sslContext))
 
-  val doRequest: (SimpleRequest, Client) => Task[SimpleResponse] = (request, httpClient) =>
+  def doRequest(request: SimpleRequest, httpClient: Client): Task[SimpleResponse] = {
+    implicit val strategy: Strategy = fs2.Strategy.fromFixedDaemonPool(1, threadName = "strategy")
+
     for {
       request  <- Http4sRequestResponseFactory.buildRequest(request)
       response <- httpClient.fetch[SimpleResponse](request)(extractResponse)
       _        <- httpClient.shutdown
     } yield response
+  }
 
 }

@@ -21,47 +21,45 @@ import scala.concurrent.duration._
 object PactStubService {
   type OptIO[A] = OptionT[IO, A]
 
-  private val nThreads: Int = 10
-  implicit val executionContext: ExecutionContext =
-    ExecutionContext.fromExecutor(Executors.newFixedThreadPool(nThreads))
-
-  def startServer(interactionManager: IInteractionManager, sslContextName: Option[String])(
-      implicit pactReader: IPactReader,
-      pactWriter: IPactWriter,
-      sslContextMap: SslContextMap): ScalaPactSettings => Unit = config => {
-    PactLogger.message(
-      ("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold)
-    PactLogger.message(("Strict matching mode: " + config.giveStrictMode.toString).white.bold)
-
-    runServer(interactionManager, nThreads, sslContextName, config.givePort)(pactReader, pactWriter, sslContextMap)(
-      config).awaitShutdown()
-  }
-
   implicit class BlazeBuilderPimper(blazeBuilder: BlazeBuilder[IO]) {
     def withOptionalSsl(sslContext: Option[SSLContext]): BlazeBuilder[IO] =
       sslContext.fold(blazeBuilder)(ssl => blazeBuilder.withSSLContext(ssl))
   }
 
-  def runServer(interactionManager: IInteractionManager,
-                connectionPoolSize: Int,
-                sslContextName: Option[String],
-                port: Int)(implicit pactReader: IPactReader,
-                           pactWriter: IPactWriter,
-                           sslContextMap: SslContextMap): ScalaPactSettings => IPactServer =
-    config =>
-      PactServer {
-        BlazeBuilder[IO]
-          .bindHttp(port, config.giveHost)
-          .withExecutionContext(executionContext)
-          .withIdleTimeout(60.seconds)
-          .withConnectorPoolSize(connectionPoolSize)
-          .withOptionalSsl(sslContextName)
-          .mountService(PactStubService.service(interactionManager, config.giveStrictMode), "/")
-          .start
-          .unsafeRunSync()
-    }
+  def createServer(interactionManager: IInteractionManager,
+                   connectionPoolSize: Int,
+                   sslContextName: Option[String],
+                   port: Option[Int],
+                   config: ScalaPactSettings)(implicit pactReader: IPactReader,
+                                              pactWriter: IPactWriter,
+                                              sslContextMap: SslContextMap): BlazeBuilder[IO] = {
 
-  def stopServer: IPactServer => Unit = server => server.shutdown()
+    val executionContext: ExecutionContext =
+      ExecutionContext.fromExecutor(Executors.newFixedThreadPool(2))
+
+    BlazeBuilder[IO]
+      .bindHttp(port.getOrElse(config.givePort), config.giveHost)
+      .withExecutionContext(executionContext)
+      .withIdleTimeout(60.seconds)
+      .withOptionalSsl(sslContextName)
+      .withConnectorPoolSize(connectionPoolSize)
+      .mountService(PactStubService.service(interactionManager, config.giveStrictMode), "/")
+  }
+
+  def startServer(interactionManager: IInteractionManager,
+                  connectionPoolSize: Int,
+                  sslContextName: Option[String],
+                  port: Option[Int])(implicit pactReader: IPactReader,
+                                     pactWriter: IPactWriter,
+                                     sslContextMap: SslContextMap): ScalaPactSettings => Unit = config => {
+    PactLogger.message(
+      ("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold)
+    PactLogger.message(("Strict matching mode: " + config.giveStrictMode.toString).white.bold)
+
+    createServer(interactionManager, connectionPoolSize, sslContextName, port, config).start.unsafeRunSync()
+
+    ()
+  }
 
   private val isAdminCall: Request[IO] => Boolean = request =>
     request.headers.get(CaseInsensitiveString("X-Pact-Admin")).exists(h => h.value == "true")
@@ -87,7 +85,7 @@ object PactStubService {
 
         case m if m == "POST" || m == "PUT" && req.pathInfo.startsWith("/interactions") =>
           pactReader.jsonStringToPact(
-            req.bodyAsText.runLog.map(body => Option(body.mkString)).unsafeRunSync().getOrElse("")) match {
+            req.bodyAsText.compile.toVector.map(body => Option(body.mkString)).unsafeRunSync().getOrElse("")) match {
             case Right(r) =>
               interactionManager.addInteractions(r.interactions)
 
@@ -115,7 +113,7 @@ object PactStubService {
           headers = req.headers,
           query = if (req.params.isEmpty) None else Option(req.params.toList.map(p => p._1 + "=" + p._2).mkString("&")),
           path = Option(req.pathInfo),
-          body = req.bodyAsText.runLog.map(body => Option(body.mkString)).unsafeRunSync(),
+          body = req.bodyAsText.compile.toVector.map(body => Option(body.mkString)).unsafeRunSync(),
           matchingRules = None
         ),
         strictMatching = strictMatching

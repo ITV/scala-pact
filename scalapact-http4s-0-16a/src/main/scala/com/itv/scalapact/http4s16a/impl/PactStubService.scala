@@ -62,7 +62,7 @@ private object PactStubService {
 
   private def matchRequestWithResponse(interactionManager: IInteractionManager, strictMatching: Boolean, req: Request)(
       implicit pactReader: IPactReader,
-      pactWriter: IPactWriter): scalaz.concurrent.Task[Response] =
+      pactWriter: IPactWriter): Task[Response] =
     if (isAdminCall(req)) {
 
       req.method.name.toUpperCase match {

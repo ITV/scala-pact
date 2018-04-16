@@ -115,7 +115,7 @@ object ScalaPactMock {
 
         result
       } else if (attemptsRemaining == 0) {
-        throw new Exception("Could not connect to stub are: " + mockConfig.baseUrl)
+        throw new Exception("Could not connect to stub at: " + mockConfig.baseUrl)
       } else {
         PactLogger.message(">  ...waiting for stub, attempts remaining: " + attemptsRemaining.toString)
         Thread.sleep(intervalMillis.toLong)
