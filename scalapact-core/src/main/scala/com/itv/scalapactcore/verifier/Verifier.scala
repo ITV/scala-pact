@@ -205,29 +205,24 @@ object Verifier {
     httpClient
       .doRequestSync(
         SimpleRequest(address, "", HttpMethod.GET, Map("Accept" -> "application/json"), None, sslContextName = None)
-      )
-      .map {
-        case r: SimpleResponse if r.is2xx =>
-          val pact = r.body.map(pactReader.jsonStringToPact).flatMap {
-            case Right(p) => Option(p)
-            case Left(msg) =>
-              PactLogger.error(s"Error: $msg".yellow)
-              None
-          }
-
-          if (pact.isEmpty) {
-            PactLogger.error("Could not convert good response to Pact:\n" + r.body.getOrElse(""))
-            pact
-          } else pact
-
-        case _ =>
-          PactLogger.error(s"Failed to load consumer pact from: $address".red)
-          None
-      } match {
-      case Right(p) =>
-        p
+      ) match {
       case Left(e) =>
         PactLogger.error(s"Error: ${e.getMessage}".yellow)
+        None
+
+      case Right(response) if response.is2xx =>
+        response.body.map(pactReader.jsonStringToPact).flatMap {
+          case Right(p) =>
+            Option(p)
+
+          case Left(msg) =>
+            PactLogger.error("Could not convert good response to Pact:\n" + response.body.getOrElse(""))
+            PactLogger.error(s"Error: $msg".yellow)
+            None
+        }
+
+      case Right(_) =>
+        PactLogger.error(s"Failed to load consumer pact from: $address".red)
         None
     }
 
@@ -262,11 +257,25 @@ object ValidatedDetails {
   def buildFrom(consumerName: String,
                 providerName: String,
                 pactBrokerAddress: String,
-                consumerVersion: String): Either[String, ValidatedDetails] =
-    for {
-      consumerName     <- Helpers.urlEncode(consumerName)
-      providerName     <- Helpers.urlEncode(providerName)
-      validatedAddress <- PactBrokerAddressValidation.checkPactBrokerAddress(pactBrokerAddress)
-    } yield ValidatedDetails(validatedAddress, providerName, consumerName, consumerVersion)
+                consumerVersion: String): Either[String, ValidatedDetails] = {
+
+    val values = (Helpers.urlEncode(consumerName),
+                  Helpers.urlEncode(providerName),
+                  PactBrokerAddressValidation.checkPactBrokerAddress(pactBrokerAddress))
+
+    values match {
+      case (Right(consumer), Right(provider), Right(validatedAddress)) =>
+        Right(ValidatedDetails(validatedAddress, provider, consumer, consumerVersion))
+
+      case (Left(e), _, _) =>
+        Left(e)
+
+      case (_, Left(e), _) =>
+        Left(e)
+
+      case (_, _, Left(e)) =>
+        Left(e)
+    }
+  }
 
 }
