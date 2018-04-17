@@ -1,5 +1,5 @@
 
-val options212 = scalacOptions ++= Seq(
+val compilerOptions212 = scalacOptions ++= Seq(
   "-deprecation", // Emit warning and location for usages of deprecated APIs.
   "-encoding",
   "utf-8", // Specify character encoding used by source files.
@@ -127,7 +127,7 @@ lazy val shared =
       name := "scalapact-shared",
       libraryDependencies ++= Seq("org.scala-lang.modules" %% "scala-xml" % "1.0.6")
     )
-    .settings(options212: _*)
+    .settings(compilerOptions212: _*)
 
 lazy val core =
   (project in file("scalapact-core"))
@@ -137,7 +137,7 @@ lazy val core =
       name := "scalapact-core"
     )
     .dependsOn(shared)
-    .settings(options212: _*)
+    .settings(compilerOptions212: _*)
 
 lazy val http4s016a =
   (project in file("scalapact-http4s-0-16a"))
@@ -153,7 +153,7 @@ lazy val http4s016a =
       )
     )
     .dependsOn(shared)
-    .settings(options212: _*)
+    .settings(compilerOptions212: _*)
 
 lazy val http4s017 =
   (project in file("scalapact-http4s-0-17"))
@@ -170,7 +170,7 @@ lazy val http4s017 =
       )
     )
     .dependsOn(shared)
-    .settings(options212: _*)
+    .settings(compilerOptions212: _*)
 
 lazy val http4s018 =
   (project in file("scalapact-http4s-0-18"))
@@ -186,7 +186,7 @@ lazy val http4s018 =
       )
     )
     .dependsOn(shared)
-    .settings(options212: _*)
+    .settings(compilerOptions212: _*)
 
 lazy val argonaut62 =
   (project in file("scalapact-argonaut-6-2"))
@@ -199,7 +199,7 @@ lazy val argonaut62 =
       )
     )
     .dependsOn(shared)
-    .settings(options212: _*)
+    .settings(compilerOptions212: _*)
 
 lazy val circe08 =
   (project in file("scalapact-circe-0-8"))
@@ -214,7 +214,7 @@ lazy val circe08 =
       ).map(_ % "0.8.0")
     )
     .dependsOn(shared)
-    .settings(options212: _*)
+    .settings(compilerOptions212: _*)
 
 lazy val circe09 =
   (project in file("scalapact-circe-0-9"))
@@ -229,7 +229,7 @@ lazy val circe09 =
       ).map(_ % "0.9.3")
     )
     .dependsOn(shared)
-    .settings(options212: _*)
+    .settings(compilerOptions212: _*)
 
 lazy val plugin =
   (project in file("sbt-scalapact"))
@@ -243,7 +243,7 @@ lazy val plugin =
     .dependsOn(core)
     .dependsOn(circe09)
     .dependsOn(http4s018)
-    .settings(options212: _*)
+    .settings(compilerOptions212: _*)
 
 lazy val framework =
   (project in file("scalapact-scalatest"))
@@ -256,7 +256,7 @@ lazy val framework =
       }
     )
     .dependsOn(core)
-    .settings(options212: _*)
+    .settings(compilerOptions212: _*)
 
 lazy val standalone =
   (project in file("scalapact-standalone-stubber"))
@@ -268,7 +268,7 @@ lazy val standalone =
     .dependsOn(core)
     .dependsOn(circe09)
     .dependsOn(http4s018)
-    .settings(options212: _*)
+    .settings(compilerOptions212: _*)
 
 lazy val pactSpec =
   (project in file("pact-spec-tests"))

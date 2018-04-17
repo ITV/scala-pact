@@ -66,17 +66,11 @@ object ScalaPactPlugin extends AutoPlugin {
     val pactCheck: InputKey[Unit] = inputKey[Unit]("Verify service based on consumer requirements")
     val pactStub: InputKey[Unit]  = inputKey[Unit]("Run stub service from Pact contract files")
 
-    addCommandAlias("pact-test", ";clean;test;pactPack")
-    addCommandAlias("pactTest", ";clean;test;pactPack")
+    val pactTest: TaskKey[Unit]     = taskKey[Unit]("clean, compile, test and then pactPack")
+    val pactPublish: InputKey[Unit] = inputKey[Unit]("pactTest and then pactPush")
+    val pactVerify: InputKey[Unit]  = inputKey[Unit]("pactCheck")
+    val pactStubber: InputKey[Unit] = inputKey[Unit]("pactTest and then pactStub")
 
-    addCommandAlias("pact-stubber", ";clean;test;pactPack;pactStub")
-    addCommandAlias("pactStubber", ";clean;test;pactPack;pactStub")
-
-    addCommandAlias("pact-publish", ";clean;test;pactPack;pactPush")
-    addCommandAlias("pactPublish", ";clean;test;pactPack;pactPush")
-
-    addCommandAlias("pact-verify", ";pactCheck")
-    addCommandAlias("pactVerify", ";pactCheck")
   }
 
   import autoImport._
@@ -154,6 +148,32 @@ object ScalaPactPlugin extends AutoPlugin {
         ScalaPactStubberCommand.interactionManagerInstance
       )
     }
+
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  lazy val pactTest: Def.Initialize[Task[Unit]] = Def.task {
+    (clean in Compile).value
+    (compile in Compile).value
+    (test in Test).value
+    (pactPack in Test).value
+  }
+
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  lazy val pactPublish: Def.Initialize[InputTask[Unit]] = Def.inputTask {
+    pactTest.value
+    pactPush.evaluated
+  }
+
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  lazy val pactVerify: Def.Initialize[InputTask[Unit]] = Def.inputTask {
+    pactCheck.evaluated
+  }
+
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  lazy val pactStubber: Def.Initialize[InputTask[Unit]] = Def.inputTask {
+    pactTest.value
+    pactStub.evaluated
+  }
+
 }
 
 case class ScalaPactEnv(protocol: Option[String],

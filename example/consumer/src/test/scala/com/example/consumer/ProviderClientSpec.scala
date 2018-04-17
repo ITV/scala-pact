@@ -12,6 +12,10 @@ class ProviderClientSpec extends FunSpec with Matchers {
   //    to Option types where the DSL requires it.
   import com.itv.scalapact.ScalaPactForger._
 
+  // Import the json and http libraries specified in the build.sbt file
+  import com.itv.scalapact.circe09._
+  import com.itv.scalapact.http4s16a._
+
   implicit val formats = DefaultFormats
 
   describe("Connecting to the Provider service") {
