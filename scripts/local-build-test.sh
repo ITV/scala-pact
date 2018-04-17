@@ -21,12 +21,12 @@ fi
 
 bash scripts/check-versions.sh
 
-bash scripts/basic-tests.sh
+bash scripts/localpublish.sh
 
 echo "Taking a breather... (1)"
 simple_countdown 5
 
-bash scripts/localpublish.sh
+bash scripts/spec-tests.sh
 
 echo "Taking a breather... (2)"
 simple_countdown 5

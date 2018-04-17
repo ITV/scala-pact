@@ -9,15 +9,15 @@ set -e
 echo "Locally published Scala-Pact (Main)"
 echo "****************************"
 
-function crossPublishLocal {
+function publishLocally {
     NAME=$1
     sleep 1
     echo ""
     echo ">>> $NAME"
-    sbt $NAME/clean $NAME/update +$NAME/compile +$NAME/test +$NAME/publishLocal
+    sbt $NAME/clean $NAME/update $NAME/compile $NAME/test $NAME/publishLocal
 }
 
-crossPublishLocal "core"
-crossPublishLocal "plugin"
-crossPublishLocal "standalone"
-crossPublishLocal "framework"
+publishLocally "core"
+publishLocally "plugin"
+publishLocally "standalone"
+publishLocally "framework"
