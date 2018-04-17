@@ -10,10 +10,6 @@ CORE_VERSION=$(grep "version :=" build.sbt | sed 's/version :=//g' | sed 's/ //g
 remove_plugin_file
 remove_config_file
 
-echo "libraryDependencies += \"com.itv\" %% \"scalapact-circe-0-9\" % \"$CORE_VERSION\"" > $PLUGIN_FILE
-echo "" >> $PLUGIN_FILE
-echo "libraryDependencies += \"com.itv\" %% \"scalapact-http4s-0-18\" % \"$CORE_VERSION\"" >> $PLUGIN_FILE
-echo "" >> $PLUGIN_FILE
 echo "addSbtPlugin(\"com.itv\" % \"sbt-scalapact\" % \"$CORE_VERSION\")" >> $PLUGIN_FILE
 
 cat > $PACT_CONFIG_FILE <<EOL
@@ -42,8 +38,8 @@ pactContractVersion := "2.0.0"
 allowSnapshotPublish := false
 EOL
 
-sbt "project framework" update
-sbt "; project framework; pact-stubber --port 1234" &
+sbt "project testsWithDeps" update
+sbt "; project testsWithDeps; pact-stubber --port 1234" &
 
 COUNTDOWN=45
 
@@ -52,7 +48,7 @@ simple_countdown $COUNTDOWN
 
 echo "Verifying..."
 
-sbt "; project framework; pact-verify --source target/pacts"
+sbt "; project testsWithDeps; pact-verify --source target/pacts"
 
 pkill -1 -f sbt-launch.jar
 

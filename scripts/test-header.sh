@@ -6,7 +6,7 @@
 set -e
 
 PLUGIN_FILE=project/pact-plugin.sbt
-PACT_CONFIG_FILE=scalapact-scalatest/pact.sbt
+PACT_CONFIG_FILE=tests-with-deps/pact.sbt
 
 function remove_plugin_file {
     if [ -f $PLUGIN_FILE ]; then rm $PLUGIN_FILE; fi
