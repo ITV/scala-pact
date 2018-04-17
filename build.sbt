@@ -1,4 +1,4 @@
-// Pinched shamelessly from https://tpolecat.github.io/2014/04/11/scalac-flags.html
+
 val options211 = Seq(
   "-deprecation",
   "-encoding",
@@ -13,10 +13,10 @@ val options211 = Seq(
   "-Ywarn-dead-code", // N.B. doesn't work well with the ??? hole
   "-Ywarn-numeric-widen",
   "-Ywarn-value-discard",
+  "-Xfatal-warnings", // Fail the compilation if there are any warnings.
   "-Xfuture"
 )
 
-//Unused since we have project < 2.12
 val options212 = Seq(
   "-deprecation", // Emit warning and location for usages of deprecated APIs.
   "-encoding",
@@ -87,7 +87,8 @@ addCommandAlias(
 lazy val commonSettings = Seq(
   version := "2.3.0-SNAPSHOT",
   organization := "com.itv",
-  scalaVersion := scala212,
+//  scalaVersion := scala212,
+  scalaVersion := scala211,
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.0.5" % "test"
   ),
