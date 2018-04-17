@@ -1,23 +1,5 @@
 
-val options211 = Seq(
-  "-deprecation",
-  "-encoding",
-  "UTF-8", // yes, this is 2 args
-  "-feature",
-  "-language:existentials",
-  "-language:higherKinds",
-  "-language:implicitConversions",
-  "-unchecked",
-  "-Xlint",
-  "-Yno-adapted-args",
-  "-Ywarn-dead-code", // N.B. doesn't work well with the ??? hole
-  "-Ywarn-numeric-widen",
-  "-Ywarn-value-discard",
-  "-Xfatal-warnings", // Fail the compilation if there are any warnings.
-  "-Xfuture"
-)
-
-val options212 = Seq(
+val options212 = scalacOptions ++= Seq(
   "-deprecation", // Emit warning and location for usages of deprecated APIs.
   "-encoding",
   "utf-8", // Specify character encoding used by source files.
@@ -66,15 +48,6 @@ val options212 = Seq(
   "-Ywarn-value-discard" // Warn when non-Unit expression results are unused.
 )
 
-lazy val compilerOptionsGeneral =
-  scalacOptions ++= (
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, p)) if p >= 12 => options212
-      case Some((2, p)) if p >= 11 => options211
-      case _                       => Nil
-    }
-  )
-
 addCommandAlias(
   "quickcompile",
   ";shared/compile;core/compile;argonaut62/compile;http4s016a/compile;pactSpec/compile;plugin/compile;standalone/compile;framework/compile;testsWithDeps/compile"
@@ -87,8 +60,7 @@ addCommandAlias(
 lazy val commonSettings = Seq(
   version := "2.3.0-SNAPSHOT",
   organization := "com.itv",
-//  scalaVersion := scala212,
-  scalaVersion := scala211,
+  scalaVersion := scala212,
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.0.5" % "test"
   ),
@@ -145,7 +117,6 @@ lazy val publishSettings = Seq(
       </developers>
 )
 
-val scala211: String = "2.11.11"
 val scala212: String = "2.12.5"
 
 lazy val shared =
@@ -154,21 +125,19 @@ lazy val shared =
     .settings(publishSettings: _*)
     .settings(
       name := "scalapact-shared",
-      crossScalaVersions := Seq(scala211, scala212),
       libraryDependencies ++= Seq("org.scala-lang.modules" %% "scala-xml" % "1.0.6")
     )
-    .settings(compilerOptionsGeneral: _*)
+    .settings(options212: _*)
 
 lazy val core =
   (project in file("scalapact-core"))
     .settings(commonSettings: _*)
     .settings(publishSettings: _*)
     .settings(
-      name := "scalapact-core",
-      crossScalaVersions := Seq(scala211, scala212)
+      name := "scalapact-core"
     )
     .dependsOn(shared)
-    .settings(compilerOptionsGeneral: _*)
+    .settings(options212: _*)
 
 lazy val http4s016a =
   (project in file("scalapact-http4s-0-16a"))
@@ -181,11 +150,10 @@ lazy val http4s016a =
         "org.http4s"             %% "http4s-blaze-client" % "0.16.6a",
         "org.http4s"             %% "http4s-dsl"          % "0.16.6a",
         "com.github.tomakehurst" % "wiremock"             % "1.56" % "test"
-      ),
-      crossScalaVersions := Seq(scala211, scala212)
+      )
     )
     .dependsOn(shared)
-    .settings(compilerOptionsGeneral: _*)
+    .settings(options212: _*)
 
 lazy val http4s017 =
   (project in file("scalapact-http4s-0-17"))
@@ -199,11 +167,10 @@ lazy val http4s017 =
         "org.http4s"             %% "http4s-blaze-client" % "0.17.6",
         "org.http4s"             %% "http4s-dsl"          % "0.17.6",
         "com.github.tomakehurst" % "wiremock"             % "1.56" % "test"
-      ),
-      crossScalaVersions := Seq(scala211, scala212)
+      )
     )
     .dependsOn(shared)
-    .settings(compilerOptionsGeneral: _*)
+    .settings(options212: _*)
 
 lazy val http4s018 =
   (project in file("scalapact-http4s-0-18"))
@@ -216,11 +183,10 @@ lazy val http4s018 =
         "org.http4s"             %% "http4s-blaze-client" % "0.18.8",
         "org.http4s"             %% "http4s-dsl"          % "0.18.8",
         "com.github.tomakehurst" % "wiremock"             % "1.56" % "test"
-      ),
-      crossScalaVersions := Seq(scala211, scala212)
+      )
     )
     .dependsOn(shared)
-    .settings(compilerOptionsGeneral: _*)
+    .settings(options212: _*)
 
 lazy val argonaut62 =
   (project in file("scalapact-argonaut-6-2"))
@@ -230,11 +196,10 @@ lazy val argonaut62 =
       name := "scalapact-argonaut-6-2",
       libraryDependencies ++= Seq(
         "io.argonaut" %% "argonaut" % "6.2"
-      ),
-      crossScalaVersions := Seq(scala211, scala212)
+      )
     )
     .dependsOn(shared)
-    .settings(compilerOptionsGeneral: _*)
+    .settings(options212: _*)
 
 lazy val circe08 =
   (project in file("scalapact-circe-0-8"))
@@ -246,11 +211,10 @@ lazy val circe08 =
         "io.circe" %% "circe-core",
         "io.circe" %% "circe-generic",
         "io.circe" %% "circe-parser"
-      ).map(_ % "0.8.0"),
-      crossScalaVersions := Seq(scala211, scala212)
+      ).map(_ % "0.8.0")
     )
     .dependsOn(shared)
-    .settings(compilerOptionsGeneral: _*)
+    .settings(options212: _*)
 
 lazy val circe09 =
   (project in file("scalapact-circe-0-9"))
@@ -262,11 +226,10 @@ lazy val circe09 =
         "io.circe" %% "circe-core",
         "io.circe" %% "circe-generic",
         "io.circe" %% "circe-parser"
-      ).map(_ % "0.9.3"),
-      crossScalaVersions := Seq(scala211, scala212)
+      ).map(_ % "0.9.3")
     )
     .dependsOn(shared)
-    .settings(compilerOptionsGeneral: _*)
+    .settings(options212: _*)
 
 lazy val plugin =
   (project in file("sbt-scalapact"))
@@ -280,13 +243,12 @@ lazy val plugin =
     .dependsOn(core)
     .dependsOn(circe09)
     .dependsOn(http4s018)
-    .settings(compilerOptionsGeneral: _*)
+    .settings(options212: _*)
 
 lazy val framework =
   (project in file("scalapact-scalatest"))
     .settings(commonSettings: _*)
     .settings(publishSettings: _*)
-    .settings(crossScalaVersions := Seq(scala211, scala212))
     .settings(
       name := "scalapact-scalatest",
       mappings in (Compile, packageBin) ~= {
@@ -294,7 +256,7 @@ lazy val framework =
       }
     )
     .dependsOn(core)
-    .settings(compilerOptionsGeneral: _*)
+    .settings(options212: _*)
 
 lazy val standalone =
   (project in file("scalapact-standalone-stubber"))
@@ -306,14 +268,14 @@ lazy val standalone =
     .dependsOn(core)
     .dependsOn(circe09)
     .dependsOn(http4s018)
-    .settings(compilerOptionsGeneral: _*)
+    .settings(options212: _*)
 
 lazy val pactSpec =
   (project in file("pact-spec-tests"))
     .settings(commonSettings: _*)
     .settings(
       name := "pact-spec-tests",
-      crossScalaVersions := Seq(scala211, scala212)
+      scalaVersion := scala212
     )
     .dependsOn(core)
     .dependsOn(argonaut62)
@@ -321,7 +283,6 @@ lazy val pactSpec =
 lazy val testsWithDeps =
   (project in file("tests-with-deps"))
     .settings(commonSettings: _*)
-    .settings(crossScalaVersions := Seq(scala211, scala212))
     .settings(
       libraryDependencies ++= Seq(
         "org.scalaj"             %% "scalaj-http"   % "2.3.0" % "test",
@@ -341,7 +302,7 @@ lazy val docs =
     .enablePlugins(ParadoxSitePlugin)
     .enablePlugins(GhpagesPlugin)
     .settings(
-      crossScalaVersions := Seq(scala212),
+      scalaVersion := scala212,
       paradoxTheme := Some(builtinParadoxTheme("generic")),
       name := "scalapact-docs",
       git.remoteRepo := "git@github.com:ITV/scala-pact.git",
