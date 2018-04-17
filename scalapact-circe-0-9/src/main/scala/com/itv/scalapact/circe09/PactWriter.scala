@@ -9,9 +9,6 @@ import io.circe.generic.auto._
 
 class PactWriter extends IPactWriter {
 
-  // Used by old Scala versions
-  import EitherWithToOption._
-
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   def pactToJsonString(pact: Pact): String = {
 
@@ -19,11 +16,11 @@ class PactWriter extends IPactWriter {
       pact.interactions.toVector
         .map { i =>
           val maybeRequestBody: Option[Json] = i.request.body.flatMap { rb =>
-            parse(rb).asOption.orElse(Option(Json.fromString(rb)))
+            parse(rb).toOption.orElse(Option(Json.fromString(rb)))
           }
 
           val maybeResponseBody: Option[Json] = i.response.body.flatMap { rb =>
-            parse(rb).asOption.orElse(Option(Json.fromString(rb)))
+            parse(rb).toOption.orElse(Option(Json.fromString(rb)))
           }
 
           val bodilessInteraction: Json = i

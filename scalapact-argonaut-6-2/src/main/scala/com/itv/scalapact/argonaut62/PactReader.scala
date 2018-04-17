@@ -57,7 +57,7 @@ object JsonBodySpecialCaseHelper {
 
   val extractInteractions: String => Option[List[(Option[Interaction], Option[String], Option[String])]] = json => {
 
-    val interations =
+    val interactions =
       json.parseOption
         .flatMap { j =>
           (j.hcursor --\ "interactions").focus.flatMap(_.array)
@@ -71,7 +71,7 @@ object JsonBodySpecialCaseHelper {
         Option(body.toString)
     }
 
-    interations.map { is =>
+    interactions.map { is =>
       is.map { i =>
         val minusRequestBody =
           (i.hcursor --\ "request" --\ "body").delete.undo match {

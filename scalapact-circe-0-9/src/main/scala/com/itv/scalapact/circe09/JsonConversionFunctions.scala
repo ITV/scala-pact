@@ -10,10 +10,8 @@ import com.itv.scalapact.shared.PactLogger
 
 object JsonConversionFunctions extends IJsonConversionFunctions {
 
-  import EitherWithToOption._
-
   def fromJSON(jsonString: String): Option[IrNode] =
-    parse(jsonString).asOption.flatMap { json =>
+    parse(jsonString).toOption.flatMap { json =>
       jsonRootToIrNode(json, IrNodePathEmpty)
     }
 

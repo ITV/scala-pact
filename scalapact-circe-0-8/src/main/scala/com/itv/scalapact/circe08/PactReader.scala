@@ -46,22 +46,20 @@ class PactReader extends IPactReader {
 
 object JsonBodySpecialCaseHelper {
 
-  import EitherWithToOption._
-
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   val extractPactActor: String => String => Option[PactActor] = field =>
     json =>
-      parse(json).asOption
+      parse(json).toOption
         .flatMap { j =>
           j.hcursor.downField(field).focus
         }
-        .flatMap(p => p.as[PactActor].asOption)
+        .flatMap(p => p.as[PactActor].toOption)
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference", "org.wartremover.warts.Any"))
   val extractInteractions: String => Option[List[(Option[Interaction], Option[String], Option[String])]] = json => {
 
     val interactions =
-      parse(json).asOption
+      parse(json).toOption
         .flatMap { j =>
           j.hcursor.downField("interactions").focus.flatMap(p => p.asArray.map(_.toList))
         }
@@ -101,7 +99,7 @@ object JsonBodySpecialCaseHelper {
           .focus
           .flatMap { makeOptionalBody }
 
-        (minusResponseBody.flatMap(p => p.as[Interaction].asOption), requestBody, responseBody)
+        (minusResponseBody.flatMap(p => p.as[Interaction].toOption), requestBody, responseBody)
       }
     }
   }

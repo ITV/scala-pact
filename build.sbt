@@ -56,6 +56,10 @@ addCommandAlias(
   "quicktest",
   ";shared/test;core/test;argonaut62/test;http4s016a/test;pactSpec/test;plugin/test;standalone/test;framework/test;testsWithDeps/test"
 )
+addCommandAlias(
+  "quickpublish",
+  ";shared/publishLocal;core/publishLocal;argonaut62/publishLocal;circe08/publishLocal;circe09/publishLocal;http4s016a/publishLocal;http4s017/publishLocal;http4s018/publishLocal;plugin/publishLocal;standalone/publishLocal;framework/publishLocal"
+)
 
 lazy val commonSettings = Seq(
   version := "2.3.0-SNAPSHOT",
@@ -241,8 +245,8 @@ lazy val plugin =
       scalaVersion := scala212
     )
     .dependsOn(core)
-    .dependsOn(circe09)
-    .dependsOn(http4s018)
+    .dependsOn(argonaut62)
+    .dependsOn(http4s016a)
     .settings(compilerOptions212: _*)
 
 lazy val framework =

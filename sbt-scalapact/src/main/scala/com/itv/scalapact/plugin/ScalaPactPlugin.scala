@@ -1,7 +1,7 @@
 package com.itv.scalapact.plugin
 
-import com.itv.scalapact.circe09._
-import com.itv.scalapact.http4s18._
+import com.itv.scalapact.argonaut62._
+import com.itv.scalapact.http4s16a._
 import com.itv.scalapact.plugin.publish.ScalaPactPublishCommand
 import com.itv.scalapact.plugin.stubber.ScalaPactStubberCommand
 import com.itv.scalapact.plugin.tester.ScalaPactTestCommand

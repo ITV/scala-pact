@@ -4,6 +4,57 @@ import com.itv.scalapact.shared._
 
 object PactFileExamples {
 
+  val anotherExample: String =
+    """{
+      |  "provider" : {
+      |    "name" : "Their Provider Service"
+      |  },
+      |  "consumer" : {
+      |    "name" : "My Consumer"
+      |  },
+      |  "interactions" : [
+      |    {
+      |      "description" : "a simple get example with a header matcher",
+      |      "request" : {
+      |        "method" : "GET",
+      |        "path" : "/header-match",
+      |        "headers" : {
+      |          "fish" : "chips",
+      |          "sauce" : "ketchup"
+      |        },
+      |        "matchingRules" : {
+      |          "$.headers.fish" : {
+      |            "match" : "regex",
+      |            "regex" : "\\w+"
+      |          },
+      |          "$.headers.sauce" : {
+      |            "match" : "regex",
+      |            "regex" : "\\w+"
+      |          }
+      |        }
+      |      },
+      |      "response" : {
+      |        "status" : 200,
+      |        "headers" : {
+      |          "fish" : "chips",
+      |          "sauce" : "ketchup"
+      |        },
+      |        "body" : "Hello there!",
+      |        "matchingRules" : {
+      |          "$.headers.fish" : {
+      |            "match" : "regex",
+      |            "regex" : "\\w+"
+      |          },
+      |          "$.headers.sauce" : {
+      |            "match" : "regex",
+      |            "regex" : "\\w+"
+      |          }
+      |        }
+      |      }
+      |    }
+      |  ]
+      |}""".stripMargin
+
   val verySimple = Pact(
     consumer = PactActor("consumer"),
     provider = PactActor("provider"),

@@ -8,9 +8,6 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
   val pactReader = new PactReader
   val pactWriter = new PactWriter
 
-  //Used by earlier scala versions
-  import EitherWithToOption._
-
   describe("Reading and writing a homogeneous Pact files") {
 
     it("should be able to read Pact files") {
@@ -31,7 +28,7 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
 
       val expected = PactFileExamples.simpleAsString
 
-      parse(written).asOption.get shouldEqual parse(expected).asOption.get
+      parse(written).toOption.get shouldEqual parse(expected).toOption.get
     }
 
     it("should be able to eat it's own dog food") {
@@ -40,9 +37,9 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
 
       val pact = pactReader.jsonStringToPact(json).right.get
 
-      val `reJson'd` = parse(pactWriter.pactToJsonString(pact)).asOption.get
+      val `reJson'd` = parse(pactWriter.pactToJsonString(pact)).toOption.get
 
-      `reJson'd` shouldEqual parse(PactFileExamples.simpleAsString).asOption.get
+      `reJson'd` shouldEqual parse(PactFileExamples.simpleAsString).toOption.get
 
       pact shouldEqual PactFileExamples.simple
 
@@ -70,9 +67,9 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
 
       val pact = pactReader.jsonStringToPact(json).right.get
 
-      val `reJson'd` = parse(pactWriter.pactToJsonString(pact)).asOption.get
+      val `reJson'd` = parse(pactWriter.pactToJsonString(pact)).toOption.get
 
-      `reJson'd` shouldEqual parse(PactFileExamples.verySimpleAsString).asOption.get
+      `reJson'd` shouldEqual parse(PactFileExamples.verySimpleAsString).toOption.get
 
       pact shouldEqual PactFileExamples.verySimple
 
@@ -90,7 +87,21 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
 
       val expected = PactFileExamples.verySimpleAsString
 
-      parse(written).asOption.get shouldEqual parse(expected).asOption.get
+      parse(written).toOption.get shouldEqual parse(expected).toOption.get
+    }
+
+    it("should be able to parse another example") {
+
+      pactReader.jsonStringToPact(PactFileExamples.anotherExample) match {
+        case Left(e) =>
+          fail(e)
+
+        case Right(pact) =>
+          pact.consumer.name shouldEqual "My Consumer"
+          pact.provider.name shouldEqual "Their Provider Service"
+          pact.interactions.head.response.body.get shouldEqual "Hello there!"
+      }
+
     }
 
   }
