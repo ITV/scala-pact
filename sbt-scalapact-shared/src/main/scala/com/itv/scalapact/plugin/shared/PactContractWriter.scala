@@ -1,8 +1,6 @@
 package com.itv.scalapact.plugin.shared
 
-import java.io.PrintWriter
-
-import sbt.File
+import java.io.{File, PrintWriter}
 
 object PactContractWriter {
 

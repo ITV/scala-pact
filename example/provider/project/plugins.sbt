@@ -3,4 +3,4 @@ libraryDependencies ++= Seq(
   "com.itv" %% "scalapact-http4s-0-16a" % "2.3.0-SNAPSHOT"
 )
 
-addSbtPlugin("com.itv" % "sbt-scalapact" % "2.3.0-SNAPSHOT")
+addSbtPlugin("com.itv" % "sbt-scalapact-nodeps" % "2.3.0-SNAPSHOT")

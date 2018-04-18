@@ -1,18 +1,15 @@
 package com.itv.scalapact.plugin
 
+import com.itv.scalapact.json._
+import com.itv.scalapact.http._
 import com.itv.scalapact.plugin.shared._
 import com.itv.scalapact.shared.ScalaPactSettings
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter, IScalaPactHttpClient}
 import sbt.Keys._
 import sbt.plugins.JvmPlugin
 import sbt.{Def, _}
 import complete.DefaultParsers._
 
-abstract class ScalaPactPluginImpl[F[_]](implicit pactReader: IPactReader,
-                                         pactWriter: IPactWriter,
-                                         httpClient: IScalaPactHttpClient[F],
-                                         pactStubServer: IPactStubber)
-    extends AutoPlugin {
+object ScalaPactPlugin extends AutoPlugin {
   override def requires: JvmPlugin.type = plugins.JvmPlugin
   override def trigger: PluginTrigger   = allRequirements
 

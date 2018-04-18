@@ -241,7 +241,6 @@ lazy val pluginShared =
     .settings(publishSettings: _*)
     .settings(
       name := "sbt-scalapact-shared",
-      sbtPlugin := true,
       scalaVersion := scala212
     )
     .dependsOn(core)
@@ -261,19 +260,19 @@ lazy val plugin =
     .dependsOn(http4s016a)
     .settings(compilerOptions212: _*)
 
-//lazy val pluginNoDeps =
-//  (project in file("sbt-scalapact"))
-//    .settings(commonSettings: _*)
-//    .settings(publishSettings: _*)
-//    .settings(
-//      name := "sbt-scalapact-nodeps",
-//      sbtPlugin := true,
-//      scalaVersion := scala212
-//    )
-//    .dependsOn(core)
-//    .dependsOn(circe08 % "provided")
-//    .dependsOn(http4s017 % "provided")
-//    .settings(compilerOptions212: _*)
+lazy val pluginNoDeps =
+  (project in file("sbt-scalapact-nodeps"))
+    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
+    .settings(
+      name := "sbt-scalapact-nodeps",
+      sbtPlugin := true,
+      scalaVersion := scala212
+    )
+    .dependsOn(pluginShared)
+    .dependsOn(circe08 % "provided")
+    .dependsOn(http4s017 % "provided")
+    .settings(compilerOptions212: _*)
 
 lazy val framework =
   (project in file("scalapact-scalatest"))
@@ -342,7 +341,7 @@ lazy val docs =
 lazy val scalaPactProject =
   (project in file("."))
     .settings(commonSettings: _*)
-    .aggregate(shared, core, pluginShared, plugin, framework, standalone)
+    .aggregate(shared, core, pluginShared, plugin, pluginNoDeps, framework, standalone)
     .aggregate(http4s016a, http4s017, http4s018)
     .aggregate(argonaut62, circe08, circe09)
     .aggregate(docs)

@@ -4,18 +4,18 @@ name := "provider_tests"
 
 version := "0.0.1"
 
-scalaVersion := "2.11.11"
+scalaVersion := "2.12.5"
 
 libraryDependencies ++=
   Seq(
-    "org.http4s"    %% "http4s-blaze-server"     % "0.18.0",
-    "org.http4s"    %% "http4s-dsl"              % "0.18.0",
-    "org.http4s"    %% "http4s-circe"            % "0.18.0",
-    "org.slf4j"     % "slf4j-simple"             % "1.6.4",
-    "org.scalatest" %% "scalatest"               % "3.0.1" % "test",
-    "com.itv"       %% "scalapact-circe-0-9"     % "2.3.0-SNAPSHOT" % "test",
-    "com.itv"       %% "scalapact-http4s-0-18-0" % "2.3.0-SNAPSHOT" % "test",
-    "com.itv"       %% "scalapact-scalatest"     % "2.3.0-SNAPSHOT" % "test",
+    "org.http4s"    %% "http4s-blaze-server"   % "0.18.0",
+    "org.http4s"    %% "http4s-dsl"            % "0.18.0",
+    "org.http4s"    %% "http4s-circe"          % "0.18.0",
+    "org.slf4j"     % "slf4j-simple"           % "1.6.4",
+    "org.scalatest" %% "scalatest"             % "3.0.1" % "test",
+    "com.itv"       %% "scalapact-circe-0-9"   % "2.3.0-SNAPSHOT" % "test",
+    "com.itv"       %% "scalapact-http4s-0-18" % "2.3.0-SNAPSHOT" % "test",
+    "com.itv"       %% "scalapact-scalatest"   % "2.3.0-SNAPSHOT" % "test",
     // Optional for auto-derivation of JSON codecs
     "io.circe" %% "circe-generic" % "0.9.0",
     // Optional for string interpolation to JSON model

@@ -1,4 +1,4 @@
-package com.itv.scalapact.plugin.shared
+package com.itv.scalapact.plugin
 
 import com.itv.scalapact.shared.ScalaPactSettings
 
