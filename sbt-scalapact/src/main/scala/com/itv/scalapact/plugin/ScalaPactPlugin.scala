@@ -92,14 +92,15 @@ object ScalaPactPlugin extends AutoPlugin {
       String,
       String
     ] with String with Seq[String] with PartialFunction[String, Boolean] with Task[Unit] with InputTask[Unit]
-  ]] =
+  ]] = {
     pactSettings ++ Seq(
       pactPack := pactPackTask.value,
       pactPush := pactPushTask.evaluated,
       pactCheck := pactCheckTask.evaluated,
-      pactStub := pactStubTask.parsed.value,
+      pactStub := pactStubTask.evaluated,
       pactTest := pactTestTask.value
     )
+  }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   lazy val pactPackTask: Def.Initialize[Task[Unit]] =
@@ -140,10 +141,10 @@ object ScalaPactPlugin extends AutoPlugin {
     Def.inputTask {
       val args: Seq[String] = spaceDelimited("<arg>").parsed
       println("Stub me! Args: " + args.mkString(", "))
-      ScalaPactStubberCommand.runStubber(
-        scalaPactEnv.value.toSettings + ScalaPactSettings.parseArguments(spaceDelimited("<arg>").parsed),
-        ScalaPactStubberCommand.interactionManagerInstance
-      )
+//      ScalaPactStubberCommand.runStubber(
+//        scalaPactEnv.value.toSettings + ScalaPactSettings.parseArguments(spaceDelimited("<arg>").parsed),
+//        ScalaPactStubberCommand.interactionManagerInstance
+//      )
     }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
