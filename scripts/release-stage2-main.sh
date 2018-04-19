@@ -14,6 +14,8 @@ function publishReal {
 }
 
 publishReal "core"
+publishReal "pluginShared"
 publishReal "plugin"
+publishReal "pluginNoDeps"
 publishReal "standalone"
 publishReal "framework"

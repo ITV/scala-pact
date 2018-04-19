@@ -1,6 +1,6 @@
 package com.itv.scalapactcore.common
 
-import com.itv.scalapact.circe09.pactReaderInstance
+import com.itv.scalapact.json.pactReaderInstance
 import com.itv.scalapact.shared.matchir.IrNodeMatchingRules
 import com.itv.scalapact.shared.{MatchingRule, Pact}
 import com.itv.scalapactcore.common.matching.BodyMatching._

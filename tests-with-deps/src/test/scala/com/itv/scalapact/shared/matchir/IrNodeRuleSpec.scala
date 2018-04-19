@@ -1,6 +1,6 @@
 package com.itv.scalapact.shared.matchir
 
-import com.itv.scalapact.circe09.JsonConversionFunctions
+import com.itv.scalapact.argonaut62.JsonConversionFunctions
 import com.itv.scalapact.shared.{MatchingRule, PactLogger}
 import org.scalatest.{FunSpec, Matchers}
 

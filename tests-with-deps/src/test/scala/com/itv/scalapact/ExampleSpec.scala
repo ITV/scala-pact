@@ -17,8 +17,8 @@ import scalaj.http.{Http, HttpRequest}
 
 class ExampleSpec extends FunSpec with Matchers {
 
-  import com.itv.scalapact.circe09._
-  import com.itv.scalapact.http4s18._
+  import com.itv.scalapact.json._
+  import com.itv.scalapact.http._
 
   private implicit val formats: DefaultFormats.type = DefaultFormats
 

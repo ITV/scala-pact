@@ -6,8 +6,8 @@ import ScalaPactForger._
 
 class HeavySpec extends FunSpec with Matchers {
 
-  import com.itv.scalapact.circe09._
-  import com.itv.scalapact.http4s18._
+  import com.itv.scalapact.json._
+  import com.itv.scalapact.http._
 
   def makeEndPoints(name: String, count: Int): List[String] = (0 until count).toList.map(i => s"/$name/_$i")
 

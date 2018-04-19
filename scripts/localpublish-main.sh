@@ -18,6 +18,8 @@ function publishLocally {
 }
 
 publishLocally "core"
+publishLocally "pluginShared"
 publishLocally "plugin"
+publishLocally "pluginNoDeps"
 publishLocally "standalone"
 publishLocally "framework"
