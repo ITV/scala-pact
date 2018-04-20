@@ -1,9 +1,10 @@
 package com.itv.standalonestubber
 
-import com.itv.scalapact.circe09.{pactReaderInstance, pactWriterInstance}
-import com.itv.scalapact.http4s18.serverInstance
+import com.itv.scalapact.http.serverInstance
+import com.itv.scalapact.json.{pactReaderInstance, pactWriterInstance}
 import com.itv.scalapact.shared.ColourOuput._
-import com.itv.scalapact.shared.{PactLogger, ScalaPactSettings, SslContextMap}
+import com.itv.scalapact.shared.typeclasses.IPactStubber
+import com.itv.scalapact.shared.{PactLogger, ScalaPactSettings}
 import com.itv.scalapactcore.common.LocalPactFileLoader._
 import com.itv.scalapactcore.common.stubber.InteractionManager
 
@@ -15,14 +16,18 @@ object PactStubber {
     PactLogger.message("** ScalaPact: Running Stubber      **".white.bold)
     PactLogger.message("*************************************".white.bold)
 
-    val interactionManager: InteractionManager = new InteractionManager
+    val interactionManager = new InteractionManager
 
-    (ScalaPactSettings.parseArguments andThen loadPactFiles(pactReaderInstance)(true)("pacts") andThen interactionManager.addToInteractionManager andThen serverInstance
-      .startServer(interactionManager, 5, sslContextName = None, port = None)(
-        pactReaderInstance,
-        pactWriterInstance,
-        SslContextMap.defaultEmptyContextMap
-      ))(args)
+    val parseArgs       = ScalaPactSettings.parseArguments
+    val loadPacts       = loadPactFiles(pactReaderInstance)(true)("pacts")
+    val addInteractions = interactionManager.addToInteractionManager
+    val startUp = serverInstance
+      .startServer(interactionManager, 5, sslContextName = None, port = None)
+
+    val launch: Seq[String] => IPactStubber =
+      parseArgs andThen loadPacts andThen addInteractions andThen startUp
+
+    launch(args).awaitShutdown()
 
     ()
   }

@@ -8,9 +8,10 @@ import com.itv.scalapact.http4s18.impl.HeaderImplicitConversions._
 import com.itv.scalapact.shared.ColourOuput._
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter}
 import com.itv.scalapact.shared.{PactLogger, _}
+import fs2.async
+import fs2.async.mutable
 import javax.net.ssl.SSLContext
 import org.http4s.dsl.io._
-import org.http4s.server.Server
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.util.CaseInsensitiveString
 import org.http4s.{HttpService, Request, Response, Status}
@@ -151,7 +152,10 @@ object PactStubService {
 
 class PactServer extends IPactStubber {
 
-  private var instance: Option[Server[IO]] = None
+  import scala.concurrent.ExecutionContext.Implicits.global
+
+  private val terminator: mutable.Signal[IO, Boolean] =
+    async.signalOf[IO, Boolean](false).unsafeRunSync()
 
   private def blazeBuilder(
       scalaPactSettings: ScalaPactSettings,
@@ -174,26 +178,23 @@ class PactServer extends IPactStubber {
                   port: Option[Int])(implicit pactReader: IPactReader,
                                      pactWriter: IPactWriter,
                                      sslContextMap: SslContextMap): ScalaPactSettings => IPactStubber =
-    scalaPactSettings =>
-      instance match {
-        case Some(_) =>
-          this
+    scalaPactSettings => {
 
-        case None =>
-          instance = Option(
-            blazeBuilder(scalaPactSettings, interactionManager, connectionPoolSize, sslContextName, port).start
-              .unsafeRunSync()
-          )
-          this
+      blazeBuilder(scalaPactSettings, interactionManager, connectionPoolSize, sslContextName, port).serve
+        .interruptWhen(terminator)
+        .compile
+        .drain
+        .unsafeToFuture()
+
+      this
     }
 
-  def awaitShutdown(): Unit =
-    instance.foreach(_.shutdown.unsafeRunSync())
-
-  def shutdown(): Unit = {
-    instance.foreach(_.shutdown.unsafeRunSync())
-    instance = None
-    ()
+  def awaitShutdown(): Unit = {
+    scala.io.StdIn.readLine()
+    terminator.set(true).unsafeRunSync()
   }
+
+  def shutdown(): Unit =
+    terminator.set(true).unsafeRunSync()
 
 }

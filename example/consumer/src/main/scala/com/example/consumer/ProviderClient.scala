@@ -23,11 +23,9 @@ object ProviderClient {
       .headers(("Accept", "application/json"), ("Name", name))
       .asString match {
       case r: HttpResponse[String] if r.is2xx =>
-        println(">> " + r)
         parse(r.body).extractOpt[Token]
 
       case r: HttpResponse[String] =>
-        println("<< " + r)
         None
     }
 

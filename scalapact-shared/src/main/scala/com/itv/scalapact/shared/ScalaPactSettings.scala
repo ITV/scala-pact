@@ -54,6 +54,9 @@ case class ScalaPactSettings(protocol: Option[String],
       clientTimeout.map(p => ("--clientTimeout", p.toSeconds.toString)),
       outputPath.map(p => ("--out", p))
     ).collect { case Some(s) => s }.toMap
+
+  def renderAsString: String =
+    toArguments.mkString(", ")
 }
 
 object ScalaPactSettings {

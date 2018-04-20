@@ -2,7 +2,7 @@ package com.itv.scalapact.plugin
 
 import com.itv.scalapact.shared.ScalaPactSettings
 
-import scala.concurrent.duration.Duration
+import scala.concurrent.duration._
 
 case class ScalaPactEnv(protocol: Option[String],
                         host: Option[String],
@@ -46,9 +46,23 @@ case class ScalaPactEnv(protocol: Option[String],
 
 object ScalaPactEnv {
 
-  def apply: ScalaPactEnv = default
+  def apply: ScalaPactEnv = defaults
 
-  def default: ScalaPactEnv = ScalaPactEnv(None, None, None, None, None, None, None)
+  def apply(protocol: String, host: String, port: Int): ScalaPactEnv =
+    ScalaPactEnv(
+      Option(protocol),
+      Option(host),
+      Option(port),
+      None, // "pacts"
+      None, // false
+      Option(Duration(1, SECONDS)),
+      None // "target/pacts"
+    )
+
+  def defaults: ScalaPactEnv =
+    ScalaPactEnv("http", "localhost", 1234)
+
+  def empty: ScalaPactEnv = ScalaPactEnv(None, None, None, None, None, None, None)
 
   def append(a: ScalaPactEnv, b: ScalaPactEnv): ScalaPactEnv =
     ScalaPactEnv(

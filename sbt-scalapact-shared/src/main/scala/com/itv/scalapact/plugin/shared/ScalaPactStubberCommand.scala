@@ -14,10 +14,14 @@ object ScalaPactStubberCommand {
       pactWriter: IPactWriter,
       pactStubber: IPactStubber,
       sslContextMap: SslContextMap
-  ): Unit = {
-    (loadPactFiles(pactReader)(true)(scalaPactSettings.giveOutputPath) andThen interactionManager.addToInteractionManager andThen pactStubber
-      .startServer(interactionManager, 2, None, None)(pactReader, pactWriter, sslContextMap))(scalaPactSettings)
-    ()
+  ): IPactStubber = {
+    val loadPacts    = loadPactFiles(pactReader)(true)(scalaPactSettings.giveOutputPath)
+    val addToManager = interactionManager.addToInteractionManager
+    val launchStub = pactStubber.startServer(interactionManager, 2, None, scalaPactSettings.port)(pactReader,
+                                                                                                  pactWriter,
+                                                                                                  sslContextMap)
+
+    (loadPacts andThen addToManager andThen launchStub)(scalaPactSettings)
   }
 
 }

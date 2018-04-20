@@ -83,7 +83,7 @@ object ScalaPactPlugin extends AutoPlugin {
     versionedConsumerNames := Seq.empty[(String, String)],
     pactContractVersion := "",
     allowSnapshotPublish := false,
-    scalaPactEnv := ScalaPactEnv.default
+    scalaPactEnv := ScalaPactEnv.empty
   )
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))

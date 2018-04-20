@@ -359,11 +359,6 @@ object SimpleClient {
     try {
       val response = request.asString
 
-      //      if(!response.is2xx) {
-      //        println("Request: \n" +  request)
-      //        println("Response: \n" + response)
-      //      }
-
       SimpleResponse(response.code, response.headers, response.body)
     } catch {
       case e: Throwable =>

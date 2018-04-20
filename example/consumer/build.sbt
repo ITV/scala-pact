@@ -21,4 +21,4 @@ libraryDependencies ++=
     "org.scalatest" %% "scalatest"             % "3.0.1" % "test"
   )
 
-scalaPactEnv := ScalaPactEnv.default.withPort(8080)
+scalaPactEnv := ScalaPactEnv.defaults.withPort(8080)

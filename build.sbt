@@ -321,7 +321,7 @@ lazy val testsWithDeps =
     )
     .dependsOn(framework)
     .dependsOn(argonaut62)
-    .dependsOn(http4s016a)
+    .dependsOn(http4s018)
 
 lazy val docs =
   (project in file("scalapact-docs"))
