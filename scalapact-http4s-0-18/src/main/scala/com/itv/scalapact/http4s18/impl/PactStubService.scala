@@ -12,6 +12,7 @@ import fs2.async
 import fs2.async.mutable
 import javax.net.ssl.SSLContext
 import org.http4s.dsl.io._
+import org.http4s.server.Server
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.util.CaseInsensitiveString
 import org.http4s.{HttpService, Request, Response, Status}
@@ -45,22 +46,6 @@ object PactStubService {
       .withOptionalSsl(sslContextName)
       .withConnectorPoolSize(connectionPoolSize)
       .mountService(PactStubService.service(interactionManager, config.giveStrictMode), "/")
-  }
-
-  def startServer(interactionManager: IInteractionManager,
-                  connectionPoolSize: Int,
-                  sslContextName: Option[String],
-                  port: Option[Int])(implicit pactReader: IPactReader,
-                                     pactWriter: IPactWriter,
-                                     sslContextMap: SslContextMap): ScalaPactSettings => Unit = config => {
-    PactLogger.message(
-      ("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold
-    )
-    PactLogger.message(("Strict matching mode: " + config.giveStrictMode.toString).white.bold)
-
-    createServer(interactionManager, connectionPoolSize, sslContextName, port, config).start.unsafeRunSync()
-
-    ()
   }
 
   private val isAdminCall: Request[IO] => Boolean = request =>
@@ -157,6 +142,8 @@ class PactServer extends IPactStubber {
   private val terminator: mutable.Signal[IO, Boolean] =
     async.signalOf[IO, Boolean](false).unsafeRunSync()
 
+  private var instance: Option[Server[IO]] = None
+
   private def blazeBuilder(
       scalaPactSettings: ScalaPactSettings,
       interactionManager: IInteractionManager,
@@ -172,13 +159,37 @@ class PactServer extends IPactStubber {
       scalaPactSettings
     )
 
-  def startServer(interactionManager: IInteractionManager,
-                  connectionPoolSize: Int,
-                  sslContextName: Option[String],
-                  port: Option[Int])(implicit pactReader: IPactReader,
-                                     pactWriter: IPactWriter,
-                                     sslContextMap: SslContextMap): ScalaPactSettings => IPactStubber =
+  def startTestServer(interactionManager: IInteractionManager,
+                      connectionPoolSize: Int,
+                      sslContextName: Option[String],
+                      port: Option[Int])(implicit pactReader: IPactReader,
+                                         pactWriter: IPactWriter,
+                                         sslContextMap: SslContextMap): ScalaPactSettings => IPactStubber =
     scalaPactSettings => {
+      instance match {
+        case Some(_) =>
+          this
+
+        case None =>
+          instance = Option(
+            blazeBuilder(scalaPactSettings, interactionManager, connectionPoolSize, sslContextName, port).start
+              .unsafeRunSync()
+          )
+          this
+      }
+    }
+
+  def startStubServer(interactionManager: IInteractionManager,
+                      connectionPoolSize: Int,
+                      sslContextName: Option[String],
+                      port: Option[Int])(implicit pactReader: IPactReader,
+                                         pactWriter: IPactWriter,
+                                         sslContextMap: SslContextMap): ScalaPactSettings => IPactStubber =
+    scalaPactSettings => {
+      PactLogger.message(
+        ("Starting ScalaPact Stubber on: http://" + scalaPactSettings.giveHost + ":" + scalaPactSettings.givePort.toString).white.bold
+      )
+      PactLogger.message(("Strict matching mode: " + scalaPactSettings.giveStrictMode.toString).white.bold)
 
       blazeBuilder(scalaPactSettings, interactionManager, connectionPoolSize, sslContextName, port).serve
         .interruptWhen(terminator)
@@ -191,10 +202,15 @@ class PactServer extends IPactStubber {
 
   def awaitShutdown(): Unit = {
     scala.io.StdIn.readLine()
+    instance.foreach(_.shutdown.unsafeRunSync())
+    instance = None
     terminator.set(true).unsafeRunSync()
   }
 
-  def shutdown(): Unit =
+  def shutdown(): Unit = {
+    instance.foreach(_.shutdown.unsafeRunSync())
+    instance = None
     terminator.set(true).unsafeRunSync()
+  }
 
 }

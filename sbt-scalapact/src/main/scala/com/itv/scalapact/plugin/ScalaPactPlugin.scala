@@ -145,12 +145,12 @@ object ScalaPactPlugin extends AutoPlugin {
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   def pactStubTask: Def.Initialize[InputTask[Unit]] =
     Def.inputTask {
-      val args: Seq[String] = spaceDelimited("<arg>").parsed
-
-      ScalaPactStubberCommand.runStubber(
-        scalaPactEnv.value.toSettings + ScalaPactSettings.parseArguments(spaceDelimited("<arg>").parsed),
-        ScalaPactStubberCommand.interactionManagerInstance
-      )
+      ScalaPactStubberCommand
+        .runStubber(
+          scalaPactEnv.value.toSettings + ScalaPactSettings.parseArguments(spaceDelimited("<arg>").parsed),
+          ScalaPactStubberCommand.interactionManagerInstance
+        )
+        .awaitShutdown()
     }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
@@ -159,12 +159,12 @@ object ScalaPactPlugin extends AutoPlugin {
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   def pactPublishTask: Def.Initialize[InputTask[Unit]] = Def.inputTask {
-    pactPushTask.dependsOn(pactTestTask)
+    pactPushTask.dependsOn(pactTestTask).evaluated
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   def pactStubberTask: Def.Initialize[InputTask[Unit]] = Def.inputTask {
-    pactStubTask.dependsOn(pactTestTask)
+    pactStubTask.dependsOn(pactTestTask).evaluated
   }
 
 }

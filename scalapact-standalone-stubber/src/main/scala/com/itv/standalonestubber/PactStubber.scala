@@ -22,7 +22,7 @@ object PactStubber {
     val loadPacts       = loadPactFiles(pactReaderInstance)(true)("pacts")
     val addInteractions = interactionManager.addToInteractionManager
     val startUp = serverInstance
-      .startServer(interactionManager, 5, sslContextName = None, port = None)
+      .startStubServer(interactionManager, 5, sslContextName = None, port = None)
 
     val launch: Seq[String] => IPactStubber =
       parseArgs andThen loadPacts andThen addInteractions andThen startUp

@@ -167,12 +167,30 @@ class PactServer extends IPactStubber {
       scalaPactSettings
     )
 
-  def startServer(interactionManager: IInteractionManager,
-                  connectionPoolSize: Int,
-                  sslContextName: Option[String],
-                  port: Option[Int])(implicit pactReader: IPactReader,
-                                     pactWriter: IPactWriter,
-                                     sslContextMap: SslContextMap): ScalaPactSettings => IPactStubber =
+  def startTestServer(interactionManager: IInteractionManager,
+                      connectionPoolSize: Int,
+                      sslContextName: Option[String],
+                      port: Option[Int])(implicit pactReader: IPactReader,
+                                         pactWriter: IPactWriter,
+                                         sslContextMap: SslContextMap): ScalaPactSettings => IPactStubber =
+    scalaPactSettings =>
+      instance match {
+        case Some(_) =>
+          this
+
+        case None =>
+          instance = Option(
+            blazeBuilder(scalaPactSettings, interactionManager, connectionPoolSize, sslContextName, port).run
+          )
+          this
+    }
+
+  def startStubServer(interactionManager: IInteractionManager,
+                      connectionPoolSize: Int,
+                      sslContextName: Option[String],
+                      port: Option[Int])(implicit pactReader: IPactReader,
+                                         pactWriter: IPactWriter,
+                                         sslContextMap: SslContextMap): ScalaPactSettings => IPactStubber =
     scalaPactSettings =>
       instance match {
         case Some(_) =>

@@ -17,9 +17,9 @@ object ScalaPactStubberCommand {
   ): IPactStubber = {
     val loadPacts    = loadPactFiles(pactReader)(true)(scalaPactSettings.giveOutputPath)
     val addToManager = interactionManager.addToInteractionManager
-    val launchStub = pactStubber.startServer(interactionManager, 2, None, scalaPactSettings.port)(pactReader,
-                                                                                                  pactWriter,
-                                                                                                  sslContextMap)
+    val launchStub = pactStubber.startStubServer(interactionManager, 2, None, scalaPactSettings.port)(pactReader,
+                                                                                                      pactWriter,
+                                                                                                      sslContextMap)
 
     (loadPacts andThen addToManager andThen launchStub)(scalaPactSettings)
   }

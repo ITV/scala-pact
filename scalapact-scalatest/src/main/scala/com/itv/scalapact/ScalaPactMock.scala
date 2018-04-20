@@ -93,7 +93,7 @@ object ScalaPactMock {
     )
 
     val startStub: ScalaPactSettings => IPactStubber =
-      pactStubber.startServer(interactionManager, 5, pactDescription.serverSslContextName, None)
+      pactStubber.startTestServer(interactionManager, 5, pactDescription.serverSslContextName, None)
 
     val server: IPactStubber = (interactionManager.addToInteractionManager andThen startStub)(configAndPacts)
 

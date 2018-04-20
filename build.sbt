@@ -256,7 +256,7 @@ lazy val plugin =
     )
     .dependsOn(pluginShared)
     .dependsOn(argonaut62)
-    .dependsOn(http4s016a)
+    .dependsOn(http4s018)
     .settings(compilerOptions212: _*)
 
 lazy val pluginNoDeps =
@@ -269,8 +269,8 @@ lazy val pluginNoDeps =
       scalaVersion := scala212
     )
     .dependsOn(pluginShared)
-    .dependsOn(circe08 % "provided")
-    .dependsOn(http4s017 % "provided")
+    .dependsOn(argonaut62 % "provided")
+    .dependsOn(http4s018 % "provided")
     .settings(compilerOptions212: _*)
 
 lazy val framework =
