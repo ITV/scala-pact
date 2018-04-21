@@ -27,7 +27,7 @@ object PactStubber {
     val launch: Seq[String] => IPactStubber =
       parseArgs andThen loadPacts andThen addInteractions andThen startUp
 
-    launch(args).awaitShutdown()
+    launch(args)
 
     ()
   }

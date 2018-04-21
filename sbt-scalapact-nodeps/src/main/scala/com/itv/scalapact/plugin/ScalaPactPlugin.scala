@@ -4,6 +4,7 @@ import com.itv.scalapact.json._
 import com.itv.scalapact.http._
 import com.itv.scalapact.plugin.shared._
 import com.itv.scalapact.shared.ScalaPactSettings
+
 import sbt.Keys._
 import sbt.plugins.JvmPlugin
 import sbt.{Def, _}
@@ -92,14 +93,20 @@ object ScalaPactPlugin extends AutoPlugin {
       String,
       String
     ] with String with Seq[String] with PartialFunction[String, Boolean] with Task[Unit] with InputTask[Unit]
-  ]] =
+  ]] = {
     pactSettings ++ Seq(
-      pactPack := pactPackTask.value
-    ) ++ Seq(
+      // Tasks
+      pactPack := pactPackTask.value,
       pactPush := pactPushTask.evaluated,
       pactCheck := pactCheckTask.evaluated,
-      pactStub := pactStubTask.evaluated
+      pactStub := pactStubTask.evaluated,
+      // Classic
+      pactTest := pactTestTask.value,
+      pactPublish := pactPublishTask.evaluated,
+      pactVerify := pactCheckTask.evaluated,
+      pactStubber := pactStubberTask.evaluated
     )
+  }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   lazy val pactPackTask: Def.Initialize[Task[Unit]] =
@@ -108,7 +115,7 @@ object ScalaPactPlugin extends AutoPlugin {
     }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  lazy val pactPushTask: Def.Initialize[InputTask[Unit]] =
+  def pactPushTask: Def.Initialize[InputTask[Unit]] =
     Def.inputTask {
       ScalaPactPublishCommand.doPactPublish(
         scalaPactEnv.value.toSettings + ScalaPactSettings.parseArguments(spaceDelimited("<arg>").parsed),
@@ -121,7 +128,7 @@ object ScalaPactPlugin extends AutoPlugin {
     }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  lazy val pactCheckTask: Def.Initialize[InputTask[Unit]] =
+  def pactCheckTask: Def.Initialize[InputTask[Unit]] =
     Def.inputTask {
       ScalaPactVerifyCommand.doPactVerify(
         scalaPactEnv.value.toSettings + ScalaPactSettings.parseArguments(spaceDelimited("<arg>").parsed),
@@ -136,37 +143,28 @@ object ScalaPactPlugin extends AutoPlugin {
     }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  lazy val pactStubTask: Def.Initialize[InputTask[Unit]] =
+  def pactStubTask: Def.Initialize[InputTask[Unit]] =
     Def.inputTask {
-      ScalaPactStubberCommand.runStubber(
-        scalaPactEnv.value.toSettings + ScalaPactSettings.parseArguments(spaceDelimited("<arg>").parsed),
-        ScalaPactStubberCommand.interactionManagerInstance
-      )
+      ScalaPactStubberCommand
+        .runStubber(
+          scalaPactEnv.value.toSettings + ScalaPactSettings.parseArguments(spaceDelimited("<arg>").parsed),
+          ScalaPactStubberCommand.interactionManagerInstance
+        )
+      ()
     }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  lazy val pactTest: Def.Initialize[Task[Unit]] = Def.task {
-    (clean in Compile).value
-    (compile in Compile).value
-    (test in Test).value
-    (pactPack in Test).value
+  def pactTestTask: Def.Initialize[Task[Unit]] =
+    pactPackTask.dependsOn((test in Test).dependsOn((compile in Compile).dependsOn(clean in Compile)))
+
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  def pactPublishTask: Def.Initialize[InputTask[Unit]] = Def.inputTask {
+    pactPushTask.dependsOn(pactTestTask).evaluated
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  lazy val pactPublish: Def.Initialize[InputTask[Unit]] = Def.inputTask {
-    pactTest.value
-    pactPush.evaluated
-  }
-
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  lazy val pactVerify: Def.Initialize[InputTask[Unit]] = Def.inputTask {
-    pactCheck.evaluated
-  }
-
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  lazy val pactStubber: Def.Initialize[InputTask[Unit]] = Def.inputTask {
-    pactTest.value
-    pactStub.evaluated
+  def pactStubberTask: Def.Initialize[InputTask[Unit]] = Def.inputTask {
+    pactStubTask.dependsOn(pactTestTask).evaluated
   }
 
 }
