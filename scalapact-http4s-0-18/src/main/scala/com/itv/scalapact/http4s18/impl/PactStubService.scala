@@ -195,19 +195,19 @@ class PactServer extends IPactStubber {
         .interruptWhen(terminator)
         .compile
         .drain
-        .unsafeToFuture()
+        .unsafeRunSync()
+
+      sys.ShutdownHookThread {
+        fullShutdown()
+      }
 
       this
     }
 
-  def awaitShutdown(): Unit = {
-    scala.io.StdIn.readLine()
-    instance.foreach(_.shutdown.unsafeRunSync())
-    instance = None
-    terminator.set(true).unsafeRunSync()
-  }
+  def shutdown(): Unit =
+    fullShutdown()
 
-  def shutdown(): Unit = {
+  private def fullShutdown(): Unit = {
     instance.foreach(_.shutdown.unsafeRunSync())
     instance = None
     terminator.set(true).unsafeRunSync()

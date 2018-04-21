@@ -150,7 +150,7 @@ object ScalaPactPlugin extends AutoPlugin {
           scalaPactEnv.value.toSettings + ScalaPactSettings.parseArguments(spaceDelimited("<arg>").parsed),
           ScalaPactStubberCommand.interactionManagerInstance
         )
-        .awaitShutdown()
+      ()
     }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))

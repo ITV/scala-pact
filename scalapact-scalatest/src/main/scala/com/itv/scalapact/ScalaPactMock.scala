@@ -97,7 +97,7 @@ object ScalaPactMock {
 
     val server: IPactStubber = (interactionManager.addToInteractionManager andThen startStub)(configAndPacts)
 
-    PactLogger.message("> ScalaPact stub running at: " + mockConfig.baseUrl)
+    PactLogger.debug("> ScalaPact stub running at: " + mockConfig.baseUrl)
 
     waitForServerThenTest(server, mockConfig, test, pactDescription)
   }
