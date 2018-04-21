@@ -49,15 +49,15 @@ val compilerOptions212 = scalacOptions ++= Seq(
 
 addCommandAlias(
   "quickcompile",
-  ";shared/compile;core/compile;argonaut62/compile;http4s016a/compile;pactSpec/compile;pluginShared/compile;plugin/compile;pluginNoDeps/compile;standalone/compile;framework/compile;testsWithDeps/compile"
+  ";shared/compile;core/compile;argonaut62/compile;pactSpec/compile;pluginShared/compile;plugin/compile;pluginNoDeps/compile;standalone/compile;framework/compile;testsWithDeps/compile"
 )
 addCommandAlias(
   "quicktest",
-  ";shared/test;core/test;argonaut62/test;http4s016a/test;pactSpec/test;pluginShared/test;plugin/test;pluginNoDeps/test;standalone/test;framework/test;testsWithDeps/test"
+  ";shared/test;core/test;argonaut62/test;pactSpec/test;pluginShared/test;plugin/test;pluginNoDeps/test;standalone/test;framework/test;testsWithDeps/test"
 )
 addCommandAlias(
   "quickpublish",
-  ";shared/publishLocal;core/publishLocal;argonaut62/publishLocal;circe08/publishLocal;circe09/publishLocal;http4s016a/publishLocal;http4s017/publishLocal;http4s018/publishLocal;pluginShared/publishLocal;plugin/publishLocal;pluginNoDeps/publishLocal;standalone/publishLocal;framework/publishLocal"
+  ";shared/publishLocal;core/publishLocal;argonaut62/publishLocal;circe08/publishLocal;circe09/publishLocal;http4s017/publishLocal;http4s018/publishLocal;pluginShared/publishLocal;plugin/publishLocal;pluginNoDeps/publishLocal;standalone/publishLocal;framework/publishLocal"
 )
 
 lazy val commonSettings = Seq(
@@ -138,22 +138,6 @@ lazy val core =
     .settings(publishSettings: _*)
     .settings(
       name := "scalapact-core"
-    )
-    .dependsOn(shared)
-    .settings(compilerOptions212: _*)
-
-lazy val http4s016a =
-  (project in file("scalapact-http4s-0-16a"))
-    .settings(commonSettings: _*)
-    .settings(publishSettings: _*)
-    .settings(
-      name := "scalapact-http4s-0-16a",
-      libraryDependencies ++= Seq(
-        "org.http4s"             %% "http4s-blaze-server" % "0.16.6a",
-        "org.http4s"             %% "http4s-blaze-client" % "0.16.6a",
-        "org.http4s"             %% "http4s-dsl"          % "0.16.6a",
-        "com.github.tomakehurst" % "wiremock"             % "1.56" % "test"
-      )
     )
     .dependsOn(shared)
     .settings(compilerOptions212: _*)
@@ -256,7 +240,7 @@ lazy val plugin =
     )
     .dependsOn(pluginShared)
     .dependsOn(argonaut62)
-    .dependsOn(http4s017)
+    .dependsOn(http4s018)
     .settings(compilerOptions212: _*)
 
 lazy val pluginNoDeps =
@@ -321,7 +305,7 @@ lazy val testsWithDeps =
     )
     .dependsOn(framework)
     .dependsOn(argonaut62)
-    .dependsOn(http4s017)
+    .dependsOn(http4s018)
 
 lazy val docs =
   (project in file("scalapact-docs"))
@@ -341,7 +325,7 @@ lazy val scalaPactProject =
   (project in file("."))
     .settings(commonSettings: _*)
     .aggregate(shared, core, pluginShared, plugin, pluginNoDeps, framework, standalone)
-    .aggregate(http4s016a, http4s017, http4s018)
+    .aggregate(http4s017, http4s018)
     .aggregate(argonaut62, circe08, circe09)
     .aggregate(docs)
     .aggregate(pactSpec, testsWithDeps)

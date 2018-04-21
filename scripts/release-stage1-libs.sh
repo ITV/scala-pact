@@ -15,10 +15,6 @@ echo ">>> Shared"
 publishReal "shared"
 
 echo ""
-echo ">>> Http4s 0.16.xa"
-publishReal "http4s016a"
-
-echo ""
 echo ">>> Http4s 0.17.x"
 publishReal "http4s017"
 

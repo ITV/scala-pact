@@ -19,10 +19,6 @@ echo ">>> Shared"
 publishLocally "shared"
 
 echo ""
-echo ">>> Http4s 0.16.xa"
-publishLocally "http4s016a"
-
-echo ""
 echo ">>> Http4s 0.17.x"
 publishLocally "http4s017"
 
