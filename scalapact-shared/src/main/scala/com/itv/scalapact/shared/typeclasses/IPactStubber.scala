@@ -4,7 +4,7 @@ import com.itv.scalapact.shared.{IInteractionManager, ScalaPactSettings, SslCont
 
 trait IPactStubber {
 
-  def startStubServer(
+  def startLongRunningStubServer(
       interactionManager: IInteractionManager,
       connectionPoolSize: Int,
       sslContextName: Option[String],

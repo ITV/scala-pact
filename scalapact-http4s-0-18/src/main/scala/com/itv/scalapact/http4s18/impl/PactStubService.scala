@@ -8,8 +8,6 @@ import com.itv.scalapact.http4s18.impl.HeaderImplicitConversions._
 import com.itv.scalapact.shared.ColourOuput._
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter}
 import com.itv.scalapact.shared.{PactLogger, _}
-import fs2.async
-import fs2.async.mutable
 import javax.net.ssl.SSLContext
 import org.http4s.dsl.io._
 import org.http4s.server.Server
@@ -137,11 +135,6 @@ object PactStubService {
 
 class PactServer extends IPactStubber {
 
-  import scala.concurrent.ExecutionContext.Implicits.global
-
-  private val terminator: mutable.Signal[IO, Boolean] =
-    async.signalOf[IO, Boolean](false).unsafeRunSync()
-
   private var instance: Option[Server[IO]] = None
 
   private def blazeBuilder(
@@ -179,27 +172,23 @@ class PactServer extends IPactStubber {
       }
     }
 
-  def startStubServer(interactionManager: IInteractionManager,
-                      connectionPoolSize: Int,
-                      sslContextName: Option[String],
-                      port: Option[Int])(implicit pactReader: IPactReader,
-                                         pactWriter: IPactWriter,
-                                         sslContextMap: SslContextMap): ScalaPactSettings => IPactStubber =
+  def startLongRunningStubServer(interactionManager: IInteractionManager,
+                                 connectionPoolSize: Int,
+                                 sslContextName: Option[String],
+                                 port: Option[Int])(implicit pactReader: IPactReader,
+                                                    pactWriter: IPactWriter,
+                                                    sslContextMap: SslContextMap): ScalaPactSettings => IPactStubber =
     scalaPactSettings => {
       PactLogger.message(
         ("Starting ScalaPact Stubber on: http://" + scalaPactSettings.giveHost + ":" + scalaPactSettings.givePort.toString).white.bold
       )
       PactLogger.message(("Strict matching mode: " + scalaPactSettings.giveStrictMode.toString).white.bold)
+      PactLogger.message("**Press ENTER to quit!**".cyan.bold)
 
-      blazeBuilder(scalaPactSettings, interactionManager, connectionPoolSize, sslContextName, port).serve
-        .interruptWhen(terminator)
-        .compile
-        .drain
+      blazeBuilder(scalaPactSettings, interactionManager, connectionPoolSize, sslContextName, port).start
         .unsafeRunSync()
 
-      sys.ShutdownHookThread {
-        fullShutdown()
-      }
+      scala.io.StdIn.readLine()
 
       this
     }
@@ -210,7 +199,6 @@ class PactServer extends IPactStubber {
   private def fullShutdown(): Unit = {
     instance.foreach(_.shutdown.unsafeRunSync())
     instance = None
-    terminator.set(true).unsafeRunSync()
   }
 
 }

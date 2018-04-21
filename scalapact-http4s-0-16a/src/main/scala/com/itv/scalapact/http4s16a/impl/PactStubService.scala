@@ -157,28 +157,24 @@ class PactServer extends IPactStubber {
           this
     }
 
-  def startStubServer(interactionManager: IInteractionManager,
-                      connectionPoolSize: Int,
-                      sslContextName: Option[String],
-                      port: Option[Int])(implicit pactReader: IPactReader,
-                                         pactWriter: IPactWriter,
-                                         sslContextMap: SslContextMap): ScalaPactSettings => IPactStubber =
+  def startLongRunningStubServer(interactionManager: IInteractionManager,
+                                 connectionPoolSize: Int,
+                                 sslContextName: Option[String],
+                                 port: Option[Int])(implicit pactReader: IPactReader,
+                                                    pactWriter: IPactWriter,
+                                                    sslContextMap: SslContextMap): ScalaPactSettings => IPactStubber =
     scalaPactSettings => {
       PactLogger.message(
         ("Starting ScalaPact Stubber on: http://" + scalaPactSettings.giveHost + ":" + scalaPactSettings.givePort.toString).white.bold
       )
       PactLogger.message(("Strict matching mode: " + scalaPactSettings.giveStrictMode.toString).white.bold)
+      PactLogger.message("**Press ENTER to quit!**".cyan.bold)
 
-      instance match {
-        case Some(_) =>
-          this
+      blazeBuilder(scalaPactSettings, interactionManager, connectionPoolSize, sslContextName, port).run
 
-        case None =>
-          instance = Option(
-            blazeBuilder(scalaPactSettings, interactionManager, connectionPoolSize, sslContextName, port).run
-          )
-          this
-      }
+      scala.io.StdIn.readLine()
+
+      this
     }
 
   def awaitShutdown(): Unit =

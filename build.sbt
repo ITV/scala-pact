@@ -256,7 +256,7 @@ lazy val plugin =
     )
     .dependsOn(pluginShared)
     .dependsOn(argonaut62)
-    .dependsOn(http4s017)
+    .dependsOn(http4s018)
     .settings(compilerOptions212: _*)
 
 lazy val pluginNoDeps =
