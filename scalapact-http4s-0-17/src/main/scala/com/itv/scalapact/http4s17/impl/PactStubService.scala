@@ -1,12 +1,13 @@
 package com.itv.scalapact.http4s17.impl
 
-import java.util.concurrent.Executors
+import java.util.concurrent.{ExecutorService, Executors}
 
 import com.itv.scalapact.http4s17.impl.HeaderImplicitConversions._
 import com.itv.scalapact.shared.ColourOuput._
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter}
 import com.itv.scalapact.shared.{PactLogger, _}
-import fs2.{Strategy, Task}
+import fs2.async.mutable
+import fs2.{Strategy, Task, async}
 import javax.net.ssl.SSLContext
 import org.http4s.dsl._
 import org.http4s.server.Server
@@ -43,22 +44,6 @@ private object PactStubService {
       .withOptionalSsl(sslContextName)
       .withConnectorPoolSize(connectionPoolSize)
       .mountService(PactStubService.service(interactionManager, config.giveStrictMode), "/")
-  }
-
-  def startServer(interactionManager: IInteractionManager,
-                  connectionPoolSize: Int,
-                  sslContextName: Option[String],
-                  port: Option[Int])(implicit pactReader: IPactReader,
-                                     pactWriter: IPactWriter,
-                                     sslContextMap: SslContextMap): ScalaPactSettings => Unit = config => {
-    PactLogger.message(
-      ("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold
-    )
-    PactLogger.message(("Strict matching mode: " + config.giveStrictMode.toString).white.bold)
-
-    createServer(interactionManager, connectionPoolSize, sslContextName, port, config).run
-
-    ()
   }
 
   private val isAdminCall: Request => Boolean = request =>
@@ -150,6 +135,13 @@ private object PactStubService {
 
 class PactServer extends IPactStubber {
 
+  private val executorService: ExecutorService = Executors.newFixedThreadPool(2)
+  implicit val strategy: Strategy =
+    Strategy.fromExecutionContext(ExecutionContext.fromExecutorService(executorService))
+
+  private val terminator: mutable.Signal[Task, Boolean] =
+    async.signalOf[Task, Boolean](false).unsafeRun()
+
   private var instance: Option[Server] = None
 
   private def blazeBuilder(
@@ -191,25 +183,31 @@ class PactServer extends IPactStubber {
                       port: Option[Int])(implicit pactReader: IPactReader,
                                          pactWriter: IPactWriter,
                                          sslContextMap: SslContextMap): ScalaPactSettings => IPactStubber =
-    scalaPactSettings =>
-      instance match {
-        case Some(_) =>
-          this
+    scalaPactSettings => {
+      PactLogger.message(
+        ("Starting ScalaPact Stubber on: http://" + scalaPactSettings.giveHost + ":" + scalaPactSettings.givePort.toString).white.bold
+      )
+      PactLogger.message(("Strict matching mode: " + scalaPactSettings.giveStrictMode.toString).white.bold)
 
-        case None =>
-          instance = Option(
-            blazeBuilder(scalaPactSettings, interactionManager, connectionPoolSize, sslContextName, port).run
-          )
-          this
+      blazeBuilder(scalaPactSettings, interactionManager, connectionPoolSize, sslContextName, port).serve
+        .interruptWhen(terminator)
+        .run
+        .unsafeRun()
+
+      sys.ShutdownHookThread {
+        fullShutdown()
+      }
+
+      this
     }
 
-  def awaitShutdown(): Unit =
-    instance.foreach(_.shutdown.unsafeRun())
+  def shutdown(): Unit =
+    fullShutdown()
 
-  def shutdown(): Unit = {
-    instance.foreach(_.shutdownNow())
+  private def fullShutdown(): Unit = {
+    instance.foreach(_.shutdown.unsafeRunSync())
     instance = None
-    ()
+    terminator.set(true).unsafeRun()
   }
 
 }

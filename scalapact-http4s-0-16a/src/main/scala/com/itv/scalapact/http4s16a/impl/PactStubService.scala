@@ -38,20 +38,6 @@ private object PactStubService {
       .withConnectorPoolSize(connectionPoolSize)
       .mountService(PactStubService.service(interactionManager, config.giveStrictMode), "/")
 
-  def startServer(interactionManager: IInteractionManager,
-                  connectionPoolSize: Int,
-                  sslContextName: Option[String],
-                  port: Option[Int])(implicit pactReader: IPactReader,
-                                     pactWriter: IPactWriter,
-                                     sslContextMap: SslContextMap): ScalaPactSettings => Server = config => {
-    PactLogger.message(
-      ("Starting ScalaPact Stubber on: http://" + config.giveHost + ":" + config.givePort.toString).white.bold
-    )
-    PactLogger.message(("Strict matching mode: " + config.giveStrictMode.toString).white.bold)
-
-    createServer(interactionManager, connectionPoolSize, sslContextName, port, config).run
-  }
-
   private val isAdminCall: Request => Boolean = request =>
     request.headers.get(CaseInsensitiveString("X-Pact-Admin")).exists(h => h.value == "true")
 
@@ -177,7 +163,12 @@ class PactServer extends IPactStubber {
                       port: Option[Int])(implicit pactReader: IPactReader,
                                          pactWriter: IPactWriter,
                                          sslContextMap: SslContextMap): ScalaPactSettings => IPactStubber =
-    scalaPactSettings =>
+    scalaPactSettings => {
+      PactLogger.message(
+        ("Starting ScalaPact Stubber on: http://" + scalaPactSettings.giveHost + ":" + scalaPactSettings.givePort.toString).white.bold
+      )
+      PactLogger.message(("Strict matching mode: " + scalaPactSettings.giveStrictMode.toString).white.bold)
+
       instance match {
         case Some(_) =>
           this
@@ -187,6 +178,7 @@ class PactServer extends IPactStubber {
             blazeBuilder(scalaPactSettings, interactionManager, connectionPoolSize, sslContextName, port).run
           )
           this
+      }
     }
 
   def awaitShutdown(): Unit =
