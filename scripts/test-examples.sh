@@ -8,7 +8,7 @@ echo "***********************"
 echo ""
 echo "> Consumer tests"
 cd example/consumer
-sbt clean update compile pact-test
+sbt clean update compile pactTest
 cd ..
 bash deliver.sh
 
@@ -26,7 +26,7 @@ sbt run &
 echo "..wait a bit for the service to start"
 simple_countdown 30
 
-sbt "pact-verify --source delivered_pacts/ --host localhost --port 8080 --clientTimeout 2"
+sbt "pactVerify --source delivered_pacts/ --host localhost --port 8080 --clientTimeout 2"
 
 cd ../..
 
