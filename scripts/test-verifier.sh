@@ -38,17 +38,16 @@ pactContractVersion := "2.0.0"
 allowSnapshotPublish := false
 EOL
 
-sbt "project testsWithDeps" update
-sbt "; project testsWithDeps; pact-stubber --port 1234" &
+sbt "testsWithDeps/pactTest"
+sbt "standalone/run --port 1234 --source target/pacts" &
 
-COUNTDOWN=45
+COUNTDOWN=15
 
 echo "...giving the stubber a $COUNTDOWN second head start to warm up..."
 simple_countdown $COUNTDOWN
 
 echo "Verifying..."
-
-sbt "; project testsWithDeps; pact-verify --source target/pacts"
+sbt "testsWithDeps/pactVerify --source target/pacts"
 
 pkill -1 -f sbt-launch.jar
 
