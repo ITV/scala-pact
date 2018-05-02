@@ -4,21 +4,12 @@ import com.itv.scalapact.shared.{IInteractionManager, ScalaPactSettings, SslCont
 
 trait IPactStubber {
 
-  def startLongRunningStubServer(
-      interactionManager: IInteractionManager,
-      connectionPoolSize: Int,
-      sslContextName: Option[String],
-      port: Option[Int]
-  )(implicit pactReader: IPactReader,
-    pactWriter: IPactWriter,
-    sslContextMap: SslContextMap): ScalaPactSettings => IPactStubber
-
-  def startTestServer(interactionManager: IInteractionManager,
-                      connectionPoolSize: Int,
-                      sslContextName: Option[String],
-                      port: Option[Int])(implicit pactReader: IPactReader,
-                                         pactWriter: IPactWriter,
-                                         sslContextMap: SslContextMap): ScalaPactSettings => IPactStubber
+  def start(interactionManager: IInteractionManager,
+            connectionPoolSize: Int,
+            sslContextName: Option[String],
+            port: Option[Int])(implicit pactReader: IPactReader,
+                               pactWriter: IPactWriter,
+                               sslContextMap: SslContextMap): ScalaPactSettings => IPactStubber
 
   def shutdown(): Unit
 

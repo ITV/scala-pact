@@ -1,10 +1,9 @@
 package com.itv.scalapact.plugin
 
-import com.itv.scalapact.json._
 import com.itv.scalapact.http._
+import com.itv.scalapact.json._
 import com.itv.scalapact.plugin.shared._
 import com.itv.scalapact.shared.ScalaPactSettings
-
 import sbt.Keys._
 import sbt.plugins.JvmPlugin
 import sbt.{Def, _}
@@ -19,7 +18,7 @@ object ScalaPactPlugin extends AutoPlugin {
       SettingKey[PartialFunction[String, Boolean]]("provider-state-matcher",
                                                    "Alternative partial function for provider state setup")
 
-    val providerStates: SettingKey[Seq[(String, (String) => Boolean)]] =
+    val providerStates: SettingKey[Seq[(String, String => Boolean)]] =
       SettingKey[Seq[(String, String => Boolean)]]("provider-states", "A list of provider state setup functions")
 
     val pactBrokerAddress: SettingKey[String] =
@@ -150,7 +149,6 @@ object ScalaPactPlugin extends AutoPlugin {
           scalaPactEnv.value.toSettings + ScalaPactSettings.parseArguments(spaceDelimited("<arg>").parsed),
           ScalaPactStubberCommand.interactionManagerInstance
         )
-      ()
     }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))

@@ -3,9 +3,8 @@ package com.itv.scalapact.http4s17.impl
 import java.util.concurrent.Executors
 
 import com.itv.scalapact.http4s17.impl.HeaderImplicitConversions._
-import com.itv.scalapact.shared.ColourOuput._
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter}
-import com.itv.scalapact.shared.{PactLogger, _}
+import com.itv.scalapact.shared._
 import fs2.{Strategy, Task}
 import javax.net.ssl.SSLContext
 import org.http4s.dsl._
@@ -151,12 +150,12 @@ class PactServer extends IPactStubber {
       scalaPactSettings
     )
 
-  def startTestServer(interactionManager: IInteractionManager,
-                      connectionPoolSize: Int,
-                      sslContextName: Option[String],
-                      port: Option[Int])(implicit pactReader: IPactReader,
-                                         pactWriter: IPactWriter,
-                                         sslContextMap: SslContextMap): ScalaPactSettings => IPactStubber =
+  def start(interactionManager: IInteractionManager,
+            connectionPoolSize: Int,
+            sslContextName: Option[String],
+            port: Option[Int])(implicit pactReader: IPactReader,
+                               pactWriter: IPactWriter,
+                               sslContextMap: SslContextMap): ScalaPactSettings => IPactStubber =
     scalaPactSettings =>
       instance match {
         case Some(_) =>
@@ -169,30 +168,7 @@ class PactServer extends IPactStubber {
           this
     }
 
-  def startLongRunningStubServer(interactionManager: IInteractionManager,
-                                 connectionPoolSize: Int,
-                                 sslContextName: Option[String],
-                                 port: Option[Int])(implicit pactReader: IPactReader,
-                                                    pactWriter: IPactWriter,
-                                                    sslContextMap: SslContextMap): ScalaPactSettings => IPactStubber =
-    scalaPactSettings => {
-      PactLogger.message(
-        ("Starting ScalaPact Stubber on: http://" + scalaPactSettings.giveHost + ":" + scalaPactSettings.givePort.toString).white.bold
-      )
-      PactLogger.message(("Strict matching mode: " + scalaPactSettings.giveStrictMode.toString).white.bold)
-      PactLogger.message("**Press ENTER to quit!**".cyan.bold)
-
-      blazeBuilder(scalaPactSettings, interactionManager, connectionPoolSize, sslContextName, port).run
-
-      scala.io.StdIn.readLine()
-
-      this
-    }
-
-  def shutdown(): Unit =
-    fullShutdown()
-
-  private def fullShutdown(): Unit = {
+  def shutdown(): Unit = {
     instance.foreach(_.shutdown.unsafeRunSync())
     instance = None
   }
