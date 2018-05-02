@@ -10,7 +10,7 @@ function publishReal {
     sleep 1
     echo ""
     echo ">>> $NAME"
-    sbt $NAME/clean $NAME/update $NAME/compile $NAME/test $NAME/publish
+    sbt $NAME/clean $NAME/update $NAME/compile $NAME/test $NAME/publishSigned sonatypeRelease
 }
 
 publishReal "core"

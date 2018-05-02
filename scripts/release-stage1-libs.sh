@@ -7,7 +7,7 @@ echo "*****************"
 
 function publishReal {
     NAME=$1
-    sbt $NAME/clean $NAME/update $NAME/compile $NAME/test $NAME/publish
+    sbt $NAME/clean $NAME/update $NAME/compile $NAME/test $NAME/publishSigned sonatypeRelease
 }
 
 echo ""
