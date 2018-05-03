@@ -61,7 +61,7 @@ addCommandAlias(
 )
 
 lazy val commonSettings = Seq(
-  version := "2.3.0-RC1",
+  version := "2.3.0-SNAPSHOT",
   organization := "com.itv",
   scalaVersion := scala212,
   libraryDependencies ++= Seq(
@@ -291,7 +291,8 @@ lazy val standalone =
     .settings(commonSettings: _*)
     .settings(
       name := "scalapact-standalone-stubber",
-      scalaVersion := scala212
+      scalaVersion := scala212,
+      publish := {}
     )
     .dependsOn(core)
     .dependsOn(circe09)

@@ -17,5 +17,5 @@ publishReal "core"
 publishReal "pluginShared"
 publishReal "plugin"
 publishReal "pluginNoDeps"
-publishReal "standalone"
+#publishReal "standalone" # <-- we don't release this at the moment!
 publishReal "framework"
