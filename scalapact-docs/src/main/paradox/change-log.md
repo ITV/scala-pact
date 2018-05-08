@@ -23,7 +23,10 @@ With thanks to all contributors!
 
 Maintained by [davesmith00000].
 
-## 2.2.4 - ???
+## 2.3.0 - ???
+- Static dependencies converted to Typeclasses
+- SBT 1.x support
+- Verification test summary ([dandxy89])
 - Documentation corrections ([pgordon9])
 - Exclude logback.xml and log4j.properties from published jar ([cjwebb])
 - Documentation corrections ([cjwebb])
@@ -151,3 +154,4 @@ Other improvements for contributors:
 [afiore]: https://github.com/afiore
 [pgordon9]: https://github.com/pgordon9
 [gcvt]: https://github.com/gcvt
+[dandxy89]: https://github.com/dandxy89
