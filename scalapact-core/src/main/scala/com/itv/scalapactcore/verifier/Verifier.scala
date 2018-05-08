@@ -18,6 +18,8 @@ object Verifier {
     sslContextMap: SslContextMap,
     httpClient: IScalaPactHttpClient[F]): ScalaPactSettings => Boolean = arguments => {
 
+    val scalaPactLogPrefix = "[scala-pact] ".white
+
     val pacts: List[Pact] = if (arguments.localPactFilePath.isDefined) {
       PactLogger.message(
         s"Attempting to use local pact files at: '${arguments.localPactFilePath.getOrElse("<path missing>")}'".white.bold
@@ -115,6 +117,11 @@ object Verifier {
       }
     }
 
+    PactLogger.message(scalaPactLogPrefix + s"Run completed in: ${(endTime - startTime).toInt} ms".yellow)
+    PactLogger.message(scalaPactLogPrefix + s"Total number of test run: $testCount".yellow)
+    PactLogger.message(scalaPactLogPrefix + s"Tests: succeeded ${testCount - failureCount}, failed $failureCount".yellow)
+    if (failureCount == 0) PactLogger.message(scalaPactLogPrefix + "All tests passed.".green)
+    else PactLogger.message(scalaPactLogPrefix + s"$failureCount tests failed.".red)
     failureCount == 0
   }
 
