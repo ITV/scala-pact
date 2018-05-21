@@ -23,7 +23,7 @@ With thanks to all contributors!
 
 Maintained by [davesmith00000].
 
-## 2.3.0 - ???
+## 2.3.0-RC1 - 2018-05-03
 - Static dependencies converted to Typeclasses
 - SBT 1.x support
 - Verification test summary ([dandxy89])
