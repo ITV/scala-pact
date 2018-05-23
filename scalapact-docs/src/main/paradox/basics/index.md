@@ -5,12 +5,14 @@
 * [SBT Tasks](sbt-tasks.md)
 * [SBT Commands](sbt-commands.md)
 * [Test frameworks](test-frameworks.md)
+* [Pact Stubber](pact-stubber.md)
 
 @@@
 
 1. @ref:[SBT Tasks](sbt-tasks.md)
 1. @ref:[SBT Commands](sbt-commands.md)
 1. @ref:[Test frameworks](test-frameworks.md)
+1. @ref:[Pact Stubber](pact-stubber.md)
 
 ## Tasks vs Commands
 All Scala-Pact versions prior to 2.2.0 only had SBT Commands available.

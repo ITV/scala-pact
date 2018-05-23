@@ -81,7 +81,8 @@ lazy val commonSettings = Seq(
     Wart.Null,
     Wart.Var
   ),
-  parallelExecution in Test := false
+  parallelExecution in Test := false,
+  test in assembly := {}
 )
 
 lazy val mockSettings = Seq(
@@ -292,7 +293,11 @@ lazy val standalone =
     .settings(
       name := "scalapact-standalone-stubber",
       scalaVersion := scala212,
-      publish := {}
+      publish := {},
+      assemblyJarName in assembly := "pactstubber.jar",
+      libraryDependencies ++= Seq(
+        "ch.qos.logback"        % "logback-classic"             % "1.2.3"
+      )
     )
     .dependsOn(core)
     .dependsOn(circe09)

@@ -1,7 +1,13 @@
 # Dependencies
+
 The Pact integration test library itself depends on other of Scala libraries to make it work. Specifically it needs an Http and a JSON library.
 
+## Scala-Pact 2.3.x
+
+Currently, everything works with everything. Your only limitation is that you must be using Scala 2.12.x and SBT 1.x.
+
 ## Scala-Pact 2.2.x
+
 Versions of Scala-Pact have their dependencies baked in. The benefit was that it made development of the library initially easy, but as more people tried to adopt it, reports came in that it was causing massive dependency conflicts for fairly obvious reasons.
 
 To tackle this, Scala-Pact now supports a range of libraries and versions. We can add more, and @ref:[pull-requests are welcome](contributing.md).
@@ -11,6 +17,7 @@ As far as the user is concerned there are two things to be aware of:
 2. That you need to explicitly add them to your project (see set up guides).
 
 ### Compatibility Matrix
+
 Please note that this is for SBT 13.x. Once the upgrade to SBT 1.x (with Scala 2.12.3 compatible plugins) is complete this table will change. For instance, Circe is not very useful at the moment, but will be soon!
 ```
                     |   Plugin  |             Framework
