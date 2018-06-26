@@ -162,4 +162,5 @@ class PactServer extends IPactStubber {
     ()
   }
 
+  def port: Option[Int] = instance.map(_.address.getPort)
 }
