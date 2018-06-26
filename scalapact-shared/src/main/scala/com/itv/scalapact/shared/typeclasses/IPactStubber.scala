@@ -13,4 +13,5 @@ trait IPactStubber {
 
   def shutdown(): Unit
 
+  def port: Option[Int]
 }

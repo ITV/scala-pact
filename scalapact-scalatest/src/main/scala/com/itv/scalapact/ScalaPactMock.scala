@@ -1,16 +1,11 @@
 package com.itv.scalapact
 
-import java.io.IOException
-import java.net.ServerSocket
-
 import com.itv.scalapact.ScalaPactForger._
-import com.itv.scalapact.shared._
+import com.itv.scalapact.shared.{PactLogger, _}
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter, IScalaPactHttpClient}
 import com.itv.scalapactcore.common.stubber.InteractionManager
 
 import scala.concurrent.duration._
-import scala.util.{Failure, Success, Try}
-import com.itv.scalapact.shared.PactLogger
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter, IScalaPactHttpClient}
 
 object ScalaPactMock {
 
@@ -25,45 +20,6 @@ object ScalaPactMock {
     test(config)
   }
 
-  // Ported from a Java gist
-  private def findFreePort(): Try[Int] = Try {
-    val socket: ServerSocket = new ServerSocket(0)
-    var port                 = -1
-
-    try {
-      socket.setReuseAddress(false)
-      port = socket.getLocalPort
-
-      try {
-        socket.close()
-      } catch {
-        // Ignore IOException on close()
-        case _: IOException =>
-      }
-    } catch {
-      case _: IOException =>
-    } finally {
-      if (socket != null) {
-        try {
-          socket.close()
-        } catch {
-          case _: IOException =>
-        }
-      }
-    }
-
-    if (port == -1)
-      throw new IllegalStateException("Could not find a free TCP/IP port to start embedded HTTP Server on")
-    else port
-  }
-
-  private def findFreePortRetry(attempts: Int): Int =
-    findFreePort() match {
-      case Success(port)              => port
-      case Failure(_) if attempts > 0 => findFreePortRetry(attempts - 1)
-      case Failure(e)                 => throw e
-    }
-
   def runConsumerIntegrationTest[F[_], A](
       strict: Boolean
   )(pactDescription: ScalaPactDescriptionFinal)(test: ScalaPactMockConfig => A)(implicit sslContextMap: SslContextMap,
@@ -74,20 +30,19 @@ object ScalaPactMock {
 
     val interactionManager: InteractionManager = new InteractionManager
 
-    val mockConfig = ScalaPactMockConfig(pactDescription.serverSslContextName.fold("http")(_ => "https"),
-                                         "localhost",
-                                         findFreePortRetry(3),
-                                         pactDescription.options.outputPath)
+    val protocol = pactDescription.serverSslContextName.fold("http")(_ => "https")
+    val host = "localhost"
+    val outputPath = pactDescription.options.outputPath
 
     val configAndPacts: ConfigAndPacts = ConfigAndPacts(
       scalaPactSettings = ScalaPactSettings(
-        host = Option(mockConfig.host),
-        protocol = Option(mockConfig.protocol),
-        port = Option(mockConfig.port),
+        protocol = Option(protocol),
+        host = Option(host),
+        port = Option(0), // `0` means "use any available port".
         localPactFilePath = None,
         strictMode = Option(strict),
         clientTimeout = Option(Duration(2, SECONDS)), // Should never ever take this long. Used to make an http request against the local stub.
-        outputPath = Option(mockConfig.outputPath)
+        outputPath = Option(outputPath)
       ),
       pacts = List(ScalaPactContractWriter.producePactFromDescription(pactDescription))
     )
@@ -96,6 +51,12 @@ object ScalaPactMock {
       pactStubber.start(interactionManager, 5, pactDescription.serverSslContextName, None)
 
     val server: IPactStubber = (interactionManager.addToInteractionManager andThen startStub)(configAndPacts)
+
+    val port: Int = server.port.getOrElse {
+      throw new IllegalStateException("Could not obtain the server port")
+    }
+
+    val mockConfig = ScalaPactMockConfig(protocol, host, port, outputPath)
 
     PactLogger.debug("> ScalaPact stub running at: " + mockConfig.baseUrl)
 
