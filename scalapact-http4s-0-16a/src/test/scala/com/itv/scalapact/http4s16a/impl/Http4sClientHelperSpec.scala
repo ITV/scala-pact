@@ -9,13 +9,15 @@ import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
 
 class Http4sClientHelperSpec extends FunSpec with Matchers with BeforeAndAfterAll {
 
-  val wireMockServer = new WireMockServer(wireMockConfig().port(1234))
+  private val wireMockServer = new WireMockServer(wireMockConfig().port(0))
+
+  private def port(): Int = wireMockServer.port
 
   override def beforeAll(): Unit = {
 
     wireMockServer.start()
 
-    WireMock.configureFor("localhost", 1234)
+    WireMock.configureFor("localhost", port())
 
     val response = aResponse().withStatus(200).withBody("Success").withHeader("foo", "bar")
 
@@ -31,9 +33,7 @@ class Http4sClientHelperSpec extends FunSpec with Matchers with BeforeAndAfterAl
   describe("Making an HTTP request") {
 
     it("should be able to make a simple request") {
-
-      val request = SimpleRequest("http://localhost:1234", "/test", HttpMethod.GET, sslContextName = None)
-
+      val request = SimpleRequest(s"http://localhost:${port()}", "/test", HttpMethod.GET, sslContextName = None)
       val response = Http4sClientHelper.doRequest(request, Http4sClientHelper.defaultClient).unsafePerformSync
 
       response.statusCode shouldEqual 200

@@ -49,13 +49,15 @@ class ExampleVerification extends FunSpec with Matchers with BeforeAndAfterAll {
   }
   """
 
-  val wireMockServer = new WireMockServer(wireMockConfig().port(1234))
+  private val wireMockServer = new WireMockServer(wireMockConfig().port(0))
+
+  private def port(): Int = wireMockServer.port
 
   override def beforeAll(): Unit = {
 
     wireMockServer.start()
 
-    WireMock.configureFor("localhost", 1234)
+    WireMock.configureFor("localhost", port())
 
     val response1 = aResponse().withStatus(200).withBody("Success")
     val response2 = aResponse().withStatus(200).withBody("[\"blue\", \"red\"]")
@@ -79,7 +81,7 @@ class ExampleVerification extends FunSpec with Matchers with BeforeAndAfterAll {
       verifyPact
         .withPactSource(pactAsJsonString(samplePact))
         .noSetupRequired
-        .runVerificationAgainst(1234, 5.seconds)
+        .runVerificationAgainst(port(), 5.seconds)
 
     }
 
@@ -88,7 +90,7 @@ class ExampleVerification extends FunSpec with Matchers with BeforeAndAfterAll {
       verifyPact
         .withPactSource(pactAsJsonString(samplePact))
         .noSetupRequired
-        .runVerificationAgainst(1234)
+        .runVerificationAgainst(port())
 
     }
 
@@ -98,7 +100,7 @@ class ExampleVerification extends FunSpec with Matchers with BeforeAndAfterAll {
         verifyPact
           .withPactSource(pactAsJsonString(samplePact))
           .noSetupRequired
-          .runStrictVerificationAgainst(1234)
+          .runStrictVerificationAgainst(port())
       }
 
     }
