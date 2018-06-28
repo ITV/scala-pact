@@ -82,6 +82,9 @@ lazy val commonSettings = Seq(
     Wart.Var
   ),
   parallelExecution in Test := false,
+//  javaOptions in Test ++= Seq(
+//    "-XX:+UnlockCommercialFeatures", "-XX:+FlightRecorder"
+//  ),
   test in assembly := {}
 )
 
