@@ -61,7 +61,7 @@ addCommandAlias(
 )
 
 lazy val commonSettings = Seq(
-  version := "2.3.0-SNAPSHOT",
+  version := "2.3.0",
   organization := "com.itv",
   scalaVersion := scala212,
   libraryDependencies ++= Seq(
@@ -186,9 +186,9 @@ lazy val http4s018 =
     .settings(
       name := "scalapact-http4s-0-18",
       libraryDependencies ++= Seq(
-        "org.http4s"             %% "http4s-blaze-server" % "0.18.9",
-        "org.http4s"             %% "http4s-blaze-client" % "0.18.9",
-        "org.http4s"             %% "http4s-dsl"          % "0.18.9",
+        "org.http4s"             %% "http4s-blaze-server" % "0.18.13",
+        "org.http4s"             %% "http4s-blaze-client" % "0.18.13",
+        "org.http4s"             %% "http4s-dsl"          % "0.18.13",
         "com.github.tomakehurst" % "wiremock"             % "1.56" % "test"
       )
     )
