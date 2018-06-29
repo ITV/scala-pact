@@ -5,6 +5,7 @@ import com.itv.scalapact.shared.SslContextMap
 import scala.language.implicitConversions
 import scala.util.Properties
 import com.itv.scalapact.shared.Maps._
+import com.itv.scalapact.shared.PactFormat
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter, IScalaPactHttpClient}
 
 object ScalaPactForger {
@@ -26,19 +27,43 @@ object ScalaPactForger {
     protected val strict: Boolean = true
   }
 
+
+  case class PartialScalaPactMessage(description: String,
+                                    providerState: Option[String],
+                                    meta: Map[String, String]) {
+
+    def withProviderState(state: String): PartialScalaPactMessage =
+      copy(providerState = Some(state))
+
+    def withMeta(meta: Map[String, String]): PartialScalaPactMessage =
+      copy(meta = meta)
+
+    def withContent[T](value: T)(implicit format: PactFormat[T]): ScalaPactMessage =
+      ScalaPactMessage(description, providerState, format.encode(value), meta + ("contentType" -> format.contentType))
+  }
+
+  case class ScalaPactMessage(description: String,
+                              providerState: Option[String],
+                              content: Option[String],
+                              meta: Map[String, String]) {
+
+    val contentType: Option[String] = meta.get("contentType")
+  }
+
   sealed trait ForgePactElements {
     protected val strict: Boolean
 
     def between(consumer: String): ScalaPartialPact = new ScalaPartialPact(consumer)
 
     class ScalaPartialPact(consumer: String) {
-      def and(provider: String): ScalaPactDescription = new ScalaPactDescription(consumer, provider, None, Nil)
+      def and(provider: String): ScalaPactDescription = new ScalaPactDescription(consumer, provider, None, Nil, Nil)
     }
 
     class ScalaPactDescription(consumer: String,
                                provider: String,
                                sslContextName: Option[String],
-                               interactions: List[ScalaPactInteraction]) {
+                               interactions: List[ScalaPactInteraction],
+                               messages: List[ScalaPactMessage]) {
 
       /**
         * Adds interactions to the Pact. Interactions should be created using the helper object 'interaction'
@@ -47,10 +72,10 @@ object ScalaPactForger {
         * @return [ScalaPactDescription] to allow the builder to continue
         */
       def addInteraction(interaction: ScalaPactInteraction): ScalaPactDescription =
-        new ScalaPactDescription(consumer, provider, sslContextName, interactions ++ List(interaction))
+        new ScalaPactDescription(consumer, provider, sslContextName, interactions ++ List(interaction), messages)
 
       def addSslContextForServer(name: String): ScalaPactDescription =
-        new ScalaPactDescription(consumer, provider, Some(name), interactions)
+        new ScalaPactDescription(consumer, provider, Some(name), interactions, messages)
 
       def runConsumerTest[F[_], A](test: ScalaPactMockConfig => A)(implicit options: ScalaPactOptions,
                                                                    sslContextMap: SslContextMap,
@@ -70,6 +95,10 @@ object ScalaPactForger {
 
     }
 
+  }
+  object message {
+    def description(desc: String): ScalaPactMessage =
+      ScalaPactMessage(desc, None, None, Map.empty)
   }
 
   object interaction {

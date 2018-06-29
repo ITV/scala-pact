@@ -1,5 +1,13 @@
 package com.itv.scalapact.shared
 
+trait FormatError
+
+trait PactFormat[T] {
+  def contentType: String
+  def encode(t: T): String
+  def decode(s: String): Either[FormatError, T]
+}
+
 case class Pact(provider: PactActor, consumer: PactActor, interactions: List[Interaction]) {
   def withoutSslHeader: Pact = copy(interactions = interactions.map(_.withoutSslHeader))
 
