@@ -1,6 +1,6 @@
 package com.itv.scalapact.circe09
 
-import com.itv.scalapact.shared.Pact
+import com.itv.scalapact.shared.{JsonRepresentation, MessageContentType, Pact}
 import com.itv.scalapact.shared.typeclasses.IPactWriter
 import io.circe._
 import io.circe.parser._
@@ -11,6 +11,23 @@ class PactWriter extends IPactWriter {
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   def pactToJsonString(pact: Pact): String = {
+
+    val messages = pact.messages.toVector.map { m =>
+      val content = m.contentType.jsonRepresentation match {
+        case JsonRepresentation.AsString =>
+          Json.fromString(m.content)
+        case JsonRepresentation.AsObject =>
+          parse(m.content).fold(_ => Json.obj(), identity) //we produce a blank object here if the encoder fails!
+      }
+
+      Json.obj(
+        "description" -> Json.fromString(m.description),
+        "providerState" -> m.providerState.asJson,
+        "contents" -> content,
+        "metaData" -> m.meta.asJson
+      )
+    }
+
 
     val interactions: Vector[Json] =
       pact.interactions.toVector
@@ -57,14 +74,20 @@ class PactWriter extends IPactWriter {
         }
         .collect { case Some(s) => s }
 
-    val json: Option[Json] =
+    val json: Option[Json] = {
+      implicit val messageContentTypeEnc: Encoder[MessageContentType] =
+        implicitly[Encoder[String]].contramap(_.renderString)
+
       pact
-        .copy(interactions = Nil)
+        .copy(interactions = Nil, messages = Nil)
         .asJson
         .hcursor
+        .downField("messages")
+        .withFocus(_.withArray(_ => messages.asJson))
         .downField("interactions")
         .withFocus(_.withArray(_ => interactions.asJson))
         .top
+    }
 
     // I don't believe you can ever see this exception.
     json

@@ -31,6 +31,7 @@ class PactReader extends IPactReader {
       Pact(
         provider = bp._1,
         consumer = bp._2,
+        messages = Nil, //TODO: implement this
         interactions = interactions
           .map(i => i.copy(providerState = i.providerState.orElse(i.provider_state)))
           .map(i => i.copy(provider_state = None))

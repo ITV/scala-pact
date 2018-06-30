@@ -58,6 +58,7 @@ object PactFileExamples {
   val verySimple = Pact(
     consumer = PactActor("consumer"),
     provider = PactActor("provider"),
+    messages = Nil, //TODO: add this field
     interactions = List(
       Interaction(
         provider_state = None,
@@ -107,6 +108,7 @@ object PactFileExamples {
   val simple = Pact(
     consumer = PactActor("consumer"),
     provider = PactActor("provider"),
+    messages = Nil, //TODO: add this field
     interactions = List(
       Interaction(
         provider_state = None,

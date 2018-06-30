@@ -69,7 +69,8 @@ object ScalaPactContractWriter {
       Pact(
         provider = PactActor(pactDescription.provider),
         consumer = PactActor(pactDescription.consumer),
-        interactions = pactDescription.interactions.map { convertInteractionsFinalToInteractions }
+        messages = pactDescription.messages,
+        interactions = pactDescription.interactions.map(convertInteractionsFinalToInteractions)
     )
 
   lazy val convertInteractionsFinalToInteractions: ScalaPactInteractionFinal => Interaction = i => {
@@ -122,6 +123,6 @@ object ScalaPactContractWriter {
   implicit private val mapToBoolean: Map[String, String] => Boolean = v => v.nonEmpty
 
   implicit private def valueToOptional[A](value: A)(implicit p: A => Boolean): Option[A] =
-    if (p(value)) Option(value) else None
+    Option(value).filter(p)
 
 }

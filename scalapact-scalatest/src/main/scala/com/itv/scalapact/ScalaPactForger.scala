@@ -1,12 +1,11 @@
 package com.itv.scalapact
 
-import com.itv.scalapact.shared.SslContextMap
+import com.itv.scalapact.shared.Maps._
+import com.itv.scalapact.shared.typeclasses._
+import com.itv.scalapact.shared.{Message, SslContextMap}
 
 import scala.language.implicitConversions
 import scala.util.Properties
-import com.itv.scalapact.shared.Maps._
-import com.itv.scalapact.shared.PactFormat
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter, IScalaPactHttpClient}
 
 object ScalaPactForger {
 
@@ -38,16 +37,8 @@ object ScalaPactForger {
     def withMeta(meta: Map[String, String]): PartialScalaPactMessage =
       copy(meta = meta)
 
-    def withContent[T](value: T)(implicit format: PactFormat[T]): ScalaPactMessage =
-      ScalaPactMessage(description, providerState, format.encode(value), meta + ("contentType" -> format.contentType))
-  }
-
-  case class ScalaPactMessage(description: String,
-                              providerState: Option[String],
-                              content: Option[String],
-                              meta: Map[String, String]) {
-
-    val contentType: Option[String] = meta.get("contentType")
+    def withContent[T](value: T)(implicit format: IMessageFormat[T]): Message =
+      Message(description, format.contentType, providerState, format.encode(value), meta + ("contentType" -> format.contentType.renderString))
   }
 
   sealed trait ForgePactElements {
@@ -63,7 +54,15 @@ object ScalaPactForger {
                                provider: String,
                                sslContextName: Option[String],
                                interactions: List[ScalaPactInteraction],
-                               messages: List[ScalaPactMessage]) {
+                               messages: List[Message]) {
+      /**
+        * Adds a message example to the Pact. Messages should be created using the helper object 'message'
+        *
+        * @param message [ScalaPactMessage] definition
+        * @return [ScalaPactDescription] to allow the builder to continue
+        */
+      def addMessage(message: Message): ScalaPactDescription =
+        new ScalaPactDescription(consumer, provider, sslContextName, interactions, messages :+ message)
 
       /**
         * Adds interactions to the Pact. Interactions should be created using the helper object 'interaction'
@@ -72,7 +71,7 @@ object ScalaPactForger {
         * @return [ScalaPactDescription] to allow the builder to continue
         */
       def addInteraction(interaction: ScalaPactInteraction): ScalaPactDescription =
-        new ScalaPactDescription(consumer, provider, sslContextName, interactions ++ List(interaction), messages)
+        new ScalaPactDescription(consumer, provider, sslContextName, interactions :+ interaction, messages)
 
       def addSslContextForServer(name: String): ScalaPactDescription =
         new ScalaPactDescription(consumer, provider, Some(name), interactions, messages)
@@ -89,6 +88,7 @@ object ScalaPactForger {
             provider,
             sslContextName,
             interactions.map(i => i.finalise),
+            messages,
             options
           )
         )(test)
@@ -97,8 +97,8 @@ object ScalaPactForger {
 
   }
   object message {
-    def description(desc: String): ScalaPactMessage =
-      ScalaPactMessage(desc, None, None, Map.empty)
+    def description(desc: String): PartialScalaPactMessage =
+      PartialScalaPactMessage(desc, None, Map.empty)
   }
 
   object interaction {
@@ -167,6 +167,7 @@ object ScalaPactForger {
                                        provider: String,
                                        serverSslContextName: Option[String],
                                        interactions: List[ScalaPactInteractionFinal],
+                                       messages: List[Message],
                                        options: ScalaPactOptions) {
     def withHeaderForSsl: ScalaPactDescriptionFinal =
       copy(

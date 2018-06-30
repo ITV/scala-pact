@@ -1,14 +1,39 @@
 package com.itv.scalapact.shared
 
-trait FormatError
-
-trait PactFormat[T] {
-  def contentType: String
-  def encode(t: T): String
-  def decode(s: String): Either[FormatError, T]
+sealed trait JsonRepresentation
+object JsonRepresentation {
+  object AsString extends JsonRepresentation
+  object AsObject extends JsonRepresentation
 }
 
-case class Pact(provider: PactActor, consumer: PactActor, interactions: List[Interaction]) {
+
+trait MessageContentType {
+  def renderString: String
+
+  /**
+    * Explicitly states how the message type should be represented in the pact contract
+    *
+    * XML messages are best represented as strings, while JSON are represented as objects
+    *
+    * @return [MessageEncoding]
+    */
+  def jsonRepresentation: JsonRepresentation
+}
+
+object MessageContentType {
+  case object ApplicationJson extends MessageContentType {
+    override val renderString = "application/json"
+    override val jsonRepresentation = JsonRepresentation.AsObject
+  }
+}
+
+case class Message(description: String,
+                   contentType: MessageContentType,
+                   providerState: Option[String],
+                   content: String,
+                   meta: Map[String, String])
+
+case class Pact(provider: PactActor, consumer: PactActor, interactions: List[Interaction], messages: List[Message]) {
   def withoutSslHeader: Pact = copy(interactions = interactions.map(_.withoutSslHeader))
 
   def renderAsString: String =
@@ -22,7 +47,6 @@ case class Pact(provider: PactActor, consumer: PactActor, interactions: List[Int
 }
 
 case class PactActor(name: String) {
-
   def renderAsString: String =
     s"""$name"""
 
