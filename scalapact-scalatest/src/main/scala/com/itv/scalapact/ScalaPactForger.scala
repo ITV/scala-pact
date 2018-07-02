@@ -93,7 +93,14 @@ object ScalaPactForger {
           )
         )(test)
 
+
+      def runMessageTests[A](test: Message => A): A =
+        test(this.messages.head)
     }
+
+
+
+
 
   }
   object message {

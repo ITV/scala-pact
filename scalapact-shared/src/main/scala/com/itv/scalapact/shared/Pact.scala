@@ -25,6 +25,10 @@ object MessageContentType {
     override val renderString = "application/json"
     override val jsonRepresentation = JsonRepresentation.AsObject
   }
+  def apply(mct: String): MessageContentType = mct match {
+    case "application/json" => ApplicationJson
+  }
+  def unnaply(mct: MessageContentType) : String = mct.renderString
 }
 
 case class Message(description: String,
@@ -32,8 +36,8 @@ case class Message(description: String,
                    providerState: Option[String],
                    content: String,
                    meta: Map[String, String])
-
-case class Pact(provider: PactActor, consumer: PactActor, interactions: List[Interaction], messages: List[Message]) {
+//FIXME: Remove default for messages once contract is stable
+case class Pact(provider: PactActor, consumer: PactActor, interactions: List[Interaction], messages: List[Message] = List.empty) {
   def withoutSslHeader: Pact = copy(interactions = interactions.map(_.withoutSslHeader))
 
   def renderAsString: String =

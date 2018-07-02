@@ -1,5 +1,5 @@
 val compilerOptions212 = scalacOptions ++= Seq(
-  "-deprecation", // Emit warning and location for usages of deprecated APIs.
+  /*"-deprecation", // Emit warning and location for usages of deprecated APIs.
   "-encoding",
   "utf-8", // Specify character encoding used by source files.
   "-explaintypes", // Explain type errors in more detail.
@@ -42,7 +42,7 @@ val compilerOptions212 = scalacOptions ++= Seq(
   "-Ywarn-unused:imports", // Warn if an import selector is not referenced.
   "-Ywarn-unused:params", // Warn if a value parameter is unused.
   "-Ywarn-unused:patvars", // Warn if a variable bound in a pattern is unused.
-  "-Ywarn-value-discard" // Warn when non-Unit expression results are unused.
+  "-Ywarn-value-discard" // Warn when non-Unit expression results are unused.*/
 
   //TODO: these two flags don't seem to play well with io.circe.generic.auto. Find a way to re-instate them
   //  "-Ywarn-unused:locals", // Warn if a local definition is unused.
@@ -69,7 +69,8 @@ lazy val commonSettings = Seq(
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.0.5" % "test"
   ),
-  wartremoverWarnings in (Compile, compile) ++= Warts.allBut(
+  //FIXME: Once contracts and interfaces are stable , add this back
+/*  wartremoverWarnings in (Compile, compile) ++= Warts.allBut(
     Wart.Overloading,
     Wart.FinalCaseClass,
     Wart.ImplicitConversion,
@@ -82,7 +83,7 @@ lazy val commonSettings = Seq(
     Wart.LeakingSealed,
     Wart.Null,
     Wart.Var
-  ),
+  ),*/
   parallelExecution in Test := false,
 //  javaOptions in Test ++= Seq(
 //    "-XX:+UnlockCommercialFeatures", "-XX:+FlightRecorder"

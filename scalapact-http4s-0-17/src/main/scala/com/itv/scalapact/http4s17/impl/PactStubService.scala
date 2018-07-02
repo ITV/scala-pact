@@ -67,7 +67,8 @@ private object PactStubService {
 
           case m if m == "GET" && req.pathInfo.startsWith("/interactions") =>
             val output =
-              pactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions))
+              //FIXME: This was added just so that code compiles
+              pactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, List.empty))
             Ok(output)
 
           case m if m == "POST" || m == "PUT" && req.pathInfo.startsWith("/interactions") =>
@@ -77,8 +78,9 @@ private object PactStubService {
               case Right(r) =>
                 interactionManager.addInteractions(r.interactions)
 
+                //FIXME: This was added just so that code compiles
                 val output =
-                  pactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions))
+                  pactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, List.empty))
                 Ok(output)
 
               case Left(l) =>
@@ -89,7 +91,7 @@ private object PactStubService {
             interactionManager.clearInteractions()
 
             val output =
-              pactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions))
+              pactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, List.empty))
             Ok(output)
         }
 

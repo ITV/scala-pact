@@ -3,16 +3,31 @@ package com.itv.scalapact.argonaut62
 import argonaut.Argonaut._
 import argonaut._
 import com.itv.scalapact.shared._
+import argonaut._, Argonaut._
 
 object PactImplicits {
-  implicit lazy val PactCodecJson: CodecJson[Pact] = casecodec3(Pact.apply, Pact.unapply)(
+  implicit lazy val PactCodecJson: CodecJson[Pact] = casecodec4(Pact.apply, Pact.unapply)(
     "provider",
     "consumer",
-    "interactions"
+    "interactions",
+    "messages"
   )
 
   implicit lazy val PactActorCodecJson: CodecJson[PactActor] = casecodec1(PactActor.apply, PactActor.unapply)(
     "name"
+  )
+
+  implicit lazy val MessageCodecJson: CodecJson[Message] = casecodec5(Message.apply, Message.unapply)(
+    "description",
+    "contentType",
+    "providerState",
+    "content",
+    "meta"
+  )
+
+  implicit lazy val MessageContentTypeCodecJson: CodecJson[MessageContentType] = CodecJson[MessageContentType](x =>
+    EncodeJson.StringEncodeJson(x.renderString),
+    _.as[String].map(MessageContentType.apply)
   )
 
   implicit lazy val InteractionCodecJson: CodecJson[Interaction] = casecodec5(Interaction.apply, Interaction.unapply)(

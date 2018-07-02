@@ -12,11 +12,12 @@ class PactReader extends IPactReader {
     JsonConversionFunctions.fromJSON(jsonString)
 
   def jsonStringToPact(json: String): Either[String, Pact] = {
-    val brokenPact: Option[(PactActor, PactActor, List[(Option[Interaction], Option[String], Option[String])])] = for {
+    val brokenPact: Option[(PactActor, PactActor, List[(Option[Interaction], Option[String], Option[String])], Option[List[Message]])] = for {
       provider     <- JsonBodySpecialCaseHelper.extractPactActor("provider")(json)
       consumer     <- JsonBodySpecialCaseHelper.extractPactActor("consumer")(json)
       interactions <- JsonBodySpecialCaseHelper.extractInteractions(json)
-    } yield (provider, consumer, interactions)
+      messages     <- Some(JsonBodySpecialCaseHelper.extractMessages(json))
+    } yield (provider, consumer, interactions, messages)
 
     brokenPact.map { bp =>
       val interactions = bp._3.collect {
@@ -32,9 +33,9 @@ class PactReader extends IPactReader {
         consumer = bp._2,
         interactions = interactions
           .map(i => i.copy(providerState = i.providerState.orElse(i.provider_state)))
-          .map(i => i.copy(provider_state = None))
+          .map(i => i.copy(provider_state = None)),
+        messages = bp._4.toList.flatten
       )
-
     } match {
       case Some(pact) => Right(pact)
       case None       => Left(s"Could not read pact from json: $json")
@@ -96,5 +97,8 @@ object JsonBodySpecialCaseHelper {
       }
     }
   }
+
+  //FIXME:
+  val extractMessages : String => Option[List[Message]] = _ => None
 
 }

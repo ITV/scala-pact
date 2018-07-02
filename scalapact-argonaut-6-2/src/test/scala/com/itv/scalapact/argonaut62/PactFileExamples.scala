@@ -27,7 +27,9 @@ object PactFileExamples {
           None
         )
       )
-    )
+    ),
+    //FIXME: added just to compile
+    messages = List.empty
   )
 
   val verySimpleAsString: String =
