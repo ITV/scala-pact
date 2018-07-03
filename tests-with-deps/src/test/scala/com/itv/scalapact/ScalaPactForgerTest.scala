@@ -32,9 +32,7 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with TypeCheckedTri
 
   val stringMessageFormat = new IMessageFormat[String] {
     override def contentType: MessageContentType = ApplicationJson
-
     override def encode(t: String): String = contentType.renderString
-
     override def decode(s: String): Either[MessageFormatError, String] = Right(contentType.renderString)
   }
 
@@ -94,7 +92,7 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with TypeCheckedTri
             message
           }
 
-        writer.messages.map(Right(_)) should contain theSameElementsAs (newStub.currentResult)
+        writer.messages.map(Right(_)) should contain theSameElementsAs newStub.currentResult
         newStub
       })(writer)
 

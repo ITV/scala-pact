@@ -58,11 +58,9 @@ object MessageStub {
         messages
           .find(m => m.description == description)
           .fold(fail(s"No $description found"))(m => {
-            if (m.content == test)
-              none
-            else
-              fail(s"Expected different content: ${m.content} /= ${test}")
-
+            Option(m)
+              .filter(_.content == test) //FIXME: This can't really be done here; Matchers are a concept of scala-pact core and core depends on shared, not the other way around
+              .fold(fail(s"Expected different content: ${m.content} /= ${test}"))(_ => none)
           })
       //FIXME it should not use == (do the same as http)
 

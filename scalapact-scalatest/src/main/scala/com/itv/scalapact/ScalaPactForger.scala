@@ -94,8 +94,8 @@ object ScalaPactForger {
         if (y.nonEmpty)
           throw new ScalaPactVerifyFailed
         else x.map(_.right.get)
-
       }
+
 
       private def scalaPactDescriptionFinal(options: ScalaPactOptions): ScalaPactDescriptionFinal =
         ScalaPactDescriptionFinal(
