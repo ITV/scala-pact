@@ -6,7 +6,9 @@ import com.itv.scalapact.shared.typeclasses.{IPactStubber, IScalaPactHttpClient}
 
 package object http4s18 {
 
-  implicit val serverInstance: IPactStubber =
+  // Note that we create a new stubber anytime this implicit is needed (i.e. this is a `def`).
+  // We need this because implementations of `IPactStubber` might want to have their own state about the server running.
+  implicit def serverInstance: IPactStubber =
     new PactServer
 
   implicit val scalaPactHttpClient: IScalaPactHttpClient[IO] =
