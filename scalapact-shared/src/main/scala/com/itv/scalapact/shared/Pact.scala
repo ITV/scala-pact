@@ -6,7 +6,6 @@ object JsonRepresentation {
   object AsObject extends JsonRepresentation
 }
 
-
 trait MessageContentType {
   def renderString: String
 
@@ -22,13 +21,53 @@ trait MessageContentType {
 
 object MessageContentType {
   case object ApplicationJson extends MessageContentType {
-    override val renderString = "application/json"
+    override val renderString       = "application/json"
     override val jsonRepresentation = JsonRepresentation.AsObject
   }
   def apply(mct: String): MessageContentType = mct match {
     case "application/json" => ApplicationJson
   }
-  def unnaply(mct: MessageContentType) : String = mct.renderString
+  def unnaply(mct: MessageContentType): String = mct.renderString
+}
+
+trait MessageStub[A] {
+  def consume(description: String)(test: Message => A): MessageStub[A]
+  def publish(description: String, content: String): MessageStub[A]
+
+  def currentResult: List[Either[String, A]]
+}
+
+object MessageStub {
+  def apply[A](messages: List[Message], results: List[Either[String, A]] = List.empty): MessageStub[A] =
+    new MessageStub[A] {
+
+      private def messageStub(result: Either[String, A]): MessageStub[A] = MessageStub[A](messages, result :: results)
+      private def fail(result: String): MessageStub[A]                   = MessageStub[A](messages, Left(result) :: results)
+      private def success(result: A): MessageStub[A]                     = MessageStub[A](messages, Right(result) :: results)
+      private def none: MessageStub[A]                                   = this
+
+      def consume(description: String)(test: Message => A): MessageStub[A] =
+        messages
+          .find(_.description == description)
+          .map(test)
+          .fold(fail(s"No $description found")) { r =>
+            success(r)
+          }
+
+      def publish(description: String, test: String): MessageStub[A] =
+        messages
+          .find(m => m.description == description)
+          .fold(fail(s"No $description found"))(m => {
+            if (m.content == test)
+              none
+            else
+              fail(s"Expected different content: ${m.content} /= ${test}")
+
+          })
+      //FIXME it should not use == (do the same as http)
+
+      override def currentResult: List[Either[String, A]] = results
+    }
 }
 
 case class Message(description: String,
@@ -37,7 +76,10 @@ case class Message(description: String,
                    content: String,
                    meta: Map[String, String])
 //FIXME: Remove default for messages once contract is stable
-case class Pact(provider: PactActor, consumer: PactActor, interactions: List[Interaction], messages: List[Message] = List.empty) {
+case class Pact(provider: PactActor,
+                consumer: PactActor,
+                interactions: List[Interaction],
+                messages: List[Message] = List.empty) {
   def withoutSslHeader: Pact = copy(interactions = interactions.map(_.withoutSslHeader))
 
   def renderAsString: String =

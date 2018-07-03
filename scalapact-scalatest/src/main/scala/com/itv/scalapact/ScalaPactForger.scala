@@ -1,8 +1,10 @@
 package com.itv.scalapact
 
+import com.itv.scalapact.ScalaPactForger.ScalaPactOptions
+import com.itv.scalapact.ScalaPactVerify.ScalaPactVerifyFailed
 import com.itv.scalapact.shared.Maps._
 import com.itv.scalapact.shared.typeclasses._
-import com.itv.scalapact.shared.{Message, SslContextMap}
+import com.itv.scalapact.shared._
 
 import scala.language.implicitConversions
 import scala.util.Properties
@@ -26,10 +28,7 @@ object ScalaPactForger {
     protected val strict: Boolean = true
   }
 
-
-  case class PartialScalaPactMessage(description: String,
-                                    providerState: Option[String],
-                                    meta: Map[String, String]) {
+  case class PartialScalaPactMessage(description: String, providerState: Option[String], meta: Map[String, String]) {
 
     def withProviderState(state: String): PartialScalaPactMessage =
       copy(providerState = Some(state))
@@ -38,7 +37,7 @@ object ScalaPactForger {
       copy(meta = meta)
 
     def withContent[T](value: T)(implicit format: IMessageFormat[T]): Message =
-      Message(description, format.contentType, providerState, format.encode(value), meta + ("contentType" -> format.contentType.renderString))
+      Message(description, format.contentType, providerState, format.encode(value), meta)
   }
 
   sealed trait ForgePactElements {
@@ -55,6 +54,7 @@ object ScalaPactForger {
                                sslContextName: Option[String],
                                interactions: List[ScalaPactInteraction],
                                messages: List[Message]) {
+
       /**
         * Adds a message example to the Pact. Messages should be created using the helper object 'message'
         *
@@ -83,27 +83,53 @@ object ScalaPactForger {
                                                                    httpClient: IScalaPactHttpClient[F],
                                                                    pactStubber: IPactStubber): A =
         ScalaPactMock.runConsumerIntegrationTest(strict)(
-          ScalaPactDescriptionFinal(
-            consumer,
-            provider,
-            sslContextName,
-            interactions.map(i => i.finalise),
-            messages,
-            options
-          )
+          scalaPactDescriptionFinal(options)
         )(test)
 
+      def runMessageTests[A](
+          test: MessageStub[A] => MessageStub[A]
+      )(implicit contractWriter: IContractWriter): List[A] = {
+        contractWriter.writeContract(scalaPactDescriptionFinal(options))
+        val (y, x) = test(MessageStub(this.messages)).currentResult.partition(_.isLeft)
+        if (y.nonEmpty)
+          throw new ScalaPactVerifyFailed
+        else x.map(_.right.get)
 
-      def runMessageTests[A](test: Message => A): A =
-        test(this.messages.head)
+      }
+
+      private def scalaPactDescriptionFinal(options: ScalaPactOptions): ScalaPactDescriptionFinal =
+        ScalaPactDescriptionFinal(
+          consumer,
+          provider,
+          sslContextName,
+          interactions.map(i => i.finalise),
+          messages,
+          options
+        )
+
     }
 
-
-
-
-
   }
+
+  trait IContractWriter {
+    def writeContract(scalaPactDescriptionFinal: ScalaPactDescriptionFinal): Unit
+  }
+
+  object IContractWriter {
+
+    def apply()(implicit options: ScalaPactOptions, pactWriter: IPactWriter): IContractWriter = new IContractWriter {
+
+      def writeContract(scalaPactDescriptionFinal: ScalaPactDescriptionFinal) =
+        if (options.writePactFiles) {
+          ScalaPactContractWriter.writePactContracts(options.outputPath)(pactWriter)(
+            scalaPactDescriptionFinal.withHeaderForSsl
+          )
+        }
+    }
+  }
+
   object message {
+
     def description(desc: String): PartialScalaPactMessage =
       PartialScalaPactMessage(desc, None, Map.empty)
   }

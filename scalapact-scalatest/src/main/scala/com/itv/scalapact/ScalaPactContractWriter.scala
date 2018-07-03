@@ -29,7 +29,7 @@ object ScalaPactContractWriter {
       }
 
       val string = simplifyName(
-        pactDescription.consumer + pactDescription.provider + pactDescription.interactions
+        pactDescription.consumer + pactDescription.provider + pactDescription.interactions + pactDescription.messages
           .map(_.description)
           .mkString + System.currentTimeMillis().toString
       )
