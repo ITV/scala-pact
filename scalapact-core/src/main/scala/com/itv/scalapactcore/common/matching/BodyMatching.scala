@@ -5,17 +5,6 @@ import com.itv.scalapact.shared.typeclasses.IPactReader
 
 object BodyMatching {
 
-  def nodeMatchToMatchResult(irNodeEqualityResult: IrNodeEqualityResult,
-                             rules: IrNodeMatchingRules,
-                             isXml: Boolean): MatchOutcome =
-    irNodeEqualityResult match {
-      case IrNodesEqual =>
-        MatchOutcomeSuccess
-
-      case e: IrNodesNotEqual =>
-        MatchOutcomeFailed(e.renderDifferencesListWithRules(rules, isXml), e.differences.length * 1)
-    }
-
   def matchBodies(headers: Option[Map[String, String]], expected: Option[String], received: Option[String])(
       implicit rules: IrNodeMatchingRules,
       pactReader: IPactReader

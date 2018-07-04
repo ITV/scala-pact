@@ -39,9 +39,7 @@ object MessageStubber {
           .fold(noDescriptionFound(description))(
             message =>
               OutcomeAndMessage(
-                MessageMatchers.matchSingleMessage(None,
-                                                   Some(message.content),
-                                                   Some(messageFormat.encode(actualMessage))),
+                MessageMatchers.matchSingleMessage(None, message.content, messageFormat.encode(actualMessage)),
                 message
               ) match {
                 case OutcomeAndMessage(MatchOutcomeSuccess, _) => none
