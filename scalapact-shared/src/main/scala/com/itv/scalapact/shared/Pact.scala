@@ -34,7 +34,7 @@ case class Message(description: String,
                    contentType: MessageContentType,
                    providerState: Option[String],
                    content: String,
-                   meta: Map[String, String]) {
+                   meta: Message.Metadata) {
   def renderAsString: String = s"""Message
                                    |  description:   [$description]
                                    |  contentType: [${contentType.renderString}]
@@ -42,6 +42,17 @@ case class Message(description: String,
                                    |  meta: [${meta.mkString(",")}]
                                    |  $content""".stripMargin
 }
+
+object Message {
+  type Metadata = Map[String, String]
+
+  object Metadata {
+    val empty                                 = Metadata()
+    def apply(x: (String, String)*): Metadata = x.toMap
+  }
+
+}
+
 //FIXME: Remove default for messages once contract is stable
 case class Pact(provider: PactActor,
                 consumer: PactActor,

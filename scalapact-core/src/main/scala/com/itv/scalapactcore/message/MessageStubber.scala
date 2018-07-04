@@ -16,10 +16,14 @@ object MessageStubber {
 
       private def messageStub(result: Either[List[String], A]): IMessageStubber[A] =
         MessageStubber.apply(messages, result :: results)
-      private def fail(result: String): IMessageStubber[A]       = fail(List(result))
+
+      private def fail(result: String): IMessageStubber[A] = fail(List(result))
+
       private def fail(result: List[String]): IMessageStubber[A] = messageStub(Left(result))
-      private def success(result: A): IMessageStubber[A]         = messageStub(Right(result))
-      private def none: IMessageStubber[A]                       = this
+
+      private def success(result: A): IMessageStubber[A] = messageStub(Right(result))
+
+      private def none: IMessageStubber[A] = this
 
       private def noDescriptionFound(description: String) =
         fail(s"No `$description` found in:\n [ ${messages.map(_.renderAsString).mkString("\n")} \n ]")
@@ -32,26 +36,31 @@ object MessageStubber {
             success(r)
           }
 
-      def publish[T](description: String,
-                     actualMessage: T)(implicit messageFormat: IMessageFormat[T]): IMessageStubber[A] =
+      def publish[T](description: String, actualMessage: T, metadata: Message.Metadata)(
+          implicit messageFormat: IMessageFormat[T]
+      ): IMessageStubber[A] =
         messages
           .find(m => m.description == description)
-          .fold(noDescriptionFound(description))(
+          .map(
             message =>
               OutcomeAndMessage(
                 MessageMatchers.matchSingleMessage(None, message.content, messageFormat.encode(actualMessage)),
                 message
-              ) match {
-                case OutcomeAndMessage(MatchOutcomeSuccess, _) => none
-                case outcomeAndMessage @ OutcomeAndMessage(MatchOutcomeFailed(_, _), _) =>
-                  fail(
-                    MessageMatchers
-                      .renderOutcome(Some(outcomeAndMessage), messageFormat.encode(actualMessage), description)
-                      .left
-                      .get
-                  )
-            }
+            )
           )
+          .map {
+            case OutcomeAndMessage(x, message) if !message.meta.forall(n => metadata.get(n._1) == Some(n._2)) =>
+              fail(s"Metadata does not match: ${message.meta} /= $metadata")
+            case OutcomeAndMessage(MatchOutcomeSuccess, _) => none
+            case outcomeAndMessage @ OutcomeAndMessage(MatchOutcomeFailed(_, _), _) =>
+              fail(
+                MessageMatchers
+                  .renderOutcome(Some(outcomeAndMessage), messageFormat.encode(actualMessage), description)
+                  .left
+                  .get
+              )
+          }
+          .getOrElse(noDescriptionFound(description))
 
       override def currentResult: List[Either[String, A]] = results.map(_.fold(x => Left(x.mkString("")), Right(_)))
     }

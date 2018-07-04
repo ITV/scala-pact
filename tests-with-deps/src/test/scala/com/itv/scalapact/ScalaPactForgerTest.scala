@@ -147,11 +147,35 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with EitherValues w
     }
   }
 
+  it should "succeed if the published message is in the right format when we send metadata it is not required" in {
+    specWithOneMessage.runMessageTests[Any] {
+      _.publish("description", expectedMessage, Message.Metadata("foo" -> "foo1"))
+    }
+  }
+
   it should "fail if the published message is not in the right shape" in {
     a[ScalaPactVerifyFailed] should be thrownBy {
       specWithOneMessage.runMessageTests[Any] {
         _.publish("description", Json.jNull)
       }
+    }
+  }
+
+  it should "fail if the published message metadata doesn't match the expected metadata" in {
+    val expectedContent = Json.obj("key" -> jString("value"))
+    val m = message
+      .description("a message with the wrong metadata")
+      .withMeta(Message.Metadata("foo" -> "bar"))
+      .withContent(expectedContent)
+
+    a[ScalaPactVerifyFailed] should be thrownBy {
+      forgePact
+        .between("Consumer")
+        .and("Provider")
+        .addMessage(m)
+        .runMessageTests[Any] {
+          _.publish(m.description, expectedContent, Message.Metadata.empty)
+        }
     }
   }
 
