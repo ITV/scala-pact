@@ -5,6 +5,9 @@ import com.itv.scalapact.ScalaPactVerify.ScalaPactVerifyFailed
 import com.itv.scalapact.shared.Maps._
 import com.itv.scalapact.shared.typeclasses._
 import com.itv.scalapact.shared._
+import com.itv.scalapact.shared.matchir.IrNodeMatchingRules
+import com.itv.scalapactcore.message.{IMessageStubber, MessageStubber}
+import com.itv.scalapact.shared.ColourOuput._
 
 import scala.language.implicitConversions
 import scala.util.Properties
@@ -86,16 +89,19 @@ object ScalaPactForger {
           scalaPactDescriptionFinal(options)
         )(test)
 
-      def runMessageTests[A](
-          test: MessageStub[A] => MessageStub[A]
-      )(implicit contractWriter: IContractWriter): List[A] = {
+      def runMessageTests[A](test: IMessageStubber[A] => IMessageStubber[A])(
+          implicit contractWriter: messageSpec.IContractWriter,
+          matchingRules: IrNodeMatchingRules,
+          pactReader: IPactReader
+      ): List[A] = {
         contractWriter.writeContract(scalaPactDescriptionFinal(options))
-        val (y, x) = test(MessageStub(this.messages)).currentResult.partition(_.isLeft)
-        if (y.nonEmpty)
-          throw new ScalaPactVerifyFailed
-        else x.map(_.right.get)
-      }
+        val (y, x) = test(MessageStubber(this.messages)).currentResult.partition(_.isLeft)
 
+        if (y.nonEmpty) {
+          PactLogger.error(y.map(_.left.get).mkString("\n").red)
+          throw new ScalaPactVerifyFailed
+        } else x.map(_.right.get)
+      }
 
       private def scalaPactDescriptionFinal(options: ScalaPactOptions): ScalaPactDescriptionFinal =
         ScalaPactDescriptionFinal(
@@ -111,20 +117,23 @@ object ScalaPactForger {
 
   }
 
-  trait IContractWriter {
-    def writeContract(scalaPactDescriptionFinal: ScalaPactDescriptionFinal): Unit
-  }
+  object messageSpec {
+    implicit def default(implicit options: ScalaPactOptions, pactWriter: IPactWriter) = IContractWriter()
 
-  object IContractWriter {
+    trait IContractWriter {
+      def writeContract(scalaPactDescriptionFinal: ScalaPactDescriptionFinal): Unit
+    }
 
-    def apply()(implicit options: ScalaPactOptions, pactWriter: IPactWriter): IContractWriter = new IContractWriter {
+    private object IContractWriter {
+      def apply()(implicit options: ScalaPactOptions, pactWriter: IPactWriter): IContractWriter = new IContractWriter {
 
-      def writeContract(scalaPactDescriptionFinal: ScalaPactDescriptionFinal) =
-        if (options.writePactFiles) {
-          ScalaPactContractWriter.writePactContracts(options.outputPath)(pactWriter)(
-            scalaPactDescriptionFinal.withHeaderForSsl
-          )
-        }
+        def writeContract(scalaPactDescriptionFinal: ScalaPactDescriptionFinal) =
+          if (options.writePactFiles) {
+            ScalaPactContractWriter.writePactContracts(options.outputPath)(pactWriter)(
+              scalaPactDescriptionFinal.withHeaderForSsl
+            )
+          }
+      }
     }
   }
 

@@ -30,49 +30,18 @@ object MessageContentType {
   def unnaply(mct: MessageContentType): String = mct.renderString
 }
 
-trait MessageStub[A] {
-  def consume(description: String)(test: Message => A): MessageStub[A]
-  def publish(description: String, content: String): MessageStub[A]
-
-  def currentResult: List[Either[String, A]]
-}
-
-object MessageStub {
-  def apply[A](messages: List[Message], results: List[Either[String, A]] = List.empty): MessageStub[A] =
-    new MessageStub[A] {
-
-      private def messageStub(result: Either[String, A]): MessageStub[A] = MessageStub[A](messages, result :: results)
-      private def fail(result: String): MessageStub[A]                   = MessageStub[A](messages, Left(result) :: results)
-      private def success(result: A): MessageStub[A]                     = MessageStub[A](messages, Right(result) :: results)
-      private def none: MessageStub[A]                                   = this
-
-      def consume(description: String)(test: Message => A): MessageStub[A] =
-        messages
-          .find(_.description == description)
-          .map(test)
-          .fold(fail(s"No $description found")) { r =>
-            success(r)
-          }
-
-      def publish(description: String, test: String): MessageStub[A] =
-        messages
-          .find(m => m.description == description)
-          .fold(fail(s"No $description found"))(m => {
-            Option(m)
-              .filter(_.content == test) //FIXME: This can't really be done here; Matchers are a concept of scala-pact core and core depends on shared, not the other way around
-              .fold(fail(s"Expected different content: ${m.content} /= ${test}"))(_ => none)
-          })
-      //FIXME it should not use == (do the same as http)
-
-      override def currentResult: List[Either[String, A]] = results
-    }
-}
-
 case class Message(description: String,
                    contentType: MessageContentType,
                    providerState: Option[String],
                    content: String,
-                   meta: Map[String, String])
+                   meta: Map[String, String]) {
+  def renderAsString: String = s"""Message
+                                   |  description:   [$description]
+                                   |  contentType: [${contentType.renderString}]
+                                   |  providerState: [${providerState.getOrElse("<none>")}]
+                                   |  meta: [${meta.mkString(",")}]
+                                   |  $content""".stripMargin
+}
 //FIXME: Remove default for messages once contract is stable
 case class Pact(provider: PactActor,
                 consumer: PactActor,
@@ -86,6 +55,7 @@ case class Pact(provider: PactActor,
        |  provider: [${provider.renderAsString}]
        |  interactions:
        |${interactions.map(_.renderAsString).mkString("\n")}
+       |${messages.map(_.renderAsString).mkString("\n")}
      """.stripMargin
 
 }

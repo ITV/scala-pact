@@ -2,41 +2,44 @@ package com.itv.scalapact
 
 import java.util.concurrent.atomic.AtomicReference
 
+import argonaut.Json
+import argonaut._
+import Argonaut._
 import com.itv.scalapact.ScalaPactForger.{
-  IContractWriter,
   ScalaPactInteractionFinal,
   ScalaPactOptions,
   forgePact,
   interaction,
-  message
+  message,
+  messageSpec
 }
 import com.itv.scalapact.ScalaPactVerify.ScalaPactVerifyFailed
-import com.itv.scalapact.argonaut62.PactWriter
 import com.itv.scalapact.shared.MessageContentType.ApplicationJson
 import com.itv.scalapact.shared.typeclasses.{IMessageFormat, MessageFormatError}
 import com.itv.scalapact.shared.{Message, MessageContentType}
 import org.scalactic.TypeCheckedTripleEquals
-import org.scalatest.{FlatSpec, OptionValues}
+import org.scalatest.{EitherValues, FlatSpec, OptionValues}
 import org.scalatest.Matchers._
 
-class ScalaPactForgerTest extends FlatSpec with OptionValues with TypeCheckedTripleEquals {
+class ScalaPactForgerTest extends FlatSpec with OptionValues with EitherValues with TypeCheckedTripleEquals {
 
-  implicit val defaultWriter = new PactWriter
+  import com.itv.scalapact.json._
+  implicit val defaultOptions = ScalaPactOptions(writePactFiles = true, outputPath = "/tmp")
+  import messageSpec._
 
   val noMetadata = Map.empty[String, String]
 
-  implicit val defaultOptions =
-    ScalaPactOptions(writePactFiles = true, outputPath = "/tmp")
-
-  implicit val defaultWriterContract = IContractWriter()
-
-  val stringMessageFormat = new IMessageFormat[String] {
+  //TODO Add default one in each json module
+  implicit val jsonMessageFormat = new IMessageFormat[Json] {
     override def contentType: MessageContentType = ApplicationJson
-    override def encode(t: String): String = contentType.renderString
-    override def decode(s: String): Either[MessageFormatError, String] = Right(contentType.renderString)
+
+    override def encode(t: Json): String = t.nospaces
+
+    override def decode(s: String): Either[MessageFormatError, Json] =
+      Parse.parse(s).fold(m => Left(MessageFormatError(m)), Right(_))
   }
 
-  val expectedMessage = ApplicationJson.renderString
+  val expectedMessage = Json.obj("key1" -> jNumber(1), "key2" -> jString("foo"))
 
   val specWithOneMessage = forgePact
     .between("Consumer")
@@ -46,7 +49,7 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with TypeCheckedTri
         .description("description")
         .withProviderState("whatever")
         .withMeta(noMetadata)
-        .withContent(expectedMessage)(stringMessageFormat)
+        .withContent(expectedMessage)
     )
 
   val specWithMultipleMessages = specWithOneMessage
@@ -55,7 +58,7 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with TypeCheckedTri
         .description("description2")
         .withProviderState("whatever")
         .withMeta(noMetadata)
-        .withContent(expectedMessage)(stringMessageFormat)
+        .withContent(expectedMessage)
     )
 
   it should "create a specification of the message" in {
@@ -66,10 +69,10 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with TypeCheckedTri
         message.contentType should ===(ApplicationJson)
 
         message.meta should ===(noMetadata)
-        message.content should ===(expectedMessage)
+        message.content should ===(expectedMessage.nospaces)
         message
       }
-    }(writer)
+    }(writer, implicitly, implicitly)
     writer.messages should ===(actualMessage)
   }
 
@@ -82,19 +85,19 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with TypeCheckedTri
           .consume("description") { message =>
             message.contentType should ===(ApplicationJson)
             message.meta should ===(noMetadata)
-            message.content should ===(expectedMessage)
+            message.content should ===(expectedMessage.nospaces)
             message
           }
           .consume("description2") { message =>
             message.contentType should ===(ApplicationJson)
             message.meta should ===(noMetadata)
-            message.content should ===(expectedMessage)
+            message.content should ===(expectedMessage.nospaces)
             message
           }
 
         writer.messages.map(Right(_)) should contain theSameElementsAs newStub.currentResult
         newStub
-      })(writer)
+      })(writer, implicitly, implicitly)
 
   }
 
@@ -110,7 +113,7 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with TypeCheckedTri
       )
       .runMessageTests[Unit](_.consume("description") { _ =>
         ()
-      })(writer)
+      })(writer, implicitly, implicitly)
     writer.interactions should have size 1
     writer.messages should have size 2
   }
@@ -144,10 +147,18 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with TypeCheckedTri
     }
   }
 
-  it should "fail if the published message is not in the right format" in {
+  it should "fail if the published message is not in the right shape" in {
     a[ScalaPactVerifyFailed] should be thrownBy {
       specWithOneMessage.runMessageTests[Any] {
-        _.publish("description", "")
+        _.publish("description", Json.jNull)
+      }
+    }
+  }
+
+  it should "fail if the published message when the fields are the same but not the same type" in {
+    a[ScalaPactVerifyFailed] should be thrownBy {
+      specWithOneMessage.runMessageTests[Any] {
+        _.publish("description", Json.obj("key1" -> jString("1"), "key2" -> jString("foo3")))
       }
     }
   }
