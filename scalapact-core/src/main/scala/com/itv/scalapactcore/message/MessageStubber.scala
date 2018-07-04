@@ -4,26 +4,28 @@ import com.itv.scalapact.shared.matchir.IrNodeMatchingRules
 import com.itv.scalapact.shared.typeclasses.{IMessageFormat, IPactReader}
 import com.itv.scalapact.shared.Message
 import com.itv.scalapactcore.common.matching.MessageMatchers.OutcomeAndMessage
-import com.itv.scalapactcore.common.matching.{MatchOutcomeFailed, MatchOutcomeSuccess, MessageMatchers}
+import com.itv.scalapactcore.common.matching.{MatchOutcome, MatchOutcomeFailed, MatchOutcomeSuccess, MessageMatchers}
 
 object MessageStubber {
 
   def apply[A](
       messages: List[Message],
-      results: List[Either[List[String], A]] = List.empty
+      outcomes: MatchOutcome = MatchOutcomeSuccess,
+      currentResults: List[A] = List.empty
   )(implicit matchingRules: IrNodeMatchingRules, pactReader: IPactReader): IMessageStubber[A] =
     new IMessageStubber[A] {
 
-      private def messageStub(result: Either[List[String], A]): IMessageStubber[A] =
-        MessageStubber.apply(messages, result :: results)
+      private def messageStub(outcome: MatchOutcome, result: Option[A]): IMessageStubber[A] = MessageStubber.apply(
+        messages,
+        outcomes + outcome,
+        result.toList ++ results
+      )
 
-      private def fail(result: String): IMessageStubber[A] = fail(List(result))
-
-      private def fail(result: List[String]): IMessageStubber[A] = messageStub(Left(result))
-
-      private def success(result: A): IMessageStubber[A] = messageStub(Right(result))
-
+      private def success(result: A): IMessageStubber[A] = messageStub(MatchOutcomeSuccess, Some(result))
+      private def fail(outcome: MatchOutcome): IMessageStubber[A] = messageStub(outcomes + outcome, None)
+      private def fail(outcome: String): IMessageStubber[A] = messageStub(outcomes + MatchOutcomeFailed(outcome), None)
       private def none: IMessageStubber[A] = this
+
 
       private def noDescriptionFound(description: String) =
         fail(s"No `$description` found in:\n [ ${messages.map(_.renderAsString).mkString("\n")} \n ]")
@@ -41,16 +43,15 @@ object MessageStubber {
       ): IMessageStubber[A] =
         messages
           .find(m => m.description == description)
-          .map(
-            message =>
+          .map( message =>
               OutcomeAndMessage(
                 MessageMatchers.matchSingleMessage(None, message.content, messageFormat.encode(actualMessage)),
                 message
             )
           )
           .map {
-            case OutcomeAndMessage(x, message) if !message.meta.forall(n => metadata.get(n._1) == Some(n._2)) =>
-              fail(s"Metadata does not match: ${message.meta} /= $metadata")
+            case OutcomeAndMessage(oc, message) if !message.meta.forall(n => metadata.get(n._1).contains(n._2)) =>
+              fail(oc + MatchOutcomeFailed(s"Metadata does not match: ${message.meta} /= $metadata"))
             case OutcomeAndMessage(MatchOutcomeSuccess, _) => none
             case outcomeAndMessage @ OutcomeAndMessage(MatchOutcomeFailed(_, _), _) =>
               fail(
@@ -62,6 +63,7 @@ object MessageStubber {
           }
           .getOrElse(noDescriptionFound(description))
 
-      override def currentResult: List[Either[String, A]] = results.map(_.fold(x => Left(x.mkString("")), Right(_)))
+      override def results: List[A] = currentResults
+      override def outcome: MatchOutcome = outcomes
     }
 }

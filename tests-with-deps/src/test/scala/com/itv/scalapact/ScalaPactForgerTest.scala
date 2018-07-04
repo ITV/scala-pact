@@ -95,7 +95,7 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with EitherValues w
             message
           }
 
-        writer.messages.map(Right(_)) should contain theSameElementsAs newStub.currentResult
+        writer.messages should contain theSameElementsAs newStub.results
         newStub
       })(writer, implicitly, implicitly)
 

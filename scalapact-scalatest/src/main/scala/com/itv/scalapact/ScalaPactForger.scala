@@ -95,12 +95,13 @@ object ScalaPactForger {
           pactReader: IPactReader
       ): List[A] = {
         contractWriter.writeContract(scalaPactDescriptionFinal(options))
-        val (y, x) = test(MessageStubber(this.messages)).currentResult.partition(_.isLeft)
-
-        if (y.nonEmpty) {
-          PactLogger.error(y.map(_.left.get).mkString("\n").red)
+        val ms = test(MessageStubber(this.messages))
+        if (ms.outcome.isSuccess){
+          ms.results
+        } else {
+          PactLogger.error(ms.outcome.renderAsString.red)
           throw new ScalaPactVerifyFailed
-        } else x.map(_.right.get)
+        }
       }
 
       private def scalaPactDescriptionFinal(options: ScalaPactOptions): ScalaPactDescriptionFinal =
