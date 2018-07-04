@@ -25,7 +25,6 @@ object MessageMatchers {
              | ...Differences
              |${f.renderDifferences}
              """.stripMargin
-          //TODO Match on headers
         )
 
       case Some(OutcomeAndMessage(MatchOutcomeSuccess, message)) =>
