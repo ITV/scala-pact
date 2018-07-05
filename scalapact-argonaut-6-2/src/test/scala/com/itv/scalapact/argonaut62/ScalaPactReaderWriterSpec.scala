@@ -28,7 +28,7 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
 
       val expected = PactFileExamples.simpleAsString
 
-      parse(written).toOption.get shouldEqual parse(expected).toOption.get
+      parse(written) shouldEqual parse(expected)
     }
 
     it("should be able to eat it's own dog food") {

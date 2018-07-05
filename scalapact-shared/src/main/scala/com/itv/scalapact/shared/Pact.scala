@@ -1,5 +1,7 @@
 package com.itv.scalapact.shared
 
+import com.itv.scalapact.shared.MessageContentType.ApplicationJson
+
 sealed trait JsonRepresentation
 object JsonRepresentation {
   object AsString extends JsonRepresentation
@@ -30,17 +32,16 @@ object MessageContentType {
   def unnaply(mct: MessageContentType): String = mct.renderString
 }
 
-case class Message(description: String,
-                   contentType: MessageContentType,
-                   providerState: Option[String],
-                   content: String,
-                   meta: Message.Metadata) {
+case class Message(description: String, providerState: Option[String], contents: String, metaData: Message.Metadata) {
+  def contentType: MessageContentType =
+    metaData.get("Content-Type").map(MessageContentType.apply).getOrElse(ApplicationJson)
+
   def renderAsString: String = s"""Message
                                    |  description:   [$description]
                                    |  contentType: [${contentType.renderString}]
                                    |  providerState: [${providerState.getOrElse("<none>")}]
-                                   |  meta: [${meta.mkString(",")}]
-                                   |  $content""".stripMargin
+                                   |  meta: [${metaData.mkString(",")}]
+                                   |  $contents""".stripMargin
 }
 
 object Message {

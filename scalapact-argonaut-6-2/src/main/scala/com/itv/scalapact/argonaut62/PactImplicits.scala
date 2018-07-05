@@ -17,16 +17,18 @@ object PactImplicits {
     "name"
   )
 
-  implicit lazy val MessageCodecJson: CodecJson[Message] = casecodec5(Message.apply, Message.unapply)(
-    "description",
-    "contentType",
-    "providerState",
-    "content",
-    "meta"
+  implicit lazy val MessageCodecJson: CodecJson[Message] = CodecJson(
+    message => ???, //FIXME Implement it
+    c =>
+      for {
+        description   <- (c --\ "description").as[String]
+        providerState <- (c --\ "providerState").as[Option[String]]
+        contents      <- (c --\ "contents").as[Json].map(_.nospaces)
+        metadata      <- (c --\ "metaData").as[Map[String, String]]
+      } yield Message(description, providerState, contents, metadata)
   )
-
-  implicit lazy val MessageContentTypeCodecJson: CodecJson[MessageContentType] = CodecJson[MessageContentType](x =>
-    EncodeJson.StringEncodeJson(x.renderString),
+  implicit lazy val MessageContentTypeCodecJson: CodecJson[MessageContentType] = CodecJson[MessageContentType](
+    x => EncodeJson.StringEncodeJson(x.renderString),
     _.as[String].map(MessageContentType.apply)
   )
 

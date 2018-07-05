@@ -15,19 +15,18 @@ class PactWriter extends IPactWriter {
     val messages = pact.messages.toVector.map { m =>
       val content = m.contentType.jsonRepresentation match {
         case JsonRepresentation.AsString =>
-          Json.fromString(m.content)
+          Json.fromString(m.contents)
         case JsonRepresentation.AsObject =>
-          parse(m.content).fold(_ => Json.obj(), identity) //we produce a blank object here if the encoder fails!
+          parse(m.contents).fold(_ => Json.obj(), identity) //we produce a blank object here if the encoder fails!
       }
 
       Json.obj(
-        "description" -> Json.fromString(m.description),
+        "description"   -> Json.fromString(m.description),
         "providerState" -> m.providerState.asJson,
-        "contents" -> content,
-        "metaData" -> m.meta.asJson
+        "contents"      -> content,
+        "metaData"      -> m.metaData.asJson
       )
     }
-
 
     val interactions: Vector[Json] =
       pact.interactions.toVector

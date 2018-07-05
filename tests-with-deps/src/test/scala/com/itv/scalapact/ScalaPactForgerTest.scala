@@ -52,8 +52,8 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with EitherValues w
       _.consume("description") { message =>
         message.contentType should ===(ApplicationJson)
 
-        message.meta should ===(Message.Metadata.empty)
-        toJson(message.content) should ===(firstExpectedMessage)
+        message.metaData should ===(Message.Metadata.empty)
+        toJson(message.contents) should ===(firstExpectedMessage)
         message
       }
     }(writer, implicitly, implicitly)
@@ -68,14 +68,14 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with EitherValues w
         val newStub = stub
           .consume("description") { message =>
             message.contentType should ===(ApplicationJson)
-            message.meta should ===(Message.Metadata.empty)
-            toJson(message.content) should ===(firstExpectedMessage)
+            message.metaData should ===(Message.Metadata.empty)
+            toJson(message.contents) should ===(firstExpectedMessage)
             message
           }
           .consume("description2") { message =>
             message.contentType should ===(ApplicationJson)
-            message.meta should ===(secondExpectedMetadata)
-            toJson(message.content) should ===(secondExpectedMessage)
+            message.metaData should ===(secondExpectedMetadata)
+            toJson(message.contents) should ===(secondExpectedMessage)
             message
           }
 

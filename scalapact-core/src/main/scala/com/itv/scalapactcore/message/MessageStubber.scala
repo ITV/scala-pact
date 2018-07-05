@@ -45,13 +45,13 @@ object MessageStubber {
           .map(
             message =>
               OutcomeAndMessage(
-                MessageMatchers.matchSingleMessage(None, message.content, messageFormat.encode(actualMessage)),
+                MessageMatchers.matchSingleMessage(None, message.contents, messageFormat.encode(actualMessage)),
                 message
             )
           )
           .map {
-            case OutcomeAndMessage(oc, message) if !message.meta.forall(n => metadata.get(n._1).contains(n._2)) =>
-              fail(oc + MatchOutcomeFailed(s"Metadata does not match: ${message.meta} /= $metadata"))
+            case OutcomeAndMessage(oc, message) if !message.metaData.forall(n => metadata.get(n._1).contains(n._2)) =>
+              fail(oc + MatchOutcomeFailed(s"Metadata does not match: ${message.metaData} /= $metadata"))
             case OutcomeAndMessage(MatchOutcomeSuccess, _) => none
             case outcomeAndMessage @ OutcomeAndMessage(MatchOutcomeFailed(_, _), _) =>
               fail(

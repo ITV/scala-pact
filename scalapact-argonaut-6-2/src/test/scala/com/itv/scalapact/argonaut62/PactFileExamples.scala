@@ -270,4 +270,25 @@ object PactFileExamples {
                                  |    }
                                  |  ]
                                  |}""".stripMargin
+
+  val simpleMessageAsString = """{
+                                |    "consumer": {
+                                |        "name": "Consumer"
+                                |    },
+                                |    "provider": {
+                                |        "name": "Provider"
+                                |    },
+                                |    "messages": [
+                                |        {
+                                |            "description": "Published credit data",
+                                |            "providerState": "or maybe 'scenario'? not sure about this",
+                                |            "contents": {
+                                |                "foo": "bar"
+                                |            },
+                                |            "metaData": {
+                                |              "contentType": "application/json"
+                                |            }
+                                |        }
+                                |    ]
+                                |}""".stripMargin
 }

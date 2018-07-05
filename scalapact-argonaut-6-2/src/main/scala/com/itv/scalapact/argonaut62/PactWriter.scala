@@ -1,6 +1,6 @@
 package com.itv.scalapact.argonaut62
 
-import argonaut.Argonaut._
+import argonaut.Argonaut.{JsonArray, _}
 import argonaut._
 import com.itv.scalapact.shared.Pact
 import com.itv.scalapact.shared.typeclasses.IPactWriter
@@ -66,6 +66,9 @@ class PactWriter extends IPactWriter {
 
     // I don't believe you can ever see this exception.
     json
+      .map(obj => {
+        Json(obj.obj.get.-("messages").toMap.toList: _*) //FIXME Need to return messages when it is required
+      })
       .getOrElse(
         throw new Exception(
           "Something went really wrong serialising the following pact into json: " + pact.renderAsString
