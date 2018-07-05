@@ -107,7 +107,8 @@ object PactFileExamples {
           matchingRules = None
         )
       )
-    )
+    ),
+    messages = List.empty
   )
 
   val simpleAsString: String = """{

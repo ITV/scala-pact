@@ -53,11 +53,7 @@ object Message {
 
 }
 
-//FIXME: Remove default for messages once contract is stable
-case class Pact(provider: PactActor,
-                consumer: PactActor,
-                interactions: List[Interaction],
-                messages: List[Message] = List.empty) {
+case class Pact(provider: PactActor, consumer: PactActor, interactions: List[Interaction], messages: List[Message]) {
   def withoutSslHeader: Pact = copy(interactions = interactions.map(_.withoutSslHeader))
 
   def renderAsString: String =
@@ -66,6 +62,7 @@ case class Pact(provider: PactActor,
        |  provider: [${provider.renderAsString}]
        |  interactions:
        |${interactions.map(_.renderAsString).mkString("\n")}
+       |  messages:
        |${messages.map(_.renderAsString).mkString("\n")}
      """.stripMargin
 

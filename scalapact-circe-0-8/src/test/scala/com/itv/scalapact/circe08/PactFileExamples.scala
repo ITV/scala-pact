@@ -27,7 +27,8 @@ object PactFileExamples {
           None
         )
       )
-    )
+    ),
+    messages = List.empty
   )
 
   val verySimpleAsString: String =
@@ -117,9 +118,10 @@ object PactFileExamples {
           matchingRules = None
         )
       )
-    )
+    ),
+    messages = List.empty
   )
-
+  //FIXME: Add messages to string/json pacts
   val simpleAsString: String = """{
                          |  "provider" : {
                          |    "name" : "provider"

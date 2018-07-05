@@ -33,7 +33,8 @@ class PactReader extends IPactReader {
         consumer = bp._2,
         interactions = interactions
           .map(i => i.copy(providerState = i.providerState.orElse(i.provider_state)))
-          .map(i => i.copy(provider_state = None))
+          .map(i => i.copy(provider_state = None)),
+        messages = List.empty //FIXME: Should read the messages from the pact broker
       )
 
     } match {
