@@ -57,24 +57,28 @@ class PactWriter extends IPactWriter {
         }
         .collect { case Some(s) => s }
 
-    val pactNoInteractionsAsJson = pact.copy(interactions = Nil).asJson
+    val pactNoInteractionsAsJson = pact
+      .copy(interactions = Nil)
+      .asJson
 
-    val json: Option[Json] = for {
+    (for {
       interactionsField <- pactNoInteractionsAsJson.cursor.downField("interactions")
-      updated           <- Option(interactionsField.withFocus(_.withArray(_ => interactions)))
-    } yield updated.undo
-
-    // I don't believe you can ever see this exception.
-    json
-      .map(obj => {
-        Json(obj.obj.get.-("messages").toMap.toList: _*) //FIXME Need to return messages when it is required
-      })
+      updatedC          <- Option(interactionsField.withFocus(_.withArray(_ => interactions)))
+    } yield updatedC.undo)
+      .map(removeJsonFieldIf(pact.messages.isEmpty)("messages"))
+      .map(removeJsonFieldIf(pact.interactions.isEmpty)("interactions"))
       .getOrElse(
-        throw new Exception(
+        throw new Exception( // I don't believe you can ever see this exception.
           "Something went really wrong serialising the following pact into json: " + pact.renderAsString
         )
       )
       .pretty(PrettyParams.spaces2.copy(dropNullKeys = true))
   }
 
+  private def removeJsonFieldIf(remove: Boolean)(field: JsonField)(json: Json): Json =
+    Option(json)
+      .filter(_ => remove)
+      .flatMap(_.cursor.downField(field))
+      .flatMap(_.delete)
+      .fold(json)(_.undo)
 }

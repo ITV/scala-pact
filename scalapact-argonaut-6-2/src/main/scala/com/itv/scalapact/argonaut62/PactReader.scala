@@ -54,7 +54,7 @@ object JsonBodySpecialCaseHelper {
 
     })
 
-  protected[this] val extractInteractionsTuple: JsonParser[List[InterationTuple]] = json =>
+  protected[argonaut62] val extractInteractionsTuple: JsonParser[List[InterationTuple]] = json =>
     json
       .field("interactions")
       .fold[DecodeResult[JsonArray]](DecodeResult.ok(List.empty[Json]))(
