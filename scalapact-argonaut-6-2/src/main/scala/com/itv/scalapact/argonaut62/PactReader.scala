@@ -39,7 +39,7 @@ object JsonBodySpecialCaseHelper {
       json
         .field(field)
         .fold[DecodeResult[PactActor]](DecodeResult.fail(s"field `$field` does not exist", CursorHistory.empty))(
-          _.as[PactActor] //.map(PactActor)
+          _.as[PactActor]
     )
 
   val extractInteractions: JsonParser[List[Interaction]] = json =>

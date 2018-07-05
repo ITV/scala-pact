@@ -3,7 +3,9 @@ package com.itv.scalapact.argonaut62
 import argonaut.Argonaut._
 import argonaut._
 import com.itv.scalapact.shared._
-import argonaut._, Argonaut._
+import argonaut._
+import Argonaut._
+import com.itv.scalapact.shared.MessageContentType.ApplicationJson
 
 object PactImplicits {
   implicit lazy val PactCodecJson: CodecJson[Pact] = casecodec4(Pact.apply, Pact.unapply)(
@@ -17,8 +19,19 @@ object PactImplicits {
     "name"
   )
 
+  private def contents(message: Message): Json = message.contentType match {
+    case ApplicationJson => message.contents.parse.right.get
+    case _               => message.contents.asJson
+  }
+
   implicit lazy val MessageCodecJson: CodecJson[Message] = CodecJson(
-    message => ???, //FIXME Implement it
+    message =>
+      Json.obj(
+        "description"   -> message.description.asJson,
+        "providerState" -> message.providerState.asJson,
+        "contents"      -> contents(message),
+        "metaData"      -> message.metaData.asJson
+    ),
     c =>
       for {
         description   <- (c --\ "description").as[String]

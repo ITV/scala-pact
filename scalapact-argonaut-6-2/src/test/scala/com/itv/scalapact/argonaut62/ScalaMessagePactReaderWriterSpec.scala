@@ -12,15 +12,11 @@ class ScalaMessagePactReaderWriterSpec extends FlatSpec with EitherValues with T
 
   it should "parse a simple message" in {
     val source = PactFileExamples.simpleMessageAsString
-    val pact   = pactReader.jsonStringToPact(source)
+    val pact   = pactReader.jsonStringToPact(source).right.value
 
-    pact shouldBe 'right
+    val target = pactWriter.pactToJsonString(pact)
 
-    println(pact.right.value)
-
-//    val target = pactWriter.pactToJsonString(pact)
-//
-//    parse(target) should ===(parse(source))
+    parse(target) should ===(parse(source))
 
   }
 
