@@ -5,18 +5,11 @@ import java.util.concurrent.atomic.AtomicReference
 import argonaut.Json
 import argonaut._
 import Argonaut._
-import com.itv.scalapact.ScalaPactForger.{
-  ScalaPactInteractionFinal,
-  ScalaPactOptions,
-  forgePact,
-  interaction,
-  message,
-  messageSpec
-}
+import com.itv.scalapact.ScalaPactForger.{ScalaPactOptions, forgePact, interaction, message, messageSpec}
 import com.itv.scalapact.ScalaPactVerify.ScalaPactVerifyFailed
 import com.itv.scalapact.shared.MessageContentType.ApplicationJson
-import com.itv.scalapact.shared.typeclasses.{IMessageFormat, MessageFormatError}
-import com.itv.scalapact.shared.{Message, MessageContentType}
+
+import com.itv.scalapact.shared.Message
 import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.{EitherValues, FlatSpec, OptionValues}
 import org.scalatest.Matchers._
@@ -27,19 +20,7 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with EitherValues w
   implicit val defaultOptions = ScalaPactOptions(writePactFiles = true, outputPath = "/tmp")
   import messageSpec._
 
-  val noMetadata = Map.empty[String, String]
-
-  //TODO Add default one in each json module
-  implicit val jsonMessageFormat = new IMessageFormat[Json] {
-    override def contentType: MessageContentType = ApplicationJson
-
-    override def encode(t: Json): String = t.nospaces
-
-    override def decode(s: String): Either[MessageFormatError, Json] =
-      Parse.parse(s).fold(m => Left(MessageFormatError(m)), Right(_))
-  }
-
-  val expectedMessage = Json.obj("key1" -> jNumber(1), "key2" -> jString("foo"))
+  val firstExpectedMessage = Json.obj("key1" -> jNumber(1), "key2" -> jString("foo"))
 
   val specWithOneMessage = forgePact
     .between("Consumer")
@@ -48,17 +29,20 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with EitherValues w
       message
         .description("description")
         .withProviderState("whatever")
-        .withMeta(noMetadata)
-        .withContent(expectedMessage)
+        .withMeta(Message.Metadata.empty)
+        .withContent(firstExpectedMessage)
     )
+
+  val secondExpectedMessage  = Json.obj("key5"       -> jNumber(1), "key6" -> jString("foo"))
+  val secondExpectedMetadata = Message.Metadata("id" -> "333")
 
   val specWithMultipleMessages = specWithOneMessage
     .addMessage(
       message
         .description("description2")
         .withProviderState("whatever")
-        .withMeta(noMetadata)
-        .withContent(expectedMessage)
+        .withMeta(secondExpectedMetadata)
+        .withContent(secondExpectedMessage)
     )
 
   it should "create a specification of the message" in {
@@ -68,8 +52,8 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with EitherValues w
       _.consume("description") { message =>
         message.contentType should ===(ApplicationJson)
 
-        message.meta should ===(noMetadata)
-        message.content should ===(expectedMessage.nospaces)
+        message.meta should ===(Message.Metadata.empty)
+        toJson(message.content) should ===(firstExpectedMessage)
         message
       }
     }(writer, implicitly, implicitly)
@@ -84,14 +68,14 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with EitherValues w
         val newStub = stub
           .consume("description") { message =>
             message.contentType should ===(ApplicationJson)
-            message.meta should ===(noMetadata)
-            message.content should ===(expectedMessage.nospaces)
+            message.meta should ===(Message.Metadata.empty)
+            toJson(message.content) should ===(firstExpectedMessage)
             message
           }
           .consume("description2") { message =>
             message.contentType should ===(ApplicationJson)
-            message.meta should ===(noMetadata)
-            message.content should ===(expectedMessage.nospaces)
+            message.meta should ===(secondExpectedMetadata)
+            toJson(message.content) should ===(secondExpectedMessage)
             message
           }
 
@@ -143,13 +127,13 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with EitherValues w
 
   it should "succeed if the published message is in the right format" in {
     specWithOneMessage.runMessageTests[Any] {
-      _.publish("description", expectedMessage)
+      _.publish("description", firstExpectedMessage)
     }
   }
 
   it should "succeed if the published message is in the right format when we send metadata it is not required" in {
     specWithOneMessage.runMessageTests[Any] {
-      _.publish("description", expectedMessage, Message.Metadata("foo" -> "foo1"))
+      _.publish("description", firstExpectedMessage, Message.Metadata("foo" -> "foo1"))
     }
   }
 
@@ -193,10 +177,12 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with EitherValues w
 
     def messages: List[Message] = actualPact.get().map(_.messages).toList.flatten
 
-    def interactions: List[ScalaPactInteractionFinal] = actualPact.get().map(_.interactions).toList.flatten
+    def interactions = actualPact.get().map(_.interactions).toList.flatten
 
     override def writeContract(scalaPactDescriptionFinal: ScalaPactForger.ScalaPactDescriptionFinal): Unit =
       actualPact.set(Some(scalaPactDescriptionFinal))
   }
+
+  def toJson(value: String) = Parse.parse(value).right.value
 
 }

@@ -1,6 +1,5 @@
 package com.itv.scalapact
 
-import com.itv.scalapact.ScalaPactForger.ScalaPactOptions
 import com.itv.scalapact.ScalaPactVerify.ScalaPactVerifyFailed
 import com.itv.scalapact.shared.Maps._
 import com.itv.scalapact.shared.typeclasses._
@@ -95,11 +94,11 @@ object ScalaPactForger {
           pactReader: IPactReader
       ): List[A] = {
         contractWriter.writeContract(scalaPactDescriptionFinal(options))
-        val ms = test(MessageStubber(this.messages))
-        if (ms.outcome.isSuccess){
-          ms.results
-        } else {
-          PactLogger.error(ms.outcome.renderAsString.red)
+        val result = test(MessageStubber(this.messages))
+        if (result.outcome.isSuccess)
+          result.results
+        else {
+          PactLogger.error(result.outcome.renderAsString.red)
           throw new ScalaPactVerifyFailed
         }
       }

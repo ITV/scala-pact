@@ -21,14 +21,13 @@ object MessageStubber {
         result.toList ++ results
       )
 
-      private def success(result: A): IMessageStubber[A] = messageStub(MatchOutcomeSuccess, Some(result))
+      private def success(result: A): IMessageStubber[A]          = messageStub(MatchOutcomeSuccess, Some(result))
       private def fail(outcome: MatchOutcome): IMessageStubber[A] = messageStub(outcomes + outcome, None)
-      private def fail(outcome: String): IMessageStubber[A] = messageStub(outcomes + MatchOutcomeFailed(outcome), None)
-      private def none: IMessageStubber[A] = this
-
+      private def fail(outcome: String): IMessageStubber[A]       = messageStub(outcomes + MatchOutcomeFailed(outcome), None)
+      private def none: IMessageStubber[A]                        = this
 
       private def noDescriptionFound(description: String) =
-        fail(s"No `$description` found in:\n [ ${messages.map(_.renderAsString).mkString("\n")} \n ]")
+        fail(s"No description `$description` found in:\n [ ${messages.map(_.renderAsString).mkString("\n")} \n ]")
 
       def consume(description: String)(test: Message => A): IMessageStubber[A] =
         messages
@@ -43,7 +42,8 @@ object MessageStubber {
       ): IMessageStubber[A] =
         messages
           .find(m => m.description == description)
-          .map( message =>
+          .map(
+            message =>
               OutcomeAndMessage(
                 MessageMatchers.matchSingleMessage(None, message.content, messageFormat.encode(actualMessage)),
                 message
@@ -63,7 +63,7 @@ object MessageStubber {
           }
           .getOrElse(noDescriptionFound(description))
 
-      override def results: List[A] = currentResults
+      override def results: List[A]      = currentResults
       override def outcome: MatchOutcome = outcomes
     }
 }
