@@ -10,14 +10,38 @@ class ScalaMessagePactReaderWriterSpec extends FlatSpec with EitherValues with T
   val pactReader = new PactReader
   val pactWriter = new PactWriter
 
-  it should "parse a simple message" in {
-    val source = PactFileExamples.simpleMessageAsString
-    val pact   = pactReader.jsonStringToPact(source).right.value
+  List(
+    (PactFileExamples.simpleMessageAsString, PactFileExamples.simpleMessage),
+    (PactFileExamples.multipleMessageAsString, PactFileExamples.multipleMessage),
+    (PactFileExamples.multipleMessagesAndInteractionsAsString, PactFileExamples.multipleMessagesAndInteractions)
+  ).foreach {
+    case (expectedWritten, expectedPact) =>
+      it should s"should be able to read Pact files: [$expectedPact]" in {
 
-    val target = pactWriter.pactToJsonString(pact)
+        val actualPact = pactReader.jsonStringToPact(expectedWritten).right.value
 
-    parse(target) should ===(parse(source))
+        actualPact should ===(expectedPact)
+      }
 
+      it should s"should be able to write Pact files: [$expectedPact]" in {
+
+        val actualWritten = pactWriter.pactToJsonString(expectedPact)
+
+        parse(actualWritten) should ===(parse(expectedWritten))
+
+      }
+
+      it should s"should be able to eat it's own dog food: [$expectedPact]" in {
+        val actualWritten = pactWriter.pactToJsonString(expectedPact)
+
+        val actualPact = pactReader.jsonStringToPact(actualWritten).right.value
+
+        val `reJson'd` = pactWriter.pactToJsonString(actualPact)
+
+        parse(`reJson'd`) should ===(parse(expectedWritten))
+
+        actualPact should ===(expectedPact)
+      }
   }
 
 }
