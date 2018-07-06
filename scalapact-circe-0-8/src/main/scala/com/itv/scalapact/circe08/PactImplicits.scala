@@ -1,0 +1,63 @@
+package com.itv.scalapact.circe08
+
+import com.itv.scalapact.shared.Message.Metadata
+import com.itv.scalapact.shared.MessageContentType.ApplicationJson
+import com.itv.scalapact.shared._
+import io.circe._
+import io.circe.generic.semiauto._
+import io.circe.parser.parse
+import io.circe.syntax._
+
+object PactImplicits {
+  implicit val pactActorEncoder: Encoder[PactActor] = deriveEncoder[PactActor]
+  implicit val pactActorDecoder: Decoder[PactActor] = deriveDecoder[PactActor]
+
+  implicit val matchingRulesEncoder: Encoder[MatchingRule] = deriveEncoder[MatchingRule]
+  implicit val matchingRulesDecoder: Decoder[MatchingRule] = deriveDecoder[MatchingRule]
+
+  implicit val interactionRequestEncoder: Encoder[InteractionRequest] = deriveEncoder[InteractionRequest]
+  implicit val interactionRequestDecoder: Decoder[InteractionRequest] = deriveDecoder[InteractionRequest]
+
+  implicit val InteractionResponseEncoder: Encoder[InteractionResponse] = deriveEncoder[InteractionResponse]
+  implicit val InteractionResponseDecoder: Decoder[InteractionResponse] = deriveDecoder[InteractionResponse]
+
+  implicit val interactionEncoder: Encoder[Interaction] = deriveEncoder[Interaction]
+  implicit val interactionDecoder: Decoder[Interaction] = deriveDecoder[Interaction]
+
+  implicit val messageEncoder: Encoder[Message] = Encoder.instance { m =>
+    Json.obj(
+      "description"   -> m.description.asJson,
+      "providerState" -> m.providerState.asJson,
+      "contents" -> (m.contentType match {
+        case ApplicationJson => parse(m.contents).right.get
+        case _               => Json.fromString(m.contents)
+      }),
+      "metaData" -> m.metaData.asJson
+    )
+  }
+
+  implicit val messageDecoder: Decoder[Message] = Decoder.decodeJson.emap { json =>
+    val cursor = json.hcursor
+    (for {
+      description   <- cursor.downField("description").as[String]
+      providerState <- cursor.downField("providerState").as[Option[String]]
+      contents      <- contents(cursor)
+      metaData      <- cursor.downField("metaData").as[Metadata]
+    } yield Message(description, providerState, contents, metaData))
+      .fold(
+        f => Left(s"There was a failure during decoder because ${f.message}: [$f]"),
+        Right(_)
+      )
+  }
+
+  private def contents(cursor: HCursor): Decoder.Result[String] =
+    cursor
+      .downField("contents")
+      .as[Json]
+      .map(
+        x => x.asString.getOrElse(x.noSpaces)
+      )
+
+  implicit val pactEncoder: Encoder[Pact] = deriveEncoder[Pact]
+  implicit val pactDecoder: Decoder[Pact] = deriveDecoder[Pact]
+}

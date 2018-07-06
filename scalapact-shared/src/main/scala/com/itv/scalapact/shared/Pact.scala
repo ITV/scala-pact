@@ -1,6 +1,6 @@
 package com.itv.scalapact.shared
 
-import com.itv.scalapact.shared.MessageContentType.ApplicationJson
+import com.itv.scalapact.shared.MessageContentType.{ApplicationJson, ApplicationText}
 
 sealed trait JsonRepresentation
 object JsonRepresentation {
@@ -22,6 +22,11 @@ trait MessageContentType {
 }
 
 object MessageContentType {
+  case object ApplicationText extends MessageContentType {
+    override def renderString: String = "application/text"
+
+    override def jsonRepresentation: JsonRepresentation = JsonRepresentation.AsString
+  }
   case object ApplicationJson extends MessageContentType {
     override val renderString       = "application/json"
     override val jsonRepresentation = JsonRepresentation.AsObject
@@ -34,7 +39,11 @@ object MessageContentType {
 
 case class Message(description: String, providerState: Option[String], contents: String, metaData: Message.Metadata) {
   def contentType: MessageContentType =
-    metaData.get("Content-Type").map(MessageContentType.apply).getOrElse(ApplicationJson)
+    metaData
+      .get("Content-Type")
+      .orElse(metaData.get("contentType"))
+      .map(MessageContentType.apply)
+      .getOrElse(ApplicationText)
 
   def renderAsString: String = s"""Message
                                    |  description:   [$description]
@@ -45,6 +54,7 @@ case class Message(description: String, providerState: Option[String], contents:
 }
 
 object Message {
+
   type Metadata = Map[String, String]
 
   object Metadata {

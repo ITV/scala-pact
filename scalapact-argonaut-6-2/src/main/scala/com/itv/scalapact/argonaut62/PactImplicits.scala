@@ -20,7 +20,7 @@ object PactImplicits {
   )
 
   private def contents(message: Message): Json = message.contentType match {
-    case ApplicationJson => message.contents.parse.right.get
+    case ApplicationJson => message.contents.value.parse.right.get
     case _               => message.contents.asJson
   }
 

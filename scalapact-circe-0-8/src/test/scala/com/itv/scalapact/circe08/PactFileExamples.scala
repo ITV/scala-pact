@@ -3,30 +3,30 @@ package com.itv.scalapact.circe08
 import com.itv.scalapact.shared._
 
 object PactFileExamples {
-
+  private val simpleInteraction = Interaction(
+    provider_state = None,
+    providerState = None,
+    description = "a simple request",
+    request = InteractionRequest(
+      method = Option("GET"),
+      path = Option("/"),
+      query = None,
+      headers = None,
+      body = None,
+      matchingRules = None
+    ),
+    response = InteractionResponse(
+      status = Option(200),
+      headers = None,
+      body = Option("""Hello"""),
+      None
+    )
+  )
   val verySimple = Pact(
     consumer = PactActor("consumer"),
     provider = PactActor("provider"),
     interactions = List(
-      Interaction(
-        provider_state = None,
-        providerState = None,
-        description = "a simple request",
-        request = InteractionRequest(
-          method = Option("GET"),
-          path = Option("/"),
-          query = None,
-          headers = None,
-          body = None,
-          matchingRules = None
-        ),
-        response = InteractionResponse(
-          status = Option(200),
-          headers = None,
-          body = Option("""Hello"""),
-          None
-        )
-      )
+      simpleInteraction
     ),
     messages = List.empty
   )
@@ -281,4 +281,151 @@ object PactFileExamples {
                                  |    }
                                  |  ]
                                  |}""".stripMargin
+
+  val stringMessage = Pact(
+    consumer = PactActor("Consumer"),
+    provider = PactActor("Provider"),
+    interactions = List.empty,
+    messages = List(
+      Message(
+        description = "Published credit data",
+        providerState = Some("or maybe 'scenario'? not sure about this"),
+        contents = """Hello world!""",
+        metaData = Message.Metadata()
+      )
+    )
+  )
+
+  val stringMessageAsString = """{
+                              |    "consumer": {
+                              |        "name": "Consumer"
+                              |    },
+                              |    "provider": {
+                              |        "name": "Provider"
+                              |    },
+                              |    "messages": [
+                              |        {
+                              |            "description": "Published credit data",
+                              |            "providerState": "or maybe 'scenario'? not sure about this",
+                              |            "contents": "Hello world!",
+                              |            "metaData": {
+                              |            }
+                              |        }
+                              |    ]
+                              |}""".stripMargin
+
+  val jsonMessage = Pact(
+    consumer = PactActor("Consumer"),
+    provider = PactActor("Provider"),
+    interactions = List.empty,
+    messages = List(
+      Message(
+        description = "Published credit data",
+        providerState = Some("or maybe 'scenario'? not sure about this"),
+        contents = """{"foo":"bar"}""",
+        metaData = Message.Metadata("contentType" -> "application/json")
+      )
+    )
+  )
+
+  val jsonMessageAsString = """{
+                                |    "consumer": {
+                                |        "name": "Consumer"
+                                |    },
+                                |    "provider": {
+                                |        "name": "Provider"
+                                |    },
+                                |    "messages": [
+                                |        {
+                                |            "description": "Published credit data",
+                                |            "providerState": "or maybe 'scenario'? not sure about this",
+                                |            "contents": {"foo":"bar"},
+                                |            "metaData": {
+                                |              "contentType": "application/json"
+                                |            }
+                                |        }
+                                |    ]
+                                |}""".stripMargin
+
+  val multipleMessage = jsonMessage.copy(
+    messages = jsonMessage.messages ++ List(
+      Message(
+        description = "Published another credit data",
+        providerState = Some("or maybe 'scenario'! not sure about this"),
+        contents = """{"boo":"xxx"}""",
+        metaData = Message.Metadata("contentType" -> "application/json")
+      )
+    )
+  )
+  val multipleMessageAsString = """{
+                                  |    "consumer": {
+                                  |        "name": "Consumer"
+                                  |    },
+                                  |    "provider": {
+                                  |        "name": "Provider"
+                                  |    },
+                                  |    "messages": [
+                                  |        {
+                                  |            "description": "Published credit data",
+                                  |            "providerState": "or maybe 'scenario'? not sure about this",
+                                  |            "contents": {"foo":"bar"},
+                                  |            "metaData": {
+                                  |              "contentType": "application/json"
+                                  |            }
+                                  |        },
+                                  |        {
+                                  |            "description": "Published another credit data",
+                                  |            "providerState": "or maybe 'scenario'! not sure about this",
+                                  |            "contents": {"boo":"xxx"},
+                                  |            "metaData": {
+                                  |              "contentType": "application/json"
+                                  |            }
+                                  |        }
+                                  |    ]
+                                  |}""".stripMargin
+
+  val multipleMessagesAndInteractions = multipleMessage
+    .copy(interactions = List(simpleInteraction))
+
+  val multipleMessagesAndInteractionsAsString =
+    """{
+      |    "consumer": {
+      |        "name": "Consumer"
+      |    },
+      |    "provider": {
+      |        "name": "Provider"
+      |    },
+      |    "messages": [
+      |        {
+      |            "description": "Published credit data",
+      |            "providerState": "or maybe 'scenario'? not sure about this",
+      |            "contents": {"foo":"bar"},
+      |            "metaData": {
+      |              "contentType": "application/json"
+      |            }
+      |        },
+      |        {
+      |            "description": "Published another credit data",
+      |            "providerState": "or maybe 'scenario'! not sure about this",
+      |            "contents": {"boo":"xxx"},
+      |            "metaData": {
+      |              "contentType": "application/json"
+      |            }
+      |        }
+      |    ],
+      |    "interactions": [
+      |    {
+      |      "description" : "a simple request",
+      |      "request" : {
+      |        "method" : "GET",
+      |        "path" : "/"
+      |      },
+      |      "response" : {
+      |        "status" : 200,
+      |        "body" : "Hello"
+      |      }
+      |     }
+      |    ]
+      | }
+    """.stripMargin
 }

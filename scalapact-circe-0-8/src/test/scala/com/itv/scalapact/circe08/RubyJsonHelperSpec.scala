@@ -1,15 +1,21 @@
 package com.itv.scalapact.circe08
 
 import com.itv.scalapact.shared._
-import org.scalatest.{FunSpec, Matchers}
+import org.scalactic.TypeCheckedTripleEquals
+import org.scalatest.{EitherValues, FunSpec, Matchers}
+import io.circe.parser.parse
+import Matchers._
 
-class RubyJsonHelperSpec extends FunSpec with Matchers {
+class RubyJsonHelperSpec extends FunSpec with EitherValues with TypeCheckedTripleEquals {
 
   describe("Handling ruby json") {
 
     it("should be able to extract the provider") {
 
-      JsonBodySpecialCaseHelper.extractPactActor("provider")(PactFileExamples.simpleAsString) shouldEqual Some(
+      JsonBodySpecialCaseHelper
+        .extractPactActor("provider")(parse(PactFileExamples.simpleAsString).right.value)
+        .right
+        .value should ===(
         PactActor("provider")
       )
 
@@ -17,7 +23,10 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
 
     it("should be able to extract the consumer") {
 
-      JsonBodySpecialCaseHelper.extractPactActor("consumer")(PactFileExamples.simpleAsString) shouldEqual Some(
+      JsonBodySpecialCaseHelper
+        .extractPactActor("consumer")(parse(PactFileExamples.simpleAsString).right.value)
+        .right
+        .value should ===(
         PactActor("consumer")
       )
 
@@ -91,12 +100,15 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
           |  ]
           |}""".stripMargin)
 
-      val list = List(
-        (Some(interaction1), interaction1RequestBody, interaction1ResponseBody),
-        (Some(interaction2), interaction2RequestBody, interaction2ResponseBody)
+      JsonBodySpecialCaseHelper
+        .extractInteractionsTuple(parse(PactFileExamples.simpleAsString).right.value)
+        .right
+        .value should ===(
+        List(
+          (interaction1, interaction1RequestBody, interaction1ResponseBody),
+          (interaction2, interaction2RequestBody, interaction2ResponseBody)
+        )
       )
-
-      JsonBodySpecialCaseHelper.extractInteractions(PactFileExamples.simpleAsString) shouldEqual Some(list)
 
     }
 

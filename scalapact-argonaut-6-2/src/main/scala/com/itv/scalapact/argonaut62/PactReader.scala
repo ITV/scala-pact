@@ -58,7 +58,9 @@ object JsonBodySpecialCaseHelper {
     json
       .field("interactions")
       .fold[DecodeResult[JsonArray]](DecodeResult.ok(List.empty[Json]))(
-        _.array.fold[DecodeResult[JsonArray]](DecodeResult.fail("", CursorHistory.empty))(DecodeResult.ok)
+        _.array.fold[DecodeResult[JsonArray]](
+          DecodeResult.fail(s"`interactions` field is not an array: [$json]", CursorHistory.empty)
+        )(DecodeResult.ok)
       )
       .flatMap {
         _.map(parseInteractionTuple)
@@ -104,10 +106,8 @@ object JsonBodySpecialCaseHelper {
       .getOrElse(DecodeResult.ok(None))
   }
 
-  val extractMessages: Json => DecodeResult[List[Message]] = json =>
-    json
-      .field("messages")
-      .fold[DecodeResult[List[Message]]](DecodeResult.ok(List.empty[Message]))(_.as[List[Message]])
+  val extractMessages: Json => DecodeResult[List[Message]] = _.field("messages")
+    .fold[DecodeResult[List[Message]]](DecodeResult.ok(List.empty[Message]))(_.as[List[Message]])
 
   private val makeOptionalBody: Json => Option[String] = {
     case body: Json if body.isString =>

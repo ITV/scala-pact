@@ -5,13 +5,16 @@ import com.itv.scalapact.shared.typeclasses.IPactWriter
 import io.circe._
 import io.circe.parser._
 import io.circe.syntax._
-import io.circe.generic.auto._
+
+import PactImplicits._
 
 class PactWriter extends IPactWriter {
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   def pactToJsonString(pact: Pact): String = {
-
+    //TODO: Deal with empty interacations/messages
+    //TODO: Add the messages
+    //
     val interactions: Vector[Json] =
       pact.interactions.toVector
         .map { i =>
@@ -65,6 +68,8 @@ class PactWriter extends IPactWriter {
         .downField("interactions")
         .withFocus(_.withArray(_ => interactions.asJson))
         .top
+        .map(removeJsonFieldIf(pact.messages.isEmpty)("messages"))
+        .map(removeJsonFieldIf(pact.interactions.isEmpty)("interactions"))
 
     // I don't believe you can ever see this exception.
     json
@@ -75,5 +80,13 @@ class PactWriter extends IPactWriter {
       )
       .pretty(Printer.spaces2.copy(dropNullKeys = true))
   }
+
+  private def removeJsonFieldIf(remove: Boolean)(field: String)(json: Json): Json =
+    Option(json)
+      .filter(_ => remove)
+      .flatMap(_.asObject)
+      .map(_.filterKeys(_ != field))
+      .map(_.asJson)
+      .getOrElse(json)
 
 }

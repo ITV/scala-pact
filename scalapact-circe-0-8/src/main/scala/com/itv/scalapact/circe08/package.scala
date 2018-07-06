@@ -9,4 +9,5 @@ package object circe08 {
 
   implicit val pactWriterInstance: IPactWriter =
     new PactWriter
+
 }
