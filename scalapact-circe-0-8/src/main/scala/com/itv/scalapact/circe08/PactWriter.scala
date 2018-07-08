@@ -12,9 +12,6 @@ class PactWriter extends IPactWriter {
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   def pactToJsonString(pact: Pact): String = {
-    //TODO: Deal with empty interacations/messages
-    //TODO: Add the messages
-    //
     val interactions: Vector[Json] =
       pact.interactions.toVector
         .map { i =>

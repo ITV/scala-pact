@@ -1,33 +1,17 @@
 package com.itv.scalapact.circe09
 
-import com.itv.scalapact.shared.{JsonRepresentation, MessageContentType, Pact}
+import com.itv.scalapact.shared.Pact
 import com.itv.scalapact.shared.typeclasses.IPactWriter
 import io.circe._
 import io.circe.parser._
 import io.circe.syntax._
-import io.circe.generic.auto._
+
+import PactImplicits._
 
 class PactWriter extends IPactWriter {
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   def pactToJsonString(pact: Pact): String = {
-
-    val messages = pact.messages.toVector.map { m =>
-      val content = m.contentType.jsonRepresentation match {
-        case JsonRepresentation.AsString =>
-          Json.fromString(m.contents)
-        case JsonRepresentation.AsObject =>
-          parse(m.contents).fold(_ => Json.obj(), identity) //we produce a blank object here if the encoder fails!
-      }
-
-      Json.obj(
-        "description"   -> Json.fromString(m.description),
-        "providerState" -> m.providerState.asJson,
-        "contents"      -> content,
-        "metaData"      -> m.metaData.asJson
-      )
-    }
-
     val interactions: Vector[Json] =
       pact.interactions.toVector
         .map { i =>
@@ -73,20 +57,16 @@ class PactWriter extends IPactWriter {
         }
         .collect { case Some(s) => s }
 
-    val json: Option[Json] = {
-      implicit val messageContentTypeEnc: Encoder[MessageContentType] =
-        implicitly[Encoder[String]].contramap(_.renderString)
-
+    val json: Option[Json] =
       pact
-        .copy(interactions = Nil, messages = Nil)
+        .copy(interactions = Nil)
         .asJson
         .hcursor
-        .downField("messages")
-        .withFocus(_.withArray(_ => messages.asJson))
         .downField("interactions")
         .withFocus(_.withArray(_ => interactions.asJson))
         .top
-    }
+        .map(removeJsonFieldIf(pact.messages.isEmpty)("messages"))
+        .map(removeJsonFieldIf(pact.interactions.isEmpty)("interactions"))
 
     // I don't believe you can ever see this exception.
     json
@@ -97,5 +77,13 @@ class PactWriter extends IPactWriter {
       )
       .pretty(Printer.spaces2.copy(dropNullValues = true))
   }
+
+  private def removeJsonFieldIf(remove: Boolean)(field: String)(json: Json): Json =
+    Option(json)
+      .filter(_ => remove)
+      .flatMap(_.asObject)
+      .map(_.filterKeys(_ != field))
+      .map(_.asJson)
+      .getOrElse(json)
 
 }

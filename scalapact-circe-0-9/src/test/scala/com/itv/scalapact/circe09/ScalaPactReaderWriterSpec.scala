@@ -90,20 +90,6 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
       parse(written).toOption.get shouldEqual parse(expected).toOption.get
     }
 
-    it("should be able to parse another example") {
-
-      pactReader.jsonStringToPact(PactFileExamples.anotherExample) match {
-        case Left(e) =>
-          fail(e)
-
-        case Right(pact) =>
-          pact.consumer.name shouldEqual "My Consumer"
-          pact.provider.name shouldEqual "Their Provider Service"
-          pact.interactions.head.response.body.get shouldEqual "Hello there!"
-      }
-
-    }
-
   }
 
 }
