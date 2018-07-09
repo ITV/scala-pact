@@ -33,6 +33,10 @@ object ScalaPactForger {
                                      providerState: Option[String],
                                      meta: Message.Metadata,
                                      matchingRules: Map[String, MatchingRule]) {
+
+    def withRegex(key: String, regex: String): PartialScalaPactMessage =
+      withMatchingRule(key, MatchingRule(Some("regex"), Some(regex), None))
+
     def withMatchingRule(key: String, value: MatchingRule): PartialScalaPactMessage =
       copy(matchingRules = matchingRules + (key -> value))
 

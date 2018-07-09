@@ -29,7 +29,7 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with EitherValues w
         .description("description")
         .withProviderState("whatever")
         .withMeta(Message.Metadata.empty)
-        .withMatchingRule(".key2", MatchingRule(Some("regex"), Some("\\d+"), None))
+        .withRegex(".key2", "\\d+")
         .withContent(firstExpectedMessage)
     )
 
