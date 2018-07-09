@@ -41,7 +41,7 @@ case class Message(description: String,
                    providerState: Option[String],
                    contents: String,
                    metaData: Message.Metadata,
-                   contentType: MessageContentType = ApplicationJson) {
+                   contentType: MessageContentType) {
 
   def renderAsString: String = s"""Message
                                    |  description:   [$description]
@@ -54,6 +54,9 @@ case class Message(description: String,
 object Message {
 
   type Metadata = Map[String, String]
+
+  def apply(description: String, providerState: Option[String], contents: String, metaData: Metadata): Message =
+    new Message(description, providerState, contents, metaData, ApplicationJson)
 
   object Metadata {
     val empty                                 = Metadata()
