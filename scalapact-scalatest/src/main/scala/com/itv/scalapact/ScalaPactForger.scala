@@ -118,7 +118,8 @@ object ScalaPactForger {
   }
 
   object messageSpec {
-    implicit def default(implicit options: ScalaPactOptions, pactWriter: IPactWriter) = IContractWriter()
+    implicit def default(implicit options: ScalaPactOptions, pactWriter: IPactWriter): IContractWriter =
+      IContractWriter()
 
     trait IContractWriter {
       def writeContract(scalaPactDescriptionFinal: ScalaPactDescriptionFinal): Unit

@@ -13,7 +13,7 @@ package object json {
   implicit val pactWriterInstance: IPactWriter =
     new PactWriter
 
-  implicit val jsonMessageFormatInstance = new IMessageFormat[Json] {
+  implicit val jsonMessageFormatInstance: IMessageFormat[Json] = new IMessageFormat[Json] {
     override def contentType: MessageContentType = ApplicationJson
 
     override def encode(t: Json): String = t.nospaces

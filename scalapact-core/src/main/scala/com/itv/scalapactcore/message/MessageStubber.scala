@@ -8,10 +8,14 @@ import com.itv.scalapactcore.common.matching.{MatchOutcome, MatchOutcomeFailed, 
 
 object MessageStubber {
 
+  def apply[A](messages: List[Message])(implicit matchingRules: IrNodeMatchingRules,
+                                        pactReader: IPactReader): IMessageStubber[A] =
+    MessageStubber.apply[A](messages, MatchOutcomeSuccess, List.empty)
+
   def apply[A](
       messages: List[Message],
-      outcomes: MatchOutcome = MatchOutcomeSuccess,
-      currentResults: List[A] = List.empty
+      outcomes: MatchOutcome,
+      currentResults: List[A]
   )(implicit matchingRules: IrNodeMatchingRules, pactReader: IPactReader): IMessageStubber[A] =
     new IMessageStubber[A] {
 
@@ -45,7 +49,7 @@ object MessageStubber {
           .map(
             message =>
               OutcomeAndMessage(
-                MessageMatchers.matchSingleMessage(None, message.contents, messageFormat.encode(actualMessage)),
+                MessageMatchers.matchSingleMessage(message.contents, messageFormat.encode(actualMessage)),
                 message
             )
           )
@@ -57,8 +61,7 @@ object MessageStubber {
               fail(
                 MessageMatchers
                   .renderOutcome(Some(outcomeAndMessage), messageFormat.encode(actualMessage), description)
-                  .left
-                  .get
+                  .fold(identity, _ => ???)
               )
           }
           .getOrElse(noDescriptionFound(description))

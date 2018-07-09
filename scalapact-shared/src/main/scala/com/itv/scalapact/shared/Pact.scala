@@ -59,7 +59,7 @@ object Message {
     new Message(description, providerState, contents, metaData, ApplicationJson)
 
   object Metadata {
-    val empty                                 = Metadata()
+    val empty: Metadata                       = Metadata()
     def apply(x: (String, String)*): Metadata = x.toMap
   }
 

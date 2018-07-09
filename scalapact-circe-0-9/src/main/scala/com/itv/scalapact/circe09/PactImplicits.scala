@@ -8,6 +8,7 @@ import io.circe.generic.semiauto._
 import io.circe.parser.parse
 import io.circe.syntax._
 
+@SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
 object PactImplicits {
   implicit val pactActorEncoder: Encoder[PactActor] = deriveEncoder[PactActor]
   implicit val pactActorDecoder: Decoder[PactActor] = deriveDecoder[PactActor]
@@ -29,7 +30,7 @@ object PactImplicits {
       "description"   -> m.description.asJson,
       "providerState" -> m.providerState.asJson,
       "contents" -> (m.contentType match {
-        case ApplicationJson => parse(m.contents).right.get
+        case ApplicationJson => parse(m.contents).fold(_ => Json.Null, identity)
         case _               => Json.fromString(m.contents)
       }),
       "metaData" -> m.metaData.asJson
@@ -60,7 +61,7 @@ object PactImplicits {
       .as[String]
       .map(_ => MessageContentType.ApplicationText) //TODO it should be simple to support xml
       .toOption
-      .getOrElse(MessageContentType.ApplicationJson)
+      .getOrElse[MessageContentType](MessageContentType.ApplicationJson)
 
   private def contents(cursor: HCursor): Decoder.Result[Json] =
     cursor

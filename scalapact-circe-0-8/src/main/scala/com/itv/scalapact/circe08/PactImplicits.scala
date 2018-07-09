@@ -8,7 +8,9 @@ import io.circe.generic.semiauto._
 import io.circe.parser.parse
 import io.circe.syntax._
 
+@SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
 object PactImplicits {
+
   implicit val pactActorEncoder: Encoder[PactActor] = deriveEncoder[PactActor]
   implicit val pactActorDecoder: Decoder[PactActor] = deriveDecoder[PactActor]
 
@@ -16,9 +18,11 @@ object PactImplicits {
   implicit val matchingRulesDecoder: Decoder[MatchingRule] = deriveDecoder[MatchingRule]
 
   implicit val interactionRequestEncoder: Encoder[InteractionRequest] = deriveEncoder[InteractionRequest]
+
   implicit val interactionRequestDecoder: Decoder[InteractionRequest] = deriveDecoder[InteractionRequest]
 
   implicit val InteractionResponseEncoder: Encoder[InteractionResponse] = deriveEncoder[InteractionResponse]
+
   implicit val InteractionResponseDecoder: Decoder[InteractionResponse] = deriveDecoder[InteractionResponse]
 
   implicit val interactionEncoder: Encoder[Interaction] = deriveEncoder[Interaction]
@@ -29,13 +33,13 @@ object PactImplicits {
       "description"   -> m.description.asJson,
       "providerState" -> m.providerState.asJson,
       "contents" -> (m.contentType match {
-        case ApplicationJson => parse(m.contents).right.get
+        case ApplicationJson => parse(m.contents).toOption.getOrElse(Json.Null)
         case _               => Json.fromString(m.contents)
       }),
       "metaData" -> m.metaData.asJson
     )
   }
-
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   implicit val messageDecoder: Decoder[Message] = Decoder.decodeJson.emap { json =>
     val cursor = json.hcursor
     (for {
@@ -58,9 +62,8 @@ object PactImplicits {
   def contentType(contents: Json): MessageContentType =
     contents
       .as[String]
-      .map(_ => MessageContentType.ApplicationText) //TODO it should be simple to support xml
-      .toOption
-      .getOrElse(MessageContentType.ApplicationJson)
+      .fold[MessageContentType](_ => MessageContentType.ApplicationJson, _ => MessageContentType.ApplicationText)
+  //TODO it should be simple to support xml
 
   private def contents(cursor: HCursor): Decoder.Result[Json] =
     cursor

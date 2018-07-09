@@ -1,7 +1,7 @@
 package com.itv.scalapactcore.common.matching
 
-import com.itv.scalapact.shared._
-import com.itv.scalapact.shared.matchir._
+import com.itv.scalapact.shared.matchir.{IrNodeMatchingRules, MatchIr}
+import com.itv.scalapact.shared.Message
 import com.itv.scalapact.shared.typeclasses.IPactReader
 
 object MessageMatchers {
@@ -32,7 +32,7 @@ object MessageMatchers {
 
     }
 
-  def matchSingleMessage(rules: Option[Map[String, MatchingRule]], expected: String, received: String)(
+  def matchSingleMessage(expected: String, received: String)(
       implicit matchingRules: IrNodeMatchingRules,
       pactReader: IPactReader
   ): MatchOutcome =

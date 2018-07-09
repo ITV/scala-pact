@@ -6,9 +6,15 @@ import com.itv.scalapactcore.common.matching.MatchOutcome
 
 trait IMessageStubber[A] {
   def consume(description: String)(test: Message => A): IMessageStubber[A]
-  def publish[T](description: String, actualContent: T, meta: Message.Metadata = Message.Metadata.empty)(
+
+  def publish[T](description: String, actualContent: T)(
+      implicit messageFormat: IMessageFormat[T]
+  ): IMessageStubber[A] = publish(description, actualContent, Message.Metadata.empty)
+
+  def publish[T](description: String, actualContent: T, meta: Message.Metadata)(
       implicit messageFormat: IMessageFormat[T]
   ): IMessageStubber[A]
+
   def results: List[A]
   def outcome: MatchOutcome
 }

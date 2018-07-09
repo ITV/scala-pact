@@ -21,7 +21,7 @@ object PactImplicits {
   )
 
   private def contents(message: Message): Json = message.contentType match {
-    case ApplicationJson => message.contents.value.parse.right.get
+    case ApplicationJson => message.contents.value.parse.fold(_ => Json.jNull, identity)
     case _               => message.contents.asJson
   }
 
@@ -45,9 +45,8 @@ object PactImplicits {
   def contentType(contents: Json): MessageContentType =
     contents
       .as[String]
-      .map(_ => MessageContentType.ApplicationText) //TODO it should be simple to support xml
-      .toOption
-      .getOrElse(MessageContentType.ApplicationJson)
+      .fold[MessageContentType]((_, _) => MessageContentType.ApplicationJson, _ => MessageContentType.ApplicationText)
+  //TODO it should be simple to support xml
 
   implicit lazy val MessageContentTypeCodecJson: CodecJson[MessageContentType] = CodecJson[MessageContentType](
     x => EncodeJson.StringEncodeJson(x.renderString),
