@@ -281,6 +281,7 @@ object PactFileExamples {
         providerState = Some("or maybe 'scenario'? not sure about this"),
         contents = """{"foo":"bar"}""",
         metaData = Message.Metadata("contentType" -> "application/json"),
+        matchingRules = Map.empty, //FIXME maybe ?
         MessageContentType.ApplicationJson
       )
     )
@@ -312,6 +313,7 @@ object PactFileExamples {
         providerState = Some("or maybe 'scenario'! not sure about this"),
         contents = """{"boo":"xxx"}""",
         metaData = Message.Metadata("contentType" -> "application/json"),
+        matchingRules = Map.empty, //FIXME maybe ?
         MessageContentType.ApplicationJson
       )
     )

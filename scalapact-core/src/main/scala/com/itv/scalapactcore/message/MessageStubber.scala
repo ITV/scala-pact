@@ -49,7 +49,9 @@ object MessageStubber {
           .map(
             message =>
               OutcomeAndMessage(
-                MessageMatchers.matchSingleMessage(message.contents, messageFormat.encode(actualMessage)),
+                MessageMatchers.matchSingleMessage(message.contents,
+                                                   messageFormat.encode(actualMessage),
+                                                   Some(message.matchingRules)),
                 message
             )
           )

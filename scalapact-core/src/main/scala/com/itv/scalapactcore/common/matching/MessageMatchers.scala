@@ -1,7 +1,7 @@
 package com.itv.scalapactcore.common.matching
 
-import com.itv.scalapact.shared.matchir.{IrNodeMatchingRules, MatchIr}
-import com.itv.scalapact.shared.Message
+import com.itv.scalapact.shared.matchir._
+import com.itv.scalapact.shared.{MatchingRule, Message}
 import com.itv.scalapact.shared.typeclasses.IPactReader
 
 object MessageMatchers {
@@ -32,19 +32,23 @@ object MessageMatchers {
 
     }
 
-  def matchSingleMessage(expected: String, received: String)(
-      implicit matchingRules: IrNodeMatchingRules,
-      pactReader: IPactReader
+  def matchSingleMessage(expected: String, received: String, rules: Option[Map[String, MatchingRule]])(
+      implicit pactReader: IPactReader
   ): MatchOutcome =
-    MatchIr
-      .fromJSON(pactReader.fromJSON)(expected)
-      .flatMap { e =>
-        MatchIr
-          .fromJSON(pactReader.fromJSON)(received)
-          .map(r => {
-            nodeMatchToMatchResult(e =~ r, matchingRules, isXml = false)
-          })
-      }
-      .getOrElse(MatchOutcomeFailed("Failed to parse JSON body", 50))
+    IrNodeMatchingRules.fromPactRules(rules) match {
+      case Left(e) =>
+        MatchOutcomeFailed(e)
+      case Right(matchingRules) =>
+        val result = for {
+          ee <- MatchIr.fromJSON(pactReader.fromJSON)(expected)
+          rr <- MatchIr.fromJSON(pactReader.fromJSON)(received)
+        } yield
+          nodeMatchToMatchResult(ee.isEqualTo(rr, strict = false, matchingRules, bePermissive = true),
+                                 matchingRules,
+                                 isXml = false)
+
+        result.getOrElse(MatchOutcomeFailed("Failed to parse JSON body", 50))
+
+    }
 
 }

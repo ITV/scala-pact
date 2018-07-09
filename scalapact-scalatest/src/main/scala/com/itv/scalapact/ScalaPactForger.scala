@@ -4,7 +4,7 @@ import com.itv.scalapact.ScalaPactVerify.ScalaPactVerifyFailed
 import com.itv.scalapact.shared.Maps._
 import com.itv.scalapact.shared.typeclasses._
 import com.itv.scalapact.shared._
-import com.itv.scalapact.shared.matchir.IrNodeMatchingRules
+
 import com.itv.scalapactcore.message.{IMessageStubber, MessageStubber}
 import com.itv.scalapact.shared.ColourOuput._
 
@@ -30,7 +30,12 @@ object ScalaPactForger {
     protected val strict: Boolean = true
   }
 
-  case class PartialScalaPactMessage(description: String, providerState: Option[String], meta: Message.Metadata) {
+  case class PartialScalaPactMessage(description: String,
+                                     providerState: Option[String],
+                                     meta: Message.Metadata,
+                                     matchingRules: Map[String, MatchingRule]) {
+    def withMatchingRule(key: String, value: MatchingRule): PartialScalaPactMessage =
+      copy(matchingRules = matchingRules + (key -> value))
 
     def withProviderState(state: String): PartialScalaPactMessage =
       copy(providerState = Some(state))
@@ -39,7 +44,7 @@ object ScalaPactForger {
       copy(meta = meta)
 
     def withContent[T](value: T)(implicit format: IMessageFormat[T]): Message =
-      Message(description, providerState, format.encode(value), meta, format.contentType)
+      Message(description, providerState, format.encode(value), meta, matchingRules, format.contentType)
   }
 
   sealed trait ForgePactElements {
@@ -90,7 +95,6 @@ object ScalaPactForger {
 
       def runMessageTests[A](test: IMessageStubber[A] => IMessageStubber[A])(
           implicit contractWriter: messageSpec.IContractWriter,
-          matchingRules: IrNodeMatchingRules,
           pactReader: IPactReader
       ): List[A] = {
         contractWriter.writeContract(scalaPactDescriptionFinal(options))
@@ -141,7 +145,7 @@ object ScalaPactForger {
   object message {
 
     def description(desc: String): PartialScalaPactMessage =
-      PartialScalaPactMessage(desc, None, Map.empty)
+      PartialScalaPactMessage(desc, None, Map.empty, Map.empty)
   }
 
   object interaction {

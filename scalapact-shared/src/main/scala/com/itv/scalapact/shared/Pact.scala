@@ -41,6 +41,7 @@ case class Message(description: String,
                    providerState: Option[String],
                    contents: String,
                    metaData: Message.Metadata,
+                   matchingRules: Map[String, MatchingRule],
                    contentType: MessageContentType) {
 
   def renderAsString: String = s"""Message
@@ -48,6 +49,7 @@ case class Message(description: String,
                                    |  contentType: [${contentType.renderString}]
                                    |  providerState: [${providerState.getOrElse("<none>")}]
                                    |  meta: [${metaData.mkString(",")}]
+                                   |  matchingRules: [${matchingRules.mkString(",")}]
                                    |  $contents""".stripMargin
 }
 
@@ -56,7 +58,7 @@ object Message {
   type Metadata = Map[String, String]
 
   def apply(description: String, providerState: Option[String], contents: String, metaData: Metadata): Message =
-    new Message(description, providerState, contents, metaData, ApplicationJson)
+    new Message(description, providerState, contents, metaData, Map.empty, ApplicationJson)
 
   object Metadata {
     val empty: Metadata                       = Metadata()

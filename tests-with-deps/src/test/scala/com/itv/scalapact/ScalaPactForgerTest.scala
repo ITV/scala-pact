@@ -8,8 +8,7 @@ import Argonaut._
 import com.itv.scalapact.ScalaPactForger.{ScalaPactOptions, forgePact, interaction, message, messageSpec}
 import com.itv.scalapact.ScalaPactVerify.ScalaPactVerifyFailed
 import com.itv.scalapact.shared.MessageContentType.ApplicationJson
-
-import com.itv.scalapact.shared.Message
+import com.itv.scalapact.shared.{MatchingRule, Message}
 import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.{EitherValues, FlatSpec, OptionValues}
 import org.scalatest.Matchers._
@@ -20,7 +19,7 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with EitherValues w
   implicit val defaultOptions = ScalaPactOptions(writePactFiles = true, outputPath = "/tmp")
   import messageSpec._
 
-  val firstExpectedMessage = Json.obj("key1" -> jNumber(1), "key2" -> jString("foo"))
+  val firstExpectedMessage = Json.obj("key1" -> jNumber(1), "key2" -> jString("444"))
 
   val specWithOneMessage = forgePact
     .between("Consumer")
@@ -30,6 +29,7 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with EitherValues w
         .description("description")
         .withProviderState("whatever")
         .withMeta(Message.Metadata.empty)
+        .withMatchingRule(".key2", MatchingRule(Some("regex"), Some("\\d+"), None))
         .withContent(firstExpectedMessage)
     )
 
@@ -45,18 +45,19 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with EitherValues w
         .withContent(secondExpectedMessage)
     )
 
-  it should "create a specification of the message" in {
+  it should "create a specification of the message with the associated matching rules" in {
     val writer = StubContractWriter()
 
-    val actualMessage = specWithOneMessage.runMessageTests[Message] {
-      _.consume("description") { message =>
-        message.contentType should ===(ApplicationJson)
-
-        message.metaData should ===(Message.Metadata.empty)
-        toJson(message.contents) should ===(firstExpectedMessage)
-        message
-      }
-    }(writer, implicitly, implicitly)
+    val actualMessage = specWithOneMessage
+      .runMessageTests[Message] {
+        _.consume("description") { message =>
+          message.contentType should ===(ApplicationJson)
+          message.matchingRules should ===(Map(".key2" -> MatchingRule(Some("regex"), Some("\\d+"), None)))
+          message.metaData should ===(Message.Metadata.empty)
+          toJson(message.contents) should ===(firstExpectedMessage)
+          message
+        }
+      }(writer, implicitly)
     writer.messages should ===(actualMessage)
   }
 
@@ -81,7 +82,7 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with EitherValues w
 
         writer.messages should contain theSameElementsAs newStub.results
         newStub
-      })(writer, implicitly, implicitly)
+      })(writer, implicitly)
 
   }
 
@@ -97,7 +98,7 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with EitherValues w
       )
       .runMessageTests[Unit](_.consume("description") { _ =>
         ()
-      })(writer, implicitly, implicitly)
+      })(writer, implicitly)
     writer.interactions should have size 1
     writer.messages should have size 2
   }
@@ -128,6 +129,20 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with EitherValues w
   it should "succeed if the published message is in the right format" in {
     specWithOneMessage.runMessageTests[Any] {
       _.publish("description", firstExpectedMessage)
+    }
+  }
+
+  it should "succeed if the published message is in the right format and different content" in {
+    specWithOneMessage.runMessageTests[Any] {
+      _.publish("description", Json.obj("key1" -> jNumber(1), "key2" -> jString("123")))
+    }
+  }
+
+  it should "fail if the published message is in the right format however it breaks the rules" in {
+    a[ScalaPactVerifyFailed] should be thrownBy {
+      specWithOneMessage.runMessageTests[Any] {
+        _.publish("description", Json.obj("key1" -> jNumber(1), "key2" -> jString("foo")))
+      }
     }
   }
 

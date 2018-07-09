@@ -39,7 +39,8 @@ object PactImplicits {
         providerState <- (c --\ "providerState").as[Option[String]]
         contents      <- (c --\ "contents").as[Json]
         metadata      <- (c --\ "metaData").as[Map[String, String]]
-      } yield Message(description, providerState, contents.nospaces, metadata, contentType(contents))
+      } yield
+        Message(description, providerState, contents.nospaces, metadata, Map.empty, contentType(contents)) //FIXME: Matching rules should be obtained from the kjson
   )
 
   def contentType(contents: Json): MessageContentType =
