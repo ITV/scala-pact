@@ -1,6 +1,6 @@
 package com.itv.scalapact.shared
 
-import com.itv.scalapact.shared.MessageContentType.{ApplicationJson, ApplicationText}
+import com.itv.scalapact.shared.MessageContentType._
 
 sealed trait JsonRepresentation
 object JsonRepresentation {
@@ -37,13 +37,11 @@ object MessageContentType {
   def unnaply(mct: MessageContentType): String = mct.renderString
 }
 
-case class Message(description: String, providerState: Option[String], contents: String, metaData: Message.Metadata) {
-  def contentType: MessageContentType =
-    metaData
-      .get("Content-Type")
-      .orElse(metaData.get("contentType"))
-      .map(MessageContentType.apply)
-      .getOrElse(ApplicationText)
+case class Message(description: String,
+                   providerState: Option[String],
+                   contents: String,
+                   metaData: Message.Metadata,
+                   contentType: MessageContentType = ApplicationJson) {
 
   def renderAsString: String = s"""Message
                                    |  description:   [$description]

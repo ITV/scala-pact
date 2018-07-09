@@ -43,20 +43,29 @@ object PactImplicits {
       providerState <- cursor.downField("providerState").as[Option[String]]
       contents      <- contents(cursor)
       metaData      <- cursor.downField("metaData").as[Metadata]
-    } yield Message(description, providerState, contents, metaData))
+    } yield
+      Message(description,
+              providerState,
+              contents.asString.getOrElse(contents.noSpaces),
+              metaData,
+              contentType(contents)))
       .fold(
         f => Left(s"There was a failure during decoder because ${f.message}: [$f]"),
         Right(_)
       )
   }
 
-  private def contents(cursor: HCursor): Decoder.Result[String] =
+  def contentType(contents: Json): MessageContentType =
+    contents
+      .as[String]
+      .map(_ => MessageContentType.ApplicationText) //TODO it should be simple to support xml
+      .toOption
+      .getOrElse(MessageContentType.ApplicationJson)
+
+  private def contents(cursor: HCursor): Decoder.Result[Json] =
     cursor
       .downField("contents")
       .as[Json]
-      .map(
-        x => x.asString.getOrElse(x.noSpaces)
-      )
 
   implicit val pactEncoder: Encoder[Pact] = deriveEncoder[Pact]
   implicit val pactDecoder: Decoder[Pact] = deriveDecoder[Pact]

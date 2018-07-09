@@ -5,6 +5,7 @@ import argonaut._
 import com.itv.scalapact.shared._
 import argonaut._
 import Argonaut._
+
 import com.itv.scalapact.shared.MessageContentType.ApplicationJson
 
 object PactImplicits {
@@ -36,10 +37,18 @@ object PactImplicits {
       for {
         description   <- (c --\ "description").as[String]
         providerState <- (c --\ "providerState").as[Option[String]]
-        contents      <- (c --\ "contents").as[Json].map(_.nospaces)
+        contents      <- (c --\ "contents").as[Json]
         metadata      <- (c --\ "metaData").as[Map[String, String]]
-      } yield Message(description, providerState, contents, metadata)
+      } yield Message(description, providerState, contents.nospaces, metadata, contentType(contents))
   )
+
+  def contentType(contents: Json): MessageContentType =
+    contents
+      .as[String]
+      .map(_ => MessageContentType.ApplicationText) //TODO it should be simple to support xml
+      .toOption
+      .getOrElse(MessageContentType.ApplicationJson)
+
   implicit lazy val MessageContentTypeCodecJson: CodecJson[MessageContentType] = CodecJson[MessageContentType](
     x => EncodeJson.StringEncodeJson(x.renderString),
     _.as[String].map(MessageContentType.apply)

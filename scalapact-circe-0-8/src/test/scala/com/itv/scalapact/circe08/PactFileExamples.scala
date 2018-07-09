@@ -1,5 +1,6 @@
 package com.itv.scalapact.circe08
 
+import com.itv.scalapact.shared.MessageContentType.{ApplicationJson, ApplicationText}
 import com.itv.scalapact.shared._
 
 object PactFileExamples {
@@ -291,7 +292,8 @@ object PactFileExamples {
         description = "Published credit data",
         providerState = Some("or maybe 'scenario'? not sure about this"),
         contents = """Hello world!""",
-        metaData = Message.Metadata()
+        metaData = Message.Metadata(),
+        ApplicationText
       )
     )
   )
@@ -323,7 +325,8 @@ object PactFileExamples {
         description = "Published credit data",
         providerState = Some("or maybe 'scenario'? not sure about this"),
         contents = """{"foo":"bar"}""",
-        metaData = Message.Metadata("contentType" -> "application/json")
+        metaData = Message.Metadata("contentType" -> "application/json"),
+        ApplicationJson
       )
     )
   )
@@ -353,7 +356,8 @@ object PactFileExamples {
         description = "Published another credit data",
         providerState = Some("or maybe 'scenario'! not sure about this"),
         contents = """{"boo":"xxx"}""",
-        metaData = Message.Metadata("contentType" -> "application/json")
+        metaData = Message.Metadata("contentType" -> "application/json"),
+        ApplicationJson
       )
     )
   )

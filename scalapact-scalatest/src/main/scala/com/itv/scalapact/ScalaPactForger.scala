@@ -30,16 +30,16 @@ object ScalaPactForger {
     protected val strict: Boolean = true
   }
 
-  case class PartialScalaPactMessage(description: String, providerState: Option[String], meta: Map[String, String]) {
+  case class PartialScalaPactMessage(description: String, providerState: Option[String], meta: Message.Metadata) {
 
     def withProviderState(state: String): PartialScalaPactMessage =
       copy(providerState = Some(state))
 
-    def withMeta(meta: Map[String, String]): PartialScalaPactMessage =
+    def withMeta(meta: Message.Metadata): PartialScalaPactMessage =
       copy(meta = meta)
 
     def withContent[T](value: T)(implicit format: IMessageFormat[T]): Message =
-      Message(description, format.contentType, providerState, format.encode(value), meta)
+      Message(description, providerState, format.encode(value), meta, format.contentType)
   }
 
   sealed trait ForgePactElements {
