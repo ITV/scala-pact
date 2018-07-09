@@ -8,12 +8,15 @@ import com.itv.scalapactcore.common.matching.{MatchOutcome, MatchOutcomeFailed, 
 
 object MessageStubber {
 
-  def apply[A](messages: List[Message])(implicit matchingRules: IrNodeMatchingRules,
-                                        pactReader: IPactReader): IMessageStubber[A] =
-    MessageStubber.apply[A](messages, MatchOutcomeSuccess, List.empty)
+  case class Config(strictMode: Boolean)
+
+  def apply[A](messages: List[Message], config: MessageStubber.Config)(implicit matchingRules: IrNodeMatchingRules,
+                                                                       pactReader: IPactReader): IMessageStubber[A] =
+    MessageStubber.apply[A](messages, config, MatchOutcomeSuccess, List.empty)
 
   def apply[A](
       messages: List[Message],
+      config: MessageStubber.Config,
       outcomes: MatchOutcome,
       currentResults: List[A]
   )(implicit matchingRules: IrNodeMatchingRules, pactReader: IPactReader): IMessageStubber[A] =
@@ -21,6 +24,7 @@ object MessageStubber {
 
       private def messageStub(outcome: MatchOutcome, result: Option[A]): IMessageStubber[A] = MessageStubber.apply(
         messages,
+        config,
         outcomes + outcome,
         result.toList ++ results
       )
@@ -51,7 +55,8 @@ object MessageStubber {
               OutcomeAndMessage(
                 MessageMatchers.matchSingleMessage(message.contents,
                                                    messageFormat.encode(actualMessage),
-                                                   Some(message.matchingRules)),
+                                                   Some(message.matchingRules),
+                                                   config.strictMode),
                 message
             )
           )
@@ -63,7 +68,7 @@ object MessageStubber {
               fail(
                 MessageMatchers
                   .renderOutcome(Some(outcomeAndMessage), messageFormat.encode(actualMessage), description)
-                  .fold(identity, _ => ???)
+                  .fold(identity, message => s"It should not succeed for [$message]")
               )
           }
           .getOrElse(noDescriptionFound(description))

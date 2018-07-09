@@ -132,10 +132,26 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with EitherValues w
     }
   }
 
+  it should "succeed in strict mode if the published message is in the right format" in {
+    specWithOneMessage.runStrictMessageTests[Any] {
+      _.publish("description", firstExpectedMessage)
+    }
+  }
+
   it should "succeed if the published message is in the right format and different content" in {
     specWithOneMessage.runMessageTests[Any] {
-      _.publish("description", Json.obj("key1" -> jNumber(1), "key2" -> jString("123")))
+      _.publish("description", Json.obj("key1" -> jNumber(1), "key2" -> jString("123"), "foo" -> jString("bar")))
     }
+  }
+
+  it should "fail in strict mode if the published message is in the right format but has some extra field" in {
+    a[ScalaPactVerifyFailed] should be thrownBy {
+      specWithOneMessage.runStrictMessageTests[Any] {
+        _.publish("description",
+                  Json.obj("key1" -> jNumber(1), "key2" -> jString("444"), "foo" -> jString("unexpected key")))
+      }
+    }
+
   }
 
   it should "fail if the published message is in the right format however it breaks the rules" in {

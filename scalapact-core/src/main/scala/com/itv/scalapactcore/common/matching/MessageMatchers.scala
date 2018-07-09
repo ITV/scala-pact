@@ -32,7 +32,7 @@ object MessageMatchers {
 
     }
 
-  def matchSingleMessage(expected: String, received: String, rules: Option[Map[String, MatchingRule]])(
+  def matchSingleMessage(expected: String, received: String, rules: Option[Map[String, MatchingRule]], strict: Boolean)(
       implicit pactReader: IPactReader
   ): MatchOutcome =
     IrNodeMatchingRules.fromPactRules(rules) match {
@@ -43,7 +43,7 @@ object MessageMatchers {
           ee <- MatchIr.fromJSON(pactReader.fromJSON)(expected)
           rr <- MatchIr.fromJSON(pactReader.fromJSON)(received)
         } yield
-          nodeMatchToMatchResult(ee.isEqualTo(rr, strict = false, matchingRules, bePermissive = true),
+          nodeMatchToMatchResult(ee.isEqualTo(rr, strict = strict, matchingRules, bePermissive = !strict),
                                  matchingRules,
                                  isXml = false)
 

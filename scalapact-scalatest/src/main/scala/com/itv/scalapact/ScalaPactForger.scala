@@ -4,7 +4,6 @@ import com.itv.scalapact.ScalaPactVerify.ScalaPactVerifyFailed
 import com.itv.scalapact.shared.Maps._
 import com.itv.scalapact.shared.typeclasses._
 import com.itv.scalapact.shared._
-
 import com.itv.scalapactcore.message.{IMessageStubber, MessageStubber}
 import com.itv.scalapact.shared.ColourOuput._
 
@@ -96,9 +95,19 @@ object ScalaPactForger {
       def runMessageTests[A](test: IMessageStubber[A] => IMessageStubber[A])(
           implicit contractWriter: messageSpec.IContractWriter,
           pactReader: IPactReader
+      ): List[A] = runMessageTests(MessageStubber.Config(strictMode = false))(test)
+
+      def runStrictMessageTests[A](test: IMessageStubber[A] => IMessageStubber[A])(
+          implicit contractWriter: messageSpec.IContractWriter,
+          pactReader: IPactReader
+      ): List[A] = runMessageTests(MessageStubber.Config(strictMode = true))(test)
+
+      private def runMessageTests[A](config: MessageStubber.Config)(test: IMessageStubber[A] => IMessageStubber[A])(
+          implicit contractWriter: messageSpec.IContractWriter,
+          pactReader: IPactReader
       ): List[A] = {
         contractWriter.writeContract(scalaPactDescriptionFinal(options))
-        val result = test(MessageStubber(this.messages))
+        val result = test(MessageStubber(this.messages, config))
         if (result.outcome.isSuccess)
           result.results
         else {
