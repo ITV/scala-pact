@@ -31,7 +31,11 @@ object PactImplicits {
         "description"   -> message.description.asJson,
         "providerState" -> message.providerState.asJson,
         "contents"      -> contents(message),
-        "metaData"      -> message.metaData.asJson
+        "metaData"      -> message.metaData.asJson,
+        "matchingRules" -> (message.matchingRules match {
+          case mr if mr.nonEmpty => message.matchingRules.asJson
+          case _                 => jNull
+        })
     ),
     c =>
       for {
@@ -39,8 +43,14 @@ object PactImplicits {
         providerState <- (c --\ "providerState").as[Option[String]]
         contents      <- (c --\ "contents").as[Json]
         metadata      <- (c --\ "metaData").as[Map[String, String]]
+        matchingRules <- (c --\ "matchingRules").as[Option[Map[String, MatchingRule]]]
       } yield
-        Message(description, providerState, contents.nospaces, metadata, Map.empty, contentType(contents)) //FIXME: Matching rules should be obtained from the kjson
+        Message(description,
+                providerState,
+                contents.nospaces,
+                metadata,
+                matchingRules.getOrElse(Map.empty),
+                contentType(contents))
   )
 
   def contentType(contents: Json): MessageContentType =

@@ -293,6 +293,7 @@ object PactFileExamples {
         providerState = Some("or maybe 'scenario'? not sure about this"),
         contents = """Hello world!""",
         metaData = Message.Metadata(),
+        matchingRules = Map("foo" -> MatchingRule(Some("regex"), Some("\\w+"), None)),
         ApplicationText
       )
     )
@@ -311,6 +312,12 @@ object PactFileExamples {
                               |            "providerState": "or maybe 'scenario'? not sure about this",
                               |            "contents": "Hello world!",
                               |            "metaData": {
+                              |            },
+                              |            "matchingRules" : {
+                              |               "foo" : {
+                              |                 "match":"regex",
+                              |                 "regex": "\\w+"
+                              |               }
                               |            }
                               |        }
                               |    ]
@@ -326,6 +333,7 @@ object PactFileExamples {
         providerState = Some("or maybe 'scenario'? not sure about this"),
         contents = """{"foo":"bar"}""",
         metaData = Message.Metadata("contentType" -> "application/json"),
+        matchingRules = Map.empty,
         ApplicationJson
       )
     )
@@ -357,6 +365,7 @@ object PactFileExamples {
         providerState = Some("or maybe 'scenario'! not sure about this"),
         contents = """{"boo":"xxx"}""",
         metaData = Message.Metadata("contentType" -> "application/json"),
+        matchingRules = Map.empty,
         ApplicationJson
       )
     )

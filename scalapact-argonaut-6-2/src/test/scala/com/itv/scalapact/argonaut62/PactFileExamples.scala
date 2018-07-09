@@ -281,8 +281,8 @@ object PactFileExamples {
         providerState = Some("or maybe 'scenario'? not sure about this"),
         contents = """{"foo":"bar"}""",
         metaData = Message.Metadata("contentType" -> "application/json"),
-        matchingRules = Map.empty, //FIXME maybe ?
-        MessageContentType.ApplicationJson
+        matchingRules = Map("foo"                 -> MatchingRule(Some("regex"), Some("\\w+"), None)),
+        contentType = MessageContentType.ApplicationJson,
       )
     )
   )
@@ -301,6 +301,12 @@ object PactFileExamples {
                                 |            "contents": {"foo":"bar"},
                                 |            "metaData": {
                                 |              "contentType": "application/json"
+                                |            },
+                                |            "matchingRules" : {
+                                |               "foo" : {
+                                |                 "match":"regex",
+                                |                 "regex": "\\w+"
+                                |               }
                                 |            }
                                 |        }
                                 |    ]
@@ -313,7 +319,7 @@ object PactFileExamples {
         providerState = Some("or maybe 'scenario'! not sure about this"),
         contents = """{"boo":"xxx"}""",
         metaData = Message.Metadata("contentType" -> "application/json"),
-        matchingRules = Map.empty, //FIXME maybe ?
+        matchingRules = Map.empty,
         MessageContentType.ApplicationJson
       )
     )
@@ -332,7 +338,13 @@ object PactFileExamples {
                                 |            "contents": {"foo":"bar"},
                                 |            "metaData": {
                                 |              "contentType": "application/json"
-                                |            }
+                                |            },
+                                |            "matchingRules" : {
+                                |               "foo" : {
+                                |                 "match":"regex",
+                                |                 "regex": "\\w+"
+                                |               }
+                                |             }
                                 |        },
                                 |        {
                                 |            "description": "Published another credit data",
@@ -363,7 +375,13 @@ object PactFileExamples {
       |            "contents": {"foo":"bar"},
       |            "metaData": {
       |              "contentType": "application/json"
-      |            }
+      |            },
+      |            "matchingRules" : {
+      |               "foo" : {
+      |                 "match":"regex",
+      |                 "regex": "\\w+"
+      |               }
+      |             }
       |        },
       |        {
       |            "description": "Published another credit data",
