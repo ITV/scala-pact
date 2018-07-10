@@ -52,14 +52,24 @@ object ScalaPactForger {
         providerState,
         format.encode(value),
         meta,
-        addDollarWheRequired(iInferTypes.infer(value)) ++ addDollarWheRequired(matchingRules),
+        merge(iInferTypes.infer(value), matchingRules),
         format.contentType
       )
 
-    private def addDollarWheRequired(rules: Map[String, MatchingRule]): Map[String, MatchingRule] = rules.map {
-      case (k, v) if k.startsWith("$") => k        -> v
-      case (k, v) if k.startsWith(".") => "$" + k  -> v
-      case (k, v)                      => "$." + k -> v
+    private def normalizeKey(key: String): String =
+      if (key.startsWith("$"))
+        key
+      else if (key.startsWith("."))
+        "$" + key
+      else
+        "$." + key
+
+    private def merge(lowPriorityRules: Map[String, MatchingRule],
+                      highPriorityRules: Map[String, MatchingRule]): Map[String, MatchingRule] = {
+      val normalizeHighPriorityRules = highPriorityRules.map { case (k, v) => normalizeKey(k) -> v }
+      highPriorityRules ++ lowPriorityRules.filterKeys { k =>
+        !normalizeHighPriorityRules.contains(normalizeKey(k))
+      }
     }
   }
 

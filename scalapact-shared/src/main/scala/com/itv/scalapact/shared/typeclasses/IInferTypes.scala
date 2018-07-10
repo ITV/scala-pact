@@ -12,7 +12,7 @@ trait IInferTypes[T] {
 }
 
 object IInferTypes {
-  implicit def noneInferTypeInstance[T] = new IInferTypes[T] {
+  implicit def noneInferTypeInstance[T]: IInferTypes[T] = new IInferTypes[T] {
     override protected def inferFrom(t: T): Map[String, String] = Map.empty
   }
 }

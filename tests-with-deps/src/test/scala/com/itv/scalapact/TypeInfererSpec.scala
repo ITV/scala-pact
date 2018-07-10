@@ -39,7 +39,7 @@ class TypeInfererSpec extends FlatSpec with OptionValues with EitherValues with 
                       writer) should ===(
       List(
         Map(
-          "$.key1" -> MatchingRule(Some("int"), None, None)
+          ".key1" -> MatchingRule(Some("int"), None, None)
         )
       )
     )
@@ -55,7 +55,7 @@ class TypeInfererSpec extends FlatSpec with OptionValues with EitherValues with 
                           .withRegex(".key2", "\\d+")
                           .withContent(Json.obj("key1" -> jNumber(1), "key2" -> jString("444")))
                       ),
-                      writer) should ===(List(Map("$.key2" -> MatchingRule(Some("regex"), Some("\\d+"), None))))
+                      writer) should ===(List(Map(".key2" -> MatchingRule(Some("regex"), Some("\\d+"), None))))
   }
 
   it should "merge the inferred matching rules to the message when the user use $" in {
