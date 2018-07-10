@@ -46,8 +46,13 @@ object ScalaPactForger {
     def withMeta(meta: Message.Metadata): PartialScalaPactMessage =
       copy(meta = meta)
 
-    def withContent[T](value: T)(implicit format: IMessageFormat[T]): Message =
-      Message(description, providerState, format.encode(value), meta, matchingRules, format.contentType)
+    def withContent[T](value: T)(implicit format: IMessageFormat[T], iInferTypes: IInferTypes[T]): Message =
+      Message(description,
+              providerState,
+              format.encode(value),
+              meta,
+              iInferTypes.infer(value) ++ matchingRules,
+              format.contentType)
   }
 
   sealed trait ForgePactElements {

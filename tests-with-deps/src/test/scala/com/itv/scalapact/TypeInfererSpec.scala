@@ -1,0 +1,91 @@
+package com.itv.scalapact
+
+import argonaut.Json
+import argonaut._
+import Argonaut._
+import com.itv.scalapact.ScalaPactForger.{ScalaPactOptions, forgePact, message, messageSpec}
+
+import com.itv.scalapact.shared.typeclasses.IInferTypes
+import com.itv.scalapact.shared.{MatchingRule, Message}
+import org.scalactic.TypeCheckedTripleEquals
+import org.scalatest.{EitherValues, FlatSpec, OptionValues}
+import org.scalatest.Matchers._
+
+class TypeInfererSpec extends FlatSpec with OptionValues with EitherValues with TypeCheckedTripleEquals {
+  import json.{inferTypeInstance => _, _}
+  import messageSpec._
+  implicit val defaultOptions = ScalaPactOptions(writePactFiles = true, outputPath = "/tmp")
+
+  it should "add no matching rules if the typer inferer doesn't infer them" in {
+    implicit val typeInferer: IInferTypes[Json] = inferTypesFrom(Map.empty)
+    val writer                                  = StubContractWriter()
+
+    matchingRulesFrom(baseSpec(
+                        baseMessage.withContent(Json.obj("key1" -> jNumber(1), "key2" -> jString("444")))
+                      ),
+                      writer) should ===(List(Map.empty[String, MatchingRule]))
+  }
+
+  it should "add the infered matching rules to the message" in {
+    implicit val typeInferer: IInferTypes[Json] = inferTypesFrom(Map(".key1" -> "int"))
+
+    val writer = StubContractWriter()
+
+    matchingRulesFrom(baseSpec(
+                        baseMessage
+                          .withContent(Json.obj("key1" -> jNumber(1), "key2" -> jString("444")))
+                      ),
+                      writer) should ===(
+      List(
+        Map(
+          ".key1" -> MatchingRule(Some("int"), None, None)
+        )
+      )
+    )
+  }
+
+  it should "merge the inferred matching rules to the message" in {
+    implicit val typeInferer: IInferTypes[Json] = inferTypesFrom(Map(".key2" -> "int"))
+
+    val writer = StubContractWriter()
+
+    matchingRulesFrom(baseSpec(
+                        baseMessage
+                          .withRegex(".key2", "\\d+")
+                          .withContent(Json.obj("key1" -> jNumber(1), "key2" -> jString("444")))
+                      ),
+                      writer) should ===(List(Map(".key2" -> MatchingRule(Some("regex"), Some("\\d+"), None))))
+  }
+
+  private def inferTypesFrom(stringToString: Map[JsonField, JsonField]): IInferTypes[Json] =
+    new IInferTypes[Json] {
+      override protected def inferFrom(t: Json): Map[String, String] = stringToString
+    }
+
+  def toJson(value: String) = Parse.parse(value).right.value
+
+  private def baseSpec(message: Message): ScalaPactForger.forgePact.ScalaPactDescription =
+    forgePact
+      .between("Consumer")
+      .and("Provider")
+      .addMessage(
+        message
+      )
+
+  private def baseMessage: ScalaPactForger.PartialScalaPactMessage =
+    message
+      .description("description")
+      .withProviderState("whatever")
+      .withMeta(Message.Metadata.empty)
+
+  private def matchingRulesFrom(
+      description: ScalaPactForger.forgePact.ScalaPactDescription,
+      writer: IContractWriter
+  ): List[Map[String, MatchingRule]] =
+    description.runMessageTests[Map[String, MatchingRule]] {
+      _.consume("description") { message =>
+        message.matchingRules
+      }
+    }(writer, implicitly)
+
+}

@@ -1,7 +1,5 @@
 package com.itv.scalapact
 
-import java.util.concurrent.atomic.AtomicReference
-
 import argonaut.Json
 import argonaut._
 import Argonaut._
@@ -13,7 +11,7 @@ import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.{EitherValues, FlatSpec, OptionValues}
 import org.scalatest.Matchers._
 
-class ScalaPactForgerTest extends FlatSpec with OptionValues with EitherValues with TypeCheckedTripleEquals {
+class ScalaPactForgerSpec extends FlatSpec with OptionValues with EitherValues with TypeCheckedTripleEquals {
 
   import com.itv.scalapact.json._
   implicit val defaultOptions = ScalaPactOptions(writePactFiles = true, outputPath = "/tmp")
@@ -200,18 +198,6 @@ class ScalaPactForgerTest extends FlatSpec with OptionValues with EitherValues w
         _.publish("description", Json.obj("key1" -> jString("1"), "key2" -> jString("foo3")))
       }
     }
-  }
-
-  case class StubContractWriter(
-      actualPact: AtomicReference[Option[ScalaPactForger.ScalaPactDescriptionFinal]] = new AtomicReference(None)
-  ) extends IContractWriter {
-
-    def messages: List[Message] = actualPact.get().map(_.messages).toList.flatten
-
-    def interactions = actualPact.get().map(_.interactions).toList.flatten
-
-    override def writeContract(scalaPactDescriptionFinal: ScalaPactForger.ScalaPactDescriptionFinal): Unit =
-      actualPact.set(Some(scalaPactDescriptionFinal))
   }
 
   def toJson(value: String) = Parse.parse(value).right.value
