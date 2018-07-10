@@ -9,6 +9,7 @@ import com.itv.scalapact.shared.{Helpers, ScalaPactSettings, SslContextMap}
 import scala.concurrent.duration._
 import com.itv.scalapact.shared.PactLogger
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IScalaPactHttpClient}
+import com.itv.scalapactcore.message.{IMessageStubber, MessageStubber}
 
 object ScalaPactVerify {
   implicit def toOption[A](a: A): Option[A] = Option(a)
@@ -33,11 +34,13 @@ object ScalaPactVerify {
       def runStrictVerificationAgainst[F[_]](port: Int)(implicit pactReader: IPactReader,
                                                         httpClient: IScalaPactHttpClient[F]): Unit =
         doVerification("http", "localhost", port, VerifyTargetConfig.defaultClientTimeout, strict = true)
+
       def runStrictVerificationAgainst[F[_]](
           port: Int,
           clientTimeout: Duration
       )(implicit pactReader: IPactReader, httpClient: IScalaPactHttpClient[F]): Unit =
         doVerification("http", "localhost", port, clientTimeout, strict = true)
+
       def runStrictVerificationAgainst[F[_]](host: String, port: Int)(implicit pactReader: IPactReader,
                                                                       httpClient: IScalaPactHttpClient[F]): Unit =
         doVerification("http", host, port, VerifyTargetConfig.defaultClientTimeout, strict = true)
@@ -80,6 +83,27 @@ object ScalaPactVerify {
       def runVerificationAgainst[F[_]](target: VerifyTargetConfig)(implicit pactReader: IPactReader,
                                                                    httpClient: IScalaPactHttpClient[F]): Unit =
         doVerification(target.protocol, target.host, target.port, target.clientTimeout, strict = false)
+
+      def runMessageTests[A](test: IMessageStubber[A] => IMessageStubber[A])(
+          implicit pactReader: IPactReader
+      ): Unit = runMessageTests(MessageStubber.Config(strictMode = false))(test)
+
+      def runStrictMessageTests[A](test: IMessageStubber[A] => IMessageStubber[A])(
+          implicit pactReader: IPactReader
+      ): Unit = runMessageTests(MessageStubber.Config(strictMode = true))(test)
+
+      private def runMessageTests[A](config: MessageStubber.Config)(test: IMessageStubber[A] => IMessageStubber[A])(
+          implicit pactReader: IPactReader
+      ): Unit = {
+        import com.itv.scalapact.shared.ColourOuput._
+        val result = test(MessageStubber(pactReader.readPact("").toOption.get.messages, config)) // FIXME it is not working
+        if (result.outcome.isSuccess)
+          ()
+        else {
+          PactLogger.error(result.outcome.renderAsString.red)
+          throw new ScalaPactVerifyFailed
+        }
+      }
 
       private def doVerification[F[_]](
           protocol: String,
@@ -198,6 +222,7 @@ object ScalaPactVerify {
   }
 
   sealed trait PactSourceType
+
   case class loadFromLocal(path: String) extends PactSourceType
   case class pactBroker(url: String, provider: String, consumers: List[String]) extends PactSourceType {
     def withContractVersion(version: String): pactBrokerWithVersion =

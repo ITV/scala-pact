@@ -11,7 +11,7 @@ import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.{EitherValues, FlatSpec, OptionValues}
 import org.scalatest.Matchers._
 
-class ScalaPactForgerSpec extends FlatSpec with OptionValues with EitherValues with TypeCheckedTripleEquals {
+class ScalaPactMessageForgerSpec extends FlatSpec with OptionValues with EitherValues with TypeCheckedTripleEquals {
 
   import com.itv.scalapact.json._
   implicit val defaultOptions = ScalaPactOptions(writePactFiles = true, outputPath = "/tmp")

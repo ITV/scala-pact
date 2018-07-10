@@ -5,7 +5,6 @@ import com.itv.scalapact.shared.Maps._
 import com.itv.scalapact.shared.typeclasses._
 import com.itv.scalapact.shared._
 import com.itv.scalapactcore.message.{IMessageStubber, MessageStubber}
-import com.itv.scalapact.shared.ColourOuput._
 
 import scala.language.implicitConversions
 import scala.util.Properties
@@ -133,6 +132,7 @@ object ScalaPactForger {
           implicit contractWriter: messageSpec.IContractWriter,
           pactReader: IPactReader
       ): List[A] = {
+        import com.itv.scalapact.shared.ColourOuput._
         contractWriter.writeContract(scalaPactDescriptionFinal(options))
         val result = test(MessageStubber(this.messages, config))
         if (result.outcome.isSuccess)
