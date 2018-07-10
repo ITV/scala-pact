@@ -4,7 +4,7 @@ import argonaut.{Json, Parse}
 import com.itv.scalapact.argonaut62.{PactReader, PactWriter}
 import com.itv.scalapact.shared.MessageContentType
 import com.itv.scalapact.shared.MessageContentType.ApplicationJson
-import com.itv.scalapact.shared.typeclasses.{IMessageFormat, IPactReader, IPactWriter, MessageFormatError}
+import com.itv.scalapact.shared.typeclasses._
 
 package object json {
   implicit val pactReaderInstance: IPactReader =
@@ -20,6 +20,9 @@ package object json {
 
     override def decode(s: String): Either[MessageFormatError, Json] =
       Parse.parse(s).fold(m => Left(MessageFormatError(m)), Right(_))
+  }
+  implicit val inferTypeInstance: IInferTypes[Json] = new IInferTypes[Json] {
+    override protected def inferFrom(t: Json): Map[String, String] = Map.empty
   }
 
 }

@@ -3,7 +3,7 @@ package com.itv.scalapact
 import com.itv.scalapact.circe08.{PactReader, PactWriter}
 import com.itv.scalapact.shared.MessageContentType
 import com.itv.scalapact.shared.MessageContentType.ApplicationJson
-import com.itv.scalapact.shared.typeclasses.{IMessageFormat, IPactReader, IPactWriter, MessageFormatError}
+import com.itv.scalapact.shared.typeclasses._
 import io.circe.Json
 import io.circe.parser.parse
 
@@ -22,4 +22,9 @@ package object json {
     override def decode(s: String): Either[MessageFormatError, Json] =
       parse(s).fold(m => Left(MessageFormatError(m.message)), Right(_))
   }
+
+  implicit val inferTypeInstance: IInferTypes[Json] = new IInferTypes[Json] {
+    override protected def inferFrom(t: Json): Map[String, String] = Map.empty
+  }
+
 }
