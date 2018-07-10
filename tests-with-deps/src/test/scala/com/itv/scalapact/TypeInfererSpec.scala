@@ -17,11 +17,12 @@ class TypeInfererSpec extends FlatSpec with OptionValues with EitherValues with 
   implicit val defaultOptions = ScalaPactOptions(writePactFiles = true, outputPath = "/tmp")
 
   it should "add no matching rules if the typer inferer doesn't infer them" in {
-    implicit val typeInferer: IInferTypes[Json] = inferTypesFrom(Map.empty)
-    val writer                                  = StubContractWriter()
+    import IInferTypes.noneInferTypeInstance
+    val writer = StubContractWriter()
 
     matchingRulesFrom(baseSpec(
-                        baseMessage.withContent(Json.obj("key1" -> jNumber(1), "key2" -> jString("444")))
+                        baseMessage
+                          .withContent(Json.obj("key1" -> jNumber(1), "key2" -> jString("444")))
                       ),
                       writer) should ===(List(Map.empty[String, MatchingRule]))
   }
@@ -38,7 +39,7 @@ class TypeInfererSpec extends FlatSpec with OptionValues with EitherValues with 
                       writer) should ===(
       List(
         Map(
-          ".key1" -> MatchingRule(Some("int"), None, None)
+          "$.key1" -> MatchingRule(Some("int"), None, None)
         )
       )
     )
@@ -54,7 +55,20 @@ class TypeInfererSpec extends FlatSpec with OptionValues with EitherValues with 
                           .withRegex(".key2", "\\d+")
                           .withContent(Json.obj("key1" -> jNumber(1), "key2" -> jString("444")))
                       ),
-                      writer) should ===(List(Map(".key2" -> MatchingRule(Some("regex"), Some("\\d+"), None))))
+                      writer) should ===(List(Map("$.key2" -> MatchingRule(Some("regex"), Some("\\d+"), None))))
+  }
+
+  it should "merge the inferred matching rules to the message when the user use $" in {
+    implicit val typeInferer: IInferTypes[Json] = inferTypesFrom(Map(".key2" -> "int"))
+
+    val writer = StubContractWriter()
+
+    matchingRulesFrom(baseSpec(
+                        baseMessage
+                          .withRegex("$.key2", "\\d+")
+                          .withContent(Json.obj("key1" -> jString(""), "key2" -> jString("444")))
+                      ),
+                      writer) should ===(List(Map("$.key2" -> MatchingRule(Some("regex"), Some("\\d+"), None))))
   }
 
   private def inferTypesFrom(stringToString: Map[JsonField, JsonField]): IInferTypes[Json] =

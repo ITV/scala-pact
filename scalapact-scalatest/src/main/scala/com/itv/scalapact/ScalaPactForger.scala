@@ -47,12 +47,20 @@ object ScalaPactForger {
       copy(meta = meta)
 
     def withContent[T](value: T)(implicit format: IMessageFormat[T], iInferTypes: IInferTypes[T]): Message =
-      Message(description,
-              providerState,
-              format.encode(value),
-              meta,
-              iInferTypes.infer(value) ++ matchingRules,
-              format.contentType)
+      Message(
+        description,
+        providerState,
+        format.encode(value),
+        meta,
+        addDollarWheRequired(iInferTypes.infer(value)) ++ addDollarWheRequired(matchingRules),
+        format.contentType
+      )
+
+    private def addDollarWheRequired(rules: Map[String, MatchingRule]): Map[String, MatchingRule] = rules.map {
+      case (k, v) if k.startsWith("$") => k        -> v
+      case (k, v) if k.startsWith(".") => "$" + k  -> v
+      case (k, v)                      => "$." + k -> v
+    }
   }
 
   sealed trait ForgePactElements {

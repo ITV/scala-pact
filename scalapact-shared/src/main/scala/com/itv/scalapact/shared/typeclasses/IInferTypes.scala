@@ -10,3 +10,9 @@ trait IInferTypes[T] {
 
   protected def inferFrom(t: T): Map[String, String]
 }
+
+object IInferTypes {
+  implicit def noneInferTypeInstance[T] = new IInferTypes[T] {
+    override protected def inferFrom(t: T): Map[String, String] = Map.empty
+  }
+}
