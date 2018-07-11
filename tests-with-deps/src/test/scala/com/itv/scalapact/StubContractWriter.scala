@@ -13,6 +13,8 @@ case class StubContractWriter(
 
   def interactions = actualPact.get().map(_.interactions).toList.flatten
 
-  override def writeContract(scalaPactDescriptionFinal: ScalaPactForger.ScalaPactDescriptionFinal): Unit =
-    actualPact.set(Some(scalaPactDescriptionFinal))
+  override def writeContract(
+      scalaPactDescriptionFinal: ScalaPactForger.ScalaPactDescriptionFinal
+  ): Either[Throwable, Unit] =
+    Right(actualPact.set(Some(scalaPactDescriptionFinal)))
 }

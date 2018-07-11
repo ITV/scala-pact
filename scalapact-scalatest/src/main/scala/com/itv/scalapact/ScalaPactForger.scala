@@ -7,7 +7,7 @@ import com.itv.scalapact.shared._
 import com.itv.scalapactcore.message.{IMessageStubber, MessageStubber}
 
 import scala.language.implicitConversions
-import scala.util.Properties
+import scala.util.{Properties, Try}
 
 object ScalaPactForger {
 
@@ -133,14 +133,23 @@ object ScalaPactForger {
           pactReader: IPactReader
       ): List[A] = {
         import com.itv.scalapact.shared.ColourOuput._
-        contractWriter.writeContract(scalaPactDescriptionFinal(options))
-        val result = test(MessageStubber(this.messages, config))
-        if (result.outcome.isSuccess)
-          result.results
-        else {
-          PactLogger.error(result.outcome.renderAsString.red)
-          throw new ScalaPactVerifyFailed
-        }
+        contractWriter
+          .writeContract(scalaPactDescriptionFinal(options))
+          .fold(
+            t => {
+              PactLogger.error(s"Unable to write contract because: [$t]".red)
+              throw new ScalaPactVerifyFailed
+            },
+            _ => {
+              val result = test(MessageStubber(this.messages, config))
+              if (result.outcome.isSuccess)
+                result.results
+              else {
+                PactLogger.error(result.outcome.renderAsString.red)
+                throw new ScalaPactVerifyFailed
+              }
+            }
+          )
       }
 
       private def scalaPactDescriptionFinal(options: ScalaPactOptions): ScalaPactDescriptionFinal =
@@ -152,7 +161,6 @@ object ScalaPactForger {
           messages,
           options
         )
-
     }
 
   }
@@ -162,18 +170,20 @@ object ScalaPactForger {
       IContractWriter()
 
     trait IContractWriter {
-      def writeContract(scalaPactDescriptionFinal: ScalaPactDescriptionFinal): Unit
+      def writeContract(scalaPactDescriptionFinal: ScalaPactDescriptionFinal): Either[Throwable, Unit]
     }
 
     private object IContractWriter {
       def apply()(implicit options: ScalaPactOptions, pactWriter: IPactWriter): IContractWriter = new IContractWriter {
 
-        def writeContract(scalaPactDescriptionFinal: ScalaPactDescriptionFinal) =
-          if (options.writePactFiles) {
-            ScalaPactContractWriter.writePactContracts(options.outputPath)(pactWriter)(
-              scalaPactDescriptionFinal.withHeaderForSsl
-            )
-          }
+        def writeContract(scalaPactDescriptionFinal: ScalaPactDescriptionFinal): Either[Throwable, Unit] =
+          Try {
+            if (options.writePactFiles) {
+              ScalaPactContractWriter.writePactContracts(options.outputPath)(pactWriter)(
+                scalaPactDescriptionFinal.withHeaderForSsl
+              )
+            }
+          }.toEither
       }
     }
   }
