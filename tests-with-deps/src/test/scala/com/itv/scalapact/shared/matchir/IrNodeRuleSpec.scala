@@ -187,6 +187,90 @@ class IrNodeRuleSpec extends FunSpec with Matchers {
       (expected =<>= actual).isEqual shouldEqual false
     }
 
+    it("should validate a node using a type matching rule for integers") {
+      IrNodeMatchingRules(
+        IrNodeIntegerRule(IrNodePath.empty <~ "number")
+      )
+
+      val expected: IrNode = MatchIr
+        .fromJSON(JsonConversionFunctions.fromJSON)(
+          """
+            |{
+            |  "number": 18.0
+            |}
+          """.stripMargin
+        )
+        .get
+
+      val actual: IrNode = MatchIr
+        .fromJSON(JsonConversionFunctions.fromJSON)(
+          """
+            |{
+            |  "number": 18
+            |}
+          """.stripMargin
+        )
+        .get
+
+      (expected =<>= actual).isEqual shouldEqual false
+    }
+
+    it("should return false if node types are different using a type matching rule for decimals") {
+      implicit val rules: IrNodeMatchingRules = IrNodeMatchingRules(
+        IrNodeIntegerRule(IrNodePath.empty <~ "number")
+      )
+
+      val expected: IrNode = MatchIr
+        .fromJSON(JsonConversionFunctions.fromJSON)(
+          """
+            |{
+            |  "number": 18
+            |}
+          """.stripMargin
+        )
+        .get
+
+      val actual: IrNode = MatchIr
+        .fromJSON(JsonConversionFunctions.fromJSON)(
+          """
+            |{
+            |  "number": 18.0
+            |}
+          """.stripMargin
+        )
+        .get
+
+      (expected =<>= actual).isEqual shouldEqual false
+    }
+
+    it("should return true if node types are different using a type matching rule for decimals") {
+      implicit val rules: IrNodeMatchingRules = IrNodeMatchingRules(
+        IrNodeIntegerRule(IrNodePath.empty <~ "number")
+      )
+
+      val expected: IrNode = MatchIr
+        .fromJSON(JsonConversionFunctions.fromJSON)(
+          """
+            |{
+            |  "number": 18
+            |}
+          """.stripMargin
+        )
+        .get
+
+      val actual: IrNode = MatchIr
+        .fromJSON(JsonConversionFunctions.fromJSON)(
+          """
+            |{
+            |  "number": 19999
+            |}
+          """.stripMargin
+        )
+        .get
+
+      check(expected =<>= actual)
+    }
+
     it("should be able to validate a node primitive using regex") {
 
       implicit val rules: IrNodeMatchingRules =

@@ -27,9 +27,15 @@ trait XmlConversionFunctions extends PrimitiveConversionFunctions {
         case (k, v) if v == null =>
           IrNodeAttributes(Map(k -> IrNodeAttribute(IrNullNode, pathToParent <@ k)))
 
-        case (k, v) if v.matches(isNumericValueRegex) =>
+        case (k, v) if v.matches(isIntegerValueRegex) =>
+          safeStringToLong(v)
+            .map(IrIntegerNode)
+            .map(vv => IrNodeAttributes(Map(k -> IrNodeAttribute(vv, pathToParent <@ k))))
+            .getOrElse(IrNodeAttributes.empty)
+
+        case (k, v) if v.matches(isDecimalValueRegex) =>
           safeStringToDouble(v)
-            .map(IrNumberNode)
+            .map(IrDecimalNode)
             .map(vv => IrNodeAttributes(Map(k -> IrNodeAttribute(vv, pathToParent <@ k))))
             .getOrElse(IrNodeAttributes.empty)
 
@@ -49,7 +55,8 @@ trait XmlConversionFunctions extends PrimitiveConversionFunctions {
     nodes match {
       case Nil if value == null                      => Option(IrNullNode)
       case Nil if value.isEmpty                      => None
-      case Nil if value.matches(isNumericValueRegex) => safeStringToDouble(value).map(IrNumberNode)
+      case Nil if value.matches(isIntegerValueRegex) => safeStringToLong(value).map(IrIntegerNode)
+      case Nil if value.matches(isDecimalValueRegex) => safeStringToDouble(value).map(IrDecimalNode)
       case Nil if value.matches(isBooleanValueRegex) => safeStringToBoolean(value).map(IrBooleanNode)
       case Nil                                       => Option(IrStringNode(value))
       case _                                         => None
@@ -109,8 +116,18 @@ trait PrimitiveConversionFunctions {
 
   // Maybe negative, must have digits, may have decimal and if so must have a
   // digit after it, can have more trailing digits.
-  val isNumericValueRegex = """^-?\d+\.?\d*$"""
+  val isIntegerValueRegex = """^-?\d+$"""
+  val isDecimalValueRegex = """^-?\d+\.?\d*$"""
   val isBooleanValueRegex = """^(true|false)$"""
+
+  def safeStringToLong(str: String): Option[Long] =
+    try {
+      Option(str.toLong)
+    } catch {
+      case _: Throwable =>
+        PactLogger.error(s"Failed to convert string '$str' to number (double)".red)
+        None
+    }
 
   def safeStringToDouble(str: String): Option[Double] =
     try {

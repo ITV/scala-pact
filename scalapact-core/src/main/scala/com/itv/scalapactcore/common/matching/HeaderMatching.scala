@@ -56,6 +56,7 @@ object HeaderMatching {
                 rls
                   .findForPath(IrNodePathEmpty <~ header._1, isXml = false)
                   .map {
+                    //FIXME Avoid pattern matching
                     case IrNodeTypeRule(_) =>
                       MatchOutcomeSuccess
 
@@ -68,6 +69,7 @@ object HeaderMatching {
 
                     case IrNodeMinArrayLengthRule(_, _) =>
                       MatchOutcomeSuccess
+                    case _ => ??? //FIXME add IrNodeIntergerrule
                   }
               }
         }

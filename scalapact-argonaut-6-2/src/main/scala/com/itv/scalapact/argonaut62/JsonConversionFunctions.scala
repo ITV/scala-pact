@@ -13,7 +13,10 @@ object JsonConversionFunctions extends IJsonConversionFunctions {
       jsonRootToIrNode(json, IrNodePathEmpty)
     }
 
-  def jsonToIrNode(label: String, json: Json, pathToParent: IrNodePath): IrNode =
+  def jsonToIrNode(label: String, json: Json, pathToParent: IrNodePath): IrNode = {
+    def irNodeFrom(maybeNode: Option[IrNodePrimitive]) =
+      IrNode(label, maybeNode).withPath(pathToParent)
+
     json match {
       case j: Json if j.isArray =>
         IrNode(label, jsonArrayToIrNodeList(label, j, pathToParent)).withPath(pathToParent).markAsArray
@@ -24,15 +27,18 @@ object JsonConversionFunctions extends IJsonConversionFunctions {
       case j: Json if j.isNull =>
         IrNode(label, IrNullNode).withPath(pathToParent)
 
+      case j: Json if j.isNumber && j.toString().contains(".") =>
+        irNodeFrom(j.number.flatMap(_.toDouble).map(IrDecimalNode))
       case j: Json if j.isNumber =>
-        IrNode(label, j.number.flatMap(_.toDouble).map(d => IrNumberNode(d))).withPath(pathToParent)
+        irNodeFrom(j.number.flatMap(_.toLong).map(IrIntegerNode))
 
       case j: Json if j.isBool =>
-        IrNode(label, j.bool.map(IrBooleanNode)).withPath(pathToParent)
+        irNodeFrom(j.bool.map(IrBooleanNode))
 
       case j: Json if j.isString =>
-        IrNode(label, j.string.map(IrStringNode)).withPath(pathToParent)
+        irNodeFrom(j.string.map(IrStringNode))
     }
+  }
 
   def jsonObjectToIrNodeList(json: Json, pathToParent: IrNodePath): List[IrNode] =
     json.objectFieldsOrEmpty

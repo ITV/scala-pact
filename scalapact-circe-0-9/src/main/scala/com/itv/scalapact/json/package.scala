@@ -30,9 +30,7 @@ package object json {
 
       def typesFromJsonObject(path: String, acc: Set[(String, String)])(json: JsonObject): Set[(String, String)] = {
         def typeNumber(jsonNumber: JsonNumber): String =
-          (jsonNumber.toLong.map(x => if (x <= Int.MaxValue && x >= Int.MinValue) "integer" else "long") orElse Some(
-            "double"
-          )).getOrElse("number")
+          jsonNumber.toLong.map(_ => "integer").getOrElse("decimal")
 
         json.keys
           .flatMap(
@@ -43,10 +41,10 @@ package object json {
 
                 jsonValue.fold(
                   Set.empty,
-                  _ => Set(pair("boolean")),
+                  _ => Set.empty,
                   value => Set(pair(typeNumber(value))),
-                  _ => Set(pair("string")),
-                  _ => acc ++ Set(pair("array")),
+                  _ => Set.empty,
+                  _ => Set.empty,
                   x => typesFromJsonObject(s"$currentPath.", Set(pair("object")) ++ acc)(x)
                 )
             }

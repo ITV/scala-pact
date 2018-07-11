@@ -473,16 +473,28 @@ case class IrStringNode(value: String) extends IrNodePrimitive {
   def renderAsString: String     = value
   def primitiveTypeName: String  = "string"
 }
-case class IrNumberNode(value: Double) extends IrNodePrimitive {
+
+case class IrIntegerNode(value: Long) extends IrNodePrimitive {
   def isString: Boolean          = false
   def isNumber: Boolean          = true
   def isBoolean: Boolean         = false
   def isNull: Boolean            = false
   def asString: Option[String]   = None
-  def asNumber: Option[Double]   = Option(value)
+  def asNumber: Option[Double]   = Option(value.toDouble)
   def asBoolean: Option[Boolean] = None
   def renderAsString: String     = value.toString.replaceAll("\\.0", "")
-  def primitiveTypeName: String  = "number"
+  def primitiveTypeName: String  = "integer"
+}
+case class IrDecimalNode(value: Double) extends IrNodePrimitive {
+  def isString: Boolean          = false
+  def isNumber: Boolean          = true
+  def isBoolean: Boolean         = false
+  def isNull: Boolean            = false
+  def asString: Option[String]   = None
+  def asNumber: Option[Double]   = Option(value.toDouble)
+  def asBoolean: Option[Boolean] = None
+  def renderAsString: String     = value.toString.replaceAll("\\.0", "")
+  def primitiveTypeName: String  = "decimal"
 }
 case class IrBooleanNode(value: Boolean) extends IrNodePrimitive {
   def isString: Boolean          = false

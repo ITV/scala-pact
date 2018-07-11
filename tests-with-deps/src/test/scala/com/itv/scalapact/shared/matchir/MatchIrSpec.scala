@@ -5,6 +5,8 @@ import org.scalatest.{FunSpec, Matchers}
 
 class MatchIrSpec extends FunSpec with Matchers {
 
+  //TODO Support Decimal in the test
+
   def check(res: IrNodeEqualityResult): Unit =
     res match {
       case p @ IrNodesEqual   => p shouldEqual IrNodesEqual
@@ -124,7 +126,7 @@ class MatchIrSpec extends FunSpec with Matchers {
           .withAttributes(
             IrNodeAttributes(
               Map(
-                "id"          -> IrNodeAttribute(IrNumberNode(3), IrNodePathEmpty <~ "fish" <@ "id"),
+                "id"          -> IrNodeAttribute(IrIntegerNode(3), IrNodePathEmpty <~ "fish" <@ "id"),
                 "description" -> IrNodeAttribute(IrStringNode("A fish"), IrNodePathEmpty <~ "fish" <@ "description"),
                 "endangered"  -> IrNodeAttribute(IrBooleanNode(false), IrNodePathEmpty <~ "fish" <@ "endangered")
               )
@@ -207,9 +209,9 @@ class MatchIrSpec extends FunSpec with Matchers {
           MatchIrConstants.rootNodeLabel,
           IrNode(
             "myDates",
-            IrNode("myDates", IrNumberNode(20)).withPath(IrNodePathEmpty <~ "myDates" <~ 0),
-            IrNode("myDates", IrNumberNode(5)).withPath(IrNodePathEmpty <~ "myDates" <~ 1),
-            IrNode("myDates", IrNumberNode(70)).withPath(IrNodePathEmpty <~ "myDates" <~ 2)
+            IrNode("myDates", IrIntegerNode(20)).withPath(IrNodePathEmpty <~ "myDates" <~ 0),
+            IrNode("myDates", IrIntegerNode(5)).withPath(IrNodePathEmpty <~ "myDates" <~ 1),
+            IrNode("myDates", IrIntegerNode(70)).withPath(IrNodePathEmpty <~ "myDates" <~ 2)
           ).withPath(IrNodePathEmpty <~ "myDates").markAsArray
         ).withPath(IrNodePathEmpty)
 
@@ -227,9 +229,9 @@ class MatchIrSpec extends FunSpec with Matchers {
       val ir: IrNode =
         IrNode(
           MatchIrConstants.rootNodeLabel,
-          IrNode(MatchIrConstants.unnamedNodeLabel, IrNumberNode(1)).withPath(IrNodePathEmpty <~ 0),
-          IrNode(MatchIrConstants.unnamedNodeLabel, IrNumberNode(2)).withPath(IrNodePathEmpty <~ 1),
-          IrNode(MatchIrConstants.unnamedNodeLabel, IrNumberNode(3)).withPath(IrNodePathEmpty <~ 2)
+          IrNode(MatchIrConstants.unnamedNodeLabel, IrIntegerNode(1)).withPath(IrNodePathEmpty <~ 0),
+          IrNode(MatchIrConstants.unnamedNodeLabel, IrIntegerNode(2)).withPath(IrNodePathEmpty <~ 1),
+          IrNode(MatchIrConstants.unnamedNodeLabel, IrIntegerNode(3)).withPath(IrNodePathEmpty <~ 2)
         ).withPath(IrNodePathEmpty).markAsArray
 
       check(MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(json).get =<>= ir)

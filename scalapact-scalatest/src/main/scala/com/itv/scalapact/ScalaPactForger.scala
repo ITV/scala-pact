@@ -142,8 +142,7 @@ object ScalaPactForger {
               throw new ScalaPactVerifyFailed
             },
             _ => {
-              val messages = this.messages
-              MessageVerifier(messages, config)(test)
+              MessageVerifier(this.messages, config)(test)
             }
           )
       }

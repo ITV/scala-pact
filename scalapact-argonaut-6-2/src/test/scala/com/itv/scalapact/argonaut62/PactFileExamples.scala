@@ -279,14 +279,17 @@ object PactFileExamples {
       Message(
         description = "Published credit data",
         providerState = Some("or maybe 'scenario'? not sure about this"),
-        contents = """{"foo":"bar"}""",
+        contents = """{"foo":"bar","number":123}""",
         metaData = Message.Metadata("contentType" -> "application/json"),
-        matchingRules = Map("foo"                 -> MatchingRule(Some("regex"), Some("\\w+"), None)),
+        matchingRules = Map("foo"                 -> MatchingRule(Some("regex"), Some("\\w+"), None),
+                            "number"              -> MatchingRule(Some("integer"), None, None)),
         contentType = MessageContentType.ApplicationJson,
       )
     )
   )
 
+  //TODO Review how to generate the new matching rules
+  //http://pactbroker.stg.fp.itv.com/pacts/provider/Craft%20Backend/consumer/TVT/latest
   val simpleMessageAsString = """{
                                 |    "consumer": {
                                 |        "name": "Consumer"
@@ -298,7 +301,7 @@ object PactFileExamples {
                                 |        {
                                 |            "description": "Published credit data",
                                 |            "providerState": "or maybe 'scenario'? not sure about this",
-                                |            "contents": {"foo":"bar"},
+                                |            "contents": {"foo":"bar","number":123},
                                 |            "metaData": {
                                 |              "contentType": "application/json"
                                 |            },
@@ -306,6 +309,9 @@ object PactFileExamples {
                                 |               "foo" : {
                                 |                 "match":"regex",
                                 |                 "regex": "\\w+"
+                                |               },
+                                |               "number" : {
+                                |                  "match": "integer" 
                                 |               }
                                 |            }
                                 |        }
@@ -335,7 +341,7 @@ object PactFileExamples {
                                 |        {
                                 |            "description": "Published credit data",
                                 |            "providerState": "or maybe 'scenario'? not sure about this",
-                                |            "contents": {"foo":"bar"},
+                                |            "contents": {"foo":"bar","number":123},
                                 |            "metaData": {
                                 |              "contentType": "application/json"
                                 |            },
@@ -343,6 +349,9 @@ object PactFileExamples {
                                 |               "foo" : {
                                 |                 "match":"regex",
                                 |                 "regex": "\\w+"
+                                |               },
+                                |               "number" : {
+                                |                  "match": "integer"
                                 |               }
                                 |             }
                                 |        },
@@ -372,7 +381,7 @@ object PactFileExamples {
       |        {
       |            "description": "Published credit data",
       |            "providerState": "or maybe 'scenario'? not sure about this",
-      |            "contents": {"foo":"bar"},
+      |            "contents": {"foo":"bar","number":123},
       |            "metaData": {
       |              "contentType": "application/json"
       |            },
@@ -380,6 +389,9 @@ object PactFileExamples {
       |               "foo" : {
       |                 "match":"regex",
       |                 "regex": "\\w+"
+      |               },
+      |               "number" : {
+      |                  "match": "integer"
       |               }
       |             }
       |        },
