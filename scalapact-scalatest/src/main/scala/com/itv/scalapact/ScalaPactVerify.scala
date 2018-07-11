@@ -5,6 +5,7 @@ import com.itv.scalapactcore.verifier.{PactVerifySettings, Verifier, VersionedCo
 import java.io.{BufferedWriter, File, FileWriter}
 
 import com.itv.scalapact.ScalaPactForger.MessageVerifier
+
 import com.itv.scalapact.shared.{Helpers, ScalaPactSettings, SslContextMap}
 
 import scala.concurrent.duration._
@@ -85,19 +86,34 @@ object ScalaPactVerify {
                                                                    httpClient: IScalaPactHttpClient[F]): Unit =
         doVerification(target.protocol, target.host, target.port, target.clientTimeout, strict = false)
 
-      def runMessageTests[A](test: IMessageStubber[A] => IMessageStubber[A])(
-          implicit pactReader: IPactReader
+      def runMessageTests[F[_], A](
+          )(test: IMessageStubber[A] => IMessageStubber[A])(
+          implicit pactReader: IPactReader,
+          httpClient: IScalaPactHttpClient[F]
       ): List[A] = runMessageTests(MessageStubber.Config(strictMode = false))(test)
 
-      def runStrictMessageTests[A](test: IMessageStubber[A] => IMessageStubber[A])(
-          implicit pactReader: IPactReader
+      def runStrictMessageTests[F[_], A]()(
+          test: IMessageStubber[A] => IMessageStubber[A]
+      )(
+          implicit pactReader: IPactReader,
+          httpClient: IScalaPactHttpClient[F]
       ): List[A] = runMessageTests(MessageStubber.Config(strictMode = true))(test)
 
-      private def runMessageTests[A](config: MessageStubber.Config)(test: IMessageStubber[A] => IMessageStubber[A])(
-          implicit pactReader: IPactReader
-      ): List[A] =
-        MessageVerifier(pactReader.readPact("").toOption.get.messages, config)(test)
-      //FIXME it is not working
+      private def runMessageTests[F[_], A](config: MessageStubber.Config)(
+          test: IMessageStubber[A] => IMessageStubber[A]
+      )(
+          implicit pactReader: IPactReader,
+          httpClient: IScalaPactHttpClient[F]
+      ): List[A] = {
+        val (verifySettings, arguments) = settings(None, config.strictMode)
+
+        val messages =
+          Verifier
+            .pacts(LocalPactFileLoader.loadPactFiles(pactReader)(true), verifySettings, arguments)
+            .flatMap(_.messages)
+
+        MessageVerifier(messages, config)(test)
+      }
 
       private def doVerification[F[_]](
           protocol: String,
@@ -106,6 +122,16 @@ object ScalaPactVerify {
           clientTimeout: Duration,
           strict: Boolean
       )(implicit pactReader: IPactReader, httpClient: IScalaPactHttpClient[F]): Unit = {
+
+        val (verifySettings: PactVerifySettings, arguments: ScalaPactSettings) =
+          settings(Some(VerifyTargetConfig(protocol, host, port, clientTimeout)), strict)
+
+        val v = Verifier.verify(LocalPactFileLoader.loadPactFiles(pactReader)(true), verifySettings)
+
+        if (v(arguments)) () else throw new ScalaPactVerifyFailed
+      }
+
+      private def settings[F[_]](verifyTargetConfig: Option[VerifyTargetConfig], strict: Boolean) = {
 
         val providerStateFunc = given
           .flatMap(g => setupProviderState)
@@ -133,12 +159,12 @@ object ScalaPactVerify {
                 versionedConsumerNames = Nil
               ),
               ScalaPactSettings(
-                host = host,
-                protocol = protocol,
-                port = port,
+                host = verifyTargetConfig.map(_.host),
+                protocol = verifyTargetConfig.map(_.protocol),
+                port = verifyTargetConfig.map(_.port),
                 localPactFilePath = tmp.getAbsolutePath(),
                 strictMode = strict,
-                clientTimeout = Option(clientTimeout),
+                clientTimeout = verifyTargetConfig.map(_.clientTimeout),
                 outputPath = None
               )
             )
@@ -154,12 +180,12 @@ object ScalaPactVerify {
                 versionedConsumerNames = Nil
               ),
               ScalaPactSettings(
-                host = host,
-                protocol = protocol,
-                port = port,
+                host = verifyTargetConfig.map(_.host),
+                protocol = verifyTargetConfig.map(_.protocol),
+                port = verifyTargetConfig.map(_.port),
                 localPactFilePath = path,
                 strictMode = strict,
-                clientTimeout = Option(clientTimeout),
+                clientTimeout = verifyTargetConfig.map(_.clientTimeout),
                 outputPath = None
               )
             )
@@ -175,12 +201,12 @@ object ScalaPactVerify {
                 versionedConsumerNames = Nil
               ),
               ScalaPactSettings(
-                host = host,
-                protocol = protocol,
-                port = port,
+                host = verifyTargetConfig.map(_.host),
+                protocol = verifyTargetConfig.map(_.protocol),
+                port = verifyTargetConfig.map(_.port),
                 localPactFilePath = None,
                 strictMode = strict,
-                clientTimeout = Option(clientTimeout),
+                clientTimeout = verifyTargetConfig.map(_.clientTimeout),
                 outputPath = None
               )
             )
@@ -196,20 +222,17 @@ object ScalaPactVerify {
                 versionedConsumerNames = consumerNames.map(c => VersionedConsumer(c, version))
               ),
               ScalaPactSettings(
-                host = host,
-                protocol = protocol,
-                port = port,
+                host = verifyTargetConfig.map(_.host),
+                protocol = verifyTargetConfig.map(_.protocol),
+                port = verifyTargetConfig.map(_.port),
                 localPactFilePath = None,
                 strictMode = strict,
-                clientTimeout = Option(clientTimeout),
+                clientTimeout = verifyTargetConfig.map(_.clientTimeout),
                 outputPath = None
               )
             )
         }
-
-        val v = Verifier.verify(LocalPactFileLoader.loadPactFiles(pactReader)(true), verifySettings)
-
-        if (v(arguments)) () else throw new ScalaPactVerifyFailed
+        (verifySettings, arguments)
       }
     }
 

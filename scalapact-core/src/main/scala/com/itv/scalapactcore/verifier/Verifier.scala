@@ -11,16 +11,14 @@ import com.itv.scalapact.shared.typeclasses.{IPactReader, IScalaPactHttpClient}
 
 object Verifier {
 
-  def verify[F[_]](
-      loadPactFiles: String => ScalaPactSettings => ConfigAndPacts,
-      pactVerifySettings: PactVerifySettings
-  )(implicit pactReader: IPactReader,
-    sslContextMap: SslContextMap,
-    httpClient: IScalaPactHttpClient[F]): ScalaPactSettings => Boolean = arguments => {
-
-    val scalaPactLogPrefix = "[scala-pact] ".white
-
-    val pacts: List[Pact] = if (arguments.localPactFilePath.isDefined) {
+  def pacts[F[_]](loadPactFiles: String => ScalaPactSettings => ConfigAndPacts,
+                  pactVerifySettings: PactVerifySettings,
+                  arguments: ScalaPactSettings)(
+      implicit pactReader: IPactReader,
+      sslContextMap: SslContextMap,
+      httpClient: IScalaPactHttpClient[F]
+  ): List[Pact] =
+    if (arguments.localPactFilePath.isDefined) {
       PactLogger.message(
         s"Attempting to use local pact files at: '${arguments.localPactFilePath.getOrElse("<path missing>")}'".white.bold
       )
@@ -54,6 +52,17 @@ object Verifier {
       latestPacts
     }
 
+  def verify[F[_]](
+      loadPactFiles: String => ScalaPactSettings => ConfigAndPacts,
+      pactVerifySettings: PactVerifySettings
+  )(implicit pactReader: IPactReader,
+    sslContextMap: SslContextMap,
+    httpClient: IScalaPactHttpClient[F]): ScalaPactSettings => Boolean = arguments => {
+
+    val scalaPactLogPrefix = "[scala-pact] ".white
+
+    val pactsToVerify = pacts(loadPactFiles, pactVerifySettings, arguments)
+
     PactLogger.message(
       s"Verifying against '${arguments.giveHost}' on port '${arguments.givePort}' with a timeout of ${arguments.clientTimeout
         .map(_.toSeconds.toString)
@@ -62,7 +71,7 @@ object Verifier {
 
     val startTime = System.currentTimeMillis().toDouble
 
-    val pactVerifyResults = pacts.map { pact =>
+    val pactVerifyResults = pactsToVerify.map { pact =>
       PactVerifyResult(
         pact = pact,
         results = pact.interactions.map { interaction =>
@@ -119,7 +128,9 @@ object Verifier {
 
     PactLogger.message(scalaPactLogPrefix + s"Run completed in: ${(endTime - startTime).toInt} ms".yellow)
     PactLogger.message(scalaPactLogPrefix + s"Total number of test run: $testCount".yellow)
-    PactLogger.message(scalaPactLogPrefix + s"Tests: succeeded ${testCount - failureCount}, failed $failureCount".yellow)
+    PactLogger.message(
+      scalaPactLogPrefix + s"Tests: succeeded ${testCount - failureCount}, failed $failureCount".yellow
+    )
     if (failureCount == 0) PactLogger.message(scalaPactLogPrefix + "All tests passed.".green)
     else PactLogger.message(scalaPactLogPrefix + s"$failureCount tests failed.".red)
     failureCount == 0

@@ -164,7 +164,7 @@ object ScalaPactForger {
   object MessageVerifier {
     def apply[A](messages: List[Message], config: MessageStubber.Config)(
         test: IMessageStubber[A] => IMessageStubber[A]
-    )(implicit matchingRules: IrNodeMatchingRules, pactReader: IPactReader) = {
+    )(implicit matchingRules: IrNodeMatchingRules, pactReader: IPactReader): List[A] = {
       import com.itv.scalapact.shared.ColourOuput._
       val result = test(MessageStubber(messages, config))
       if (result.outcome.isSuccess)
