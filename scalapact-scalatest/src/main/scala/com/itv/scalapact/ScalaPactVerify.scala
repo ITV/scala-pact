@@ -4,6 +4,7 @@ import com.itv.scalapactcore.common.LocalPactFileLoader
 import com.itv.scalapactcore.verifier.{PactVerifySettings, Verifier, VersionedConsumer}
 import java.io.{BufferedWriter, File, FileWriter}
 
+import com.itv.scalapact.ScalaPactForger.MessageVerifier
 import com.itv.scalapact.shared.{Helpers, ScalaPactSettings, SslContextMap}
 
 import scala.concurrent.duration._
@@ -86,24 +87,17 @@ object ScalaPactVerify {
 
       def runMessageTests[A](test: IMessageStubber[A] => IMessageStubber[A])(
           implicit pactReader: IPactReader
-      ): Unit = runMessageTests(MessageStubber.Config(strictMode = false))(test)
+      ): List[A] = runMessageTests(MessageStubber.Config(strictMode = false))(test)
 
       def runStrictMessageTests[A](test: IMessageStubber[A] => IMessageStubber[A])(
           implicit pactReader: IPactReader
-      ): Unit = runMessageTests(MessageStubber.Config(strictMode = true))(test)
+      ): List[A] = runMessageTests(MessageStubber.Config(strictMode = true))(test)
 
       private def runMessageTests[A](config: MessageStubber.Config)(test: IMessageStubber[A] => IMessageStubber[A])(
           implicit pactReader: IPactReader
-      ): Unit = {
-        import com.itv.scalapact.shared.ColourOuput._
-        val result = test(MessageStubber(pactReader.readPact("").toOption.get.messages, config)) // FIXME it is not working
-        if (result.outcome.isSuccess)
-          ()
-        else {
-          PactLogger.error(result.outcome.renderAsString.red)
-          throw new ScalaPactVerifyFailed
-        }
-      }
+      ): List[A] =
+        MessageVerifier(pactReader.readPact("").toOption.get.messages, config)(test)
+      //FIXME it is not working
 
       private def doVerification[F[_]](
           protocol: String,

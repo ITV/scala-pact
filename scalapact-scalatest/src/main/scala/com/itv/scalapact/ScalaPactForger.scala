@@ -4,6 +4,7 @@ import com.itv.scalapact.ScalaPactVerify.ScalaPactVerifyFailed
 import com.itv.scalapact.shared.Maps._
 import com.itv.scalapact.shared.typeclasses._
 import com.itv.scalapact.shared._
+import com.itv.scalapact.shared.matchir.IrNodeMatchingRules
 import com.itv.scalapactcore.message.{IMessageStubber, MessageStubber}
 
 import scala.language.implicitConversions
@@ -141,13 +142,8 @@ object ScalaPactForger {
               throw new ScalaPactVerifyFailed
             },
             _ => {
-              val result = test(MessageStubber(this.messages, config))
-              if (result.outcome.isSuccess)
-                result.results
-              else {
-                PactLogger.error(result.outcome.renderAsString.red)
-                throw new ScalaPactVerifyFailed
-              }
+              val messages = this.messages
+              MessageVerifier(messages, config)(test)
             }
           )
       }
@@ -163,6 +159,21 @@ object ScalaPactForger {
         )
     }
 
+  }
+
+  object MessageVerifier {
+    def apply[A](messages: List[Message], config: MessageStubber.Config)(
+        test: IMessageStubber[A] => IMessageStubber[A]
+    )(implicit matchingRules: IrNodeMatchingRules, pactReader: IPactReader) = {
+      import com.itv.scalapact.shared.ColourOuput._
+      val result = test(MessageStubber(messages, config))
+      if (result.outcome.isSuccess)
+        result.results
+      else {
+        PactLogger.error(result.outcome.renderAsString.red)
+        throw new ScalaPactVerifyFailed
+      }
+    }
   }
 
   object messageSpec {
