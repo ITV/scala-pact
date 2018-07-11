@@ -363,9 +363,11 @@ object PactFileExamples {
       Message(
         description = "Published another credit data",
         providerState = Some("or maybe 'scenario'! not sure about this"),
-        contents = """{"boo":"xxx"}""",
+        contents = """{"boo":"xxx","foo":123}""",
         metaData = Message.Metadata("contentType" -> "application/json"),
-        matchingRules = Map.empty,
+        matchingRules = Map(
+          "foo" -> MatchingRule(Some("integer"),None, None)
+        ),
         ApplicationJson
       )
     )
@@ -389,7 +391,12 @@ object PactFileExamples {
                                   |        {
                                   |            "description": "Published another credit data",
                                   |            "providerState": "or maybe 'scenario'! not sure about this",
-                                  |            "contents": {"boo":"xxx"},
+                                  |            "contents": {"boo":"xxx","foo":123},
+                                  |            "matchingRules": {
+                                  |              "foo" : {
+                                  |                  "match": "integer"
+                                  |              }
+                                  |            },
                                   |            "metaData": {
                                   |              "contentType": "application/json"
                                   |            }
@@ -420,7 +427,12 @@ object PactFileExamples {
       |        {
       |            "description": "Published another credit data",
       |            "providerState": "or maybe 'scenario'! not sure about this",
-      |            "contents": {"boo":"xxx"},
+      |            "contents": {"boo":"xxx","foo":123},
+      |            "matchingRules": {
+      |              "foo" : {
+      |                  "match": "integer"
+      |              }
+      |            },
       |            "metaData": {
       |              "contentType": "application/json"
       |            }
