@@ -233,7 +233,6 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
 
     (parentTypeRules ++ findForPath(path, isXml))
       .map {
-        //TODO Avoid pattern matching
         case IrNodeTypeRule(_) =>
           RuleProcessTracing.log(s"Checking type... (${expected.primitiveTypeName} vs ${actual.primitiveTypeName})")
 
@@ -281,6 +280,11 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
           RuleProcessTracing.log(s"  ...n/a")
           None
 
+        case IrNodeIntegerRule(_) =>
+          None
+        case IrNodeDecimalRule(_) =>
+          None
+
         case _ =>
           RuleProcessTracing.log("Checking failed, unexpected condition met.")
           None
@@ -324,8 +328,12 @@ object IrNodeMatchingRules {
     (IrNodePath.fromPactPath(pair._1), pair._2) match {
       case (e: PactPathParseFailure, _) =>
         Left(e.errorString)
+      case (PactPathParseSuccess(path), MatchingRule(Some("number"), None, None)) =>
+        Right(IrNodeMatchingRules(IrNodeDecimalRule(path)))
       case (PactPathParseSuccess(path), MatchingRule(Some("integer"), None, None)) =>
         Right(IrNodeMatchingRules(IrNodeIntegerRule(path)))
+      case (PactPathParseSuccess(path), MatchingRule(Some("decimal"), None, None)) =>
+        Right(IrNodeMatchingRules(IrNodeDecimalRule(path)))
       case (PactPathParseSuccess(path), MatchingRule(Some("type"), None, None)) =>
         Right(IrNodeMatchingRules(IrNodeTypeRule(path)))
 

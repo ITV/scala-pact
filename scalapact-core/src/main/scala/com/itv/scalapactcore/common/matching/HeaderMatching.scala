@@ -3,7 +3,7 @@ package com.itv.scalapactcore.common.matching
 import com.itv.scalapact.shared.MatchingRule
 import com.itv.scalapact.shared.matchir._
 
-object HeaderMatching {
+object HeaderMatching extends PrimitiveConversionFunctions {
 
   val legalCharSeparators: List[Char] =
     List('(', ')', '<', '>', '@', ',', ';', ':', '\\', '"', '/', '[', ']', '?', '=', '{', '}')
@@ -52,25 +52,35 @@ object HeaderMatching {
           case Right(rls) =>
             withRules.toList
               .map(p => standardiseHeader(p))
-              .flatMap { header =>
-                rls
-                  .findForPath(IrNodePathEmpty <~ header._1, isXml = false)
-                  .map {
-                    //FIXME Avoid pattern matching
-                    case IrNodeTypeRule(_) =>
-                      MatchOutcomeSuccess
-
-                    case IrNodeRegexRule(regex, _) =>
-                      MatchOutcome.fromPredicate(
-                        regex.r.findAllIn(header._2).nonEmpty,
-                        s"Header '${header._1}' value of '${header._2}' did not match regex requirement for '$regex'",
-                        1
+              .flatMap {
+                case (key, value) =>
+                  rls
+                    .findForPath(IrNodePathEmpty <~ key, isXml = false)
+                    .map {
+                      _.fold[MatchOutcome](
+                        _ => MatchOutcomeSuccess,
+                        (regex, _) =>
+                          MatchOutcome.fromPredicate(
+                            regex.r.findAllIn(value).nonEmpty,
+                            s"Header '$key' value of '$value' did not match regex requirement for '$regex'",
+                            1
+                        ),
+                        (_, _) => MatchOutcomeSuccess,
+                        _ => {
+                          MatchOutcome
+                            .fromPredicate(
+                              r.get(key).exists(_.matches(isIntegerValueRegex)),
+                              s"Header '$key' value of '$value' did not match to an integer",
+                              1
+                            )
+                        },
+                        _ =>
+                          MatchOutcome
+                            .fromPredicate(r.get(key).exists(_.matches(isDecimalValueRegex)),
+                                           s"Header '$key' value of '$value' did not match to an decimal",
+                                           1)
                       )
-
-                    case IrNodeMinArrayLengthRule(_, _) =>
-                      MatchOutcomeSuccess
-                    case _ => ??? //FIXME add IrNodeIntergerrule
-                  }
+                    }
               }
         }
 

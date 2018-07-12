@@ -65,7 +65,7 @@ object PactImplicits {
   def contentType(contents: Json): MessageContentType =
     contents
       .as[String]
-      .map(_ => MessageContentType.ApplicationText) //TODO it should be simple to support xml
+      .map(_ => MessageContentType.ApplicationText)
       .toOption
       .getOrElse[MessageContentType](MessageContentType.ApplicationJson)
 

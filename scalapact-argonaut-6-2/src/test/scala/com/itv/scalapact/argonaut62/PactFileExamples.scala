@@ -288,8 +288,6 @@ object PactFileExamples {
     )
   )
 
-  //TODO Review how to generate the new matching rules
-  //http://pactbroker.stg.fp.itv.com/pacts/provider/Craft%20Backend/consumer/TVT/latest
   val simpleMessageAsString = """{
                                 |    "consumer": {
                                 |        "name": "Consumer"

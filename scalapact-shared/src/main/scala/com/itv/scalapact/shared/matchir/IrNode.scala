@@ -474,7 +474,7 @@ case class IrStringNode(value: String) extends IrNodePrimitive {
   def primitiveTypeName: String  = "string"
 }
 
-case class IrIntegerNode(value: Long) extends IrNodePrimitive {
+case class IrIntegerNode(value: BigInt) extends IrNodePrimitive {
   def isString: Boolean          = false
   def isNumber: Boolean          = true
   def isBoolean: Boolean         = false
@@ -485,7 +485,7 @@ case class IrIntegerNode(value: Long) extends IrNodePrimitive {
   def renderAsString: String     = value.toString.replaceAll("\\.0", "")
   def primitiveTypeName: String  = "integer"
 }
-case class IrDecimalNode(value: Double) extends IrNodePrimitive {
+case class IrDecimalNode(value: BigDecimal) extends IrNodePrimitive {
   def isString: Boolean          = false
   def isNumber: Boolean          = true
   def isBoolean: Boolean         = false

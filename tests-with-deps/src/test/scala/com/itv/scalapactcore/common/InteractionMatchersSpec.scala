@@ -61,6 +61,51 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
 
     }
 
+    it("should be able to apply the type rules for integer") {
+      val rules = Map(
+        "$.headers.key1" -> MatchingRule(Some("integer"), None, None),
+      )
+
+      val expected = Map("key1" -> "112", "key2" -> "1.44")
+      val received = Map("key1" -> "114", "key2" -> "1.44", "rock" -> "sandstone", "metal" -> "steel")
+
+      matchHeaders(Some(rules), expected, received).isSuccess shouldEqual true
+    }
+
+    it("should be able to apply the type rules for decimal)") {
+      val rules = Map(
+        "$.headers.key2" -> MatchingRule(Some("decimal"), None, None)
+      )
+
+      val expected = Map("key1" -> "112", "key2" -> "1.44")
+      val received = Map("key1" -> "112", "key2" -> "1.45", "rock" -> "sandstone", "metal" -> "steel")
+
+      matchHeaders(Some(rules), expected, received).isSuccess shouldEqual true
+    }
+
+    it("should fail to apply the type rules when the value is not an integer") {
+      val rules = Map(
+        "$.headers.key1" -> MatchingRule(Some("integer"), None, None)
+      )
+
+      val expected = Map("key1" -> "112", "key2"        -> "1.44")
+      val received = Map("key1" -> "112.000001", "key2" -> "1.44", "rock" -> "sandstone", "metal" -> "steel")
+
+      matchHeaders(Some(rules), expected, received).isSuccess shouldEqual false
+    }
+
+    it("should fail to apply the type rules when the value is not a decimal") {
+      val rules = Map(
+        "$.headers.key1" -> MatchingRule(Some("integer"), None, None),
+        "$.headers.key2" -> MatchingRule(Some("decimal"), None, None)
+      )
+
+      val expected = Map("key1" -> "112", "key2" -> "1.44")
+      val received = Map("key1" -> "112", "key2" -> "1d", "rock" -> "sandstone", "metal" -> "steel")
+
+      matchHeaders(Some(rules), expected, received).isSuccess shouldEqual false
+    }
+
     it("should be able to find the expected subset in a collection of headers") {
 
       val expected = Map("fish" -> "chips", "mammal" -> "bear")

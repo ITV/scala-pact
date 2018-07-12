@@ -57,7 +57,6 @@ object PactImplicits {
     contents
       .as[String]
       .fold[MessageContentType]((_, _) => MessageContentType.ApplicationJson, _ => MessageContentType.ApplicationText)
-  //TODO it should be simple to support xml
 
   implicit lazy val MessageContentTypeCodecJson: CodecJson[MessageContentType] = CodecJson[MessageContentType](
     x => EncodeJson.StringEncodeJson(x.renderString),

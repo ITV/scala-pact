@@ -69,7 +69,6 @@ object PactImplicits {
     contents
       .as[String]
       .fold[MessageContentType](_ => MessageContentType.ApplicationJson, _ => MessageContentType.ApplicationText)
-  //TODO it should be simple to support xml
 
   private def contents(cursor: HCursor): Decoder.Result[Json] =
     cursor

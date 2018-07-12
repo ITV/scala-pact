@@ -114,10 +114,9 @@ class ScalaPactMessageForgerSpec extends FlatSpec with OptionValues with EitherV
   it should "fail when the description does not exist with multiple messages" in {
 
     a[ScalaPactVerifyFailed] should be thrownBy {
-      specWithMultipleMessages.runMessageTests[Any] { stub =>
-        stub
-          .consume("description1") { message =>
-            }
+      specWithMultipleMessages.runMessageTests[Any] {
+        _.consume("description1") { message =>
+          }
           .consume("description2") { message =>
             }
       }

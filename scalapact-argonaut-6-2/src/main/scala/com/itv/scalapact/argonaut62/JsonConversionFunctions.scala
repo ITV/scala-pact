@@ -28,9 +28,9 @@ object JsonConversionFunctions extends IJsonConversionFunctions {
         IrNode(label, IrNullNode).withPath(pathToParent)
 
       case j: Json if j.isNumber && j.toString().contains(".") =>
-        irNodeFrom(j.number.flatMap(_.toDouble).map(IrDecimalNode))
+        irNodeFrom(j.number.map(_.toBigDecimal).map(IrDecimalNode))
       case j: Json if j.isNumber =>
-        irNodeFrom(j.number.flatMap(_.toLong).map(IrIntegerNode))
+        irNodeFrom(j.number.flatMap(_.toBigInt).map(IrIntegerNode))
 
       case j: Json if j.isBool =>
         irNodeFrom(j.bool.map(IrBooleanNode))

@@ -122,7 +122,7 @@ object PactFileExamples {
     ),
     messages = List.empty
   )
-  //FIXME: Add messages to string/json pacts
+
   val simpleAsString: String = """{
                          |  "provider" : {
                          |    "name" : "provider"
@@ -366,7 +366,7 @@ object PactFileExamples {
         contents = """{"boo":"xxx","foo":123}""",
         metaData = Message.Metadata("contentType" -> "application/json"),
         matchingRules = Map(
-          "foo" -> MatchingRule(Some("integer"),None, None)
+          "foo" -> MatchingRule(Some("integer"), None, None)
         ),
         ApplicationJson
       )
