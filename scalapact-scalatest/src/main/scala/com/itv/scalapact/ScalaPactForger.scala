@@ -35,14 +35,15 @@ object ScalaPactForger {
                                      meta: Message.Metadata,
                                      matchingRules: Map[String, MatchingRule]) {
 
-    def withRegexMatchingRule(key: String, regex: String): PartialScalaPactMessage = key match {
-      case value if value.startsWith("$.body") =>
-        withMatchingRule(key.replace("$.body", "$"), MatchingRule(Some("regex"), Some(regex), None))
-      case _ => this //TODO Review this
-    }
+    def withRegexMatchingRule(jsonPath: String, regex: String): PartialScalaPactMessage =
+      withMatchingRule(jsonPath, MatchingRule(Some("regex"), Some(regex), None))
 
-    def withMatchingRule(key: String, value: MatchingRule): PartialScalaPactMessage =
-      copy(matchingRules = matchingRules + (key -> value))
+    def withMatchingRule(jsonPath: String, value: MatchingRule): PartialScalaPactMessage = jsonPath match {
+      case x if x.startsWith("$.body") =>
+        copy(matchingRules = matchingRules + (jsonPath.replace("$.body", "$") -> value))
+      case _ =>
+        throw new RuntimeException(s"$jsonPath is invalid") //FIXME At the moment we only support body verifications
+    }
 
     def withProviderState(state: String): PartialScalaPactMessage =
       copy(providerStates = providerStates ++ List(state))

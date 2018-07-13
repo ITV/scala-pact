@@ -204,6 +204,17 @@ class ScalaPactMessageForgerSpec extends FlatSpec with OptionValues with EitherV
     }
   }
 
+  it should "fail when the json path does not start with '$.body'" in {
+    a[RuntimeException] should be thrownBy {
+      message
+        .description("description")
+        .withProviderState("whatever")
+        .withMeta(Message.Metadata.empty)
+        .withRegexMatchingRule(".key2", "\\d+")
+
+    }
+  }
+
   def toJson(value: String) = Parse.parse(value).right.value
 
 }
