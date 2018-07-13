@@ -278,7 +278,7 @@ object PactFileExamples {
     messages = List(
       Message(
         description = "Published credit data",
-        providerState = Some("or maybe 'scenario'? not sure about this"),
+        providerStates = List("or maybe 'scenario'? not sure about this"),
         contents = """{"foo":"bar","number":123}""",
         metaData = Message.Metadata("contentType" -> "application/json"),
         matchingRules = Map(
@@ -294,6 +294,47 @@ object PactFileExamples {
   )
 
   val simpleMessageAsString = """{
+                                |    "consumer": {
+                                |        "name": "Consumer"
+                                |    },
+                                |    "provider": {
+                                |        "name": "Provider"
+                                |    },
+                                |    "messages": [
+                                |        {
+                                |            "description": "Published credit data",
+                                |            "providerStates": [
+                                |             "or maybe 'scenario'? not sure about this"
+                                |             ],
+                                |            "contents": {"foo":"bar","number":123},
+                                |            "metaData": {
+                                |              "contentType": "application/json"
+                                |            },
+                                |            "matchingRules" : {
+                                |              "body" : {
+                                |                "$.foo" : {
+                                |                  "matchers": [
+                                |                    {
+                                |                      "match":"regex",
+                                |                      "regex": "\\w+"
+                                |                    }
+                                |                  ]
+                                |                },
+                                |                "$.number" : {
+                                |                  "matchers": [
+                                |                    {
+                                |                      "match":"integer"
+                                |                    }
+                                |                  ]
+                                |                }
+                                |              }
+                                |            }
+                                |        }
+                                |    ]
+                                |}""".stripMargin
+
+  val simpleMessageWithProviderStateAsString =
+    """{
                                 |    "consumer": {
                                 |        "name": "Consumer"
                                 |    },
@@ -335,7 +376,7 @@ object PactFileExamples {
     messages = simpleMessage.messages ++ List(
       Message(
         description = "Published another credit data",
-        providerState = Some("or maybe 'scenario'! not sure about this"),
+        providerStates = List("or maybe 'scenario'! not sure about this"),
         contents = """{"boo":"xxx"}""",
         metaData = Message.Metadata("contentType" -> "application/json"),
         matchingRules = Map.empty,
@@ -353,7 +394,9 @@ object PactFileExamples {
                                 |    "messages": [
                                 |        {
                                 |            "description": "Published credit data",
-                                |            "providerState": "or maybe 'scenario'? not sure about this",
+                                |            "providerStates": [
+                                |            "or maybe 'scenario'? not sure about this"
+                                |            ],
                                 |            "contents": {"foo":"bar","number":123},
                                 |            "metaData": {
                                 |              "contentType": "application/json"
@@ -380,7 +423,9 @@ object PactFileExamples {
                                 |        },
                                 |        {
                                 |            "description": "Published another credit data",
-                                |            "providerState": "or maybe 'scenario'! not sure about this",
+                                |            "providerStates": [
+                                |             "or maybe 'scenario'! not sure about this"
+                                |            ],
                                 |            "contents": {"boo":"xxx"},
                                 |            "metaData": {
                                 |              "contentType": "application/json"
@@ -403,7 +448,9 @@ object PactFileExamples {
       |    "messages": [
       |        {
       |            "description": "Published credit data",
-      |            "providerState": "or maybe 'scenario'? not sure about this",
+      |            "providerStates": [
+      |              "or maybe 'scenario'? not sure about this"
+      |             ],
       |            "contents": {"foo":"bar","number":123},
       |            "metaData": {
       |              "contentType": "application/json"
@@ -430,7 +477,9 @@ object PactFileExamples {
       |        },
       |        {
       |            "description": "Published another credit data",
-      |            "providerState": "or maybe 'scenario'! not sure about this",
+      |            "providerStates": [
+      |               "or maybe 'scenario'! not sure about this"
+      |            ],
       |            "contents": {"boo":"xxx"},
       |            "metaData": {
       |              "contentType": "application/json"

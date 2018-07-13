@@ -44,4 +44,11 @@ class ScalaMessagePactReaderWriterSpec extends FlatSpec with EitherValues with T
       }
   }
 
+  it should "be able to read message that use 'providerState' instead 'providerStates'" in {
+    val actualPact = pactReader.jsonStringToPact(PactFileExamples.simpleMessageWithProviderStateAsString)
+
+    actualPact should ===(Right(PactFileExamples.simpleMessage))
+
+  }
+
 }

@@ -31,12 +31,11 @@ object ScalaPactForger {
   }
 
   case class PartialScalaPactMessage(description: String,
-                                     providerState: Option[String],
+                                     providerStates: List[String],
                                      meta: Message.Metadata,
                                      matchingRules: Map[String, MatchingRule]) {
 
     def withRegexMatchingRule(key: String, regex: String): PartialScalaPactMessage = key match {
-
       case value if value.startsWith("$.body") =>
         withMatchingRule(key.replace("$.body", "$"), MatchingRule(Some("regex"), Some(regex), None))
       case _ => this //TODO Review this
@@ -46,7 +45,7 @@ object ScalaPactForger {
       copy(matchingRules = matchingRules + (key -> value))
 
     def withProviderState(state: String): PartialScalaPactMessage =
-      copy(providerState = Some(state))
+      copy(providerStates = providerStates ++ List(state))
 
     def withMeta(meta: Message.Metadata): PartialScalaPactMessage =
       copy(meta = meta)
@@ -55,7 +54,7 @@ object ScalaPactForger {
       val stringToMatchers: MatchingRules = merge(iInferTypes.infer(value), matchingRules)
       Message(
         description,
-        providerState,
+        providerStates,
         format.encode(value),
         meta,
         stringToMatchers.headOption.fold[MatchingRules](Map.empty)(_ => stringToMatchers),
@@ -216,7 +215,7 @@ object ScalaPactForger {
   object message {
 
     def description(desc: String): PartialScalaPactMessage =
-      PartialScalaPactMessage(desc, None, Map.empty, Map.empty)
+      PartialScalaPactMessage(desc, List.empty, Map.empty, Map.empty)
   }
 
   object interaction {
