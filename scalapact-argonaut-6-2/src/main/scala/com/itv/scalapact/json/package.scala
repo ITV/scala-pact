@@ -21,8 +21,6 @@ package object json {
     override def decode(s: String): Either[MessageFormatError, Json] =
       Parse.parse(s).fold(m => Left(MessageFormatError(m)), Right(_))
   }
-  implicit val inferTypeInstance: IInferTypes[Json] = new IInferTypes[Json] {
-    override protected def inferFrom(t: Json): Map[String, String] = Map.empty
-  }
+  implicit val inferTypeInstance: IInferTypes[Json] = IInferTypes.noneInferTypeInstance[Json]
 
 }

@@ -23,8 +23,6 @@ package object json {
       parse(s).fold(m => Left(MessageFormatError(m.message)), Right(_))
   }
 
-  implicit val inferTypeInstance: IInferTypes[Json] = new IInferTypes[Json] {
-    override protected def inferFrom(t: Json): Map[String, String] = Map.empty
-  }
+  implicit val inferTypeInstance: IInferTypes[Json] = IInferTypes.noneInferTypeInstance[Json]
 
 }

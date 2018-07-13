@@ -23,35 +23,42 @@ package object json {
       parse(s).fold(m => Left(MessageFormatError(m.message)), Right(_))
   }
 
-  implicit val inferTypeInstance: IInferTypes[Json] = new IInferTypes[Json] {
-    override protected def inferFrom(t: Json): Map[String, String] = typesFrom(".", t, Set.empty).toMap
+  implicit val inferTypeInstance: IInferTypes[Json] = IInferTypes.noneInferTypeInstance[Json]
 
-    private def typesFrom(path: String, json: Json, acc: Set[(String, String)]): Set[(String, String)] = {
+  object ext {
 
-      def typesFromJsonObject(path: String, acc: Set[(String, String)])(json: JsonObject): Set[(String, String)] = {
-        def typeNumber(jsonNumber: JsonNumber): String =
-          jsonNumber.toLong.map(_ => "integer").getOrElse("decimal")
+    implicit val inferTypeInstance: IInferTypes[Json] = new IInferTypes[Json] {
+      override protected def inferFrom(t: Json): Map[String, String] = typesFrom(".", t, Set.empty).toMap
 
-        json.keys
-          .flatMap(
-            key =>
-              json(key).fold(acc) { jsonValue =>
-                val currentPath                           = s"$path$key"
-                def pair(value: String): (String, String) = currentPath -> value
+      private def typesFrom(path: String, json: Json, acc: Set[(String, String)]): Set[(String, String)] = {
 
-                jsonValue.fold(
-                  Set.empty,
-                  _ => Set.empty,
-                  value => Set(pair(typeNumber(value))),
-                  _ => Set.empty,
-                  _ => Set.empty,
-                  x => typesFromJsonObject(s"$currentPath.", Set(pair("object")) ++ acc)(x)
-                )
-            }
-          )
-          .toSet
+        def typesFromJsonObject(path: String, acc: Set[(String, String)])(json: JsonObject): Set[(String, String)] = {
+          def typeNumber(jsonNumber: JsonNumber): String =
+            jsonNumber.toLong.map(_ => "integer").getOrElse("decimal")
+
+          json.keys
+            .flatMap(
+              key =>
+                json(key).fold(acc) { jsonValue =>
+                  val currentPath = s"$path$key"
+
+                  def pair(value: String): (String, String) = currentPath -> value
+
+                  jsonValue.fold(
+                    Set.empty,
+                    _ => Set.empty,
+                    value => Set(pair(typeNumber(value))),
+                    _ => Set.empty,
+                    _ => Set.empty,
+                    x => typesFromJsonObject(s"$currentPath.", Set(pair("object")) ++ acc)(x)
+                  )
+              }
+            )
+            .toSet
+        }
+
+        json.asObject.fold(acc)(typesFromJsonObject(path, acc))
       }
-      json.asObject.fold(acc)(typesFromJsonObject(path, acc))
     }
   }
 }

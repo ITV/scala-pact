@@ -8,7 +8,7 @@ import com.itv.scalapact.shared.MatchingRule
 import org.scalactic.TypeCheckedTripleEquals
 
 class IITypeInferTypeSpec extends FlatSpec with TypeCheckedTripleEquals {
-  import json.inferTypeInstance
+  import json.ext.inferTypeInstance
 
   it should "infer types from a json" in {
     inferTypeInstance
