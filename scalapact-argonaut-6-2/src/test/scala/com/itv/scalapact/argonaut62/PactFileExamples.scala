@@ -281,8 +281,13 @@ object PactFileExamples {
         providerState = Some("or maybe 'scenario'? not sure about this"),
         contents = """{"foo":"bar","number":123}""",
         metaData = Message.Metadata("contentType" -> "application/json"),
-        matchingRules = Map("foo"                 -> MatchingRule(Some("regex"), Some("\\w+"), None),
-                            "number"              -> MatchingRule(Some("integer"), None, None)),
+        matchingRules = Map(
+          "body" ->
+            Map(
+              "$.foo"    -> Message.Matchers(List(MatchingRule(Some("regex"), Some("\\w+"), None))),
+              "$.number" -> Message.Matchers(List(MatchingRule(Some("integer"), None, None)))
+            )
+        ),
         contentType = MessageContentType.ApplicationJson,
       )
     )
@@ -304,13 +309,23 @@ object PactFileExamples {
                                 |              "contentType": "application/json"
                                 |            },
                                 |            "matchingRules" : {
-                                |               "foo" : {
-                                |                 "match":"regex",
-                                |                 "regex": "\\w+"
-                                |               },
-                                |               "number" : {
-                                |                  "match": "integer" 
-                                |               }
+                                |              "body" : {
+                                |                "$.foo" : {
+                                |                  "matchers": [
+                                |                    {
+                                |                      "match":"regex",
+                                |                      "regex": "\\w+"
+                                |                    }
+                                |                  ]
+                                |                },
+                                |                "$.number" : {
+                                |                  "matchers": [
+                                |                    {
+                                |                      "match":"integer"
+                                |                    }
+                                |                  ]
+                                |                }
+                                |              }
                                 |            }
                                 |        }
                                 |    ]
@@ -344,14 +359,24 @@ object PactFileExamples {
                                 |              "contentType": "application/json"
                                 |            },
                                 |            "matchingRules" : {
-                                |               "foo" : {
-                                |                 "match":"regex",
-                                |                 "regex": "\\w+"
-                                |               },
-                                |               "number" : {
-                                |                  "match": "integer"
-                                |               }
-                                |             }
+                                |              "body" : {
+                                |                "$.foo" : {
+                                |                  "matchers": [
+                                |                    {
+                                |                      "match":"regex",
+                                |                      "regex": "\\w+"
+                                |                    }
+                                |                  ]
+                                |                },
+                                |                "$.number" : {
+                                |                  "matchers": [
+                                |                    {
+                                |                      "match":"integer"
+                                |                    }
+                                |                  ]
+                                |                }
+                                |              }
+                                |            }
                                 |        },
                                 |        {
                                 |            "description": "Published another credit data",
@@ -384,14 +409,24 @@ object PactFileExamples {
       |              "contentType": "application/json"
       |            },
       |            "matchingRules" : {
-      |               "foo" : {
-      |                 "match":"regex",
-      |                 "regex": "\\w+"
-      |               },
-      |               "number" : {
-      |                  "match": "integer"
-      |               }
-      |             }
+      |              "body" : {
+      |                "$.foo" : {
+      |                  "matchers": [
+      |                    {
+      |                      "match":"regex",
+      |                      "regex": "\\w+"
+      |                    }
+      |                  ]
+      |                },
+      |                "$.number" : {
+      |                  "matchers": [
+      |                    {
+      |                      "match":"integer"
+      |                    }
+      |                  ]
+      |                }
+      |              }
+      |            }
       |        },
       |        {
       |            "description": "Published another credit data",

@@ -14,6 +14,9 @@ object PactImplicits {
   implicit val pactActorEncoder: Encoder[PactActor] = deriveEncoder[PactActor]
   implicit val pactActorDecoder: Decoder[PactActor] = deriveDecoder[PactActor]
 
+  implicit val messageMatchersEncoder: Encoder[Message.Matchers] = deriveEncoder[Message.Matchers]
+  implicit val messageMatchersDecoder: Decoder[Message.Matchers] = deriveDecoder[Message.Matchers]
+
   implicit val matchingRulesEncoder: Encoder[MatchingRule] = deriveEncoder[MatchingRule]
   implicit val matchingRulesDecoder: Decoder[MatchingRule] = deriveDecoder[MatchingRule]
 
@@ -51,7 +54,7 @@ object PactImplicits {
       providerState <- cursor.downField("providerState").as[Option[String]]
       contents      <- contents(cursor)
       metaData      <- cursor.downField("metaData").as[Metadata]
-      matchingRules <- cursor.downField("matchingRules").as[Option[Map[String, MatchingRule]]]
+      matchingRules <- cursor.downField("matchingRules").as[Option[Message.MatchingRules]]
     } yield
       Message(description,
               providerState,

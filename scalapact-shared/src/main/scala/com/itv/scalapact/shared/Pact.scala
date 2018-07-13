@@ -41,7 +41,7 @@ case class Message(description: String,
                    providerState: Option[String],
                    contents: String,
                    metaData: Message.Metadata,
-                   matchingRules: Map[String, MatchingRule],
+                   matchingRules: Message.MatchingRules,
                    contentType: MessageContentType) {
 
   def renderAsString: String = s"""Message
@@ -56,6 +56,15 @@ case class Message(description: String,
 object Message {
 
   type Metadata = Map[String, String]
+
+  type MatchingRules = Map[String, Map[String, Message.Matchers]]
+
+  case class Matchers(matchers: List[MatchingRule])
+
+  object Matchers {
+
+    def from(rules: MatchingRule*): Message.Matchers = Message.Matchers(rules.toList)
+  }
 
   def apply(description: String, providerState: Option[String], contents: String, metaData: Metadata): Message =
     new Message(description, providerState, contents, metaData, Map.empty, ApplicationJson)

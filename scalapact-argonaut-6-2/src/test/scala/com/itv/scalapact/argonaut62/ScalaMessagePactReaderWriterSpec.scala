@@ -18,9 +18,9 @@ class ScalaMessagePactReaderWriterSpec extends FlatSpec with EitherValues with T
     case (expectedWritten, expectedPact) =>
       it should s"should be able to read Pact files: [$expectedPact]" in {
 
-        val actualPact = pactReader.jsonStringToPact(expectedWritten).right.value
+        val actualPact = pactReader.jsonStringToPact(expectedWritten)
 
-        actualPact should ===(expectedPact)
+        actualPact should ===(Right(expectedPact))
       }
 
       it should s"should be able to write Pact files: [$expectedPact]" in {

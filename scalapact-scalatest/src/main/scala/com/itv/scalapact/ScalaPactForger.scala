@@ -2,6 +2,7 @@ package com.itv.scalapact
 
 import com.itv.scalapact.ScalaPactVerify.ScalaPactVerifyFailed
 import com.itv.scalapact.shared.Maps._
+import com.itv.scalapact.shared.Message.MatchingRules
 import com.itv.scalapact.shared.typeclasses._
 import com.itv.scalapact.shared._
 import com.itv.scalapact.shared.matchir.IrNodeMatchingRules
@@ -34,7 +35,7 @@ object ScalaPactForger {
                                      meta: Message.Metadata,
                                      matchingRules: Map[String, MatchingRule]) {
 
-    def withRegex(key: String, regex: String): PartialScalaPactMessage =
+    def withRegexMatchingRule(key: String, regex: String): PartialScalaPactMessage =
       withMatchingRule(key, MatchingRule(Some("regex"), Some(regex), None))
 
     def withMatchingRule(key: String, value: MatchingRule): PartialScalaPactMessage =
@@ -46,15 +47,17 @@ object ScalaPactForger {
     def withMeta(meta: Message.Metadata): PartialScalaPactMessage =
       copy(meta = meta)
 
-    def withContent[T](value: T)(implicit format: IMessageFormat[T], iInferTypes: IInferTypes[T]): Message =
+    def withContent[T](value: T)(implicit format: IMessageFormat[T], iInferTypes: IInferTypes[T]): Message = {
+      val stringToMatchers: MatchingRules = merge(iInferTypes.infer(value), matchingRules)
       Message(
         description,
         providerState,
         format.encode(value),
         meta,
-        merge(iInferTypes.infer(value), matchingRules),
+        stringToMatchers.headOption.fold[MatchingRules](Map.empty)(_ => stringToMatchers),
         format.contentType
       )
+    }
 
     private def normalizeKey(key: String): String =
       if (key.startsWith("$"))
@@ -65,11 +68,19 @@ object ScalaPactForger {
         "$." + key
 
     private def merge(lowPriorityRules: Map[String, MatchingRule],
-                      highPriorityRules: Map[String, MatchingRule]): Map[String, MatchingRule] = {
+                      highPriorityRules: Map[String, MatchingRule]): MatchingRules = {
       val normalizeHighPriorityRules = highPriorityRules.map { case (k, v) => normalizeKey(k) -> v }
-      highPriorityRules ++ lowPriorityRules.filterKeys { k =>
-        !normalizeHighPriorityRules.contains(normalizeKey(k))
-      }
+      val stringToMatchers = (highPriorityRules ++ lowPriorityRules
+        .filterKeys { k =>
+          !normalizeHighPriorityRules.contains(normalizeKey(k))
+        }).mapValues(x => Message.Matchers.from(x))
+
+      if (stringToMatchers.isEmpty)
+        Map.empty
+      else
+        Map(
+          "body" -> stringToMatchers
+        )
     }
   }
 

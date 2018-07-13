@@ -45,7 +45,9 @@ class MessageVerificationSpec extends FlatSpec with TypeCheckedTripleEquals with
         contents = personalData.nospaces,
         metaData = Message.Metadata.empty,
         matchingRules = Map(
-          ".bar" -> MatchingRule(Some("integer"), None, None)
+          "body" -> Map(
+            "$.bar" -> Message.Matchers.from(MatchingRule(Some("integer"), None, None))
+          )
         ),
         ApplicationJson
       )
@@ -94,7 +96,7 @@ class MessageVerificationSpec extends FlatSpec with TypeCheckedTripleEquals with
       .noSetupRequired
       .runMessageTests[Task, Assertion]() {
         _.consume("Published credit data") { message =>
-          message should ===(samplePact.messages.headOption.value)
+          message should ===(multipleMessages.messages.headOption.value)
         }.publish("Published personal data", Json.obj("bar" -> jNumber(888)))
       }
   }
@@ -131,6 +133,7 @@ class MessageVerificationSpec extends FlatSpec with TypeCheckedTripleEquals with
         case s if s.baseUrl.startsWith(samplePactUrl) =>
           Right(SimpleResponse(200, Map.empty, Some(samplePact.asJson.nospaces)))
         case s if s.baseUrl.startsWith(multipleMessagesUrl) =>
+          println(multipleMessages.asJson.spaces4)
           Right(SimpleResponse(200, Map.empty, Some(multipleMessages.asJson.nospaces)))
         case _ => Right(SimpleResponse(404, Map.empty, None))
       }

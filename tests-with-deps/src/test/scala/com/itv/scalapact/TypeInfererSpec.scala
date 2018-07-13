@@ -24,11 +24,11 @@ class TypeInfererSpec extends FlatSpec with OptionValues with EitherValues with 
                         baseMessage
                           .withContent(Json.obj("key1" -> jNumber(1), "key2" -> jString("444")))
                       ),
-                      writer) should ===(List(Map.empty[String, MatchingRule]))
+                      writer) shouldBe List(Map.empty)
   }
 
   it should "add the infered matching rules to the message" in {
-    implicit val typeInferer: IInferTypes[Json] = inferTypesFrom(Map(".key1" -> "int"))
+    implicit val typeInferer: IInferTypes[Json] = inferTypesFrom(Map("$.key1" -> "int"))
 
     val writer = StubContractWriter()
 
@@ -39,7 +39,10 @@ class TypeInfererSpec extends FlatSpec with OptionValues with EitherValues with 
                       writer) should ===(
       List(
         Map(
-          ".key1" -> MatchingRule(Some("int"), None, None)
+          "body" ->
+            Map(
+              "$.key1" -> Message.Matchers.from(MatchingRule(Some("int"), None, None))
+            )
         )
       )
     )
@@ -52,10 +55,12 @@ class TypeInfererSpec extends FlatSpec with OptionValues with EitherValues with 
 
     matchingRulesFrom(baseSpec(
                         baseMessage
-                          .withRegex(".key2", "\\d+")
+                          .withRegexMatchingRule("$.key2", "\\d+")
                           .withContent(Json.obj("key1" -> jNumber(1), "key2" -> jString("444")))
                       ),
-                      writer) should ===(List(Map(".key2" -> MatchingRule(Some("regex"), Some("\\d+"), None))))
+                      writer) should ===(
+      List(Map("body" -> Map("$.key2" -> Message.Matchers.from(MatchingRule(Some("regex"), Some("\\d+"), None)))))
+    )
   }
 
   it should "merge the inferred matching rules to the message when the user use $" in {
@@ -65,10 +70,12 @@ class TypeInfererSpec extends FlatSpec with OptionValues with EitherValues with 
 
     matchingRulesFrom(baseSpec(
                         baseMessage
-                          .withRegex("$.key2", "\\d+")
+                          .withRegexMatchingRule("$.key2", "\\d+")
                           .withContent(Json.obj("key1" -> jString(""), "key2" -> jString("444")))
                       ),
-                      writer) should ===(List(Map("$.key2" -> MatchingRule(Some("regex"), Some("\\d+"), None))))
+                      writer) should ===(
+      List(Map("body" -> Map("$.key2" -> Message.Matchers.from(MatchingRule(Some("regex"), Some("\\d+"), None)))))
+    )
   }
 
   private def inferTypesFrom(stringToString: Map[JsonField, JsonField]): IInferTypes[Json] =
@@ -95,8 +102,8 @@ class TypeInfererSpec extends FlatSpec with OptionValues with EitherValues with 
   private def matchingRulesFrom(
       description: ScalaPactForger.forgePact.ScalaPactDescription,
       writer: IContractWriter
-  ): List[Map[String, MatchingRule]] =
-    description.runMessageTests[Map[String, MatchingRule]] {
+  ): List[Message.MatchingRules] =
+    description.runMessageTests[Message.MatchingRules] {
       _.consume("description") { message =>
         message.matchingRules
       }

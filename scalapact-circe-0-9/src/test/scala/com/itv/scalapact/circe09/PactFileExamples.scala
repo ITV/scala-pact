@@ -293,7 +293,8 @@ object PactFileExamples {
         providerState = Some("or maybe 'scenario'? not sure about this"),
         contents = """Hello world!""",
         metaData = Message.Metadata(),
-        matchingRules = Map("foo" -> MatchingRule(Some("regex"), Some("\\w+"), None)),
+        matchingRules =
+          Map("body" -> Map("$.foo" -> Message.Matchers(List(MatchingRule(Some("regex"), Some("\\w+"), None))))),
         ApplicationText
       )
     )
@@ -314,10 +315,16 @@ object PactFileExamples {
                                 |            "metaData": {
                                 |            },
                                 |            "matchingRules" : {
-                                |               "foo" : {
-                                |                 "match":"regex",
-                                |                 "regex": "\\w+"
-                                |               }
+                                |              "body" : {
+                                |                "$.foo" : {
+                                |                  "matchers": [
+                                |                    {
+                                |                      "match":"regex",
+                                |                      "regex": "\\w+"
+                                |                    }
+                                |                  ]
+                                |                }
+                                |              }
                                 |            }
                                 |        }
                                 |    ]
@@ -366,7 +373,10 @@ object PactFileExamples {
         contents = """{"boo":"xxx","foo":123}""",
         metaData = Message.Metadata("contentType" -> "application/json"),
         matchingRules = Map(
-          "foo" -> MatchingRule(Some("integer"), None, None)
+          "body" ->
+            Map(
+              "$.foo" -> Message.Matchers(List(MatchingRule(Some("integer"), None, None)))
+            )
         ),
         ApplicationJson
       )
@@ -392,9 +402,15 @@ object PactFileExamples {
                                   |            "description": "Published another credit data",
                                   |            "providerState": "or maybe 'scenario'! not sure about this",
                                   |            "contents": {"boo":"xxx","foo":123},
-                                  |            "matchingRules": {
-                                  |              "foo" : {
-                                  |                  "match": "integer"
+                                  |            "matchingRules" : {
+                                  |              "body" : {
+                                  |                "$.foo" : {
+                                  |                  "matchers": [
+                                  |                    {
+                                  |                      "match":"integer"
+                                  |                    }
+                                  |                  ]
+                                  |                }
                                   |              }
                                   |            },
                                   |            "metaData": {
@@ -428,9 +444,15 @@ object PactFileExamples {
       |            "description": "Published another credit data",
       |            "providerState": "or maybe 'scenario'! not sure about this",
       |            "contents": {"boo":"xxx","foo":123},
-      |            "matchingRules": {
-      |              "foo" : {
-      |                  "match": "integer"
+      |            "matchingRules" : {
+      |              "body" : {
+      |                "$.foo" : {
+      |                  "matchers": [
+      |                    {
+      |                      "match":"integer"
+      |                    }
+      |                  ]
+      |                }
       |              }
       |            },
       |            "metaData": {

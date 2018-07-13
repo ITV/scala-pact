@@ -25,6 +25,11 @@ object PactImplicits {
     case _               => message.contents.asJson
   }
 
+  implicit lazy val MessageMatchersCodecJson: CodecJson[Message.Matchers] =
+    casecodec1(Message.Matchers.apply, Message.Matchers.unapply)(
+      "matchers"
+    )
+
   implicit lazy val MessageCodecJson: CodecJson[Message] = CodecJson(
     message =>
       Json.obj(
@@ -43,7 +48,7 @@ object PactImplicits {
         providerState <- (c --\ "providerState").as[Option[String]]
         contents      <- (c --\ "contents").as[Json]
         metadata      <- (c --\ "metaData").as[Map[String, String]]
-        matchingRules <- (c --\ "matchingRules").as[Option[Map[String, MatchingRule]]]
+        matchingRules <- (c --\ "matchingRules").as[Option[Message.MatchingRules]]
       } yield
         Message(description,
                 providerState,
