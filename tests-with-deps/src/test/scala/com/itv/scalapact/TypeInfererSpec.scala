@@ -55,7 +55,7 @@ class TypeInfererSpec extends FlatSpec with OptionValues with EitherValues with 
 
     matchingRulesFrom(baseSpec(
                         baseMessage
-                          .withRegexMatchingRule("$.key2", "\\d+")
+                          .withRegexMatchingRule("$.body.key2", "\\d+")
                           .withContent(Json.obj("key1" -> jNumber(1), "key2" -> jString("444")))
                       ),
                       writer) should ===(
@@ -70,7 +70,7 @@ class TypeInfererSpec extends FlatSpec with OptionValues with EitherValues with 
 
     matchingRulesFrom(baseSpec(
                         baseMessage
-                          .withRegexMatchingRule("$.key2", "\\d+")
+                          .withRegexMatchingRule("$.body.key2", "\\d+")
                           .withContent(Json.obj("key1" -> jString(""), "key2" -> jString("444")))
                       ),
                       writer) should ===(

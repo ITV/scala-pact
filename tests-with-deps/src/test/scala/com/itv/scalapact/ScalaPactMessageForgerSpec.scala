@@ -27,7 +27,7 @@ class ScalaPactMessageForgerSpec extends FlatSpec with OptionValues with EitherV
         .description("description")
         .withProviderState("whatever")
         .withMeta(Message.Metadata.empty)
-        .withRegexMatchingRule(".key2", "\\d+")
+        .withRegexMatchingRule("$.body.key2", "\\d+")
         .withContent(firstExpectedMessage)
     )
 
@@ -53,7 +53,7 @@ class ScalaPactMessageForgerSpec extends FlatSpec with OptionValues with EitherV
           message.matchingRules should ===(
             Map(
               "body" ->
-                Map(".key2" -> Message.Matchers.from(MatchingRule(Some("regex"), Some("\\d+"), None)))
+                Map("$.key2" -> Message.Matchers.from(MatchingRule(Some("regex"), Some("\\d+"), None)))
             )
           )
           message.metaData should ===(Message.Metadata.empty)

@@ -35,8 +35,12 @@ object ScalaPactForger {
                                      meta: Message.Metadata,
                                      matchingRules: Map[String, MatchingRule]) {
 
-    def withRegexMatchingRule(key: String, regex: String): PartialScalaPactMessage =
-      withMatchingRule(key, MatchingRule(Some("regex"), Some(regex), None))
+    def withRegexMatchingRule(key: String, regex: String): PartialScalaPactMessage = key match {
+
+      case value if value.startsWith("$.body") =>
+        withMatchingRule(key.replace("$.body", "$"), MatchingRule(Some("regex"), Some(regex), None))
+      case _ => this //TODO Review this
+    }
 
     def withMatchingRule(key: String, value: MatchingRule): PartialScalaPactMessage =
       copy(matchingRules = matchingRules + (key -> value))
