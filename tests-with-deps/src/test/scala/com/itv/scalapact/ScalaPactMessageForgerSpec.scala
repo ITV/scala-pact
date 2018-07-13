@@ -31,6 +31,18 @@ class ScalaPactMessageForgerSpec extends FlatSpec with OptionValues with EitherV
         .withContent(firstExpectedMessage)
     )
 
+  val specWithOneMessageAndMultipleMatchingRules = forgePact
+    .between("Consumer")
+    .and("Provider")
+    .addMessage(
+      message
+        .description("description")
+        .withProviderState("whatever")
+        .withMeta(Message.Metadata.empty)
+        .withRegexMatchingRule("$.body.key2", "\\d{4}")
+        .withRegexMatchingRule("$.body.key2", "\\d{3}")
+        .withContent(firstExpectedMessage)
+    )
   val secondExpectedMessage  = Json.obj("key5"       -> jNumber(1), "key6" -> jString("foo"))
   val secondExpectedMetadata = Message.Metadata("id" -> "333")
 
@@ -160,6 +172,47 @@ class ScalaPactMessageForgerSpec extends FlatSpec with OptionValues with EitherV
     a[ScalaPactVerifyFailed] should be thrownBy {
       specWithOneMessage.runMessageTests[Any] {
         _.publish("description", Json.obj("key1" -> jNumber(1), "key2" -> jString("foo")))
+      }
+    }
+  }
+
+  it should "fail if the published message is in the right format and breaks one of the rules " in {
+
+    val specWithOneMessageAndMultipleMatchingRules1 = forgePact
+      .between("Consumer")
+      .and("Provider")
+      .addMessage(
+        message
+          .description("description")
+          .withProviderState("whatever")
+          .withMeta(Message.Metadata.empty)
+          .withRegexMatchingRule("$.body.key2", "\\d{4}")
+          .withRegexMatchingRule("$.body.key2", "\\d{3}")
+          .withContent(firstExpectedMessage)
+      )
+
+    val specWithOneMessageAndMultipleMatchingRules2 = forgePact
+      .between("Consumer")
+      .and("Provider")
+      .addMessage(
+        message
+          .description("description")
+          .withProviderState("whatever")
+          .withMeta(Message.Metadata.empty)
+          .withRegexMatchingRule("$.body.key2", "\\d{3}")
+          .withRegexMatchingRule("$.body.key2", "\\d{4}")
+          .withContent(firstExpectedMessage)
+      )
+
+    a[ScalaPactVerifyFailed] should be thrownBy {
+      specWithOneMessageAndMultipleMatchingRules1.runMessageTests[Any] {
+        _.publish("description", Json.obj("key1" -> jNumber(1), "key2" -> jString("123")))
+      }
+    }
+
+    a[ScalaPactVerifyFailed] should be thrownBy {
+      specWithOneMessageAndMultipleMatchingRules2.runMessageTests[Any] {
+        _.publish("description", Json.obj("key1" -> jNumber(1), "key2" -> jString("123")))
       }
     }
   }

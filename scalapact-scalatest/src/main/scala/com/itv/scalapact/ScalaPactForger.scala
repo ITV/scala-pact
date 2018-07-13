@@ -33,14 +33,14 @@ object ScalaPactForger {
   case class PartialScalaPactMessage(description: String,
                                      providerStates: List[String],
                                      meta: Message.Metadata,
-                                     matchingRules: Map[String, MatchingRule]) {
+                                     matchingRules: MatchingRules) {
 
     def withRegexMatchingRule(jsonPath: String, regex: String): PartialScalaPactMessage =
       withMatchingRule(jsonPath, MatchingRule(Some("regex"), Some(regex), None))
 
     def withMatchingRule(jsonPath: String, value: MatchingRule): PartialScalaPactMessage = jsonPath match {
       case x if x.startsWith("$.body") =>
-        copy(matchingRules = matchingRules + (jsonPath.replace("$.body", "$") -> value))
+        copy(matchingRules = MatchingRules.appendToBody(matchingRules)(jsonPath, value))
       case _ =>
         throw new RuntimeException(s"$jsonPath is invalid") //FIXME At the moment we only support body verifications
     }
@@ -51,41 +51,16 @@ object ScalaPactForger {
     def withMeta(meta: Message.Metadata): PartialScalaPactMessage =
       copy(meta = meta)
 
-    def withContent[T](value: T)(implicit format: IMessageFormat[T], iInferTypes: IInferTypes[T]): Message = {
-      val stringToMatchers: MatchingRules = merge(iInferTypes.infer(value), matchingRules)
+    def withContent[T](value: T)(implicit format: IMessageFormat[T], iInferTypes: IInferTypes[T]): Message =
       Message(
         description,
         providerStates,
         format.encode(value),
         meta,
-        stringToMatchers.headOption.fold[MatchingRules](Map.empty)(_ => stringToMatchers),
+        MatchingRules.merge(iInferTypes.infer(value), matchingRules),
         format.contentType
       )
-    }
 
-    private def normalizeKey(key: String): String =
-      if (key.startsWith("$"))
-        key
-      else if (key.startsWith("."))
-        "$" + key
-      else
-        "$." + key
-
-    private def merge(lowPriorityRules: Map[String, MatchingRule],
-                      highPriorityRules: Map[String, MatchingRule]): MatchingRules = {
-      val normalizeHighPriorityRules = highPriorityRules.map { case (k, v) => normalizeKey(k) -> v }
-      val stringToMatchers = (highPriorityRules ++ lowPriorityRules
-        .filterKeys { k =>
-          !normalizeHighPriorityRules.contains(normalizeKey(k))
-        }).mapValues(x => Message.Matchers.from(x))
-
-      if (stringToMatchers.isEmpty)
-        Map.empty
-      else
-        Map(
-          "body" -> stringToMatchers
-        )
-    }
   }
 
   sealed trait ForgePactElements {

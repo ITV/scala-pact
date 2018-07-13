@@ -35,12 +35,12 @@ class IITypeInferTypeSpec extends FlatSpec with TypeCheckedTripleEquals {
         )
       ) should ===(
       Map(
-        ".key2"   -> "integer",
-        ".key3"   -> "integer",
-        ".key4"   -> "integer",
-        ".key5"   -> "integer",
-        ".key6"   -> "integer",
-        ".key7.m" -> "decimal"
+        "$.body.key2"   -> "integer",
+        "$.body.key3"   -> "integer",
+        "$.body.key4"   -> "integer",
+        "$.body.key5"   -> "integer",
+        "$.body.key6"   -> "integer",
+        "$.body.key7.m" -> "decimal"
       ).mapValues(matchingRule)
     )
   }

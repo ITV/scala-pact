@@ -51,25 +51,16 @@ object MessageStubber {
         messages
           .find(m => m.description == description)
           .map(
-            message => {
-              val bodyRules = "body"
+            message =>
               OutcomeAndMessage(
                 MessageMatchers.matchSingleMessage(
                   message.contents,
                   messageFormat.encode(actualMessage),
-                  message.matchingRules
-                    .get(bodyRules)
-                    .map(_.flatMap {
-                      case (k, v) =>
-                        v.matchers.headOption
-                          .map(x => k.replace("$", "$." + bodyRules) -> x)
-                          .toList //FIXME at the moment we only verify the first matching rule
-                    }),
+                  message.matchingRules,
                   config.strictMode
                 ),
                 message
-              )
-            }
+            )
           )
           .map {
             case OutcomeAndMessage(oc, message) if !message.metaData.forall(n => metadata.get(n._1).contains(n._2)) =>

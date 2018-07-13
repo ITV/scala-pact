@@ -28,7 +28,7 @@ package object json {
   object ext {
 
     implicit val inferTypeInstance: IInferTypes[Json] = new IInferTypes[Json] {
-      override protected def inferFrom(t: Json): Map[String, String] = typesFrom(".", t, Set.empty).toMap
+      override protected def inferFrom(t: Json): Map[String, String] = typesFrom("$.body.", t, Set.empty).toMap
 
       private def typesFrom(path: String, json: Json, acc: Set[(String, String)]): Set[(String, String)] = {
 

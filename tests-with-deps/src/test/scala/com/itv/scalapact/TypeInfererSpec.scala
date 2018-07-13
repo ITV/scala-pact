@@ -28,7 +28,7 @@ class TypeInfererSpec extends FlatSpec with OptionValues with EitherValues with 
   }
 
   it should "add the infered matching rules to the message" in {
-    implicit val typeInferer: IInferTypes[Json] = inferTypesFrom(Map("$.key1" -> "int"))
+    implicit val typeInferer: IInferTypes[Json] = inferTypesFrom(Map("$.body.key1" -> "int"))
 
     val writer = StubContractWriter()
 
@@ -49,7 +49,7 @@ class TypeInfererSpec extends FlatSpec with OptionValues with EitherValues with 
   }
 
   it should "merge the inferred matching rules to the message" in {
-    implicit val typeInferer: IInferTypes[Json] = inferTypesFrom(Map(".key2" -> "int"))
+    implicit val typeInferer: IInferTypes[Json] = inferTypesFrom(Map("$.body.key2" -> "integer"))
 
     val writer = StubContractWriter()
 
@@ -59,22 +59,14 @@ class TypeInfererSpec extends FlatSpec with OptionValues with EitherValues with 
                           .withContent(Json.obj("key1" -> jNumber(1), "key2" -> jString("444")))
                       ),
                       writer) should ===(
-      List(Map("body" -> Map("$.key2" -> Message.Matchers.from(MatchingRule(Some("regex"), Some("\\d+"), None)))))
-    )
-  }
-
-  it should "merge the inferred matching rules to the message when the user use $" in {
-    implicit val typeInferer: IInferTypes[Json] = inferTypesFrom(Map(".key2" -> "int"))
-
-    val writer = StubContractWriter()
-
-    matchingRulesFrom(baseSpec(
-                        baseMessage
-                          .withRegexMatchingRule("$.body.key2", "\\d+")
-                          .withContent(Json.obj("key1" -> jString(""), "key2" -> jString("444")))
-                      ),
-                      writer) should ===(
-      List(Map("body" -> Map("$.key2" -> Message.Matchers.from(MatchingRule(Some("regex"), Some("\\d+"), None)))))
+      List(
+        Map(
+          "body" -> Map(
+            "$.key2" -> Message.Matchers.from(MatchingRule(Some("regex"), Some("\\d+"), None),
+                                              MatchingRule(Some("integer"), None, None))
+          )
+        )
+      )
     )
   }
 

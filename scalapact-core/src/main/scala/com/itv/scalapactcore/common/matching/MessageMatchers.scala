@@ -32,23 +32,37 @@ object MessageMatchers {
 
     }
 
-  def matchSingleMessage(expected: String, received: String, rules: Option[Map[String, MatchingRule]], strict: Boolean)(
+  def matchSingleMessage(expected: String, received: String, rules: Message.MatchingRules, strict: Boolean)(
       implicit pactReader: IPactReader
-  ): MatchOutcome =
-    IrNodeMatchingRules.fromPactRules(rules) match {
-      case Left(e) =>
-        MatchOutcomeFailed(e)
-      case Right(matchingRules) =>
-        val result = for {
-          ee <- MatchIr.fromJSON(pactReader.fromJSON)(expected)
-          rr <- MatchIr.fromJSON(pactReader.fromJSON)(received)
-        } yield
-          nodeMatchToMatchResult(ee.isEqualTo(rr, strict = strict, matchingRules, bePermissive = !strict),
-                                 matchingRules,
-                                 isXml = false)
+  ): MatchOutcome = {
 
-        result.getOrElse(MatchOutcomeFailed("Failed to parse JSON body", 50))
+    def evaluateRule(rules: (String, MatchingRule)): MatchOutcome =
+      IrNodeMatchingRules.fromPactRules(Some(Map(rules))) match {
+        case Left(e) =>
+          MatchOutcomeFailed(e)
+        case Right(matchingRules) =>
+          val result = for {
+            ee <- MatchIr.fromJSON(pactReader.fromJSON)(expected)
+            rr <- MatchIr.fromJSON(pactReader.fromJSON)(received)
+          } yield
+            nodeMatchToMatchResult(ee.isEqualTo(rr, strict = strict, matchingRules, bePermissive = !strict),
+                                   matchingRules,
+                                   isXml = false)
 
-    }
+          result.getOrElse(MatchOutcomeFailed("Failed to parse JSON body", 50))
+
+      }
+
+    rules
+      .get("body")
+      .toList
+      .flatMap {
+        _.map { case (k, v) => k.replace("$", "$.body") -> v.matchers }
+      }
+      .flatMap(x => x._2.map(y => x._1 -> y))
+      .foldLeft[MatchOutcome](MatchOutcomeSuccess) { (acc, next: (String, MatchingRule)) =>
+        acc + evaluateRule(next)
+      }
+  }
 
 }

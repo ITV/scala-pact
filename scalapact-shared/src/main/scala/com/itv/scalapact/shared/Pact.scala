@@ -59,6 +59,36 @@ object Message {
 
   type MatchingRules = Map[String, Map[String, Message.Matchers]]
 
+  object MatchingRules {
+
+    def merge(lowPriorityRules: Map[String, MatchingRule], highPriorityRules: MatchingRules): MatchingRules = {
+      println(s"$lowPriorityRules")
+      lowPriorityRules.foldLeft(highPriorityRules) { (acc, next) =>
+        val x = MatchingRules.appendToBody(acc)(next._1, next._2)
+        println(s"$x")
+        x
+      }
+    }
+
+    def appendToBody(
+        matchingRules: MatchingRules
+    )(jsonPath: String, matchingRule: MatchingRule): MatchingRules = {
+      val key = jsonPath.replace("$.body", "$")
+      matchingRules
+        .get("body")
+        .fold(matchingRules + ("body" -> Map(key -> Matchers.from(matchingRule))))(
+          rules =>
+            Map(
+              "body" -> rules
+                .get(key)
+                .fold(rules + (key  -> Matchers.from(matchingRule)))(
+                  x => rules + (key -> x.copy(matchers = x.matchers ++ List(matchingRule)))
+                )
+          )
+        )
+    }
+  }
+
   case class Matchers(matchers: List[MatchingRule])
 
   object Matchers {
