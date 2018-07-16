@@ -57,7 +57,7 @@ addCommandAlias(
 )
 addCommandAlias(
   "quickpublish",
-  ";shared/publishLocal;core/publishLocal;argonaut62/publishLocal;circe08/publishLocal;circe09/publishLocal;http4s016a/publishLocal;http4s017/publishLocal;http4s018/publishLocal;pluginShared/publishLocal;plugin/publishLocal;pluginNoDeps/publishLocal;standalone/publishLocal;framework/publishLocal"
+  ";shared/publishLocal;core/publishLocal;argonaut62/publishLocal;circe08/publishLocal;circe09/publishLocal;http4s016a/publishLocal;http4s017/publishLocal;http4s018/publishLocal;http4s019/publishLocal;pluginShared/publishLocal;plugin/publishLocal;pluginNoDeps/publishLocal;standalone/publishLocal;framework/publishLocal"
 )
 
 lazy val commonSettings = Seq(
@@ -156,7 +156,7 @@ lazy val http4s016a =
         "org.http4s"             %% "http4s-blaze-server" % "0.16.6a",
         "org.http4s"             %% "http4s-blaze-client" % "0.16.6a",
         "org.http4s"             %% "http4s-dsl"          % "0.16.6a",
-        "com.github.tomakehurst" % "wiremock"             % "1.56" % "test"
+        "com.github.tomakehurst" %  "wiremock"            % "1.56" % "test"
       )
     )
     .dependsOn(shared)
@@ -173,7 +173,7 @@ lazy val http4s017 =
         "org.http4s"             %% "http4s-blaze-server" % "0.17.6",
         "org.http4s"             %% "http4s-blaze-client" % "0.17.6",
         "org.http4s"             %% "http4s-dsl"          % "0.17.6",
-        "com.github.tomakehurst" % "wiremock"             % "1.56" % "test"
+        "com.github.tomakehurst" %  "wiremock"            % "1.56" % "test"
       )
     )
     .dependsOn(shared)
@@ -189,7 +189,23 @@ lazy val http4s018 =
         "org.http4s"             %% "http4s-blaze-server" % "0.18.13",
         "org.http4s"             %% "http4s-blaze-client" % "0.18.13",
         "org.http4s"             %% "http4s-dsl"          % "0.18.13",
-        "com.github.tomakehurst" % "wiremock"             % "1.56" % "test"
+        "com.github.tomakehurst" %  "wiremock"            % "1.56" % "test"
+      )
+    )
+    .dependsOn(shared)
+    .settings(compilerOptions212: _*)
+
+lazy val http4s019 =
+  (project in file("scalapact-http4s-0-19"))
+    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
+    .settings(
+      name := "scalapact-http4s-0-19",
+      libraryDependencies ++= Seq(
+        "org.http4s"             %% "http4s-blaze-server" % "0.19.0-M1",
+        "org.http4s"             %% "http4s-blaze-client" % "0.19.0-M1",
+        "org.http4s"             %% "http4s-dsl"          % "0.19.0-M1",
+        "com.github.tomakehurst" %  "wiremock"            % "1.56" % "test"
       )
     )
     .dependsOn(shared)
@@ -350,7 +366,7 @@ lazy val scalaPactProject =
   (project in file("."))
     .settings(commonSettings: _*)
     .aggregate(shared, core, pluginShared, plugin, pluginNoDeps, framework, standalone)
-    .aggregate(http4s016a, http4s017, http4s018)
+    .aggregate(http4s016a, http4s017, http4s018, http4s019)
     .aggregate(argonaut62, circe08, circe09)
     .aggregate(docs)
     .aggregate(pactSpec, testsWithDeps)
