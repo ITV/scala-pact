@@ -36,9 +36,9 @@ object MessageContentType {
   }
   def unnaply(mct: MessageContentType): String = mct.renderString
 }
-
+case class ProviderState(name: String, params: Map[String, String])
 case class Message(description: String,
-                   providerStates: List[String],
+                   providerStates: List[ProviderState],
                    contents: String,
                    metaData: Message.Metadata,
                    matchingRules: Message.MatchingRules,
@@ -96,7 +96,7 @@ object Message {
     def from(rules: MatchingRule*): Message.Matchers = Message.Matchers(rules.toList)
   }
 
-  def apply(description: String, providerStates: List[String], contents: String, metaData: Metadata): Message =
+  def apply(description: String, providerStates: List[ProviderState], contents: String, metaData: Metadata): Message =
     new Message(description, providerStates, contents, metaData, Map.empty, ApplicationJson)
 
   object Metadata {

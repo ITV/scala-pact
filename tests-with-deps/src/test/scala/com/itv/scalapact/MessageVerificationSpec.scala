@@ -26,7 +26,7 @@ class MessageVerificationSpec extends FlatSpec with TypeCheckedTripleEquals with
     messages = List(
       Message(
         description = "Published credit data",
-        providerStates = List("or maybe 'scenario'? not sure about this"),
+        providerStates = List(ProviderState("or maybe 'scenario'? not sure about this", Map.empty)),
         contents = """{"foo":"bar"}""",
         metaData = Message.Metadata("contentType" -> "application/json"),
         matchingRules = Map.empty,
@@ -41,7 +41,7 @@ class MessageVerificationSpec extends FlatSpec with TypeCheckedTripleEquals with
     messages = samplePact.messages ++ List(
       Message(
         description = "Published personal data",
-        providerStates = List("or maybe 'scenario'? not sure about this"),
+        providerStates = List(ProviderState("or maybe 'scenario'? not sure about this", Map.empty)),
         contents = personalData.nospaces,
         metaData = Message.Metadata.empty,
         matchingRules = Map(

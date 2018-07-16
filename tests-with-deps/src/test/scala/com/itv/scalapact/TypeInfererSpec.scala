@@ -4,9 +4,8 @@ import argonaut.Json
 import argonaut._
 import Argonaut._
 import com.itv.scalapact.ScalaPactForger.{ScalaPactOptions, forgePact, message, messageSpec}
-
 import com.itv.scalapact.shared.typeclasses.IInferTypes
-import com.itv.scalapact.shared.{MatchingRule, Message}
+import com.itv.scalapact.shared.{MatchingRule, Message, ProviderState}
 import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.{EitherValues, FlatSpec, OptionValues}
 import org.scalatest.Matchers._
@@ -88,7 +87,7 @@ class TypeInfererSpec extends FlatSpec with OptionValues with EitherValues with 
   private def baseMessage: ScalaPactForger.PartialScalaPactMessage =
     message
       .description("description")
-      .withProviderState("whatever")
+      .withProviderState(ProviderState("whatever", Map.empty))
       .withMeta(Message.Metadata.empty)
 
   private def matchingRulesFrom(

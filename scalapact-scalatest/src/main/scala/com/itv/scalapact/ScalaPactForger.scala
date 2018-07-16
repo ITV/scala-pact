@@ -31,7 +31,7 @@ object ScalaPactForger {
   }
 
   case class PartialScalaPactMessage(description: String,
-                                     providerStates: List[String],
+                                     providerStates: List[ProviderState],
                                      meta: Message.Metadata,
                                      matchingRules: MatchingRules) {
 
@@ -45,7 +45,7 @@ object ScalaPactForger {
         throw new RuntimeException(s"$jsonPath is invalid") //FIXME At the moment we only support body verifications
     }
 
-    def withProviderState(state: String): PartialScalaPactMessage =
+    def withProviderState(state: ProviderState): PartialScalaPactMessage =
       copy(providerStates = providerStates ++ List(state))
 
     def withMeta(meta: Message.Metadata): PartialScalaPactMessage =

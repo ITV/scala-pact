@@ -6,7 +6,7 @@ import Argonaut._
 import com.itv.scalapact.ScalaPactForger.{ScalaPactOptions, forgePact, interaction, message, messageSpec}
 import com.itv.scalapact.ScalaPactVerify.ScalaPactVerifyFailed
 import com.itv.scalapact.shared.MessageContentType.ApplicationJson
-import com.itv.scalapact.shared.{MatchingRule, Message}
+import com.itv.scalapact.shared.{MatchingRule, Message, ProviderState}
 import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.{EitherValues, FlatSpec, OptionValues}
 import org.scalatest.Matchers._
@@ -25,7 +25,7 @@ class ScalaPactMessageForgerSpec extends FlatSpec with OptionValues with EitherV
     .addMessage(
       message
         .description("description")
-        .withProviderState("whatever")
+        .withProviderState(ProviderState("whatever",Map.empty))
         .withMeta(Message.Metadata.empty)
         .withRegexMatchingRule("$.body.key2", "\\d+")
         .withContent(firstExpectedMessage)
@@ -37,7 +37,7 @@ class ScalaPactMessageForgerSpec extends FlatSpec with OptionValues with EitherV
     .addMessage(
       message
         .description("description")
-        .withProviderState("whatever")
+        .withProviderState(ProviderState("whatever",Map.empty))
         .withMeta(Message.Metadata.empty)
         .withRegexMatchingRule("$.body.key2", "\\d{4}")
         .withRegexMatchingRule("$.body.key2", "\\d{3}")
@@ -50,7 +50,7 @@ class ScalaPactMessageForgerSpec extends FlatSpec with OptionValues with EitherV
     .addMessage(
       message
         .description("description2")
-        .withProviderState("whatever")
+        .withProviderState(ProviderState("whatever",Map.empty))
         .withMeta(secondExpectedMetadata)
         .withContent(secondExpectedMessage)
     )
@@ -184,7 +184,7 @@ class ScalaPactMessageForgerSpec extends FlatSpec with OptionValues with EitherV
       .addMessage(
         message
           .description("description")
-          .withProviderState("whatever")
+          .withProviderState(ProviderState("whatever",Map.empty))
           .withMeta(Message.Metadata.empty)
           .withRegexMatchingRule("$.body.key2", "\\d{4}")
           .withRegexMatchingRule("$.body.key2", "\\d{3}")
@@ -197,7 +197,7 @@ class ScalaPactMessageForgerSpec extends FlatSpec with OptionValues with EitherV
       .addMessage(
         message
           .description("description")
-          .withProviderState("whatever")
+          .withProviderState(ProviderState("whatever",Map.empty))
           .withMeta(Message.Metadata.empty)
           .withRegexMatchingRule("$.body.key2", "\\d{3}")
           .withRegexMatchingRule("$.body.key2", "\\d{4}")
@@ -261,7 +261,7 @@ class ScalaPactMessageForgerSpec extends FlatSpec with OptionValues with EitherV
     a[RuntimeException] should be thrownBy {
       message
         .description("description")
-        .withProviderState("whatever")
+        .withProviderState(ProviderState("whatever",Map.empty))
         .withMeta(Message.Metadata.empty)
         .withRegexMatchingRule(".key2", "\\d+")
 

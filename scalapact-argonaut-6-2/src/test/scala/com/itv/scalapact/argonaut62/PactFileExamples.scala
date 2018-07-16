@@ -278,7 +278,7 @@ object PactFileExamples {
     messages = List(
       Message(
         description = "Published credit data",
-        providerStates = List("or maybe 'scenario'? not sure about this"),
+        providerStates = List(ProviderState("or maybe 'scenario'? not sure about this",Map.empty)),
         contents = """{"foo":"bar","number":123}""",
         metaData = Message.Metadata("contentType" -> "application/json"),
         matchingRules = Map(
@@ -304,7 +304,7 @@ object PactFileExamples {
                                 |        {
                                 |            "description": "Published credit data",
                                 |            "providerStates": [
-                                |             "or maybe 'scenario'? not sure about this"
+                                |               {"name" : "or maybe 'scenario'? not sure about this"}
                                 |             ],
                                 |            "contents": {"foo":"bar","number":123},
                                 |            "metaData": {
@@ -376,7 +376,7 @@ object PactFileExamples {
     messages = simpleMessage.messages ++ List(
       Message(
         description = "Published another credit data",
-        providerStates = List("or maybe 'scenario'! not sure about this"),
+        providerStates = List(ProviderState("or maybe 'scenario'! not sure about this",Map.empty)),
         contents = """{"boo":"xxx"}""",
         metaData = Message.Metadata("contentType" -> "application/json"),
         matchingRules = Map.empty,
@@ -395,7 +395,7 @@ object PactFileExamples {
                                 |        {
                                 |            "description": "Published credit data",
                                 |            "providerStates": [
-                                |            "or maybe 'scenario'? not sure about this"
+                                |               {"name": "or maybe 'scenario'? not sure about this"}
                                 |            ],
                                 |            "contents": {"foo":"bar","number":123},
                                 |            "metaData": {
@@ -424,7 +424,7 @@ object PactFileExamples {
                                 |        {
                                 |            "description": "Published another credit data",
                                 |            "providerStates": [
-                                |             "or maybe 'scenario'! not sure about this"
+                                |               {"name": "or maybe 'scenario'! not sure about this"}
                                 |            ],
                                 |            "contents": {"boo":"xxx"},
                                 |            "metaData": {
@@ -449,7 +449,7 @@ object PactFileExamples {
       |        {
       |            "description": "Published credit data",
       |            "providerStates": [
-      |              "or maybe 'scenario'? not sure about this"
+      |              {"name" : "or maybe 'scenario'? not sure about this"}
       |             ],
       |            "contents": {"foo":"bar","number":123},
       |            "metaData": {
@@ -478,7 +478,7 @@ object PactFileExamples {
       |        {
       |            "description": "Published another credit data",
       |            "providerStates": [
-      |               "or maybe 'scenario'! not sure about this"
+      |               {"name" : "or maybe 'scenario'! not sure about this"}
       |            ],
       |            "contents": {"boo":"xxx"},
       |            "metaData": {

@@ -30,6 +30,20 @@ object PactImplicits {
       "matchers"
     )
 
+  implicit lazy val ProviderStateCodeJson: CodecJson[ProviderState] = CodecJson[ProviderState](
+    ps => Json.obj(
+        "name" -> ps.name.asJson,
+        "params" -> (ps.params match {
+          case params if params.nonEmpty => params.asJson
+          case _ => jNull
+        })
+    ),
+    c => for {
+      name <- c.downField("name").as[String]
+      params <- c.downField("params").as[Option[Map[String,String]]]
+    } yield ProviderState(name,params.getOrElse(Map.empty))
+  )
+
   implicit lazy val MessageCodecJson: CodecJson[Message] = CodecJson(
     message =>
       Json.obj(
@@ -46,13 +60,13 @@ object PactImplicits {
       for {
         description    <- (c --\ "description").as[String]
         providerState  <- (c --\ "providerState").as[Option[String]].map(_.toList)
-        providerStates <- (c --\ "providerStates").as[Option[List[String]]].map(_.toList.flatten)
+        providerStates <- (c --\ "providerStates").as[Option[List[ProviderState]]].map(_.toList.flatten)
         contents       <- (c --\ "contents").as[Json]
         metadata       <- (c --\ "metaData").as[Map[String, String]]
         matchingRules  <- (c --\ "matchingRules").as[Option[Message.MatchingRules]]
       } yield
         Message(description,
-                providerState ++ providerStates,
+                providerState.map(s => ProviderState(s, Map.empty)) ++ providerStates,
                 contents.nospaces,
                 metadata,
                 matchingRules.getOrElse(Map.empty),

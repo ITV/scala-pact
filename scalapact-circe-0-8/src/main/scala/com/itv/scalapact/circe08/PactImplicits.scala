@@ -25,11 +25,24 @@ object PactImplicits {
   implicit val interactionRequestDecoder: Decoder[InteractionRequest] = deriveDecoder[InteractionRequest]
 
   implicit val InteractionResponseEncoder: Encoder[InteractionResponse] = deriveEncoder[InteractionResponse]
-
   implicit val InteractionResponseDecoder: Decoder[InteractionResponse] = deriveDecoder[InteractionResponse]
 
   implicit val interactionEncoder: Encoder[Interaction] = deriveEncoder[Interaction]
   implicit val interactionDecoder: Decoder[Interaction] = deriveDecoder[Interaction]
+
+  implicit val providerStateEncoder: Encoder[ProviderState] = Encoder.instance( ps =>
+    Json.obj(
+      "name" -> ps.name.asJson,
+      "params" -> (ps.params match {
+        case params if params.nonEmpty => params.asJson
+        case _ => Json.Null
+      })
+    )
+  )
+  implicit val providerStateDecoder: Decoder[ProviderState] = Decoder.instance(c => for {
+    name <- c.downField("name").as[String]
+    params <- c.downField("params").as[Option[Map[String,String]]]
+  } yield ProviderState(name, params.getOrElse(Map.empty)))
 
   implicit val messageEncoder: Encoder[Message] = Encoder.instance { m =>
     Json.obj(
@@ -52,14 +65,14 @@ object PactImplicits {
     (for {
       description    <- cursor.downField("description").as[String]
       providerState  <- cursor.downField("providerState").as[Option[String]]
-      providerStates <- cursor.downField("providerStates").as[Option[List[String]]]
+      providerStates <- cursor.downField("providerStates").as[Option[List[ProviderState]]]
       contents       <- contents(cursor)
       metaData       <- cursor.downField("metaData").as[Metadata]
       matchingRules  <- cursor.downField("matchingRules").as[Option[Message.MatchingRules]]
     } yield
       Message(
         description,
-        providerState.toList ++ providerStates.toList.flatten,
+        providerState.toList.map(s =>ProviderState(s,Map.empty)) ++ providerStates.toList.flatten,
         contents.asString.getOrElse(contents.noSpaces),
         metaData,
         matchingRules.getOrElse(Map.empty),
