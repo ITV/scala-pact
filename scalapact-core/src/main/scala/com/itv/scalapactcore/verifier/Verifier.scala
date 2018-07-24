@@ -8,8 +8,10 @@ import com.itv.scalapactcore.common._
 import scala.util.Left
 import com.itv.scalapact.shared.PactLogger
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IScalaPactHttpClient}
+import com.itv.scalapactcore.verifier.Verifier.SetupProviderState
 
 object Verifier {
+  type SetupProviderState = String => (Boolean, InteractionRequest => InteractionRequest)
 
   def verify[F[_]](
       loadPactFiles: String => ScalaPactSettings => ConfigAndPacts,
@@ -143,14 +145,13 @@ object Verifier {
       val baseUrl       = s"${arguments.giveProtocol}://" + arguments.giveHost + ":" + arguments.givePort.toString
       val clientTimeout = arguments.giveClientTimeout
 
-      try {
-
+      val finalRequest = try {
         maybeProviderState match {
           case Some(ps) =>
             PactLogger.message("--------------------".yellow.bold)
             PactLogger.message(s"Attempting to run provider state: ${ps.key}".yellow.bold)
 
-            val success = ps.f(ps.key)
+            val (success, modifyRequest) = ps.f(ps.key)
 
             if (success)
               PactLogger.message(s"Provider state ran successfully".yellow.bold)
@@ -163,10 +164,11 @@ object Verifier {
               throw ProviderStateFailure(ps.key)
             }
 
+            modifyRequest(interactionRequest)
           case None =>
           // No provider state run needed
+            interactionRequest
         }
-
       } catch {
         case t: Throwable =>
           if (maybeProviderState.isDefined) {
@@ -180,12 +182,12 @@ object Verifier {
       }
 
       try {
-        InteractionRequest.unapply(interactionRequest) match {
+        InteractionRequest.unapply(finalRequest) match {
           case Some((Some(_), Some(_), _, _, _, _)) =>
             httpClient.doInteractionRequestSync(baseUrl,
-                                                interactionRequest.withoutSslContextHeader,
+                                                finalRequest.withoutSslContextHeader,
                                                 clientTimeout,
-                                                interactionRequest.sslContextName) match {
+                                                finalRequest.sslContextName) match {
               case Left(e) =>
                 PactLogger.error(s"Error in response: ${e.getMessage}".red)
                 Left(e.getMessage)
@@ -243,11 +245,11 @@ case class PactVerifyResultInContext(result: Either[String, Interaction], contex
 
 case class ProviderStateFailure(key: String) extends Exception()
 
-case class ProviderState(key: String, f: String => Boolean)
+case class ProviderState(key: String, f: SetupProviderState)
 
 case class VersionedConsumer(name: String, version: String)
 
-case class PactVerifySettings(providerStates: (String => Boolean),
+case class PactVerifySettings(providerStates: SetupProviderState,
                               pactBrokerAddress: String,
                               projectVersion: String,
                               providerName: String,

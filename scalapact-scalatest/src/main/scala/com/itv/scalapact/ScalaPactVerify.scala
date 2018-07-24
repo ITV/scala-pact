@@ -4,31 +4,31 @@ import com.itv.scalapactcore.common.LocalPactFileLoader
 import com.itv.scalapactcore.verifier.{PactVerifySettings, Verifier, VersionedConsumer}
 import java.io.{BufferedWriter, File, FileWriter}
 
-import com.itv.scalapact.shared.{Helpers, ScalaPactSettings, SslContextMap}
+import com.itv.scalapact.shared._
 
 import scala.concurrent.duration._
-import com.itv.scalapact.shared.PactLogger
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IScalaPactHttpClient}
+import com.itv.scalapactcore.verifier.Verifier.SetupProviderState
 
 object ScalaPactVerify {
   implicit def toOption[A](a: A): Option[A] = Option(a)
+  implicit def toSetupProviderState(bool: Boolean): (Boolean, InteractionRequest => InteractionRequest) = (bool, identity[InteractionRequest])
 
   object verifyPact {
-
     def withPactSource(
         sourceType: PactSourceType
     )(implicit sslContextMap: SslContextMap): ScalaPactVerifyProviderStates =
       new ScalaPactVerifyProviderStates(sourceType)
 
     class ScalaPactVerifyProviderStates(sourceType: PactSourceType)(implicit sslContextMap: SslContextMap) {
-      def setupProviderState(given: String)(setupProviderState: String => Boolean): ScalaPactVerifyRunner =
+      def setupProviderState(given: String)(setupProviderState: SetupProviderState): ScalaPactVerifyRunner =
         new ScalaPactVerifyRunner(sourceType, given, setupProviderState)
       def noSetupRequired: ScalaPactVerifyRunner = new ScalaPactVerifyRunner(sourceType, None, None)
     }
 
     class ScalaPactVerifyRunner(sourceType: PactSourceType,
                                 given: Option[String],
-                                setupProviderState: Option[String => Boolean])(implicit sslContextMap: SslContextMap) {
+                                setupProviderState: Option[SetupProviderState])(implicit sslContextMap: SslContextMap) {
 
       def runStrictVerificationAgainst[F[_]](port: Int)(implicit pactReader: IPactReader,
                                                         httpClient: IScalaPactHttpClient[F]): Unit =
@@ -89,11 +89,9 @@ object ScalaPactVerify {
           strict: Boolean
       )(implicit pactReader: IPactReader, httpClient: IScalaPactHttpClient[F]): Unit = {
 
-        val providerStateFunc = given
+        val providerStateFunc: SetupProviderState = given
           .flatMap(g => setupProviderState)
-          .getOrElse({ _: String =>
-            true
-          })
+          .getOrElse({ _: String => true })
 
         val (verifySettings, arguments) = sourceType match {
           case pactAsJsonString(json) =>

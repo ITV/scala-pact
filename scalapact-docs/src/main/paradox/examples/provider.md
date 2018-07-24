@@ -45,7 +45,7 @@ The internal verification does not make use of provider states since the service
 }
 ```
 
-The function signature is `String => Boolean` where the `String` is the key value of the pact contract and `Boolean` is a way for you to say if your setup operation was a success or a failure.
+The function signature is `String => (Boolean, InteractionRequest => InteractionRequest)` where the `String` is the key value of the pact contract, `Boolean` is a way for you to say if your setup operation was a success or a failure and `InteractionRequest => InteractionRequest` is a function to modify the request before sending it, for example in case that you need to add a header for authorization. There is an implicit to allow you write the function as `String => Boolean` if you dont have the need to modify the request.
 
 ## Things to note
 1. The consumer and provider scala projects both use different case classes to represent the data. This does not matter, only the Pact file matters.

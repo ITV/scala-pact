@@ -1,19 +1,18 @@
 package com.itv.scalapact.plugin.shared
 
 import com.itv.scalapact.shared.ColourOuput._
-import com.itv.scalapact.shared.{ScalaPactSettings, SslContextMap}
+import com.itv.scalapact.shared.{InteractionRequest, PactLogger, ScalaPactSettings, SslContextMap}
 import com.itv.scalapactcore.common.LocalPactFileLoader
 import com.itv.scalapactcore.verifier._
 import com.itv.scalapactcore.verifier.Verifier._
-import com.itv.scalapact.shared.PactLogger
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IScalaPactHttpClient}
 
 object ScalaPactVerifyCommand {
 
   def doPactVerify[F[_]](
       scalaPactSettings: ScalaPactSettings,
-      providerStates: Seq[(String, String => Boolean)],
-      providerStateMatcher: PartialFunction[String, Boolean],
+      providerStates: Seq[(String, SetupProviderState)],
+      providerStateMatcher: PartialFunction[String, (Boolean, InteractionRequest => InteractionRequest)],
       pactBrokerAddress: String,
       projectVersion: String,
       providerName: String,
@@ -47,20 +46,20 @@ object ScalaPactVerifyCommand {
   }
 
   def combineProviderStatesIntoTotalFunction(
-      directPactStates: Seq[(String, String => Boolean)],
-      patternMatchedStates: PartialFunction[String, Boolean]
-  ): String => Boolean = {
+      directPactStates: Seq[(String, SetupProviderState)],
+      patternMatchedStates: PartialFunction[String, (Boolean, InteractionRequest => InteractionRequest)]
+  ): SetupProviderState = {
     val l = directPactStates
-      .map { ps =>
-        { case s: String if s == ps._1 => ps._2(ps._1) }: PartialFunction[String, Boolean]
+      .map { case (state, config) =>
+        { case s: String if s == state => config(state) }: PartialFunction[String, (Boolean, InteractionRequest => InteractionRequest)]
       }
 
     l match {
       case Nil =>
-        patternMatchedStates orElse { case _: String => false }
+        patternMatchedStates orElse { case _: String => (false, identity[InteractionRequest]) }
 
       case x :: xs =>
-        xs.foldLeft(x)(_ orElse _) orElse patternMatchedStates orElse { case _: String => false }
+        xs.foldLeft(x)(_ orElse _) orElse patternMatchedStates orElse { case _: String => (false, identity[InteractionRequest]) }
 
     }
   }

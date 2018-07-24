@@ -3,7 +3,8 @@ package com.itv.scalapact.plugin
 import com.itv.scalapact.http._
 import com.itv.scalapact.json._
 import com.itv.scalapact.plugin.shared._
-import com.itv.scalapact.shared.ScalaPactSettings
+import com.itv.scalapact.shared.{InteractionRequest, ScalaPactSettings}
+import com.itv.scalapactcore.verifier.Verifier.SetupProviderState
 import sbt.Keys._
 import sbt.plugins.JvmPlugin
 import sbt.{Def, _}
@@ -14,12 +15,14 @@ object ScalaPactPlugin extends AutoPlugin {
   override def trigger: PluginTrigger   = allRequirements
 
   object autoImport {
-    val providerStateMatcher: SettingKey[PartialFunction[String, Boolean]] =
-      SettingKey[PartialFunction[String, Boolean]]("provider-state-matcher",
+    implicit def toSetupProviderState(bool: Boolean): (Boolean, InteractionRequest => InteractionRequest) = (bool, identity[InteractionRequest])
+
+    val providerStateMatcher: SettingKey[PartialFunction[String, (Boolean, InteractionRequest => InteractionRequest)]] =
+      SettingKey[PartialFunction[String, (Boolean, InteractionRequest => InteractionRequest)]]("provider-state-matcher",
                                                    "Alternative partial function for provider state setup")
 
-    val providerStates: SettingKey[Seq[(String, String => Boolean)]] =
-      SettingKey[Seq[(String, String => Boolean)]]("provider-states", "A list of provider state setup functions")
+    val providerStates: SettingKey[Seq[(String, SetupProviderState)]] =
+      SettingKey[Seq[(String, SetupProviderState)]]("provider-states", "A list of provider state setup functions")
 
     val pactBrokerAddress: SettingKey[String] =
       SettingKey[String]("pactBrokerAddress", "The base url to publish / pull pact contract files to and from.")
@@ -70,7 +73,9 @@ object ScalaPactPlugin extends AutoPlugin {
 
   import autoImport._
 
-  private val pf: PartialFunction[String, Boolean] = { case (_: String) => false }
+  private val pf: PartialFunction[String, (Boolean, InteractionRequest => InteractionRequest)] = { case (_: String) =>
+    false
+  }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   private val pactSettings = Seq(
@@ -88,10 +93,10 @@ object ScalaPactPlugin extends AutoPlugin {
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   override lazy val projectSettings: Seq[Def.Setting[
-    _ >: Seq[(String, String => Boolean)] with Seq[(String, String)] with Boolean with ScalaPactEnv with Map[
+    _ >: Seq[(String, SetupProviderState)] with Seq[(String, String)] with Boolean with ScalaPactEnv with Map[
       String,
       String
-    ] with String with Seq[String] with PartialFunction[String, Boolean] with Task[Unit] with InputTask[Unit]
+    ] with String with Seq[String] with PartialFunction[String, (Boolean, InteractionRequest => InteractionRequest)] with Task[Unit] with InputTask[Unit]
   ]] = {
     pactSettings ++ Seq(
       // Tasks
