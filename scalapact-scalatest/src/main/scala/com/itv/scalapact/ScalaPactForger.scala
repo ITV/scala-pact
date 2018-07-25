@@ -248,4 +248,20 @@ object ScalaPactForger {
     val method = "OPTIONS"
   }
 
+  case object PATCH extends ScalaPactMethod {
+    val method = "PATCH"
+  }
+
+  case object CONNECT extends ScalaPactMethod {
+    val method = "CONNECT"
+  }
+
+  case object TRACE extends ScalaPactMethod {
+    val method = "TRACE"
+  }
+
+  case object HEAD extends ScalaPactMethod {
+    val method = "HEAD"
+  }
+
 }

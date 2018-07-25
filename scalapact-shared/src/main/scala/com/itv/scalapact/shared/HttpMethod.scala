@@ -21,6 +21,18 @@ object HttpMethod {
       case "OPTIONS" =>
         Option(OPTIONS)
 
+      case "PATCH" =>
+        Option(PATCH)
+
+      case "CONNECT" =>
+        Option(CONNECT)
+
+      case "TRACE" =>
+        Option(TRACE)
+
+      case "HEAD" =>
+        Option(HEAD)
+
       case _ =>
         None
     }
@@ -33,5 +45,8 @@ object HttpMethod {
   case object PUT     extends HttpMethod
   case object DELETE  extends HttpMethod
   case object OPTIONS extends HttpMethod
-
+  case object PATCH   extends HttpMethod
+  case object CONNECT extends HttpMethod
+  case object TRACE   extends HttpMethod
+  case object HEAD    extends HttpMethod
 }
