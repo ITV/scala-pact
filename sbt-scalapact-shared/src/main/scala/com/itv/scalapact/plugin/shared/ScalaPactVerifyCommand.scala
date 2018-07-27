@@ -1,7 +1,7 @@
 package com.itv.scalapact.plugin.shared
 
 import com.itv.scalapact.shared.ColourOuput._
-import com.itv.scalapact.shared.{InteractionRequest, PactLogger, ScalaPactSettings, SslContextMap}
+import com.itv.scalapact.shared.{PactLogger, ScalaPactSettings, SslContextMap}
 import com.itv.scalapactcore.common.LocalPactFileLoader
 import com.itv.scalapactcore.verifier._
 import com.itv.scalapactcore.verifier.Verifier._
@@ -12,7 +12,7 @@ object ScalaPactVerifyCommand {
   def doPactVerify[F[_]](
       scalaPactSettings: ScalaPactSettings,
       providerStates: Seq[(String, SetupProviderState)],
-      providerStateMatcher: PartialFunction[String, (Boolean, InteractionRequest => InteractionRequest)],
+      providerStateMatcher: PartialFunction[String, ProviderStateResult],
       pactBrokerAddress: String,
       projectVersion: String,
       providerName: String,
@@ -47,19 +47,19 @@ object ScalaPactVerifyCommand {
 
   def combineProviderStatesIntoTotalFunction(
       directPactStates: Seq[(String, SetupProviderState)],
-      patternMatchedStates: PartialFunction[String, (Boolean, InteractionRequest => InteractionRequest)]
+      patternMatchedStates: PartialFunction[String, ProviderStateResult]
   ): SetupProviderState = {
     val l = directPactStates
       .map { case (state, config) =>
-        { case s: String if s == state => config(state) }: PartialFunction[String, (Boolean, InteractionRequest => InteractionRequest)]
+        { case s: String if s == state => config(state) }: PartialFunction[String, ProviderStateResult]
       }
 
     l match {
       case Nil =>
-        patternMatchedStates orElse { case _: String => (false, identity[InteractionRequest]) }
+        patternMatchedStates orElse { case _: String => ProviderStateResult() }
 
       case x :: xs =>
-        xs.foldLeft(x)(_ orElse _) orElse patternMatchedStates orElse { case _: String => (false, identity[InteractionRequest]) }
+        xs.foldLeft(x)(_ orElse _) orElse patternMatchedStates orElse { case _: String => ProviderStateResult() }
 
     }
   }

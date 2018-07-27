@@ -39,7 +39,7 @@ class ProviderClientSpec extends FunSpec with Matchers {
             .description("Fetching results")
             .given("Results: Bob, Fred, Harry")
             .uponReceiving("/results")
-            .willRespondWith(200, body)
+            .willRespondWith(200, Map("Pact" -> "modifiedRequest"), body)
         )
         .runConsumerTest { mockConfig =>
           val results = ProviderClient.fetchResults(mockConfig.baseUrl)

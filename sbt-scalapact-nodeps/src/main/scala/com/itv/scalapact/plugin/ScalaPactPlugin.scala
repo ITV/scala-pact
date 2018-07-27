@@ -3,8 +3,8 @@ package com.itv.scalapact.plugin
 import com.itv.scalapact.http._
 import com.itv.scalapact.json._
 import com.itv.scalapact.plugin.shared._
-import com.itv.scalapact.shared.{InteractionRequest, ScalaPactSettings}
-import com.itv.scalapactcore.verifier.Verifier.SetupProviderState
+import com.itv.scalapact.shared.ScalaPactSettings
+import com.itv.scalapactcore.verifier.Verifier.{ProviderStateResult, SetupProviderState}
 import sbt.Keys._
 import sbt.plugins.JvmPlugin
 import sbt.{Def, _}
@@ -15,11 +15,10 @@ object ScalaPactPlugin extends AutoPlugin {
   override def trigger: PluginTrigger   = allRequirements
 
   object autoImport {
-    implicit def toSetupProviderState(bool: Boolean): (Boolean, InteractionRequest => InteractionRequest) = (bool, identity[InteractionRequest])
+    implicit def toSetupProviderState(bool: Boolean): ProviderStateResult = ProviderStateResult(bool)
 
-    val providerStateMatcher: SettingKey[PartialFunction[String, (Boolean, InteractionRequest => InteractionRequest)]] =
-      SettingKey[PartialFunction[String, (Boolean, InteractionRequest => InteractionRequest)]]("provider-state-matcher",
-                                                   "Alternative partial function for provider state setup")
+    val providerStateMatcher: SettingKey[PartialFunction[String, ProviderStateResult]] =
+      SettingKey[PartialFunction[String, ProviderStateResult]]("provider-state-matcher", "Alternative partial function for provider state setup")
 
     val providerStates: SettingKey[Seq[(String, SetupProviderState)]] =
       SettingKey[Seq[(String, SetupProviderState)]]("provider-states", "A list of provider state setup functions")
@@ -73,9 +72,7 @@ object ScalaPactPlugin extends AutoPlugin {
 
   import autoImport._
 
-  private val pf: PartialFunction[String, (Boolean, InteractionRequest => InteractionRequest)] = { case (_: String) =>
-    false
-  }
+  private val pf: PartialFunction[String, ProviderStateResult] = { case (_: String) => false }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   private val pactSettings = Seq(
@@ -96,7 +93,7 @@ object ScalaPactPlugin extends AutoPlugin {
     _ >: Seq[(String, SetupProviderState)] with Seq[(String, String)] with Boolean with ScalaPactEnv with Map[
       String,
       String
-    ] with String with Seq[String] with PartialFunction[String, (Boolean, InteractionRequest => InteractionRequest)] with Task[Unit] with InputTask[Unit]
+    ] with String with Seq[String] with PartialFunction[String, ProviderStateResult] with Task[Unit] with InputTask[Unit]
   ]] = {
     pactSettings ++ Seq(
       // Tasks

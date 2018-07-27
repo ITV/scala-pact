@@ -18,8 +18,9 @@ object Provider {
   import TokenResponseImplicits._
 
   val service = HttpService {
-    case GET -> Root / "results" =>
-      Ok(ResultResponse(3, loadPeople).asJson)
+    case request @ GET -> Root / "results" =>
+      val pactHeader = request.headers.get(CaseInsensitiveString("Pact")).map(_.value).getOrElse("")
+      Ok(ResultResponse(3, loadPeople).asJson).putHeaders(Header("Pact", pactHeader))
 
     case request @ GET -> Root / "auth_token" =>
       val acceptHeader = request.headers.get(CaseInsensitiveString("Accept")).map(_.value)
