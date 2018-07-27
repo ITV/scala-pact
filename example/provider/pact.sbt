@@ -2,6 +2,8 @@
 import java.io.PrintWriter
 
 import com.itv.scalapact.plugin._
+import com.itv.scalapact.shared.InteractionRequest
+import com.itv.scalapactcore.verifier.Verifier.ProviderStateResult
 
 import scala.concurrent.duration._
 
@@ -23,7 +25,8 @@ providerStateMatcher := {
     writer.print("Bob,Fred,Harry")
     writer.close()
 
-    true
+    val newHeader = "Pact" -> "modifiedRequest"
+    ProviderStateResult(true, { req: InteractionRequest => req.copy(headers = Option(req.headers.fold(Map(newHeader))(_ + newHeader))) })
 }
 
 // Old style - still supported

@@ -11,7 +11,12 @@ import com.itv.scalapact.shared.typeclasses.{IPactReader, IScalaPactHttpClient}
 import com.itv.scalapactcore.verifier.Verifier.SetupProviderState
 
 object Verifier {
-  type SetupProviderState = String => (Boolean, InteractionRequest => InteractionRequest)
+  case class ProviderStateResult(result: Boolean, modifyRequest: InteractionRequest => InteractionRequest)
+  object ProviderStateResult {
+    def apply(): ProviderStateResult = new ProviderStateResult(false, identity[InteractionRequest])
+    def apply(result: Boolean): ProviderStateResult = new ProviderStateResult(result, identity[InteractionRequest])
+  }
+  type SetupProviderState = String => ProviderStateResult
 
   def verify[F[_]](
       loadPactFiles: String => ScalaPactSettings => ConfigAndPacts,
@@ -151,7 +156,7 @@ object Verifier {
             PactLogger.message("--------------------".yellow.bold)
             PactLogger.message(s"Attempting to run provider state: ${ps.key}".yellow.bold)
 
-            val (success, modifyRequest) = ps.f(ps.key)
+            val ProviderStateResult(success, modifyRequest) = ps.f(ps.key)
 
             if (success)
               PactLogger.message(s"Provider state ran successfully".yellow.bold)

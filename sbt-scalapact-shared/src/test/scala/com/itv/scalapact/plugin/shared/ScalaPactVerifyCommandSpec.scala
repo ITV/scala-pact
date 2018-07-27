@@ -1,7 +1,6 @@
 package com.itv.scalapact.plugin.shared
 
-import com.itv.scalapact.shared.InteractionRequest
-import com.itv.scalapactcore.verifier.Verifier.SetupProviderState
+import com.itv.scalapactcore.verifier.Verifier.{ProviderStateResult, SetupProviderState}
 import org.scalatest.{FunSpec, Matchers}
 
 class ScalaPactVerifyCommandSpec extends FunSpec with Matchers {
@@ -18,15 +17,15 @@ class ScalaPactVerifyCommandSpec extends FunSpec with Matchers {
           "abc",
           (_: String) => {
             result = "abc"
-            (true, identity[InteractionRequest])
+            ProviderStateResult(true)
           }
         )
       )
 
-      val patternMatchedStates: PartialFunction[String, (Boolean, InteractionRequest => InteractionRequest)] = {
+      val patternMatchedStates: PartialFunction[String, ProviderStateResult] = {
         case "def" =>
           result = "def"
-          (true, identity[InteractionRequest])
+          ProviderStateResult(true)
       }
 
       val combined =
@@ -34,19 +33,19 @@ class ScalaPactVerifyCommandSpec extends FunSpec with Matchers {
 
       withClue("With key: abc") {
         result = ""
-        combined("abc")._1 shouldEqual true
+        combined("abc").result shouldEqual true
         result shouldEqual "abc"
       }
 
       withClue("With key: def") {
         result = ""
-        combined("def")._1 shouldEqual true
+        combined("def").result shouldEqual true
         result shouldEqual "def"
       }
 
       withClue("With key: fish") {
         result = ""
-        combined("fish")._1 shouldEqual false
+        combined("fish").result shouldEqual false
         result shouldEqual ""
       }
 
@@ -62,25 +61,25 @@ class ScalaPactVerifyCommandSpec extends FunSpec with Matchers {
           "abc",
           (_: String) => {
             result = "abc"
-            (true, identity[InteractionRequest])
+            ProviderStateResult(true)
           }
         )
       )
 
-      val patternMatchedStates: PartialFunction[String, (Boolean, InteractionRequest => InteractionRequest)] = { case (_: String) => (false, identity[InteractionRequest]) }
+      val patternMatchedStates: PartialFunction[String, ProviderStateResult] = { case (_: String) => ProviderStateResult() }
 
       val combined =
         ScalaPactVerifyCommand.combineProviderStatesIntoTotalFunction(directPactStates, patternMatchedStates)
 
       withClue("With key: abc") {
         result = ""
-        combined("abc")._1 shouldEqual true
+        combined("abc").result shouldEqual true
         result shouldEqual "abc"
       }
 
       withClue("With key: fish") {
         result = ""
-        combined("fish")._1 shouldEqual false
+        combined("fish").result shouldEqual false
         result shouldEqual ""
       }
 
@@ -93,10 +92,10 @@ class ScalaPactVerifyCommandSpec extends FunSpec with Matchers {
 
       val directPactStates: Seq[(String, SetupProviderState)] = Seq()
 
-      val patternMatchedStates: PartialFunction[String, (Boolean, InteractionRequest => InteractionRequest)] = {
+      val patternMatchedStates: PartialFunction[String, ProviderStateResult] = {
         case "def" =>
           result = "def"
-          (true, identity[InteractionRequest])
+          ProviderStateResult(true)
       }
 
       val combined =
@@ -104,13 +103,13 @@ class ScalaPactVerifyCommandSpec extends FunSpec with Matchers {
 
       withClue("With key: def") {
         result = ""
-        combined("def")._1 shouldEqual true
+        combined("def").result shouldEqual true
         result shouldEqual "def"
       }
 
       withClue("With key: fish") {
         result = ""
-        combined("fish")._1 shouldEqual false
+        combined("fish").result shouldEqual false
         result shouldEqual ""
       }
 
@@ -122,14 +121,14 @@ class ScalaPactVerifyCommandSpec extends FunSpec with Matchers {
       var result = ""
 
       val directPactStates: Seq[(String, SetupProviderState)]     = Seq()
-      val patternMatchedStates: PartialFunction[String, (Boolean, InteractionRequest => InteractionRequest)] = { case (_: String) => (false, identity[InteractionRequest]) }
+      val patternMatchedStates: PartialFunction[String, ProviderStateResult] = { case (_: String) => ProviderStateResult() }
 
       val combined =
         ScalaPactVerifyCommand.combineProviderStatesIntoTotalFunction(directPactStates, patternMatchedStates)
 
       withClue("With key: fish") {
         result = ""
-        combined("fish")._1 shouldEqual false
+        combined("fish").result shouldEqual false
         result shouldEqual ""
       }
 

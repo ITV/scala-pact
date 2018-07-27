@@ -8,11 +8,11 @@ import com.itv.scalapact.shared._
 
 import scala.concurrent.duration._
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IScalaPactHttpClient}
-import com.itv.scalapactcore.verifier.Verifier.SetupProviderState
+import com.itv.scalapactcore.verifier.Verifier.{ProviderStateResult, SetupProviderState}
 
 object ScalaPactVerify {
   implicit def toOption[A](a: A): Option[A] = Option(a)
-  implicit def toSetupProviderState(bool: Boolean): (Boolean, InteractionRequest => InteractionRequest) = (bool, identity[InteractionRequest])
+  implicit def toProviderStateResult(bool: Boolean): ProviderStateResult = ProviderStateResult(bool)
 
   object verifyPact {
     def withPactSource(

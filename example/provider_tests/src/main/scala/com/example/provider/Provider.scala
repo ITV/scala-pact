@@ -13,8 +13,10 @@ object Provider {
   val service: (String => List[String]) => (Int => String) => HttpService[IO] = loadPeopleData =>
     genToken =>
       HttpService[IO] {
-        case GET -> Root / "results" =>
-          Ok(ResultResponse(3, loadPeopleData("people.txt")).asJson)
+        case request @ GET -> Root / "results" =>
+          val pactHeader = request.headers.get(CaseInsensitiveString("Pact")).map(_.value).getOrElse("")
+
+          Ok(ResultResponse(3, loadPeopleData("people.txt")).asJson).putHeaders(Header("Pact", pactHeader))
 
         case request @ GET -> Root / "auth_token" =>
           val acceptHeader = request.headers.get(CaseInsensitiveString("Accept")).map(_.value)

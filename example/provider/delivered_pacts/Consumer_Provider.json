@@ -46,6 +46,9 @@
       "description" : "Fetching results",
       "response" : {
         "status" : 200,
+        "headers" : {
+          "Pact" : "modifiedRequest"
+        },
         "body" : {
           "count" : 3,
           "results" : [

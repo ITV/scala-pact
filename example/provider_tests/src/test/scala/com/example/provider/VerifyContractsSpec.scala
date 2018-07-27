@@ -4,6 +4,7 @@ import cats.effect.IO
 import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
 import org.http4s.server.Server
 import com.itv.scalapact.ScalaPactVerify._
+import com.itv.scalapactcore.verifier.Verifier.ProviderStateResult
 
 class VerifyContractsSpec extends FunSpec with Matchers with BeforeAndAfterAll {
 
@@ -36,7 +37,11 @@ class VerifyContractsSpec extends FunSpec with Matchers with BeforeAndAfterAll {
 
       verifyPact
         .withPactSource(loadFromLocal("delivered_pacts"))
-        .noSetupRequired // We did the setup in the beforeAll() function
+        .setupProviderState("given") {
+          case "Results: Bob, Fred, Harry" =>
+            val newHeader = "Pact" -> "modifiedRequest"
+            ProviderStateResult(true, req => req.copy(headers = Option(req.headers.fold(Map(newHeader))(_ + newHeader))))
+        }
         .runVerificationAgainst("localhost", 8080)
 
     }
