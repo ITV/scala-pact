@@ -13,7 +13,7 @@ import com.itv.scalapactcore.verifier.Verifier.SetupProviderState
 object Verifier {
   case class ProviderStateResult(result: Boolean, modifyRequest: InteractionRequest => InteractionRequest)
   object ProviderStateResult {
-    def apply(): ProviderStateResult = new ProviderStateResult(false, identity[InteractionRequest])
+    def apply(): ProviderStateResult                = new ProviderStateResult(false, identity[InteractionRequest])
     def apply(result: Boolean): ProviderStateResult = new ProviderStateResult(result, identity[InteractionRequest])
   }
   type SetupProviderState = String => ProviderStateResult
@@ -39,23 +39,24 @@ object Verifier {
           pactVerifySettings.versionedConsumerNames.map(vc => vc.copy(version = "/version/" + vc.version))
 
       val latestPacts: List[Pact] = versionConsumers
-        .map { consumer =>
-          ValidatedDetails.buildFrom(consumer.name,
-                                     pactVerifySettings.providerName,
-                                     pactVerifySettings.pactBrokerAddress,
-                                     consumer.version) match {
+        .flatMap { consumer =>
+          ValidatedDetails.buildFrom(
+            consumer.name,
+            pactVerifySettings.providerName,
+            pactVerifySettings.pactBrokerAddress,
+            consumer.version
+          ) match {
             case Left(l) =>
               PactLogger.error(l.red)
-              None
+              Nil
 
             case Right(v) =>
-              fetchAndReadPact(
-                v.validatedAddress.address + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + v.consumerVersion
+              List(
+                fetchAndReadPact(
+                  v.validatedAddress.address + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + v.consumerVersion
+                )
               )
           }
-        }
-        .collect {
-          case Some(s) => s
         }
 
       latestPacts
@@ -126,7 +127,9 @@ object Verifier {
 
     PactLogger.message(scalaPactLogPrefix + s"Run completed in: ${(endTime - startTime).toInt} ms".yellow)
     PactLogger.message(scalaPactLogPrefix + s"Total number of test run: $testCount".yellow)
-    PactLogger.message(scalaPactLogPrefix + s"Tests: succeeded ${testCount - failureCount}, failed $failureCount".yellow)
+    PactLogger.message(
+      scalaPactLogPrefix + s"Tests: succeeded ${testCount - failureCount}, failed $failureCount".yellow
+    )
     if (failureCount == 0) PactLogger.message(scalaPactLogPrefix + "All tests passed.".green)
     else PactLogger.message(scalaPactLogPrefix + s"$failureCount tests failed.".red)
     failureCount == 0
@@ -171,7 +174,7 @@ object Verifier {
 
             modifyRequest(interactionRequest)
           case None =>
-          // No provider state run needed
+            // No provider state run needed
             interactionRequest
         }
       } catch {
@@ -210,9 +213,9 @@ object Verifier {
 
     }
 
-  private def fetchAndReadPact[F[_]](address: String)(implicit pactReader: IPactReader,
-                                                      sslContextMap: SslContextMap,
-                                                      httpClient: IScalaPactHttpClient[F]): Option[Pact] = {
+  private def fetchAndReadPact[F[_]](
+      address: String
+  )(implicit pactReader: IPactReader, sslContextMap: SslContextMap, httpClient: IScalaPactHttpClient[F]): Pact = {
 
     PactLogger.message(s"Attempting to fetch pact from pact broker at: $address".white.bold)
 
@@ -220,24 +223,29 @@ object Verifier {
       .doRequestSync(
         SimpleRequest(address, "", HttpMethod.GET, Map("Accept" -> "application/json"), None, sslContextName = None)
       ) match {
-      case Left(e) =>
-        PactLogger.error(s"Error: ${e.getMessage}".yellow)
-        None
-
-      case Right(response) if response.is2xx =>
-        response.body.map(pactReader.jsonStringToPact).flatMap {
-          case Right(p) =>
-            Option(p)
-
-          case Left(msg) =>
-            PactLogger.error("Could not convert good response to Pact:\n" + response.body.getOrElse(""))
-            PactLogger.error(s"Error: $msg".yellow)
-            None
-        }
+      case Right(r: SimpleResponse) if r.is2xx =>
+        r.body
+          .map(pactReader.jsonStringToPact)
+          .map {
+            case Right(p) =>
+              p
+            case Left(msg) =>
+              PactLogger.error(s"Error: $msg".yellow)
+              PactLogger.error("Could not convert good response to Pact:\n" + r.body.getOrElse(""))
+              throw new Exception(s"Failed to load consumer pact from: $address")
+          }
+          .getOrElse {
+            PactLogger.error("Pact data missing from Pact Broker response")
+            throw new Exception("Pact data missing from Pact Broker response")
+          }
 
       case Right(_) =>
         PactLogger.error(s"Failed to load consumer pact from: $address".red)
-        None
+        throw new Exception(s"Failed to load consumer pact from: $address")
+
+      case Left(e) =>
+        PactLogger.error(s"Error: ${e.getMessage}".red)
+        throw e
     }
 
   }
