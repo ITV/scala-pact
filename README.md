@@ -13,7 +13,7 @@ Scala-Pact now has two branches based on SBT requirements.
 The all development going forward begins at `2.3.x` and resides on the `master` branch.
 For the sake of the maintainer's sanity, version 2.3.x and beyond will only support Scala 2.12 and SBT 1.x or greater.
 
-#### SBT 0.13.x compatible (Latest 2.2.3)
+#### SBT 0.13.x compatible (Latest 2.2.5)
 
 The reluctantly maintained EOL maintenance version of Scala-Pact lives on a branch called `v2.2.x`.
 These versions support Scala 2.10, 2.11, and 2.12 but are limited by only supporting SBT 0.13.x.
@@ -30,7 +30,7 @@ Scala-Pact goes to great lengths to help you avoid / work around dependency conf
 This is achieved by splitting the core functionality out of the library requirements which are provided separately. This allows you to align or avoid conflicting dependencies e.g. If your project uses a specific version of Circe, tell Scala-Pact to use Argonaut!
 One big change between 2.2.x and 2.3.x is that dependencies are now provided by TypeClass rather than just static linking. Please refer to the [example setup](https://github.com/ITV/scala-pact/tree/master/example).
 
-### You're using SBT 1.x or higher:
+### You're using SBT 1.x:
 
 Add the following lines to your `build.sbt` file to setup the test framework:
 ```scala
@@ -85,7 +85,7 @@ Alternatively, these are also valid if you prefer:
 ```
 
 
-### You're using SBT 0.13.17 or lower:
+### You're using SBT 0.13.x:
 
 Add the following lines to your `build.sbt` file to setup the test framework:
 ```scala
@@ -95,9 +95,9 @@ import com.itv.scalapact.plugin._
 enablePlugins(ScalaPactPlugin)
         
 libraryDependencies ++= Seq(
-  "com.itv"       %% "scalapact-circe-0-9"     % "2.2.3" % "test",
-  "com.itv"       %% "scalapact-http4s-0-18-0" % "2.2.3" % "test",
-  "com.itv"       %% "scalapact-scalatest"     % "2.2.3" % "test",
+  "com.itv"       %% "scalapact-circe-0-9"     % "2.2.5" % "test",
+  "com.itv"       %% "scalapact-http4s-0-18-0" % "2.2.5" % "test",
+  "com.itv"       %% "scalapact-scalatest"     % "2.2.5" % "test",
   "org.scalatest" %% "scalatest"               % "3.0.5" % "test"
 )
 ```
@@ -105,11 +105,11 @@ libraryDependencies ++= Seq(
 Add these lines to your `project/plugins.sbt` file to install the plugin:
 ```scala
 libraryDependencies ++= Seq(
-  "com.itv" %% "scalapact-argonaut-6-2"  % "2.2.3",
-  "com.itv" %% "scalapact-http4s-0-16-2" % "2.2.3"
+  "com.itv" %% "scalapact-argonaut-6-2"  % "2.2.5",
+  "com.itv" %% "scalapact-http4s-0-16-2" % "2.2.5"
 )
 
-addSbtPlugin("com.itv" % "sbt-scalapact" % "2.2.3")
+addSbtPlugin("com.itv" % "sbt-scalapact" % "2.2.5")
 ```
 In you're test suite, you will need the following import for Consumer tests:
 ```scala
