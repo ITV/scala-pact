@@ -130,9 +130,15 @@ object Verifier {
     PactLogger.message(
       scalaPactLogPrefix + s"Tests: succeeded ${testCount - failureCount}, failed $failureCount".yellow
     )
-    if (failureCount == 0) PactLogger.message(scalaPactLogPrefix + "All tests passed.".green)
-    else PactLogger.message(scalaPactLogPrefix + s"$failureCount tests failed.".red)
-    failureCount == 0
+
+    if (testCount == 0)
+      PactLogger.message(scalaPactLogPrefix + "No Pact verification tests run.".red)
+    else if (failureCount == 0)
+      PactLogger.message(scalaPactLogPrefix + "All Pact verify tests passed.".green)
+    else
+      PactLogger.message(scalaPactLogPrefix + s"$failureCount Pact verify tests failed.".red)
+
+    testCount > 0 && failureCount == 0
   }
 
   private def attemptMatch(strictMatching: Boolean, interactions: List[Interaction])(
