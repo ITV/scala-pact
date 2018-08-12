@@ -61,7 +61,7 @@ addCommandAlias(
 )
 
 lazy val commonSettings = Seq(
-  version := "2.3.2-SNAPSHOT",
+  version := "2.3.3-SNAPSHOT",
   organization := "com.itv",
   scalaVersion := scala212,
   libraryDependencies ++= Seq(
