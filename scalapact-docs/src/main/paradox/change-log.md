@@ -19,9 +19,21 @@ With thanks to all contributors!
 - [afiore]
 - [pgordon9]
 - [gcvt]
+- [orium]
+- [opbokel]
+- [garraspin]
 - ...your name here? :-)
 
 Maintained by [davesmith00000].
+
+## 2.3.2 - 2018-08-12
+- Added missing HTTP methods ([opbokel])
+- Added ability to modify requests during Provider State setup ([garraspin])
+- Failed Pact Broker calls now fail spectacularly (rather than silently)
+- Pact verifications that perform no tests exit with non-zero code
+
+## 2.3.1 - 2018-07-05
+- Fixed find free port race condition ([orium])
 
 ## 2.3.0-RC1 - 2018-05-03
 - Static dependencies converted to Typeclasses
@@ -155,3 +167,6 @@ Other improvements for contributors:
 [pgordon9]: https://github.com/pgordon9
 [gcvt]: https://github.com/gcvt
 [dandxy89]: https://github.com/dandxy89
+[orium]: https://github.com/orium
+[opbokel]: https://github.com/opbokel
+[garraspin]: https://github.com/garraspin
