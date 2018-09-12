@@ -9,7 +9,9 @@ case class ScalaPactSettings(protocol: Option[String],
                              localPactFilePath: Option[String],
                              strictMode: Option[Boolean],
                              clientTimeout: Option[Duration],
-                             outputPath: Option[String]) {
+                             outputPath: Option[String],
+                             publishResultsEnabled: Option[BrokerPublishData]
+                            ) {
   val giveHost: String            = host.getOrElse("localhost")
   val giveProtocol: String        = protocol.getOrElse("http")
   val givePort: Int               = port.getOrElse(1234)
@@ -44,6 +46,9 @@ case class ScalaPactSettings(protocol: Option[String],
   def withOutputPath(outputPath: String): ScalaPactSettings =
     this.copy(outputPath = Option(outputPath))
 
+  def enablePublishResults(providerVersion: String): ScalaPactSettings =
+    this.copy(publishResultsEnabled = Option(BrokerPublishData(providerVersion)))
+
   def toArguments: Map[String, String] =
     List(
       protocol.map(p => ("--protocol", p)),
@@ -63,7 +68,7 @@ object ScalaPactSettings {
 
   def apply: ScalaPactSettings = default
 
-  def default: ScalaPactSettings = ScalaPactSettings(None, None, None, None, None, None, None)
+  def default: ScalaPactSettings = ScalaPactSettings(None, None, None, None, None, None, None, None)
 
   val parseArguments: Seq[String] => ScalaPactSettings = args => (Helpers.pair andThen convertToArguments)(args.toList)
 
@@ -75,7 +80,8 @@ object ScalaPactSettings {
       localPactFilePath = b.localPactFilePath.orElse(a.localPactFilePath),
       strictMode = b.strictMode.orElse(a.strictMode),
       clientTimeout = b.clientTimeout.orElse(a.clientTimeout),
-      outputPath = b.outputPath.orElse(a.outputPath)
+      outputPath = b.outputPath.orElse(a.outputPath),
+      publishResultsEnabled = b.publishResultsEnabled.orElse(a.publishResultsEnabled)
     )
 
   private lazy val convertToArguments: Map[String, String] => ScalaPactSettings = argMap =>
@@ -87,6 +93,7 @@ object ScalaPactSettings {
       strictMode = argMap.get("--strict").flatMap(Helpers.safeStringToBoolean),
       clientTimeout =
         argMap.get("--clientTimeout").flatMap(Helpers.safeStringToLong).flatMap(i => Option(Duration(i, SECONDS))),
-      outputPath = argMap.get("--out")
+      outputPath = argMap.get("--out"),
+      publishResultsEnabled = argMap.get("--publishResultsVersion").flatMap(s => Option(BrokerPublishData(s)))
   )
 }

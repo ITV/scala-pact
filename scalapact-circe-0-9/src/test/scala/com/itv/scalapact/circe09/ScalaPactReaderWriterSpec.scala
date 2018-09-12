@@ -104,6 +104,10 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
 
     }
 
-  }
+    it("should parse _links") {
+      val pactEither = pactReader.jsonStringToPact(PactFileExamples.simpleWithLinksAsString)
 
+      pactEither.right.get shouldEqual PactFileExamples.simpleWithLinks
+    }
+  }
 }

@@ -4,7 +4,8 @@ import com.itv.scalapact.json._
 import com.itv.scalapact.http._
 import com.itv.scalapact.plugin.shared._
 import com.itv.scalapact.shared.ScalaPactSettings
-import com.itv.scalapactcore.verifier.Verifier.{ProviderStateResult, SetupProviderState}
+import com.itv.scalapact.shared.ProviderStateResult
+import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 import sbt.Keys._
 import sbt.plugins.JvmPlugin
 import sbt.{Def, _}

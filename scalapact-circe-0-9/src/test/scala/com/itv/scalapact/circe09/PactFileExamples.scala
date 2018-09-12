@@ -78,7 +78,8 @@ object PactFileExamples {
           None
         )
       )
-    )
+    ),
+    _links = None
   )
 
   val verySimpleAsString: String =
@@ -168,8 +169,38 @@ object PactFileExamples {
           matchingRules = None
         )
       )
+    ),
+    _links = None
+  )
+
+  val _links = Map(
+    "self" -> LinkValues(
+      title = Option("Pact"),
+      name = Option("Pact between consumer (v1.0.0) and provider"),
+      href = "http://localhost/pacts/provider/provider/consumer/consumer/version/1.0.0",
+      templated = None
+    ),
+    "pb:consumer" -> LinkValues(
+      title = Option("Consumer"),
+      name = Option("consumer"),
+      href = "http://localhost/pacticipants/consumer",
+      templated = None
+    ),
+    "pb:provider" -> LinkValues(
+      title = Option("Provider"),
+      name = Option("provider"),
+      href = "http://localhost/pacticipants/provider",
+      templated = None
+    ),
+    "pb:latest-tagged-pact-version" -> LinkValues(
+      title = Option("Latest tagged version of this pact"),
+      name = None,
+      href = "http://localhost/pacts/provider/special-services-service/consumer/quote-service/latest/{tag}",
+      templated = Option(true)
     )
   )
+
+  val simpleWithLinks = simple.copy(_links = Option(_links))
 
   val simpleAsString: String = """{
                          |  "provider" : {
@@ -330,4 +361,114 @@ object PactFileExamples {
                                  |    }
                                  |  ]
                                  |}""".stripMargin
+
+  val simpleWithLinksAsString: String = """{
+                                          |  "provider" : {
+                                          |    "name" : "provider"
+                                          |  },
+                                          |  "consumer" : {
+                                          |    "name" : "consumer"
+                                          |  },
+                                          |  "interactions" : [
+                                          |    {
+                                          |      "request" : {
+                                          |        "method" : "GET",
+                                          |        "body" : "fish",
+                                          |        "path" : "/fetch-json",
+                                          |        "matchingRules" : {
+                                          |          "$.headers.Accept" : {
+                                          |            "match" : "regex",
+                                          |            "regex" : "\\w+"
+                                          |          },
+                                          |          "$.headers.Content-Length" : {
+                                          |            "match" : "type"
+                                          |          }
+                                          |        },
+                                          |        "query" : "fish=chips",
+                                          |        "headers" : {
+                                          |          "Content-Type" : "text/plain"
+                                          |        }
+                                          |      },
+                                          |      "description" : "a simple request",
+                                          |      "response" : {
+                                          |        "status" : 200,
+                                          |        "headers" : {
+                                          |          "Content-Type" : "application/json"
+                                          |        },
+                                          |        "body" : {
+                                          |          "fish" : [
+                                          |            "cod",
+                                          |            "haddock",
+                                          |            "flying"
+                                          |          ]
+                                          |        },
+                                          |        "matchingRules" : {
+                                          |          "$.headers.Accept" : {
+                                          |            "match" : "regex",
+                                          |            "regex" : "\\w+"
+                                          |          },
+                                          |          "$.headers.Content-Length" : {
+                                          |            "match" : "type"
+                                          |          }
+                                          |        }
+                                          |      },
+                                          |      "providerState" : "a simple state"
+                                          |    },
+                                          |    {
+                                          |      "request" : {
+                                          |        "method" : "GET",
+                                          |        "body" : "fish",
+                                          |        "path" : "/fetch-json2",
+                                          |        "headers" : {
+                                          |          "Content-Type" : "text/plain"
+                                          |        }
+                                          |      },
+                                          |      "description" : "a simple request 2",
+                                          |      "response" : {
+                                          |        "status" : 200,
+                                          |        "headers" : {
+                                          |          "Content-Type" : "application/json"
+                                          |        },
+                                          |        "body" : {
+                                          |          "chips" : true,
+                                          |          "fish" : [
+                                          |            "cod",
+                                          |            "haddock"
+                                          |          ]
+                                          |        }
+                                          |      },
+                                          |      "providerState" : "a simple state 2"
+                                          |    }
+                                          |  ],
+                                          |  "_links": {
+                                          |    "self": {
+                                          |      "title": "Pact",
+                                          |      "name": "Pact between consumer (v1.0.0) and provider",
+                                          |      "href": "http://localhost/pacts/provider/provider/consumer/consumer/version/1.0.0"
+                                          |    },
+                                          |    "pb:consumer": {
+                                          |      "title": "Consumer",
+                                          |      "name": "consumer",
+                                          |      "href": "http://localhost/pacticipants/consumer"
+                                          |    },
+                                          |    "pb:provider": {
+                                          |      "title": "Provider",
+                                          |      "name": "provider",
+                                          |      "href": "http://localhost/pacticipants/provider"
+                                          |    },
+                                          |    "pb:latest-tagged-pact-version": {
+                                          |      "title": "Latest tagged version of this pact",
+                                          |      "href": "http://localhost/pacts/provider/special-services-service/consumer/quote-service/latest/{tag}",
+                                          |      "templated": true
+                                          |    },
+                                          |    "curies": [
+                                          |      {
+                                          |        "name": "pb",
+                                          |        "href": "http://localhost/doc/{rel}",
+                                          |        "templated": true
+                                          |      }
+                                          |    ]
+                                          |  }
+                                          |}""".stripMargin
+
 }

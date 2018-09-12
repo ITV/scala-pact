@@ -4,7 +4,7 @@ import cats.effect.IO
 import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
 import org.http4s.server.Server
 import com.itv.scalapact.ScalaPactVerify._
-import com.itv.scalapactcore.verifier.Verifier.ProviderStateResult
+import com.itv.scalapact.shared.ProviderStateResult
 
 class VerifyContractsSpec extends FunSpec with Matchers with BeforeAndAfterAll {
 

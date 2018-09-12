@@ -1,6 +1,7 @@
 package com.itv.scalapact.plugin.shared
 
-import com.itv.scalapactcore.verifier.Verifier.{ProviderStateResult, SetupProviderState}
+import com.itv.scalapact.shared.ProviderStateResult
+import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 import org.scalatest.{FunSpec, Matchers}
 
 class ScalaPactVerifyCommandSpec extends FunSpec with Matchers {

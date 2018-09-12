@@ -69,7 +69,8 @@ object ScalaPactContractWriter {
       Pact(
         provider = PactActor(pactDescription.provider),
         consumer = PactActor(pactDescription.consumer),
-        interactions = pactDescription.interactions.map { convertInteractionsFinalToInteractions }
+        interactions = pactDescription.interactions.map { convertInteractionsFinalToInteractions },
+        _links = None
     )
 
   lazy val convertInteractionsFinalToInteractions: ScalaPactInteractionFinal => Interaction = i => {

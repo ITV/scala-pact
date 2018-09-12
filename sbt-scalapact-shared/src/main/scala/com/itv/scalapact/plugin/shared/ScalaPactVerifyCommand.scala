@@ -1,11 +1,11 @@
 package com.itv.scalapact.plugin.shared
 
 import com.itv.scalapact.shared.ColourOuput._
-import com.itv.scalapact.shared.{PactLogger, ScalaPactSettings, SslContextMap}
+import com.itv.scalapact.shared._
 import com.itv.scalapactcore.common.LocalPactFileLoader
-import com.itv.scalapactcore.verifier._
 import com.itv.scalapactcore.verifier.Verifier._
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IScalaPactHttpClient}
+import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 
 object ScalaPactVerifyCommand {
 
@@ -18,8 +18,8 @@ object ScalaPactVerifyCommand {
       providerName: String,
       consumerNames: Seq[String],
       versionedConsumerNames: Seq[(String, String)]
-  )(implicit pactReader: IPactReader, httpClient: IScalaPactHttpClient[F]): Unit = {
-
+  )(implicit pactReader: IPactReader, httpClient: IScalaPactHttpClient[F], publisher: IResultPublisher
+  ): Unit = {
     PactLogger.message("*************************************".white.bold)
     PactLogger.message("** ScalaPact: Running Verifier     **".white.bold)
     PactLogger.message("*************************************".white.bold)
@@ -36,10 +36,10 @@ object ScalaPactVerifyCommand {
         .map(t => VersionedConsumer(t._1, t._2))
     )
 
-    val successfullyVerified =
-      verify(LocalPactFileLoader.loadPactFiles(pactReader)(true), pactVerifySettings)(pactReader,
-                                                                                      new SslContextMap(Map()),
-                                                                                      httpClient)(scalaPactSettings)
+    val stringToSettingsToPacts = LocalPactFileLoader.loadPactFiles(pactReader)(true)
+    val successfullyVerified = verify(stringToSettingsToPacts, pactVerifySettings)(
+      pactReader, new SslContextMap(Map()), httpClient, publisher
+    )(scalaPactSettings)
 
     if (successfullyVerified) sys.exit(0) else sys.exit(1)
 

@@ -5,10 +5,19 @@ import argonaut._
 import com.itv.scalapact.shared._
 
 object PactImplicits {
-  implicit lazy val PactCodecJson: CodecJson[Pact] = casecodec3(Pact.apply, Pact.unapply)(
+
+  implicit lazy val LinkValuesCodecJson: CodecJson[LinkValues] = casecodec4(LinkValues.apply, LinkValues.unapply)(
+    "title",
+    "name",
+    "href",
+    "templated"
+  )
+
+  implicit lazy val PactCodecJson: CodecJson[Pact] = casecodec4(Pact.apply, Pact.unapply)(
     "provider",
     "consumer",
-    "interactions"
+    "interactions",
+    "_links"
   )
 
   implicit lazy val PactActorCodecJson: CodecJson[PactActor] = casecodec1(PactActor.apply, PactActor.unapply)(
