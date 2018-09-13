@@ -4,4 +4,4 @@ trait IResultPublisher {
   def publishResults(pactVerifyResults: List[PactVerifyResult], brokerPublishData: BrokerPublishData)(implicit sslContextMap: SslContextMap): Unit
 }
 
-case class BrokerPublishData(providerVersion: String)
+case class BrokerPublishData(providerVersion: String, buildUrl: Option[String])

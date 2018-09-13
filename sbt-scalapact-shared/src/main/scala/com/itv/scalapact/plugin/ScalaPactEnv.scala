@@ -40,8 +40,8 @@ case class ScalaPactEnv(protocol: Option[String],
   def withOutputPath(outputPath: String): ScalaPactEnv =
     this.copy(outputPath = Option(outputPath))
 
-  def enablePublishResults(providerVersion: String): ScalaPactEnv =
-    this.copy(publishResultsEnabled = Option(BrokerPublishData(providerVersion)))
+  def enablePublishResults(providerVersion: String, buildUrl: Option[String]): ScalaPactEnv =
+    this.copy(publishResultsEnabled = Option(BrokerPublishData(providerVersion, buildUrl)))
 
   def toSettings: ScalaPactSettings =
     ScalaPactSettings(protocol, host, port, localPactFilePath, strictMode, clientTimeout, outputPath, publishResultsEnabled)

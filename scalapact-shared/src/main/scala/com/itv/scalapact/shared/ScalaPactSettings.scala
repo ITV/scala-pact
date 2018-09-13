@@ -46,8 +46,8 @@ case class ScalaPactSettings(protocol: Option[String],
   def withOutputPath(outputPath: String): ScalaPactSettings =
     this.copy(outputPath = Option(outputPath))
 
-  def enablePublishResults(providerVersion: String): ScalaPactSettings =
-    this.copy(publishResultsEnabled = Option(BrokerPublishData(providerVersion)))
+  def enablePublishResults(providerVersion: String, buildUrl: Option[String]): ScalaPactSettings =
+    this.copy(publishResultsEnabled = Option(BrokerPublishData(providerVersion, buildUrl)))
 
   def toArguments: Map[String, String] =
     List(
@@ -94,6 +94,11 @@ object ScalaPactSettings {
       clientTimeout =
         argMap.get("--clientTimeout").flatMap(Helpers.safeStringToLong).flatMap(i => Option(Duration(i, SECONDS))),
       outputPath = argMap.get("--out"),
-      publishResultsEnabled = argMap.get("--publishResultsVersion").flatMap(s => Option(BrokerPublishData(s)))
+      publishResultsEnabled = calculateBrokerPublishData(argMap)
   )
+
+  private def calculateBrokerPublishData(argMap: Map[String, String]): Option[BrokerPublishData] = {
+    val buildUrl = argMap.get("--publishResultsBuildUrl")
+    argMap.get("--publishResultsVersion").map(BrokerPublishData(_, buildUrl))
+  }
 }
