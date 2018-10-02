@@ -144,7 +144,7 @@ object PactFileExamples {
     "pb:latest-tagged-pact-version" -> LinkValues(
       title = Option("Latest tagged version of this pact"),
       name = None,
-      href = "http://localhost/pacts/provider/special-services-service/consumer/quote-service/latest/{tag}",
+      href = "http://localhost/pacts/provider/provider-service/consumer/consumer-service/latest/{tag}",
       templated = Option(true)
     )
   )
@@ -407,7 +407,7 @@ object PactFileExamples {
                                           |    },
                                           |    "pb:latest-tagged-pact-version": {
                                           |      "title": "Latest tagged version of this pact",
-                                          |      "href": "http://localhost/pacts/provider/special-services-service/consumer/quote-service/latest/{tag}",
+                                          |      "href": "http://localhost/pacts/provider/provider-service/consumer/consumer-service/latest/{tag}",
                                           |      "templated": true
                                           |    },
                                           |    "curies": [
