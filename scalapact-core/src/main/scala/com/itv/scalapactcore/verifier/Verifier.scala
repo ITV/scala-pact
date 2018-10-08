@@ -7,23 +7,18 @@ import com.itv.scalapactcore.common._
 
 import scala.util.Left
 import com.itv.scalapact.shared.PactLogger
+import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IScalaPactHttpClient}
-import com.itv.scalapactcore.verifier.Verifier.SetupProviderState
 
 object Verifier {
-  case class ProviderStateResult(result: Boolean, modifyRequest: InteractionRequest => InteractionRequest)
-  object ProviderStateResult {
-    def apply(): ProviderStateResult                = new ProviderStateResult(false, identity[InteractionRequest])
-    def apply(result: Boolean): ProviderStateResult = new ProviderStateResult(result, identity[InteractionRequest])
-  }
-  type SetupProviderState = String => ProviderStateResult
-
   def verify[F[_]](
       loadPactFiles: String => ScalaPactSettings => ConfigAndPacts,
       pactVerifySettings: PactVerifySettings
   )(implicit pactReader: IPactReader,
     sslContextMap: SslContextMap,
-    httpClient: IScalaPactHttpClient[F]): ScalaPactSettings => Boolean = arguments => {
+    httpClient: IScalaPactHttpClient[F],
+    publisher: IResultPublisher
+  ): ScalaPactSettings => Boolean = arguments => {
 
     val scalaPactLogPrefix = "[scala-pact] ".white
 
@@ -33,7 +28,6 @@ object Verifier {
       )
       loadPactFiles("pacts")(arguments).pacts
     } else {
-
       val versionConsumers =
         pactVerifySettings.consumerNames.map(c => VersionedConsumer(c, "/latest")) ++
           pactVerifySettings.versionedConsumerNames.map(vc => vc.copy(version = "/version/" + vc.version))
@@ -41,10 +35,7 @@ object Verifier {
       val latestPacts: List[Pact] = versionConsumers
         .flatMap { consumer =>
           ValidatedDetails.buildFrom(
-            consumer.name,
-            pactVerifySettings.providerName,
-            pactVerifySettings.pactBrokerAddress,
-            consumer.version
+            consumer.name, pactVerifySettings.providerName, pactVerifySettings.pactBrokerAddress, consumer.version
           ) match {
             case Left(l) =>
               PactLogger.error(l.red)
@@ -127,9 +118,7 @@ object Verifier {
 
     PactLogger.message(scalaPactLogPrefix + s"Run completed in: ${(endTime - startTime).toInt} ms".yellow)
     PactLogger.message(scalaPactLogPrefix + s"Total number of test run: $testCount".yellow)
-    PactLogger.message(
-      scalaPactLogPrefix + s"Tests: succeeded ${testCount - failureCount}, failed $failureCount".yellow
-    )
+    PactLogger.message(scalaPactLogPrefix + s"Tests: succeeded ${testCount - failureCount}, failed $failureCount".yellow)
 
     if (testCount == 0)
       PactLogger.message(scalaPactLogPrefix + "No Pact verification tests run.".red)
@@ -137,6 +126,9 @@ object Verifier {
       PactLogger.message(scalaPactLogPrefix + "All Pact verify tests passed.".green)
     else
       PactLogger.message(scalaPactLogPrefix + s"$failureCount Pact verify tests failed.".red)
+
+
+    arguments.publishResultsEnabled.foreach(publisher.publishResults(pactVerifyResults, _))
 
     testCount > 0 && failureCount == 0
   }
@@ -258,22 +250,9 @@ object Verifier {
 
 }
 
-case class PactVerifyResult(pact: Pact, results: List[PactVerifyResultInContext])
-
-case class PactVerifyResultInContext(result: Either[String, Interaction], context: String)
-
 case class ProviderStateFailure(key: String) extends Exception()
 
 case class ProviderState(key: String, f: SetupProviderState)
-
-case class VersionedConsumer(name: String, version: String)
-
-case class PactVerifySettings(providerStates: SetupProviderState,
-                              pactBrokerAddress: String,
-                              projectVersion: String,
-                              providerName: String,
-                              consumerNames: List[String],
-                              versionedConsumerNames: List[VersionedConsumer])
 
 case class ValidatedDetails(validatedAddress: ValidPactBrokerAddress,
                             providerName: String,

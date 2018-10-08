@@ -1,6 +1,6 @@
 package com.itv.scalapact.plugin
 
-import com.itv.scalapact.shared.ScalaPactSettings
+import com.itv.scalapact.shared.{BrokerPublishData, ScalaPactSettings}
 
 import scala.concurrent.duration._
 
@@ -10,8 +10,9 @@ case class ScalaPactEnv(protocol: Option[String],
                         localPactFilePath: Option[String],
                         strictMode: Option[Boolean],
                         clientTimeout: Option[Duration],
-                        outputPath: Option[String]) {
-
+                        outputPath: Option[String],
+                        publishResultsEnabled: Option[BrokerPublishData]
+) {
   def +(other: ScalaPactEnv): ScalaPactEnv =
     ScalaPactEnv.append(this, other)
 
@@ -39,8 +40,11 @@ case class ScalaPactEnv(protocol: Option[String],
   def withOutputPath(outputPath: String): ScalaPactEnv =
     this.copy(outputPath = Option(outputPath))
 
+  def enablePublishResults(providerVersion: String, buildUrl: Option[String]): ScalaPactEnv =
+    this.copy(publishResultsEnabled = Option(BrokerPublishData(providerVersion, buildUrl)))
+
   def toSettings: ScalaPactSettings =
-    ScalaPactSettings(protocol, host, port, localPactFilePath, strictMode, clientTimeout, outputPath)
+    ScalaPactSettings(protocol, host, port, localPactFilePath, strictMode, clientTimeout, outputPath, publishResultsEnabled)
 
 }
 
@@ -56,13 +60,14 @@ object ScalaPactEnv {
       None, // "pacts"
       None, // false
       Option(Duration(1, SECONDS)),
-      None // "target/pacts"
+      None, // "target/pacts"
+      None // false
     )
 
   def defaults: ScalaPactEnv =
     ScalaPactEnv("http", "localhost", 1234)
 
-  def empty: ScalaPactEnv = ScalaPactEnv(None, None, None, None, None, None, None)
+  def empty: ScalaPactEnv = ScalaPactEnv(None, None, None, None, None, None, None, None)
 
   def append(a: ScalaPactEnv, b: ScalaPactEnv): ScalaPactEnv =
     ScalaPactEnv(
@@ -72,6 +77,7 @@ object ScalaPactEnv {
       localPactFilePath = b.localPactFilePath.orElse(a.localPactFilePath),
       strictMode = b.strictMode.orElse(a.strictMode),
       clientTimeout = b.clientTimeout.orElse(a.clientTimeout),
-      outputPath = b.outputPath.orElse(a.outputPath)
+      outputPath = b.outputPath.orElse(a.outputPath),
+      publishResultsEnabled = b.publishResultsEnabled.orElse(a.publishResultsEnabled)
     )
 }

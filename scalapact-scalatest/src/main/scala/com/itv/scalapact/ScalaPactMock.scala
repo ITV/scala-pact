@@ -42,7 +42,8 @@ object ScalaPactMock {
         localPactFilePath = None,
         strictMode = Option(strict),
         clientTimeout = Option(Duration(2, SECONDS)), // Should never ever take this long. Used to make an http request against the local stub.
-        outputPath = Option(outputPath)
+        outputPath = Option(outputPath),
+        publishResultsEnabled = None // Nothing to publish
       ),
       pacts = List(ScalaPactContractWriter.producePactFromDescription(pactDescription))
     )

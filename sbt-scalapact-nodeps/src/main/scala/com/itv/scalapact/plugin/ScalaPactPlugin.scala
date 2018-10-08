@@ -4,7 +4,8 @@ import com.itv.scalapact.http._
 import com.itv.scalapact.json._
 import com.itv.scalapact.plugin.shared._
 import com.itv.scalapact.shared.ScalaPactSettings
-import com.itv.scalapactcore.verifier.Verifier.{ProviderStateResult, SetupProviderState}
+import com.itv.scalapact.shared.ProviderStateResult
+import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 import sbt.Keys._
 import sbt.plugins.JvmPlugin
 import sbt.{Def, _}
@@ -72,7 +73,7 @@ object ScalaPactPlugin extends AutoPlugin {
 
   import autoImport._
 
-  private val pf: PartialFunction[String, ProviderStateResult] = { case (_: String) => false }
+  private val pf: PartialFunction[String, ProviderStateResult] = { case _: String => false }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   private val pactSettings = Seq(

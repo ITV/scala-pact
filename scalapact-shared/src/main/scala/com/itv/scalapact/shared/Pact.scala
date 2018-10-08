@@ -1,6 +1,14 @@
 package com.itv.scalapact.shared
+import com.itv.scalapact.shared.Pact.Links
 
-case class Pact(provider: PactActor, consumer: PactActor, interactions: List[Interaction]) {
+case class LinkValues(title: Option[String], name: Option[String], href: String, templated: Option[Boolean])
+
+case object Pact {
+  type Links = Map[String, LinkValues]
+}
+
+case class Pact(provider: PactActor, consumer: PactActor, interactions: List[Interaction], _links: Option[Links]) {
+
   def withoutSslHeader: Pact = copy(interactions = interactions.map(_.withoutSslHeader))
 
   def renderAsString: String =

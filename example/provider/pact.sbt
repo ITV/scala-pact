@@ -3,7 +3,7 @@ import java.io.PrintWriter
 
 import com.itv.scalapact.plugin._
 import com.itv.scalapact.shared.InteractionRequest
-import com.itv.scalapactcore.verifier.Verifier.ProviderStateResult
+import com.itv.scalapact.shared.ProviderStateResult
 
 import scala.concurrent.duration._
 
