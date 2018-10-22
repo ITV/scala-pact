@@ -89,6 +89,7 @@ JSON Libraries
 "com.itv" %% "scalapact-argonaut-6-2"  % "2.3.0-RC1"
 "com.itv" %% "scalapact-circe-0-8"     % "2.3.0-RC1"
 "com.itv" %% "scalapact-circe-0-9"     % "2.3.0-RC1"
+"com.itv" %% "scalapact-circe-0-10"    % "2.3.0-RC1"
 ```
 
 HTTP Libraries
@@ -144,6 +145,7 @@ JSON Libraries
 "com.itv" %% "scalapact-argonaut-6-2"  % "2.2.0"
 "com.itv" %% "scalapact-circe-0-8"     % "2.2.0"
 "com.itv" %% "scalapact-circe-0-9"     % "2.2.0"
+"com.itv" %% "scalapact-circe-0-10"    % "2.2.0"
 ```
 
 HTTP Libraries
