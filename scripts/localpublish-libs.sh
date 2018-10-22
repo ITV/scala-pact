@@ -41,3 +41,7 @@ publishLocally "circe08"
 echo ""
 echo ">>> Circe 0.9.x"
 publishLocally "circe09"
+
+echo ""
+echo ">>> Circe 0.10.x"
+publishLocally "circe10"

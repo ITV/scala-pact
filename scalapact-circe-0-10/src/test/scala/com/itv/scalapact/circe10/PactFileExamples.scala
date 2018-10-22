@@ -1,4 +1,4 @@
-package com.itv.scalapact.circe09
+package com.itv.scalapact.circe10
 
 import com.itv.scalapact.shared._
 
@@ -200,7 +200,7 @@ object PactFileExamples {
     )
   )
 
-  val simpleWithLinks: Pact = simple.copy(_links = Option(_links))
+  val simpleWithLinks = simple.copy(_links = Option(_links))
 
   val simpleAsString: String = """{
                          |  "provider" : {
