@@ -33,6 +33,7 @@ Argonaut  6.1       |    YES    |    YES    |    YES    |    NO
 Argonaut  6.2       |    YES    |    YES    |    YES    |    YES
 Circe     0.8       |    NO     |    NO     |    YES    |    YES
 Circe     0.9       |    NO     |    NO     |    YES    |    YES
+Circe     0.10      |    NO     |    NO     |    YES    |    YES
 ```
 
 At the moment it is best to avoid Http4s 0.17.0+, Circe 0.8+ and Argonaut 6.1 if possible.
