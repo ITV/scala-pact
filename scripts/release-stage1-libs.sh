@@ -37,3 +37,7 @@ publishReal "circe08"
 echo ""
 echo ">>> Circe 0.9.x"
 publishReal "circe09"
+
+echo ""
+echo ">>> Circe 0.10.x"
+publishReal "circe10"
