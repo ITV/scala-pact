@@ -19,12 +19,17 @@ With thanks to all contributors!
 - [afiore]
 - [pgordon9]
 - [gcvt]
+- [dandxy89]
 - [orium]
 - [opbokel]
 - [garraspin]
 - ...your name here? :-)
 
 Maintained by [davesmith00000].
+
+## 2.3.3 - 2018-10-24
+- Added ability publish verification results (Fixes [#71](https://github.com/ITV/scala-pact/issues/71)) ([garraspin])
+- Added support for Circe 0.10 ([dandxy89])
 
 ## 2.3.2 - 2018-08-12
 - Added missing HTTP methods ([opbokel])
