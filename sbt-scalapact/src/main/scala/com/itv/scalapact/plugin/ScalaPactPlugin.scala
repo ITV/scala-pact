@@ -16,10 +16,15 @@ object ScalaPactPlugin extends AutoPlugin {
   override def trigger: PluginTrigger   = allRequirements
 
   object autoImport {
+
+    type BrokerPublishData = com.itv.scalapact.shared.BrokerPublishData
+    val BrokerPublishData: com.itv.scalapact.shared.BrokerPublishData.type = com.itv.scalapact.shared.BrokerPublishData
+
     implicit def toSetupProviderState(bool: Boolean): ProviderStateResult = ProviderStateResult(bool)
 
     val providerStateMatcher: SettingKey[PartialFunction[String, ProviderStateResult]] =
-      SettingKey[PartialFunction[String, ProviderStateResult]]("provider-state-matcher", "Alternative partial function for provider state setup")
+      SettingKey[PartialFunction[String, ProviderStateResult]]("provider-state-matcher",
+                                                               "Alternative partial function for provider state setup")
 
     val providerStates: SettingKey[Seq[(String, SetupProviderState)]] =
       SettingKey[Seq[(String, SetupProviderState)]]("provider-states", "A list of provider state setup functions")
@@ -94,7 +99,9 @@ object ScalaPactPlugin extends AutoPlugin {
     _ >: Seq[(String, SetupProviderState)] with Seq[(String, String)] with Boolean with ScalaPactEnv with Map[
       String,
       String
-    ] with String with Seq[String] with PartialFunction[String, ProviderStateResult] with Task[Unit] with InputTask[Unit]
+    ] with String with Seq[String] with PartialFunction[String, ProviderStateResult] with Task[Unit] with InputTask[
+      Unit
+    ]
   ]] = {
     pactSettings ++ Seq(
       // Tasks
