@@ -4,10 +4,10 @@ import com.itv.scalapact.shared.Pact
 
 trait IPactWriter {
 
-  type WritePactF = Pact => String
+  type WritePactF = (Pact, String) => String
 
-  val writePact: WritePactF = p => pactToJsonString(p)
+  val writePact: WritePactF = (p, v) => pactToJsonString(p, v)
 
-  def pactToJsonString(pact: Pact): String
+  def pactToJsonString(pact: Pact, scalaPactVersion: String): String
 
 }

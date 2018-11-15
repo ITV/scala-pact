@@ -51,7 +51,7 @@ object Publisher {
                           "",
                           HttpMethod.PUT,
                           Map("Content-Type" -> "application/json", "Content-Length" -> "0") ++ pactBrokerAuthorization.map(_.asHeader).toList,
-                          None,
+                          Option(pactWriter.pactToJsonString(pact, BuildInfo.version)),
                           sslContextName = None)
           )
         })

@@ -67,7 +67,8 @@ object PactStubService {
         case m if m == "GET" && req.pathInfo.startsWith("/interactions") =>
           val output =
             pactWriter.pactToJsonString(
-              Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None, None)
+              Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None, None),
+              BuildInfo.version
             )
           Ok(output)
 
@@ -80,7 +81,8 @@ object PactStubService {
 
               val output =
                 pactWriter.pactToJsonString(
-                  Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None, None)
+                  Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None, None),
+                  BuildInfo.version
                 )
               Ok(output)
 
@@ -93,7 +95,8 @@ object PactStubService {
 
           val output =
             pactWriter.pactToJsonString(
-              Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None, None)
+              Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None, None),
+              BuildInfo.version
             )
           Ok(output)
       }
