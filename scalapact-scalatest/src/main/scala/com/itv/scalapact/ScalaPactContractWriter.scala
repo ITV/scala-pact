@@ -61,7 +61,8 @@ object ScalaPactContractWriter {
 
   private def producePactJson(pactDescription: ScalaPactDescriptionFinal)(implicit pactWriter: IPactWriter): String =
     pactWriter.pactToJsonString(
-      producePactFromDescription(pactDescription)
+      producePactFromDescription(pactDescription),
+      BuildInfo.version
     )
 
   def producePactFromDescription: ScalaPactDescriptionFinal => Pact =

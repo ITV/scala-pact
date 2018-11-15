@@ -59,7 +59,7 @@ object ScalaPactTestCommand {
       .reduceOption(combinePacts)
       .foreach { combined =>
         PactContractWriter.writePactContracts(outputPath)(combined.provider.name)(combined.consumer.name)(
-          pactWriter.pactToJsonString(combined)
+          pactWriter.pactToJsonString(combined, BuildInfo.version)
         )
       }
 

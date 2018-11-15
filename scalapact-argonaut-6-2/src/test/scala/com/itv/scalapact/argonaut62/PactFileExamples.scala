@@ -29,7 +29,12 @@ object PactFileExamples {
       )
     ),
     _links = None,
-    metadata = None
+    metadata = Option(
+      PactMetaData(
+        pactSpecification = Option(VersionMetaData("2.0.0")),
+        `scala-pact` = Option(VersionMetaData("1.0.0"))
+      )
+    )
   )
 
   val verySimpleAsString: String =
@@ -52,7 +57,15 @@ object PactFileExamples {
       |        "body" : "Hello"
       |      }
       |    }
-      |  ]
+      |  ],
+      |  "metadata": {
+      |    "pactSpecification": {
+      |      "version": "2.0.0"
+      |    },
+      |    "scala-pact": {
+      |      "version": "1.0.0"
+      |    }
+      |  }
       |}""".stripMargin
 
   val simple = Pact(
@@ -517,4 +530,65 @@ object PactFileExamples {
        |  }
        |}""".stripMargin
 
+  val simpleWithMetaData = Pact(
+    provider = PactActor("provider"),
+    consumer = PactActor("consumer"),
+    interactions = List(
+      Interaction(
+        provider_state = None,
+        providerState = Option("a simple state"),
+        description = "a simple request",
+        request = InteractionRequest(
+          method = Option("GET"),
+          path = Option("/fetch-json"),
+          query = Option("fish=chips"),
+          headers = Option(Map("Content-Type" -> "text/plain")),
+          body = Option("""fish"""),
+          matchingRules = Option(
+            Map(
+              "$.headers.Accept"         -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
+              "$.headers.Content-Length" -> MatchingRule(`match` = Option("type"), regex = None, min = None)
+            )
+          )
+        ),
+        response = InteractionResponse(
+          status = Option(200),
+          headers = Option(Map("Content-Type" -> "application/json")),
+          body = Option("""{"fish":["cod","haddock","flying"]}"""),
+          matchingRules = Option(
+            Map(
+              "$.headers.Accept"         -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
+              "$.headers.Content-Length" -> MatchingRule(`match` = Option("type"), regex = None, min = None)
+            )
+          )
+        )
+      ),
+      Interaction(
+        provider_state = None,
+        providerState = Option("a simple state 2"),
+        description = "a simple request 2",
+        request = InteractionRequest(
+          method = Option("GET"),
+          path = Option("/fetch-json2"),
+          query = None,
+          headers = Option(Map("Content-Type" -> "text/plain")),
+          body = Option("""fish"""),
+          matchingRules = None
+        ),
+        response = InteractionResponse(
+          status = Option(200),
+          headers = Option(Map("Content-Type" -> "application/json")),
+          body = Option("""{"chips":true,"fish":["cod","haddock"]}"""),
+          matchingRules = None
+        )
+      )
+    ),
+    _links = None,
+    metadata = Option(
+      PactMetaData(
+        pactSpecification = Option(VersionMetaData("2.0.0")),
+        `scala-pact` = Option(VersionMetaData("1.0.0"))
+      )
+    )
+  )
 }
