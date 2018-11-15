@@ -2,7 +2,7 @@ package com.itv.scalapact.argonaut62
 
 import argonaut.Argonaut._
 import argonaut._
-import com.itv.scalapact.shared.Pact
+import com.itv.scalapact.shared.{BuildInfo, Pact, PactMetaData, VersionMetaData}
 import com.itv.scalapact.shared.typeclasses.IPactWriter
 
 class PactWriter extends IPactWriter {
@@ -57,7 +57,17 @@ class PactWriter extends IPactWriter {
         }
         .collect { case Some(s) => s }
 
-    val pactNoInteractionsAsJson = pact.copy(interactions = Nil).asJson
+    val updatedMetaData: Option[PactMetaData] =
+      pact.metadata.orElse {
+        Option(
+          PactMetaData(
+            pactSpecification = Option(VersionMetaData("2.0.0")), //TODO: Where to get this value from?
+            `scala-pact` = Option(VersionMetaData(BuildInfo.version))
+          )
+        )
+      }
+
+    val pactNoInteractionsAsJson = pact.copy(interactions = Nil, metadata = updatedMetaData).asJson
 
     val json: Option[Json] = for {
       interactionsField <- pactNoInteractionsAsJson.cursor.downField("interactions")

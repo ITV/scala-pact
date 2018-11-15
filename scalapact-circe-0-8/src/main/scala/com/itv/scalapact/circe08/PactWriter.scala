@@ -1,6 +1,6 @@
 package com.itv.scalapact.circe08
 
-import com.itv.scalapact.shared.Pact
+import com.itv.scalapact.shared.{BuildInfo, Pact, PactMetaData, VersionMetaData}
 import com.itv.scalapact.shared.typeclasses.IPactWriter
 import io.circe._
 import io.circe.parser._
@@ -57,9 +57,19 @@ class PactWriter extends IPactWriter {
         }
         .collect { case Some(s) => s }
 
+    val updatedMetaData: Option[PactMetaData] =
+      pact.metadata.orElse {
+        Option(
+          PactMetaData(
+            pactSpecification = Option(VersionMetaData("2.0.0")), //TODO: Where to get this value from?
+            `scala-pact` = Option(VersionMetaData(BuildInfo.version))
+          )
+        )
+      }
+
     val json: Option[Json] =
       pact
-        .copy(interactions = Nil)
+        .copy(interactions = Nil, metadata = updatedMetaData)
         .asJson
         .hcursor
         .downField("interactions")
