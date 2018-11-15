@@ -4,7 +4,7 @@ name := "provider"
 
 version := "0.0.1"
 
-scalaVersion := "2.12.5"
+scalaVersion := "2.12.7"
 
 libraryDependencies ++= Seq(
   "org.http4s" %% "http4s-blaze-server" % "0.17.6",
