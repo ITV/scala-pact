@@ -2,6 +2,7 @@ package com.itv.scalapact.argonaut62
 
 import com.itv.scalapact.shared._
 import org.scalatest.{FunSpec, Matchers}
+import com.itv.scalapact.test.PactFileExamples
 
 class RubyJsonHelperSpec extends FunSpec with Matchers {
 

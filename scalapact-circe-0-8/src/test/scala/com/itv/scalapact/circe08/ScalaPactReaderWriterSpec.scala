@@ -2,6 +2,7 @@ package com.itv.scalapact.circe08
 
 import io.circe.parser._
 import org.scalatest.{FunSpec, Matchers}
+import com.itv.scalapact.test.PactFileExamples
 
 class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
 
