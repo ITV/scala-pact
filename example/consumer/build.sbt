@@ -4,7 +4,7 @@ name := "consumer"
 
 organization := "com.example"
 
-scalaVersion := "2.12.5"
+scalaVersion := "2.12.7"
 
 version := "0.0.1"
 

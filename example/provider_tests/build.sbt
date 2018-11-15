@@ -4,7 +4,7 @@ name := "provider_tests"
 
 version := "0.0.1"
 
-scalaVersion := "2.12.5"
+scalaVersion := "2.12.7"
 
 libraryDependencies ++=
   Seq(
