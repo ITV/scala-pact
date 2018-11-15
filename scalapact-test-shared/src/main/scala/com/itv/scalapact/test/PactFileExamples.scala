@@ -1,10 +1,10 @@
-package com.itv.scalapact.argonaut62
+package com.itv.scalapact.test
 
 import com.itv.scalapact.shared._
 
 object PactFileExamples {
 
-  val verySimple = Pact(
+  val verySimple: Pact = Pact(
     provider = PactActor("provider"),
     consumer = PactActor("consumer"),
     interactions = List(
@@ -68,7 +68,7 @@ object PactFileExamples {
       |  }
       |}""".stripMargin
 
-  val simple = Pact(
+  val simple: Pact = Pact(
     provider = PactActor("provider"),
     consumer = PactActor("consumer"),
     interactions = List(
@@ -125,7 +125,7 @@ object PactFileExamples {
     metadata = None
   )
 
-  val _links = Map(
+  val _links: Map[String, LinkValues] = Map(
     "self" -> LinkValues(
       title = Option("Pact"),
       name = Option("Pact between consumer (v1.0.0) and provider"),
@@ -530,7 +530,7 @@ object PactFileExamples {
        |  }
        |}""".stripMargin
 
-  val simpleWithMetaData = Pact(
+  val simpleWithMetaData: Pact = Pact(
     provider = PactActor("provider"),
     consumer = PactActor("consumer"),
     interactions = List(
