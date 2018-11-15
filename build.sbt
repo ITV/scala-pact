@@ -401,6 +401,11 @@ lazy val docs =
 
 lazy val scalaPactProject =
   (project in file("."))
+    .enablePlugins(BuildInfoPlugin)
+    .settings(
+      buildInfoKeys := Seq[BuildInfoKey](version),
+      buildInfoPackage := "com.itv.scalapact"
+    )
     .settings(commonSettings: _*)
     .aggregate(shared, core, pluginShared, plugin, pluginNoDeps, framework, standalone)
     .aggregate(http4s016a, http4s017, http4s018, http4s020)
