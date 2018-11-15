@@ -7,7 +7,11 @@ case object Pact {
   type Links = Map[String, LinkValues]
 }
 
-case class Pact(provider: PactActor, consumer: PactActor, interactions: List[Interaction], _links: Option[Links]) {
+case class Pact(provider: PactActor,
+                consumer: PactActor,
+                interactions: List[Interaction],
+                _links: Option[Links],
+                metadata: Option[PactMetaData]) {
 
   def withoutSslHeader: Pact = copy(interactions = interactions.map(_.withoutSslHeader))
 
@@ -103,3 +107,16 @@ case class MatchingRule(`match`: Option[String], regex: Option[String], min: Opt
   def renderAsString: String =
     s"Rule type: '${`match`.getOrElse("<missing>")}'  regex: '${regex.getOrElse("n/a")}'  min: '${min.map(_.toString).getOrElse("n/a")}'"
 }
+
+/*
+"metadata": {
+        "pactSpecification": {
+            "version": "2.0.0"
+        },
+        "pact-jvm": {
+            "version": "3.2.11"
+        }
+    }
+ */
+case class PactMetaData(pactSpecification: Option[VersionMetaData], `scala-pact`: Option[VersionMetaData])
+case class VersionMetaData(version: String)

@@ -13,16 +13,28 @@ object PactImplicits {
     "templated"
   )
 
-  implicit lazy val PactCodecJson: CodecJson[Pact] = casecodec4(Pact.apply, Pact.unapply)(
+  implicit lazy val PactCodecJson: CodecJson[Pact] = casecodec5(Pact.apply, Pact.unapply)(
     "provider",
     "consumer",
     "interactions",
-    "_links"
+    "_links",
+    "metadata"
   )
 
   implicit lazy val PactActorCodecJson: CodecJson[PactActor] = casecodec1(PactActor.apply, PactActor.unapply)(
     "name"
   )
+
+  implicit lazy val PactMetaDataCodecJson: CodecJson[PactMetaData] =
+    casecodec2(PactMetaData.apply, PactMetaData.unapply)(
+      "pactSpecification",
+      "scala-pact"
+    )
+
+  implicit lazy val VersionMetaDataCodecJson: CodecJson[VersionMetaData] =
+    casecodec1(VersionMetaData.apply, VersionMetaData.unapply)(
+      "version"
+    )
 
   implicit lazy val InteractionCodecJson: CodecJson[Interaction] = casecodec5(Interaction.apply, Interaction.unapply)(
     "provider_state",

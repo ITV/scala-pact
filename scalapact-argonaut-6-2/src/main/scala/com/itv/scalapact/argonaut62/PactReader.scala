@@ -13,11 +13,23 @@ class PactReader extends IPactReader {
     JsonConversionFunctions.fromJSON(jsonString)
 
   def jsonStringToPact(json: String): Either[String, Pact] = {
-    val brokenPact: Option[(PactActor, PactActor, List[(Option[Interaction], Option[String], Option[String])], Option[Links])] = for {
-      provider     <- JsonBodySpecialCaseHelper.extractPactActor("provider")(json)
-      consumer     <- JsonBodySpecialCaseHelper.extractPactActor("consumer")(json)
-      interactions <- JsonBodySpecialCaseHelper.extractInteractions(json)
-    } yield (provider, consumer, interactions, JsonBodySpecialCaseHelper.extractLinks(json))
+    val brokenPact: Option[
+      (PactActor,
+       PactActor,
+       List[(Option[Interaction], Option[String], Option[String])],
+       Option[Links],
+       Option[PactMetaData])
+    ] =
+      for {
+        provider     <- JsonBodySpecialCaseHelper.extractPactActor("provider")(json)
+        consumer     <- JsonBodySpecialCaseHelper.extractPactActor("consumer")(json)
+        interactions <- JsonBodySpecialCaseHelper.extractInteractions(json)
+      } yield
+        (provider,
+         consumer,
+         interactions,
+         JsonBodySpecialCaseHelper.extractLinks(json),
+         JsonBodySpecialCaseHelper.extractPactMetaData(json))
 
     brokenPact.map { bp =>
       val interactions = bp._3.collect {
@@ -34,7 +46,8 @@ class PactReader extends IPactReader {
         interactions = interactions
           .map(i => i.copy(providerState = i.providerState.orElse(i.provider_state)))
           .map(i => i.copy(provider_state = None)),
-        _links = bp._4
+        _links = bp._4,
+        metadata = bp._5
       )
 
     } match {
@@ -101,16 +114,27 @@ object JsonBodySpecialCaseHelper {
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference", "org.wartremover.warts.Any"))
   val extractLinks: String => Option[Links] = json => {
-    json.parseOption.flatMap { j =>
-      (j.hcursor --\ "_links").focus
-    }.flatMap { j =>
-      val withoutCuries = (j.hcursor --\ "curies").delete.undo match {
-        case ok @ Some(_) => ok
-        case None         => Option(j)
+    json.parseOption
+      .flatMap { j =>
+        (j.hcursor --\ "_links").focus
       }
+      .flatMap { j =>
+        val withoutCuries = (j.hcursor --\ "curies").delete.undo match {
+          case ok @ Some(_) => ok
+          case None         => Option(j)
+        }
 
-      withoutCuries.flatMap(_.toString.decodeOption[Links])
-    }
+        withoutCuries.flatMap(_.toString.decodeOption[Links])
+      }
   }
+
+  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
+  val extractPactMetaData: String => Option[PactMetaData] =
+    json =>
+      json.parseOption
+        .flatMap { j =>
+          (j.hcursor --\ "metadata").focus
+        }
+        .flatMap(p => p.toString.decodeOption[PactMetaData])
 
 }

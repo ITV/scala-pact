@@ -70,7 +70,13 @@ object ScalaPactContractWriter {
         provider = PactActor(pactDescription.provider),
         consumer = PactActor(pactDescription.consumer),
         interactions = pactDescription.interactions.map { convertInteractionsFinalToInteractions },
-        _links = None
+        _links = None,
+        metadata = Option(
+          PactMetaData(
+            pactSpecification = Option(VersionMetaData("2.0.0")), // TODO: Where should this value come from?
+            `scala-pact` = Option(VersionMetaData(BuildInfo.version))
+          )
+        )
     )
 
   lazy val convertInteractionsFinalToInteractions: ScalaPactInteractionFinal => Interaction = i => {

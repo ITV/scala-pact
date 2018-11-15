@@ -28,7 +28,8 @@ object PactFileExamples {
         )
       )
     ),
-    _links = None
+    _links = None,
+    metadata = None
   )
 
   val verySimpleAsString: String =
@@ -107,7 +108,8 @@ object PactFileExamples {
         )
       )
     ),
-    _links = None
+    _links = None,
+    metadata = None
   )
 
   val _links = Map(
@@ -137,7 +139,16 @@ object PactFileExamples {
     )
   )
 
-  val simpleWithLinks = simple.copy(_links = Option(_links))
+  val simpleWithLinksAndMetaData: Pact =
+    simple.copy(
+      _links = Option(_links),
+      metadata = Option(
+        PactMetaData(
+          pactSpecification = Option(VersionMetaData("2.0.0")),
+          `scala-pact` = Option(VersionMetaData("1.0.0"))
+        )
+      )
+    )
 
   val simpleAsString: String = """{
                          |  "provider" : {
@@ -299,7 +310,8 @@ object PactFileExamples {
                                  |  ]
                                  |}""".stripMargin
 
-  val simpleWithLinksAsString: String = """{
+  val simpleWithLinksAndMetaDataAsString: String =
+    """{
                                  |  "provider" : {
                                  |    "name" : "provider"
                                  |  },
@@ -405,7 +417,104 @@ object PactFileExamples {
                                  |        "templated": true
                                  |      }
                                  |    ]
+                                 |  },
+                                 |  "metadata": {
+                                 |    "pactSpecification": {
+                                 |      "version": "2.0.0"
+                                 |    },
+                                 |    "scala-pact": {
+                                 |      "version": "1.0.0"
+                                 |    }
                                  |  }
                                  |}""".stripMargin
+
+  val simpleWithMetaDataAsString: String =
+    """{
+       |  "provider" : {
+       |    "name" : "provider"
+       |  },
+       |  "consumer" : {
+       |    "name" : "consumer"
+       |  },
+       |  "interactions" : [
+       |    {
+       |      "request" : {
+       |        "method" : "GET",
+       |        "body" : "fish",
+       |        "path" : "/fetch-json",
+       |        "matchingRules" : {
+       |          "$.headers.Accept" : {
+       |            "match" : "regex",
+       |            "regex" : "\\w+"
+       |          },
+       |          "$.headers.Content-Length" : {
+       |            "match" : "type"
+       |          }
+       |        },
+       |        "query" : "fish=chips",
+       |        "headers" : {
+       |          "Content-Type" : "text/plain"
+       |        }
+       |      },
+       |      "description" : "a simple request",
+       |      "response" : {
+       |        "status" : 200,
+       |        "headers" : {
+       |          "Content-Type" : "application/json"
+       |        },
+       |        "body" : {
+       |          "fish" : [
+       |            "cod",
+       |            "haddock",
+       |            "flying"
+       |          ]
+       |        },
+       |        "matchingRules" : {
+       |          "$.headers.Accept" : {
+       |            "match" : "regex",
+       |            "regex" : "\\w+"
+       |          },
+       |          "$.headers.Content-Length" : {
+       |            "match" : "type"
+       |          }
+       |        }
+       |      },
+       |      "providerState" : "a simple state"
+       |    },
+       |    {
+       |      "request" : {
+       |        "method" : "GET",
+       |        "body" : "fish",
+       |        "path" : "/fetch-json2",
+       |        "headers" : {
+       |          "Content-Type" : "text/plain"
+       |        }
+       |      },
+       |      "description" : "a simple request 2",
+       |      "response" : {
+       |        "status" : 200,
+       |        "headers" : {
+       |          "Content-Type" : "application/json"
+       |        },
+       |        "body" : {
+       |          "chips" : true,
+       |          "fish" : [
+       |            "cod",
+       |            "haddock"
+       |          ]
+       |        }
+       |      },
+       |      "providerState" : "a simple state 2"
+       |    }
+       |  ],
+       |  "metadata": {
+       |    "pactSpecification": {
+       |      "version": "2.0.0"
+       |    },
+       |    "scala-pact": {
+       |      "version": "1.0.0"
+       |    }
+       |  }
+       |}""".stripMargin
 
 }

@@ -128,6 +128,11 @@ val scala212: String = "2.12.8"
 
 lazy val shared =
   (project in file("scalapact-shared"))
+    .enablePlugins(BuildInfoPlugin)
+    .settings(
+      buildInfoKeys := Seq[BuildInfoKey](version),
+      buildInfoPackage := "com.itv.scalapact.shared"
+    )
     .settings(commonSettings: _*)
     .settings(publishSettings: _*)
     .settings(
@@ -401,11 +406,6 @@ lazy val docs =
 
 lazy val scalaPactProject =
   (project in file("."))
-    .enablePlugins(BuildInfoPlugin)
-    .settings(
-      buildInfoKeys := Seq[BuildInfoKey](version),
-      buildInfoPackage := "com.itv.scalapact"
-    )
     .settings(commonSettings: _*)
     .aggregate(shared, core, pluginShared, plugin, pluginNoDeps, framework, standalone)
     .aggregate(http4s016a, http4s017, http4s018, http4s020)

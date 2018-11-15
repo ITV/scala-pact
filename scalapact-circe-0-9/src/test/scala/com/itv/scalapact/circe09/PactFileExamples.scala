@@ -6,58 +6,58 @@ object PactFileExamples {
 
   val anotherExample: String =
     """{
-      |  "provider" : {
-      |    "name" : "Their Provider Service"
-      |  },
-      |  "consumer" : {
-      |    "name" : "My Consumer"
-      |  },
-      |  "interactions" : [
-      |    {
-      |      "description" : "a simple get example with a header matcher",
-      |      "request" : {
-      |        "method" : "GET",
-      |        "path" : "/header-match",
-      |        "headers" : {
-      |          "fish" : "chips",
-      |          "sauce" : "ketchup"
-      |        },
-      |        "matchingRules" : {
-      |          "$.headers.fish" : {
-      |            "match" : "regex",
-      |            "regex" : "\\w+"
-      |          },
-      |          "$.headers.sauce" : {
-      |            "match" : "regex",
-      |            "regex" : "\\w+"
-      |          }
-      |        }
-      |      },
-      |      "response" : {
-      |        "status" : 200,
-      |        "headers" : {
-      |          "fish" : "chips",
-      |          "sauce" : "ketchup"
-      |        },
-      |        "body" : "Hello there!",
-      |        "matchingRules" : {
-      |          "$.headers.fish" : {
-      |            "match" : "regex",
-      |            "regex" : "\\w+"
-      |          },
-      |          "$.headers.sauce" : {
-      |            "match" : "regex",
-      |            "regex" : "\\w+"
-      |          }
-      |        }
-      |      }
-      |    }
-      |  ]
-      |}""".stripMargin
+    |  "provider" : {
+    |    "name" : "Their Provider Service"
+    |  },
+    |  "consumer" : {
+    |    "name" : "My Consumer"
+    |  },
+    |  "interactions" : [
+    |    {
+    |      "description" : "a simple get example with a header matcher",
+    |      "request" : {
+    |        "method" : "GET",
+    |        "path" : "/header-match",
+    |        "headers" : {
+    |          "fish" : "chips",
+    |          "sauce" : "ketchup"
+    |        },
+    |        "matchingRules" : {
+    |          "$.headers.fish" : {
+    |            "match" : "regex",
+    |            "regex" : "\\w+"
+    |          },
+    |          "$.headers.sauce" : {
+    |            "match" : "regex",
+    |            "regex" : "\\w+"
+    |          }
+    |        }
+    |      },
+    |      "response" : {
+    |        "status" : 200,
+    |        "headers" : {
+    |          "fish" : "chips",
+    |          "sauce" : "ketchup"
+    |        },
+    |        "body" : "Hello there!",
+    |        "matchingRules" : {
+    |          "$.headers.fish" : {
+    |            "match" : "regex",
+    |            "regex" : "\\w+"
+    |          },
+    |          "$.headers.sauce" : {
+    |            "match" : "regex",
+    |            "regex" : "\\w+"
+    |          }
+    |        }
+    |      }
+    |    }
+    |  ]
+    |}""".stripMargin
 
   val verySimple = Pact(
-    consumer = PactActor("consumer"),
     provider = PactActor("provider"),
+    consumer = PactActor("consumer"),
     interactions = List(
       Interaction(
         provider_state = None,
@@ -79,7 +79,8 @@ object PactFileExamples {
         )
       )
     ),
-    _links = None
+    _links = None,
+    metadata = None
   )
 
   val verySimpleAsString: String =
@@ -106,8 +107,8 @@ object PactFileExamples {
       |}""".stripMargin
 
   val simple = Pact(
-    consumer = PactActor("consumer"),
     provider = PactActor("provider"),
+    consumer = PactActor("consumer"),
     interactions = List(
       Interaction(
         provider_state = None,
@@ -129,13 +130,7 @@ object PactFileExamples {
         response = InteractionResponse(
           status = Option(200),
           headers = Option(Map("Content-Type" -> "application/json")),
-          body = Option("""{
-              |  "fish" : [
-              |    "cod",
-              |    "haddock",
-              |    "flying"
-              |  ]
-              |}""".stripMargin),
+          body = Option("""{"fish":["cod","haddock","flying"]}"""),
           matchingRules = Option(
             Map(
               "$.headers.Accept"         -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
@@ -159,18 +154,13 @@ object PactFileExamples {
         response = InteractionResponse(
           status = Option(200),
           headers = Option(Map("Content-Type" -> "application/json")),
-          body = Option("""{
-              |  "chips" : true,
-              |  "fish" : [
-              |    "cod",
-              |    "haddock"
-              |  ]
-              |}""".stripMargin),
+          body = Option("""{"chips":true,"fish":["cod","haddock"]}"""),
           matchingRules = None
         )
       )
     ),
-    _links = None
+    _links = None,
+    metadata = None
   )
 
   val _links = Map(
@@ -200,89 +190,18 @@ object PactFileExamples {
     )
   )
 
-  val simpleWithLinks: Pact = simple.copy(_links = Option(_links))
+  val simpleWithLinksAndMetaData: Pact =
+    simple.copy(
+      _links = Option(_links),
+      metadata = Option(
+        PactMetaData(
+          pactSpecification = Option(VersionMetaData("2.0.0")),
+          `scala-pact` = Option(VersionMetaData("1.0.0"))
+        )
+      )
+    )
 
   val simpleAsString: String = """{
-                         |  "provider" : {
-                         |    "name" : "provider"
-                         |  },
-                         |  "consumer" : {
-                         |    "name" : "consumer"
-                         |  },
-                         |  "interactions" : [
-                         |    {
-                         |      "providerState" : "a simple state",
-                         |      "description" : "a simple request",
-                         |      "request" : {
-                         |        "method" : "GET",
-                         |        "path" : "/fetch-json",
-                         |        "query" : "fish=chips",
-                         |        "headers" : {
-                         |          "Content-Type" : "text/plain"
-                         |        },
-                         |        "body" : "fish",
-                         |        "matchingRules" : {
-                         |          "$.headers.Accept" : {
-                         |            "match" : "regex",
-                         |            "regex" : "\\w+"
-                         |          },
-                         |          "$.headers.Content-Length" : {
-                         |            "match" : "type"
-                         |          }
-                         |        }
-                         |      },
-                         |      "response" : {
-                         |        "status" : 200,
-                         |        "headers" : {
-                         |          "Content-Type" : "application/json"
-                         |        },
-                         |        "body" : {
-                         |          "fish" : [
-                         |            "cod",
-                         |            "haddock",
-                         |            "flying"
-                         |          ]
-                         |        },
-                         |        "matchingRules" : {
-                         |          "$.headers.Accept" : {
-                         |            "match" : "regex",
-                         |            "regex" : "\\w+"
-                         |          },
-                         |          "$.headers.Content-Length" : {
-                         |            "match" : "type"
-                         |          }
-                         |        }
-                         |      }
-                         |    },
-                         |    {
-                         |      "providerState" : "a simple state 2",
-                         |      "description" : "a simple request 2",
-                         |      "request" : {
-                         |        "method" : "GET",
-                         |        "path" : "/fetch-json2",
-                         |        "headers" : {
-                         |          "Content-Type" : "text/plain"
-                         |        },
-                         |        "body" : "fish"
-                         |      },
-                         |      "response" : {
-                         |        "status" : 200,
-                         |        "headers" : {
-                         |          "Content-Type" : "application/json"
-                         |        },
-                         |        "body" : {
-                         |          "chips" : true,
-                         |          "fish" : [
-                         |            "cod",
-                         |            "haddock"
-                         |          ]
-                         |        }
-                         |      }
-                         |    }
-                         |  ]
-                         |}""".stripMargin
-
-  val simpleOldProviderStateAsString: String = """{
                                  |  "provider" : {
                                  |    "name" : "provider"
                                  |  },
@@ -291,16 +210,10 @@ object PactFileExamples {
                                  |  },
                                  |  "interactions" : [
                                  |    {
-                                 |      "provider_state" : "a simple state",
-                                 |      "description" : "a simple request",
                                  |      "request" : {
                                  |        "method" : "GET",
-                                 |        "path" : "/fetch-json",
                                  |        "body" : "fish",
-                                 |        "query" : "fish=chips",
-                                 |        "headers" : {
-                                 |          "Content-Type" : "text/plain"
-                                 |        },
+                                 |        "path" : "/fetch-json",
                                  |        "matchingRules" : {
                                  |          "$.headers.Accept" : {
                                  |            "match" : "regex",
@@ -309,8 +222,13 @@ object PactFileExamples {
                                  |          "$.headers.Content-Length" : {
                                  |            "match" : "type"
                                  |          }
+                                 |        },
+                                 |        "query" : "fish=chips",
+                                 |        "headers" : {
+                                 |          "Content-Type" : "text/plain"
                                  |        }
                                  |      },
+                                 |      "description" : "a simple request",
                                  |      "response" : {
                                  |        "status" : 200,
                                  |        "headers" : {
@@ -332,19 +250,19 @@ object PactFileExamples {
                                  |            "match" : "type"
                                  |          }
                                  |        }
-                                 |      }
+                                 |      },
+                                 |      "providerState" : "a simple state"
                                  |    },
                                  |    {
-                                 |      "provider_state" : "a simple state 2",
-                                 |      "description" : "a simple request 2",
                                  |      "request" : {
                                  |        "method" : "GET",
-                                 |        "path" : "/fetch-json2",
                                  |        "body" : "fish",
+                                 |        "path" : "/fetch-json2",
                                  |        "headers" : {
                                  |          "Content-Type" : "text/plain"
                                  |        }
                                  |      },
+                                 |      "description" : "a simple request 2",
                                  |      "response" : {
                                  |        "status" : 200,
                                  |        "headers" : {
@@ -357,118 +275,297 @@ object PactFileExamples {
                                  |            "haddock"
                                  |          ]
                                  |        }
-                                 |      }
+                                 |      },
+                                 |      "providerState" : "a simple state 2"
                                  |    }
                                  |  ]
                                  |}""".stripMargin
 
-  val simpleWithLinksAsString: String = """{
-                                          |  "provider" : {
-                                          |    "name" : "provider"
-                                          |  },
-                                          |  "consumer" : {
-                                          |    "name" : "consumer"
-                                          |  },
-                                          |  "interactions" : [
-                                          |    {
-                                          |      "request" : {
-                                          |        "method" : "GET",
-                                          |        "body" : "fish",
-                                          |        "path" : "/fetch-json",
-                                          |        "matchingRules" : {
-                                          |          "$.headers.Accept" : {
-                                          |            "match" : "regex",
-                                          |            "regex" : "\\w+"
-                                          |          },
-                                          |          "$.headers.Content-Length" : {
-                                          |            "match" : "type"
-                                          |          }
-                                          |        },
-                                          |        "query" : "fish=chips",
-                                          |        "headers" : {
-                                          |          "Content-Type" : "text/plain"
-                                          |        }
-                                          |      },
-                                          |      "description" : "a simple request",
-                                          |      "response" : {
-                                          |        "status" : 200,
-                                          |        "headers" : {
-                                          |          "Content-Type" : "application/json"
-                                          |        },
-                                          |        "body" : {
-                                          |          "fish" : [
-                                          |            "cod",
-                                          |            "haddock",
-                                          |            "flying"
-                                          |          ]
-                                          |        },
-                                          |        "matchingRules" : {
-                                          |          "$.headers.Accept" : {
-                                          |            "match" : "regex",
-                                          |            "regex" : "\\w+"
-                                          |          },
-                                          |          "$.headers.Content-Length" : {
-                                          |            "match" : "type"
-                                          |          }
-                                          |        }
-                                          |      },
-                                          |      "providerState" : "a simple state"
-                                          |    },
-                                          |    {
-                                          |      "request" : {
-                                          |        "method" : "GET",
-                                          |        "body" : "fish",
-                                          |        "path" : "/fetch-json2",
-                                          |        "headers" : {
-                                          |          "Content-Type" : "text/plain"
-                                          |        }
-                                          |      },
-                                          |      "description" : "a simple request 2",
-                                          |      "response" : {
-                                          |        "status" : 200,
-                                          |        "headers" : {
-                                          |          "Content-Type" : "application/json"
-                                          |        },
-                                          |        "body" : {
-                                          |          "chips" : true,
-                                          |          "fish" : [
-                                          |            "cod",
-                                          |            "haddock"
-                                          |          ]
-                                          |        }
-                                          |      },
-                                          |      "providerState" : "a simple state 2"
-                                          |    }
-                                          |  ],
-                                          |  "_links": {
-                                          |    "self": {
-                                          |      "title": "Pact",
-                                          |      "name": "Pact between consumer (v1.0.0) and provider",
-                                          |      "href": "http://localhost/pacts/provider/provider/consumer/consumer/version/1.0.0"
-                                          |    },
-                                          |    "pb:consumer": {
-                                          |      "title": "Consumer",
-                                          |      "name": "consumer",
-                                          |      "href": "http://localhost/pacticipants/consumer"
-                                          |    },
-                                          |    "pb:provider": {
-                                          |      "title": "Provider",
-                                          |      "name": "provider",
-                                          |      "href": "http://localhost/pacticipants/provider"
-                                          |    },
-                                          |    "pb:latest-tagged-pact-version": {
-                                          |      "title": "Latest tagged version of this pact",
-                                          |      "href": "http://localhost/pacts/provider/provider-service/consumer/consumer-service/latest/{tag}",
-                                          |      "templated": true
-                                          |    },
-                                          |    "curies": [
-                                          |      {
-                                          |        "name": "pb",
-                                          |        "href": "http://localhost/doc/{rel}",
-                                          |        "templated": true
-                                          |      }
-                                          |    ]
-                                          |  }
-                                          |}""".stripMargin
+  val simpleOldProviderStateAsString: String = """{
+                                                 |  "provider" : {
+                                                 |    "name" : "provider"
+                                                 |  },
+                                                 |  "consumer" : {
+                                                 |    "name" : "consumer"
+                                                 |  },
+                                                 |  "interactions" : [
+                                                 |    {
+                                                 |      "request" : {
+                                                 |        "method" : "GET",
+                                                 |        "body" : "fish",
+                                                 |        "path" : "/fetch-json",
+                                                 |        "matchingRules" : {
+                                                 |          "$.headers.Accept" : {
+                                                 |            "match" : "regex",
+                                                 |            "regex" : "\\w+"
+                                                 |          },
+                                                 |          "$.headers.Content-Length" : {
+                                                 |            "match" : "type"
+                                                 |          }
+                                                 |        },
+                                                 |        "query" : "fish=chips",
+                                                 |        "headers" : {
+                                                 |          "Content-Type" : "text/plain"
+                                                 |        }
+                                                 |      },
+                                                 |      "description" : "a simple request",
+                                                 |      "response" : {
+                                                 |        "status" : 200,
+                                                 |        "headers" : {
+                                                 |          "Content-Type" : "application/json"
+                                                 |        },
+                                                 |        "body" : {
+                                                 |          "fish" : [
+                                                 |            "cod",
+                                                 |            "haddock",
+                                                 |            "flying"
+                                                 |          ]
+                                                 |        },
+                                                 |        "matchingRules" : {
+                                                 |          "$.headers.Accept" : {
+                                                 |            "match" : "regex",
+                                                 |            "regex" : "\\w+"
+                                                 |          },
+                                                 |          "$.headers.Content-Length" : {
+                                                 |            "match" : "type"
+                                                 |          }
+                                                 |        }
+                                                 |      },
+                                                 |      "provider_state" : "a simple state"
+                                                 |    },
+                                                 |    {
+                                                 |      "request" : {
+                                                 |        "method" : "GET",
+                                                 |        "body" : "fish",
+                                                 |        "path" : "/fetch-json2",
+                                                 |        "headers" : {
+                                                 |          "Content-Type" : "text/plain"
+                                                 |        }
+                                                 |      },
+                                                 |      "description" : "a simple request 2",
+                                                 |      "response" : {
+                                                 |        "status" : 200,
+                                                 |        "headers" : {
+                                                 |          "Content-Type" : "application/json"
+                                                 |        },
+                                                 |        "body" : {
+                                                 |          "chips" : true,
+                                                 |          "fish" : [
+                                                 |            "cod",
+                                                 |            "haddock"
+                                                 |          ]
+                                                 |        }
+                                                 |      },
+                                                 |      "provider_state" : "a simple state 2"
+                                                 |    }
+                                                 |  ]
+                                                 |}""".stripMargin
+
+  val simpleWithLinksAndMetaDataAsString: String =
+    """{
+      |  "provider" : {
+      |    "name" : "provider"
+      |  },
+      |  "consumer" : {
+      |    "name" : "consumer"
+      |  },
+      |  "interactions" : [
+      |    {
+      |      "request" : {
+      |        "method" : "GET",
+      |        "body" : "fish",
+      |        "path" : "/fetch-json",
+      |        "matchingRules" : {
+      |          "$.headers.Accept" : {
+      |            "match" : "regex",
+      |            "regex" : "\\w+"
+      |          },
+      |          "$.headers.Content-Length" : {
+      |            "match" : "type"
+      |          }
+      |        },
+      |        "query" : "fish=chips",
+      |        "headers" : {
+      |          "Content-Type" : "text/plain"
+      |        }
+      |      },
+      |      "description" : "a simple request",
+      |      "response" : {
+      |        "status" : 200,
+      |        "headers" : {
+      |          "Content-Type" : "application/json"
+      |        },
+      |        "body" : {
+      |          "fish" : [
+      |            "cod",
+      |            "haddock",
+      |            "flying"
+      |          ]
+      |        },
+      |        "matchingRules" : {
+      |          "$.headers.Accept" : {
+      |            "match" : "regex",
+      |            "regex" : "\\w+"
+      |          },
+      |          "$.headers.Content-Length" : {
+      |            "match" : "type"
+      |          }
+      |        }
+      |      },
+      |      "providerState" : "a simple state"
+      |    },
+      |    {
+      |      "request" : {
+      |        "method" : "GET",
+      |        "body" : "fish",
+      |        "path" : "/fetch-json2",
+      |        "headers" : {
+      |          "Content-Type" : "text/plain"
+      |        }
+      |      },
+      |      "description" : "a simple request 2",
+      |      "response" : {
+      |        "status" : 200,
+      |        "headers" : {
+      |          "Content-Type" : "application/json"
+      |        },
+      |        "body" : {
+      |          "chips" : true,
+      |          "fish" : [
+      |            "cod",
+      |            "haddock"
+      |          ]
+      |        }
+      |      },
+      |      "providerState" : "a simple state 2"
+      |    }
+      |  ],
+      |  "_links": {
+      |    "self": {
+      |      "title": "Pact",
+      |      "name": "Pact between consumer (v1.0.0) and provider",
+      |      "href": "http://localhost/pacts/provider/provider/consumer/consumer/version/1.0.0"
+      |    },
+      |    "pb:consumer": {
+      |      "title": "Consumer",
+      |      "name": "consumer",
+      |      "href": "http://localhost/pacticipants/consumer"
+      |    },
+      |    "pb:provider": {
+      |      "title": "Provider",
+      |      "name": "provider",
+      |      "href": "http://localhost/pacticipants/provider"
+      |    },
+      |    "pb:latest-tagged-pact-version": {
+      |      "title": "Latest tagged version of this pact",
+      |      "href": "http://localhost/pacts/provider/provider-service/consumer/consumer-service/latest/{tag}",
+      |      "templated": true
+      |    },
+      |    "curies": [
+      |      {
+      |        "name": "pb",
+      |        "href": "http://localhost/doc/{rel}",
+      |        "templated": true
+      |      }
+      |    ]
+      |  },
+      |  "metadata": {
+      |    "pactSpecification": {
+      |      "version": "2.0.0"
+      |    },
+      |    "scala-pact": {
+      |      "version": "1.0.0"
+      |    }
+      |  }
+      |}""".stripMargin
+
+  val simpleWithMetaDataAsString: String =
+    """{
+      |  "provider" : {
+      |    "name" : "provider"
+      |  },
+      |  "consumer" : {
+      |    "name" : "consumer"
+      |  },
+      |  "interactions" : [
+      |    {
+      |      "request" : {
+      |        "method" : "GET",
+      |        "body" : "fish",
+      |        "path" : "/fetch-json",
+      |        "matchingRules" : {
+      |          "$.headers.Accept" : {
+      |            "match" : "regex",
+      |            "regex" : "\\w+"
+      |          },
+      |          "$.headers.Content-Length" : {
+      |            "match" : "type"
+      |          }
+      |        },
+      |        "query" : "fish=chips",
+      |        "headers" : {
+      |          "Content-Type" : "text/plain"
+      |        }
+      |      },
+      |      "description" : "a simple request",
+      |      "response" : {
+      |        "status" : 200,
+      |        "headers" : {
+      |          "Content-Type" : "application/json"
+      |        },
+      |        "body" : {
+      |          "fish" : [
+      |            "cod",
+      |            "haddock",
+      |            "flying"
+      |          ]
+      |        },
+      |        "matchingRules" : {
+      |          "$.headers.Accept" : {
+      |            "match" : "regex",
+      |            "regex" : "\\w+"
+      |          },
+      |          "$.headers.Content-Length" : {
+      |            "match" : "type"
+      |          }
+      |        }
+      |      },
+      |      "providerState" : "a simple state"
+      |    },
+      |    {
+      |      "request" : {
+      |        "method" : "GET",
+      |        "body" : "fish",
+      |        "path" : "/fetch-json2",
+      |        "headers" : {
+      |          "Content-Type" : "text/plain"
+      |        }
+      |      },
+      |      "description" : "a simple request 2",
+      |      "response" : {
+      |        "status" : 200,
+      |        "headers" : {
+      |          "Content-Type" : "application/json"
+      |        },
+      |        "body" : {
+      |          "chips" : true,
+      |          "fish" : [
+      |            "cod",
+      |            "haddock"
+      |          ]
+      |        }
+      |      },
+      |      "providerState" : "a simple state 2"
+      |    }
+      |  ],
+      |  "metadata": {
+      |    "pactSpecification": {
+      |      "version": "2.0.0"
+      |    },
+      |    "scala-pact": {
+      |      "version": "1.0.0"
+      |    }
+      |  }
+      |}""".stripMargin
 
 }
