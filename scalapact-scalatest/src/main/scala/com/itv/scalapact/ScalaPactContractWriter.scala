@@ -112,7 +112,7 @@ object ScalaPactContractWriter {
             Map(key -> MatchingRule("regex", regex, None))
 
           case ScalaPactMatchingRuleArrayMinLength(key, min) =>
-            Map(key -> MatchingRule(None, None, min))
+            Map(key -> MatchingRule("type", None, min))
 
         }
         .foldLeft(Map.empty[String, MatchingRule])(_ ++ _)
