@@ -19,7 +19,8 @@ object ScalaPactPlugin extends AutoPlugin {
     implicit def toSetupProviderState(bool: Boolean): ProviderStateResult = ProviderStateResult(bool)
 
     val providerStateMatcher: SettingKey[PartialFunction[String, ProviderStateResult]] =
-      SettingKey[PartialFunction[String, ProviderStateResult]]("provider-state-matcher", "Alternative partial function for provider state setup")
+      SettingKey[PartialFunction[String, ProviderStateResult]]("provider-state-matcher",
+                                                               "Alternative partial function for provider state setup")
 
     val providerStates: SettingKey[Seq[(String, SetupProviderState)]] =
       SettingKey[Seq[(String, SetupProviderState)]]("provider-states", "A list of provider state setup functions")
@@ -45,10 +46,22 @@ object ScalaPactPlugin extends AutoPlugin {
         "The name and pact version numbers of the services that consume the service to verify"
       )
 
+    val taggedConsumerNames: SettingKey[Seq[(String, Seq[String])]] =
+      SettingKey[Seq[(String, Seq[String])]](
+        "taggedConsumerNames",
+        "The name and list of tags of the services that consume the service to verify"
+      )
+
     val pactContractVersion: SettingKey[String] =
       SettingKey[String](
         "pactContractVersion",
         "The version number the pact contract will be published under. If missing or empty, the project version will be used."
+      )
+
+    val pactContractTags: SettingKey[Seq[String]] =
+      SettingKey[Seq[String]](
+        "pactContractTags",
+        "The tags the pact contract will be published with. If missing or empty, the contract will be published without tags."
       )
 
     val allowSnapshotPublish: SettingKey[Boolean] =
@@ -84,17 +97,21 @@ object ScalaPactPlugin extends AutoPlugin {
     providerName := "",
     consumerNames := Seq.empty[String],
     versionedConsumerNames := Seq.empty[(String, String)],
+    taggedConsumerNames := Seq.empty[(String, Seq[String])],
     pactContractVersion := "",
+    pactContractTags := Seq.empty[String],
     allowSnapshotPublish := false,
     scalaPactEnv := ScalaPactEnv.empty
   )
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   override lazy val projectSettings: Seq[Def.Setting[
-    _ >: Seq[(String, SetupProviderState)] with Seq[(String, String)] with Boolean with ScalaPactEnv with Map[
+    _ >: Seq[(String, SetupProviderState)] with Seq[(String, String)] with Seq[(String, Seq[String])] with Boolean with ScalaPactEnv with Map[
       String,
       String
-    ] with String with Seq[String] with PartialFunction[String, ProviderStateResult] with Task[Unit] with InputTask[Unit]
+    ] with String with Seq[String] with PartialFunction[String, ProviderStateResult] with Task[Unit] with InputTask[
+      Unit
+    ]
   ]] = {
     pactSettings ++ Seq(
       // Tasks
@@ -125,7 +142,8 @@ object ScalaPactPlugin extends AutoPlugin {
         providerBrokerPublishMap.value,
         version.value,
         pactContractVersion.value,
-        allowSnapshotPublish.value
+        allowSnapshotPublish.value,
+        pactContractTags.value
       )
     }
 
@@ -140,7 +158,8 @@ object ScalaPactPlugin extends AutoPlugin {
         version.value,
         providerName.value,
         consumerNames.value,
-        versionedConsumerNames.value
+        versionedConsumerNames.value,
+        taggedConsumerNames.value
       )
     }
 

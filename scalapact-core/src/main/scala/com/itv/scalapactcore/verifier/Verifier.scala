@@ -17,8 +17,7 @@ object Verifier {
   )(implicit pactReader: IPactReader,
     sslContextMap: SslContextMap,
     httpClient: IScalaPactHttpClient[F],
-    publisher: IResultPublisher
-  ): ScalaPactSettings => Boolean = arguments => {
+    publisher: IResultPublisher): ScalaPactSettings => Boolean = arguments => {
 
     val scalaPactLogPrefix = "[scala-pact] ".white
 
@@ -28,9 +27,11 @@ object Verifier {
       )
       loadPactFiles("pacts")(arguments).pacts
     } else {
-      val versionConsumers =
-        pactVerifySettings.consumerNames.map(c => VersionedConsumer(c, "/latest")) ++
-          pactVerifySettings.versionedConsumerNames.map(vc => vc.copy(version = "/version/" + vc.version))
+      val versionConsumers = pactVerifySettings.consumerNames.map(c => VersionedConsumer(c, "/latest")) ++
+        pactVerifySettings.versionedConsumerNames.map(vc => vc.copy(version = "/version/" + vc.version)) ++
+        pactVerifySettings.taggedConsumerNames.flatMap(
+          tc => tc.tags.map(t => VersionedConsumer(tc.name, "/latest/" + t))
+        )
 
       val latestPacts: List[Pact] = versionConsumers
         .flatMap { consumer =>
@@ -118,7 +119,9 @@ object Verifier {
 
     PactLogger.message(scalaPactLogPrefix + s"Run completed in: ${(endTime - startTime).toInt} ms".yellow)
     PactLogger.message(scalaPactLogPrefix + s"Total number of test run: $testCount".yellow)
-    PactLogger.message(scalaPactLogPrefix + s"Tests: succeeded ${testCount - failureCount}, failed $failureCount".yellow)
+    PactLogger.message(
+      scalaPactLogPrefix + s"Tests: succeeded ${testCount - failureCount}, failed $failureCount".yellow
+    )
 
     if (testCount == 0)
       PactLogger.message(scalaPactLogPrefix + "No Pact verification tests run.".red)
@@ -126,7 +129,6 @@ object Verifier {
       PactLogger.message(scalaPactLogPrefix + "All Pact verify tests passed.".green)
     else
       PactLogger.message(scalaPactLogPrefix + s"$failureCount Pact verify tests failed.".red)
-
 
     arguments.publishResultsEnabled.foreach(publisher.publishResults(pactVerifyResults, _))
 

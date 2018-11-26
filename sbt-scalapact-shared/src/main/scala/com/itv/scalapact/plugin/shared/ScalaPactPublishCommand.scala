@@ -13,7 +13,8 @@ object ScalaPactPublishCommand {
       providerBrokerPublishMap: Map[String, String],
       projectVersion: String,
       pactContractVersion: String,
-      allowSnapshotPublish: Boolean
+      allowSnapshotPublish: Boolean,
+      tagsToPublishWith: Seq[String]
   )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F]): Unit = {
     import Publisher._
 
@@ -33,13 +34,14 @@ object ScalaPactPublishCommand {
         LocalPactFileLoader.loadPactFiles(pactReader)(false)(scalaPactSettings.giveOutputPath)(scalaPactSettings)
 
       // Publish all to main broker
-      publishToBroker(httpClient.doRequestSync, pactBrokerAddress, versionToPublishAs)(pactWriter)(configAndPactFiles)
-        .foreach(r => PactLogger.message(r.renderAsString))
+      publishToBroker(httpClient.doRequestSync, pactBrokerAddress, versionToPublishAs, tagsToPublishWith)(pactWriter)(
+        configAndPactFiles
+      ).foreach(r => PactLogger.message(r.renderAsString))
 
       // Publish to other specified brokers
       configAndPactFiles.pacts.foreach { pactContract =>
         providerBrokerPublishMap.get(pactContract.provider.name).foreach { broker =>
-          publishToBroker(httpClient.doRequestSync, broker, versionToPublishAs)(pactWriter)(
+          publishToBroker(httpClient.doRequestSync, broker, versionToPublishAs, tagsToPublishWith)(pactWriter)(
             ConfigAndPacts(scalaPactSettings, List(pactContract))
           ).foreach(r => PactLogger.message(r.renderAsString))
         }
