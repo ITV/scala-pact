@@ -55,6 +55,11 @@ You can also specify the version you wish to publish under by adding:
 
 If you omit this variable or set it to an empty string, the main project version will be the version used to publish against.
 
+You can specify the tags of the contract by adding: 
+`pactContractTags := List("tag1", "tag2")`
+
+If you omit this variable or set it to an empty list, the contract will not be tagged under publishing. 
+
 You can then use the publish command to generate and upload your pact files to pact broker:
 
 `sbt pact-publish`

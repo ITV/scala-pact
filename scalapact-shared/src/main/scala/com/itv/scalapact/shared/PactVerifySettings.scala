@@ -7,4 +7,5 @@ case class PactVerifySettings(providerStates: SetupProviderState,
                               projectVersion: String,
                               providerName: String,
                               consumerNames: List[String],
+                              taggedConsumerNames: List[TaggedConsumer],
                               versionedConsumerNames: List[VersionedConsumer])

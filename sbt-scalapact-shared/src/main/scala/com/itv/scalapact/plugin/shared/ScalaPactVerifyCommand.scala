@@ -17,9 +17,9 @@ object ScalaPactVerifyCommand {
       projectVersion: String,
       providerName: String,
       consumerNames: Seq[String],
-      versionedConsumerNames: Seq[(String, String)]
-  )(implicit pactReader: IPactReader, httpClient: IScalaPactHttpClient[F], publisher: IResultPublisher
-  ): Unit = {
+      versionedConsumerNames: Seq[(String, String)],
+      taggedConsumerNames: Seq[(String, Seq[String])]
+  )(implicit pactReader: IPactReader, httpClient: IScalaPactHttpClient[F], publisher: IResultPublisher): Unit = {
     PactLogger.message("*************************************".white.bold)
     PactLogger.message("** ScalaPact: Running Verifier     **".white.bold)
     PactLogger.message("*************************************".white.bold)
@@ -32,6 +32,8 @@ object ScalaPactVerifyCommand {
       projectVersion,
       providerName,
       consumerNames.toList,
+      taggedConsumerNames = taggedConsumerNames.toList
+        .map(t => TaggedConsumer(t._1, t._2.toList)),
       versionedConsumerNames = versionedConsumerNames.toList
         .map(t => VersionedConsumer(t._1, t._2))
     )

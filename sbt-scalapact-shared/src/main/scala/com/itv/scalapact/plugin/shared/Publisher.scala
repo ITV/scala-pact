@@ -10,16 +10,20 @@ object Publisher {
   def publishToBroker(
       sendIt: SimpleRequest => Either[Throwable, SimpleResponse],
       pactBrokerAddress: String,
-      versionToPublishAs: String
+      versionToPublishAs: String,
+      tagsToPublishWith: Seq[String]
   )(implicit pactWriter: IPactWriter): ConfigAndPacts => List[PublishResult] =
     configAndPacts =>
       configAndPacts.pacts.map { pact =>
-        publishPact(sendIt, pact, versionToPublishAs) {
+        publishPact(sendIt, pact, versionToPublishAs, tagsToPublishWith) {
           ValidatedDetails.buildFrom(pact.consumer.name, pact.provider.name, pactBrokerAddress, "/latest")
         }
     }
 
-  def publishPact(sendIt: SimpleRequest => Either[Throwable, SimpleResponse], pact: Pact, versionToPublishAs: String)(
+  def publishPact(sendIt: SimpleRequest => Either[Throwable, SimpleResponse],
+                  pact: Pact,
+                  versionToPublishAs: String,
+                  tagsToPublishWith: Seq[String])(
       details: Either[String, ValidatedDetails]
   )(implicit pactWriter: IPactWriter): PublishResult =
     details match {
@@ -27,30 +31,53 @@ object Publisher {
         PublishFailed("Validation error", l)
 
       case Right(v) =>
-        val address = v.validatedAddress.address + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + "/version/" + versionToPublishAs
-          .replace("-SNAPSHOT", ".x")
+        val consumerVersion = versionToPublishAs.replace("-SNAPSHOT", ".x")
+        val tagAddresses = tagsToPublishWith.map(
+          v.validatedAddress.address + "/pacticipants/" + v.consumerName + "/versions/" + consumerVersion + "/tags/" + _
+        )
+        val address = v.validatedAddress.address + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + "/version/" + consumerVersion
 
-        val context = s"Publishing '${v.consumerName} -> ${v.providerName}' to:\n > $address".yellow
+        val tagContext = if (tagAddresses.nonEmpty) s" (With tags: ${tagsToPublishWith.mkString(", ")})" else ""
+        val context    = s"Publishing '${v.consumerName} -> ${v.providerName}'$tagContext to:\n > $address".yellow
 
-        sendIt(
-          SimpleRequest(address,
-                        "",
-                        HttpMethod.PUT,
-                        Map("Content-Type" -> "application/json"),
-                        Option(pactWriter.pactToJsonString(pact)),
-                        sslContextName = None)
-        ) match {
-          case Right(r) if r.is2xx =>
-            PublishSuccess(context)
+        val tagResponses = tagAddresses.map(tagAddress => {
+          sendIt(
+            SimpleRequest(tagAddress,
+                          "",
+                          HttpMethod.PUT,
+                          Map("Content-Type" -> "application/json", "Content-Length" -> "0"),
+                          None,
+                          sslContextName = None)
+          )
+        })
 
-          case Right(r) =>
-            PublishFailed(context, s"$r\nFailed: ${r.statusCode}, ${r.body}".red)
+        tagResponses
+          .collectFirst[PublishResult] {
+            case Left(e) =>
+              PublishFailed(context, s"Failed with error: ${e.getMessage}".red)
+            case Right(r) if !r.is2xx =>
+              PublishFailed(context, s"$r\nFailed: ${r.statusCode}, ${r.body}".red)
+          }
+          .getOrElse {
+            sendIt(
+              SimpleRequest(address,
+                            "",
+                            HttpMethod.PUT,
+                            Map("Content-Type" -> "application/json"),
+                            Option(pactWriter.pactToJsonString(pact)),
+                            sslContextName = None)
+            ) match {
+              case Right(r) if r.is2xx =>
+                PublishSuccess(context)
 
-          case Left(e) =>
-            PublishFailed(context, s"Failed with error: ${e.getMessage}".red)
-        }
+              case Right(r) =>
+                PublishFailed(context, s"$r\nFailed: ${r.statusCode}, ${r.body}".red)
+
+              case Left(e) =>
+                PublishFailed(context, s"Failed with error: ${e.getMessage}".red)
+            }
+          }
     }
-
 }
 
 sealed trait PublishResult {

@@ -130,6 +130,7 @@ object ScalaPactVerify {
                 projectVersion = "",
                 providerName = "",
                 consumerNames = Nil,
+                taggedConsumerNames = Nil,
                 versionedConsumerNames = Nil
               ),
               ScalaPactSettings(
@@ -152,6 +153,7 @@ object ScalaPactVerify {
                 projectVersion = "",
                 providerName = "",
                 consumerNames = Nil,
+                taggedConsumerNames = Nil,
                 versionedConsumerNames = Nil
               ),
               ScalaPactSettings(
@@ -174,6 +176,30 @@ object ScalaPactVerify {
                 projectVersion = "",
                 providerName = providerName,
                 consumerNames = consumerNames,
+                taggedConsumerNames = Nil,
+                versionedConsumerNames = Nil
+              ),
+              ScalaPactSettings(
+                host = host,
+                protocol = protocol,
+                port = port,
+                localPactFilePath = None,
+                strictMode = strict,
+                clientTimeout = Option(clientTimeout),
+                outputPath = None,
+                publishResultsEnabled = publishResultsEnabled
+              )
+            )
+
+          case pactBrokerWithTags(url, providerName, publishResultsEnabled, consumersWithTags) =>
+            (
+              PactVerifySettings(
+                providerStates = providerStateFunc,
+                pactBrokerAddress = url,
+                projectVersion = "",
+                providerName = providerName,
+                consumerNames = Nil,
+                taggedConsumerNames = consumersWithTags,
                 versionedConsumerNames = Nil
               ),
               ScalaPactSettings(
@@ -196,6 +222,7 @@ object ScalaPactVerify {
                 projectVersion = "",
                 providerName = providerName,
                 consumerNames = Nil,
+                taggedConsumerNames = Nil,
                 versionedConsumerNames = consumerNames.map(c => VersionedConsumer(c, version))
               ),
               ScalaPactSettings(
@@ -222,13 +249,25 @@ object ScalaPactVerify {
   sealed trait PactSourceType
   case class loadFromLocal(path: String) extends PactSourceType
   case class pactBroker(
-    url: String, provider: String, consumers: List[String], publishResultsEnabled: Option[BrokerPublishData]
+      url: String,
+      provider: String,
+      consumers: List[String],
+      publishResultsEnabled: Option[BrokerPublishData]
   ) extends PactSourceType {
     def withContractVersion(version: String): pactBrokerWithVersion =
       pactBrokerWithVersion(url, version, provider, consumers, publishResultsEnabled)
   }
+  case class pactBrokerWithTags(url: String,
+                                provider: String,
+                                publishResultsEnabled: Option[BrokerPublishData],
+                                consumerNamesWithTags: List[TaggedConsumer]
+   ) extends PactSourceType
   case class pactBrokerWithVersion(
-    url: String, contractVersion: String, provider: String, consumers: List[String], publishResultsEnabled: Option[BrokerPublishData]
+      url: String,
+      contractVersion: String,
+      provider: String,
+      consumers: List[String],
+      publishResultsEnabled: Option[BrokerPublishData]
   ) extends PactSourceType
   case class pactAsJsonString(json: String) extends PactSourceType
 
