@@ -11,13 +11,24 @@ class ResultPublisher(fetcher: (SimpleRequest, IO[Client[IO]]) => IO[SimpleRespo
 
   val maxTotalConnections: Int = 2
 
-  override def publishResults(pactVerifyResults: List[PactVerifyResult], brokerPublishData: BrokerPublishData)(implicit sslContextMap: SslContextMap): Unit = {
+  override def publishResults(
+      pactVerifyResults: List[PactVerifyResult],
+      brokerPublishData: BrokerPublishData,
+      pactBrokerCredentials: Option[BasicAuthenticationCredentials]
+  )(implicit sslContextMap: SslContextMap): Unit = {
     pactVerifyResults
       .map { result =>
-      result.pact._links.flatMap(_.get("pb:publish-verification-results")).map(_.href) match {
-        case Some(link) =>
-          val success = !result.results.exists(_.result.isLeft)
-          val request = SimpleRequest(link, "", HttpMethod.POST, Map("Content-Type" -> "application/json; charset=UTF-8"), body(brokerPublishData, success), None)
+        result.pact._links.flatMap(_.get("pb:publish-verification-results")).map(_.href) match {
+          case Some(link) =>
+            val success = !result.results.exists(_.result.isLeft)
+            val request = SimpleRequest(
+              link,
+              "",
+              HttpMethod.POST,
+              Map("Content-Type" -> "application/json; charset=UTF-8") ++ pactBrokerCredentials.map(_.asHeader).toList,
+              body(brokerPublishData, success),
+              None
+            )
 
           SslContextMap(request)(
             sslContext =>

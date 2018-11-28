@@ -8,4 +8,5 @@ case class PactVerifySettings(providerStates: SetupProviderState,
                               providerName: String,
                               consumerNames: List[String],
                               taggedConsumerNames: List[TaggedConsumer],
-                              versionedConsumerNames: List[VersionedConsumer])
+                              versionedConsumerNames: List[VersionedConsumer],
+                              pactBrokerCredentials: Option[BasicAuthenticationCredentials])

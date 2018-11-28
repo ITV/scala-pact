@@ -47,7 +47,8 @@ object Verifier {
             case Right(v) =>
               List(
                 fetchAndReadPact(
-                  v.validatedAddress.address + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + v.consumerVersion
+                  v.validatedAddress.address + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + v.consumerVersion,
+                  pactVerifySettings.pactBrokerCredentials
                 )
               )
           }
@@ -132,7 +133,9 @@ object Verifier {
     else
       PactLogger.message(scalaPactLogPrefix + s"$failureCount Pact verify tests failed.".red)
 
-    arguments.publishResultsEnabled.foreach(publisher.publishResults(pactVerifyResults, _))
+    arguments.publishResultsEnabled.foreach(
+      publisher.publishResults(pactVerifyResults, _, pactVerifySettings.pactBrokerCredentials)
+    )
 
     testCount > 0 && failureCount == 0
   }
@@ -216,14 +219,20 @@ object Verifier {
     }
 
   private def fetchAndReadPact[F[_]](
-      address: String
+      address: String,
+      credentials: Option[BasicAuthenticationCredentials]
   )(implicit pactReader: IPactReader, sslContextMap: SslContextMap, httpClient: IScalaPactHttpClient[F]): Pact = {
 
     PactLogger.message(s"Attempting to fetch pact from pact broker at: $address".white.bold)
 
     httpClient
       .doRequestSync(
-        SimpleRequest(address, "", HttpMethod.GET, Map("Accept" -> "application/json"), None, sslContextName = None)
+        SimpleRequest(address,
+                      "",
+                      HttpMethod.GET,
+                      Map("Accept" -> "application/json") ++ credentials.map(_.asHeader).toList,
+                      None,
+                      sslContextName = None)
       ) match {
       case Right(r: SimpleResponse) if r.is2xx =>
         r.body
