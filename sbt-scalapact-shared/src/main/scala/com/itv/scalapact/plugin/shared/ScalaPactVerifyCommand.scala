@@ -18,13 +18,17 @@ object ScalaPactVerifyCommand {
       providerName: String,
       consumerNames: Seq[String],
       versionedConsumerNames: Seq[(String, String)],
-      taggedConsumerNames: Seq[(String, Seq[String])]
+      taggedConsumerNames: Seq[(String, Seq[String])],
+      pactBrokerCredentials: (String, String)
   )(implicit pactReader: IPactReader, httpClient: IScalaPactHttpClient[F], publisher: IResultPublisher): Unit = {
     PactLogger.message("*************************************".white.bold)
     PactLogger.message("** ScalaPact: Running Verifier     **".white.bold)
     PactLogger.message("*************************************".white.bold)
 
     val combinedPactStates = combineProviderStatesIntoTotalFunction(providerStates, providerStateMatcher)
+    val credentials =
+      if (pactBrokerCredentials._1.isEmpty || pactBrokerCredentials._2.isEmpty) None
+      else Some(BasicAuthenticationCredentials(pactBrokerCredentials._1, pactBrokerCredentials._2))
 
     val pactVerifySettings = PactVerifySettings(
       combinedPactStates,
@@ -35,7 +39,8 @@ object ScalaPactVerifyCommand {
       taggedConsumerNames = taggedConsumerNames.toList
         .map(t => TaggedConsumer(t._1, t._2.toList)),
       versionedConsumerNames = versionedConsumerNames.toList
-        .map(t => VersionedConsumer(t._1, t._2))
+        .map(t => VersionedConsumer(t._1, t._2)),
+      credentials
     )
 
     val stringToSettingsToPacts = LocalPactFileLoader.loadPactFiles(pactReader)(true)

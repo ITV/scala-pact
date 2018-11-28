@@ -32,6 +32,9 @@ object ScalaPactPlugin extends AutoPlugin {
     val pactBrokerAddress: SettingKey[String] =
       SettingKey[String]("pactBrokerAddress", "The base url to publish / pull pact contract files to and from.")
 
+    val pactBrokerCredentials: SettingKey[(String, String)] =
+      SettingKey[(String, String)]("pactBrokerCredentials", "The basic authentication credentials (username, password) for accessing the broker.")
+
     val providerBrokerPublishMap: SettingKey[Map[String, String]] =
       SettingKey[Map[String, String]](
         "providerBrokerPublishMap",
@@ -105,12 +108,13 @@ object ScalaPactPlugin extends AutoPlugin {
     pactContractVersion := "",
     pactContractTags := Seq.empty[String],
     allowSnapshotPublish := false,
-    scalaPactEnv := ScalaPactEnv.empty
+    scalaPactEnv := ScalaPactEnv.empty,
+    pactBrokerCredentials := (("", ""): (String, String))
   )
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   override lazy val projectSettings: Seq[Def.Setting[
-    _ >: Seq[(String, SetupProviderState)] with Seq[(String, String)] with Seq[(String, Seq[String])] with Boolean with ScalaPactEnv with Map[
+    _ >: Seq[(String, SetupProviderState)] with Seq[(String, String)] with Seq[(String, Seq[String])] with (String, String) with Boolean with ScalaPactEnv with Map[
       String,
       String
     ] with String with Seq[String] with PartialFunction[String, ProviderStateResult] with Task[Unit] with InputTask[
@@ -147,7 +151,8 @@ object ScalaPactPlugin extends AutoPlugin {
         version.value,
         pactContractVersion.value,
         allowSnapshotPublish.value,
-        pactContractTags.value
+        pactContractTags.value,
+        pactBrokerCredentials.value
       )
     }
 
@@ -163,7 +168,8 @@ object ScalaPactPlugin extends AutoPlugin {
         providerName.value,
         consumerNames.value,
         versionedConsumerNames.value,
-        taggedConsumerNames.value
+        taggedConsumerNames.value,
+        pactBrokerCredentials.value
       )
     }
 

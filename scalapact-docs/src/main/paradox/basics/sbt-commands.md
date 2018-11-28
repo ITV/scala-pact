@@ -49,6 +49,10 @@ Before we can publish, we have to tell Scala-Pact where it can find a running in
 
 `pactBrokerAddress := "http://my-pact-broker:4321"`
 
+If your broker uses basic authentication you can specify the credentials like so:
+
+`pactBrokerCredentials := ("username", "password")`
+
 You can also specify the version you wish to publish under by adding:
 
 `pactContractVersion := "1.0.0"`
