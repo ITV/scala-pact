@@ -1,17 +1,19 @@
 package com.itv.scalapact.http4s20M3.impl
 
 import cats.effect._
+import cats.implicits._
 import com.itv.scalapact.shared._
+import com.itv.scalapact.shared.ColourOuput._
 import org.http4s.client.Client
 import org.http4s.client.blaze.BlazeClientBuilder
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 
-class ResultPublisher(fetcher: (SimpleRequest, IO[Client[IO]]) => IO[SimpleResponse]) extends IResultPublisher {
+class ResultPublisher(fetcher: (SimpleRequest, Resource[IO, Client[IO]]) => IO[SimpleResponse]) extends IResultPublisher {
 
-  val maxTotalConnections = 2
+  private val maxTotalConnections = 2
 
   override def publishResults(pactVerifyResults: List[PactVerifyResult], brokerPublishData: BrokerPublishData)(implicit sslContextMap: SslContextMap): Unit = {
     pactVerifyResults
@@ -24,11 +26,13 @@ class ResultPublisher(fetcher: (SimpleRequest, IO[Client[IO]]) => IO[SimpleRespo
             SslContextMap(request)(
               sslContext =>
                 simpleRequestWithoutFakeHeader => {
-                  val client = BlazeClientBuilder(ExecutionContext.Implicits.global)
-                    .withMaxTotalConnections(maxTotalConnections)
-                    .withRequestTimeout(2.seconds)
-                    .withSslContext(sslContext)
-                  fetcher(simpleRequestWithoutFakeHeader, client)
+                  fetcher(simpleRequestWithoutFakeHeader, {
+                    implicit val cs: ContextShift[IO] = IO.contextShift(global)
+                    val clientPreSsl = BlazeClientBuilder[IO](global)
+                      .withMaxTotalConnections(maxTotalConnections)
+                      .withRequestTimeout(2.seconds)
+                    sslContext.fold(clientPreSsl)(s => clientPreSsl.withSslContext(s)).resource
+                  })
                     .map { response =>
                       if (response.is2xx) {
                         PactLogger.message(
