@@ -63,7 +63,7 @@ Thanks to the way SBT works, that one plugin line will work in most cases, but i
  addSbtPlugin("com.itv" % "sbt-scalapact-nodeps" % "2.3.3")
 ```
 
-In you're test suite, you will need the following imports:
+In your test suite, you will need the following imports:
 
 The DSL/builder import for Consumer tests:
 ```scala
