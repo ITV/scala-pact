@@ -1,6 +1,6 @@
 package com.itv.scalapact.http4s20M3.impl
 
-import cats.effect.{IO, Resource}
+import cats.effect.{ContextShift, IO, Resource}
 import com.itv.scalapact.shared.{SimpleRequest, SimpleResponse}
 import javax.net.ssl.SSLContext
 import org.http4s._
@@ -15,6 +15,7 @@ object Http4sClientHelper {
 
   import HeaderImplicitConversions._
 
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   private val extractResponse: Response[IO] => IO[SimpleResponse] = r =>
     r.bodyAsText.compile.toVector.map(_.mkString).map { b =>
       SimpleResponse(r.status.code, r.headers, Some(b))
@@ -26,7 +27,7 @@ object Http4sClientHelper {
   def buildPooledBlazeHttpClient(maxTotalConnections: Int,
                                  clientTimeout: Duration,
                                  sslContext: Option[SSLContext]): Resource[IO, Client[IO]] = {
-    implicit val cs =  IO.contextShift(ExecutionContext.global)
+    implicit val cs: ContextShift[IO] =  IO.contextShift(ExecutionContext.global)
 
     BlazeClientBuilder[IO](ExecutionContext.global)
       .withMaxTotalConnections(maxTotalConnections)
