@@ -9,7 +9,8 @@ import org.http4s.client.blaze.BlazeClientBuilder
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-class ScalaPactHttpClient(fetcher: (SimpleRequest, Resource[IO, Client[IO]]) => IO[SimpleResponse]) extends IScalaPactHttpClient[IO] {
+class ScalaPactHttpClient(fetcher: (SimpleRequest, Resource[IO, Client[IO]]) => IO[SimpleResponse])
+    extends IScalaPactHttpClient[IO] {
 
   private val maxTotalConnections: Int = 1
 
@@ -19,24 +20,24 @@ class ScalaPactHttpClient(fetcher: (SimpleRequest, Resource[IO, Client[IO]]) => 
     doRequestIO(fetcher, simpleRequest)
 
   def doInteractionRequest(
-                            url: String,
-                            ir: InteractionRequest,
-                            clientTimeout: Duration,
-                            sslContextName: Option[String]
-                          )(implicit sslContextMap: SslContextMap): IO[InteractionResponse] =
+      url: String,
+      ir: InteractionRequest,
+      clientTimeout: Duration,
+      sslContextName: Option[String]
+  )(implicit sslContextMap: SslContextMap): IO[InteractionResponse] =
     doInteractionRequestIO(fetcher, url, ir, clientTimeout, sslContextName)
 
   def doRequestSync(
-                     simpleRequest: SimpleRequest
-                   )(implicit sslContextMap: SslContextMap): Either[Throwable, SimpleResponse] =
+      simpleRequest: SimpleRequest
+  )(implicit sslContextMap: SslContextMap): Either[Throwable, SimpleResponse] =
     doRequestIO(fetcher, simpleRequest).attempt.unsafeRunSync()
 
   def doInteractionRequestSync(
-                                url: String,
-                                ir: InteractionRequest,
-                                clientTimeout: Duration,
-                                sslContextName: Option[String]
-                              )(implicit sslContextMap: SslContextMap): Either[Throwable, InteractionResponse] =
+      url: String,
+      ir: InteractionRequest,
+      clientTimeout: Duration,
+      sslContextName: Option[String]
+  )(implicit sslContextMap: SslContextMap): Either[Throwable, InteractionResponse] =
     doInteractionRequestIO(fetcher, url, ir, clientTimeout, sslContextName).attempt
       .unsafeRunSync()
 
@@ -45,20 +46,23 @@ class ScalaPactHttpClient(fetcher: (SimpleRequest, Resource[IO, Client[IO]]) => 
     SslContextMap(simpleRequest)(
       sslContext =>
         simpleRequestWithoutFakeHeader =>
-          performRequest(simpleRequestWithoutFakeHeader, {
-            val client = BlazeClientBuilder[IO](ExecutionContext.Implicits.global)
-              .withMaxTotalConnections(maxTotalConnections)
-              .withRequestTimeout(2.seconds)
-            sslContext.fold(client)(s => client.withSslContext(s)).resource
-          }))
+          performRequest(
+            simpleRequestWithoutFakeHeader, {
+              val client = BlazeClientBuilder[IO](ExecutionContext.Implicits.global)
+                .withMaxTotalConnections(maxTotalConnections)
+                .withRequestTimeout(2.seconds)
+              sslContext.fold(client)(s => client.withSslContext(s)).resource
+            }
+      )
+    )
 
   def doInteractionRequestIO(
-                              performRequest: (SimpleRequest, Resource[IO, Client[IO]]) => IO[SimpleResponse],
-                              url: String,
-                              ir: InteractionRequest,
-                              clientTimeout: Duration,
-                              sslContextName: Option[String]
-                            )(implicit sslContextMap: SslContextMap): IO[InteractionResponse] =
+      performRequest: (SimpleRequest, Resource[IO, Client[IO]]) => IO[SimpleResponse],
+      url: String,
+      ir: InteractionRequest,
+      clientTimeout: Duration,
+      sslContextName: Option[String]
+  )(implicit sslContextMap: SslContextMap): IO[InteractionResponse] =
     SslContextMap(
       SimpleRequest(
         url,

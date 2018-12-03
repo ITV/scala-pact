@@ -21,7 +21,7 @@ object Http4sClientHelper {
   def buildPooledBlazeHttpClient(maxTotalConnections: Int,
                                  clientTimeout: Duration,
                                  sslContext: Option[SSLContext]): Resource[IO, Client[IO]] = {
-    implicit val cs: ContextShift[IO] =  IO.contextShift(ExecutionContext.global)
+    implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
     BlazeClientBuilder[IO](ExecutionContext.global)
       .withMaxTotalConnections(maxTotalConnections)
@@ -35,12 +35,10 @@ object Http4sClientHelper {
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   def doRequest(request: SimpleRequest, httpClient: Resource[IO, Client[IO]]): IO[SimpleResponse] =
     for {
-      request  <- Http4sRequestResponseFactory.buildRequest(request)
-      response   <- httpClient.use {
-        c => c.fetch[SimpleResponse](request){ r: Response[IO] =>
-          r.bodyAsText
-            .compile
-            .toVector
+      request <- Http4sRequestResponseFactory.buildRequest(request)
+      response <- httpClient.use { c =>
+        c.fetch[SimpleResponse](request) { r: Response[IO] =>
+          r.bodyAsText.compile.toVector
             .map(_.mkString)
             .map { b =>
               SimpleResponse(r.status.code, r.headers, Some(b))
