@@ -195,6 +195,22 @@ lazy val http4s018 =
     .dependsOn(shared)
     .settings(compilerOptions212: _*)
 
+lazy val http4s020M3 =
+  (project in file("scalapact-http4s-0-20-M3"))
+    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
+    .settings(
+      name := "scalapact-http4s-0-20-M3",
+      libraryDependencies ++= Seq(
+        "org.http4s"             %% "http4s-blaze-server" % "0.20.0-M3",
+        "org.http4s"             %% "http4s-blaze-client" % "0.20.0-M3",
+        "org.http4s"             %% "http4s-dsl"          % "0.20.0-M3",
+        "com.github.tomakehurst" % "wiremock"             % "1.56" % "test"
+      )
+    )
+    .dependsOn(shared)
+    .settings(compilerOptions212: _*)
+
 lazy val argonaut62 =
   (project in file("scalapact-argonaut-6-2"))
     .settings(commonSettings: _*)
