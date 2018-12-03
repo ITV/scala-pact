@@ -1,6 +1,6 @@
 package com.itv.scalapact.http4s16a.impl
 
-import com.itv.scalapact.shared.ColourOuput._
+import com.itv.scalapact.shared.ColourOutput._
 import com.itv.scalapact.shared._
 import org.http4s.client.Client
 import scalaz.concurrent.Task

@@ -3,7 +3,7 @@ import cats.effect.IO
 import cats.implicits._
 import com.itv.scalapact.shared.{IResultPublisher, _}
 import org.http4s.client.Client
-import com.itv.scalapact.shared.ColourOuput._
+import com.itv.scalapact.shared.ColourOutput._
 
 import scala.concurrent.duration._
 

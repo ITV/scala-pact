@@ -1,7 +1,7 @@
 package com.itv.scalapact.shared.matchir
 
 import scala.xml.{Elem, Node, XML}
-import com.itv.scalapact.shared.ColourOuput._
+import com.itv.scalapact.shared.ColourOutput._
 import com.itv.scalapact.shared.PactLogger
 
 object MatchIr extends XmlConversionFunctions with PrimitiveConversionFunctions {

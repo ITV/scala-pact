@@ -1,7 +1,7 @@
 package com.itv.scalapact.plugin.shared
 
 import com.itv.scalapact.shared._
-import com.itv.scalapact.shared.ColourOuput._
+import com.itv.scalapact.shared.ColourOutput._
 import com.itv.scalapact.shared.typeclasses.IPactWriter
 import com.itv.scalapactcore.verifier.ValidatedDetails
 

@@ -1,7 +1,7 @@
 package com.itv.scalapact.argonaut62
 
 import argonaut._
-import com.itv.scalapact.shared.ColourOuput._
+import com.itv.scalapact.shared.ColourOutput._
 import com.itv.scalapact.shared.{IJsonConversionFunctions, PactLogger}
 import com.itv.scalapact.shared.matchir.MatchIrConstants.{rootNodeLabel, unnamedNodeLabel}
 import com.itv.scalapact.shared.matchir._
