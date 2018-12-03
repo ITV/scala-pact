@@ -1,6 +1,6 @@
 package com.itv.scalapact.http4s17.impl
 
-import com.itv.scalapact.shared.ColourOuput._
+import com.itv.scalapact.shared.ColourOutput._
 import com.itv.scalapact.shared._
 import fs2.Task
 import org.http4s.client.Client

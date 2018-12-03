@@ -2,7 +2,7 @@ package com.itv.scalapact.shared
 
 import scala.language.implicitConversions
 
-object ColourOuput {
+object ColourOutput {
 
   implicit def toColouredString(s: String): ColouredString = new ColouredString(s)
 

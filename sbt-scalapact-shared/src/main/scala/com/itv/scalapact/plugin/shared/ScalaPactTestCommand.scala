@@ -3,7 +3,7 @@ package com.itv.scalapact.plugin.shared
 import java.io.File
 
 import com.itv.scalapact.shared.ScalaPactSettings
-import com.itv.scalapact.shared.ColourOuput._
+import com.itv.scalapact.shared.ColourOutput._
 
 import scala.io.Source
 import com.itv.scalapact.shared.PactLogger

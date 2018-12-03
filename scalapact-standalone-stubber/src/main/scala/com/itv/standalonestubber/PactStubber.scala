@@ -4,7 +4,7 @@ import java.util.concurrent.{ExecutorService, Executors}
 
 import com.itv.scalapact.http.serverInstance
 import com.itv.scalapact.json.{pactReaderInstance, pactWriterInstance}
-import com.itv.scalapact.shared.ColourOuput._
+import com.itv.scalapact.shared.ColourOutput._
 import com.itv.scalapact.shared.typeclasses.IPactStubber
 import com.itv.scalapact.shared.{PactLogger, ScalaPactSettings, SslContextMap}
 import com.itv.scalapactcore.common.LocalPactFileLoader._

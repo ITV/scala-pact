@@ -1,7 +1,7 @@
 package com.itv.scalapactcore.common.stubber
 
 import com.itv.scalapact.shared._
-import ColourOuput._
+import ColourOutput._
 import com.itv.scalapact.shared.PactLogger
 import com.itv.scalapact.shared.typeclasses.IPactReader
 

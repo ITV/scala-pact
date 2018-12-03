@@ -2,7 +2,7 @@ package com.itv.scalapactcore.verifier
 
 import com.itv.scalapact.shared._
 import com.itv.scalapactcore.common.matching.InteractionMatchers._
-import com.itv.scalapact.shared.ColourOuput._
+import com.itv.scalapact.shared.ColourOutput._
 import com.itv.scalapactcore.common._
 
 import scala.util.Left
