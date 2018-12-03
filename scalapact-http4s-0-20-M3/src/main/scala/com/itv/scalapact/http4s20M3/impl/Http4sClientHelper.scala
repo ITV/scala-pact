@@ -15,12 +15,6 @@ object Http4sClientHelper {
 
   import HeaderImplicitConversions._
 
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  private val extractResponse: Response[IO] => IO[SimpleResponse] = r =>
-    r.bodyAsText.compile.toVector.map(_.mkString).map { b =>
-      SimpleResponse(r.status.code, r.headers, Some(b))
-  }
-
   def defaultClient: Resource[IO, Client[IO]] =
     buildPooledBlazeHttpClient(1, Duration(1, SECONDS), None)
 
@@ -38,11 +32,20 @@ object Http4sClientHelper {
       .resource
   }
 
-  def doRequest(request: SimpleRequest, httpClient: IO[Client[IO]]): IO[SimpleResponse] =
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  def doRequest(request: SimpleRequest, httpClient: Resource[IO, Client[IO]]): IO[SimpleResponse] =
     for {
       request  <- Http4sRequestResponseFactory.buildRequest(request)
-      client   <- httpClient
-      response <- client.fetch[SimpleResponse](request)(extractResponse)
+      response   <- httpClient.use {
+        c => c.fetch[SimpleResponse](request){ r: Response[IO] =>
+          r.bodyAsText
+            .compile
+            .toVector
+            .map(_.mkString)
+            .map { b =>
+              SimpleResponse(r.status.code, r.headers, Some(b))
+            }
+        }
+      }
     } yield response
-
 }

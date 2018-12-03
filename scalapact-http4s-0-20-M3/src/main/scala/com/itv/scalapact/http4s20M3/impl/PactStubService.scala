@@ -5,10 +5,9 @@ import java.util.concurrent.Executors
 import cats.data._
 import cats.effect._
 import com.itv.scalapact.shared._
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter}
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter}
 import javax.net.ssl.SSLContext
 import org.http4s.dsl.io._
-import org.http4s.server.Server
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.util.CaseInsensitiveString
 import org.http4s.{HttpApp, Request, Response, Status}
@@ -133,47 +132,3 @@ object PactStubService {
   }
 }
 
-class PactStubService extends IPactStubber {
-
-  private var instance: Option[Resource[IO, Server[IO]]] = None
-
-  private def blazeBuilder(
-                            scalaPactSettings: ScalaPactSettings,
-                            interactionManager: IInteractionManager,
-                            connectionPoolSize: Int,
-                            sslContextName: Option[String],
-                            port: Option[Int]
-                          )(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): BlazeServerBuilder[IO] =
-    PactStubService.createServer(
-      interactionManager,
-      connectionPoolSize,
-      sslContextName,
-      port,
-      scalaPactSettings
-    )
-
-  def start(interactionManager: IInteractionManager,
-            connectionPoolSize: Int,
-            sslContextName: Option[String],
-            port: Option[Int])(implicit pactReader: IPactReader,
-                               pactWriter: IPactWriter,
-                               sslContextMap: SslContextMap): ScalaPactSettings => IPactStubber =
-    scalaPactSettings => {
-      instance match {
-        case Some(_) =>
-          this
-
-        case None =>
-          instance = Option(
-            blazeBuilder(scalaPactSettings, interactionManager, connectionPoolSize, sslContextName, port).resource
-          )
-          this
-      }
-    }
-
-  def shutdown(): Unit = {
-    instance = None
-  }
-
-  def port: Option[Int] = instance.map(_.use(s => IO(s.address.getPort)).unsafeRunSync())
-}
