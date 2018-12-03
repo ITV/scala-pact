@@ -30,7 +30,8 @@ class ScalaPactHttpClientSpec extends FunSpec with Matchers {
         matchingRules = None
       )
 
-      val fakeCaller: (SimpleRequest, Resource[IO, Client[IO]]) => IO[SimpleResponse] = (_, _) => IO.pure(SimpleResponse(200))
+      val fakeCaller: (SimpleRequest, Resource[IO, Client[IO]]) => IO[SimpleResponse] =
+        (_, _) => IO.pure(SimpleResponse(200))
 
       val result =
         new ScalaPactHttpClient(fakeCaller)

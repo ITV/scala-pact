@@ -10,12 +10,12 @@ class PactStubber extends IPactStubber {
   private var instance: Option[Resource[IO, Server[IO]]] = None
 
   private def blazeBuilder(
-                            scalaPactSettings: ScalaPactSettings,
-                            interactionManager: IInteractionManager,
-                            connectionPoolSize: Int,
-                            sslContextName: Option[String],
-                            port: Option[Int]
-                          )(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): BlazeServerBuilder[IO] =
+      scalaPactSettings: ScalaPactSettings,
+      interactionManager: IInteractionManager,
+      connectionPoolSize: Int,
+      sslContextName: Option[String],
+      port: Option[Int]
+  )(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): BlazeServerBuilder[IO] =
     PactStubService.createServer(
       interactionManager,
       connectionPoolSize,
@@ -43,9 +43,8 @@ class PactStubber extends IPactStubber {
       }
     }
 
-  def shutdown(): Unit = {
+  def shutdown(): Unit =
     instance = None
-  }
 
   def port: Option[Int] = instance.map(_.use(s => IO(s.address.getPort)).unsafeRunSync())
 }

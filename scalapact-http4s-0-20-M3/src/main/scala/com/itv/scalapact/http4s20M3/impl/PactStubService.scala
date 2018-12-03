@@ -15,7 +15,6 @@ import org.http4s.{HttpApp, Request, Response, Status}
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-
 object PactStubService {
 
   implicit class BlazeBuilderPimper(blazeBuilder: BlazeServerBuilder[IO]) {
@@ -24,17 +23,17 @@ object PactStubService {
   }
 
   def createServer(
-                    interactionManager: IInteractionManager,
-                    connectionPoolSize: Int,
-                    sslContextName: Option[String],
-                    port: Option[Int],
-                    config: ScalaPactSettings
-                  )(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): BlazeServerBuilder[IO] = {
+      interactionManager: IInteractionManager,
+      connectionPoolSize: Int,
+      sslContextName: Option[String],
+      port: Option[Int],
+      config: ScalaPactSettings
+  )(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): BlazeServerBuilder[IO] = {
 
     val executionContext: ExecutionContext =
       ExecutionContext.fromExecutor(Executors.newFixedThreadPool(2))
     implicit val cs: ContextShift[IO] = IO.contextShift(executionContext)
-    implicit val timer: Timer[IO] = IO.timer(executionContext)
+    implicit val timer: Timer[IO]     = IO.timer(executionContext)
 
     BlazeServerBuilder[IO]
       .bindHttp(port.getOrElse(config.givePort), config.giveHost)
@@ -49,17 +48,17 @@ object PactStubService {
     request.headers.get(CaseInsensitiveString("X-Pact-Admin")).exists(h => h.value == "true")
 
   private def service(
-                       interactionManager: IInteractionManager,
-                       strictMatching: Boolean
-                     )(implicit pactReader: IPactReader, pactWriter: IPactWriter): HttpApp[IO] =
+      interactionManager: IInteractionManager,
+      strictMatching: Boolean
+  )(implicit pactReader: IPactReader, pactWriter: IPactWriter): HttpApp[IO] =
     Kleisli[IO, Request[IO], Response[IO]](matchRequestWithResponse(interactionManager, strictMatching, _))
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   private def matchRequestWithResponse(
-                                        interactionManager: IInteractionManager,
-                                        strictMatching: Boolean,
-                                        req: Request[IO]
-                                      )(implicit pactReader: IPactReader, pactWriter: IPactWriter): IO[Response[IO]] = {
+      interactionManager: IInteractionManager,
+      strictMatching: Boolean,
+      req: Request[IO]
+  )(implicit pactReader: IPactReader, pactWriter: IPactWriter): IO[Response[IO]] =
     if (isAdminCall(req)) {
       req.method.name.toUpperCase match {
         case m if m == "GET" && req.pathInfo.startsWith("/stub/status") =>
@@ -78,7 +77,9 @@ object PactStubService {
               interactionManager.addInteractions(r.interactions)
 
               val output =
-                pactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None))
+                pactWriter.pactToJsonString(
+                  Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None)
+                )
               Ok(output)
 
             case Left(l) =>
@@ -129,6 +130,4 @@ object PactStubService {
           )
       }
     }
-  }
 }
-

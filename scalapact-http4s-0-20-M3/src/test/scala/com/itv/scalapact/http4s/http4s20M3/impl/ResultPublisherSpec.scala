@@ -38,7 +38,7 @@ class ResultPublisherSpec extends FunSpec with Matchers with BeforeAndAfter {
 
   private val publishUrl = "http://localhost/pacts/provider/provider-service/consumer/consumer-service/latest/{tag}"
 
-  private   val _links = Map(
+  private val _links = Map(
     "pb:publish-verification-results" -> LinkValues(
       title = Option("Publish result url"),
       name = None,
@@ -63,33 +63,43 @@ class ResultPublisherSpec extends FunSpec with Matchers with BeforeAndAfter {
   }
 
   describe("resultPublisher") {
-    val brokerPublishData = BrokerPublishData("1.0.0", Option("http://buildUrl.com"))
+    val brokerPublishData           = BrokerPublishData("1.0.0", Option("http://buildUrl.com"))
     val brokerPublishDataNoBuildUrl = BrokerPublishData("1.0.0", None)
-    val successfulResult = PactVerifyResultInContext(Right(simpleInteraction), "context")
-    val successfulResults = List(successfulResult)
-    val failedResult = PactVerifyResultInContext(Left("failed"), "context")
-    val failedResults = List(successfulResult, failedResult)
+    val successfulResult            = PactVerifyResultInContext(Right(simpleInteraction), "context")
+    val successfulResults           = List(successfulResult)
+    val failedResult                = PactVerifyResultInContext(Left("failed"), "context")
+    val failedResults               = List(successfulResult, failedResult)
 
     it("should publish successful results") {
-      val results = successfulResults
+      val results           = successfulResults
       val pactVerifyResults = List(PactVerifyResult(simpleWithLinks, results))
 
       resultPublisher.publishResults(pactVerifyResults, brokerPublishData)
 
       val successfulRequest = SimpleRequest(
-        publishUrl, "", HttpMethod.POST, Map("Content-Type" -> "application/json; charset=UTF-8"), Option("""{ "success": "true", "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""), None
+        publishUrl,
+        "",
+        HttpMethod.POST,
+        Map("Content-Type" -> "application/json; charset=UTF-8"),
+        Option("""{ "success": "true", "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""),
+        None
       )
       requests shouldBe ArrayBuffer(successfulRequest)
     }
 
     it("should publish successful results without buildUrl") {
-      val results = successfulResults
+      val results           = successfulResults
       val pactVerifyResults = List(PactVerifyResult(simpleWithLinks, results))
 
       resultPublisher.publishResults(pactVerifyResults, brokerPublishDataNoBuildUrl)
 
       val successfulRequest = SimpleRequest(
-        publishUrl, "", HttpMethod.POST, Map("Content-Type" -> "application/json; charset=UTF-8"), Option("""{ "success": "true", "providerApplicationVersion": "1.0.0" }"""), None
+        publishUrl,
+        "",
+        HttpMethod.POST,
+        Map("Content-Type" -> "application/json; charset=UTF-8"),
+        Option("""{ "success": "true", "providerApplicationVersion": "1.0.0" }"""),
+        None
       )
       requests shouldBe ArrayBuffer(successfulRequest)
     }
@@ -100,13 +110,18 @@ class ResultPublisherSpec extends FunSpec with Matchers with BeforeAndAfter {
       resultPublisher.publishResults(pactVerifyResults, brokerPublishData)
 
       val failedRequest = SimpleRequest(
-        publishUrl, "", HttpMethod.POST, Map("Content-Type" -> "application/json; charset=UTF-8"), Option("""{ "success": "false", "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""), None
+        publishUrl,
+        "",
+        HttpMethod.POST,
+        Map("Content-Type" -> "application/json; charset=UTF-8"),
+        Option("""{ "success": "false", "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""),
+        None
       )
       requests shouldBe ArrayBuffer(failedRequest)
     }
 
     it("should not publish if no _links available") {
-      val results = successfulResults
+      val results           = successfulResults
       val pactVerifyResults = List(PactVerifyResult(simple, results))
 
       resultPublisher.publishResults(pactVerifyResults, brokerPublishData)
