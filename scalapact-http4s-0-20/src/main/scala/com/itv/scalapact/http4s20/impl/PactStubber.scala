@@ -1,4 +1,5 @@
-package com.itv.scalapact.http4s20M3.impl
+package com.itv.scalapact.http4s20.impl
+
 import cats.effect.{IO, Resource}
 import com.itv.scalapact.shared.{IInteractionManager, ScalaPactSettings, SslContextMap}
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter}

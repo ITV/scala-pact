@@ -1,10 +1,11 @@
-package com.itv.scalapact
+package com.itv.scalapact.http
+
 import cats.effect.IO
-import com.itv.scalapact.http4s20M3.impl._
+import com.itv.scalapact.http4s20.impl._
 import com.itv.scalapact.shared.IResultPublisher
 import com.itv.scalapact.shared.typeclasses.{IPactStubber, IScalaPactHttpClient}
 
-package object http4s20M3 {
+object http {
 
   // Note that we create a new stubber anytime this implicit is needed (i.e. this is a `def`).
   // We need this because implementations of `IPactStubber` might want to have their own state about the server running.
@@ -15,4 +16,5 @@ package object http4s20M3 {
     new ScalaPactHttpClient(Http4sClientHelper.doRequest)
 
   implicit val resultPublisher: IResultPublisher = new ResultPublisher(Http4sClientHelper.doRequest)
+
 }

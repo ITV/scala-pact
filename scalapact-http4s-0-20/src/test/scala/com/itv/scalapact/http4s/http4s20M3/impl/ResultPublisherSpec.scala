@@ -1,7 +1,7 @@
 package com.itv.scalapact.http4s.http4s20M3.impl
 
 import cats.effect.{IO, Resource}
-import com.itv.scalapact.http4s20M3.impl.ResultPublisher
+import com.itv.scalapact.http4s20.impl.ResultPublisher
 import com.itv.scalapact.shared._
 import org.http4s.client.Client
 import org.scalatest.{BeforeAndAfter, FunSpec, Matchers}

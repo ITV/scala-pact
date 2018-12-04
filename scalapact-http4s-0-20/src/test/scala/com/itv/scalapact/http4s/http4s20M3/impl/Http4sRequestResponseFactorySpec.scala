@@ -1,6 +1,6 @@
 package com.itv.scalapact.http4s.http4s20M3.impl
 
-import com.itv.scalapact.http4s20M3.impl.{Http4sRequestResponseFactory, IntAndReason}
+import com.itv.scalapact.http4s20.impl.{Http4sRequestResponseFactory, IntAndReason}
 import com.itv.scalapact.shared.{HttpMethod, SimpleRequest}
 import org.scalatest.{FunSpec, Matchers}
 
