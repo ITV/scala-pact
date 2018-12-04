@@ -1,4 +1,4 @@
-package com.itv.scalapact.http4s20M3.impl
+package com.itv.scalapact.http4s20.impl
 
 import java.nio.charset.StandardCharsets
 

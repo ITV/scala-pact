@@ -1,4 +1,4 @@
-package com.itv.scalapact.http4s20M3.impl
+package com.itv.scalapact.http4s20.impl
 
 import cats.effect.{ContextShift, IO, Resource}
 import com.itv.scalapact.shared.{SimpleRequest, SimpleResponse}

@@ -57,7 +57,7 @@ addCommandAlias(
 )
 addCommandAlias(
   "quickpublish",
-  ";shared/publishLocal;core/publishLocal;argonaut62/publishLocal;circe08/publishLocal;circe09/publishLocal;circe10/publishLocal;http4s016a/publishLocal;http4s017/publishLocal;http4s018/publishLocal;http4s020M3/publishLocal;pluginShared/publishLocal;plugin/publishLocal;pluginNoDeps/publishLocal;standalone/publishLocal;framework/publishLocal"
+  ";shared/publishLocal;core/publishLocal;argonaut62/publishLocal;circe08/publishLocal;circe09/publishLocal;circe10/publishLocal;http4s016a/publishLocal;http4s017/publishLocal;http4s018/publishLocal;http4s020/publishLocal;pluginShared/publishLocal;plugin/publishLocal;pluginNoDeps/publishLocal;standalone/publishLocal;framework/publishLocal"
 )
 
 lazy val commonSettings = Seq(
@@ -195,7 +195,7 @@ lazy val http4s018 =
     .dependsOn(shared)
     .settings(compilerOptions212: _*)
 
-lazy val http4s020M3 =
+lazy val http4s020 =
   (project in file("scalapact-http4s-0-20-m3"))
     .settings(commonSettings: _*)
     .settings(publishSettings: _*)
@@ -381,7 +381,7 @@ lazy val scalaPactProject =
   (project in file("."))
     .settings(commonSettings: _*)
     .aggregate(shared, core, pluginShared, plugin, pluginNoDeps, framework, standalone)
-    .aggregate(http4s016a, http4s017, http4s018, http4s020M3)
+    .aggregate(http4s016a, http4s017, http4s018, http4s020)
     .aggregate(argonaut62, circe08, circe09, circe10)
     .aggregate(docs)
     .aggregate(pactSpec, testsWithDeps)

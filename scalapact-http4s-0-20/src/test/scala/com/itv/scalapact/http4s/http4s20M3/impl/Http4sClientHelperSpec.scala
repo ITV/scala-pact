@@ -4,7 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
-import com.itv.scalapact.http4s20M3.impl.Http4sClientHelper
+import com.itv.scalapact.http4s20.impl.Http4sClientHelper
 import com.itv.scalapact.shared.{HttpMethod, SimpleRequest}
 import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
 
