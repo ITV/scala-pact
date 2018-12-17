@@ -1,5 +1,7 @@
 package com.itv.scalapactcore.verifier
 
+import java.net.URLEncoder
+
 import com.itv.scalapact.shared._
 import com.itv.scalapactcore.common.matching.InteractionMatchers._
 import com.itv.scalapact.shared.ColourOutput._
@@ -30,7 +32,7 @@ object Verifier {
       val versionConsumers = pactVerifySettings.consumerNames.map(c => VersionedConsumer(c, "/latest")) ++
         pactVerifySettings.versionedConsumerNames.map(vc => vc.copy(version = "/version/" + vc.version)) ++
         pactVerifySettings.taggedConsumerNames.flatMap(
-          tc => tc.tags.map(t => VersionedConsumer(tc.name, "/latest/" + t))
+          tc => tc.tags.map(t => VersionedConsumer(tc.name, "/latest/" + URLEncoder.encode(t, "UTF-8")))
         )
 
       val latestPacts: List[Pact] = versionConsumers
