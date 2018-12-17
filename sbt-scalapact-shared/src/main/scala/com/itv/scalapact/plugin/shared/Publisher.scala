@@ -1,5 +1,7 @@
 package com.itv.scalapact.plugin.shared
 
+import java.net.URLEncoder
+
 import com.itv.scalapact.shared._
 import com.itv.scalapact.shared.ColourOutput._
 import com.itv.scalapact.shared.typeclasses.IPactWriter
@@ -33,7 +35,8 @@ object Publisher {
       case Right(v) =>
         val consumerVersion = versionToPublishAs.replace("-SNAPSHOT", ".x")
         val tagAddresses = tagsToPublishWith.map(
-          v.validatedAddress.address + "/pacticipants/" + v.consumerName + "/versions/" + consumerVersion + "/tags/" + _
+          v.validatedAddress.address + "/pacticipants/" + v.consumerName + "/versions/" + consumerVersion + "/tags/" + URLEncoder
+            .encode(_, "UTF-8")
         )
         val address = v.validatedAddress.address + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + "/version/" + consumerVersion
 
