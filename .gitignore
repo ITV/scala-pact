@@ -10,6 +10,8 @@ sbt
 .ensime*
 pgp.sbt
 credentials.sbt
+.bloop/
+.metals/
 
 # Misc
 .DS_Store
