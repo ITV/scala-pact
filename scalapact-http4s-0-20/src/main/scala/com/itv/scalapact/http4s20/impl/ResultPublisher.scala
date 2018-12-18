@@ -2,8 +2,8 @@ package com.itv.scalapact.http4s20.impl
 
 import cats.effect._
 import cats.implicits._
+import com.itv.scalapact.shared.ColourOutput._
 import com.itv.scalapact.shared._
-import com.itv.scalapact.shared.ColourOuput._
 import org.http4s.client.Client
 import org.http4s.client.blaze.BlazeClientBuilder
 
