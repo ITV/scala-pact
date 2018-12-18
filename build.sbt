@@ -264,7 +264,7 @@ lazy val circe10 =
         "io.circe" %% "circe-core",
         "io.circe" %% "circe-generic",
         "io.circe" %% "circe-parser"
-      ).map(_ % "0.10.0")
+      ).map(_ % "0.10.1")
     )
     .dependsOn(shared)
     .settings(compilerOptions212: _*)
