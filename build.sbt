@@ -61,7 +61,7 @@ addCommandAlias(
 )
 
 lazy val commonSettings = Seq(
-  version := "2.3.5-SNAPSHOT",
+  version := "2.3.4-SNAPSHOT",
   organization := "com.itv",
   scalaVersion := scala212,
   libraryDependencies ++= Seq(
@@ -124,7 +124,7 @@ lazy val publishSettings = Seq(
       </developers>
 )
 
-val scala212: String = "2.12.5"
+val scala212: String = "2.12.8"
 
 lazy val shared =
   (project in file("scalapact-shared"))
@@ -202,9 +202,9 @@ lazy val http4s020 =
     .settings(
       name := "scalapact-http4s-0-20",
       libraryDependencies ++= Seq(
-        "org.http4s"             %% "http4s-blaze-server" % "0.20.0-M3",
-        "org.http4s"             %% "http4s-blaze-client" % "0.20.0-M3",
-        "org.http4s"             %% "http4s-dsl"          % "0.20.0-M3",
+        "org.http4s"             %% "http4s-blaze-server" % "0.20.0-M4",
+        "org.http4s"             %% "http4s-blaze-client" % "0.20.0-M4",
+        "org.http4s"             %% "http4s-dsl"          % "0.20.0-M4",
         "com.github.tomakehurst" % "wiremock"             % "1.56" % "test"
       )
     )
@@ -361,7 +361,7 @@ lazy val testsWithDeps =
     )
     .dependsOn(framework)
     .dependsOn(argonaut62)
-    .dependsOn(http4s017)
+    .dependsOn(http4s018)
 
 lazy val docs =
   (project in file("scalapact-docs"))

@@ -30,7 +30,7 @@ case class IrNode(label: String,
                                      this.value,
                                      other.value) +
       check[Option[String]](namespaceTest(other.path), this.ns, other.ns) +
-      check[IrNodeAttributes](attributesTest(strict, this.isXml, bePermissive, other.path, rules, this, other),
+      check[IrNodeAttributes](attributesTest(strict, this.isXml, bePermissive, other.path, rules),
                               this.attributes,
                               other.attributes) +
       check[IrNodePath](pathTest(other.path), this.path, other.path)
@@ -335,11 +335,11 @@ object IrNodeEqualityResult {
           }
     }
 
-  val attributesTest: (Boolean, Boolean, Boolean, IrNodePath, IrNodeMatchingRules, IrNode, IrNode) => (
+  val attributesTest: (Boolean, Boolean, Boolean, IrNodePath, IrNodeMatchingRules) => (
       IrNodeAttributes,
       IrNodeAttributes
   ) => IrNodeEqualityResult =
-    (strict, isXml, bePermissive, path, rules, parentA, parentB) =>
+    (strict, isXml, bePermissive, path, rules) =>
       (a, b) =>
         if (strict) {
           val as      = a.attributes.toList

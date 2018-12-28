@@ -56,7 +56,7 @@ class ChunkedRequestsSpec extends FunSpec with Matchers {
                 )
               )
 
-          val res: SimpleHttpResponse = Await.result(request.post(PlainTextBody(xml)), 3.second)
+          val res: SimpleHttpResponse = Await.result(request.post(PlainTextBody(xml)), 5.second)
 
           res.get.statusCode shouldEqual 200
           res.get.body shouldEqual "Success"

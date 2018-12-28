@@ -77,7 +77,9 @@ object PactStubService {
               interactionManager.addInteractions(r.interactions)
 
               val output =
-                pactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None))
+                pactWriter.pactToJsonString(
+                  Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None)
+                )
               Ok(output)
 
             case Left(l) =>
