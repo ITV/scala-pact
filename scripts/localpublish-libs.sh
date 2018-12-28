@@ -31,6 +31,10 @@ echo ">>> Http4s 0.18.x"
 publishLocally "http4s018"
 
 echo ""
+echo ">>> Http4s 0.20.x"
+publishLocally "http4s020"
+
+echo ""
 echo ">>> Argonaut 6.2"
 publishLocally "argonaut62"
 

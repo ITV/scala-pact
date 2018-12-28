@@ -3,7 +3,7 @@ package com.itv.scalapact.http4s20.impl
 import cats.effect._
 import cats.implicits._
 import com.itv.scalapact.shared._
-import com.itv.scalapact.shared.ColourOuput._
+import com.itv.scalapact.shared.ColourOutput._
 import org.http4s.client.Client
 import org.http4s.client.blaze.BlazeClientBuilder
 
@@ -41,14 +41,14 @@ class ResultPublisher(fetcher: (SimpleRequest, Resource[IO, Client[IO]]) => IO[S
                       sslContext.fold(clientPreSsl)(s => clientPreSsl.withSslContext(s)).resource
                     }
                   ).map { response =>
-                      if (response.is2xx) {
-                        PactLogger.message(
-                          s"Verification results published for provider ${result.pact.provider} and consumer ${result.pact.consumer}"
-                        )
-                      } else {
-                        PactLogger.error(s"Publish verification results failed with ${response.statusCode}".red)
-                      }
+                    if (response.is2xx) {
+                      PactLogger.message(
+                        s"Verification results published for provider ${result.pact.provider} and consumer ${result.pact.consumer}"
+                      )
+                    } else {
+                      PactLogger.error(s"Publish verification results failed with ${response.statusCode}".red)
                     }
+                  }
               }
             )
           case None =>
@@ -61,7 +61,8 @@ class ResultPublisher(fetcher: (SimpleRequest, Resource[IO, Client[IO]]) => IO[S
       .sequence
       .map(_ => ())
       .unsafeRunSync()
-  private def body(brokerPublishData: BrokerPublishData, success: Boolean) = {
+
+  private def body(brokerPublishData: BrokerPublishData, success: Boolean): Option[String] = {
     val buildUrl = brokerPublishData.buildUrl.fold("")(u => s""", "buildUrl": "$u"""")
     Option(
       s"""{ "success": "$success", "providerApplicationVersion": "${brokerPublishData.providerVersion}"$buildUrl }"""

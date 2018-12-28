@@ -53,7 +53,6 @@ object PactStubService {
   )(implicit pactReader: IPactReader, pactWriter: IPactWriter): HttpApp[IO] =
     Kleisli[IO, Request[IO], Response[IO]](matchRequestWithResponse(interactionManager, strictMatching, _))
 
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   private def matchRequestWithResponse(
       interactionManager: IInteractionManager,
       strictMatching: Boolean,
@@ -70,21 +69,26 @@ object PactStubService {
           Ok(output)
 
         case m if m == "POST" || m == "PUT" && req.pathInfo.startsWith("/interactions") =>
-          pactReader.jsonStringToPact(
-            req.bodyAsText.compile.toVector.map(body => Option(body.mkString)).unsafeRunSync().getOrElse("")
-          ) match {
-            case Right(r) =>
-              interactionManager.addInteractions(r.interactions)
+          req.bodyAsText
+            .compile[IO, IO, String]
+            .toVector
+            .map(body => Option(body.mkString))
+            .map { x =>
+              pactReader.jsonStringToPact(x.getOrElse(""))
+            }
+            .flatMap {
+              case Right(r) =>
+                interactionManager.addInteractions(r.interactions)
 
-              val output =
-                pactWriter.pactToJsonString(
-                  Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None)
-                )
-              Ok(output)
+                val output =
+                  pactWriter.pactToJsonString(
+                    Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None)
+                  )
+                Ok(output)
 
-            case Left(l) =>
-              InternalServerError(l)
-          }
+              case Left(l) =>
+                InternalServerError(l)
+            }
 
         case m if m == "DELETE" && req.pathInfo.startsWith("/interactions") =>
           interactionManager.clearInteractions()
@@ -95,7 +99,6 @@ object PactStubService {
       }
 
     } else {
-
       interactionManager.findMatchingInteraction(
         InteractionRequest(
           method = Option(req.method.name.toUpperCase),
@@ -104,7 +107,7 @@ object PactStubService {
           }.toMap),
           query = if (req.params.isEmpty) None else Option(req.params.toList.map(p => p._1 + "=" + p._2).mkString("&")),
           path = Option(req.pathInfo),
-          body = req.bodyAsText.compile.toVector.map(body => Option(body.mkString)).unsafeRunSync(),
+          body = req.bodyAsText.compile[IO, IO, String].toVector.map(body => Option(body.mkString)).unsafeRunSync(),
           matchingRules = None
         ),
         strictMatching = strictMatching

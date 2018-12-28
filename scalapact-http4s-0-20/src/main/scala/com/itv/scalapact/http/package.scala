@@ -1,11 +1,11 @@
-package com.itv.scalapact.http
+package com.itv.scalapact
 
 import cats.effect.IO
 import com.itv.scalapact.http4s20.impl._
 import com.itv.scalapact.shared.IResultPublisher
 import com.itv.scalapact.shared.typeclasses.{IPactStubber, IScalaPactHttpClient}
 
-object http {
+package object http {
 
   // Note that we create a new stubber anytime this implicit is needed (i.e. this is a `def`).
   // We need this because implementations of `IPactStubber` might want to have their own state about the server running.

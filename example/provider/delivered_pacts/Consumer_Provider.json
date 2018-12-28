@@ -9,28 +9,6 @@
     {
       "request" : {
         "method" : "GET",
-        "path" : "/results"
-      },
-      "description" : "Fetching results",
-      "response" : {
-        "status" : 200,
-        "headers" : {
-          "Pact" : "modifiedRequest"
-        },
-        "body" : {
-          "count" : 3,
-          "results" : [
-            "Bob",
-            "Fred",
-            "Harry"
-          ]
-        }
-      },
-      "providerState" : "Results: Bob, Fred, Harry"
-    },
-    {
-      "request" : {
-        "method" : "GET",
         "path" : "/auth_token",
         "matchingRules" : {
           "$.headers.Name" : {
@@ -59,6 +37,28 @@
           }
         }
       }
+    },
+    {
+      "request" : {
+        "method" : "GET",
+        "path" : "/results"
+      },
+      "description" : "Fetching results",
+      "response" : {
+        "status" : 200,
+        "headers" : {
+          "Pact" : "modifiedRequest"
+        },
+        "body" : {
+          "count" : 3,
+          "results" : [
+            "Bob",
+            "Fred",
+            "Harry"
+          ]
+        }
+      },
+      "providerState" : "Results: Bob, Fred, Harry"
     }
   ]
 }
