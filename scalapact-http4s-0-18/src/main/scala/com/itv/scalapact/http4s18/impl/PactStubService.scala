@@ -71,7 +71,7 @@ object PactStubService {
 
         case m if m == "POST" || m == "PUT" && req.pathInfo.startsWith("/interactions") =>
           pactReader.jsonStringToPact(
-            req.bodyAsText.compile.toVector.map(body => Option(body.mkString)).unsafeRunSync().getOrElse("")
+            req.attemptAs[String].fold(_ => None, Option.apply).unsafeRunSync().getOrElse("")
           ) match {
             case Right(r) =>
               interactionManager.addInteractions(r.interactions)
@@ -102,7 +102,7 @@ object PactStubService {
           headers = req.headers,
           query = if (req.params.isEmpty) None else Option(req.params.toList.map(p => p._1 + "=" + p._2).mkString("&")),
           path = Option(req.pathInfo),
-          body = req.bodyAsText.compile.toVector.map(body => Option(body.mkString)).unsafeRunSync(),
+          body = req.attemptAs[String].fold(_ => None, Option.apply).unsafeRunSync(),
           matchingRules = None
         ),
         strictMatching = strictMatching

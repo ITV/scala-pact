@@ -69,10 +69,9 @@ object PactStubService {
           Ok(output)
 
         case m if m == "POST" || m == "PUT" && req.pathInfo.startsWith("/interactions") =>
-          req.bodyAsText
-            .compile[IO, IO, String]
-            .toVector
-            .map(body => Option(body.mkString))
+          req
+            .attemptAs[String]
+            .fold(_ => None, Option.apply)
             .map { x =>
               pactReader.jsonStringToPact(x.getOrElse(""))
             }
@@ -99,38 +98,41 @@ object PactStubService {
       }
 
     } else {
-      interactionManager.findMatchingInteraction(
-        InteractionRequest(
-          method = Option(req.method.name.toUpperCase),
-          headers = Some(req.headers.toList.map { h =>
-            h.name.toString -> h.value
-          }.toMap),
-          query = if (req.params.isEmpty) None else Option(req.params.toList.map(p => p._1 + "=" + p._2).mkString("&")),
-          path = Option(req.pathInfo),
-          body = req.bodyAsText.compile[IO, IO, String].toVector.map(body => Option(body.mkString)).unsafeRunSync(),
-          matchingRules = None
-        ),
-        strictMatching = strictMatching
-      ) match {
-        case Right(ir) =>
-          Status.fromInt(ir.response.status.getOrElse(200)) match {
-            case Right(_) =>
-              Http4sRequestResponseFactory.buildResponse(
-                status = IntAndReason(ir.response.status.getOrElse(200), None),
-                headers = ir.response.headers.getOrElse(Map.empty),
-                body = ir.response.body
-              )
+      req.attemptAs[String].fold(_ => None, Option.apply).flatMap { maybeBody =>
+        interactionManager.findMatchingInteraction(
+          InteractionRequest(
+            method = Option(req.method.name.toUpperCase),
+            headers = Option(req.headers.toList.map { h =>
+              h.name.toString -> h.value
+            }.toMap),
+            query =
+              if (req.params.isEmpty) None else Option(req.params.toList.map(p => p._1 + "=" + p._2).mkString("&")),
+            path = Option(req.pathInfo),
+            body = maybeBody,
+            matchingRules = None
+          ),
+          strictMatching = strictMatching
+        ) match {
+          case Right(ir) =>
+            Status.fromInt(ir.response.status.getOrElse(200)) match {
+              case Right(_) =>
+                Http4sRequestResponseFactory.buildResponse(
+                  status = IntAndReason(ir.response.status.getOrElse(200), None),
+                  headers = ir.response.headers.getOrElse(Map.empty),
+                  body = ir.response.body
+                )
 
-            case Left(l) =>
-              InternalServerError(l.sanitized)
-          }
+              case Left(l) =>
+                InternalServerError(l.sanitized)
+            }
 
-        case Left(message) =>
-          Http4sRequestResponseFactory.buildResponse(
-            status = IntAndReason(598, Some("Pact Match Failure")),
-            headers = Map("X-Pact-Admin" -> "Pact Match Failure"),
-            body = Option(message)
-          )
+          case Left(message) =>
+            Http4sRequestResponseFactory.buildResponse(
+              status = IntAndReason(598, Some("Pact Match Failure")),
+              headers = Map("X-Pact-Admin" -> "Pact Match Failure"),
+              body = Option(message)
+            )
+        }
       }
     }
 }
