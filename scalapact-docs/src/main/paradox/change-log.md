@@ -37,6 +37,7 @@ Maintained by [davesmith00000].
 - Added Http4s 0.20 support (version 0.20.0-M4) ([randbw])
 - Fixed ScalaPactMatchingRuleArrayMinLength writing (Fixes [#108](https://github.com/ITV/scala-pact/issues/108)) ([Paulymorph])
 - Fix spelling of ColourOutput object ([randbw])
+- Circe upgraded to 0.10.1 ([dandxy89])
 
 ## 2.3.3 - 2018-10-24
 
