@@ -30,10 +30,11 @@ With thanks to all contributors!
 
 Maintained by [davesmith00000].
 
-## 2.3.4 - 2018-12-28
+## 2.3.4 - 2018-12-31
 
+- Adds support for http basic authentication (Fixes [#110](https://github.com/ITV/scala-pact/issues/110))  ([jnatten])
 - Adds support for tagging pacts while publishing and verifying (Fixes [#107](https://github.com/ITV/scala-pact/issues/107))  ([jnatten])
-- Added Http4s 0.20 support ([randbw])
+- Added Http4s 0.20 support (version 0.20.0-M4) ([randbw])
 - Fixed ScalaPactMatchingRuleArrayMinLength writing (Fixes [#108](https://github.com/ITV/scala-pact/issues/108)) ([Paulymorph])
 - Fix spelling of ColourOutput object ([randbw])
 
