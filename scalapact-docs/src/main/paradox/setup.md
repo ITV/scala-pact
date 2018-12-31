@@ -9,7 +9,7 @@ As of version 2.2.0, both the test framework and the plugin require you to speci
 
 Scala-Pact now has two branches based on SBT requirements.
 
-#### SBT 1.x compatible (Latest 2.3.3)
+#### SBT 1.x compatible (Latest 2.3.4)
 
 The all development going forward begins at `2.3.x` and resides on the `master` branch.
 For the sake of the maintainer's sanity, version 2.3.x and beyond will only support Scala 2.12 and SBT 1.x or greater.
@@ -36,27 +36,27 @@ import com.itv.scalapact.plugin._
 enablePlugins(ScalaPactPlugin)
         
 libraryDependencies ++= Seq(
-  "com.itv"       %% "scalapact-circe-0-9"     % "2.3.3" % "test",
-  "com.itv"       %% "scalapact-http4s-0-18"   % "2.3.3" % "test",
-  "com.itv"       %% "scalapact-scalatest"     % "2.3.3" % "test",
+  "com.itv"       %% "scalapact-circe-0-9"     % "2.3.4" % "test",
+  "com.itv"       %% "scalapact-http4s-0-18"   % "2.3.4" % "test",
+  "com.itv"       %% "scalapact-scalatest"     % "2.3.4" % "test",
   "org.scalatest" %% "scalatest"               % "3.0.5" % "test"
 )
 ```
 
 Add this line to your `project/plugins.sbt` file to install the plugin:
 ```
-addSbtPlugin("com.itv" % "sbt-scalapact" % "2.3.3")
+addSbtPlugin("com.itv" % "sbt-scalapact" % "2.3.4")
 ```
 This version of the plugin comes pre-packaged with the latest JSON and Http libraries.
 Thanks to the way SBT works, that one plugin line will work in most cases, but if you're still having conflicts, you can also do this to use your preferred libraries:
 
 ```
  libraryDependencies ++= Seq(
-   "com.itv" %% "scalapact-argonaut-6-2" % "2.3.3",
-   "com.itv" %% "scalapact-http4s-0-16a" % "2.3.3"
+   "com.itv" %% "scalapact-argonaut-6-2" % "2.3.4",
+   "com.itv" %% "scalapact-http4s-0-16a" % "2.3.4"
  )
  
- addSbtPlugin("com.itv" % "sbt-scalapact-nodeps" % "2.3.3")
+ addSbtPlugin("com.itv" % "sbt-scalapact-nodeps" % "2.3.4")
 ```
 
 In you're test suite, you will need the following imports:
@@ -86,17 +86,17 @@ Please check the @ref:[compatibility matrix](project-deps.md) before using.
 
 JSON Libraries
 ```
-"com.itv" %% "scalapact-argonaut-6-2"  % "2.3.3"
-"com.itv" %% "scalapact-circe-0-8"     % "2.3.3"
-"com.itv" %% "scalapact-circe-0-9"     % "2.3.3"
-"com.itv" %% "scalapact-circe-0-10"    % "2.3.3"
+"com.itv" %% "scalapact-argonaut-6-2"  % "2.3.4"
+"com.itv" %% "scalapact-circe-0-8"     % "2.3.4"
+"com.itv" %% "scalapact-circe-0-9"     % "2.3.4"
+"com.itv" %% "scalapact-circe-0-10"    % "2.3.4"
 ```
 
 HTTP Libraries
 ```
-"com.itv" %% "scalapact-http4s-0-16a"  % "2.3.3"
-"com.itv" %% "scalapact-http4s-0-17"   % "2.3.3"
-"com.itv" %% "scalapact-http4s-0-18"   % "2.3.3"
+"com.itv" %% "scalapact-http4s-0-16a"  % "2.3.4"
+"com.itv" %% "scalapact-http4s-0-17"   % "2.3.4"
+"com.itv" %% "scalapact-http4s-0-18"   % "2.3.4"
 ```
 
 ### You're using SBT 0.13.17 or lower:
