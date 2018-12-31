@@ -28,8 +28,7 @@ publishReal "http4s018"
 
 echo ""
 echo ">>> Http4s 0.20.x"
-echo "(ignored until 0.20.0 is released)"
-#publishLocally "http4s020"
+publishReal "http4s020"
 
 echo ""
 echo ">>> Argonaut 6.2"
