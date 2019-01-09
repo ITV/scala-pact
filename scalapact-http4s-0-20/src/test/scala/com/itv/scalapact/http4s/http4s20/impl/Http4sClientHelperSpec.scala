@@ -1,4 +1,4 @@
-package com.itv.scalapact.http4s.http4s20M3.impl
+package com.itv.scalapact.http4s.http4s20.impl
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
