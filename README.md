@@ -78,12 +78,12 @@ You'll also need to reference the json and http libraries specified in the `buil
   import com.itv.scalapact.circe09._
   import com.itv.scalapact.http4s18._
 ```
-Alternatively, these are also valid if you prefer:
+Alternatively, in case your project has both `scalapact-http4s` and `scalapact-circe` as dependencies, you could also use the following:
+
 ```scala
   import com.itv.scalapact.json._
   import com.itv.scalapact.http._
 ```
-
 
 ### You're using SBT 0.13.x:
 
