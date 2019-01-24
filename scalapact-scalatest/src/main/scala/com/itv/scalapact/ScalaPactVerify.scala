@@ -290,10 +290,10 @@ object ScalaPactVerify {
       provider: String,
       consumers: List[String],
       publishResultsEnabled: Option[BrokerPublishData],
-      basicAuthenticationCredentilas: Option[BasicAuthenticationCredentials]
+      basicAuthenticationCredentials: Option[BasicAuthenticationCredentials]
   ) extends PactSourceType {
     def withContractVersion(version: String): pactBrokerWithVersion =
-      pactBrokerWithVersion(url, version, provider, consumers, publishResultsEnabled, basicAuthenticationCredentilas)
+      pactBrokerWithVersion(url, version, provider, consumers, publishResultsEnabled, basicAuthenticationCredentials)
   }
   case class pactBrokerWithTags(url: String,
                                 provider: String,
