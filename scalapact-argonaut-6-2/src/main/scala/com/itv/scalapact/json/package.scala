@@ -9,4 +9,6 @@ package object json {
 
   implicit val pactWriterInstance: IPactWriter =
     new PactWriter
+
+  val JsonConversionFunctions: argonaut62.JsonConversionFunctions.type = argonaut62.JsonConversionFunctions
 }

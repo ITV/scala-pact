@@ -7,7 +7,7 @@ import org.scalatest.{FunSpec, Matchers}
 
 trait PactSpecTester extends FunSpec with Matchers {
 
-  import com.itv.scalapact.argonaut62._
+  import com.itv.scalapact.json._
 
   val pactSpecVersion: String
 

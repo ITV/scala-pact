@@ -361,6 +361,11 @@ lazy val pactSpec =
       name := "pact-spec-tests",
       scalaVersion := scala212
     )
+    .settings(
+      libraryDependencies ++= Seq(
+        "io.argonaut" %% "argonaut" % "6.2"
+      )
+    )
     .dependsOn(core)
     .dependsOn(argonaut62)
 
@@ -372,11 +377,12 @@ lazy val testsWithDeps =
         "org.scalaj"             %% "scalaj-http"   % "2.3.0" % "test",
         "org.json4s"             %% "json4s-native" % "3.5.0" % "test",
         "com.github.tomakehurst" % "wiremock"       % "1.56"  % "test",
-        "fr.hmil"                %% "roshttp"       % "2.0.1" % "test"
+        "fr.hmil"                %% "roshttp"       % "2.0.1" % "test",
+        "io.argonaut" %% "argonaut" % "6.2"
       )
     )
     .dependsOn(framework)
-    .dependsOn(argonaut62)
+    .dependsOn(circe11)
     .dependsOn(http4s020)
 
 lazy val docs =

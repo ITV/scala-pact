@@ -7,4 +7,6 @@ package object json {
   implicit val pactReaderInstance: IPactReader = new PactReader
 
   implicit val pactWriterInstance: IPactWriter = new PactWriter
+
+  val JsonConversionFunctions: circe11.JsonConversionFunctions.type = circe11.JsonConversionFunctions
 }

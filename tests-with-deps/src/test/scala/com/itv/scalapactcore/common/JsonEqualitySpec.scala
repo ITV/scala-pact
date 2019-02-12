@@ -2,7 +2,7 @@ package com.itv.scalapactcore.common
 
 import argonaut._
 import Argonaut._
-import com.itv.scalapact.argonaut62.JsonConversionFunctions
+import com.itv.scalapact.json.JsonConversionFunctions
 import com.itv.scalapact.shared.matchir._
 import org.scalatest.{FunSpec, Matchers}
 

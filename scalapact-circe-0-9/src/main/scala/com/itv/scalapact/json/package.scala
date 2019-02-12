@@ -9,4 +9,6 @@ package object json {
 
   implicit val pactWriterInstance: IPactWriter =
     new PactWriter
+
+  val JsonConversionFunctions: circe09.JsonConversionFunctions.type = circe09.JsonConversionFunctions
 }
