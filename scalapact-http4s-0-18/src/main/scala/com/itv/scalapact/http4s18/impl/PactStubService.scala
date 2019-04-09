@@ -100,7 +100,7 @@ object PactStubService {
         InteractionRequest(
           method = Option(req.method.name.toUpperCase),
           headers = req.headers,
-          query = if (req.params.isEmpty) None else Option(req.params.toList.map(p => p._1 + "=" + p._2).mkString("&")),
+          query = if (req.params.isEmpty) None else Option(req.multiParams.toList.flatMap { case (key, values) => values.map((key,_))}.map(p => p._1 + "=" + p._2).mkString("&")),
           path = Option(req.pathInfo),
           body = req.attemptAs[String].fold(_ => None, Option.apply).unsafeRunSync(),
           matchingRules = None

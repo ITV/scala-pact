@@ -99,7 +99,7 @@ private object PactStubService {
             method = Option(req.method.name.toUpperCase),
             headers = req.headers,
             query =
-              if (req.params.isEmpty) None else Option(req.params.toList.map(p => p._1 + "=" + p._2).mkString("&")),
+              if (req.params.isEmpty) None else Option(req.multiParams.toList.flatMap { case (key, values) => values.map((key,_))}.map(p => p._1 + "=" + p._2).mkString("&")),
             path = Option(req.pathInfo),
             body = req.bodyAsText.runLog.map(body => Option(body.mkString)).unsafeRun(),
             matchingRules = None
