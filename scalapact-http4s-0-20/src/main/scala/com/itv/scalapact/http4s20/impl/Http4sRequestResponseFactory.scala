@@ -111,7 +111,7 @@ object Http4sRequestResponseFactory {
 
 object HeaderImplicitConversions {
   implicit def mapToHeaderList(headerMap: Map[String, String]): Headers =
-    Headers.apply(headerMap.toList.map(t => Header(t._1, t._2)))
+    Headers(headerMap.toList.map(t => Header(t._1, t._2)))
 
   implicit def headerListToMap(headers: Headers): Map[String, String] =
     headers.toList.map(h => Header.unapply(h)).collect { case Some(h) => (h._1.toString, h._2) }.toMap
