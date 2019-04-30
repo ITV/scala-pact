@@ -59,15 +59,17 @@ object ScalaPactForger {
                                                                    httpClient: IScalaPactHttpClient[F],
                                                                    pactStubber: IPactStubber): A =
         ScalaPactMock.runConsumerIntegrationTest(strict)(
-          ScalaPactDescriptionFinal(
-            consumer,
-            provider,
-            sslContextName,
-            interactions.map(i => i.finalise),
-            options
-          )
+          finalise(options)
         )(test)
 
+      def finalise(implicit options: ScalaPactOptions): ScalaPactDescriptionFinal =
+        ScalaPactDescriptionFinal(
+          consumer,
+          provider,
+          sslContextName,
+          interactions.map(i => i.finalise),
+          options
+        )
     }
 
   }
