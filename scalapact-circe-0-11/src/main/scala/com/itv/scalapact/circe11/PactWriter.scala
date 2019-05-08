@@ -1,6 +1,6 @@
 package com.itv.scalapact.circe11
 
-import com.itv.scalapact.shared.Pact
+import com.itv.scalapact.shared.{Pact, PactMetaData, VersionMetaData}
 import com.itv.scalapact.shared.typeclasses.IPactWriter
 import io.circe._
 import io.circe.parser._
@@ -10,7 +10,7 @@ import io.circe.generic.auto._
 class PactWriter extends IPactWriter {
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  def pactToJsonString(pact: Pact): String = {
+  def pactToJsonString(pact: Pact, scalaPactVersion: String): String = {
 
     val interactions: Vector[Json] =
       pact.interactions.toVector
@@ -57,9 +57,19 @@ class PactWriter extends IPactWriter {
         }
         .collect { case Some(s) => s }
 
+    val updatedMetaData: Option[PactMetaData] =
+      pact.metadata.orElse {
+        Option(
+          PactMetaData(
+            pactSpecification = Option(VersionMetaData("2.0.0")), //TODO: Where to get this value from?
+            `scala-pact` = Option(VersionMetaData(scalaPactVersion))
+          )
+        )
+      }
+
     val json: Option[Json] =
       pact
-        .copy(interactions = Nil)
+        .copy(interactions = Nil, metadata = updatedMetaData)
         .asJson
         .hcursor
         .downField("interactions")
