@@ -79,7 +79,13 @@ object PactFileExamples {
         )
       )
     ),
-    _links = None
+    _links = None,
+    metadata = Option(
+      PactMetaData(
+        pactSpecification = Option(VersionMetaData("2.0.0")),
+        `scala-pact` = Option(VersionMetaData("1.0.0"))
+      )
+    )
   )
 
   val verySimpleAsString: String =
@@ -170,7 +176,8 @@ object PactFileExamples {
         )
       )
     ),
-    _links = None
+    _links = None,
+    metadata = None
   )
 
   val _links = Map(
