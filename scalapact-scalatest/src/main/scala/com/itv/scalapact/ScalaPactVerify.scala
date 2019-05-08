@@ -107,10 +107,6 @@ object ScalaPactVerify {
             .flatMap(_ => setupProviderState)
             .getOrElse(_ => true)
 
-            case _ =>
-              false
-          })
-
         val (verifySettings, arguments) = sourceType match {
           case pactAsJsonString(json) =>
             val tmp = File.createTempFile("tmp_pact_", ".json")

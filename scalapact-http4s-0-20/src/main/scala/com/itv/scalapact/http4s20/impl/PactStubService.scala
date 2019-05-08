@@ -65,7 +65,10 @@ object PactStubService {
 
         case m if m == "GET" && req.pathInfo.startsWith("/interactions") =>
           val output =
-            pactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None))
+            pactWriter.pactToJsonString(
+              Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None, None),
+              BuildInfo.version
+            )
           Ok(output)
 
         case m if m == "POST" || m == "PUT" && req.pathInfo.startsWith("/interactions") =>
@@ -81,7 +84,8 @@ object PactStubService {
 
                 val output =
                   pactWriter.pactToJsonString(
-                    Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None)
+                    Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None, None),
+                    BuildInfo.version
                   )
                 Ok(output)
 
@@ -93,7 +97,10 @@ object PactStubService {
           interactionManager.clearInteractions()
 
           val output =
-            pactWriter.pactToJsonString(Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None))
+            pactWriter.pactToJsonString(
+              Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None, None),
+              BuildInfo.version
+            )
           Ok(output)
       }
 
