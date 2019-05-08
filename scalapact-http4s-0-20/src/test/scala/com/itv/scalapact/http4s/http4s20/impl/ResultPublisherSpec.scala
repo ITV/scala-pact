@@ -33,7 +33,8 @@ class ResultPublisherSpec extends FunSpec with Matchers with BeforeAndAfter {
     provider = PactActor("provider"),
     consumer = PactActor("consumer"),
     interactions = List(simpleInteraction),
-    _links = None
+    _links = None,
+    metadata = None
   )
 
   private val publishUrl = "http://localhost/pacts/provider/provider-service/consumer/consumer-service/latest/{tag}"
