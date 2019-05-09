@@ -82,8 +82,8 @@ object JsonBodySpecialCaseHelper {
       case body: Json if body.isString =>
         body.string.map(_.toString)
 
-      case body =>
-        Option(body.toString)
+      case body => // TODO check this is fine. We want to keep spaces in body - this should be arg equivalent of circe.
+        Option(body.pretty(PrettyParams.spaces2.copy(dropNullKeys = true)))
     }
 
     interactions.map { is =>

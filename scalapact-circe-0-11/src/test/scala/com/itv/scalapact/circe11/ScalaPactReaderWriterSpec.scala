@@ -2,6 +2,7 @@ package com.itv.scalapact.circe11
 
 import io.circe.parser._
 import org.scalatest.{FunSpec, Matchers}
+import com.itv.scalapact.test.PactFileExamples
 
 class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
 
@@ -106,10 +107,19 @@ class ScalaPactReaderWriterSpec extends FunSpec with Matchers {
 
     }
 
-    it("should parse _links") {
-      val pactEither = pactReader.jsonStringToPact(PactFileExamples.simpleWithLinksAsString)
+    it("should be able to parse _links and metadata") {
+      val pactEither = pactReader.jsonStringToPact(PactFileExamples.simpleWithLinksAndMetaDataAsString)
 
-      pactEither.right.get shouldEqual PactFileExamples.simpleWithLinks
+      pactEither.right.get shouldEqual PactFileExamples.simpleWithLinksAndMetaData
+    }
+
+    it("should be able to write Pact files and add metadata when missing") {
+
+      val written = pactWriter.pactToJsonString(PactFileExamples.simple, scalaPactVersion)
+
+      val expected = PactFileExamples.simpleWithMetaDataAsString
+
+      parse(written).toOption.get shouldEqual parse(expected).toOption.get
     }
   }
 }

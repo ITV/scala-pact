@@ -1,6 +1,7 @@
 package com.itv.scalapact.circe11
 
 import com.itv.scalapact.shared._
+import com.itv.scalapact.test.PactFileExamples
 import org.scalatest.{FunSpec, Matchers}
 
 class RubyJsonHelperSpec extends FunSpec with Matchers {
