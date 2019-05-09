@@ -302,6 +302,7 @@ lazy val circe11 =
       ).map(_ % "0.11.1")
     )
     .dependsOn(shared)
+    .dependsOn(testShared % "test->compile")
     .settings(compilerOptions212: _*)
 
 lazy val pluginShared =

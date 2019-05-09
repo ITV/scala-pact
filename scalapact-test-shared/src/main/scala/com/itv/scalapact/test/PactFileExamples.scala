@@ -4,6 +4,57 @@ import com.itv.scalapact.shared._
 
 object PactFileExamples {
 
+  val anotherExample: String =
+    """{
+      |  "provider" : {
+      |    "name" : "Their Provider Service"
+      |  },
+      |  "consumer" : {
+      |    "name" : "My Consumer"
+      |  },
+      |  "interactions" : [
+      |    {
+      |      "description" : "a simple get example with a header matcher",
+      |      "request" : {
+      |        "method" : "GET",
+      |        "path" : "/header-match",
+      |        "headers" : {
+      |          "fish" : "chips",
+      |          "sauce" : "ketchup"
+      |        },
+      |        "matchingRules" : {
+      |          "$.headers.fish" : {
+      |            "match" : "regex",
+      |            "regex" : "\\w+"
+      |          },
+      |          "$.headers.sauce" : {
+      |            "match" : "regex",
+      |            "regex" : "\\w+"
+      |          }
+      |        }
+      |      },
+      |      "response" : {
+      |        "status" : 200,
+      |        "headers" : {
+      |          "fish" : "chips",
+      |          "sauce" : "ketchup"
+      |        },
+      |        "body" : "Hello there!",
+      |        "matchingRules" : {
+      |          "$.headers.fish" : {
+      |            "match" : "regex",
+      |            "regex" : "\\w+"
+      |          },
+      |          "$.headers.sauce" : {
+      |            "match" : "regex",
+      |            "regex" : "\\w+"
+      |          }
+      |        }
+      |      }
+      |    }
+      |  ]
+      |}""".stripMargin
+
   val verySimple: Pact = Pact(
     provider = PactActor("provider"),
     consumer = PactActor("consumer"),
@@ -92,7 +143,14 @@ object PactFileExamples {
         response = InteractionResponse(
           status = Option(200),
           headers = Option(Map("Content-Type" -> "application/json")),
-          body = Option("""{"fish":["cod","haddock","flying"]}"""),
+          body = Option("""{
+            |  "fish" : [
+            |    "cod",
+            |    "haddock",
+            |    "flying"
+            |  ]
+            |}""".stripMargin
+          ),
           matchingRules = Option(
             Map(
               "$.headers.Accept"         -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
@@ -116,13 +174,25 @@ object PactFileExamples {
         response = InteractionResponse(
           status = Option(200),
           headers = Option(Map("Content-Type" -> "application/json")),
-          body = Option("""{"chips":true,"fish":["cod","haddock"]}"""),
+          body = Option("""{
+            |  "chips" : true,
+            |  "fish" : [
+            |    "cod",
+            |    "haddock"
+            |  ]
+            |}""".stripMargin
+          ),
           matchingRules = None
         )
       )
     ),
     _links = None,
-    metadata = None
+    metadata = Option(
+      PactMetaData(
+        pactSpecification = Option(VersionMetaData("2.0.0")),
+        `scala-pact` = Option(VersionMetaData("1.0.0"))
+      )
+    )
   )
 
   val _links: Map[String, LinkValues] = Map(
@@ -172,10 +242,16 @@ object PactFileExamples {
                          |  },
                          |  "interactions" : [
                          |    {
+                         |      "providerState" : "a simple state",
+                         |      "description" : "a simple request",
                          |      "request" : {
                          |        "method" : "GET",
-                         |        "body" : "fish",
                          |        "path" : "/fetch-json",
+                         |        "query" : "fish=chips",
+                         |        "headers" : {
+                         |          "Content-Type" : "text/plain"
+                         |        },
+                         |        "body" : "fish",
                          |        "matchingRules" : {
                          |          "$.headers.Accept" : {
                          |            "match" : "regex",
@@ -184,13 +260,8 @@ object PactFileExamples {
                          |          "$.headers.Content-Length" : {
                          |            "match" : "type"
                          |          }
-                         |        },
-                         |        "query" : "fish=chips",
-                         |        "headers" : {
-                         |          "Content-Type" : "text/plain"
                          |        }
                          |      },
-                         |      "description" : "a simple request",
                          |      "response" : {
                          |        "status" : 200,
                          |        "headers" : {
@@ -212,19 +283,19 @@ object PactFileExamples {
                          |            "match" : "type"
                          |          }
                          |        }
-                         |      },
-                         |      "providerState" : "a simple state"
+                         |      }
                          |    },
                          |    {
+                         |      "providerState" : "a simple state 2",
+                         |      "description" : "a simple request 2",
                          |      "request" : {
                          |        "method" : "GET",
-                         |        "body" : "fish",
                          |        "path" : "/fetch-json2",
                          |        "headers" : {
                          |          "Content-Type" : "text/plain"
-                         |        }
+                         |        },
+                         |        "body" : "fish"
                          |      },
-                         |      "description" : "a simple request 2",
                          |      "response" : {
                          |        "status" : 200,
                          |        "headers" : {
@@ -237,10 +308,17 @@ object PactFileExamples {
                          |            "haddock"
                          |          ]
                          |        }
-                         |      },
-                         |      "providerState" : "a simple state 2"
+                         |      }
                          |    }
-                         |  ]
+                         |  ],
+                         |  "metadata" : {
+                         |    "pactSpecification" : {
+                         |      "version" : "2.0.0"
+                         |    },
+                         |    "scala-pact" : {
+                         |      "version" : "1.0.0"
+                         |    }
+                         |  }
                          |}""".stripMargin
 
   val simpleOldProviderStateAsString: String = """{
@@ -320,7 +398,15 @@ object PactFileExamples {
                                  |      },
                                  |      "provider_state" : "a simple state 2"
                                  |    }
-                                 |  ]
+                                 |  ],
+                                 |  "metadata" : {
+                                 |    "pactSpecification" : {
+                                 |      "version" : "2.0.0"
+                                 |    },
+                                 |    "scala-pact" : {
+                                 |      "version" : "1.0.0"
+                                 |    }
+                                 |  }
                                  |}""".stripMargin
 
   val simpleWithLinksAndMetaDataAsString: String =
@@ -554,7 +640,14 @@ object PactFileExamples {
         response = InteractionResponse(
           status = Option(200),
           headers = Option(Map("Content-Type" -> "application/json")),
-          body = Option("""{"fish":["cod","haddock","flying"]}"""),
+          body = Option("""{
+            |  "fish" : [
+            |    "cod",
+            |    "haddock",
+            |    "flying"
+            |  ]
+            |}""".stripMargin
+          ),
           matchingRules = Option(
             Map(
               "$.headers.Accept"         -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
@@ -578,7 +671,14 @@ object PactFileExamples {
         response = InteractionResponse(
           status = Option(200),
           headers = Option(Map("Content-Type" -> "application/json")),
-          body = Option("""{"chips":true,"fish":["cod","haddock"]}"""),
+          body = Option("""{
+            |  "chips" : true,
+            |  "fish" : [
+            |    "cod",
+            |    "haddock"
+            |  ]
+            |}""".stripMargin
+          ),
           matchingRules = None
         )
       )
