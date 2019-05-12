@@ -2,12 +2,13 @@ package com.itv.scalapact.plugin.shared
 
 import java.io.File
 
-import com.itv.scalapact.shared.ScalaPactSettings
+import com.itv.scalapact.shared.{Pact, PactLogger, ScalaPactSettings}
 import com.itv.scalapact.shared.ColourOutput._
 
 import scala.io.Source
-import com.itv.scalapact.shared.PactLogger
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter}
+
+import scala.util.Try
 
 object ScalaPactTestCommand {
 
@@ -46,53 +47,35 @@ object ScalaPactTestCommand {
 
   private def squashPactFiles(outputPath: String, files: List[File])(implicit pactReader: IPactReader,
                                                                      pactWriter: IPactWriter): Int = {
-    //Yuk!
-    var errorCount = 0
+    val jsonStringToPact: String => Option[Pact] = pactReader.jsonStringToPact(_).toOption
 
-    val pactList = {
+    val (failed, squashedPacts) =
       files
-        .map { file =>
-          val fileContents = try {
-            val contents = Option(Source.fromFile(file).getLines().mkString)
+        .map(fileToJsonString(_).flatMap(jsonStringToPact))
+        .partition(_.isEmpty)
 
-            file.delete()
-
-            contents
-          } catch {
-            case _: Throwable =>
-              PactLogger.message(("Problem reading Pact file at path: " + file.getCanonicalPath).red)
-              errorCount = errorCount + 1
-              None
-          }
-          fileContents.flatMap { t =>
-            pactReader.jsonStringToPact(t) match {
-              case Right(r) => Option(r)
-              case Left(_) =>
-                errorCount += 1
-                None
-            }
-          }
-        }
-        .collect { case Some(s) => s }
-    }
-
-    pactList match {
-      case Nil =>
-        ()
-
-      case x :: xs =>
-        val combined = xs.foldLeft(x) { (accumulatedPact, nextPact) =>
-          accumulatedPact.copy(interactions = accumulatedPact.interactions ++ nextPact.interactions)
-        }
-
+    squashedPacts
+      .collect { case Some(pact) => pact }
+      .reduceOption(combinePacts)
+      .foreach { combined =>
         PactContractWriter.writePactContracts(outputPath)(combined.provider.name)(combined.consumer.name)(
           pactWriter.pactToJsonString(combined)
         )
+      }
 
-        ()
-    }
-
-    errorCount
+    failed.size
   }
 
+  private def fileToJsonString(file: File): Option[String] =
+    Try {
+      val contents = Source.fromFile(file).getLines().mkString
+      file.delete()
+      contents
+    }.toOption.orElse {
+      PactLogger.message(("Problem reading Pact file at path: " + file.getCanonicalPath).red)
+      None
+    }
+
+  private def combinePacts(p1: Pact, p2: Pact): Pact =
+    p1.copy(interactions = p1.interactions ++ p2.interactions)
 }
