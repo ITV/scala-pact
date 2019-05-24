@@ -2,10 +2,29 @@
   "provider" : {
     "name" : "Provider"
   },
-  "consumer" : {
-    "name" : "Consumer"
-  },
   "interactions" : [
+    {
+      "request" : {
+        "method" : "GET",
+        "path" : "/results"
+      },
+      "description" : "Fetching results",
+      "response" : {
+        "status" : 200,
+        "headers" : {
+          "Pact" : "modifiedRequest"
+        },
+        "body" : {
+          "count" : 3,
+          "results" : [
+            "Bob",
+            "Fred",
+            "Harry"
+          ]
+        }
+      },
+      "providerState" : "Results: Bob, Fred, Harry"
+    },
     {
       "request" : {
         "method" : "GET",
@@ -37,28 +56,17 @@
           }
         }
       }
-    },
-    {
-      "request" : {
-        "method" : "GET",
-        "path" : "/results"
-      },
-      "description" : "Fetching results",
-      "response" : {
-        "status" : 200,
-        "headers" : {
-          "Pact" : "modifiedRequest"
-        },
-        "body" : {
-          "count" : 3,
-          "results" : [
-            "Bob",
-            "Fred",
-            "Harry"
-          ]
-        }
-      },
-      "providerState" : "Results: Bob, Fred, Harry"
     }
-  ]
+  ],
+  "consumer" : {
+    "name" : "Consumer"
+  },
+  "metadata" : {
+    "pactSpecification" : {
+      "version" : "2.0.0"
+    },
+    "scala-pact" : {
+      "version" : "2.3.9-SNAPSHOT"
+    }
+  }
 }
