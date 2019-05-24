@@ -56,7 +56,13 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
         )
       )
       val interaction1RequestBody  = Option("fish")
-      val interaction1ResponseBody = Option("""{"fish":["cod","haddock","flying"]}""")
+      val interaction1ResponseBody = Option("""{
+          |  "fish" : [
+          |    "cod",
+          |    "haddock",
+          |    "flying"
+          |  ]
+          |}""".stripMargin)
 
       val interaction2 = Interaction(
         provider_state = None,
@@ -78,7 +84,13 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
         )
       )
       val interaction2RequestBody  = Option("fish")
-      val interaction2ResponseBody = Option("""{"chips":true,"fish":["cod","haddock"]}""")
+      val interaction2ResponseBody = Option("""{
+          |  "chips" : true,
+          |  "fish" : [
+          |    "cod",
+          |    "haddock"
+          |  ]
+          |}""".stripMargin)
 
       val list = List(
         (Some(interaction1), interaction1RequestBody, interaction1ResponseBody),
