@@ -3,8 +3,7 @@ package com.itv.scalapact.plugin
 import com.itv.scalapact.json._
 import com.itv.scalapact.http._
 import com.itv.scalapact.plugin.shared._
-import com.itv.scalapact.shared.ScalaPactSettings
-import com.itv.scalapact.shared.ProviderStateResult
+import com.itv.scalapact.shared.{PactBrokerAuthorization, ProviderStateResult, ScalaPactSettings}
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 import sbt.Keys._
 import sbt.plugins.JvmPlugin
@@ -34,6 +33,9 @@ object ScalaPactPlugin extends AutoPlugin {
 
     val pactBrokerCredentials: SettingKey[(String, String)] =
       SettingKey[(String, String)]("pactBrokerCredentials", "The basic authentication credentials (username, password) for accessing the broker.")
+
+    val pactBrokerToken: SettingKey[String] =
+      SettingKey[String]("pactBrokerToken", "The token used in the \"Bearer theToken\" header for accessing the broker.")
 
     val providerBrokerPublishMap: SettingKey[Map[String, String]] =
       SettingKey[Map[String, String]](
@@ -109,7 +111,8 @@ object ScalaPactPlugin extends AutoPlugin {
     pactContractTags := Seq.empty[String],
     allowSnapshotPublish := false,
     scalaPactEnv := ScalaPactEnv.empty,
-    pactBrokerCredentials := (("", ""): (String, String))
+    pactBrokerCredentials := (("", ""): (String, String)),
+    pactBrokerToken := ""
   )
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
@@ -152,7 +155,7 @@ object ScalaPactPlugin extends AutoPlugin {
         pactContractVersion.value,
         allowSnapshotPublish.value,
         pactContractTags.value,
-        pactBrokerCredentials.value
+        PactBrokerAuthorization(pactBrokerCredentials.value, pactBrokerToken.value)
       )
     }
 
@@ -169,7 +172,7 @@ object ScalaPactPlugin extends AutoPlugin {
         consumerNames.value,
         versionedConsumerNames.value,
         taggedConsumerNames.value,
-        pactBrokerCredentials.value
+        PactBrokerAuthorization(pactBrokerCredentials.value, pactBrokerToken.value)
       )
     }
 

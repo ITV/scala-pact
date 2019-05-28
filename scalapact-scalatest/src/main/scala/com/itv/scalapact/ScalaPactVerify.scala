@@ -126,7 +126,7 @@ object ScalaPactVerify {
                 consumerNames = Nil,
                 taggedConsumerNames = Nil,
                 versionedConsumerNames = Nil,
-                pactBrokerCredentials = None
+                pactBrokerAuthorization = None
               ),
               ScalaPactSettings(
                 host = host,
@@ -150,7 +150,7 @@ object ScalaPactVerify {
                 consumerNames = Nil,
                 taggedConsumerNames = Nil,
                 versionedConsumerNames = Nil,
-                pactBrokerCredentials = None
+                pactBrokerAuthorization = None
               ),
               ScalaPactSettings(
                 host = host,
@@ -164,7 +164,7 @@ object ScalaPactVerify {
               )
             )
 
-          case pactBroker(url, providerName, consumerNames, publishResultsEnabled, credentials) =>
+          case pactBroker(url, providerName, consumerNames, publishResultsEnabled, pactBrokerAuthorization) =>
             (
               PactVerifySettings(
                 providerStates = providerStateFunc,
@@ -174,7 +174,7 @@ object ScalaPactVerify {
                 consumerNames = consumerNames,
                 taggedConsumerNames = Nil,
                 versionedConsumerNames = Nil,
-                pactBrokerCredentials = credentials
+                pactBrokerAuthorization = pactBrokerAuthorization
               ),
               ScalaPactSettings(
                 host = host,
@@ -188,7 +188,7 @@ object ScalaPactVerify {
               )
             )
 
-          case pactBrokerUseLatest(url, providerName, consumerNames, publishResultsEnabled, credentials) =>
+          case pactBrokerUseLatest(url, providerName, consumerNames, publishResultsEnabled, pactBrokerAuthorization) =>
             (
               PactVerifySettings(
                 providerStates = providerStateFunc,
@@ -198,7 +198,7 @@ object ScalaPactVerify {
                 consumerNames = consumerNames,
                 taggedConsumerNames = Nil,
                 versionedConsumerNames = Nil,
-                pactBrokerCredentials = credentials
+                pactBrokerAuthorization = pactBrokerAuthorization
               ),
               ScalaPactSettings(
                 host = host,
@@ -212,7 +212,7 @@ object ScalaPactVerify {
               )
             )
 
-          case pactBrokerWithTags(url, providerName, publishResultsEnabled, consumersWithTags, credentials) =>
+          case pactBrokerWithTags(url, providerName, publishResultsEnabled, consumersWithTags, pactBrokerAuthorization) =>
             (
               PactVerifySettings(
                 providerStates = providerStateFunc,
@@ -222,7 +222,7 @@ object ScalaPactVerify {
                 consumerNames = Nil,
                 taggedConsumerNames = consumersWithTags,
                 versionedConsumerNames = Nil,
-                pactBrokerCredentials = credentials
+                pactBrokerAuthorization = pactBrokerAuthorization
               ),
               ScalaPactSettings(
                 host = host,
@@ -236,7 +236,7 @@ object ScalaPactVerify {
               )
             )
 
-          case pactBrokerWithVersion(url, version, providerName, consumerNames, publishResultsEnabled, credentials) =>
+          case pactBrokerWithVersion(url, version, providerName, consumerNames, publishResultsEnabled, pactBrokerAuthorization) =>
             (
               PactVerifySettings(
                 providerStates = providerStateFunc,
@@ -246,7 +246,7 @@ object ScalaPactVerify {
                 consumerNames = Nil,
                 taggedConsumerNames = Nil,
                 versionedConsumerNames = consumerNames.map(c => VersionedConsumer(c, version)),
-                pactBrokerCredentials = credentials
+                pactBrokerAuthorization = pactBrokerAuthorization
               ),
               ScalaPactSettings(
                 host = host,
@@ -276,38 +276,40 @@ object ScalaPactVerify {
     "The `pactBroker` source type will be removed for clarity, please use `pactBrokerUseLatest` which is identical.",
     "Since 2.3.4"
   )
-  case class pactBroker(url: String,
-                        provider: String,
-                        consumers: List[String],
-                        publishResultsEnabled: Option[BrokerPublishData],
-                        basicAuthenticationCredentials: Option[BasicAuthenticationCredentials])
-      extends PactSourceType {
+  case class pactBroker(
+      url: String,
+      provider: String,
+      consumers: List[String],
+      publishResultsEnabled: Option[BrokerPublishData],
+      pactBrokerAuthorization: Option[PactBrokerAuthorization]
+  ) extends PactSourceType {
     def withContractVersion(version: String): pactBrokerWithVersion =
-      pactBrokerWithVersion(url, version, provider, consumers, publishResultsEnabled, basicAuthenticationCredentials)
+      pactBrokerWithVersion(url, version, provider, consumers, publishResultsEnabled, pactBrokerAuthorization)
   }
   case class pactBrokerUseLatest(
       url: String,
       provider: String,
       consumers: List[String],
       publishResultsEnabled: Option[BrokerPublishData],
-      basicAuthenticationCredentials: Option[BasicAuthenticationCredentials]
+      pactBrokerAuthorization: Option[PactBrokerAuthorization]
   ) extends PactSourceType {
     def withContractVersion(version: String): pactBrokerWithVersion =
-      pactBrokerWithVersion(url, version, provider, consumers, publishResultsEnabled, basicAuthenticationCredentials)
+      pactBrokerWithVersion(url, version, provider, consumers, publishResultsEnabled, pactBrokerAuthorization)
   }
-  case class pactBrokerWithTags(url: String,
-                                provider: String,
-                                publishResultsEnabled: Option[BrokerPublishData],
-                                consumerNamesWithTags: List[TaggedConsumer],
-                                basicAuthenticationCredentials: Option[BasicAuthenticationCredentials])
-      extends PactSourceType
+  case class pactBrokerWithTags(
+      url: String,
+      provider: String,
+      publishResultsEnabled: Option[BrokerPublishData],
+      consumerNamesWithTags: List[TaggedConsumer],
+      pactBrokerAuthorization: Option[PactBrokerAuthorization]
+  ) extends PactSourceType
   case class pactBrokerWithVersion(
       url: String,
       contractVersion: String,
       provider: String,
       consumers: List[String],
       publishResultsEnabled: Option[BrokerPublishData],
-      basicAuthenticationCredentials: Option[BasicAuthenticationCredentials]
+      pactBrokerAuthorization: Option[PactBrokerAuthorization]
   ) extends PactSourceType
   case class pactAsJsonString(json: String) extends PactSourceType
 

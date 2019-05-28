@@ -14,7 +14,7 @@ class ResultPublisher(fetcher: (SimpleRequest, IO[Client[IO]]) => IO[SimpleRespo
   override def publishResults(
       pactVerifyResults: List[PactVerifyResult],
       brokerPublishData: BrokerPublishData,
-      pactBrokerCredentials: Option[BasicAuthenticationCredentials]
+      pactBrokerAuthorization: Option[PactBrokerAuthorization]
   )(implicit sslContextMap: SslContextMap): Unit = {
     pactVerifyResults
       .map { result =>
@@ -25,7 +25,7 @@ class ResultPublisher(fetcher: (SimpleRequest, IO[Client[IO]]) => IO[SimpleRespo
               link,
               "",
               HttpMethod.POST,
-              Map("Content-Type" -> "application/json; charset=UTF-8") ++ pactBrokerCredentials.map(_.asHeader).toList,
+              Map("Content-Type" -> "application/json; charset=UTF-8") ++ pactBrokerAuthorization.map(_.asHeader).toList,
               body(brokerPublishData, success),
               None
             )

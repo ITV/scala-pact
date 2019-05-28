@@ -134,12 +134,16 @@ class ResultPublisherSpec extends FunSpec with Matchers with BeforeAndAfter {
       val expectedHeader = ("Authorization" -> "Basic dXNlcm5hbWU6cGFzc3dvcmQ=")
       val pactVerifyResults = List(PactVerifyResult(simpleWithLinks, results))
 
-      resultPublisher.publishResults(pactVerifyResults, brokerPublishData, Some(BasicAuthenticationCredentials("username", "password")))
+      resultPublisher.publishResults(pactVerifyResults, brokerPublishData, PactBrokerAuthorization(("username", "password"), ""))
 
       val successfulRequest = SimpleRequest(
         publishUrl, "", HttpMethod.POST, Map("Content-Type" -> "application/json; charset=UTF-8") + expectedHeader, Option("""{ "success": "true", "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""), None
       )
       requests shouldBe ArrayBuffer(successfulRequest)
+    }
+
+    it("should add bearer token header if a token is specified") {
+      fail("DTB TODO - test for bearer token pact broker auth")
     }
   }
 }
