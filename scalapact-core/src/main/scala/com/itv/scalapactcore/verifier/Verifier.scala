@@ -38,7 +38,10 @@ object Verifier {
       val latestPacts: List[Pact] = versionConsumers
         .flatMap { consumer =>
           ValidatedDetails.buildFrom(
-            consumer.name, pactVerifySettings.providerName, pactVerifySettings.pactBrokerAddress, consumer.version
+            consumer.name,
+            pactVerifySettings.providerName,
+            pactVerifySettings.pactBrokerAddress,
+            consumer.version
           ) match {
             case Left(l) =>
               PactLogger.error(l.red)
@@ -48,7 +51,7 @@ object Verifier {
               List(
                 fetchAndReadPact(
                   v.validatedAddress.address + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + v.consumerVersion,
-                  pactVerifySettings.pactBrokerCredentials
+                  pactVerifySettings.pactBrokerAuthorization
                 )
               )
           }
@@ -134,7 +137,7 @@ object Verifier {
       PactLogger.message(scalaPactLogPrefix + s"$failureCount Pact verify tests failed.".red)
 
     arguments.publishResultsEnabled.foreach(
-      publisher.publishResults(pactVerifyResults, _, pactVerifySettings.pactBrokerCredentials)
+      publisher.publishResults(pactVerifyResults, _, pactVerifySettings.pactBrokerAuthorization)
     )
 
     testCount > 0 && failureCount == 0
@@ -220,7 +223,7 @@ object Verifier {
 
   private def fetchAndReadPact[F[_]](
       address: String,
-      credentials: Option[BasicAuthenticationCredentials]
+      pactBrokerAuthorization: Option[PactBrokerAuthorization]
   )(implicit pactReader: IPactReader, sslContextMap: SslContextMap, httpClient: IScalaPactHttpClient[F]): Pact = {
 
     PactLogger.message(s"Attempting to fetch pact from pact broker at: $address".white.bold)
@@ -230,7 +233,7 @@ object Verifier {
         SimpleRequest(address,
                       "",
                       HttpMethod.GET,
-                      Map("Accept" -> "application/json") ++ credentials.map(_.asHeader).toList,
+                      Map("Accept" -> "application/json") ++ pactBrokerAuthorization.map(_.asHeader).toList,
                       None,
                       sslContextName = None)
       ) match {

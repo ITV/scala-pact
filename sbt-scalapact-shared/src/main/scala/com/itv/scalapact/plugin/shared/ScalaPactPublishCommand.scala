@@ -2,7 +2,7 @@ package com.itv.scalapact.plugin.shared
 
 import com.itv.scalapact.shared.ColourOutput._
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClient}
-import com.itv.scalapact.shared.{BasicAuthenticationCredentials, ConfigAndPacts, PactLogger, ScalaPactSettings}
+import com.itv.scalapact.shared._
 import com.itv.scalapactcore.common.LocalPactFileLoader
 
 object ScalaPactPublishCommand {
@@ -15,7 +15,7 @@ object ScalaPactPublishCommand {
       pactContractVersion: String,
       allowSnapshotPublish: Boolean,
       tagsToPublishWith: Seq[String],
-      basicAuthenticationCredentials: (String, String)
+      pactBrokerAuthorization: Option[PactBrokerAuthorization]
   )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F]): Unit = {
     import Publisher._
 
@@ -24,9 +24,6 @@ object ScalaPactPublishCommand {
     PactLogger.message("*************************************".white.bold)
 
     val versionToPublishAs = if (pactContractVersion.isEmpty) projectVersion else pactContractVersion
-    val credentials =
-      if (basicAuthenticationCredentials._1.isEmpty || basicAuthenticationCredentials._2.isEmpty) None
-      else Some(BasicAuthenticationCredentials(basicAuthenticationCredentials._1, basicAuthenticationCredentials._2))
 
     if (versionToPublishAs.contains("SNAPSHOT") && !allowSnapshotPublish) {
       PactLogger.error("Snapshot pact file publishing not permitted".red.bold)
@@ -38,7 +35,7 @@ object ScalaPactPublishCommand {
         LocalPactFileLoader.loadPactFiles(pactReader)(false)(scalaPactSettings.giveOutputPath)(scalaPactSettings)
 
       // Publish all to main broker
-      publishToBroker(httpClient.doRequestSync, pactBrokerAddress, versionToPublishAs, tagsToPublishWith, credentials)(
+      publishToBroker(httpClient.doRequestSync, pactBrokerAddress, versionToPublishAs, tagsToPublishWith, pactBrokerAuthorization)(
         pactWriter
       )(
         configAndPactFiles
@@ -47,7 +44,7 @@ object ScalaPactPublishCommand {
       // Publish to other specified brokers
       configAndPactFiles.pacts.foreach { pactContract =>
         providerBrokerPublishMap.get(pactContract.provider.name).foreach { broker =>
-          publishToBroker(httpClient.doRequestSync, broker, versionToPublishAs, tagsToPublishWith, credentials)(
+          publishToBroker(httpClient.doRequestSync, broker, versionToPublishAs, tagsToPublishWith, pactBrokerAuthorization)(
             pactWriter
           )(
             ConfigAndPacts(scalaPactSettings, List(pactContract))

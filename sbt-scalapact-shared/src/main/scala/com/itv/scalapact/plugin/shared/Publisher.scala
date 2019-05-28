@@ -14,11 +14,11 @@ object Publisher {
       pactBrokerAddress: String,
       versionToPublishAs: String,
       tagsToPublishWith: Seq[String],
-      pactBrokerCredentials: Option[BasicAuthenticationCredentials]
+      pactBrokerAuthorization: Option[PactBrokerAuthorization]
   )(implicit pactWriter: IPactWriter): ConfigAndPacts => List[PublishResult] =
     configAndPacts =>
       configAndPacts.pacts.map { pact =>
-        publishPact(sendIt, pact, versionToPublishAs, tagsToPublishWith, pactBrokerCredentials) {
+        publishPact(sendIt, pact, versionToPublishAs, tagsToPublishWith, pactBrokerAuthorization) {
           ValidatedDetails.buildFrom(pact.consumer.name, pact.provider.name, pactBrokerAddress, "/latest")
         }
     }
@@ -27,7 +27,7 @@ object Publisher {
                   pact: Pact,
                   versionToPublishAs: String,
                   tagsToPublishWith: Seq[String],
-                  basicAuthCredentials: Option[BasicAuthenticationCredentials])(
+                  pactBrokerAuthorization: Option[PactBrokerAuthorization])(
       details: Either[String, ValidatedDetails]
   )(implicit pactWriter: IPactWriter): PublishResult =
     details match {
@@ -50,7 +50,7 @@ object Publisher {
             SimpleRequest(tagAddress,
                           "",
                           HttpMethod.PUT,
-                          Map("Content-Type" -> "application/json", "Content-Length" -> "0") ++ basicAuthCredentials.map(_.asHeader).toList,
+                          Map("Content-Type" -> "application/json", "Content-Length" -> "0") ++ pactBrokerAuthorization.map(_.asHeader).toList,
                           None,
                           sslContextName = None)
           )
@@ -68,7 +68,7 @@ object Publisher {
               SimpleRequest(address,
                             "",
                             HttpMethod.PUT,
-                            Map("Content-Type" -> "application/json") ++ basicAuthCredentials.map(_.asHeader).toList,
+                            Map("Content-Type" -> "application/json") ++ pactBrokerAuthorization.map(_.asHeader).toList,
                             Option(pactWriter.pactToJsonString(pact)),
                             sslContextName = None)
             ) match {
