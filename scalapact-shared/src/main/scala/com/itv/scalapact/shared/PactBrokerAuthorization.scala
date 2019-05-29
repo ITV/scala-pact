@@ -27,5 +27,4 @@ object PactBrokerAuthorization {
   private case class BearerToken(token: String) extends PactBrokerAuthorization {
     val value: String = s"Bearer $token"
   }
-
 }

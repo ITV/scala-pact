@@ -67,6 +67,7 @@ class ResultPublisherSpec extends FunSpec with Matchers with BeforeAndAfter {
     val successfulResults = List(successfulResult)
     val failedResult = PactVerifyResultInContext(Left("failed"), "context")
     val failedResults = List(successfulResult, failedResult)
+    val pactVerifyResults = List(PactVerifyResult(simpleWithLinks, successfulResults))
 
     it("should publish successful results") {
       val results = successfulResults
@@ -126,7 +127,24 @@ class ResultPublisherSpec extends FunSpec with Matchers with BeforeAndAfter {
     }
 
     it("should add bearer token header if a token is specified") {
-      fail("DTB TODO - test for bearer token pact broker auth")
+      val token = "fakeToken"
+      val expectedHeader = ("Authorization" -> s"Bearer $token")
+
+      resultPublisher.publishResults(pactVerifyResults, brokerPublishData, PactBrokerAuthorization(("", ""), token))
+
+      val successfulRequest = SimpleRequest(
+        publishUrl, "", HttpMethod.POST, Map("Content-Type" -> "application/json; charset=UTF-8") + expectedHeader, Option("""{ "success": "true", "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""), None
+      )
+      requests shouldBe ArrayBuffer(successfulRequest)
+    }
+
+    it("should have no Authorization header when no auth config is provided") {
+      resultPublisher.publishResults(pactVerifyResults, brokerPublishData, None)
+
+      val successfulRequest = SimpleRequest(
+        publishUrl, "", HttpMethod.POST, Map("Content-Type" -> "application/json; charset=UTF-8"), Option("""{ "success": "true", "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""), None
+      )
+      requests shouldBe ArrayBuffer(successfulRequest)
     }
   }
 }
