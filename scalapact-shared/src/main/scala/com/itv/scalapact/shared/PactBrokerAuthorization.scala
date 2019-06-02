@@ -17,14 +17,14 @@ object PactBrokerAuthorization {
       case _ => None
     }
 
-  private case class BasicAuthenticationCredentials(username: String, password: String) extends PactBrokerAuthorization {
+  case class BasicAuthenticationCredentials(username: String, password: String) extends PactBrokerAuthorization {
     val value: String = {
       val toEncode = s"$username:$password".getBytes
       s"Basic ${Base64.getEncoder.encodeToString(toEncode)}"
     }
   }
 
-  private case class BearerToken(token: String) extends PactBrokerAuthorization {
+  case class BearerToken(token: String) extends PactBrokerAuthorization {
     val value: String = s"Bearer $token"
   }
 }
