@@ -2,7 +2,7 @@ package com.itv.scalapact.plugin.shared
 
 import java.io.File
 
-import com.itv.scalapact.shared.{Pact, PactLogger, ScalaPactSettings}
+import com.itv.scalapact.shared.{BuildInfo, Pact, PactLogger, ScalaPactSettings}
 import com.itv.scalapact.shared.ColourOutput._
 
 import scala.io.Source
