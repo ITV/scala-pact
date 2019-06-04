@@ -69,7 +69,7 @@ object Publisher {
                             "",
                             HttpMethod.PUT,
                             Map("Content-Type" -> "application/json") ++ pactBrokerAuthorization.map(_.asHeader).toList,
-                            Option(pactWriter.pactToJsonString(pact)),
+                            Option(pactWriter.pactToJsonString(pact, BuildInfo.version)),
                             sslContextName = None)
             ) match {
               case Right(r) if r.is2xx =>
