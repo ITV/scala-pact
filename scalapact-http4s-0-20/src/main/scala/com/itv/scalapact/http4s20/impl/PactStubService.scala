@@ -47,7 +47,7 @@ object PactStubService {
   private val isAdminCall: Request[IO] => Boolean = request =>
     request.headers.get(CaseInsensitiveString("X-Pact-Admin")).exists(h => h.value == "true")
 
-  private def service(
+  def service(
       interactionManager: IInteractionManager,
       strictMatching: Boolean
   )(implicit pactReader: IPactReader, pactWriter: IPactWriter): HttpApp[IO] =
