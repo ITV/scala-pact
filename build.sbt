@@ -305,6 +305,22 @@ lazy val circe11 =
     .dependsOn(testShared % "test->compile")
     .settings(compilerOptions212: _*)
 
+lazy val circe12 =
+  (project in file("scalapact-circe-0-12"))
+    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
+    .settings(
+      name := "scalapact-circe-0-12",
+      libraryDependencies ++= Seq(
+        "io.circe" %% "circe-core",
+        "io.circe" %% "circe-generic",
+        "io.circe" %% "circe-parser"
+      ).map(_ % "0.12.1")
+    )
+    .dependsOn(shared)
+    .dependsOn(testShared % "test->compile")
+    .settings(compilerOptions212: _*)
+
 lazy val pluginShared =
   (project in file("sbt-scalapact-shared"))
     .settings(commonSettings: _*)
