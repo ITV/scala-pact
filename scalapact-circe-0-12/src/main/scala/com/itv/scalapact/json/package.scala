@@ -1,5 +1,6 @@
 package com.itv.scalapact
 
+import com.itv.scalapact.circe12.{PactReader, PactWriter}
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter}
 
 package object json {
@@ -7,5 +8,5 @@ package object json {
 
   implicit val pactWriterInstance: IPactWriter = new PactWriter
 
-  val JsonConversionFunctions: circe11.JsonConversionFunctions.type = circe11.JsonConversionFunctions
+  val JsonConversionFunctions: circe12.JsonConversionFunctions.type = circe12.JsonConversionFunctions
 }
