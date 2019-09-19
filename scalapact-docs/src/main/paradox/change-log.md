@@ -26,9 +26,39 @@ With thanks to all contributors!
 - [Paulymorph]
 - [jnatten]
 - [randbw]
+- [ShahOdin]
+- [aggenebbisj]
+- [mcarolan]
+- [cmcmteixeira]
+- [chrischivers]
+- [jacemale]
+- [dantb]
+- [razerno]
 - ...your name here? :-)
 
 Maintained by [davesmith00000].
+
+## 2.3.9 - 2019-06-27
+
+- Add pact metadata to generated contracts (Fixes [#84](https://github.com/ITV/scala-pact/issues/84)) ([davesmith00000])
+- Support finalising a `ScalaPactDescription` within the `ScalaPactForger` DSL (Fixes [#134](https://github.com/ITV/scala-pact/issues/134)) ([razerno])
+- Refactored squashPactFiles method in SBT plugin ([dantb])
+- Added support for token based Pact Broker authentication (Fixes [#140](https://github.com/ITV/scala-pact/issues/140)) ([dantb])
+
+## 2.3.8 - 2019-04-26
+- Added support for Http4s 0.20.0 ([jacemale])
+
+## 2.3.6 - 2019-04-13
+- Bugfix: Use correct `Headers` apply function in `Http4sRequestResponseFactory` ([davesmith00000])
+- Use recommended scalafix SBT JVM memory settings ([davesmith00000])
+- Added Http4s 0.20.0-M4 support ([chrischivers])
+- Fix handling of URL parameter lists in `PactStubService` ([cmcmteixeira])
+
+## 2.3.5 - 2019-02-15
+- Added support for Circe 0.11 ([mcarolan])
+- Fix typo in `ScalaPactVerify` ([aggenebbisj])
+- Documentation corrections ([ShahOdin])
+- Remove milestone version from package name ([randbw])
 
 ## 2.3.4 - 2018-12-31
 
@@ -206,3 +236,11 @@ Other improvements for contributors:
 [Paulymorph]: https://github.com/Paulymorph
 [jnatten]: https://github.com/jnatten
 [randbw]: https://github.com/randbw
+[ShahOdin]: https://github.com/ShahOdin
+[aggenebbisj]: https://github.com/aggenebbisj
+[mcarolan]: https://github.com/mcarolan
+[cmcmteixeira]: https://github.com/cmcmteixeira
+[chrischivers]: https://github.com/chrischivers
+[jacemale]: https://github.com/jacemale
+[dantb]: https://github.com/dantb
+[razerno]: https://github.com/razerno
