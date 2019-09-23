@@ -57,7 +57,7 @@ addCommandAlias(
 )
 addCommandAlias(
   "quickpublish",
-  ";shared/publishLocal;core/publishLocal;argonaut62/publishLocal;circe08/publishLocal;circe09/publishLocal;circe10/publishLocal;circe11/publishLocal;http4s016a/publishLocal;http4s017/publishLocal;http4s018/publishLocal;http4s020/publishLocal;pluginShared/publishLocal;plugin/publishLocal;pluginNoDeps/publishLocal;standalone/publishLocal;framework/publishLocal"
+  ";shared/publishLocal;core/publishLocal;argonaut62/publishLocal;circe08/publishLocal;circe09/publishLocal;circe10/publishLocal;circe11/publishLocal;circe12/publishLocal;http4s016a/publishLocal;http4s017/publishLocal;http4s018/publishLocal;http4s020/publishLocal;pluginShared/publishLocal;plugin/publishLocal;pluginNoDeps/publishLocal;standalone/publishLocal;framework/publishLocal"
 )
 
 lazy val commonSettings = Seq(
@@ -305,6 +305,22 @@ lazy val circe11 =
     .dependsOn(testShared % "test->compile")
     .settings(compilerOptions212: _*)
 
+lazy val circe12 =
+  (project in file("scalapact-circe-0-12"))
+    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
+    .settings(
+      name := "scalapact-circe-0-12",
+      libraryDependencies ++= Seq(
+        "io.circe" %% "circe-core",
+        "io.circe" %% "circe-generic",
+        "io.circe" %% "circe-parser"
+      ).map(_ % "0.12.1")
+    )
+    .dependsOn(shared)
+    .dependsOn(testShared % "test->compile")
+    .settings(compilerOptions212: _*)
+
 lazy val pluginShared =
   (project in file("sbt-scalapact-shared"))
     .settings(commonSettings: _*)
@@ -424,6 +440,6 @@ lazy val scalaPactProject =
     .settings(commonSettings: _*)
     .aggregate(shared, core, pluginShared, plugin, pluginNoDeps, framework, standalone, testShared)
     .aggregate(http4s016a, http4s017, http4s018, http4s020)
-    .aggregate(argonaut62, circe08, circe09, circe10, circe11)
+    .aggregate(argonaut62, circe08, circe09, circe10, circe11, circe12)
     .aggregate(docs)
     .aggregate(pactSpec, testsWithDeps)
