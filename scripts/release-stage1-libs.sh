@@ -49,3 +49,7 @@ publishReal "circe10"
 echo ""
 echo ">>> Circe 0.11.x"
 publishReal "circe11"
+
+echo ""
+echo ">>> Circe 0.12.x"
+publishReal "circe12"
