@@ -25,11 +25,19 @@ else
 fi
 
 echo ""
-echo "Starting Stage 1 Deploy"
+echo "Preparing Scala-Pact for publishing"
 
-bash scripts/release-stage1-libs.sh
+sbt prepareScalaPactPublish
 
 echo ""
-echo "Starting Stage 2 Deploy"
+echo -e "Preparation complete, release to Sonatype? [y/n] \c"
+read RELEASE_NOW
 
-bash scripts/release-stage2-main.sh
+if [ $RELEASE_NOW != 'y' ]; then
+  echo "Aborting as instructed."
+  exit 1
+else
+  echo "Publishing now.."
+fi
+
+sbt sonatypeBundleRelease
