@@ -9,6 +9,5 @@ set -e
 echo "Locally published Scala-Pact"
 echo "****************************"
 
-bash scripts/localpublish-libs.sh
+sbt localPublishScalaPact
 
-bash scripts/localpublish-main.sh

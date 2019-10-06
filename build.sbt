@@ -1,67 +1,54 @@
-val compilerOptions212 = scalacOptions ++= Seq(
+lazy val compilerOptions212 = scalacOptions ++= Seq(
   "-deprecation", // Emit warning and location for usages of deprecated APIs.
   "-encoding",
-  "utf-8", // Specify character encoding used by source files.
-  "-explaintypes", // Explain type errors in more detail.
-  "-feature", // Emit warning and location for usages of features that should be imported explicitly.
-  "-language:existentials", // Existential types (besides wildcard types) can be written and inferred
-  "-language:experimental.macros", // Allow macro definition (besides implementation and application)
-  "-language:higherKinds", // Allow higher-kinded types
-  "-language:implicitConversions", // Allow definition of implicit functions called views
-  "-unchecked", // Enable additional warnings where generated code depends on assumptions.
-  "-Xcheckinit", // Wrap field accessors to throw an exception on uninitialized access.
-  "-Xfatal-warnings", // Fail the compilation if there are any warnings.
-  "-Xfuture", // Turn on future language features.
-  "-Xlint:adapted-args", // Warn if an argument list is modified to match the receiver.
+  "utf-8",                            // Specify character encoding used by source files.
+  "-explaintypes",                    // Explain type errors in more detail.
+  "-feature",                         // Emit warning and location for usages of features that should be imported explicitly.
+  "-language:existentials",           // Existential types (besides wildcard types) can be written and inferred
+  "-language:experimental.macros",    // Allow macro definition (besides implementation and application)
+  "-language:higherKinds",            // Allow higher-kinded types
+  "-language:implicitConversions",    // Allow definition of implicit functions called views
+  "-unchecked",                       // Enable additional warnings where generated code depends on assumptions.
+  "-Xcheckinit",                      // Wrap field accessors to throw an exception on uninitialized access.
+  "-Xfatal-warnings",                 // Fail the compilation if there are any warnings.
+  "-Xfuture",                         // Turn on future language features.
+  "-Xlint:adapted-args",              // Warn if an argument list is modified to match the receiver.
   "-Xlint:by-name-right-associative", // By-name parameter of right associative operator.
-  "-Xlint:constant", // Evaluation of a constant arithmetic expression results in an error.
-  "-Xlint:delayedinit-select", // Selecting member of DelayedInit.
-  "-Xlint:doc-detached", // A Scaladoc comment appears to be detached from its element.
-  "-Xlint:inaccessible", // Warn about inaccessible types in method signatures.
-  "-Xlint:infer-any", // Warn when a type argument is inferred to be `Any`.
-  "-Xlint:missing-interpolator", // A string literal appears to be missing an interpolator id.
-  "-Xlint:nullary-override", // Warn when non-nullary `def f()' overrides nullary `def f'.
-  "-Xlint:nullary-unit", // Warn when nullary methods return Unit.
-  "-Xlint:option-implicit", // Option.apply used implicit view.
-  "-Xlint:package-object-classes", // Class or object defined in package object.
-  "-Xlint:poly-implicit-overload", // Parameterized overloaded implicit methods are not visible as view bounds.
-  "-Xlint:private-shadow", // A private field (or class parameter) shadows a superclass field.
-  "-Xlint:stars-align", // Pattern sequence wildcard must align with sequence component.
-  "-Xlint:type-parameter-shadow", // A local type parameter shadows a type already in scope.
-  "-Xlint:unsound-match", // Pattern match may not be typesafe.
-  "-Yno-adapted-args", // Do not adapt an argument list (either by inserting () or creating a tuple) to match the receiver.
-  "-Ypartial-unification", // Enable partial unification in type constructor inference
-  "-Ywarn-dead-code", // Warn when dead code is identified.
-  "-Ywarn-extra-implicit", // Warn when more than one implicit parameter section is defined.
-  "-Ywarn-inaccessible", // Warn about inaccessible types in method signatures.
-  "-Ywarn-infer-any", // Warn when a type argument is inferred to be `Any`.
-  "-Ywarn-nullary-override", // Warn when non-nullary `def f()' overrides nullary `def f'.
-  "-Ywarn-nullary-unit", // Warn when nullary methods return Unit.
-  "-Ywarn-numeric-widen", // Warn when numerics are widened.
-  "-Ywarn-unused:implicits", // Warn if an implicit parameter is unused.
-  "-Ywarn-unused:imports", // Warn if an import selector is not referenced.
-  "-Ywarn-unused:locals", // Warn if a local definition is unused.
-  "-Ywarn-unused:params", // Warn if a value parameter is unused.
-  "-Ywarn-unused:patvars", // Warn if a variable bound in a pattern is unused.
-  "-Ywarn-unused:privates", // Warn if a private member is unused.
-  "-Ywarn-value-discard" // Warn when non-Unit expression results are unused.
-)
-
-addCommandAlias(
-  "quickcompile",
-  ";shared/compile;core/compile;argonaut62/compile;http4s016a/compile;pactSpec/compile;pluginShared/compile;plugin/compile;pluginNoDeps/compile;standalone/compile;framework/compile;testsWithDeps/compile"
-)
-addCommandAlias(
-  "quicktest",
-  ";shared/test;core/test;argonaut62/test;http4s016a/test;pactSpec/test;pluginShared/test;plugin/test;pluginNoDeps/test;standalone/test;framework/test;testsWithDeps/test"
-)
-addCommandAlias(
-  "quickpublish",
-  ";shared/publishLocal;core/publishLocal;argonaut62/publishLocal;circe08/publishLocal;circe09/publishLocal;circe10/publishLocal;circe11/publishLocal;circe12/publishLocal;http4s016a/publishLocal;http4s017/publishLocal;http4s018/publishLocal;http4s020/publishLocal;pluginShared/publishLocal;plugin/publishLocal;pluginNoDeps/publishLocal;standalone/publishLocal;framework/publishLocal"
+  "-Xlint:constant",                  // Evaluation of a constant arithmetic expression results in an error.
+  "-Xlint:delayedinit-select",        // Selecting member of DelayedInit.
+  "-Xlint:doc-detached",              // A Scaladoc comment appears to be detached from its element.
+  "-Xlint:inaccessible",              // Warn about inaccessible types in method signatures.
+  "-Xlint:infer-any",                 // Warn when a type argument is inferred to be `Any`.
+  "-Xlint:missing-interpolator",      // A string literal appears to be missing an interpolator id.
+  "-Xlint:nullary-override",          // Warn when non-nullary `def f()' overrides nullary `def f'.
+  "-Xlint:nullary-unit",              // Warn when nullary methods return Unit.
+  "-Xlint:option-implicit",           // Option.apply used implicit view.
+  "-Xlint:package-object-classes",    // Class or object defined in package object.
+  "-Xlint:poly-implicit-overload",    // Parameterized overloaded implicit methods are not visible as view bounds.
+  "-Xlint:private-shadow",            // A private field (or class parameter) shadows a superclass field.
+  "-Xlint:stars-align",               // Pattern sequence wildcard must align with sequence component.
+  "-Xlint:type-parameter-shadow",     // A local type parameter shadows a type already in scope.
+  "-Xlint:unsound-match",             // Pattern match may not be typesafe.
+  "-Yno-adapted-args",                // Do not adapt an argument list (either by inserting () or creating a tuple) to match the receiver.
+  "-Ypartial-unification",            // Enable partial unification in type constructor inference
+  "-Ywarn-dead-code",                 // Warn when dead code is identified.
+  "-Ywarn-extra-implicit",            // Warn when more than one implicit parameter section is defined.
+  "-Ywarn-inaccessible",              // Warn about inaccessible types in method signatures.
+  "-Ywarn-infer-any",                 // Warn when a type argument is inferred to be `Any`.
+  "-Ywarn-nullary-override",          // Warn when non-nullary `def f()' overrides nullary `def f'.
+  "-Ywarn-nullary-unit",              // Warn when nullary methods return Unit.
+  "-Ywarn-numeric-widen",             // Warn when numerics are widened.
+  "-Ywarn-unused:implicits",          // Warn if an implicit parameter is unused.
+  "-Ywarn-unused:imports",            // Warn if an import selector is not referenced.
+  "-Ywarn-unused:locals",             // Warn if a local definition is unused.
+  "-Ywarn-unused:params",             // Warn if a value parameter is unused.
+  "-Ywarn-unused:patvars",            // Warn if a variable bound in a pattern is unused.
+  "-Ywarn-unused:privates",           // Warn if a private member is unused.
+  "-Ywarn-value-discard"              // Warn when non-Unit expression results are unused.
 )
 
 lazy val commonSettings = Seq(
-  version := "2.3.11-SNAPSHOT",
+  version := "2.3.11",
   organization := "com.itv",
   scalaVersion := scala212,
   libraryDependencies ++= Seq(
@@ -100,6 +87,7 @@ lazy val publishSettings = Seq(
     else
       Some("releases" at nexus + "service/local/staging/deploy/maven2")
   },
+  publishTo := sonatypePublishToBundle.value,
   publishMavenStyle := true,
   publishArtifact in Test := false,
   pomIncludeRepository := { _ =>
@@ -124,7 +112,7 @@ lazy val publishSettings = Seq(
       </developers>
 )
 
-val scala212: String = "2.12.8"
+lazy val scala212: String = "2.12.8"
 
 lazy val shared =
   (project in file("scalapact-shared"))
@@ -221,7 +209,7 @@ lazy val testShared =
     .settings(commonSettings: _*)
     .settings(
       name := "scalapact-test-shared",
-      publish := {}
+      skip in publish := true
     )
     .dependsOn(shared)
     .settings(compilerOptions212: _*)
@@ -287,7 +275,6 @@ lazy val circe10 =
     .dependsOn(shared)
     .dependsOn(testShared % "test->compile")
     .settings(compilerOptions212: _*)
-
 
 lazy val circe11 =
   (project in file("scalapact-circe-0-11"))
@@ -382,8 +369,9 @@ lazy val standalone =
       publish := {},
       assemblyJarName in assembly := "pactstubber.jar",
       libraryDependencies ++= Seq(
-        "ch.qos.logback"        % "logback-classic"             % "1.2.3"
-      )
+        "ch.qos.logback" % "logback-classic" % "1.2.3"
+      ),
+      skip in publish := true
     )
     .dependsOn(core)
     .dependsOn(circe09)
@@ -395,7 +383,8 @@ lazy val pactSpec =
     .settings(commonSettings: _*)
     .settings(
       name := "pact-spec-tests",
-      scalaVersion := scala212
+      scalaVersion := scala212,
+      skip in publish := true
     )
     .settings(
       libraryDependencies ++= Seq(
@@ -412,10 +401,11 @@ lazy val testsWithDeps =
       libraryDependencies ++= Seq(
         "org.scalaj"             %% "scalaj-http"   % "2.3.0" % "test",
         "org.json4s"             %% "json4s-native" % "3.5.0" % "test",
-        "com.github.tomakehurst" % "wiremock"       % "1.56"  % "test",
+        "com.github.tomakehurst" % "wiremock"       % "1.56" % "test",
         "fr.hmil"                %% "roshttp"       % "2.0.1" % "test",
-        "io.argonaut" %% "argonaut" % "6.2"
-      )
+        "io.argonaut"            %% "argonaut"      % "6.2"
+      ),
+      skip in publish := true
     )
     .dependsOn(framework)
     .dependsOn(circe11)
@@ -432,14 +422,19 @@ lazy val docs =
       paradoxTheme := Some(builtinParadoxTheme("generic")),
       name := "scalapact-docs",
       git.remoteRepo := "git@github.com:ITV/scala-pact.git",
-      sourceDirectory in Paradox := sourceDirectory.value / "main" / "paradox"
+      sourceDirectory in Paradox := sourceDirectory.value / "main" / "paradox",
+      skip in publish := true
     )
 
 lazy val scalaPactProject =
   (project in file("."))
     .settings(commonSettings: _*)
-    .aggregate(shared, core, pluginShared, plugin, pluginNoDeps, framework, standalone, testShared)
+    .settings(
+      skip in publish := true
+    )
+    .aggregate(shared, core, pluginShared, plugin, pluginNoDeps, framework, testShared)
     .aggregate(http4s016a, http4s017, http4s018, http4s020)
     .aggregate(argonaut62, circe08, circe09, circe10, circe11, circe12)
+    .aggregate(standalone)
     .aggregate(docs)
     .aggregate(pactSpec, testsWithDeps)
