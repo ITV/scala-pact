@@ -35,23 +35,44 @@ object ScalaPactPublishCommand {
         LocalPactFileLoader.loadPactFiles(pactReader)(false)(scalaPactSettings.giveOutputPath)(scalaPactSettings)
 
       // Publish all to main broker
-      publishToBroker(httpClient.doRequestSync, pactBrokerAddress, versionToPublishAs, tagsToPublishWith, pactBrokerAuthorization)(
-        pactWriter
-      )(
-        configAndPactFiles
-      ).foreach(r => PactLogger.message(r.renderAsString))
+      val mainPublishResults: List[PublishResult] = publishToBroker(
+        sendIt = httpClient.doRequestSync,
+        pactBrokerAddress,
+        versionToPublishAs,
+        tagsToPublishWith,
+        pactBrokerAuthorization
+      )(pactWriter)(configAndPactFiles)
 
       // Publish to other specified brokers
-      configAndPactFiles.pacts.foreach { pactContract =>
-        providerBrokerPublishMap.get(pactContract.provider.name).foreach { broker =>
-          publishToBroker(httpClient.doRequestSync, broker, versionToPublishAs, tagsToPublishWith, pactBrokerAuthorization)(
-            pactWriter
-          )(
-            ConfigAndPacts(scalaPactSettings, List(pactContract))
-          ).foreach(r => PactLogger.message(r.renderAsString))
-        }
-      }
+      val otherPublishResults: List[PublishResult] = for {
+        pactContract <- configAndPactFiles.pacts
+        broker       <- providerBrokerPublishMap.get(pactContract.provider.name).toList
+        publishResult <- publishToBroker(
+          sendIt = httpClient.doRequestSync,
+          broker,
+          versionToPublishAs,
+          tagsToPublishWith,
+          pactBrokerAuthorization
+        )(pactWriter)(ConfigAndPacts(scalaPactSettings, List(pactContract)))
+      } yield publishResult
 
+      evaluatePublishResults(mainPublishResults ++ otherPublishResults)
     }
   }
+
+  private def evaluatePublishResults(publishResults: List[PublishResult]): Unit = {
+    publishResults.foreach {
+      case result: PublishSuccess => PactLogger.message(result.renderAsString)
+      case result: PublishFailed  => PactLogger.error(result.renderAsString)
+    }
+
+    val noErrors = publishResults.collectFirst { case _: PublishFailed => () }.isEmpty
+
+    if (noErrors) exitSuccess()
+    else exitFailure()
+  }
+
+  private def exitSuccess(): Unit = sys.exit(0)
+
+  private def exitFailure(): Unit = sys.exit(1)
 }
