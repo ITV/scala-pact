@@ -48,7 +48,7 @@ lazy val compilerOptions212 = scalacOptions ++= Seq(
 )
 
 lazy val commonSettings = Seq(
-  version := "2.3.11",
+  version := "2.3.12",
   organization := "com.itv",
   scalaVersion := scala212,
   libraryDependencies ++= Seq(
