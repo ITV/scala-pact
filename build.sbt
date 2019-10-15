@@ -74,7 +74,7 @@ lazy val scala213: String       = "2.13.1"
 lazy val supportedScalaVersions = List(scala212, scala213)
 
 lazy val commonSettings = Seq(
-  version := "2.3.11",
+  version := "2.3.12-SNAPSHOT",
   organization := "com.itv",
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.0.8" % "test"
