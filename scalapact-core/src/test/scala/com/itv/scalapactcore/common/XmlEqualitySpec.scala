@@ -6,6 +6,8 @@ import org.scalatest.{FunSpec, Matchers}
 
 import scala.xml.Elem
 
+import scala.language.implicitConversions
+
 class XmlEqualitySpec extends FunSpec with Matchers {
 
   implicit def elemToNode(elem: Elem): IrNode =

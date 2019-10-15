@@ -1,39 +1,10 @@
-lazy val compilerOptions212 = scalacOptions ++= Seq(
-  "-deprecation", // Emit warning and location for usages of deprecated APIs.
-  "-encoding",
-  "utf-8",                            // Specify character encoding used by source files.
-  "-explaintypes",                    // Explain type errors in more detail.
-  "-feature",                         // Emit warning and location for usages of features that should be imported explicitly.
-  "-language:existentials",           // Existential types (besides wildcard types) can be written and inferred
-  "-language:experimental.macros",    // Allow macro definition (besides implementation and application)
-  "-language:higherKinds",            // Allow higher-kinded types
-  "-language:implicitConversions",    // Allow definition of implicit functions called views
-  "-unchecked",                       // Enable additional warnings where generated code depends on assumptions.
-  "-Xcheckinit",                      // Wrap field accessors to throw an exception on uninitialized access.
-  "-Xfatal-warnings",                 // Fail the compilation if there are any warnings.
+lazy val compilerOptions212 = Seq(
   "-Xfuture",                         // Turn on future language features.
-  "-Xlint:adapted-args",              // Warn if an argument list is modified to match the receiver.
   "-Xlint:by-name-right-associative", // By-name parameter of right associative operator.
-  "-Xlint:constant",                  // Evaluation of a constant arithmetic expression results in an error.
-  "-Xlint:delayedinit-select",        // Selecting member of DelayedInit.
-  "-Xlint:doc-detached",              // A Scaladoc comment appears to be detached from its element.
-  "-Xlint:inaccessible",              // Warn about inaccessible types in method signatures.
-  "-Xlint:infer-any",                 // Warn when a type argument is inferred to be `Any`.
-  "-Xlint:missing-interpolator",      // A string literal appears to be missing an interpolator id.
-  "-Xlint:nullary-override",          // Warn when non-nullary `def f()' overrides nullary `def f'.
-  "-Xlint:nullary-unit",              // Warn when nullary methods return Unit.
-  "-Xlint:option-implicit",           // Option.apply used implicit view.
-  "-Xlint:package-object-classes",    // Class or object defined in package object.
-  "-Xlint:poly-implicit-overload",    // Parameterized overloaded implicit methods are not visible as view bounds.
-  "-Xlint:private-shadow",            // A private field (or class parameter) shadows a superclass field.
-  "-Xlint:stars-align",               // Pattern sequence wildcard must align with sequence component.
-  "-Xlint:type-parameter-shadow",     // A local type parameter shadows a type already in scope.
   "-Xlint:unsound-match",             // Pattern match may not be typesafe.
   "-Yno-adapted-args",                // Do not adapt an argument list (either by inserting () or creating a tuple) to match the receiver.
-  "-Ypartial-unification",            // Enable partial unification in type constructor inference
   "-Ywarn-dead-code",                 // Warn when dead code is identified.
   "-Ywarn-extra-implicit",            // Warn when more than one implicit parameter section is defined.
-  "-Ywarn-inaccessible",              // Warn about inaccessible types in method signatures.
   "-Ywarn-infer-any",                 // Warn when a type argument is inferred to be `Any`.
   "-Ywarn-nullary-override",          // Warn when non-nullary `def f()' overrides nullary `def f'.
   "-Ywarn-nullary-unit",              // Warn when nullary methods return Unit.
@@ -44,17 +15,72 @@ lazy val compilerOptions212 = scalacOptions ++= Seq(
   "-Ywarn-unused:params",             // Warn if a value parameter is unused.
   "-Ywarn-unused:patvars",            // Warn if a variable bound in a pattern is unused.
   "-Ywarn-unused:privates",           // Warn if a private member is unused.
-  "-Ywarn-value-discard"              // Warn when non-Unit expression results are unused.
+  "-Ywarn-value-discard",             // Warn when non-Unit expression results are unused.
+  "-Ypartial-unification"             // Enable partial unification in type constructor inference
 )
+
+lazy val compilerOptions213 = Seq(
+  "-Xlint:adapted-args",     // Warn if an argument list is modified to match the receiver.
+  "-Xlint:inaccessible",     // Warn about inaccessible types in method signatures.
+  "-Xlint:infer-any",        // Warn when a type argument is inferred to be Any.
+  "-Xlint:nullary-override", // Warn when non-nullary def f()' overrides nullarydef f’.
+  "-Xlint:nullary-unit",     // Warn when nullary methods return Unit.
+  "-Xlint:unused",           // Enable -Ywarn-unused:imports,privates,locals,implicits.
+  "-Wdead-code",             // Warn when dead code is identified.
+  "-Wextra-implicit",        // Warn when more than one implicit parameter section is defined.
+  "-Wnumeric-widen",         // Warn when numerics are widened.
+  "-Wunused:patvars",        // Warn if a variable bound in a pattern is unused.
+  "-Wvalue-discard"          // Warn when non-Unit expression results are unused.
+)
+
+lazy val compilerOptionsAll = Seq(
+  "-deprecation", // Emit warning and location for usages of deprecated APIs.
+  "-encoding",
+  "utf-8",                         // Specify character encoding used by source files.
+  "-explaintypes",                 // Explain type errors in more detail.
+  "-feature",                      // Emit warning and location for usages of features that should be imported explicitly.
+  "-language:existentials",        // Existential types (besides wildcard types) can be written and inferred
+  "-language:experimental.macros", // Allow macro definition (besides implementation and application)
+  "-language:higherKinds",         // Allow higher-kinded types
+  "-unchecked",                    // Enable additional warnings where generated code depends on assumptions.
+  "-Xcheckinit",                   // Wrap field accessors to throw an exception on uninitialized access.
+  "-Xfatal-warnings",              // Fail the compilation if there are any warnings.
+  "-Xlint:adapted-args",           // Warn if an argument list is modified to match the receiver.
+  "-Xlint:constant",               // Evaluation of a constant arithmetic expression results in an error.
+  "-Xlint:delayedinit-select",     // Selecting member of DelayedInit.
+  "-Xlint:doc-detached",           // A Scaladoc comment appears to be detached from its element.
+  "-Xlint:inaccessible",           // Warn about inaccessible types in method signatures.
+  "-Xlint:infer-any",              // Warn when a type argument is inferred to be `Any`.
+  "-Xlint:missing-interpolator",   // A string literal appears to be missing an interpolator id.
+  "-Xlint:nullary-override",       // Warn when non-nullary `def f()' overrides nullary `def f'.
+  "-Xlint:nullary-unit",           // Warn when nullary methods return Unit.
+  "-Xlint:option-implicit",        // Option.apply used implicit view.
+  "-Xlint:package-object-classes", // Class or object defined in package object.
+  "-Xlint:poly-implicit-overload", // Parameterized overloaded implicit methods are not visible as view bounds.
+  "-Xlint:private-shadow",         // A private field (or class parameter) shadows a superclass field.
+  "-Xlint:stars-align",            // Pattern sequence wildcard must align with sequence component.
+  "-Xlint:type-parameter-shadow"   // A local type parameter shadows a type already in scope.
+)
+
+def compilerOptionsVersion(scalaVersion: String) =
+  compilerOptionsAll ++ (CrossVersion.partialVersion(scalaVersion) match {
+    case Some((2L, scalaMajor)) if scalaMajor == 12 => compilerOptions212
+    case Some((2L, scalaMajor)) if scalaMajor == 13 => compilerOptions213
+    case _                                          => Nil
+  })
+
+lazy val scala212: String       = "2.12.8"
+lazy val scala213: String       = "2.13.1"
+lazy val supportedScalaVersions = List(scala212, scala213)
 
 lazy val commonSettings = Seq(
   version := "2.3.11",
   organization := "com.itv",
-  scalaVersion := scala212,
   libraryDependencies ++= Seq(
-    "org.scalatest" %% "scalatest" % "3.0.5" % "test"
+    "org.scalatest" %% "scalatest" % "3.0.8" % "test"
   ),
   wartremoverWarnings in (Compile, compile) ++= Warts.allBut(
+    Wart.Any,
     Wart.Overloading,
     Wart.FinalCaseClass,
     Wart.ImplicitConversion,
@@ -66,13 +92,22 @@ lazy val commonSettings = Seq(
     Wart.Recursion,
     Wart.LeakingSealed,
     Wart.Null,
-    Wart.Var
+    Wart.Var,
+    Wart.StringPlusAny
   ),
   parallelExecution in Test := false,
 //  javaOptions in Test ++= Seq(
 //    "-XX:+UnlockCommercialFeatures", "-XX:+FlightRecorder"
 //  ),
   test in assembly := {}
+)
+
+lazy val scala212OnlySettings = Seq(
+  scalaVersion := scala212
+)
+
+lazy val crossBuildSettings = Seq(
+  crossScalaVersions := supportedScalaVersions
 )
 
 lazy val mockSettings = Seq(
@@ -112,8 +147,6 @@ lazy val publishSettings = Seq(
       </developers>
 )
 
-lazy val scala212: String = "2.12.8"
-
 lazy val shared =
   (project in file("scalapact-shared"))
     .enablePlugins(BuildInfoPlugin)
@@ -125,9 +158,10 @@ lazy val shared =
     .settings(publishSettings: _*)
     .settings(
       name := "scalapact-shared",
-      libraryDependencies ++= Seq("org.scala-lang.modules" %% "scala-xml" % "1.0.6")
+      libraryDependencies ++= Seq("org.scala-lang.modules" %% "scala-xml" % "1.2.0")
     )
-    .settings(compilerOptions212: _*)
+    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
+    .settings(crossBuildSettings: _*)
 
 lazy val core =
   (project in file("scalapact-core"))
@@ -137,7 +171,8 @@ lazy val core =
       name := "scalapact-core"
     )
     .dependsOn(shared)
-    .settings(compilerOptions212: _*)
+    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
+    .settings(crossBuildSettings: _*)
 
 lazy val http4s016a =
   (project in file("scalapact-http4s-0-16a"))
@@ -153,7 +188,8 @@ lazy val http4s016a =
       )
     )
     .dependsOn(shared)
-    .settings(compilerOptions212: _*)
+    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
+    .settings(scala212OnlySettings)
 
 lazy val http4s017 =
   (project in file("scalapact-http4s-0-17"))
@@ -170,7 +206,8 @@ lazy val http4s017 =
       )
     )
     .dependsOn(shared)
-    .settings(compilerOptions212: _*)
+    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
+    .settings(scala212OnlySettings)
 
 lazy val http4s018 =
   (project in file("scalapact-http4s-0-18"))
@@ -186,7 +223,8 @@ lazy val http4s018 =
       )
     )
     .dependsOn(shared)
-    .settings(compilerOptions212: _*)
+    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
+    .settings(scala212OnlySettings)
 
 lazy val http4s020 =
   (project in file("scalapact-http4s-0-20"))
@@ -195,14 +233,32 @@ lazy val http4s020 =
     .settings(
       name := "scalapact-http4s-0-20",
       libraryDependencies ++= Seq(
-        "org.http4s"             %% "http4s-blaze-server" % "0.20.0",
-        "org.http4s"             %% "http4s-blaze-client" % "0.20.0",
-        "org.http4s"             %% "http4s-dsl"          % "0.20.0",
+        "org.http4s"             %% "http4s-blaze-server" % "0.20.11",
+        "org.http4s"             %% "http4s-blaze-client" % "0.20.11",
+        "org.http4s"             %% "http4s-dsl"          % "0.20.11",
         "com.github.tomakehurst" % "wiremock"             % "1.56" % "test"
       )
     )
     .dependsOn(shared)
-    .settings(compilerOptions212: _*)
+    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
+    .settings(scala212OnlySettings)
+
+lazy val http4s021 =
+  (project in file("scalapact-http4s-0-21"))
+    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
+    .settings(
+      name := "scalapact-http4s-0-21",
+      libraryDependencies ++= Seq(
+        "org.http4s"             %% "http4s-blaze-server" % "0.21.0-M5",
+        "org.http4s"             %% "http4s-blaze-client" % "0.21.0-M5",
+        "org.http4s"             %% "http4s-dsl"          % "0.21.0-M5",
+        "com.github.tomakehurst" % "wiremock"             % "1.56" % "test"
+      )
+    )
+    .dependsOn(shared)
+    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
+    .settings(crossBuildSettings: _*)
 
 lazy val testShared =
   (project in file("scalapact-test-shared"))
@@ -212,7 +268,8 @@ lazy val testShared =
       skip in publish := true
     )
     .dependsOn(shared)
-    .settings(compilerOptions212: _*)
+    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
+    .settings(crossBuildSettings: _*)
 
 lazy val argonaut62 =
   (project in file("scalapact-argonaut-6-2"))
@@ -221,12 +278,13 @@ lazy val argonaut62 =
     .settings(
       name := "scalapact-argonaut-6-2",
       libraryDependencies ++= Seq(
-        "io.argonaut" %% "argonaut" % "6.2"
+        "io.argonaut" %% "argonaut" % "6.2.3"
       )
     )
     .dependsOn(shared)
     .dependsOn(testShared % "test->compile")
-    .settings(compilerOptions212: _*)
+    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
+    .settings(crossBuildSettings: _*)
 
 lazy val circe08 =
   (project in file("scalapact-circe-0-8"))
@@ -242,7 +300,8 @@ lazy val circe08 =
     )
     .dependsOn(shared)
     .dependsOn(testShared % "test->compile")
-    .settings(compilerOptions212: _*)
+    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
+    .settings(scala212OnlySettings)
 
 lazy val circe09 =
   (project in file("scalapact-circe-0-9"))
@@ -258,7 +317,8 @@ lazy val circe09 =
     )
     .dependsOn(shared)
     .dependsOn(testShared % "test->compile")
-    .settings(compilerOptions212: _*)
+    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
+    .settings(scala212OnlySettings)
 
 lazy val circe10 =
   (project in file("scalapact-circe-0-10"))
@@ -274,7 +334,8 @@ lazy val circe10 =
     )
     .dependsOn(shared)
     .dependsOn(testShared % "test->compile")
-    .settings(compilerOptions212: _*)
+    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
+    .settings(scala212OnlySettings)
 
 lazy val circe11 =
   (project in file("scalapact-circe-0-11"))
@@ -290,7 +351,8 @@ lazy val circe11 =
     )
     .dependsOn(shared)
     .dependsOn(testShared % "test->compile")
-    .settings(compilerOptions212: _*)
+    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
+    .settings(scala212OnlySettings)
 
 lazy val circe12 =
   (project in file("scalapact-circe-0-12"))
@@ -306,7 +368,8 @@ lazy val circe12 =
     )
     .dependsOn(shared)
     .dependsOn(testShared % "test->compile")
-    .settings(compilerOptions212: _*)
+    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
+    .settings(crossBuildSettings: _*)
 
 lazy val pluginShared =
   (project in file("sbt-scalapact-shared"))
@@ -317,7 +380,7 @@ lazy val pluginShared =
       scalaVersion := scala212
     )
     .dependsOn(core)
-    .settings(compilerOptions212: _*)
+    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
 
 lazy val plugin =
   (project in file("sbt-scalapact"))
@@ -331,7 +394,7 @@ lazy val plugin =
     .dependsOn(pluginShared)
     .dependsOn(argonaut62)
     .dependsOn(http4s018)
-    .settings(compilerOptions212: _*)
+    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
 
 lazy val pluginNoDeps =
   (project in file("sbt-scalapact-nodeps"))
@@ -345,7 +408,7 @@ lazy val pluginNoDeps =
     .dependsOn(pluginShared)
     .dependsOn(argonaut62 % "provided")
     .dependsOn(http4s018 % "provided")
-    .settings(compilerOptions212: _*)
+    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
 
 lazy val framework =
   (project in file("scalapact-scalatest"))
@@ -358,7 +421,8 @@ lazy val framework =
       }
     )
     .dependsOn(core)
-    .settings(compilerOptions212: _*)
+    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
+    .settings(crossBuildSettings: _*)
 
 lazy val standalone =
   (project in file("scalapact-standalone-stubber"))
@@ -376,7 +440,7 @@ lazy val standalone =
     .dependsOn(core)
     .dependsOn(circe09)
     .dependsOn(http4s018)
-    .settings(compilerOptions212: _*)
+    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
 
 lazy val pactSpec =
   (project in file("pact-spec-tests"))
@@ -430,10 +494,11 @@ lazy val scalaPactProject =
   (project in file("."))
     .settings(commonSettings: _*)
     .settings(
-      skip in publish := true
+      skip in publish := true,
+      crossScalaVersions := Nil
     )
     .aggregate(shared, core, pluginShared, plugin, pluginNoDeps, framework, testShared)
-    .aggregate(http4s016a, http4s017, http4s018, http4s020)
+    .aggregate(http4s016a, http4s017, http4s018, http4s020, http4s021)
     .aggregate(argonaut62, circe08, circe09, circe10, circe11, circe12)
     .aggregate(standalone)
     .aggregate(docs)

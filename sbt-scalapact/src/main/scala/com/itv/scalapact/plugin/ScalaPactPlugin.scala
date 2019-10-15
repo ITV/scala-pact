@@ -10,6 +10,8 @@ import sbt.plugins.JvmPlugin
 import sbt.{Def, _}
 import complete.DefaultParsers._
 
+import scala.language.implicitConversions
+
 object ScalaPactPlugin extends AutoPlugin {
   override def requires: JvmPlugin.type = plugins.JvmPlugin
   override def trigger: PluginTrigger   = allRequirements
@@ -22,8 +24,10 @@ object ScalaPactPlugin extends AutoPlugin {
     implicit def toSetupProviderState(bool: Boolean): ProviderStateResult = ProviderStateResult(bool)
 
     val providerStateMatcher: SettingKey[PartialFunction[String, ProviderStateResult]] =
-      SettingKey[PartialFunction[String, ProviderStateResult]]("provider-state-matcher",
-                                                               "Alternative partial function for provider state setup")
+      SettingKey[PartialFunction[String, ProviderStateResult]](
+        "provider-state-matcher",
+        "Alternative partial function for provider state setup"
+      )
 
     val providerStates: SettingKey[Seq[(String, SetupProviderState)]] =
       SettingKey[Seq[(String, SetupProviderState)]]("provider-states", "A list of provider state setup functions")
@@ -32,10 +36,16 @@ object ScalaPactPlugin extends AutoPlugin {
       SettingKey[String]("pactBrokerAddress", "The base url to publish / pull pact contract files to and from.")
 
     val pactBrokerCredentials: SettingKey[(String, String)] =
-      SettingKey[(String, String)]("pactBrokerCredentials", "The basic authentication credentials (username, password) for accessing the broker.")
+      SettingKey[(String, String)](
+        "pactBrokerCredentials",
+        "The basic authentication credentials (username, password) for accessing the broker."
+      )
 
     val pactBrokerToken: SettingKey[String] =
-      SettingKey[String]("pactBrokerToken", "The token used in the \"Bearer theToken\" header for accessing the broker.")
+      SettingKey[String](
+        "pactBrokerToken",
+        "The token used in the \"Bearer theToken\" header for accessing the broker."
+      )
 
     val providerBrokerPublishMap: SettingKey[Map[String, String]] =
       SettingKey[Map[String, String]](
@@ -74,8 +84,10 @@ object ScalaPactPlugin extends AutoPlugin {
       )
 
     val allowSnapshotPublish: SettingKey[Boolean] =
-      SettingKey[Boolean]("allowSnapshotPublish",
-                          "Flag to permit publishing of snapshot pact files to pact broker. Default is false.")
+      SettingKey[Boolean](
+        "allowSnapshotPublish",
+        "Flag to permit publishing of snapshot pact files to pact broker. Default is false."
+      )
 
     val scalaPactEnv: SettingKey[ScalaPactEnv] =
       SettingKey[ScalaPactEnv]("scalaPactEnv", "Settings used to config the running of tasks and commands")
@@ -117,7 +129,10 @@ object ScalaPactPlugin extends AutoPlugin {
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   override lazy val projectSettings: Seq[Def.Setting[
-    _ >: Seq[(String, SetupProviderState)] with Seq[(String, String)] with Seq[(String, Seq[String])] with (String, String) with Boolean with ScalaPactEnv with Map[
+    _ >: Seq[(String, SetupProviderState)] with Seq[(String, String)] with Seq[(String, Seq[String])] with (
+        String,
+        String
+    ) with Boolean with ScalaPactEnv with Map[
       String,
       String
     ] with String with Seq[String] with PartialFunction[String, ProviderStateResult] with Task[Unit] with InputTask[

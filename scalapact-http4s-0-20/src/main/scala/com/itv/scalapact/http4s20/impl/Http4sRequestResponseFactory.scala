@@ -10,6 +10,8 @@ import io.chrisdavenport.vault.Vault
 import org.http4s._
 import scodec.bits.ByteVector
 
+import scala.language.implicitConversions
+
 object Http4sRequestResponseFactory {
 
   import HeaderImplicitConversions._

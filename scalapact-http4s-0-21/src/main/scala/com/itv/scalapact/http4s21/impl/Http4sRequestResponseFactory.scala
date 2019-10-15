@@ -1,4 +1,4 @@
-package com.itv.scalapact.http4s18.impl
+package com.itv.scalapact.http4s21.impl
 
 import java.nio.charset.StandardCharsets
 
@@ -6,6 +6,7 @@ import cats.effect.IO
 import com.itv.scalapact.shared.HttpMethod._
 import com.itv.scalapact.shared.{HttpMethod, SimpleRequest}
 import fs2.Chunk
+import io.chrisdavenport.vault.Vault
 import org.http4s._
 import scodec.bits.ByteVector
 
@@ -72,7 +73,7 @@ object Http4sRequestResponseFactory {
         httpVersion = HttpVersion.`HTTP/1.1`,
         headers = request.headers,
         body = EmptyBody,
-        attributes = AttributeMap.empty
+        attributes = Vault.empty
       )
 
       request.body
@@ -80,7 +81,7 @@ object Http4sRequestResponseFactory {
           implicit val enc: EntityEncoder[IO, String] =
             EntityEncoder.simple[IO, String]()(stringToByteVector)
 
-          r.withBody(b)
+          IO(r.withEntity(b))
         }
         .getOrElse(IO(r))
     }
@@ -96,14 +97,14 @@ object Http4sRequestResponseFactory {
           httpVersion = HttpVersion.`HTTP/1.1`,
           headers = headers,
           body = EmptyBody,
-          attributes = AttributeMap.empty
+          attributes = Vault.empty
         )
 
         body
           .map { b =>
             implicit val enc: EntityEncoder[IO, String] =
               EntityEncoder.simple[IO, String]()(stringToByteVector)
-            response.withBody(b)
+            IO(response.withEntity(b))
           }
           .getOrElse(IO(response))
     }

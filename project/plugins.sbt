@@ -2,7 +2,7 @@ addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.6")
 
 addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.1.0")
 
-addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.2.1")
+addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.4.3")
 
 addSbtPlugin("com.lightbend.paradox" % "sbt-paradox" % "0.3.0")
 
