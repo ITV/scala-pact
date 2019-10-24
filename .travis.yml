@@ -4,7 +4,7 @@ scala:
   - 2.12.8
 
 script:
-  - echo "A THING IS BUILDING"
+  - bash ./scripts/local-build-test.sh
 
 after_success:
-  - echo "Finished yaaaayyy"
+  - echo "Build completed for commit $TRAVIS_COMMIT on branch $TRAVIS_BRANCH"
