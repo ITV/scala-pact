@@ -1,0 +1,10 @@
+language: scala
+
+scala:
+  - 2.12.8
+
+script:
+  - echo "A THING IS BUILDING"
+
+after_success:
+  - echo "Finished yaaaayyy"

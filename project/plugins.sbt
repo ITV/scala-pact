@@ -17,3 +17,5 @@ addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.6")
 addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.9.0")
 
 addSbtPlugin("ch.epfl.scala" % "sbt-bloop" % "1.0.0")
+
+addSbtPlugin("com.dwijnand" % "sbt-travisci" % "1.2.0")
