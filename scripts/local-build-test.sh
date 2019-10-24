@@ -9,8 +9,12 @@ source scripts/test-header.sh
 echo "Building and testing locally published Scala-Pact"
 echo "*************************************************"
 
-echo -e "Have you considered clearing out ~/.ivy2/local to ensure old artefacts aren't being picked up? [y/n] \c"
-read CLEAR_LOCAL_CHECK
+if [[ -z "${CI}" ]]; then
+  echo -e "Have you considered clearing out ~/.ivy2/local to ensure old artefacts aren't being picked up? [y/n] \c"
+  read CLEAR_LOCAL_CHECK
+else
+  CLEAR_LOCAL_CHECK="y"
+fi
 
 if [ $CLEAR_LOCAL_CHECK != 'y' ]; then
   echo "It's worth considering... I'll leave you to think about it..."

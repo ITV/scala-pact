@@ -15,8 +15,12 @@ ALL_VERSIONS="$CORE_VERSION $CONSUMER_VERSION $CONSUMER_PLUGIN_VERSION $PROVIDER
 ALL_EXPECTED="$CORE_VERSION $CORE_VERSION $CORE_VERSION $CORE_VERSION $CORE_VERSION"
 
 if [[ $ALL_VERSIONS == $ALL_EXPECTED ]]; then
-  echo -e "Version set to $CORE_VERSION, proceed? [y/n] \c"
-  read CORRECT
+  if [[ -z "${CI}" ]]; then
+    echo -e "Version set to $CORE_VERSION, proceed? [y/n] \c"
+    read CORRECT
+  else
+    CORRECT="y"
+  fi
 else
   echo "Project versions did not match."
   echo "Have you aligned the versions in all the projects? Found:"

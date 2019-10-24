@@ -1,4 +1,4 @@
-# Scala-Pact
+# Scala-Pact [![travis-badge][]][travis]
 
 A Consumer Driven Contract testing library for Scala and [ScalaTest](http://www.scalatest.org/) that follows the [Pact](https://docs.pact.io/) standard.
 
