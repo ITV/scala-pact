@@ -4,6 +4,7 @@ scala:
   - 2.12.8
 
 script:
+  - alias sbt='sbt ++$TRAVIS_SCALA_VERSION -jvm-opts .jvmopts'
   - bash ./scripts/local-build-test.sh
 
 after_success:
