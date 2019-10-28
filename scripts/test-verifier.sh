@@ -47,7 +47,7 @@ echo "...giving the stubber a $COUNTDOWN second head start to warm up..."
 simple_countdown $COUNTDOWN
 
 echo "Verifying..."
-sbt "testsWithDeps/pactVerify --source target/pacts"
+sbt "testsWithDeps/pactVerify --source target/pacts --clientTimeout 10"
 
 pkill -1 -f sbt-launch.jar
 
