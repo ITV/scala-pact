@@ -18,22 +18,20 @@ object Http4sClientHelper {
   def defaultClient: Resource[IO, Client[IO]] =
     buildPooledBlazeHttpClient(1, Duration(1, SECONDS), None)
 
-  def buildPooledBlazeHttpClient(maxTotalConnections: Int,
-                                 clientTimeout: Duration,
-                                 sslContext: Option[SSLContext]): Resource[IO, Client[IO]] = {
+  def buildPooledBlazeHttpClient(
+      maxTotalConnections: Int,
+      clientTimeout: Duration,
+      sslContext: Option[SSLContext]
+  ): Resource[IO, Client[IO]] = {
     implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
-    val builder = BlazeClientBuilder[IO](ExecutionContext.global)
+    BlazeClientBuilder[IO](ExecutionContext.global)
       .withMaxTotalConnections(maxTotalConnections)
       .withRequestTimeout(clientTimeout)
+      .withSslContext(sslContext.getOrElse(SSLContext.getDefault))
       .withUserAgentOption(Option(`User-Agent`(AgentProduct("scala-pact", Option(BuildInfo.version)))))
       .withCheckEndpointAuthentication(false)
-    sslContext.fold(
-      builder.withDefaultSslContext
-    )(ctx =>
-      builder.withSslContext(ctx)
-    ).resource
-    builder.resource
+      .resource
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
