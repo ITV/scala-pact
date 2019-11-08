@@ -376,10 +376,10 @@ lazy val pluginShared =
     .settings(commonSettings: _*)
     .settings(publishSettings: _*)
     .settings(
-      name := "sbt-scalapact-shared",
-      scalaVersion := scala212
+      name := "sbt-scalapact-shared"
     )
     .dependsOn(core)
+    .settings(scala212OnlySettings)
     .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
 
 lazy val plugin =
@@ -388,12 +388,12 @@ lazy val plugin =
     .settings(publishSettings: _*)
     .settings(
       name := "sbt-scalapact",
-      sbtPlugin := true,
-      scalaVersion := scala212
+      sbtPlugin := true
     )
     .dependsOn(pluginShared)
     .dependsOn(argonaut62)
     .dependsOn(http4s018)
+    .settings(scala212OnlySettings)
     .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
 
 lazy val pluginNoDeps =
@@ -402,12 +402,12 @@ lazy val pluginNoDeps =
     .settings(publishSettings: _*)
     .settings(
       name := "sbt-scalapact-nodeps",
-      sbtPlugin := true,
-      scalaVersion := scala212
+      sbtPlugin := true
     )
     .dependsOn(pluginShared)
     .dependsOn(argonaut62 % "provided")
     .dependsOn(http4s018 % "provided")
+    .settings(scala212OnlySettings)
     .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
 
 lazy val framework =
@@ -429,7 +429,6 @@ lazy val standalone =
     .settings(commonSettings: _*)
     .settings(
       name := "scalapact-standalone-stubber",
-      scalaVersion := scala212,
       publish := {},
       assemblyJarName in assembly := "pactstubber.jar",
       libraryDependencies ++= Seq(
@@ -440,6 +439,7 @@ lazy val standalone =
     .dependsOn(core)
     .dependsOn(circe09)
     .dependsOn(http4s018)
+    .settings(scala212OnlySettings)
     .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
 
 lazy val pactSpec =
