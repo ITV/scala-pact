@@ -112,7 +112,7 @@ lazy val publishSettings = Seq(
       </developers>
 )
 
-lazy val scala212: String = "2.12.8"
+lazy val scala212: String = "2.12.10"
 
 lazy val shared =
   (project in file("scalapact-shared"))
@@ -199,6 +199,22 @@ lazy val http4s020 =
         "org.http4s"             %% "http4s-blaze-client" % "0.20.0",
         "org.http4s"             %% "http4s-dsl"          % "0.20.0",
         "com.github.tomakehurst" % "wiremock"             % "1.56" % "test"
+      )
+    )
+    .dependsOn(shared)
+    .settings(compilerOptions212: _*)
+
+lazy val http4s021 =
+  (project in file("scalapact-http4s-0-21"))
+    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
+    .settings(
+      name := "scalapact-http4s-0-20",
+      libraryDependencies ++= Seq(
+        "org.http4s"             %% "http4s-blaze-server" % "0.21.0-M6",
+        "org.http4s"             %% "http4s-blaze-client" % "0.21.0-M6",
+        "org.http4s"             %% "http4s-dsl"          % "0.21.0-M6",
+        "com.github.tomakehurst" % "wiremock"             % "2.25.1" % "test"
       )
     )
     .dependsOn(shared)
@@ -433,7 +449,7 @@ lazy val scalaPactProject =
       skip in publish := true
     )
     .aggregate(shared, core, pluginShared, plugin, pluginNoDeps, framework, testShared)
-    .aggregate(http4s016a, http4s017, http4s018, http4s020)
+    .aggregate(http4s016a, http4s017, http4s018, http4s020, http4s021)
     .aggregate(argonaut62, circe08, circe09, circe10, circe11, circe12)
     .aggregate(standalone)
     .aggregate(docs)
