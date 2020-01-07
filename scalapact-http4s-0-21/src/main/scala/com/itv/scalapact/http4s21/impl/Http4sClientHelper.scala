@@ -16,7 +16,7 @@ object Http4sClientHelper {
   import HeaderImplicitConversions._
 
   def defaultClient: Resource[IO, Client[IO]] =
-    buildPooledBlazeHttpClient(1, Duration(1, SECONDS), None)
+    buildPooledBlazeHttpClient(1, Duration(5, SECONDS), None)
 
   def buildPooledBlazeHttpClient(maxTotalConnections: Int,
                                  clientTimeout: Duration,

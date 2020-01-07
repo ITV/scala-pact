@@ -209,7 +209,7 @@ lazy val http4s021 =
     .settings(commonSettings: _*)
     .settings(publishSettings: _*)
     .settings(
-      name := "scalapact-http4s-0-20",
+      name := "scalapact-http4s-0-21",
       libraryDependencies ++= Seq(
         "org.http4s"             %% "http4s-blaze-server" % "0.21.0-M6",
         "org.http4s"             %% "http4s-blaze-client" % "0.21.0-M6",
