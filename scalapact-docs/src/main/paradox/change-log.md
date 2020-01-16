@@ -39,6 +39,9 @@ With thanks to all contributors!
 
 Maintained by [davesmith00000].
 
+## 2.3.13 - 2020-01-16
+- Cross compile for Scala 2.13.
+
 ## 2.3.12 - 2019-10-16
 - Exit with error if any pact push operations fail (not API breaking, but potentially CI breaking) ([dantb])
 
