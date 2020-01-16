@@ -1,21 +1,21 @@
 addCommandAlias(
   "prepareScalaPactPublish",
   List(
-    "clean",
-    "update",
-    "compile",
-    "test",
-    "publishSigned"
+    "+clean",
+    "+update",
+    "+compile",
+    "+test",
+    "+publishSigned"
   ).mkString(";", ";", "")
 )
 
 addCommandAlias(
   "localPublishScalaPact",
   List(
-    "clean",
-    "update",
-    "compile",
-    "test",
-    "publishLocal"
+    "+clean",
+    "+update",
+    "+compile",
+    "+test",
+    "+publishLocal"
   ).mkString(";", ";", "")
 )
