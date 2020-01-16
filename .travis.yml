@@ -1,0 +1,12 @@
+language: scala
+
+scala:
+  - 2.12.10
+  - 2.13.1
+
+script:
+  - alias sbt='sbt ++$TRAVIS_SCALA_VERSION -jvm-opts .jvmopts'
+  - bash ./scripts/local-build-test.sh
+
+after_success:
+  - echo "Build completed for commit $TRAVIS_COMMIT on branch $TRAVIS_BRANCH"

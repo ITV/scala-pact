@@ -16,19 +16,17 @@ object Http4sClientHelper {
   import HeaderImplicitConversions._
 
   def defaultClient: Resource[IO, Client[IO]] =
-    buildPooledBlazeHttpClient(1, Duration(1, SECONDS), None)
+    buildPooledBlazeHttpClient(1, Duration(5, SECONDS), None)
 
-  def buildPooledBlazeHttpClient(
-      maxTotalConnections: Int,
-      clientTimeout: Duration,
-      sslContext: Option[SSLContext]
-  ): Resource[IO, Client[IO]] = {
+  def buildPooledBlazeHttpClient(maxTotalConnections: Int,
+                                 clientTimeout: Duration,
+                                 sslContext: Option[SSLContext]): Resource[IO, Client[IO]] = {
     implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
     BlazeClientBuilder[IO](ExecutionContext.global)
       .withMaxTotalConnections(maxTotalConnections)
       .withRequestTimeout(clientTimeout)
-      .withSslContext(sslContext.getOrElse(SSLContext.getDefault))
+      .withSslContextOption(sslContext)
       .withUserAgentOption(Option(`User-Agent`(AgentProduct("scala-pact", Option(BuildInfo.version)))))
       .withCheckEndpointAuthentication(false)
       .resource

@@ -12,9 +12,9 @@ enablePlugins(ScalaPactPlugin)
 
 libraryDependencies ++=
   Seq(
-    "com.itv"       %% "scalapact-circe-0-9"   % "2.3.11" % "test",
-    "com.itv"       %% "scalapact-http4s-0-18" % "2.3.11" % "test",
-    "com.itv"       %% "scalapact-scalatest"   % "2.3.11" % "test",
+    "com.itv"       %% "scalapact-circe-0-9"   % "2.3.12" % "test",
+    "com.itv"       %% "scalapact-http4s-0-18" % "2.3.12" % "test",
+    "com.itv"       %% "scalapact-scalatest"   % "2.3.12" % "test",
     "org.scalaj"    %% "scalaj-http"           % "2.3.0",
     "org.slf4j"     % "slf4j-simple"           % "1.6.4",
     "org.json4s"    %% "json4s-native"         % "3.5.0",

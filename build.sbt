@@ -64,17 +64,19 @@ lazy val compilerOptionsAll = Seq(
 
 def compilerOptionsVersion(scalaVersion: String) =
   compilerOptionsAll ++ (CrossVersion.partialVersion(scalaVersion) match {
-    case Some((2L, scalaMajor)) if scalaMajor == 12 => compilerOptions212
-    case Some((2L, scalaMajor)) if scalaMajor == 13 => compilerOptions213
-    case _                                          => Nil
+    case Some((2L, 12L)) => compilerOptions212
+    case Some((2L, 13L)) => compilerOptions213
+    case _               => Nil
   })
 
-lazy val scala212: String       = "2.12.8"
-lazy val scala213: String       = "2.13.1"
-lazy val supportedScalaVersions = List(scala212, scala213)
+lazy val scalaVersion212: String       = "2.12.10"
+lazy val scalaVersion213: String       = "2.13.1"
+lazy val supportedScalaVersions = List(scalaVersion212, scalaVersion213)
+
+ThisBuild / scalaVersion := scalaVersion213
 
 lazy val commonSettings = Seq(
-  version := "2.3.12-SNAPSHOT",
+  version := "2.3.13-SNAPSHOT",
   organization := "com.itv",
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.0.8" % "test"
@@ -103,7 +105,7 @@ lazy val commonSettings = Seq(
 )
 
 lazy val scala212OnlySettings = Seq(
-  scalaVersion := scala212
+  scalaVersion := scalaVersion212
 )
 
 lazy val crossBuildSettings = Seq(
@@ -244,16 +246,16 @@ lazy val http4s020 =
     .settings(scala212OnlySettings)
 
 lazy val http4s021 =
-  (project in file("scalapact-http4s-0-21"))
+  (project in file("scalapact-http4s-0-21-m6"))
     .settings(commonSettings: _*)
     .settings(publishSettings: _*)
     .settings(
-      name := "scalapact-http4s-0-21",
+      name := "scalapact-http4s-0-21-m6",
       libraryDependencies ++= Seq(
-        "org.http4s"             %% "http4s-blaze-server" % "0.21.0-M5",
-        "org.http4s"             %% "http4s-blaze-client" % "0.21.0-M5",
-        "org.http4s"             %% "http4s-dsl"          % "0.21.0-M5",
-        "com.github.tomakehurst" % "wiremock"             % "1.56" % "test"
+        "org.http4s"             %% "http4s-blaze-server" % "0.21.0-M6",
+        "org.http4s"             %% "http4s-blaze-client" % "0.21.0-M6",
+        "org.http4s"             %% "http4s-dsl"          % "0.21.0-M6",
+        "com.github.tomakehurst" % "wiremock"             % "2.25.1" % "test"
       )
     )
     .dependsOn(shared)
@@ -284,7 +286,7 @@ lazy val argonaut62 =
     .dependsOn(shared)
     .dependsOn(testShared % "test->compile")
     .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
-    .settings(crossBuildSettings: _*)
+    .settings(scala212OnlySettings)
 
 lazy val circe08 =
   (project in file("scalapact-circe-0-8"))
@@ -447,12 +449,12 @@ lazy val pactSpec =
     .settings(commonSettings: _*)
     .settings(
       name := "pact-spec-tests",
-      scalaVersion := scala212,
+      scalaVersion := scalaVersion212, // WIP!
       skip in publish := true
     )
     .settings(
       libraryDependencies ++= Seq(
-        "io.argonaut" %% "argonaut" % "6.2"
+        "io.argonaut" %% "argonaut" % "6.2.3"
       )
     )
     .dependsOn(core)
@@ -467,10 +469,11 @@ lazy val testsWithDeps =
         "org.json4s"             %% "json4s-native" % "3.5.0" % "test",
         "com.github.tomakehurst" % "wiremock"       % "1.56" % "test",
         "fr.hmil"                %% "roshttp"       % "2.0.1" % "test",
-        "io.argonaut"            %% "argonaut"      % "6.2"
+        "io.argonaut"            %% "argonaut"      % "6.2.3"
       ),
       skip in publish := true
     )
+    .settings(scala212OnlySettings)
     .dependsOn(framework)
     .dependsOn(circe11)
     .dependsOn(http4s020)
@@ -482,7 +485,7 @@ lazy val docs =
     .enablePlugins(ParadoxSitePlugin)
     .enablePlugins(GhpagesPlugin)
     .settings(
-      scalaVersion := scala212,
+      scalaVersion := scalaVersion212, // WIP!
       paradoxTheme := Some(builtinParadoxTheme("generic")),
       name := "scalapact-docs",
       git.remoteRepo := "git@github.com:ITV/scala-pact.git",

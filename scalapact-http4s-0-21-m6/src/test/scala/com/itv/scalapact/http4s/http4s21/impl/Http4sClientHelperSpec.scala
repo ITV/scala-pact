@@ -22,8 +22,8 @@ class Http4sClientHelperSpec extends FunSpec with Matchers with BeforeAndAfterAl
 
     val response = aResponse().withStatus(200).withBody("Success").withHeader("foo", "bar")
 
-    wireMockServer.stubFor(
-      get(urlEqualTo("/test")).willReturn(response)
+    wireMockServer.addStubMapping(
+      get(urlEqualTo("/test")).willReturn(response).build()
     )
 
   }

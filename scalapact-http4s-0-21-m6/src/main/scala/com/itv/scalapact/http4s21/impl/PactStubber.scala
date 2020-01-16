@@ -46,7 +46,7 @@ class PactStubber extends IPactStubber {
             blazeServerBuilder(scalaPactSettings, interactionManager, connectionPoolSize, sslContextName, _port)
               .resource
               .use { server =>
-                IO{_port = Some(server.address.getPort)} *> IO.never
+                IO { _port = Some(server.address.getPort) } *> IO.never
               }
               .runCancelable(_ => IO.unit)
               .unsafeRunSync()

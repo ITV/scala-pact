@@ -34,9 +34,16 @@ With thanks to all contributors!
 - [jacemale]
 - [dantb]
 - [razerno]
+- [jatcwang]
 - ...your name here? :-)
 
 Maintained by [davesmith00000].
+
+## 2.3.12 - 2019-10-16
+- Exit with error if any pact push operations fail (not API breaking, but potentially CI breaking) ([dantb])
+
+## 2.3.11 - 2019-10-04
+- Added support for Circe 0.12.1 ([agustafson], [jatcwang])
 
 ## 2.3.9 - 2019-06-27
 
@@ -244,3 +251,4 @@ Other improvements for contributors:
 [jacemale]: https://github.com/jacemale
 [dantb]: https://github.com/dantb
 [razerno]: https://github.com/razerno
+[jatcwang]: https://github.com/jatcwang
