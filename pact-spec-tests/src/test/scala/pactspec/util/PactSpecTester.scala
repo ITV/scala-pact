@@ -47,9 +47,8 @@ trait PactSpecTester extends FunSpec with Matchers {
                              path: String): Unit =
     matchSingleRequest(strictMatching, i.request.matchingRules, i.request, spec.actual) match {
       case MatchOutcomeSuccess =>
-        // Found a match
-        if (shouldMatch) 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
-        else
+
+        if (!shouldMatch)
           fail(
             makeErrorString(shouldMatch,
                             path,
@@ -61,7 +60,6 @@ trait PactSpecTester extends FunSpec with Matchers {
           )
 
       case e: MatchOutcomeFailed =>
-        // Failed to match
         if (shouldMatch)
           fail(
             makeErrorString(shouldMatch,
@@ -72,7 +70,6 @@ trait PactSpecTester extends FunSpec with Matchers {
                             spec.expected.renderAsString,
                             e.renderDifferences)
           )
-        else 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
     }
 
   protected val fetchResponseSpec: String => StrictTestMode => (ResponseSpec, StrictTestMode, String) = path =>
@@ -110,9 +107,7 @@ trait PactSpecTester extends FunSpec with Matchers {
                               path: String): Unit =
     matchSingleResponse(strictMatching, i.response.matchingRules, i.response, spec.actual) match {
       case MatchOutcomeSuccess =>
-        // Found a match
-        if (shouldMatch) 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
-        else
+        if (!shouldMatch)
           fail(
             makeErrorString(shouldMatch,
                             path,
@@ -124,7 +119,6 @@ trait PactSpecTester extends FunSpec with Matchers {
           )
 
       case e: MatchOutcomeFailed =>
-        // Failed to match
         if (shouldMatch)
           fail(
             makeErrorString(shouldMatch,
@@ -135,7 +129,6 @@ trait PactSpecTester extends FunSpec with Matchers {
                             spec.expected.renderAsString,
                             e.renderDifferences)
           )
-        else 1 shouldEqual 1 // It's here, so the test should pass. Can't find a 'pass' method...
     }
 
   private def makeErrorString(shouldMatch: Boolean,

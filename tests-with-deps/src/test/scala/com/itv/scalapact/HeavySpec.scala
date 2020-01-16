@@ -11,7 +11,7 @@ class HeavySpec extends FunSpec with Matchers {
 
   def makeEndPoints(name: String, count: Int): List[String] = (0 until count).toList.map(i => s"/$name/_$i")
 
-  def generatePactAndTestIt(endPoint: String): Unit =
+  def generatePactAndTestIt(endPoint: String): Unit = {
     forgePact
       .between("heavy-consumer")
       .and("heavy-provider")
@@ -23,6 +23,9 @@ class HeavySpec extends FunSpec with Matchers {
           response.status shouldEqual 200
         }
       }
+
+    ()
+  }
 
   describe("Running many pacts") {
 

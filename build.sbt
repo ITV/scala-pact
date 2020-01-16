@@ -76,8 +76,10 @@ lazy val supportedScalaVersions = List(scalaVersion212, scalaVersion213)
 ThisBuild / scalaVersion := scalaVersion213
 
 lazy val commonSettings = Seq(
-  version := "2.3.13-SNAPSHOT",
+  version := "2.3.12",
   organization := "com.itv",
+  crossScalaVersions := supportedScalaVersions,
+  scalacOptions ++= compilerOptionsVersion(scalaVersion.value),
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.0.8" % "test"
   ),
@@ -105,11 +107,7 @@ lazy val commonSettings = Seq(
 )
 
 lazy val scala212OnlySettings = Seq(
-  scalaVersion := scalaVersion212
-)
-
-lazy val crossBuildSettings = Seq(
-  crossScalaVersions := supportedScalaVersions
+  crossScalaVersions := Seq(scalaVersion212)
 )
 
 lazy val mockSettings = Seq(
@@ -162,8 +160,6 @@ lazy val shared =
       name := "scalapact-shared",
       libraryDependencies ++= Seq("org.scala-lang.modules" %% "scala-xml" % "1.2.0")
     )
-    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
-    .settings(crossBuildSettings: _*)
 
 lazy val core =
   (project in file("scalapact-core"))
@@ -173,8 +169,6 @@ lazy val core =
       name := "scalapact-core"
     )
     .dependsOn(shared)
-    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
-    .settings(crossBuildSettings: _*)
 
 lazy val http4s016a =
   (project in file("scalapact-http4s-0-16a"))
@@ -190,7 +184,6 @@ lazy val http4s016a =
       )
     )
     .dependsOn(shared)
-    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
     .settings(scala212OnlySettings)
 
 lazy val http4s017 =
@@ -208,7 +201,6 @@ lazy val http4s017 =
       )
     )
     .dependsOn(shared)
-    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
     .settings(scala212OnlySettings)
 
 lazy val http4s018 =
@@ -225,7 +217,6 @@ lazy val http4s018 =
       )
     )
     .dependsOn(shared)
-    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
     .settings(scala212OnlySettings)
 
 lazy val http4s020 =
@@ -242,7 +233,6 @@ lazy val http4s020 =
       )
     )
     .dependsOn(shared)
-    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
     .settings(scala212OnlySettings)
 
 lazy val http4s021 =
@@ -259,8 +249,6 @@ lazy val http4s021 =
       )
     )
     .dependsOn(shared)
-    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
-    .settings(crossBuildSettings: _*)
 
 lazy val testShared =
   (project in file("scalapact-test-shared"))
@@ -270,8 +258,6 @@ lazy val testShared =
       skip in publish := true
     )
     .dependsOn(shared)
-    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
-    .settings(crossBuildSettings: _*)
 
 lazy val argonaut62 =
   (project in file("scalapact-argonaut-6-2"))
@@ -285,7 +271,6 @@ lazy val argonaut62 =
     )
     .dependsOn(shared)
     .dependsOn(testShared % "test->compile")
-    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
     .settings(scala212OnlySettings)
 
 lazy val circe08 =
@@ -302,7 +287,6 @@ lazy val circe08 =
     )
     .dependsOn(shared)
     .dependsOn(testShared % "test->compile")
-    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
     .settings(scala212OnlySettings)
 
 lazy val circe09 =
@@ -319,7 +303,6 @@ lazy val circe09 =
     )
     .dependsOn(shared)
     .dependsOn(testShared % "test->compile")
-    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
     .settings(scala212OnlySettings)
 
 lazy val circe10 =
@@ -336,7 +319,6 @@ lazy val circe10 =
     )
     .dependsOn(shared)
     .dependsOn(testShared % "test->compile")
-    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
     .settings(scala212OnlySettings)
 
 lazy val circe11 =
@@ -353,7 +335,6 @@ lazy val circe11 =
     )
     .dependsOn(shared)
     .dependsOn(testShared % "test->compile")
-    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
     .settings(scala212OnlySettings)
 
 lazy val circe12 =
@@ -370,8 +351,6 @@ lazy val circe12 =
     )
     .dependsOn(shared)
     .dependsOn(testShared % "test->compile")
-    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
-    .settings(crossBuildSettings: _*)
 
 lazy val pluginShared =
   (project in file("sbt-scalapact-shared"))
@@ -382,7 +361,6 @@ lazy val pluginShared =
     )
     .dependsOn(core)
     .settings(scala212OnlySettings)
-    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
 
 lazy val plugin =
   (project in file("sbt-scalapact"))
@@ -396,7 +374,6 @@ lazy val plugin =
     .dependsOn(argonaut62)
     .dependsOn(http4s018)
     .settings(scala212OnlySettings)
-    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
 
 lazy val pluginNoDeps =
   (project in file("sbt-scalapact-nodeps"))
@@ -410,7 +387,6 @@ lazy val pluginNoDeps =
     .dependsOn(argonaut62 % "provided")
     .dependsOn(http4s018 % "provided")
     .settings(scala212OnlySettings)
-    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
 
 lazy val framework =
   (project in file("scalapact-scalatest"))
@@ -423,8 +399,6 @@ lazy val framework =
       }
     )
     .dependsOn(core)
-    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
-    .settings(crossBuildSettings: _*)
 
 lazy val standalone =
   (project in file("scalapact-standalone-stubber"))
@@ -442,14 +416,12 @@ lazy val standalone =
     .dependsOn(circe09)
     .dependsOn(http4s018)
     .settings(scala212OnlySettings)
-    .settings(scalacOptions ++= compilerOptionsVersion(scalaVersion.value))
 
 lazy val pactSpec =
   (project in file("pact-spec-tests"))
     .settings(commonSettings: _*)
     .settings(
       name := "pact-spec-tests",
-      scalaVersion := scalaVersion212, // WIP!
       skip in publish := true
     )
     .settings(
@@ -457,6 +429,7 @@ lazy val pactSpec =
         "io.argonaut" %% "argonaut" % "6.2.3"
       )
     )
+    .settings(scala212OnlySettings)
     .dependsOn(core)
     .dependsOn(argonaut62)
 
