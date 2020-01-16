@@ -7,6 +7,6 @@ echo "**********************"
 
 # At this point, all the local publishing (therefore: clean update compile test publishLocal) should be done.
 
-sbt test:compile
-sbt pactSpec/test
-sbt testsWithDeps/test
+sbt +test:compile
+sbt +pactSpec/test
+sbt +testsWithDeps/test

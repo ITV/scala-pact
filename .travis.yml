@@ -1,11 +1,11 @@
 language: scala
 
 scala:
-  - 2.12.10
+  # We just keep the latest version here.  All scripts do their own cross-building (because they are supposed to do
+  # that locally.)
   - 2.13.1
 
 script:
-  - alias sbt='sbt ++$TRAVIS_SCALA_VERSION -jvm-opts .jvmopts'
   - bash ./scripts/local-build-test.sh
 
 after_success:

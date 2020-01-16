@@ -27,7 +27,7 @@ fi
 echo ""
 echo "Preparing Scala-Pact for publishing"
 
-sbt prepareScalaPactPublish
+sbt +prepareScalaPactPublish
 
 echo ""
 echo -e "Preparation complete, release to Sonatype? [y/n] \c"
@@ -40,4 +40,4 @@ else
   echo "Publishing now.."
 fi
 
-sbt sonatypeBundleRelease
+sbt +sonatypeBundleRelease

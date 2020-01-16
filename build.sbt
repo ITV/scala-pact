@@ -69,11 +69,11 @@ def compilerOptionsVersion(scalaVersion: String) =
     case _               => Nil
   })
 
-lazy val scalaVersion212: String       = "2.12.10"
-lazy val scalaVersion213: String       = "2.13.1"
+lazy val scalaVersion212: String = "2.12.10"
+lazy val scalaVersion213: String = "2.13.1"
 lazy val supportedScalaVersions = List(scalaVersion212, scalaVersion213)
 
-ThisBuild / scalaVersion := scalaVersion213
+ThisBuild / scalaVersion := scalaVersion212
 
 lazy val commonSettings = Seq(
   version := "2.3.12",
@@ -458,13 +458,13 @@ lazy val docs =
     .enablePlugins(ParadoxSitePlugin)
     .enablePlugins(GhpagesPlugin)
     .settings(
-      scalaVersion := scalaVersion212, // WIP!
       paradoxTheme := Some(builtinParadoxTheme("generic")),
       name := "scalapact-docs",
       git.remoteRepo := "git@github.com:ITV/scala-pact.git",
       sourceDirectory in Paradox := sourceDirectory.value / "main" / "paradox",
       skip in publish := true
     )
+    .settings(scala212OnlySettings)
 
 lazy val scalaPactProject =
   (project in file("."))

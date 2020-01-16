@@ -9,5 +9,4 @@ set -e
 echo "Locally published Scala-Pact"
 echo "****************************"
 
-sbt localPublishScalaPact
-
+sbt +localPublishScalaPact
