@@ -205,11 +205,11 @@ lazy val http4s020 =
     .settings(compilerOptions212: _*)
 
 lazy val http4s021 =
-  (project in file("scalapact-http4s-0-21"))
+  (project in file("scalapact-http4s-0-21-M6"))
     .settings(commonSettings: _*)
     .settings(publishSettings: _*)
     .settings(
-      name := "scalapact-http4s-0-21",
+      name := "scalapact-http4s-0-21-M6",
       libraryDependencies ++= Seq(
         "org.http4s"             %% "http4s-blaze-server" % "0.21.0-M6",
         "org.http4s"             %% "http4s-blaze-client" % "0.21.0-M6",
