@@ -14,6 +14,7 @@ class ResultPublisher(fetcher: (SimpleRequest, Resource[IO, Client[IO]]) => IO[S
     extends IResultPublisher {
 
   private val maxTotalConnections = 2
+  private val requestTimeout = 10.seconds
 
   override def publishResults(
       pactVerifyResults: List[PactVerifyResult],
@@ -42,7 +43,7 @@ class ResultPublisher(fetcher: (SimpleRequest, Resource[IO, Client[IO]]) => IO[S
                       implicit val cs: ContextShift[IO] = IO.contextShift(global)
                       val clientPreSsl = BlazeClientBuilder[IO](global)
                         .withMaxTotalConnections(maxTotalConnections)
-                        .withRequestTimeout(2.seconds)
+                        .withRequestTimeout(requestTimeout)
                       sslContext.fold(clientPreSsl)(s => clientPreSsl.withSslContext(s)).resource
                     }
                   ).map { response =>
