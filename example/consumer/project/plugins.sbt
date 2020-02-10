@@ -1,1 +1,1 @@
-addSbtPlugin("com.itv" % "sbt-scalapact" % "2.3.14")
+addSbtPlugin("com.itv" % "sbt-scalapact" % "2.3.15-SNAPSHOT")

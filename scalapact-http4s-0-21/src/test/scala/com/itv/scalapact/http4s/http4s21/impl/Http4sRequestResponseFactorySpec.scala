@@ -40,7 +40,6 @@ class Http4sRequestResponseFactorySpec extends FunSpec with Matchers {
           ),
           Some("Missing")
         )
-        .unsafeRunSync()
 
       response.status.code shouldEqual 404
       response.bodyAsText.compile.toVector.unsafeRunSync().mkString shouldEqual "Missing"
