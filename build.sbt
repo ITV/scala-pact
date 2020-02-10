@@ -236,15 +236,15 @@ lazy val http4s020 =
     .settings(scala212OnlySettings)
 
 lazy val http4s021 =
-  (project in file("scalapact-http4s-0-21-m6"))
+  (project in file("scalapact-http4s-0-21"))
     .settings(commonSettings: _*)
     .settings(publishSettings: _*)
     .settings(
-      name := "scalapact-http4s-0-21-m6",
+      name := "scalapact-http4s-0-21",
       libraryDependencies ++= Seq(
-        "org.http4s"             %% "http4s-blaze-server" % "0.21.0-M6",
-        "org.http4s"             %% "http4s-blaze-client" % "0.21.0-M6",
-        "org.http4s"             %% "http4s-dsl"          % "0.21.0-M6",
+        "org.http4s"             %% "http4s-blaze-server" % "0.21.0",
+        "org.http4s"             %% "http4s-blaze-client" % "0.21.0",
+        "org.http4s"             %% "http4s-dsl"          % "0.21.0",
         "com.github.tomakehurst" % "wiremock"             % "2.25.1" % "test"
       )
     )
@@ -348,6 +348,21 @@ lazy val circe12 =
         "io.circe" %% "circe-generic",
         "io.circe" %% "circe-parser"
       ).map(_ % "0.12.1")
+    )
+    .dependsOn(shared)
+    .dependsOn(testShared % "test->compile")
+
+lazy val circe13 =
+  (project in file("scalapact-circe-0-13"))
+    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
+    .settings(
+      name := "scalapact-circe-0-13",
+      libraryDependencies ++= Seq(
+        "io.circe" %% "circe-core",
+        "io.circe" %% "circe-generic",
+        "io.circe" %% "circe-parser"
+      ).map(_ % "0.13.0")
     )
     .dependsOn(shared)
     .dependsOn(testShared % "test->compile")

@@ -17,14 +17,13 @@ object Http4sRequestResponseFactory {
   import HeaderImplicitConversions._
   import com.itv.scalapact.shared.RightBiasEither._
 
-  implicit def toIO[A <: Throwable, B](a: Either[A, B]): IO[B] = a.fold(IO.raiseError, IO.pure)
-
-  private val stringToByteVector: String => Chunk[Byte] = str => {
-    Chunk.bytes(ByteVector(str.getBytes(StandardCharsets.UTF_8)).toArray)
-  }
+  implicit val enc: EntityEncoder[IO, String] =
+    EntityEncoder.simple[IO, String](){ str =>
+      Chunk.bytes(ByteVector(str.getBytes(StandardCharsets.UTF_8)).toArray)
+    }
 
   def buildUri(baseUrl: String, endpoint: String): IO[Uri] =
-    Uri.fromString(baseUrl + endpoint).leftMap(l => new Exception(l.message))
+    Uri.fromString(baseUrl + endpoint).leftMap(l => new Exception(l.message)).fold(IO.raiseError, IO.pure)
 
   def intToStatus(status: IntAndReason): ParseResult[Status] =
     status match {
@@ -78,18 +77,15 @@ object Http4sRequestResponseFactory {
 
       request.body
         .map { b =>
-          implicit val enc: EntityEncoder[IO, String] =
-            EntityEncoder.simple[IO, String]()(stringToByteVector)
-
           IO(r.withEntity(b))
         }
         .getOrElse(IO(r))
     }
 
-  def buildResponse(status: IntAndReason, headers: Map[String, String], body: Option[String]): IO[Response[IO]] =
+  def buildResponse(status: IntAndReason, headers: Map[String, String], body: Option[String]): Response[IO] =
     intToStatus(status) match {
       case Left(l) =>
-        l.toHttpResponse(HttpVersion.`HTTP/1.1`)
+        l.toHttpResponse[IO](HttpVersion.`HTTP/1.1`)
 
       case Right(code) =>
         val response = Response[IO](
@@ -102,11 +98,9 @@ object Http4sRequestResponseFactory {
 
         body
           .map { b =>
-            implicit val enc: EntityEncoder[IO, String] =
-              EntityEncoder.simple[IO, String]()(stringToByteVector)
-            IO(response.withEntity(b))
+            response.withEntity(b)
           }
-          .getOrElse(IO(response))
+          .getOrElse(response)
     }
 
 }

@@ -19,7 +19,7 @@ object PactStubService {
 
   implicit class BlazeBuilderPimper(blazeBuilder: BlazeServerBuilder[IO]) {
     def withOptionalSsl(sslContext: Option[SSLContext]): BlazeServerBuilder[IO] =
-      sslContext.fold(blazeBuilder)(ssl => blazeBuilder.withSSLContext(ssl))
+      sslContext.fold(blazeBuilder)(ssl => blazeBuilder.withSslContext(ssl))
   }
 
   def createServer(
@@ -123,22 +123,22 @@ object PactStubService {
           case Right(ir) =>
             Status.fromInt(ir.response.status.getOrElse(200)) match {
               case Right(_) =>
-                Http4sRequestResponseFactory.buildResponse(
+                IO(Http4sRequestResponseFactory.buildResponse(
                   status = IntAndReason(ir.response.status.getOrElse(200), None),
                   headers = ir.response.headers.getOrElse(Map.empty),
                   body = ir.response.body
-                )
+                ))
 
               case Left(l) =>
                 InternalServerError(l.sanitized)
             }
 
           case Left(message) =>
-            Http4sRequestResponseFactory.buildResponse(
+            IO(Http4sRequestResponseFactory.buildResponse(
               status = IntAndReason(598, Some("Pact Match Failure")),
               headers = Map("X-Pact-Admin" -> "Pact Match Failure"),
               body = Option(message)
-            )
+            ))
         }
       }
     }
