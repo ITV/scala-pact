@@ -490,7 +490,7 @@ lazy val scalaPactProject =
     )
     .aggregate(shared, core, pluginShared, plugin, pluginNoDeps, framework, testShared)
     .aggregate(http4s016a, http4s017, http4s018, http4s020, http4s021)
-    .aggregate(argonaut62, circe08, circe09, circe10, circe11, circe12)
+    .aggregate(argonaut62, circe08, circe09, circe10, circe11, circe12, circe13)
     .aggregate(standalone)
     .aggregate(docs)
     .aggregate(pactSpec, testsWithDeps)
