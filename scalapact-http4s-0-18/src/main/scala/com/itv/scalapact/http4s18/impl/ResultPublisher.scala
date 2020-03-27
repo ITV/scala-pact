@@ -10,6 +10,7 @@ import scala.concurrent.duration._
 class ResultPublisher(fetcher: (SimpleRequest, IO[Client[IO]]) => IO[SimpleResponse]) extends IResultPublisher {
 
   val maxTotalConnections: Int = 2
+  private val clientTimeout = 10.seconds
 
   override def publishResults(
       pactVerifyResults: List[PactVerifyResult],
@@ -33,7 +34,7 @@ class ResultPublisher(fetcher: (SimpleRequest, IO[Client[IO]]) => IO[SimpleRespo
           SslContextMap(request)(
             sslContext =>
               simpleRequestWithoutFakeHeader => {
-                val client = Http4sClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, 2.seconds, sslContext)
+                val client = Http4sClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, clientTimeout, sslContext)
                 fetcher(simpleRequestWithoutFakeHeader, client)
                   .map { response =>
                     if (response.is2xx) {
