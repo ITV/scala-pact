@@ -16,8 +16,8 @@ class ScalaPactHttpClient(fetcher: (SimpleRequest, Resource[IO, Client[IO]]) => 
 
   private implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
-  def doRequest(simpleRequest: SimpleRequest)(implicit sslContextMap: SslContextMap): IO[SimpleResponse] =
-    doRequestIO(fetcher, simpleRequest)
+  def doRequest(simpleRequest: SimpleRequest, clientTimeout: Duration)(implicit sslContextMap: SslContextMap): IO[SimpleResponse] =
+    doRequestIO(fetcher, simpleRequest, clientTimeout)
 
   def doInteractionRequest(
       url: String,
@@ -28,9 +28,10 @@ class ScalaPactHttpClient(fetcher: (SimpleRequest, Resource[IO, Client[IO]]) => 
     doInteractionRequestIO(fetcher, url, ir, clientTimeout, sslContextName)
 
   def doRequestSync(
-      simpleRequest: SimpleRequest
+      simpleRequest: SimpleRequest,
+      clientTimeout: Duration
   )(implicit sslContextMap: SslContextMap): Either[Throwable, SimpleResponse] =
-    doRequestIO(fetcher, simpleRequest).attempt.unsafeRunSync()
+    doRequestIO(fetcher, simpleRequest, clientTimeout).attempt.unsafeRunSync()
 
   def doInteractionRequestSync(
       url: String,
@@ -42,7 +43,7 @@ class ScalaPactHttpClient(fetcher: (SimpleRequest, Resource[IO, Client[IO]]) => 
       .unsafeRunSync()
 
   def doRequestIO(performRequest: (SimpleRequest, Resource[IO, Client[IO]]) => IO[SimpleResponse],
-                  simpleRequest: SimpleRequest)(implicit sslContextMap: SslContextMap): IO[SimpleResponse] =
+                  simpleRequest: SimpleRequest, clientTimeout: Duration)(implicit sslContextMap: SslContextMap): IO[SimpleResponse] =
     SslContextMap(simpleRequest)(
       sslContext =>
         simpleRequestWithoutFakeHeader =>
@@ -50,7 +51,7 @@ class ScalaPactHttpClient(fetcher: (SimpleRequest, Resource[IO, Client[IO]]) => 
             simpleRequestWithoutFakeHeader, {
               val client = BlazeClientBuilder[IO](ExecutionContext.Implicits.global)
                 .withMaxTotalConnections(maxTotalConnections)
-                .withRequestTimeout(2.seconds)
+                .withRequestTimeout(clientTimeout)
               sslContext.fold(client)(s => client.withSslContext(s)).resource
             }
       )

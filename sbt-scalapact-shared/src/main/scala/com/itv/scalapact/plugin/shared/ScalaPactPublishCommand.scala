@@ -36,7 +36,7 @@ object ScalaPactPublishCommand {
 
       // Publish all to main broker
       val mainPublishResults: List[PublishResult] = publishToBroker(
-        httpClient.doRequestSync,
+        httpClient.doRequestSync(_, scalaPactSettings.giveClientTimeout),
         pactBrokerAddress,
         versionToPublishAs,
         tagsToPublishWith,
@@ -48,7 +48,7 @@ object ScalaPactPublishCommand {
         pactContract <- configAndPactFiles.pacts
         broker       <- providerBrokerPublishMap.get(pactContract.provider.name).toList
         publishResult <- publishToBroker(
-          httpClient.doRequestSync,
+          httpClient.doRequestSync(_, scalaPactSettings.giveClientTimeout),
           broker,
           versionToPublishAs,
           tagsToPublishWith,

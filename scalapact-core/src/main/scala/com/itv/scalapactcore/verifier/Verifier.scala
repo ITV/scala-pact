@@ -12,6 +12,8 @@ import com.itv.scalapact.shared.PactLogger
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IScalaPactHttpClient}
 
+import scala.concurrent.duration.Duration
+
 object Verifier {
   def verify[F[_]](
       loadPactFiles: String => ScalaPactSettings => ConfigAndPacts,
@@ -51,7 +53,8 @@ object Verifier {
               List(
                 fetchAndReadPact(
                   v.validatedAddress.address + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + v.consumerVersion,
-                  pactVerifySettings.pactBrokerAuthorization
+                  pactVerifySettings.pactBrokerAuthorization,
+                  arguments.giveClientTimeout
                 )
               )
           }
@@ -223,7 +226,8 @@ object Verifier {
 
   private def fetchAndReadPact[F[_]](
       address: String,
-      pactBrokerAuthorization: Option[PactBrokerAuthorization]
+      pactBrokerAuthorization: Option[PactBrokerAuthorization],
+      clientTimeout: Duration,
   )(implicit pactReader: IPactReader, sslContextMap: SslContextMap, httpClient: IScalaPactHttpClient[F]): Pact = {
 
     PactLogger.message(s"Attempting to fetch pact from pact broker at: $address".white.bold)
@@ -235,7 +239,8 @@ object Verifier {
                       HttpMethod.GET,
                       Map("Accept" -> "application/json") ++ pactBrokerAuthorization.map(_.asHeader).toList,
                       None,
-                      sslContextName = None)
+                      sslContextName = None),
+        clientTimeout
       ) match {
       case Right(r: SimpleResponse) if r.is2xx =>
         r.body
