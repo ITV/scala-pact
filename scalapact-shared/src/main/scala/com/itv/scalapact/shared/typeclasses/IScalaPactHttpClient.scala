@@ -6,7 +6,7 @@ import scala.concurrent.duration.Duration
 
 trait IScalaPactHttpClient[F[_]] {
 
-  def doRequest(simpleRequest: SimpleRequest)(implicit sslContextMap: SslContextMap): F[SimpleResponse]
+  def doRequest(simpleRequest: SimpleRequest, clientTimeout: Duration)(implicit sslContextMap: SslContextMap): F[SimpleResponse]
 
   def doInteractionRequest(
       url: String,
@@ -15,7 +15,7 @@ trait IScalaPactHttpClient[F[_]] {
       sslContextName: Option[String]
   )(implicit sslContextMap: SslContextMap): F[InteractionResponse]
 
-  def doRequestSync(simpleRequest: SimpleRequest)(
+  def doRequestSync(simpleRequest: SimpleRequest, clientTimeout: Duration)(
       implicit sslContextMap: SslContextMap
   ): Either[Throwable, SimpleResponse]
 

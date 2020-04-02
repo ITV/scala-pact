@@ -11,8 +11,8 @@ class ScalaPactHttpClient(fetcher: (SimpleRequest, Client) => Task[SimpleRespons
 
   val maxTotalConnections: Int = 1
 
-  def doRequest(simpleRequest: SimpleRequest)(implicit sslContextMap: SslContextMap): Task[SimpleResponse] =
-    doRequestTask(fetcher, simpleRequest)
+  def doRequest(simpleRequest: SimpleRequest, clientTimeout: Duration)(implicit sslContextMap: SslContextMap): Task[SimpleResponse] =
+    doRequestTask(fetcher, simpleRequest, clientTimeout)
 
   def doInteractionRequest(
       url: String,
@@ -23,9 +23,9 @@ class ScalaPactHttpClient(fetcher: (SimpleRequest, Client) => Task[SimpleRespons
     doInteractionRequestTask(fetcher, url, ir, clientTimeout, sslContextName)
 
   def doRequestSync(
-      simpleRequest: SimpleRequest
+      simpleRequest: SimpleRequest, clientTimeout: Duration
   )(implicit sslContextMap: SslContextMap): Either[Throwable, SimpleResponse] =
-    doRequestTask(fetcher, simpleRequest).unsafeAttemptRun()
+    doRequestTask(fetcher, simpleRequest, clientTimeout).unsafeAttemptRun()
 
   def doInteractionRequestSync(
       url: String,
@@ -36,10 +36,10 @@ class ScalaPactHttpClient(fetcher: (SimpleRequest, Client) => Task[SimpleRespons
     doInteractionRequestTask(fetcher, url, ir, clientTimeout, sslContextName).unsafeAttemptRun()
 
   def doRequestTask(performRequest: (SimpleRequest, Client) => Task[SimpleResponse],
-                    simpleRequest: SimpleRequest)(implicit sslContextMap: SslContextMap): Task[SimpleResponse] =
+                    simpleRequest: SimpleRequest, clientTimeout: Duration)(implicit sslContextMap: SslContextMap): Task[SimpleResponse] =
     SslContextMap(simpleRequest) { sslContext => simpleRequestWithoutFakeHeader =>
       performRequest(simpleRequestWithoutFakeHeader,
-                     Http4sClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, 2.seconds, sslContext))
+                     Http4sClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, clientTimeout, sslContext))
     }
 
   def doInteractionRequestTask(

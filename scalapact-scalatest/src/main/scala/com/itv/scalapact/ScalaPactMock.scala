@@ -61,17 +61,18 @@ object ScalaPactMock {
 
     PactLogger.debug("> ScalaPact stub running at: " + mockConfig.baseUrl)
 
-    waitForServerThenTest(server, mockConfig, test, pactDescription)
+    waitForServerThenTest(server, configAndPacts.scalaPactSettings.giveClientTimeout, mockConfig, test, pactDescription)
   }
 
   private def waitForServerThenTest[F[_], A](
       server: IPactStubber,
+      clientTimeout: Duration,
       mockConfig: ScalaPactMockConfig,
       test: ScalaPactMockConfig => A,
       pactDescription: ScalaPactDescriptionFinal
   )(implicit sslContextMap: SslContextMap, pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F]): A = {
     def rec(attemptsRemaining: Int, intervalMillis: Int): A =
-      if (isStubReady(mockConfig, pactDescription.serverSslContextName)) {
+      if (isStubReady(mockConfig, clientTimeout, pactDescription.serverSslContextName)) {
         val result = configuredTestRunner(pactDescription)(mockConfig)(test)
 
         server.shutdown()
@@ -90,6 +91,7 @@ object ScalaPactMock {
 
   private def isStubReady[F[_]](
       mockConfig: ScalaPactMockConfig,
+      clientTimeout: Duration,
       sslContextName: Option[String]
   )(implicit sslContextMap: SslContextMap, httpClient: IScalaPactHttpClient[F]): Boolean =
     httpClient.doRequestSync(
@@ -98,7 +100,8 @@ object ScalaPactMock {
                     HttpMethod.GET,
                     Map("X-Pact-Admin" -> "true"),
                     None,
-                    sslContextName = sslContextName)
+                    sslContextName = sslContextName),
+      clientTimeout
     ) match {
       case Left(_) =>
         false
