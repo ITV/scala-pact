@@ -4,11 +4,11 @@ A Consumer Driven Contract testing library for Scala and [ScalaTest](http://www.
 
 Scala-Pact is intended for Scala developers who are looking for a better way to manage the HTTP contracts between their services.
 
-## Latest version is 2.3.16
+## Latest version is 2.3.17
 
 Scala-Pact now has two branches based on SBT requirements.
 
-#### SBT 1.x compatible (Latest 2.3.16)
+#### SBT 1.x compatible (Latest 2.3.17)
 
 All development going forward begins at `2.3.x` and resides on the `master` branch.
 For the sake of the maintainer's sanity, version 2.3.x and beyond will only support Scala 2.12 and SBT 1.x or greater.
