@@ -81,7 +81,7 @@ class ResultPublisherSpec extends FunSpec with Matchers with BeforeAndAfter {
         "",
         HttpMethod.POST,
         Map("Content-Type" -> "application/json; charset=UTF-8"),
-        Option("""{ "success": "true", "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""),
+        Option("""{ "success": true, "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""),
         None
       )
       requests shouldBe ArrayBuffer(successfulRequest)
@@ -98,7 +98,7 @@ class ResultPublisherSpec extends FunSpec with Matchers with BeforeAndAfter {
         "",
         HttpMethod.POST,
         Map("Content-Type" -> "application/json; charset=UTF-8"),
-        Option("""{ "success": "true", "providerApplicationVersion": "1.0.0" }"""),
+        Option("""{ "success": true, "providerApplicationVersion": "1.0.0" }"""),
         None
       )
       requests shouldBe ArrayBuffer(successfulRequest)
@@ -114,7 +114,7 @@ class ResultPublisherSpec extends FunSpec with Matchers with BeforeAndAfter {
         "",
         HttpMethod.POST,
         Map("Content-Type" -> "application/json; charset=UTF-8"),
-        Option("""{ "success": "false", "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""),
+        Option("""{ "success": false, "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""),
         None
       )
       requests shouldBe ArrayBuffer(failedRequest)
@@ -135,7 +135,7 @@ class ResultPublisherSpec extends FunSpec with Matchers with BeforeAndAfter {
       resultPublisher.publishResults(pactVerifyResults, brokerPublishData, PactBrokerAuthorization(("username", "password"), ""))
 
       val successfulRequest = SimpleRequest(
-        publishUrl, "", HttpMethod.POST, Map("Content-Type" -> "application/json; charset=UTF-8") + expectedHeader, Option("""{ "success": "true", "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""), None
+        publishUrl, "", HttpMethod.POST, Map("Content-Type" -> "application/json; charset=UTF-8") + expectedHeader, Option("""{ "success": true, "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""), None
       )
       requests shouldBe ArrayBuffer(successfulRequest)
     }
@@ -147,7 +147,7 @@ class ResultPublisherSpec extends FunSpec with Matchers with BeforeAndAfter {
       resultPublisher.publishResults(pactVerifyResults, brokerPublishData, PactBrokerAuthorization(("", ""), token))
 
       val successfulRequest = SimpleRequest(
-        publishUrl, "", HttpMethod.POST, Map("Content-Type" -> "application/json; charset=UTF-8") + expectedHeader, Option("""{ "success": "true", "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""), None
+        publishUrl, "", HttpMethod.POST, Map("Content-Type" -> "application/json; charset=UTF-8") + expectedHeader, Option("""{ "success": true, "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""), None
       )
       requests shouldBe ArrayBuffer(successfulRequest)
     }
@@ -156,7 +156,7 @@ class ResultPublisherSpec extends FunSpec with Matchers with BeforeAndAfter {
       resultPublisher.publishResults(pactVerifyResults, brokerPublishData, None)
 
       val successfulRequest = SimpleRequest(
-        publishUrl, "", HttpMethod.POST, Map("Content-Type" -> "application/json; charset=UTF-8"), Option("""{ "success": "true", "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""), None
+        publishUrl, "", HttpMethod.POST, Map("Content-Type" -> "application/json; charset=UTF-8"), Option("""{ "success": true, "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""), None
       )
       requests shouldBe ArrayBuffer(successfulRequest)
     }
