@@ -60,7 +60,7 @@ class ResultPublisher(fetcher: (SimpleRequest, IO[Client[IO]]) => IO[SimpleRespo
   }
   private def body(brokerPublishData: BrokerPublishData, success: Boolean) = {
     val buildUrl = brokerPublishData.buildUrl.fold("")(u => s""", "buildUrl": "$u"""")
-    Option(s"""{ "success": "$success", "providerApplicationVersion": "${brokerPublishData.providerVersion}"$buildUrl }""")
+    Option(s"""{ "success": $success, "providerApplicationVersion": "${brokerPublishData.providerVersion}"$buildUrl }""")
   }
 
 }
