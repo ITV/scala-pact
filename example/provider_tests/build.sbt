@@ -1,9 +1,13 @@
+import java.io.File
+
 organization := "com.example"
 
 name := "provider_tests"
 
 
 scalaVersion := "2.12.10"
+
+lazy val pactVersion = IO.read(new File("../version.txt"))
 
 libraryDependencies ++=
   Seq(
@@ -12,9 +16,9 @@ libraryDependencies ++=
     "org.http4s"    %% "http4s-circe"          % "0.18.9",
     "org.slf4j"     % "slf4j-simple"           % "1.6.4",
     "org.scalatest" %% "scalatest"             % "3.0.1" % "test",
-    "com.itv"       %% "scalapact-circe-0-9"   % version.value % "test",
-    "com.itv"       %% "scalapact-http4s-0-18" % version.value % "test",
-    "com.itv"       %% "scalapact-scalatest"   % version.value % "test",
+    "com.itv"       %% "scalapact-circe-0-9"   % pactVersion % "test",
+    "com.itv"       %% "scalapact-http4s-0-18" % pactVersion % "test",
+    "com.itv"       %% "scalapact-scalatest"   % pactVersion % "test",
     // Optional for auto-derivation of JSON codecs
     "io.circe" %% "circe-generic" % "0.9.0",
     // Optional for string interpolation to JSON model

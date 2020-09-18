@@ -23,8 +23,6 @@ else
   echo "Ok, proceeding..."
 fi
 
-bash scripts/check-versions.sh
-
 bash scripts/localpublish.sh
 
 echo "Taking a breather... (1)"

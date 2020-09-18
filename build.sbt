@@ -70,7 +70,7 @@ def compilerOptionsVersion(scalaVersion: String) =
   })
 
 lazy val scalaVersion212: String = "2.12.10"
-lazy val scalaVersion213: String = "2.13.3"
+lazy val scalaVersion213: String = "2.13.1"
 lazy val supportedScalaVersions = List(scalaVersion212, scalaVersion213)
 
 ThisBuild / scalaVersion := scalaVersion212
