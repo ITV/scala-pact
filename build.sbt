@@ -76,7 +76,7 @@ lazy val supportedScalaVersions = List(scalaVersion212, scalaVersion213)
 ThisBuild / scalaVersion := scalaVersion212
 
 lazy val commonSettings = Seq(
-  version := "2.3.18-SNAPSHOT",
+  version := "2.3.19-SNAPSHOT",
   organization := "com.itv",
   crossScalaVersions := supportedScalaVersions,
   scalacOptions ++= compilerOptionsVersion(scalaVersion.value),
