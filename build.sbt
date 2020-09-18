@@ -499,23 +499,11 @@ import sbtrelease.Utilities._
 import sbtrelease.Vcs
 import scala.sys.process.ProcessLogger
 
-val exampleVersionFileKey = settingKey[File]("The file to write the example version to")
-exampleVersionFileKey := baseDirectory.value / "example" / "version.txt"
-
 val readmeFileKey = settingKey[File]("The location of the readme")
 readmeFileKey := baseDirectory.value / "README.md"
 
-lazy val setNextExampleVersion: ReleaseStep = { st: State =>
-  st.get(ReleaseKeys.versions).map { case (_, nextVersion) =>
-    val exampleVersionFile = st.extract.get(exampleVersionFileKey).getCanonicalFile
-    IO.write(exampleVersionFile, nextVersion)
-  }.getOrElse(())
-  st
-}
-
 lazy val updateVersionsInReadme: ReleaseStep = { st: State =>
   st.get(ReleaseKeys.versions).flatMap { case (newVersion, _) =>
-    println("newVersion: " + newVersion)
     val readmeFile = st.extract.get(readmeFileKey).getCanonicalFile
     val readmeLines = IO.readLines(readmeFile)
     val versionPrefix = "## Latest version is "
@@ -539,16 +527,13 @@ lazy val commitAllVersionBumps: ReleaseStep = { st: State =>
     override def buffer[T](f: => T): T = st.log.buffer(f)
   }
   val buildVersionFile = st.extract.get(releaseVersionFile).getCanonicalFile
-  val exampleVersionFile = st.extract.get(exampleVersionFileKey).getCanonicalFile
   val readmeFile = st.extract.get(readmeFileKey).getCanonicalFile
   val base = vcs(st).baseDir.getCanonicalFile
   val sign = st.extract.get(releaseVcsSign)
   val signOff = st.extract.get(releaseVcsSignOff)
-  val relativePathToExampleVersion = IO.relativize(base, exampleVersionFile).getOrElse("Example Version file [%s] is outside of this VCS repository with base directory [%s]!" format(exampleVersionFile, base))
   val relativePathToBuildVersion = IO.relativize(base, buildVersionFile).getOrElse("Version file [%s] is outside of this VCS repository with base directory [%s]!" format(buildVersionFile, base))
   val relativePathToReadme = IO.relativize(base, readmeFile).getOrElse("Readme file [%s] is outside of this VCS repository with base directory [%s]!" format(readmeFile, base))
 
-  vcs(st).add(relativePathToExampleVersion) !! log
   vcs(st).add(relativePathToBuildVersion) !! log
   vcs(st).add(relativePathToReadme) !! log
 
@@ -577,7 +562,6 @@ releaseProcess := Seq[ReleaseStep](
   releaseStepCommandAndRemaining("+publishSigned"),
   releaseStepCommand("sonatypeBundleRelease"),
   setNextVersion,
-  setNextExampleVersion,
   commitAllVersionBumps,
   pushChanges
 )

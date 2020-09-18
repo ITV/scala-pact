@@ -8,10 +8,10 @@ name := "provider_tests"
 scalaVersion := "2.12.10"
 
 lazy val pactVersionFile: SettingKey[File] = settingKey[File]("location of scala-pact version for examples")
-pactVersionFile := baseDirectory.value.getParentFile / "version.txt"
+pactVersionFile := baseDirectory.value.getParentFile.getParentFile / "version.sbt"
 
 libraryDependencies ++= {
-    lazy val pactVersion = IO.read(pactVersionFile.value)
+    lazy val pactVersion = IO.read(pactVersionFile.value).split('"')(1)
     Seq(
         "org.http4s" %% "http4s-blaze-server" % "0.18.9",
         "org.http4s" %% "http4s-dsl" % "0.18.9",
