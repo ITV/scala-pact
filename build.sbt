@@ -502,6 +502,9 @@ import scala.sys.process.ProcessLogger
 val exampleVersionFileKey = settingKey[File]("The file to write the example version to")
 exampleVersionFileKey := baseDirectory.value / "example" / "version.txt"
 
+val readmeFileKey = settingKey[File]("The location of the readme")
+readmeFileKey := baseDirectory.value / "README.md"
+
 lazy val setNextExampleVersion: ReleaseStep = { st: State =>
   st.get(ReleaseKeys.versions).map { case (_, nextVersion) =>
     val exampleVersionFile = st.extract.get(exampleVersionFileKey).getCanonicalFile
@@ -510,7 +513,16 @@ lazy val setNextExampleVersion: ReleaseStep = { st: State =>
   st
 }
 
-lazy val commitNextExampleVersion: ReleaseStep = { st: State =>
+lazy val updateVersionsInReadme: ReleaseStep = { st: State =>
+  st.get(ReleaseKeys.versions).map { case (oldVersion, nextVersion) =>
+    val readmeFile = st.extract.get(readmeFileKey).getCanonicalFile
+    val readmeLines = IO.readLines(readmeFile)
+    IO.writeLines(readmeFile, readmeLines.map(_.replaceAll(oldVersion, nextVersion)))
+  }.getOrElse(())
+  st
+}
+
+lazy val commitAllVersionBumps: ReleaseStep = { st: State =>
   def vcs(st: State): Vcs = {
     st.extract.get(releaseVcs).getOrElse(sys.error("Aborting release. Working directory is not a repository of a recognized VCS."))
   }
@@ -522,14 +534,17 @@ lazy val commitNextExampleVersion: ReleaseStep = { st: State =>
   }
   val buildVersionFile = st.extract.get(releaseVersionFile).getCanonicalFile
   val exampleVersionFile = st.extract.get(exampleVersionFileKey).getCanonicalFile
+  val readmeFile = st.extract.get(readmeFileKey).getCanonicalFile
   val base = vcs(st).baseDir.getCanonicalFile
   val sign = st.extract.get(releaseVcsSign)
   val signOff = st.extract.get(releaseVcsSignOff)
   val relativePathToExampleVersion = IO.relativize(base, exampleVersionFile).getOrElse("Example Version file [%s] is outside of this VCS repository with base directory [%s]!" format(exampleVersionFile, base))
   val relativePathToBuildVersion = IO.relativize(base, buildVersionFile).getOrElse("Version file [%s] is outside of this VCS repository with base directory [%s]!" format(buildVersionFile, base))
+  val relativePathToReadme = IO.relativize(base, readmeFile).getOrElse("Readme file [%s] is outside of this VCS repository with base directory [%s]!" format(readmeFile, base))
 
   vcs(st).add(relativePathToExampleVersion) !! log
   vcs(st).add(relativePathToBuildVersion) !! log
+  vcs(st).add(relativePathToReadme) !! log
 
   val status = vcs(st).status.!!.trim
 
@@ -556,6 +571,7 @@ releaseProcess := Seq[ReleaseStep](
   releaseStepCommand("sonatypeBundleRelease"),
   setNextVersion,
   setNextExampleVersion,
-  commitNextExampleVersion,
+  updateVersionsInReadme,
+  commitAllVersionBumps,
   pushChanges
 )
