@@ -514,11 +514,17 @@ lazy val setNextExampleVersion: ReleaseStep = { st: State =>
 }
 
 lazy val updateVersionsInReadme: ReleaseStep = { st: State =>
-  st.get(ReleaseKeys.versions).map { case (oldVersion, nextVersion) =>
+  st.get(ReleaseKeys.versions).flatMap { case (newVersion, _) =>
+    println("newVersion: " + newVersion)
     val readmeFile = st.extract.get(readmeFileKey).getCanonicalFile
     val readmeLines = IO.readLines(readmeFile)
-    IO.writeLines(readmeFile, readmeLines.map(_.replaceAll(oldVersion, nextVersion)))
+    val versionPrefix = "## Latest version is "
+    val currentVersion = readmeLines.collectFirst { case s if s.startsWith(versionPrefix) => s.replace(versionPrefix, "").dropWhile(_.isWhitespace)}
+    currentVersion.map { cv =>
+      IO.writeLines(readmeFile, readmeLines.map(_.replaceAll(cv, newVersion)))
+    }
   }.getOrElse(())
+
   st
 }
 
@@ -564,6 +570,7 @@ releaseProcess := Seq[ReleaseStep](
   inquireVersions,
   runClean,
   runTest,
+  updateVersionsInReadme,
   setReleaseVersion,
   commitReleaseVersion,
   tagRelease,
@@ -571,7 +578,6 @@ releaseProcess := Seq[ReleaseStep](
   releaseStepCommand("sonatypeBundleRelease"),
   setNextVersion,
   setNextExampleVersion,
-  updateVersionsInReadme,
   commitAllVersionBumps,
   pushChanges
 )
