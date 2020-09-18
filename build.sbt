@@ -495,6 +495,53 @@ lazy val scalaPactProject =
     .aggregate(pactSpec, testsWithDeps)
 
 import ReleaseTransformations._
+import sbtrelease.Utilities._
+import sbtrelease.Vcs
+import scala.sys.process.ProcessLogger
+
+val exampleVersionFileKey = settingKey[File]("The file to write the example version to")
+exampleVersionFileKey := baseDirectory.value / "example" / "version.txt"
+
+lazy val setNextExampleVersion: ReleaseStep = { st: State =>
+  st.get(ReleaseKeys.versions).map { case (_, nextVersion) =>
+    val exampleVersionFile = st.extract.get(exampleVersionFileKey).getCanonicalFile
+    IO.write(exampleVersionFile, nextVersion)
+  }.getOrElse(())
+  st
+}
+
+lazy val commitNextExampleVersion: ReleaseStep = { st: State =>
+  def vcs(st: State): Vcs = {
+    st.extract.get(releaseVcs).getOrElse(sys.error("Aborting release. Working directory is not a repository of a recognized VCS."))
+  }
+  val commitMessage: TaskKey[String] = releaseNextCommitMessage
+  val log = new ProcessLogger {
+    override def err(s: => String): Unit = st.log.info(s)
+    override def out(s: => String): Unit = st.log.info(s)
+    override def buffer[T](f: => T): T = st.log.buffer(f)
+  }
+  val buildVersionFile = st.extract.get(releaseVersionFile).getCanonicalFile
+  val exampleVersionFile = st.extract.get(exampleVersionFileKey).getCanonicalFile
+  val base = vcs(st).baseDir.getCanonicalFile
+  val sign = st.extract.get(releaseVcsSign)
+  val signOff = st.extract.get(releaseVcsSignOff)
+  val relativePathToExampleVersion = IO.relativize(base, exampleVersionFile).getOrElse("Example Version file [%s] is outside of this VCS repository with base directory [%s]!" format(exampleVersionFile, base))
+  val relativePathToBuildVersion = IO.relativize(base, buildVersionFile).getOrElse("Version file [%s] is outside of this VCS repository with base directory [%s]!" format(buildVersionFile, base))
+
+  vcs(st).add(relativePathToExampleVersion) !! log
+  vcs(st).add(relativePathToBuildVersion) !! log
+
+  val status = vcs(st).status.!!.trim
+
+  val newState = if (status.nonEmpty) {
+    val (state, msg) = st.extract.runTask(commitMessage, st)
+    vcs(state).commit(msg, sign, signOff) ! log
+    state
+  } else {
+    st
+  }
+  newState
+}
 
 releaseCrossBuild := true // true if you cross-build the project for multiple Scala versions
 releaseProcess := Seq[ReleaseStep](
@@ -508,6 +555,7 @@ releaseProcess := Seq[ReleaseStep](
   releaseStepCommandAndRemaining("+publishSigned"),
   releaseStepCommand("sonatypeBundleRelease"),
   setNextVersion,
-  commitNextVersion,
+  setNextExampleVersion,
+  commitNextExampleVersion,
   pushChanges
 )

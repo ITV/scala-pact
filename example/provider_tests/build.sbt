@@ -7,20 +7,23 @@ name := "provider_tests"
 
 scalaVersion := "2.12.10"
 
-lazy val pactVersion = IO.read(new File("../version.txt"))
+lazy val pactVersionFile: SettingKey[File] = settingKey[File]("location of scala-pact version for examples")
+pactVersionFile := baseDirectory.value.getParentFile / "version.txt"
 
-libraryDependencies ++=
-  Seq(
-    "org.http4s"    %% "http4s-blaze-server"   % "0.18.9",
-    "org.http4s"    %% "http4s-dsl"            % "0.18.9",
-    "org.http4s"    %% "http4s-circe"          % "0.18.9",
-    "org.slf4j"     % "slf4j-simple"           % "1.6.4",
-    "org.scalatest" %% "scalatest"             % "3.0.1" % "test",
-    "com.itv"       %% "scalapact-circe-0-9"   % pactVersion % "test",
-    "com.itv"       %% "scalapact-http4s-0-18" % pactVersion % "test",
-    "com.itv"       %% "scalapact-scalatest"   % pactVersion % "test",
-    // Optional for auto-derivation of JSON codecs
-    "io.circe" %% "circe-generic" % "0.9.0",
-    // Optional for string interpolation to JSON model
-    "io.circe" %% "circe-literal" % "0.9.0"
-  )
+libraryDependencies ++= {
+    lazy val pactVersion = IO.read(pactVersionFile.value)
+    Seq(
+        "org.http4s" %% "http4s-blaze-server" % "0.18.9",
+        "org.http4s" %% "http4s-dsl" % "0.18.9",
+        "org.http4s" %% "http4s-circe" % "0.18.9",
+        "org.slf4j" % "slf4j-simple" % "1.6.4",
+        "org.scalatest" %% "scalatest" % "3.0.1" % "test",
+        "com.itv" %% "scalapact-circe-0-9" % pactVersion % "test",
+        "com.itv" %% "scalapact-http4s-0-18" % pactVersion % "test",
+        "com.itv" %% "scalapact-scalatest" % pactVersion % "test",
+        // Optional for auto-derivation of JSON codecs
+        "io.circe" %% "circe-generic" % "0.9.0",
+        // Optional for string interpolation to JSON model
+        "io.circe" %% "circe-literal" % "0.9.0"
+    )
+}
