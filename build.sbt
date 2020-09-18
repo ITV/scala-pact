@@ -70,13 +70,12 @@ def compilerOptionsVersion(scalaVersion: String) =
   })
 
 lazy val scalaVersion212: String = "2.12.10"
-lazy val scalaVersion213: String = "2.13.1"
+lazy val scalaVersion213: String = "2.13.3"
 lazy val supportedScalaVersions = List(scalaVersion212, scalaVersion213)
 
 ThisBuild / scalaVersion := scalaVersion212
 
 lazy val commonSettings = Seq(
-  version := "2.3.18-SNAPSHOT",
   organization := "com.itv",
   crossScalaVersions := supportedScalaVersions,
   scalacOptions ++= compilerOptionsVersion(scalaVersion.value),
@@ -494,3 +493,21 @@ lazy val scalaPactProject =
     .aggregate(standalone)
     .aggregate(docs)
     .aggregate(pactSpec, testsWithDeps)
+
+import ReleaseTransformations._
+
+releaseCrossBuild := true // true if you cross-build the project for multiple Scala versions
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  releaseStepCommandAndRemaining("+publishSigned"),
+  releaseStepCommand("sonatypeBundleRelease"),
+  setNextVersion,
+  commitNextVersion,
+  pushChanges
+)
