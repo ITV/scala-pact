@@ -2,7 +2,6 @@ organization := "com.example"
 
 name := "provider_tests"
 
-version := "0.0.1"
 
 scalaVersion := "2.12.10"
 
@@ -13,9 +12,9 @@ libraryDependencies ++=
     "org.http4s"    %% "http4s-circe"          % "0.18.9",
     "org.slf4j"     % "slf4j-simple"           % "1.6.4",
     "org.scalatest" %% "scalatest"             % "3.0.1" % "test",
-    "com.itv"       %% "scalapact-circe-0-9"   % "2.3.18-SNAPSHOT" % "test",
-    "com.itv"       %% "scalapact-http4s-0-18" % "2.3.18-SNAPSHOT" % "test",
-    "com.itv"       %% "scalapact-scalatest"   % "2.3.18-SNAPSHOT" % "test",
+    "com.itv"       %% "scalapact-circe-0-9"   % version.value % "test",
+    "com.itv"       %% "scalapact-http4s-0-18" % version.value % "test",
+    "com.itv"       %% "scalapact-scalatest"   % version.value % "test",
     // Optional for auto-derivation of JSON codecs
     "io.circe" %% "circe-generic" % "0.9.0",
     // Optional for string interpolation to JSON model

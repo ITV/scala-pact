@@ -2,8 +2,6 @@ organization := "com.example"
 
 name := "provider"
 
-version := "0.0.1"
-
 scalaVersion := "2.12.10"
 
 libraryDependencies ++= Seq(
