@@ -5,7 +5,7 @@ source scripts/test-header.sh
 echo ""
 echo "Checking verifier..."
 
-CORE_VERSION=$(grep "version :=" build.sbt | sed 's/version :=//g' | sed 's/ //g' | sed 's/,//g' | sed 's/\"//g')
+CORE_VERSION=$(grep "version in ThisBuild :=" version.sbt | sed 's/version in ThisBuild :=//g' | sed 's/ //g' | sed 's/,//g' | sed 's/\"//g')
 
 remove_plugin_file
 remove_config_file

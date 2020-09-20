@@ -76,7 +76,6 @@ lazy val supportedScalaVersions = List(scalaVersion212, scalaVersion213)
 ThisBuild / scalaVersion := scalaVersion212
 
 lazy val commonSettings = Seq(
-  version := "2.3.19-SNAPSHOT",
   organization := "com.itv",
   crossScalaVersions := supportedScalaVersions,
   scalacOptions ++= compilerOptionsVersion(scalaVersion.value),
@@ -494,3 +493,75 @@ lazy val scalaPactProject =
     .aggregate(standalone)
     .aggregate(docs)
     .aggregate(pactSpec, testsWithDeps)
+
+import ReleaseTransformations._
+import sbtrelease.Utilities._
+import sbtrelease.Vcs
+import scala.sys.process.ProcessLogger
+
+val readmeFileKey = settingKey[File]("The location of the readme")
+readmeFileKey := baseDirectory.value / "README.md"
+
+lazy val updateVersionsInReadme: ReleaseStep = { st: State =>
+  st.get(ReleaseKeys.versions).flatMap { case (newVersion, _) =>
+    val readmeFile = st.extract.get(readmeFileKey).getCanonicalFile
+    val readmeLines = IO.readLines(readmeFile)
+    val versionPrefix = "## Latest version is "
+    val currentVersion = readmeLines.collectFirst { case s if s.startsWith(versionPrefix) => s.replace(versionPrefix, "").dropWhile(_.isWhitespace)}
+    currentVersion.map { cv =>
+      IO.writeLines(readmeFile, readmeLines.map(_.replaceAll(cv, newVersion)))
+    }
+  }.getOrElse(())
+
+  st
+}
+
+lazy val commitAllVersionBumps: ReleaseStep = { st: State =>
+  def vcs(st: State): Vcs = {
+    st.extract.get(releaseVcs).getOrElse(sys.error("Aborting release. Working directory is not a repository of a recognized VCS."))
+  }
+  val commitMessage: TaskKey[String] = releaseNextCommitMessage
+  val log = new ProcessLogger {
+    override def err(s: => String): Unit = st.log.info(s)
+    override def out(s: => String): Unit = st.log.info(s)
+    override def buffer[T](f: => T): T = st.log.buffer(f)
+  }
+  val buildVersionFile = st.extract.get(releaseVersionFile).getCanonicalFile
+  val readmeFile = st.extract.get(readmeFileKey).getCanonicalFile
+  val base = vcs(st).baseDir.getCanonicalFile
+  val sign = st.extract.get(releaseVcsSign)
+  val signOff = st.extract.get(releaseVcsSignOff)
+  val relativePathToBuildVersion = IO.relativize(base, buildVersionFile).getOrElse("Version file [%s] is outside of this VCS repository with base directory [%s]!" format(buildVersionFile, base))
+  val relativePathToReadme = IO.relativize(base, readmeFile).getOrElse("Readme file [%s] is outside of this VCS repository with base directory [%s]!" format(readmeFile, base))
+
+  vcs(st).add(relativePathToBuildVersion) !! log
+  vcs(st).add(relativePathToReadme) !! log
+
+  val status = vcs(st).status.!!.trim
+
+  val newState = if (status.nonEmpty) {
+    val (state, msg) = st.extract.runTask(commitMessage, st)
+    vcs(state).commit(msg, sign, signOff) ! log
+    state
+  } else {
+    st
+  }
+  newState
+}
+
+releaseCrossBuild := true // true if you cross-build the project for multiple Scala versions
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  updateVersionsInReadme,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  releaseStepCommandAndRemaining("+publishSigned"),
+  releaseStepCommand("sonatypeBundleRelease"),
+  setNextVersion,
+  commitAllVersionBumps,
+  pushChanges
+)
