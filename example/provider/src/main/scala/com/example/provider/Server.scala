@@ -1,11 +1,21 @@
 package com.example.provider
 
-import org.http4s.server.blaze.BlazeBuilder
+import java.util.concurrent.Executors
 
-object Server extends App {
-  BlazeBuilder
+import cats.effect.{ExitCode, IO, IOApp}
+import org.http4s.server.blaze.BlazeServerBuilder
+
+import scala.concurrent.ExecutionContext
+
+object Server extends IOApp {
+  val executionContext = ExecutionContext.fromExecutor(
+    Executors.newFixedThreadPool(Runtime.getRuntime.availableProcessors())
+  )
+
+  def run(args: List[String]): IO[ExitCode] = BlazeServerBuilder[IO](executionContext)
     .bindHttp(8080)
-    .mountService(Provider.service, "/")
-    .run
-    .awaitShutdown()
+    .withHttpApp(Provider.service)
+    .serve.compile.drain
+    .flatMap(_ => IO.never)
+    .as(ExitCode.Success)
 }

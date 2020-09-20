@@ -25,7 +25,7 @@ object ProviderClient {
       case r: HttpResponse[String] if r.is2xx =>
         parse(r.body).extractOpt[Token]
 
-      case r: HttpResponse[String] =>
+      case _ =>
         None
     }
 
