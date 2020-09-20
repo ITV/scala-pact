@@ -40,27 +40,27 @@ import com.itv.scalapact.plugin._
 enablePlugins(ScalaPactPlugin)
         
 libraryDependencies ++= Seq(
-  "com.itv"       %% "scalapact-circe-0-9"   % "2.3.16" % "test",
-  "com.itv"       %% "scalapact-http4s-0-18" % "2.3.16" % "test",
-  "com.itv"       %% "scalapact-scalatest"   % "2.3.16" % "test",
+  "com.itv"       %% "scalapact-circe-0-9"   % "2.3.18" % "test",
+  "com.itv"       %% "scalapact-http4s-0-18" % "2.3.18" % "test",
+  "com.itv"       %% "scalapact-scalatest"   % "2.3.18" % "test",
   "org.scalatest" %% "scalatest"             % "3.0.5"  % "test"
 )
 ```
 
 Add this line to your `project/plugins.sbt` file to install the plugin:
 ```scala
-addSbtPlugin("com.itv" % "sbt-scalapact" % "2.3.16")
+addSbtPlugin("com.itv" % "sbt-scalapact" % "2.3.18")
 ```
 This version of the plugin comes pre-packaged with the latest JSON and Http libraries.
 Thanks to the way SBT works, that one plugin line will work in most cases, but if you're still having conflicts, you can also do this to use your preferred libraries:
 
 ```scala
  libraryDependencies ++= Seq(
-   "com.itv" %% "scalapact-argonaut-6-2" % "2.3.16",
-   "com.itv" %% "scalapact-http4s-0-16a" % "2.3.16"
+   "com.itv" %% "scalapact-argonaut-6-2" % "2.3.18",
+   "com.itv" %% "scalapact-http4s-0-16a" % "2.3.18"
  )
  
- addSbtPlugin("com.itv" % "sbt-scalapact-nodeps" % "2.3.16")
+ addSbtPlugin("com.itv" % "sbt-scalapact-nodeps" % "2.3.18")
 ```
 
 In your test suite, you will need the following imports:
