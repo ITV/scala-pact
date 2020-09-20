@@ -49,10 +49,11 @@ class ScalaPactHttpClient(fetcher: (SimpleRequest, Resource[IO, Client[IO]]) => 
         simpleRequestWithoutFakeHeader =>
           performRequest(
             simpleRequestWithoutFakeHeader, {
-              val client = BlazeClientBuilder[IO](ExecutionContext.Implicits.global)
+              BlazeClientBuilder[IO](ExecutionContext.Implicits.global)
                 .withMaxTotalConnections(maxTotalConnections)
                 .withRequestTimeout(clientTimeout)
-              sslContext.fold(client)(s => client.withSslContext(s)).resource
+                .withSslContextOption(sslContext)
+                .resource
             }
       )
     )
@@ -76,17 +77,18 @@ class ScalaPactHttpClient(fetcher: (SimpleRequest, Resource[IO, Client[IO]]) => 
     ) { sslContext => simpleRequestWithoutFakeHeader =>
       performRequest(
         simpleRequestWithoutFakeHeader, {
-          val client = BlazeClientBuilder[IO](ExecutionContext.Implicits.global)
+          BlazeClientBuilder[IO](ExecutionContext.Implicits.global)
             .withMaxTotalConnections(maxTotalConnections)
             .withRequestTimeout(clientTimeout)
-          sslContext.fold(client)(s => client.withSslContext(s)).resource
+            .withSslContextOption(sslContext)
+            .resource
         }
       ).map { r =>
         InteractionResponse(
           status = Option(r.statusCode),
           headers =
             if (r.headers.isEmpty) None
-            else Option(r.headers.map(p => p._1 -> p._2.mkString)),
+            else Option(r.headers.map(p => p._1 -> p._2)),
           body = r.body,
           matchingRules = None
         )

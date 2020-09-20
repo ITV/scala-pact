@@ -31,7 +31,7 @@ class ResultPublisher(fetcher: (SimpleRequest, Resource[IO, Client[IO]]) => IO[S
               "",
               HttpMethod.POST,
               Map("Content-Type" -> "application/json; charset=UTF-8") ++ pactBrokerAuthorization.map(_.asHeader).toList,
-              body(brokerPublishData, success),
+              body(brokerPublishData, success).some,
               None
             )
 
@@ -64,14 +64,11 @@ class ResultPublisher(fetcher: (SimpleRequest, Resource[IO, Client[IO]]) => IO[S
             )
         }
       }
-      .sequence
-      .map(_ => ())
+      .sequence_
       .unsafeRunSync()
 
-  private def body(brokerPublishData: BrokerPublishData, success: Boolean): Option[String] = {
+  private def body(brokerPublishData: BrokerPublishData, success: Boolean): String = {
     val buildUrl = brokerPublishData.buildUrl.fold("")(u => s""", "buildUrl": "$u"""")
-    Option(
-      s"""{ "success": $success, "providerApplicationVersion": "${brokerPublishData.providerVersion}"$buildUrl }"""
-    )
+    s"""{ "success": $success, "providerApplicationVersion": "${brokerPublishData.providerVersion}"$buildUrl }"""
   }
 }

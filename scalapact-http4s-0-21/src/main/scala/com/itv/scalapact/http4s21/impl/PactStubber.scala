@@ -1,7 +1,6 @@
 package com.itv.scalapact.http4s21.impl
 
 import cats.effect._
-import cats.implicits._
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter}
 import com.itv.scalapact.shared.{IInteractionManager, ScalaPactSettings, SslContextMap}
 import org.http4s.server.blaze.BlazeServerBuilder
@@ -28,7 +27,6 @@ class PactStubber extends IPactStubber {
       scalaPactSettings
     )
 
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   def start(interactionManager: IInteractionManager,
             connectionPoolSize: Int,
             sslContextName: Option[String],
@@ -55,7 +53,6 @@ class PactStubber extends IPactStubber {
       }
     }
 
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   def shutdown(): Unit = {
     instance.foreach(_.unsafeRunSync())
     instance = None

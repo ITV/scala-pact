@@ -26,7 +26,7 @@ class Http4sRequestResponseFactorySpec extends FunSpec with Matchers {
 
       request.method.name shouldEqual "POST"
       request.pathInfo.contains("foo") shouldEqual true
-      request.bodyAsText.compile.toVector.unsafeRunSync().mkString shouldEqual "Greetings!"
+      request.bodyText.compile.toVector.unsafeRunSync().mkString shouldEqual "Greetings!"
 
     }
 
@@ -42,7 +42,7 @@ class Http4sRequestResponseFactorySpec extends FunSpec with Matchers {
         )
 
       response.status.code shouldEqual 404
-      response.bodyAsText.compile.toVector.unsafeRunSync().mkString shouldEqual "Missing"
+      response.bodyText.compile.toVector.unsafeRunSync().mkString shouldEqual "Missing"
 
     }
 
