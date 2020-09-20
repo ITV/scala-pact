@@ -4,10 +4,11 @@ import org.http4s._
 import org.http4s.dsl.io._
 import org.http4s.circe.jsonEncoderOf
 import java.io.File
-import org.http4s.implicits._
 
+import org.http4s.implicits._
 import cats.effect.IO
 import io.circe.Encoder
+import org.http4s.headers.`Content-Type`
 
 import scala.io.Source
 import scala.util.Random
@@ -57,7 +58,7 @@ case class ResultResponse(count: Int, results: List[String])
 
 object ResultResponse {
   implicit val resultsEncoder: Encoder[ResultResponse] =
-    Encoder.forProduct2("count", "result")(r => (r.count, r.results))
+    Encoder.forProduct2("count", "results")(r => (r.count, r.results))
     implicit val entityEncoder: EntityEncoder[IO, ResultResponse] = jsonEncoderOf[IO, ResultResponse]
 }
 
@@ -67,4 +68,5 @@ object Token {
   implicit val tokenEncoder: Encoder[Token] =
     Encoder.forProduct1("token")(_.token)
   implicit val entityEncoder: EntityEncoder[IO, Token] = jsonEncoderOf[IO, Token]
+    .withContentType(`Content-Type`(MediaType.application.json).withCharset(Charset.`UTF-8`))
 }
