@@ -25,6 +25,5 @@ libraryDependencies ++= {
     "io.circe" %% "circe-generic" % "0.13.0",
     // Optional for string interpolation to JSON model
     "io.circe" %% "circe-literal" % "0.13.0",
-    "com.dimafeng" %% "testcontainers-scala-scalatest" % "0.35.2" % "test"
   )
 }
