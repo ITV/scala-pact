@@ -6,16 +6,10 @@ import cats.effect.IO
 import com.itv.scalapact.shared.HttpMethod._
 import com.itv.scalapact.shared.{HttpMethod, SimpleRequest}
 import fs2.Chunk
-import io.chrisdavenport.vault.Vault
 import org.http4s._
 import scodec.bits.ByteVector
 
-import scala.language.implicitConversions
-
 object Http4sRequestResponseFactory {
-
-  import HeaderImplicitConversions._
-  import com.itv.scalapact.shared.RightBiasEither._
 
   implicit val enc: EntityEncoder[IO, String] =
     EntityEncoder.simple[IO, String](){ str =>
@@ -23,7 +17,7 @@ object Http4sRequestResponseFactory {
     }
 
   def buildUri(baseUrl: String, endpoint: String): IO[Uri] =
-    Uri.fromString(baseUrl + endpoint).leftMap(l => new Exception(l.message)).fold(IO.raiseError, IO.pure)
+    IO.fromEither(Uri.fromString(baseUrl + endpoint))
 
   def intToStatus(status: IntAndReason): ParseResult[Status] =
     status match {
@@ -69,10 +63,8 @@ object Http4sRequestResponseFactory {
       val r = Request[IO](
         method = httpMethodToMethod(request.method),
         uri = uri,
-        httpVersion = HttpVersion.`HTTP/1.1`,
-        headers = request.headers,
-        body = EmptyBody,
-        attributes = Vault.empty
+      ).withHeaders(
+        request.headers.toHttp4sHeaders
       )
 
       request.body
@@ -86,15 +78,10 @@ object Http4sRequestResponseFactory {
     intToStatus(status) match {
       case Left(l) =>
         l.toHttpResponse[IO](HttpVersion.`HTTP/1.1`)
-
       case Right(code) =>
         val response = Response[IO](
-          status = code,
-          httpVersion = HttpVersion.`HTTP/1.1`,
-          headers = headers,
-          body = EmptyBody,
-          attributes = Vault.empty
-        )
+          status = code
+        ).withHeaders(headers.toHttp4sHeaders)
 
         body
           .map { b =>
@@ -103,17 +90,6 @@ object Http4sRequestResponseFactory {
           .getOrElse(response)
     }
 
-}
-
-object HeaderImplicitConversions {
-  implicit def mapToHeaderList(headerMap: Map[String, String]): Headers =
-    Headers(headerMap.toList.map(t => Header(t._1, t._2)))
-
-  implicit def headerListToMap(headers: Headers): Map[String, String] =
-    headers.toList.map(h => Header.unapply(h)).collect { case Some(h) => (h._1.toString, h._2) }.toMap
-
-  implicit def headerListToMaybeMap(headers: Headers): Option[Map[String, String]] =
-    Option(headerListToMap(headers))
 }
 
 case class IntAndReason(code: Int, reason: Option[String])

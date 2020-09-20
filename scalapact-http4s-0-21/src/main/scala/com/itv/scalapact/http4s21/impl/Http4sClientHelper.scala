@@ -13,8 +13,6 @@ import scala.concurrent.duration._
 
 object Http4sClientHelper {
 
-  import HeaderImplicitConversions._
-
   def defaultClient: Resource[IO, Client[IO]] =
     buildPooledBlazeHttpClient(1, Duration(5, SECONDS), None)
 
@@ -32,16 +30,15 @@ object Http4sClientHelper {
       .resource
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   def doRequest(request: SimpleRequest, httpClient: Resource[IO, Client[IO]]): IO[SimpleResponse] =
     for {
       request <- Http4sRequestResponseFactory.buildRequest(request)
       response <- httpClient.use { c =>
-        c.fetch[SimpleResponse](request) { r: Response[IO] =>
-          r.bodyAsText.compile.toVector
+        c.run(request).use { r: Response[IO] =>
+          r.bodyText.compile.toVector
             .map(_.mkString)
             .map { b =>
-              SimpleResponse(r.status.code, r.headers, Some(b))
+              SimpleResponse(r.status.code, r.headers.toMap, Some(b))
             }
         }
       }

@@ -13,8 +13,8 @@ class ProviderClientSpec extends FunSpec with Matchers {
   import com.itv.scalapact.ScalaPactForger._
 
   // Import the json and http libraries specified in the build.sbt file
-  import com.itv.scalapact.circe09._
-  import com.itv.scalapact.http4s18._
+  import com.itv.scalapact.circe13._
+  import com.itv.scalapact.http4s21._
 
   implicit val formats = DefaultFormats
 
