@@ -23,7 +23,6 @@ lazy val compilerOptions213 = Seq(
   "-Xlint:adapted-args",     // Warn if an argument list is modified to match the receiver.
   "-Xlint:inaccessible",     // Warn about inaccessible types in method signatures.
   "-Xlint:infer-any",        // Warn when a type argument is inferred to be Any.
-  "-Xlint:nullary-override", // Warn when non-nullary def f()' overrides nullarydef f’.
   "-Xlint:nullary-unit",     // Warn when nullary methods return Unit.
   "-Xlint:unused",           // Enable -Ywarn-unused:imports,privates,locals,implicits.
   "-Wdead-code",             // Warn when dead code is identified.
@@ -52,7 +51,6 @@ lazy val compilerOptionsAll = Seq(
   "-Xlint:inaccessible",           // Warn about inaccessible types in method signatures.
   "-Xlint:infer-any",              // Warn when a type argument is inferred to be `Any`.
   "-Xlint:missing-interpolator",   // A string literal appears to be missing an interpolator id.
-  "-Xlint:nullary-override",       // Warn when non-nullary `def f()' overrides nullary `def f'.
   "-Xlint:nullary-unit",           // Warn when nullary methods return Unit.
   "-Xlint:option-implicit",        // Option.apply used implicit view.
   "-Xlint:package-object-classes", // Class or object defined in package object.
@@ -70,7 +68,7 @@ def compilerOptionsVersion(scalaVersion: String) =
   })
 
 lazy val scalaVersion212: String = "2.12.10"
-lazy val scalaVersion213: String = "2.13.1"
+lazy val scalaVersion213: String = "2.13.3"
 lazy val supportedScalaVersions = List(scalaVersion212, scalaVersion213)
 
 ThisBuild / scalaVersion := scalaVersion212
