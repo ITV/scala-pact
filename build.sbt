@@ -427,7 +427,6 @@ lazy val standalone =
     .dependsOn(core)
     .dependsOn(circe13)
     .dependsOn(http4s021)
-    .settings(scala212OnlySettings)
 
 lazy val pactSpec =
   (project in file("pact-spec-tests"))
