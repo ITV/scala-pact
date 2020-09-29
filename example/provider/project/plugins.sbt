@@ -10,7 +10,7 @@ libraryDependencies ++= {
   val sbtV = (sbtBinaryVersion in pluginCrossBuild).value
   val scalaV = (scalaBinaryVersion in update).value
   Seq(
-    "com.itv" %% "scalapact-argonaut-6-2" % pactVersion,
+    "com.itv" %% "scalapact-circe-0-13" % pactVersion,
     "com.itv" %% "scalapact-http4s-0-21" % pactVersion,
     sbtPluginExtra("com.itv" % "sbt-scalapact-nodeps" % pactVersion, sbtV, scalaV)
   )

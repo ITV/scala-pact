@@ -445,18 +445,18 @@ lazy val testsWithDeps =
     .settings(commonSettings: _*)
     .settings(
       libraryDependencies ++= Seq(
-        "org.scalaj"             %% "scalaj-http"   % "2.3.0" % "test",
-        "org.json4s"             %% "json4s-native" % "3.5.0" % "test",
+        "org.scalaj"             %% "scalaj-http"   % "2.4.2" % "test",
+        "org.json4s"             %% "json4s-native" % "3.6.9" % "test",
         "com.github.tomakehurst" % "wiremock"       % "1.56" % "test",
-        "fr.hmil"                %% "roshttp"       % "2.0.1" % "test",
+        "fr.hmil"                %% "roshttp"       % "2.1.0" % "test",
         "io.argonaut"            %% "argonaut"      % "6.2.3"
       ),
       skip in publish := true
     )
     .settings(scala212OnlySettings)
     .dependsOn(framework)
-    .dependsOn(circe11)
-    .dependsOn(http4s020)
+    .dependsOn(circe13)
+    .dependsOn(http4s021)
 
 lazy val docs =
   (project in file("scalapact-docs"))

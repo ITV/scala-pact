@@ -5,7 +5,7 @@ organization := "com.example"
 name := "provider_tests"
 
 
-scalaVersion := "2.13.1"
+scalaVersion := "2.13.3"
 
 lazy val pactVersionFile: SettingKey[File] = settingKey[File]("location of scala-pact version for examples")
 pactVersionFile := baseDirectory.value.getParentFile.getParentFile / "version.sbt"
