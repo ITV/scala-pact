@@ -3,6 +3,7 @@ package com.example.provider
 import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
 import com.itv.scalapact.ScalaPactVerify._
 import com.itv.scalapact.shared.ProviderStateResult
+import scala.concurrent.duration._
 
 class VerifyContractsSpec extends FunSpec with Matchers with BeforeAndAfterAll {
 
@@ -30,7 +31,7 @@ class VerifyContractsSpec extends FunSpec with Matchers with BeforeAndAfterAll {
             val newHeader = "Pact" -> "modifiedRequest"
             ProviderStateResult(true, req => req.copy(headers = Option(req.headers.fold(Map(newHeader))(_ + newHeader))))
         }
-        .runVerificationAgainst("localhost", 8080)
+        .runVerificationAgainst("localhost", 8080, 10.seconds)
     }
   }
 

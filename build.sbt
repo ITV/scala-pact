@@ -23,7 +23,6 @@ lazy val compilerOptions213 = Seq(
   "-Xlint:adapted-args",     // Warn if an argument list is modified to match the receiver.
   "-Xlint:inaccessible",     // Warn about inaccessible types in method signatures.
   "-Xlint:infer-any",        // Warn when a type argument is inferred to be Any.
-  "-Xlint:nullary-override", // Warn when non-nullary def f()' overrides nullarydef f’.
   "-Xlint:nullary-unit",     // Warn when nullary methods return Unit.
   "-Xlint:unused",           // Enable -Ywarn-unused:imports,privates,locals,implicits.
   "-Wdead-code",             // Warn when dead code is identified.
@@ -52,7 +51,6 @@ lazy val compilerOptionsAll = Seq(
   "-Xlint:inaccessible",           // Warn about inaccessible types in method signatures.
   "-Xlint:infer-any",              // Warn when a type argument is inferred to be `Any`.
   "-Xlint:missing-interpolator",   // A string literal appears to be missing an interpolator id.
-  "-Xlint:nullary-override",       // Warn when non-nullary `def f()' overrides nullary `def f'.
   "-Xlint:nullary-unit",           // Warn when nullary methods return Unit.
   "-Xlint:option-implicit",        // Option.apply used implicit view.
   "-Xlint:package-object-classes", // Class or object defined in package object.
@@ -69,8 +67,8 @@ def compilerOptionsVersion(scalaVersion: String) =
     case _               => Nil
   })
 
-lazy val scalaVersion212: String = "2.12.10"
-lazy val scalaVersion213: String = "2.13.1"
+lazy val scalaVersion212: String = "2.12.12"
+lazy val scalaVersion213: String = "2.13.3"
 lazy val supportedScalaVersions = List(scalaVersion212, scalaVersion213)
 
 ThisBuild / scalaVersion := scalaVersion212
@@ -176,8 +174,8 @@ lazy val http4s016a =
     .settings(
       name := "scalapact-http4s-0-16a",
       libraryDependencies ++= Seq(
-        "org.http4s"             %% "http4s-blaze-server" % "0.16.6a",
-        "org.http4s"             %% "http4s-blaze-client" % "0.16.6a",
+        "org.http4s"             %% "http4s-blaze-server" % "0.16.6a" exclude("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"             %% "http4s-blaze-client" % "0.16.6a" exclude("org.scala-lang.modules", "scala-xml"),
         "org.http4s"             %% "http4s-dsl"          % "0.16.6a",
         "com.github.tomakehurst" % "wiremock"             % "1.56" % "test"
       )
@@ -193,8 +191,8 @@ lazy val http4s017 =
     .settings(
       name := "scalapact-http4s-0-17",
       libraryDependencies ++= Seq(
-        "org.http4s"             %% "http4s-blaze-server" % "0.17.6",
-        "org.http4s"             %% "http4s-blaze-client" % "0.17.6",
+        "org.http4s"             %% "http4s-blaze-server" % "0.17.6" exclude("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"             %% "http4s-blaze-client" % "0.17.6" exclude("org.scala-lang.modules", "scala-xml"),
         "org.http4s"             %% "http4s-dsl"          % "0.17.6",
         "com.github.tomakehurst" % "wiremock"             % "1.56" % "test"
       )
@@ -209,8 +207,8 @@ lazy val http4s018 =
     .settings(
       name := "scalapact-http4s-0-18",
       libraryDependencies ++= Seq(
-        "org.http4s"             %% "http4s-blaze-server" % "0.18.13",
-        "org.http4s"             %% "http4s-blaze-client" % "0.18.13",
+        "org.http4s"             %% "http4s-blaze-server" % "0.18.13" exclude("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"             %% "http4s-blaze-client" % "0.18.13" exclude("org.scala-lang.modules", "scala-xml"),
         "org.http4s"             %% "http4s-dsl"          % "0.18.13",
         "com.github.tomakehurst" % "wiremock"             % "1.56" % "test"
       )
@@ -225,8 +223,8 @@ lazy val http4s020 =
     .settings(
       name := "scalapact-http4s-0-20",
       libraryDependencies ++= Seq(
-        "org.http4s"             %% "http4s-blaze-server" % "0.20.11",
-        "org.http4s"             %% "http4s-blaze-client" % "0.20.11",
+        "org.http4s"             %% "http4s-blaze-server" % "0.20.11" exclude("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"             %% "http4s-blaze-client" % "0.20.11" exclude("org.scala-lang.modules", "scala-xml"),
         "org.http4s"             %% "http4s-dsl"          % "0.20.11",
         "com.github.tomakehurst" % "wiremock"             % "1.56" % "test"
       )
@@ -241,8 +239,8 @@ lazy val http4s021 =
     .settings(
       name := "scalapact-http4s-0-21",
       libraryDependencies ++= Seq(
-        "org.http4s"             %% "http4s-blaze-server" % "0.21.7",
-        "org.http4s"             %% "http4s-blaze-client" % "0.21.7",
+        "org.http4s"             %% "http4s-blaze-server" % "0.21.7" exclude("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"             %% "http4s-blaze-client" % "0.21.7" exclude("org.scala-lang.modules", "scala-xml"),
         "org.http4s"             %% "http4s-dsl"          % "0.21.7",
         "com.github.tomakehurst" % "wiremock"             % "2.25.1" % "test"
       )
@@ -382,11 +380,11 @@ lazy val plugin =
     .settings(publishSettings: _*)
     .settings(
       name := "sbt-scalapact",
-      sbtPlugin := true
+      sbtPlugin := true,
     )
     .dependsOn(pluginShared)
-    .dependsOn(argonaut62)
-    .dependsOn(http4s018)
+    .dependsOn(circe13)
+    .dependsOn(http4s021)
     .settings(scala212OnlySettings)
 
 lazy val pluginNoDeps =
@@ -395,11 +393,11 @@ lazy val pluginNoDeps =
     .settings(publishSettings: _*)
     .settings(
       name := "sbt-scalapact-nodeps",
-      sbtPlugin := true
+      sbtPlugin := true,
     )
     .dependsOn(pluginShared)
-    .dependsOn(argonaut62 % "provided")
-    .dependsOn(http4s018 % "provided")
+    .dependsOn(circe13 % "provided")
+    .dependsOn(http4s021 % "provided")
     .settings(scala212OnlySettings)
 
 lazy val framework =
@@ -427,9 +425,8 @@ lazy val standalone =
       skip in publish := true
     )
     .dependsOn(core)
-    .dependsOn(circe09)
-    .dependsOn(http4s018)
-    .settings(scala212OnlySettings)
+    .dependsOn(circe13)
+    .dependsOn(http4s021)
 
 lazy val pactSpec =
   (project in file("pact-spec-tests"))
@@ -437,11 +434,6 @@ lazy val pactSpec =
     .settings(
       name := "pact-spec-tests",
       skip in publish := true
-    )
-    .settings(
-      libraryDependencies ++= Seq(
-        "io.argonaut" %% "argonaut" % "6.2.3"
-      )
     )
     .settings(scala212OnlySettings)
     .dependsOn(core)
@@ -452,18 +444,18 @@ lazy val testsWithDeps =
     .settings(commonSettings: _*)
     .settings(
       libraryDependencies ++= Seq(
-        "org.scalaj"             %% "scalaj-http"   % "2.3.0" % "test",
-        "org.json4s"             %% "json4s-native" % "3.5.0" % "test",
+        "org.scalaj"             %% "scalaj-http"   % "2.4.2" % "test",
+        "org.json4s"             %% "json4s-native" % "3.6.9" % "test",
         "com.github.tomakehurst" % "wiremock"       % "1.56" % "test",
-        "fr.hmil"                %% "roshttp"       % "2.0.1" % "test",
+        "fr.hmil"                %% "roshttp"       % "2.1.0" % "test",
         "io.argonaut"            %% "argonaut"      % "6.2.3"
       ),
       skip in publish := true
     )
     .settings(scala212OnlySettings)
     .dependsOn(framework)
-    .dependsOn(circe11)
-    .dependsOn(http4s020)
+    .dependsOn(circe13)
+    .dependsOn(http4s021)
 
 lazy val docs =
   (project in file("scalapact-docs"))

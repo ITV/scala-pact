@@ -6,7 +6,7 @@ name := "consumer"
 
 organization := "com.example"
 
-scalaVersion := "2.13.1"
+scalaVersion := "2.13.3"
 
 enablePlugins(ScalaPactPlugin)
 

@@ -51,7 +51,7 @@ object PactStubber {
 
 class RunnableStubber(args: Array[String], launch: Seq[String] => IPactStubber) extends Runnable {
   override def run(): Unit = {
-    launch(args)
+    launch(args.toSeq)
     ()
   }
 }
