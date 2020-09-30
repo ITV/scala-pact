@@ -11,12 +11,7 @@ import com.itv.scalapact.shared.typeclasses.{IPactReader, IScalaPactHttpClient}
 import com.itv.scalapact.shared.ProviderStateResult
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 
-import scala.language.implicitConversions
-
 object ScalaPactVerify {
-  implicit def toOption[A](a: A): Option[A]                              = Option(a)
-  implicit def toProviderStateResult(bool: Boolean): ProviderStateResult = ProviderStateResult(bool)
-
   object verifyPact {
     def withPactSource(
         sourceType: PactSourceType
@@ -25,7 +20,7 @@ object ScalaPactVerify {
 
     class ScalaPactVerifyProviderStates(sourceType: PactSourceType)(implicit sslContextMap: SslContextMap) {
       def setupProviderState(given: String)(setupProviderState: SetupProviderState): ScalaPactVerifyRunner =
-        new ScalaPactVerifyRunner(sourceType, given, setupProviderState)
+        ScalaPactVerifyRunner(sourceType, given, setupProviderState)
       def noSetupRequired: ScalaPactVerifyRunner = new ScalaPactVerifyRunner(sourceType, None, None)
     }
 
@@ -112,7 +107,7 @@ object ScalaPactVerify {
         val providerStateFunc: SetupProviderState =
           given
             .flatMap(_ => setupProviderState)
-            .getOrElse(_ => true)
+            .getOrElse(_ => ProviderStateResult(true))
 
         val (verifySettings, arguments) = sourceType match {
           case pactAsJsonString(json) =>
@@ -136,12 +131,12 @@ object ScalaPactVerify {
                 pactBrokerAuthorization = None
               ),
               ScalaPactSettings(
-                host = host,
-                protocol = protocol,
-                port = port,
-                localPactFilePath = tmp.getAbsolutePath(),
-                strictMode = strict,
-                clientTimeout = Option(clientTimeout),
+                host = Some(host),
+                protocol = Some(protocol),
+                port = Some(port),
+                localPactFilePath = Some(tmp.getAbsolutePath()),
+                strictMode = Some(strict),
+                clientTimeout = Some(clientTimeout),
                 outputPath = None,
                 publishResultsEnabled = None
               )
@@ -160,12 +155,12 @@ object ScalaPactVerify {
                 pactBrokerAuthorization = None
               ),
               ScalaPactSettings(
-                host = host,
-                protocol = protocol,
-                port = port,
-                localPactFilePath = path,
-                strictMode = strict,
-                clientTimeout = Option(clientTimeout),
+                host = Some(host),
+                protocol = Some(protocol),
+                port = Some(port),
+                localPactFilePath = Some(path),
+                strictMode = Some(strict),
+                clientTimeout = Some(clientTimeout),
                 outputPath = None,
                 publishResultsEnabled = None
               )
@@ -184,12 +179,12 @@ object ScalaPactVerify {
                 pactBrokerAuthorization = pactBrokerAuthorization
               ),
               ScalaPactSettings(
-                host = host,
-                protocol = protocol,
-                port = port,
+                host = Some(host),
+                protocol = Some(protocol),
+                port = Some(port),
                 localPactFilePath = None,
-                strictMode = strict,
-                clientTimeout = Option(clientTimeout),
+                strictMode = Some(strict),
+                clientTimeout = Some(clientTimeout),
                 outputPath = None,
                 publishResultsEnabled = publishResultsEnabled
               )
@@ -208,12 +203,12 @@ object ScalaPactVerify {
                 pactBrokerAuthorization = pactBrokerAuthorization
               ),
               ScalaPactSettings(
-                host = host,
-                protocol = protocol,
-                port = port,
+                host = Some(host),
+                protocol = Some(protocol),
+                port = Some(port),
                 localPactFilePath = None,
-                strictMode = strict,
-                clientTimeout = Option(clientTimeout),
+                strictMode = Some(strict),
+                clientTimeout = Some(clientTimeout),
                 outputPath = None,
                 publishResultsEnabled = publishResultsEnabled
               )
@@ -238,12 +233,12 @@ object ScalaPactVerify {
                 pactBrokerAuthorization = pactBrokerAuthorization
               ),
               ScalaPactSettings(
-                host = host,
-                protocol = protocol,
-                port = port,
+                host = Some(host),
+                protocol = Some(protocol),
+                port = Some(port),
                 localPactFilePath = None,
-                strictMode = strict,
-                clientTimeout = Option(clientTimeout),
+                strictMode = Some(strict),
+                clientTimeout = Some(clientTimeout),
                 outputPath = None,
                 publishResultsEnabled = publishResultsEnabled
               )
@@ -269,12 +264,12 @@ object ScalaPactVerify {
                 pactBrokerAuthorization = pactBrokerAuthorization
               ),
               ScalaPactSettings(
-                host = host,
-                protocol = protocol,
-                port = port,
+                host = Some(host),
+                protocol = Some(protocol),
+                port = Some(port),
                 localPactFilePath = None,
-                strictMode = strict,
-                clientTimeout = Option(clientTimeout),
+                strictMode = Some(strict),
+                clientTimeout = Some(clientTimeout),
                 outputPath = None,
                 publishResultsEnabled = publishResultsEnabled
               )
@@ -285,6 +280,14 @@ object ScalaPactVerify {
 
         if (v(arguments)) () else throw new ScalaPactVerifyFailed
       }
+    }
+
+    object ScalaPactVerifyRunner {
+      def apply(
+                 sourceType: PactSourceType,
+                 given: String,
+                 setupProviderState: SetupProviderState
+               )(implicit sslContextMap: SslContextMap): ScalaPactVerifyRunner = new ScalaPactVerifyRunner(sourceType, Some(given), Some(setupProviderState))
     }
 
   }
@@ -353,7 +356,7 @@ object ScalaPactVerify {
         val pattern                       = """^([a-z]+):\/\/([a-z0-9\.\-_]+):(\d+).*""".r
         val pattern(protocol, host, port) = url.toLowerCase
 
-        VerifyTargetConfig(protocol, host, Helpers.safeStringToInt(port).getOrElse(80), clientTimeout)
+        Some(VerifyTargetConfig(protocol, host, Helpers.safeStringToInt(port).getOrElse(80), clientTimeout))
       } catch {
         case _: Throwable =>
           PactLogger.error(

@@ -12,9 +12,6 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 object Http4sClientHelper {
-
-  import HeaderImplicitConversions._
-
   def defaultClient: Resource[IO, Client[IO]] =
     buildPooledBlazeHttpClient(1, Duration(1, SECONDS), None)
 
@@ -43,7 +40,7 @@ object Http4sClientHelper {
           r.bodyAsText.compile.toVector
             .map(_.mkString)
             .map { b =>
-              SimpleResponse(r.status.code, r.headers, Some(b))
+              SimpleResponse(r.status.code, r.headers.toMap, Some(b))
             }
         }
       }

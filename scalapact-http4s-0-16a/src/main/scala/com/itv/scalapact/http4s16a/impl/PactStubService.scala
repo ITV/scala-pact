@@ -2,7 +2,6 @@ package com.itv.scalapact.http4s16a.impl
 
 import java.util.concurrent.Executors
 
-import com.itv.scalapact.http4s16a.impl.HeaderImplicitConversions._
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter}
 import com.itv.scalapact.shared.{ScalaPactSettings, _}
 import javax.net.ssl.SSLContext
@@ -102,7 +101,7 @@ private object PactStubService {
       interactionManager.findMatchingInteraction(
         InteractionRequest(
           method = Option(req.method.name.toUpperCase),
-          headers = req.headers,
+          headers = Option(req.headers.asMap),
           query = if (req.multiParams.isEmpty) None else Option(req.multiParams.toList.flatMap { case (key, values) => values.map((key,_))}.map(p => p._1 + "=" + p._2).mkString("&")),
           path = Option(req.pathInfo),
           body = req.bodyAsText.runLog[Task, String].map(body => Option(body.mkString)).unsafePerformSync,

@@ -1,12 +1,7 @@
 package com.itv.scalapact.shared
 
-import scala.language.implicitConversions
-
 object ColourOutput {
-
-  implicit def toColouredString(s: String): ColouredString = new ColouredString(s)
-
-  class ColouredString(s: String) {
+  implicit class ColouredString(val s: String) extends AnyVal {
     import Console._
 
     def black: String      = BLACK + s + RESET

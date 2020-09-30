@@ -84,7 +84,6 @@ lazy val commonSettings = Seq(
     Wart.Any,
     Wart.Overloading,
     Wart.FinalCaseClass,
-    Wart.ImplicitConversion,
     Wart.Nothing,
     Wart.ImplicitParameter,
     Wart.NonUnitStatements,

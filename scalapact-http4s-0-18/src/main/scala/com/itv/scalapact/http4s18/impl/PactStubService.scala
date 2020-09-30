@@ -4,7 +4,6 @@ import java.util.concurrent.Executors
 
 import cats.data.{Kleisli, OptionT}
 import cats.effect.IO
-import com.itv.scalapact.http4s18.impl.HeaderImplicitConversions._
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter}
 import com.itv.scalapact.shared._
 import javax.net.ssl.SSLContext
@@ -106,7 +105,7 @@ object PactStubService {
       interactionManager.findMatchingInteraction(
         InteractionRequest(
           method = Option(req.method.name.toUpperCase),
-          headers = req.headers,
+          headers = Option(req.headers.asMap),
           query = if (req.params.isEmpty) None else Option(req.multiParams.toList.flatMap { case (key, values) => values.map((key,_))}.map(p => p._1 + "=" + p._2).mkString("&")),
           path = Option(req.pathInfo),
           body = req.attemptAs[String].fold(_ => None, Option.apply).unsafeRunSync(),

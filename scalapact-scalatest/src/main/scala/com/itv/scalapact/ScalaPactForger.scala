@@ -2,20 +2,11 @@ package com.itv.scalapact
 
 import com.itv.scalapact.shared.SslContextMap
 
-import scala.language.implicitConversions
 import scala.util.Properties
 import com.itv.scalapact.shared.Maps._
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter, IScalaPactHttpClient}
 
 object ScalaPactForger {
-
-  implicit def toOption[A](a: A): Option[A] = Option(a)
-
-  implicit def rulesToOptionalList(
-      rules: ScalaPactForger.ScalaPactMatchingRules
-  ): Option[List[ScalaPactForger.ScalaPactMatchingRule]] =
-    Option(rules.rules)
-
   implicit val options: ScalaPactOptions = ScalaPactOptions.DefaultOptions
 
   object forgePact extends ForgePactElements {

@@ -109,9 +109,7 @@ object PactStubService {
         interactionManager.findMatchingInteraction(
           InteractionRequest(
             method = Option(req.method.name.toUpperCase),
-            headers = Option(req.headers.toList.map { h =>
-              h.name.toString -> h.value
-            }.toMap),
+            headers = Option(req.headers.toMap),
             query =
               if (req.params.isEmpty) None else Option(req.multiParams.toList.flatMap { case (key, values) => values.map((key,_))}.map(p => p._1 + "=" + p._2).mkString("&")),
             path = Option(req.pathInfo),

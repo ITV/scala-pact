@@ -10,15 +10,11 @@ import sbt.plugins.JvmPlugin
 import sbt.{Def, _}
 import complete.DefaultParsers._
 
-import scala.language.implicitConversions
-
 object ScalaPactPlugin extends AutoPlugin {
   override def requires: JvmPlugin.type = plugins.JvmPlugin
   override def trigger: PluginTrigger   = allRequirements
 
   object autoImport {
-    implicit def toSetupProviderState(bool: Boolean): ProviderStateResult = ProviderStateResult(bool)
-
     val providerStateMatcher: SettingKey[PartialFunction[String, ProviderStateResult]] =
       SettingKey[PartialFunction[String, ProviderStateResult]](
         "provider-state-matcher",
@@ -103,7 +99,7 @@ object ScalaPactPlugin extends AutoPlugin {
 
   import autoImport._
 
-  private val pf: PartialFunction[String, ProviderStateResult] = { case _: String => false }
+  private val pf: PartialFunction[String, ProviderStateResult] = { case _: String => ProviderStateResult(false) }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   private val pactSettings = Seq(

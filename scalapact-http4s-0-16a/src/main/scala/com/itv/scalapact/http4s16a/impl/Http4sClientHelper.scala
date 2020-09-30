@@ -1,5 +1,7 @@
 package com.itv.scalapact.http4s16a.impl
 
+import java.time.Instant
+
 import com.itv.scalapact.shared.{SimpleRequest, SimpleResponse}
 import javax.net.ssl.SSLContext
 import org.http4s.client.Client
@@ -11,8 +13,7 @@ import scalaz.concurrent.Task
 import scala.concurrent.duration._
 
 object Http4sClientHelper {
-
-  import HeaderImplicitConversions._
+  Instant
 
   private def blazeClientConfig(clientTimeout: Duration, sslContext: Option[SSLContext]): BlazeClientConfig =
     BlazeClientConfig.defaultConfig.copy(
@@ -24,7 +25,7 @@ object Http4sClientHelper {
 
   private val extractResponse: Response => Task[SimpleResponse] = r =>
     r.bodyAsText.runLog[Task, String].map(_.mkString).map { b =>
-      SimpleResponse(r.status.code, r.headers, Some(b))
+      SimpleResponse(r.status.code, r.headers.asMap, Some(b))
   }
 
   def defaultClient: Client =
