@@ -10,9 +10,14 @@ import sbt.plugins.JvmPlugin
 import sbt.{Def, _}
 import complete.DefaultParsers._
 
+import scala.language.implicitConversions
+
 object ScalaPactPlugin extends AutoPlugin {
   override def requires: JvmPlugin.type = plugins.JvmPlugin
   override def trigger: PluginTrigger   = allRequirements
+
+  @SuppressWarnings(Array("org.wartremover.warts.ImplicitConversion"))
+  implicit def booleanToProviderStateResult(bool: Boolean): ProviderStateResult = ProviderStateResult(bool)
 
   object autoImport {
 

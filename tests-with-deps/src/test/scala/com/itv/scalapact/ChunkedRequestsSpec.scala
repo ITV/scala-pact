@@ -37,14 +37,12 @@ class ChunkedRequestsSpec extends FunSpec with Matchers {
               path = endPoint,
               query = None,
               headers = Map.empty,
-              body = Some(xml),
-              matchingRules = None
+              body = xml,
             )
             .willRespondWith(
               status = 200,
               headers = Map.empty,
-              body = Some("Success"),
-              matchingRules = None
+              body = "Success"
             )
         )
         .runConsumerTest { mockConfig =>
@@ -83,14 +81,12 @@ class ChunkedRequestsSpec extends FunSpec with Matchers {
                             "Accept"       -> "text/xml",
                             "Content-Type" -> "text/xml; charset=utf-8",
                             "User-Agent"   -> "scala-pact-test"),
-              body = Some(xml),
-              matchingRules = None
+              body = xml,
             )
             .willRespondWith(
               status = 200,
               headers = Map.empty,
-              body = Some("Success"),
-              matchingRules = None
+              body = "Success",
             )
         )
         .runConsumerTest { mockConfig =>

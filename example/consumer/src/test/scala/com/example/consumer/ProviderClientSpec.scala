@@ -72,7 +72,7 @@ class ProviderClientSpec extends FunSpec with Matchers {
             .willRespondWith(
               status = 202,
               headers = Map("Content-Type" -> "application/json; charset=UTF-8"),
-              body = """{"token":"abcABC123"}""",
+              body = Some("""{"token":"abcABC123"}"""),
               matchingRules = // When verifying externally, we don't mind what is in the token
                 // as long as it contains a token field with an alphanumeric
                 // value
