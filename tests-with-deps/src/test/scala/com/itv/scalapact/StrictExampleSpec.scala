@@ -42,13 +42,11 @@ class StrictExampleSpec extends FunSpec with Matchers {
               query = None,
               headers = Map.empty,
               body = json("Fred")(10)(List("red", "blue")),
-              matchingRules = None
             )
             .willRespondWith(
               status = 200,
               headers = Map.empty,
               body = "Success",
-              matchingRules = None
             )
         )
         .runConsumerTest { mockConfig =>

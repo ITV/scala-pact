@@ -1,11 +1,7 @@
 package com.itv.scalapact.shared
 
-import scala.language.implicitConversions
-
 object RightBiasEither {
-  implicit def makeBetterEither[AA, BB](e: Either[AA, BB]): RightBiasEither[AA, BB] = new RightBiasEither(e)
-
-  class RightBiasEither[AA, BB](e: Either[AA, BB]) {
+  implicit class RightBiasEither[AA, BB](val e: Either[AA, BB]) extends AnyVal {
 
     def bind[CC](f: BB => Either[AA, CC]): Either[AA, CC] =
       e match {

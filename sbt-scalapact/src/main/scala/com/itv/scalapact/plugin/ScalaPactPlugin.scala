@@ -16,12 +16,13 @@ object ScalaPactPlugin extends AutoPlugin {
   override def requires: JvmPlugin.type = plugins.JvmPlugin
   override def trigger: PluginTrigger   = allRequirements
 
+  @SuppressWarnings(Array("org.wartremover.warts.ImplicitConversion"))
+  implicit def booleanToProviderStateResult(bool: Boolean): ProviderStateResult = ProviderStateResult(bool)
+
   object autoImport {
 
     type BrokerPublishData = com.itv.scalapact.shared.BrokerPublishData
     val BrokerPublishData: com.itv.scalapact.shared.BrokerPublishData.type = com.itv.scalapact.shared.BrokerPublishData
-
-    implicit def toSetupProviderState(bool: Boolean): ProviderStateResult = ProviderStateResult(bool)
 
     val providerStateMatcher: SettingKey[PartialFunction[String, ProviderStateResult]] =
       SettingKey[PartialFunction[String, ProviderStateResult]](
@@ -107,7 +108,7 @@ object ScalaPactPlugin extends AutoPlugin {
 
   import autoImport._
 
-  private val pf: PartialFunction[String, ProviderStateResult] = { case _: String => false }
+  private val pf: PartialFunction[String, ProviderStateResult] = { case _: String => ProviderStateResult(false) }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   private val pactSettings = Seq(

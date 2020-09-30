@@ -14,14 +14,14 @@ class ScalaPactContractWriterSpec extends FunSpec with Matchers {
         query = None,
         headers = Map.empty,
         body = None,
-        matchingRules = matchingRulesWithMinArray
+        matchingRules = Some(matchingRulesWithMinArray)
       )
 
       val response = ScalaPactResponse(
         status = 200,
         headers = Map.empty,
         body = None,
-        matchingRules = matchingRulesWithMinArray
+        matchingRules = Some(matchingRulesWithMinArray)
       )
 
       val interactionWithMatchMinArray: ScalaPactInteractionFinal = ScalaPactInteractionFinal(

@@ -9,21 +9,15 @@ import fs2.Chunk
 import org.http4s._
 import scodec.bits.ByteVector
 
-import scala.language.implicitConversions
-
 object Http4sRequestResponseFactory {
-
-  import HeaderImplicitConversions._
   import com.itv.scalapact.shared.RightBiasEither._
-
-  implicit def toIO[A <: Throwable, B](a: Either[A, B]): IO[B] = a.fold(IO.raiseError, IO.pure)
 
   private val stringToByteVector: String => Chunk[Byte] = str => {
     Chunk.bytes(ByteVector(str.getBytes(StandardCharsets.UTF_8)).toArray)
   }
 
   def buildUri(baseUrl: String, endpoint: String): IO[Uri] =
-    Uri.fromString(baseUrl + endpoint).leftMap(l => new Exception(l.message))
+    IO.fromEither(Uri.fromString(baseUrl + endpoint).leftMap(l => new Exception(l.message)))
 
   def intToStatus(status: IntAndReason): ParseResult[Status] =
     status match {
@@ -70,7 +64,7 @@ object Http4sRequestResponseFactory {
         method = httpMethodToMethod(request.method),
         uri = uri,
         httpVersion = HttpVersion.`HTTP/1.1`,
-        headers = request.headers,
+        headers = request.headers.toHttp4sHeaders,
         body = EmptyBody,
         attributes = AttributeMap.empty
       )
@@ -94,7 +88,7 @@ object Http4sRequestResponseFactory {
         val response = Response[IO](
           status = code,
           httpVersion = HttpVersion.`HTTP/1.1`,
-          headers = headers,
+          headers = headers.toHttp4sHeaders,
           body = EmptyBody,
           attributes = AttributeMap.empty
         )
@@ -108,17 +102,6 @@ object Http4sRequestResponseFactory {
           .getOrElse(IO(response))
     }
 
-}
-
-object HeaderImplicitConversions {
-  implicit def mapToHeaderList(headerMap: Map[String, String]): Headers =
-    Headers(headerMap.toList.map(t => Header(t._1, t._2)))
-
-  implicit def headerListToMap(headers: Headers): Map[String, String] =
-    headers.toList.map(h => Header.unapply(h)).collect { case Some(h) => (h._1.toString, h._2) }.toMap
-
-  implicit def headerListToMaybeMap(headers: Headers): Option[Map[String, String]] =
-    Option(headerListToMap(headers))
 }
 
 case class IntAndReason(code: Int, reason: Option[String])

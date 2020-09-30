@@ -11,9 +11,6 @@ import org.http4s.headers.{AgentProduct, `User-Agent`}
 import scala.concurrent.duration._
 
 object Http4sClientHelper {
-
-  import HeaderImplicitConversions._
-
   private def blazeClientConfig(clientTimeout: Duration,
                                 sslContext: Option[SSLContext],
                                 maxTotalConnections: Int): BlazeClientConfig =
@@ -27,7 +24,7 @@ object Http4sClientHelper {
 
   private val extractResponse: Response[IO] => IO[SimpleResponse] = r =>
     r.bodyAsText.compile.toVector.map(_.mkString).map { b =>
-      SimpleResponse(r.status.code, r.headers, Some(b))
+      SimpleResponse(r.status.code, r.headers.asMap, Some(b))
   }
 
   def defaultClient: IO[Client[IO]] =
