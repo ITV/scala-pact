@@ -37,13 +37,13 @@ class ChunkedRequestsSpec extends FunSpec with Matchers {
               path = endPoint,
               query = None,
               headers = Map.empty,
-              body = xml,
+              body = Some(xml),
               matchingRules = None
             )
             .willRespondWith(
               status = 200,
               headers = Map.empty,
-              body = "Success",
+              body = Some("Success"),
               matchingRules = None
             )
         )
@@ -58,8 +58,8 @@ class ChunkedRequestsSpec extends FunSpec with Matchers {
 
           val res: SimpleHttpResponse = Await.result(request.post(PlainTextBody(xml)), 5.second)
 
-          res.get.statusCode shouldEqual 200
-          res.get.body shouldEqual "Success"
+          res.statusCode shouldEqual 200
+          res.body shouldEqual "Success"
 
         }
 
@@ -83,13 +83,13 @@ class ChunkedRequestsSpec extends FunSpec with Matchers {
                             "Accept"       -> "text/xml",
                             "Content-Type" -> "text/xml; charset=utf-8",
                             "User-Agent"   -> "scala-pact-test"),
-              body = xml,
+              body = Some(xml),
               matchingRules = None
             )
             .willRespondWith(
               status = 200,
               headers = Map.empty,
-              body = "Success",
+              body = Some("Success"),
               matchingRules = None
             )
         )
@@ -112,8 +112,8 @@ class ChunkedRequestsSpec extends FunSpec with Matchers {
 
           val res: SimpleHttpResponse = Await.result(request.send(), 1.second)
 
-          res.get.statusCode shouldEqual 200
-          res.get.body shouldEqual "Success"
+          res.statusCode shouldEqual 200
+          res.body shouldEqual "Success"
 
         }
 

@@ -175,6 +175,8 @@ object ScalaPactForger {
     def ~>(newRules: ScalaPactMatchingRules): ScalaPactMatchingRules = ScalaPactMatchingRules(
       rules = rules ++ newRules.rules
     )
+
+    def rulesOption: Option[List[ScalaPactMatchingRule]] = Some(rules)
   }
 
   object headerRegexRule {

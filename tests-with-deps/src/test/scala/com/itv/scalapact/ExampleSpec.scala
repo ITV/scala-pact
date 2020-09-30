@@ -101,7 +101,7 @@ class ExampleSpec extends FunSpec with Matchers {
         .addInteraction(
           interaction
             .description("a get example with query parameters")
-            .uponReceiving(GET, endPoint, "id=1&name=joe")
+            .uponReceiving(GET, endPoint, Some("id=1&name=joe"))
             .willRespondWith(200, "Hello there!")
         )
         .runConsumerTest { mockConfig =>
@@ -150,7 +150,7 @@ class ExampleSpec extends FunSpec with Matchers {
           interaction
             .description("Request for some json")
             .uponReceiving(endPoint)
-            .willRespondWith(200, Map("Content-Type" -> "application/json"), write(data), None)
+            .willRespondWith(200, Map("Content-Type" -> "application/json"), Some(write(data)), None)
         )
         .runConsumerTest { mockConfig =>
           val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint, Map())
@@ -189,8 +189,8 @@ class ExampleSpec extends FunSpec with Matchers {
         .addInteraction(
           interaction
             .description("POST JSON receive XML example")
-            .uponReceiving(POST, endPoint, None, headers, write(requestData), None)
-            .willRespondWith(400, Map("Content-Type" -> "text/xml"), responseXml.toString(), None)
+            .uponReceiving(POST, endPoint, None, headers, Some(write(requestData)), None)
+            .willRespondWith(400, Map("Content-Type" -> "text/xml"), Some(responseXml.toString()), None)
         )
         .runConsumerTest { mockConfig =>
           val result = SimpleClient.doPostRequest(mockConfig.baseUrl, endPoint, headers, write(requestData))
@@ -252,14 +252,14 @@ class ExampleSpec extends FunSpec with Matchers {
               headers = Map("fish" -> "chips", "sauce" -> "ketchup"),
               body = None,
               matchingRules =
-                headerRegexRule("fish", "\\w+") ~> headerRegexRule("sauce", "\\w+")
+                (headerRegexRule("fish", "\\w+") ~> headerRegexRule("sauce", "\\w+")).rulesOption
             )
             .willRespondWith(
               status = 200,
               headers = Map("fish" -> "chips", "sauce" -> "ketchup"),
-              body = "Hello there!",
+              body = Some("Hello there!"),
               matchingRules =
-                headerRegexRule("fish", "\\w+") ~> headerRegexRule("sauce", "\\w+")
+                (headerRegexRule("fish", "\\w+") ~> headerRegexRule("sauce", "\\w+")).rulesOption
             )
         )
         .runConsumerTest { mockConfig =>
@@ -299,17 +299,17 @@ class ExampleSpec extends FunSpec with Matchers {
               path = endPoint,
               query = None,
               headers = Map.empty,
-              body = json("Fred")(10)(List("red", "blue")),
+              body = Some(json("Fred")(10)(List("red", "blue"))),
               matchingRules =
-                bodyRegexRule("name", "\\w+")
+                (bodyRegexRule("name", "\\w+")
                   ~> bodyTypeRule("count")
                   ~> bodyArrayMinimumLengthRule("colours", 1)
-                  ~> bodyRegexRule("colours[*]", "red|blue")
+                  ~> bodyRegexRule("colours[*]", "red|blue")).rulesOption
             )
             .willRespondWith(
               status = 200,
               headers = Map.empty,
-              body = "Success",
+              body = Some("Success"),
               matchingRules = None
             )
         )
