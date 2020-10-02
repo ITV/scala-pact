@@ -41,7 +41,7 @@ object ScalaPactMock {
         port = Option(0), // `0` means "use any available port".
         localPactFilePath = None,
         strictMode = Option(strict),
-        clientTimeout = Option(Duration(2, SECONDS)), // Should never ever take this long. Used to make an http request against the local stub.
+        clientTimeout = Option(2.seconds), // Should never ever take this long. Used to make an http request against the local stub.
         outputPath = Option(outputPath),
         publishResultsEnabled = None // Nothing to publish
       ),
@@ -71,6 +71,7 @@ object ScalaPactMock {
       test: ScalaPactMockConfig => A,
       pactDescription: ScalaPactDescriptionFinal
   )(implicit sslContextMap: SslContextMap, pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F]): A = {
+    @scala.annotation.tailrec
     def rec(attemptsRemaining: Int, intervalMillis: Int): A =
       if (isStubReady(mockConfig, clientTimeout, pactDescription.serverSslContextName)) {
         val result = configuredTestRunner(pactDescription)(mockConfig)(test)

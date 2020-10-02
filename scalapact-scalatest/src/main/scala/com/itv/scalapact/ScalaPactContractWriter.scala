@@ -14,12 +14,7 @@ import com.itv.scalapact.ScalaPactForger.{
 import com.itv.scalapact.shared._
 import com.itv.scalapact.shared.typeclasses.IPactWriter
 
-import scala.language.implicitConversions
-
 object ScalaPactContractWriter {
-
-  private val simplifyName: String => String = name => "[^a-zA-Z0-9-]".r.replaceAllIn(name.replace(" ", "-"), "")
-
   def writePactContracts(outputPath: String)(implicit pactWriter: IPactWriter): ScalaPactDescriptionFinal => Unit =
     pactDescription => {
       val dirFile = new File(outputPath)
@@ -59,18 +54,32 @@ object ScalaPactContractWriter {
       ()
     }
 
+  private implicit class MapOps(val m: Map[String, String]) extends AnyVal {
+    def toOption: Option[Map[String, String]] = if (m.nonEmpty) Some(m) else None
+  }
+
+  private implicit class StringOps(val s: String) extends AnyVal {
+    def toOption: Option[String] = if (s.nonEmpty) Some(s) else None
+  }
+
+  private implicit class IntOps(val i: Int) extends AnyVal {
+    def positive: Option[Int] = if (i > 0) Some(i) else None
+  }
+
+  private val simplifyName: String => String = name => "[^a-zA-Z0-9-]".r.replaceAllIn(name.replace(" ", "-"), "")
+
   private def producePactJson(pactDescription: ScalaPactDescriptionFinal)(implicit pactWriter: IPactWriter): String =
     pactWriter.pactToJsonString(
       producePactFromDescription(pactDescription),
       BuildInfo.version
     )
 
-  def producePactFromDescription: ScalaPactDescriptionFinal => Pact =
+  private[scalapact] def producePactFromDescription: ScalaPactDescriptionFinal => Pact =
     pactDescription =>
       Pact(
         provider = PactActor(pactDescription.provider),
         consumer = PactActor(pactDescription.consumer),
-        interactions = pactDescription.interactions.map { convertInteractionsFinalToInteractions },
+        interactions = pactDescription.interactions.map(convertInteractionsFinalToInteractions),
         _links = None,
         metadata = Option(
           PactMetaData(
@@ -80,7 +89,7 @@ object ScalaPactContractWriter {
         )
     )
 
-  lazy val convertInteractionsFinalToInteractions: ScalaPactInteractionFinal => Interaction = i => {
+  private def convertInteractionsFinalToInteractions: ScalaPactInteractionFinal => Interaction = i => {
     val pathAndQuery: (String, String) = i.request.path.split('?').toList ++ List(i.request.query.getOrElse("")) match {
       case Nil     => ("/", "")
       case x :: xs => (x, xs.filter(!_.isEmpty).mkString("&"))
@@ -91,45 +100,36 @@ object ScalaPactContractWriter {
       providerState = i.providerState,
       description = i.description,
       request = InteractionRequest(
-        method = i.request.method.method,
-        path = pathAndQuery._1,
-        query = pathAndQuery._2,
-        headers = i.request.headers,
+        method = i.request.method.name.toOption,
+        path = pathAndQuery._1.toOption,
+        query = pathAndQuery._2.toOption,
+        headers = i.request.headers.toOption,
         body = i.request.body,
-        matchingRules = i.request.matchingRules
+        matchingRules = convertMatchingRules(i.request.matchingRules)
       ),
       response = InteractionResponse(
-        status = i.response.status,
-        headers = i.response.headers,
+        status = i.response.status.positive,
+        headers = i.response.headers.toOption,
         body = i.response.body,
-        matchingRules = i.response.matchingRules
+        matchingRules = convertMatchingRules(i.response.matchingRules)
       )
     )
   }
 
-  implicit private def convertMatchingRules(
+  private def convertMatchingRules(
       rules: Option[List[ScalaPactMatchingRule]]
   ): Option[Map[String, MatchingRule]] =
     rules.map { rs =>
-      rs.map {
-          case ScalaPactMatchingRuleType(key) =>
-            Map(key -> MatchingRule("type", None, None))
+      rs.foldLeft(Map.empty[String, MatchingRule]) {
+          case (mrs, ScalaPactMatchingRuleType(key)) =>
+            mrs + (key -> MatchingRule(Some("type"), None, None))
 
-          case ScalaPactMatchingRuleRegex(key, regex) =>
-            Map(key -> MatchingRule("regex", regex, None))
+          case (mrs, ScalaPactMatchingRuleRegex(key, regex)) =>
+            mrs + (key -> MatchingRule(Some("regex"), regex.toOption, None))
 
-          case ScalaPactMatchingRuleArrayMinLength(key, min) =>
-            Map(key -> MatchingRule("type", None, min))
+          case (mrs, ScalaPactMatchingRuleArrayMinLength(key, min)) =>
+            mrs + (key -> MatchingRule(Some("type"), None, min.positive))
 
         }
-        .foldLeft(Map.empty[String, MatchingRule])(_ ++ _)
     }
-
-  implicit private val intToBoolean: Int => Boolean                 = v => v > 0
-  implicit private val stringToBoolean: String => Boolean           = v => v != ""
-  implicit private val mapToBoolean: Map[String, String] => Boolean = v => v.nonEmpty
-
-  implicit private def valueToOptional[A](value: A)(implicit p: A => Boolean): Option[A] =
-    if (p(value)) Option(value) else None
-
 }

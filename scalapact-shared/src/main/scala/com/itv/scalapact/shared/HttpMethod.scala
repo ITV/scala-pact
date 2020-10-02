@@ -1,11 +1,20 @@
 package com.itv.scalapact.shared
 
-sealed trait HttpMethod
+sealed abstract class HttpMethod(val name: String)
 
 object HttpMethod {
+  case object GET     extends HttpMethod("GET")
+  case object POST    extends HttpMethod("POST")
+  case object PUT     extends HttpMethod("PUT")
+  case object DELETE  extends HttpMethod("DELETE")
+  case object OPTIONS extends HttpMethod("OPTIONS")
+  case object PATCH   extends HttpMethod("PATCH")
+  case object CONNECT extends HttpMethod("CONNECT")
+  case object TRACE   extends HttpMethod("TRACE")
+  case object HEAD    extends HttpMethod("HEAD")
 
   def apply(method: String): Option[HttpMethod] =
-    method match {
+    method.toUpperCase match {
       case "GET" =>
         Option(GET)
 
@@ -38,15 +47,5 @@ object HttpMethod {
     }
 
   val maybeMethodToMethod: Option[String] => HttpMethod = maybeMethod =>
-    maybeMethod.map(_.toUpperCase).flatMap(HttpMethod.apply).getOrElse(GET)
-
-  case object GET     extends HttpMethod
-  case object POST    extends HttpMethod
-  case object PUT     extends HttpMethod
-  case object DELETE  extends HttpMethod
-  case object OPTIONS extends HttpMethod
-  case object PATCH   extends HttpMethod
-  case object CONNECT extends HttpMethod
-  case object TRACE   extends HttpMethod
-  case object HEAD    extends HttpMethod
+    maybeMethod.flatMap(HttpMethod.apply).getOrElse(GET)
 }

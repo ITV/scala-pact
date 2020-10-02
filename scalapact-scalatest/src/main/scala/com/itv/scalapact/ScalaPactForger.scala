@@ -1,6 +1,6 @@
 package com.itv.scalapact
 
-import com.itv.scalapact.shared.SslContextMap
+import com.itv.scalapact.shared.{HttpMethod, SslContextMap}
 
 import scala.util.Properties
 import com.itv.scalapact.shared.Maps._
@@ -38,7 +38,7 @@ object ScalaPactForger {
         * @return [ScalaPactDescription] to allow the builder to continue
         */
       def addInteraction(interaction: ScalaPactInteraction): ScalaPactDescription =
-        new ScalaPactDescription(consumer, provider, sslContextName, interactions ++ List(interaction))
+        new ScalaPactDescription(consumer, provider, sslContextName, interactions :+ interaction)
 
       def addSslContextForServer(name: String): ScalaPactDescription =
         new ScalaPactDescription(consumer, provider, Some(name), interactions)
@@ -83,26 +83,26 @@ object ScalaPactForger {
 
     def uponReceiving(path: String): ScalaPactInteraction = uponReceiving(GET, path, None, Map.empty, None, ScalaPactMatchingRules.empty)
 
-    def uponReceiving(method: ScalaPactMethod, path: String): ScalaPactInteraction =
+    def uponReceiving(method: HttpMethod, path: String): ScalaPactInteraction =
       uponReceiving(method, path, None, Map.empty, None, ScalaPactMatchingRules.empty)
 
-    def uponReceiving(method: ScalaPactMethod, path: String, query: Option[String]): ScalaPactInteraction =
+    def uponReceiving(method: HttpMethod, path: String, query: Option[String]): ScalaPactInteraction =
       uponReceiving(method, path, query, Map.empty, None, ScalaPactMatchingRules.empty)
 
-    def uponReceiving(method: ScalaPactMethod,
+    def uponReceiving(method: HttpMethod,
                       path: String,
                       query: Option[String],
                       headers: Map[String, String]): ScalaPactInteraction =
       uponReceiving(method, path, query, headers, None, ScalaPactMatchingRules.empty)
 
-    def uponReceiving(method: ScalaPactMethod,
+    def uponReceiving(method: HttpMethod,
                       path: String,
                       query: Option[String],
                       headers: Map[String, String],
                       body: String): ScalaPactInteraction =
       uponReceiving(method, path, query, headers, Some(body), ScalaPactMatchingRules.empty)
 
-    def uponReceiving(method: ScalaPactMethod,
+    def uponReceiving(method: HttpMethod,
                       path: String,
                       query: Option[String],
                       headers: Map[String, String],
@@ -167,7 +167,7 @@ object ScalaPactForger {
     val default: ScalaPactRequest = ScalaPactRequest(GET, "/", None, Map.empty, None, None)
   }
 
-  case class ScalaPactRequest(method: ScalaPactMethod,
+  case class ScalaPactRequest(method: HttpMethod,
                               path: String,
                               query: Option[String],
                               headers: Map[String, String],
@@ -238,44 +238,13 @@ object ScalaPactForger {
 
   case class ScalaPactOptions(writePactFiles: Boolean, outputPath: String)
 
-  sealed trait ScalaPactMethod {
-    val method: String
-  }
-
-  case object GET extends ScalaPactMethod {
-    val method = "GET"
-  }
-
-  case object PUT extends ScalaPactMethod {
-    val method = "PUT"
-  }
-
-  case object POST extends ScalaPactMethod {
-    val method = "POST"
-  }
-
-  case object DELETE extends ScalaPactMethod {
-    val method = "DELETE"
-  }
-
-  case object OPTIONS extends ScalaPactMethod {
-    val method = "OPTIONS"
-  }
-
-  case object PATCH extends ScalaPactMethod {
-    val method = "PATCH"
-  }
-
-  case object CONNECT extends ScalaPactMethod {
-    val method = "CONNECT"
-  }
-
-  case object TRACE extends ScalaPactMethod {
-    val method = "TRACE"
-  }
-
-  case object HEAD extends ScalaPactMethod {
-    val method = "HEAD"
-  }
-
+  val GET: HttpMethod = HttpMethod.GET
+  val POST: HttpMethod = HttpMethod.POST
+  val PUT: HttpMethod = HttpMethod.PUT
+  val DELETE: HttpMethod = HttpMethod.DELETE
+  val OPTIONS: HttpMethod = HttpMethod.OPTIONS
+  val PATCH: HttpMethod = HttpMethod.PATCH
+  val CONNECT: HttpMethod = HttpMethod.CONNECT
+  val TRACE: HttpMethod = HttpMethod.TRACE
+  val HEAD: HttpMethod = HttpMethod.HEAD
 }

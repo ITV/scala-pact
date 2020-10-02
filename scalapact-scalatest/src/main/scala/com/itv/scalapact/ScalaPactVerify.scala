@@ -11,7 +11,11 @@ import com.itv.scalapact.shared.typeclasses.{IPactReader, IScalaPactHttpClient}
 import com.itv.scalapact.shared.ProviderStateResult
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 
+import scala.util.Try
+
 object ScalaPactVerify {
+  private val defaultClientTimeout: Duration = 2.seconds
+
   object verifyPact {
     def withPactSource(
         sourceType: PactSourceType
@@ -33,7 +37,7 @@ object ScalaPactVerify {
       def runStrictVerificationAgainst[F[_]](
           port: Int
       )(implicit pactReader: IPactReader, httpClient: IScalaPactHttpClient[F], publisher: IResultPublisher): Unit =
-        doVerification("http", "localhost", port, VerifyTargetConfig.defaultClientTimeout, strict = true)
+        doVerification("http", "localhost", port, defaultClientTimeout, strict = true)
       def runStrictVerificationAgainst[F[_]](
           port: Int,
           clientTimeout: Duration
@@ -43,7 +47,7 @@ object ScalaPactVerify {
           host: String,
           port: Int
       )(implicit pactReader: IPactReader, httpClient: IScalaPactHttpClient[F], publisher: IResultPublisher): Unit =
-        doVerification("http", host, port, VerifyTargetConfig.defaultClientTimeout, strict = true)
+        doVerification("http", host, port, defaultClientTimeout, strict = true)
       def runStrictVerificationAgainst[F[_]](host: String, port: Int, clientTimeout: Duration)(
           implicit pactReader: IPactReader,
           httpClient: IScalaPactHttpClient[F],
@@ -54,7 +58,7 @@ object ScalaPactVerify {
           httpClient: IScalaPactHttpClient[F],
           publisher: IResultPublisher
       ): Unit =
-        doVerification(protocol, host, port, VerifyTargetConfig.defaultClientTimeout, strict = true)
+        doVerification(protocol, host, port, defaultClientTimeout, strict = true)
       def runStrictVerificationAgainst[F[_]](
           target: VerifyTargetConfig
       )(implicit pactReader: IPactReader, httpClient: IScalaPactHttpClient[F], publisher: IResultPublisher): Unit =
@@ -62,7 +66,7 @@ object ScalaPactVerify {
       def runVerificationAgainst[F[_]](
           port: Int
       )(implicit pactReader: IPactReader, httpClient: IScalaPactHttpClient[F], publisher: IResultPublisher): Unit =
-        doVerification("http", "localhost", port, VerifyTargetConfig.defaultClientTimeout, strict = false)
+        doVerification("http", "localhost", port, defaultClientTimeout, strict = false)
       def runVerificationAgainst[F[_]](
           port: Int,
           clientTimeout: Duration
@@ -72,7 +76,7 @@ object ScalaPactVerify {
           host: String,
           port: Int
       )(implicit pactReader: IPactReader, httpClient: IScalaPactHttpClient[F], publisher: IResultPublisher): Unit =
-        doVerification("http", host, port, VerifyTargetConfig.defaultClientTimeout, strict = false)
+        doVerification("http", host, port, defaultClientTimeout, strict = false)
       def runVerificationAgainst[F[_]](host: String, port: Int, clientTimeout: Duration)(
           implicit pactReader: IPactReader,
           httpClient: IScalaPactHttpClient[F],
@@ -84,7 +88,7 @@ object ScalaPactVerify {
           httpClient: IScalaPactHttpClient[F],
           publisher: IResultPublisher
       ): Unit =
-        doVerification(protocol, host, port, VerifyTargetConfig.defaultClientTimeout, strict = false)
+        doVerification(protocol, host, port, defaultClientTimeout, strict = false)
       def runVerificationAgainst[F[_]](protocol: String, host: String, port: Int, clientTimeout: Duration)(
           implicit pactReader: IPactReader,
           httpClient: IScalaPactHttpClient[F],
@@ -134,7 +138,7 @@ object ScalaPactVerify {
                 host = Some(host),
                 protocol = Some(protocol),
                 port = Some(port),
-                localPactFilePath = Some(tmp.getAbsolutePath()),
+                localPactFilePath = Some(tmp.getAbsolutePath),
                 strictMode = Some(strict),
                 clientTimeout = Some(clientTimeout),
                 outputPath = None,
@@ -163,30 +167,6 @@ object ScalaPactVerify {
                 clientTimeout = Some(clientTimeout),
                 outputPath = None,
                 publishResultsEnabled = None
-              )
-            )
-
-          case pactBroker(url, providerName, consumerNames, publishResultsEnabled, pactBrokerAuthorization) =>
-            (
-              PactVerifySettings(
-                providerStates = providerStateFunc,
-                pactBrokerAddress = url,
-                projectVersion = "",
-                providerName = providerName,
-                consumerNames = consumerNames,
-                taggedConsumerNames = Nil,
-                versionedConsumerNames = Nil,
-                pactBrokerAuthorization = pactBrokerAuthorization
-              ),
-              ScalaPactSettings(
-                host = Some(host),
-                protocol = Some(protocol),
-                port = Some(port),
-                localPactFilePath = None,
-                strictMode = Some(strict),
-                clientTimeout = Some(clientTimeout),
-                outputPath = None,
-                publishResultsEnabled = publishResultsEnabled
               )
             )
 
@@ -295,20 +275,6 @@ object ScalaPactVerify {
   sealed trait PactSourceType
   case class loadFromLocal(path: String) extends PactSourceType
 
-  @deprecated(
-    "The `pactBroker` source type will be removed for clarity, please use `pactBrokerUseLatest` which is identical.",
-    "Since 2.3.4"
-  )
-  case class pactBroker(
-      url: String,
-      provider: String,
-      consumers: List[String],
-      publishResultsEnabled: Option[BrokerPublishData],
-      pactBrokerAuthorization: Option[PactBrokerAuthorization]
-  ) extends PactSourceType {
-    def withContractVersion(version: String): pactBrokerWithVersion =
-      pactBrokerWithVersion(url, version, provider, consumers, publishResultsEnabled, pactBrokerAuthorization)
-  }
   case class pactBrokerUseLatest(
       url: String,
       provider: String,
@@ -319,6 +285,7 @@ object ScalaPactVerify {
     def withContractVersion(version: String): pactBrokerWithVersion =
       pactBrokerWithVersion(url, version, provider, consumers, publishResultsEnabled, pactBrokerAuthorization)
   }
+
   case class pactBrokerWithTags(
       url: String,
       provider: String,
@@ -326,6 +293,7 @@ object ScalaPactVerify {
       consumerNamesWithTags: List[TaggedConsumer],
       pactBrokerAuthorization: Option[PactBrokerAuthorization]
   ) extends PactSourceType
+
   case class pactBrokerWithVersion(
       url: String,
       contractVersion: String,
@@ -334,44 +302,42 @@ object ScalaPactVerify {
       publishResultsEnabled: Option[BrokerPublishData],
       pactBrokerAuthorization: Option[PactBrokerAuthorization]
   ) extends PactSourceType
+
   case class pactAsJsonString(json: String) extends PactSourceType
 
   class ScalaPactVerifyFailed extends Exception
 
-  object VerifyTargetConfig {
-
-    val defaultClientTimeout: Duration = Duration(2, SECONDS)
-
-    def apply(port: Int): VerifyTargetConfig = VerifyTargetConfig("http", "localhost", port, defaultClientTimeout)
-    def apply(port: Int, clientTimeout: Duration): VerifyTargetConfig =
-      VerifyTargetConfig("http", "localhost", port, clientTimeout)
-    def apply(host: String, port: Int): VerifyTargetConfig =
-      VerifyTargetConfig("http", host, port, defaultClientTimeout)
-    def apply(host: String, port: Int, clientTimeout: Duration): VerifyTargetConfig =
-      VerifyTargetConfig("http", host, port, clientTimeout)
-
-    def fromUrl(url: String): Option[VerifyTargetConfig] = fromUrl(url, defaultClientTimeout)
-    def fromUrl(url: String, clientTimeout: Duration): Option[VerifyTargetConfig] =
-      try {
-        val pattern                       = """^([a-z]+):\/\/([a-z0-9\.\-_]+):(\d+).*""".r
-        val pattern(protocol, host, port) = url.toLowerCase
-
-        Some(VerifyTargetConfig(protocol, host, Helpers.safeStringToInt(port).getOrElse(80), clientTimeout))
-      } catch {
-        case _: Throwable =>
-          PactLogger.error(
-            "Could not parse url '" + url + "', expected something like: http://localhost:80 (must specify the port!)"
-          )
-          None
-      }
-
-  }
   case class VerifyTargetConfig(protocol: String, host: String, port: Int, clientTimeout: Duration) {
     def withProtocol(protocol: String): VerifyTargetConfig = this.copy(protocol = protocol)
     def withHost(host: String): VerifyTargetConfig         = this.copy(host = host)
     def withPort(port: Int): VerifyTargetConfig            = this.copy(port = port)
+    def withClientTimeout(clientTimeout: Duration): VerifyTargetConfig = this.copy(clientTimeout = clientTimeout)
+
+    @deprecated("Use `withClientTimeout` instead", "2.3.19")
     def withClientTimeoutInSeconds(clientTimeout: Duration): VerifyTargetConfig =
       this.copy(clientTimeout = clientTimeout)
   }
 
+  object VerifyTargetConfig {
+    def apply(port: Int): VerifyTargetConfig = VerifyTargetConfig("http", "localhost", port, defaultClientTimeout)
+    def apply(port: Int, clientTimeout: Duration): VerifyTargetConfig = VerifyTargetConfig("http", "localhost", port, clientTimeout)
+    def apply(host: String, port: Int): VerifyTargetConfig = VerifyTargetConfig("http", host, port, defaultClientTimeout)
+    def apply(protocol: String, host: String, port: Int): VerifyTargetConfig = VerifyTargetConfig(protocol, host, port, defaultClientTimeout)
+    def apply(host: String, port: Int, clientTimeout: Duration): VerifyTargetConfig = VerifyTargetConfig("http", host, port, clientTimeout)
+
+    def fromUrl(url: String): Option[VerifyTargetConfig] = fromUrl(url, defaultClientTimeout)
+    def fromUrl(url: String, clientTimeout: Duration): Option[VerifyTargetConfig] = {
+      Try {
+        val pattern                       = """^([a-z]+)://([a-z0-9.\-_]+):(\d+).*""".r
+        val pattern(protocol, host, port) = url.toLowerCase
+        Some(VerifyTargetConfig(protocol, host, Helpers.safeStringToInt(port).getOrElse(80), clientTimeout))
+      }.getOrElse {
+        PactLogger.error(
+          "Could not parse url '" + url + "', expected something like: http://localhost:80 (must specify the port!)"
+        )
+        None
+      }
+    }
+
+  }
 }
