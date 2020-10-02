@@ -13,7 +13,6 @@
             "regex" : "^([a-zA-Z]+)$"
           }
         },
-        "query" : "",
         "headers" : {
           "Accept" : "application/json",
           "Name" : "Bob"
@@ -39,8 +38,7 @@
     {
       "request" : {
         "method" : "GET",
-        "path" : "/results",
-        "query" : ""
+        "path" : "/results"
       },
       "description" : "Fetching results",
       "response" : {
