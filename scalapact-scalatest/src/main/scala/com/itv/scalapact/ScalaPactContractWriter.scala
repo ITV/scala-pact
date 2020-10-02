@@ -15,13 +15,6 @@ import com.itv.scalapact.shared._
 import com.itv.scalapact.shared.typeclasses.IPactWriter
 
 object ScalaPactContractWriter {
-
-  private implicit class MapOps(val m: Map[String, String]) extends AnyVal {
-    def toOption: Option[Map[String, String]] = if (m.nonEmpty) Some(m) else None
-  }
-
-  private val simplifyName: String => String = name => "[^a-zA-Z0-9-]".r.replaceAllIn(name.replace(" ", "-"), "")
-
   def writePactContracts(outputPath: String)(implicit pactWriter: IPactWriter): ScalaPactDescriptionFinal => Unit =
     pactDescription => {
       val dirFile = new File(outputPath)
@@ -61,6 +54,20 @@ object ScalaPactContractWriter {
       ()
     }
 
+  private implicit class MapOps(val m: Map[String, String]) extends AnyVal {
+    def toOption: Option[Map[String, String]] = if (m.nonEmpty) Some(m) else None
+  }
+
+  private implicit class StringOps(val s: String) extends AnyVal {
+    def toOption: Option[String] = if (s.nonEmpty) Some(s) else None
+  }
+
+  private implicit class IntOps(val i: Int) extends AnyVal {
+    def positive: Option[Int] = if (i > 0) Some(i) else None
+  }
+
+  private val simplifyName: String => String = name => "[^a-zA-Z0-9-]".r.replaceAllIn(name.replace(" ", "-"), "")
+
   private def producePactJson(pactDescription: ScalaPactDescriptionFinal)(implicit pactWriter: IPactWriter): String =
     pactWriter.pactToJsonString(
       producePactFromDescription(pactDescription),
@@ -93,15 +100,15 @@ object ScalaPactContractWriter {
       providerState = i.providerState,
       description = i.description,
       request = InteractionRequest(
-        method = Some(i.request.method.name),
-        path = Some(pathAndQuery._1),
-        query = Some(pathAndQuery._2),
+        method = i.request.method.name.toOption,
+        path = pathAndQuery._1.toOption,
+        query = pathAndQuery._2.toOption,
         headers = i.request.headers.toOption,
         body = i.request.body,
         matchingRules = convertMatchingRules(i.request.matchingRules)
       ),
       response = InteractionResponse(
-        status = Some(i.response.status),
+        status = i.response.status.positive,
         headers = i.response.headers.toOption,
         body = i.response.body,
         matchingRules = convertMatchingRules(i.response.matchingRules)
@@ -117,13 +124,11 @@ object ScalaPactContractWriter {
           case (mrs, ScalaPactMatchingRuleType(key)) =>
             mrs + (key -> MatchingRule(Some("type"), None, None))
 
-          case (mrs, ScalaPactMatchingRuleRegex(key, r)) =>
-            val regex = if (r.nonEmpty) Some(r) else None
-            mrs + (key -> MatchingRule(Some("regex"), regex, None))
+          case (mrs, ScalaPactMatchingRuleRegex(key, regex)) =>
+            mrs + (key -> MatchingRule(Some("regex"), regex.toOption, None))
 
-          case (mrs, ScalaPactMatchingRuleArrayMinLength(key, length)) =>
-            val min = if (length > 0) Some(length) else None
-            mrs + (key -> MatchingRule(Some("type"), None, min))
+          case (mrs, ScalaPactMatchingRuleArrayMinLength(key, min)) =>
+            mrs + (key -> MatchingRule(Some("type"), None, min.positive))
 
         }
     }
