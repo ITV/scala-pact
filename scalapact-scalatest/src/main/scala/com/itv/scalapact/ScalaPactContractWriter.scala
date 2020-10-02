@@ -14,9 +14,11 @@ import com.itv.scalapact.ScalaPactForger.{
 import com.itv.scalapact.shared._
 import com.itv.scalapact.shared.typeclasses.IPactWriter
 
-import scala.language.implicitConversions
-
 object ScalaPactContractWriter {
+
+  private implicit class MapOps(val m: Map[String, String]) extends AnyVal {
+    def toOption: Option[Map[String, String]] = if (m.nonEmpty) Some(m) else None
+  }
 
   private val simplifyName: String => String = name => "[^a-zA-Z0-9-]".r.replaceAllIn(name.replace(" ", "-"), "")
 
@@ -65,12 +67,12 @@ object ScalaPactContractWriter {
       BuildInfo.version
     )
 
-  def producePactFromDescription: ScalaPactDescriptionFinal => Pact =
+  private[scalapact] def producePactFromDescription: ScalaPactDescriptionFinal => Pact =
     pactDescription =>
       Pact(
         provider = PactActor(pactDescription.provider),
         consumer = PactActor(pactDescription.consumer),
-        interactions = pactDescription.interactions.map { convertInteractionsFinalToInteractions },
+        interactions = pactDescription.interactions.map(convertInteractionsFinalToInteractions),
         _links = None,
         metadata = Option(
           PactMetaData(
@@ -80,7 +82,7 @@ object ScalaPactContractWriter {
         )
     )
 
-  lazy val convertInteractionsFinalToInteractions: ScalaPactInteractionFinal => Interaction = i => {
+  private def convertInteractionsFinalToInteractions: ScalaPactInteractionFinal => Interaction = i => {
     val pathAndQuery: (String, String) = i.request.path.split('?').toList ++ List(i.request.query.getOrElse("")) match {
       case Nil     => ("/", "")
       case x :: xs => (x, xs.filter(!_.isEmpty).mkString("&"))
@@ -91,45 +93,38 @@ object ScalaPactContractWriter {
       providerState = i.providerState,
       description = i.description,
       request = InteractionRequest(
-        method = i.request.method.method,
-        path = pathAndQuery._1,
-        query = pathAndQuery._2,
-        headers = i.request.headers,
+        method = Some(i.request.method.name),
+        path = Some(pathAndQuery._1),
+        query = Some(pathAndQuery._2),
+        headers = i.request.headers.toOption,
         body = i.request.body,
-        matchingRules = i.request.matchingRules
+        matchingRules = convertMatchingRules(i.request.matchingRules)
       ),
       response = InteractionResponse(
-        status = i.response.status,
-        headers = i.response.headers,
+        status = Some(i.response.status),
+        headers = i.response.headers.toOption,
         body = i.response.body,
-        matchingRules = i.response.matchingRules
+        matchingRules = convertMatchingRules(i.response.matchingRules)
       )
     )
   }
 
-  implicit private def convertMatchingRules(
+  private def convertMatchingRules(
       rules: Option[List[ScalaPactMatchingRule]]
   ): Option[Map[String, MatchingRule]] =
     rules.map { rs =>
-      rs.map {
-          case ScalaPactMatchingRuleType(key) =>
-            Map(key -> MatchingRule("type", None, None))
+      rs.foldLeft(Map.empty[String, MatchingRule]) {
+          case (mrs, ScalaPactMatchingRuleType(key)) =>
+            mrs + (key -> MatchingRule(Some("type"), None, None))
 
-          case ScalaPactMatchingRuleRegex(key, regex) =>
-            Map(key -> MatchingRule("regex", regex, None))
+          case (mrs, ScalaPactMatchingRuleRegex(key, r)) =>
+            val regex = if (r.nonEmpty) Some(r) else None
+            mrs + (key -> MatchingRule(Some("regex"), regex, None))
 
-          case ScalaPactMatchingRuleArrayMinLength(key, min) =>
-            Map(key -> MatchingRule("type", None, min))
+          case (mrs, ScalaPactMatchingRuleArrayMinLength(key, length)) =>
+            val min = if (length > 0) Some(length) else None
+            mrs + (key -> MatchingRule(Some("type"), None, min))
 
         }
-        .foldLeft(Map.empty[String, MatchingRule])(_ ++ _)
     }
-
-  implicit private val intToBoolean: Int => Boolean                 = v => v > 0
-  implicit private val stringToBoolean: String => Boolean           = v => v != ""
-  implicit private val mapToBoolean: Map[String, String] => Boolean = v => v.nonEmpty
-
-  implicit private def valueToOptional[A](value: A)(implicit p: A => Boolean): Option[A] =
-    if (p(value)) Option(value) else None
-
 }
