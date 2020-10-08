@@ -26,4 +26,7 @@ trait IScalaPactHttpClient[F[_]] {
       sslContextName: Option[String]
   )(implicit sslContextMap: SslContextMap): Either[Throwable, InteractionResponse]
 
+  def fetchHALIndex: F[HALIndex]
+
+  def fetchHALIndexSync: HALIndex
 }

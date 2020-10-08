@@ -15,15 +15,15 @@ object Publisher {
       versionToPublishAs: String,
       tagsToPublishWith: Seq[String],
       pactBrokerAuthorization: Option[PactBrokerAuthorization]
-  )(implicit pactWriter: IPactWriter): ConfigAndPacts => List[PublishResult] =
+  )(implicit pactWriter: IPactWriter): List[Pact] => List[PublishResult] =
     configAndPacts =>
-      configAndPacts.pacts.map { pact =>
+      configAndPacts.map { pact =>
         publishPact(sendIt, pact, versionToPublishAs, tagsToPublishWith, pactBrokerAuthorization) {
           ValidatedDetails.buildFrom(pact.consumer.name, pact.provider.name, pactBrokerAddress, "/latest")
         }
     }
 
-  def publishPact(sendIt: SimpleRequest => Either[Throwable, SimpleResponse],
+  private def publishPact(sendIt: SimpleRequest => Either[Throwable, SimpleResponse],
                   pact: Pact,
                   versionToPublishAs: String,
                   tagsToPublishWith: Seq[String],

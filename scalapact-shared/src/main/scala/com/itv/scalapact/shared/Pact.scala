@@ -3,7 +3,7 @@ import com.itv.scalapact.shared.Pact.Links
 
 case class LinkValues(title: Option[String], name: Option[String], href: String, templated: Option[Boolean])
 
-case object Pact {
+object Pact {
   type Links = Map[String, LinkValues]
 }
 

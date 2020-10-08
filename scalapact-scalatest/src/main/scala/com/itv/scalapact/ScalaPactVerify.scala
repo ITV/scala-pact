@@ -113,7 +113,19 @@ object ScalaPactVerify {
             .flatMap(_ => setupProviderState)
             .getOrElse(_ => ProviderStateResult(true))
 
-        val (verifySettings, arguments) = sourceType match {
+        def makeScalaPactSettings(localPactFilePath: Option[String], publishResultsEnabled: Option[BrokerPublishData]): ScalaPactSettings = ScalaPactSettings(
+          host = Some(host),
+          protocol = Some(protocol),
+          port = Some(port),
+          localPactFilePath = localPactFilePath,
+          strictMode = Some(strict),
+          clientTimeout = Some(clientTimeout),
+          outputPath = None,
+          publishResultsEnabled = publishResultsEnabled
+        )
+
+
+        val (verifySettings, scalaPactSettings) = sourceType match {
           case pactAsJsonString(json) =>
             val tmp = File.createTempFile("tmp_pact_", ".json")
 
@@ -123,106 +135,66 @@ object ScalaPactVerify {
             bw.write(json)
             bw.close()
 
-            (
-              PactVerifySettings(
-                providerStates = providerStateFunc,
-                pactBrokerAddress = "",
-                projectVersion = "",
-                providerName = "",
-                consumerNames = Nil,
-                taggedConsumerNames = Nil,
-                versionedConsumerNames = Nil,
-                pactBrokerAuthorization = None
-              ),
-              ScalaPactSettings(
-                host = Some(host),
-                protocol = Some(protocol),
-                port = Some(port),
-                localPactFilePath = Some(tmp.getAbsolutePath),
-                strictMode = Some(strict),
-                clientTimeout = Some(clientTimeout),
-                outputPath = None,
-                publishResultsEnabled = None
-              )
-            )
+            PactVerifySettings(
+              providerStates = providerStateFunc,
+              pactBrokerAddress = "",
+              projectVersion = "",
+              providerName = "",
+              consumerNames = Nil,
+              taggedConsumerNames = Nil,
+              versionedConsumerNames = Nil,
+              consumerVersionSelectors = Nil,
+              pactBrokerAuthorization = None
+            ) ->
+              makeScalaPactSettings(Some(tmp.getAbsolutePath), None)
 
           case loadFromLocal(path) =>
-            (
-              PactVerifySettings(
-                providerStates = providerStateFunc,
-                pactBrokerAddress = "",
-                projectVersion = "",
-                providerName = "",
-                consumerNames = Nil,
-                taggedConsumerNames = Nil,
-                versionedConsumerNames = Nil,
-                pactBrokerAuthorization = None
-              ),
-              ScalaPactSettings(
-                host = Some(host),
-                protocol = Some(protocol),
-                port = Some(port),
-                localPactFilePath = Some(path),
-                strictMode = Some(strict),
-                clientTimeout = Some(clientTimeout),
-                outputPath = None,
-                publishResultsEnabled = None
-              )
-            )
+            PactVerifySettings(
+              providerStates = providerStateFunc,
+              pactBrokerAddress = "",
+              projectVersion = "",
+              providerName = "",
+              consumerNames = Nil,
+              taggedConsumerNames = Nil,
+              versionedConsumerNames = Nil,
+              consumerVersionSelectors = Nil,
+              pactBrokerAuthorization = None
+            ) ->
+              makeScalaPactSettings(Some(path), None)
 
           case pactBrokerUseLatest(url, providerName, consumerNames, publishResultsEnabled, pactBrokerAuthorization) =>
-            (
-              PactVerifySettings(
-                providerStates = providerStateFunc,
-                pactBrokerAddress = url,
-                projectVersion = "",
-                providerName = providerName,
-                consumerNames = consumerNames,
-                taggedConsumerNames = Nil,
-                versionedConsumerNames = Nil,
-                pactBrokerAuthorization = pactBrokerAuthorization
-              ),
-              ScalaPactSettings(
-                host = Some(host),
-                protocol = Some(protocol),
-                port = Some(port),
-                localPactFilePath = None,
-                strictMode = Some(strict),
-                clientTimeout = Some(clientTimeout),
-                outputPath = None,
-                publishResultsEnabled = publishResultsEnabled
-              )
-            )
+            PactVerifySettings(
+              providerStates = providerStateFunc,
+              pactBrokerAddress = url,
+              projectVersion = "",
+              providerName = providerName,
+              consumerNames = consumerNames,
+              taggedConsumerNames = Nil,
+              versionedConsumerNames = Nil,
+              consumerVersionSelectors = Nil,
+              pactBrokerAuthorization = pactBrokerAuthorization
+            ) ->
+            makeScalaPactSettings(None, publishResultsEnabled)
 
           case pactBrokerWithTags(
               url,
               providerName,
-              publishResultsEnabled,
+          publishResultsEnabled,
               consumersWithTags,
               pactBrokerAuthorization
               ) =>
-            (
-              PactVerifySettings(
-                providerStates = providerStateFunc,
-                pactBrokerAddress = url,
-                projectVersion = "",
-                providerName = providerName,
-                consumerNames = Nil,
-                taggedConsumerNames = consumersWithTags,
-                versionedConsumerNames = Nil,
-                pactBrokerAuthorization = pactBrokerAuthorization
-              ),
-              ScalaPactSettings(
-                host = Some(host),
-                protocol = Some(protocol),
-                port = Some(port),
-                localPactFilePath = None,
-                strictMode = Some(strict),
-                clientTimeout = Some(clientTimeout),
-                outputPath = None,
-                publishResultsEnabled = publishResultsEnabled
-              )
-            )
+            PactVerifySettings(
+              providerStates = providerStateFunc,
+              pactBrokerAddress = url,
+              projectVersion = "",
+              providerName = providerName,
+              consumerNames = Nil,
+              taggedConsumerNames = consumersWithTags,
+              versionedConsumerNames = Nil,
+              consumerVersionSelectors = Nil,
+              pactBrokerAuthorization = pactBrokerAuthorization
+            ) ->
+              makeScalaPactSettings(None, publishResultsEnabled)
 
           case pactBrokerWithVersion(
               url,
@@ -232,33 +204,43 @@ object ScalaPactVerify {
               publishResultsEnabled,
               pactBrokerAuthorization
               ) =>
-            (
-              PactVerifySettings(
-                providerStates = providerStateFunc,
-                pactBrokerAddress = url,
-                projectVersion = "",
-                providerName = providerName,
-                consumerNames = Nil,
-                taggedConsumerNames = Nil,
-                versionedConsumerNames = consumerNames.map(c => VersionedConsumer(c, version)),
-                pactBrokerAuthorization = pactBrokerAuthorization
-              ),
-              ScalaPactSettings(
-                host = Some(host),
-                protocol = Some(protocol),
-                port = Some(port),
-                localPactFilePath = None,
-                strictMode = Some(strict),
-                clientTimeout = Some(clientTimeout),
-                outputPath = None,
-                publishResultsEnabled = publishResultsEnabled
-              )
-            )
+            PactVerifySettings(
+              providerStates = providerStateFunc,
+              pactBrokerAddress = url,
+              projectVersion = "",
+              providerName = providerName,
+              consumerNames = Nil,
+              taggedConsumerNames = Nil,
+              versionedConsumerNames = consumerNames.map(c => VersionedConsumer(c, version)),
+              consumerVersionSelectors = Nil,
+              pactBrokerAuthorization = pactBrokerAuthorization
+            ) ->
+            makeScalaPactSettings(None, publishResultsEnabled)
+
+          case pactBrokerWithVersionSelectors(
+              url,
+              providerName,
+              consumerVersionSelectors,
+              publishResultsEnabled,
+              pactBrokerAuthorization
+              ) =>
+            PactVerifySettings(
+              providerStates = providerStateFunc,
+              pactBrokerAddress = url,
+              projectVersion = "",
+              providerName = providerName,
+              consumerNames = Nil,
+              taggedConsumerNames = Nil,
+              versionedConsumerNames = Nil,
+              consumerVersionSelectors = consumerVersionSelectors,
+              pactBrokerAuthorization = pactBrokerAuthorization
+            ) ->
+            makeScalaPactSettings(None, publishResultsEnabled)
         }
 
         val v = Verifier.verify(LocalPactFileLoader.loadPactFiles(pactReader)(true), verifySettings)
 
-        if (v(arguments)) () else throw new ScalaPactVerifyFailed
+        if (v(scalaPactSettings)) () else throw new ScalaPactVerifyFailed
       }
     }
 
@@ -273,6 +255,7 @@ object ScalaPactVerify {
   }
 
   sealed trait PactSourceType
+
   case class loadFromLocal(path: String) extends PactSourceType
 
   case class pactBrokerUseLatest(
@@ -299,6 +282,14 @@ object ScalaPactVerify {
       contractVersion: String,
       provider: String,
       consumers: List[String],
+      publishResultsEnabled: Option[BrokerPublishData],
+      pactBrokerAuthorization: Option[PactBrokerAuthorization]
+  ) extends PactSourceType
+
+  case class pactBrokerWithVersionSelectors(
+      url: String,
+      provider: String,
+      consumerVersionSelectors: List[ConsumerVersionSelector],
       publishResultsEnabled: Option[BrokerPublishData],
       pactBrokerAuthorization: Option[PactBrokerAuthorization]
   ) extends PactSourceType

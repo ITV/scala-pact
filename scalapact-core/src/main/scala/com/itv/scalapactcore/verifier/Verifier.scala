@@ -16,7 +16,7 @@ import scala.concurrent.duration.Duration
 
 object Verifier {
   def verify[F[_]](
-      loadPactFiles: String => ScalaPactSettings => ConfigAndPacts,
+      loadPactFiles: String => ScalaPactSettings => List[Pact],
       pactVerifySettings: PactVerifySettings
   )(implicit pactReader: IPactReader,
     sslContextMap: SslContextMap,
@@ -25,42 +25,20 @@ object Verifier {
 
     val scalaPactLogPrefix = "[scala-pact] ".white
 
+    val providerPactsForVerificationUrl: Option[String] = pactVerifySettings.consumerVersionSelectors.headOption.map(_ => httpClient.fetchHALIndexSync).flatMap {
+      _._links.get("pb:provider-pacts-for-verification").map(_.href)
+    }
+
     val pacts: List[Pact] = if (arguments.localPactFilePath.isDefined) {
       PactLogger.message(
         s"Attempting to use local pact files at: '${arguments.localPactFilePath.getOrElse("<path missing>")}'".white.bold
       )
-      loadPactFiles("pacts")(arguments).pacts
+      loadPactFiles("pacts")(arguments)
     } else {
-      val versionConsumers = pactVerifySettings.consumerNames.map(c => VersionedConsumer(c, "/latest")) ++
-        pactVerifySettings.versionedConsumerNames.map(vc => vc.copy(version = "/version/" + vc.version)) ++
-        pactVerifySettings.taggedConsumerNames.flatMap(
-          tc => tc.tags.map(t => VersionedConsumer(tc.name, "/latest/" + URLEncoder.encode(t, "UTF-8")))
-        )
-
-      val latestPacts: List[Pact] = versionConsumers
-        .flatMap { consumer =>
-          ValidatedDetails.buildFrom(
-            consumer.name,
-            pactVerifySettings.providerName,
-            pactVerifySettings.pactBrokerAddress,
-            consumer.version
-          ) match {
-            case Left(l) =>
-              PactLogger.error(l.red)
-              Nil
-
-            case Right(v) =>
-              List(
-                fetchAndReadPact(
-                  v.validatedAddress.address + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + v.consumerVersion,
-                  pactVerifySettings.pactBrokerAuthorization,
-                  arguments.giveClientTimeout
-                )
-              )
-          }
-        }
-
-      latestPacts
+      providerPactsForVerificationUrl match {
+        case Some(url) =>
+        case None => prePactsForVerificationEndpointFetch(pactVerifySettings, arguments)
+      }
     }
 
     PactLogger.message(
@@ -144,6 +122,38 @@ object Verifier {
     )
 
     testCount > 0 && failureCount == 0
+  }
+
+  private def prePactsForVerificationEndpointFetch[F[_]](pactVerifySettings: PactVerifySettings, arguments: ScalaPactSettings)
+                                                  (implicit IPactReader: IPactReader, httpClient: IScalaPactHttpClient[F]) : List[Pact] = {
+    val versionConsumers = pactVerifySettings.consumerNames.map(c => VersionedConsumer(c, "/latest")) ++
+      pactVerifySettings.versionedConsumerNames.map(vc => vc.copy(version = "/version/" + vc.version)) ++
+      pactVerifySettings.taggedConsumerNames.flatMap(
+        tc => tc.tags.map(t => VersionedConsumer(tc.name, "/latest/" + URLEncoder.encode(t, "UTF-8")))
+      )
+    val latestPacts: List[Pact] = versionConsumers
+      .flatMap { consumer =>
+        ValidatedDetails.buildFrom(
+          consumer.name,
+          pactVerifySettings.providerName,
+          pactVerifySettings.pactBrokerAddress,
+          consumer.version
+        ) match {
+          case Left(l) =>
+            PactLogger.error(l.red)
+            Nil
+
+          case Right(v) =>
+            List(
+              fetchAndReadPact(
+                v.validatedAddress.address + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + v.consumerVersion,
+                pactVerifySettings.pactBrokerAuthorization,
+                arguments.giveClientTimeout
+              )
+            )
+        }
+      }
+    latestPacts
   }
 
   private def attemptMatch(strictMatching: Boolean, interactions: List[Interaction])(
