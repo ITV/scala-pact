@@ -10,7 +10,7 @@ import com.itv.scalapactcore.common._
 import scala.util.Left
 import com.itv.scalapact.shared.PactLogger
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IScalaPactHttpClient}
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClient}
 
 import scala.concurrent.duration.Duration
 
@@ -19,6 +19,7 @@ object Verifier {
       loadPactFiles: String => ScalaPactSettings => List[Pact],
       pactVerifySettings: PactVerifySettings
   )(implicit pactReader: IPactReader,
+    pactWriter: IPactWriter,
     sslContextMap: SslContextMap,
     httpClient: IScalaPactHttpClient[F],
     publisher: IResultPublisher): ScalaPactSettings => Boolean = arguments => {
@@ -36,7 +37,7 @@ object Verifier {
       loadPactFiles("pacts")(arguments)
     } else {
       providerPactsForVerificationUrl match {
-        case Some(url) =>
+        case Some(url) => fetchFromPactsForVerification(url, pactVerifySettings, arguments)
         case None => prePactsForVerificationEndpointFetch(pactVerifySettings, arguments)
       }
     }
@@ -122,6 +123,33 @@ object Verifier {
     )
 
     testCount > 0 && failureCount == 0
+  }
+
+  private def fetchFromPactsForVerification[F[_]](url: String, pactVerifySettings: PactVerifySettings, arguments: ScalaPactSettings)
+                                                 (implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F]) : List[Pact] = {
+    val body = pactWriter.consumerVersionSelectorsToJsonString(pactVerifySettings.consumerVersionSelectors, pactVerifySettings.providerVersionTags)
+    val request = SimpleRequest(
+      baseUrl = url,
+      endPoint = "",
+      method = HttpMethod.POST,
+      headers = Map.empty[String, String],
+      body = Some(body),
+      sslContextName = None
+    )
+
+    httpClient.doRequestSync(request, arguments.giveClientTimeout) match {
+      case Right(resp) if resp.is2xx => resp.body.map(pactReader.jsonStringToPactsForVerification).map {
+        case Right(pactsForVerification) =>
+          pactsForVerification.pacts.map(_.link).map { href =>
+            fetchAndReadPact(href, pactVerifySettings.pactBrokerAuthorization, arguments.giveClientTimeout)
+          }
+        case Left(err) => ???
+      }.getOrElse {
+        ???
+      }
+      case Right(_) => ???
+      case Left(err) => ???
+    }
   }
 
   private def prePactsForVerificationEndpointFetch[F[_]](pactVerifySettings: PactVerifySettings, arguments: ScalaPactSettings)

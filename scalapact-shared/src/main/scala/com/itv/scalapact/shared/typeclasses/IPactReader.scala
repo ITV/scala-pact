@@ -1,13 +1,9 @@
 package com.itv.scalapact.shared.typeclasses
 
-import com.itv.scalapact.shared.{IJsonConversionFunctions, Pact}
+import com.itv.scalapact.shared.{IJsonConversionFunctions, Pact, PactsForVerification}
 
 trait IPactReader extends IJsonConversionFunctions {
-
-  type ReadPactF = String => Either[String, Pact]
-
-  val readPact: ReadPactF = p => jsonStringToPact(p)
-
   def jsonStringToPact(json: String): Either[String, Pact]
 
+  def jsonStringToPactsForVerification(json: String): Either[String, PactsForVerification]
 }
