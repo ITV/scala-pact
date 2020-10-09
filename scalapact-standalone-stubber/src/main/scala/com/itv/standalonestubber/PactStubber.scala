@@ -6,7 +6,7 @@ import com.itv.scalapact.http.serverInstance
 import com.itv.scalapact.json.{pactReaderInstance, pactWriterInstance}
 import com.itv.scalapact.shared.ColourOutput._
 import com.itv.scalapact.shared.typeclasses.IPactStubber
-import com.itv.scalapact.shared.{PactLogger, ScalaPactSettings, SslContextMap}
+import com.itv.scalapact.shared.{ConfigAndPacts, PactLogger, ScalaPactSettings, SslContextMap}
 import com.itv.scalapactcore.common.LocalPactFileLoader._
 import com.itv.scalapactcore.common.stubber.InteractionManager
 
@@ -39,8 +39,12 @@ object PactStubber {
       )(scalaPactSettings)
     }
 
-    val launch: Seq[String] => IPactStubber =
-      parseArgs andThen loadPacts andThen addInteractions andThen startUp
+    val launch: Seq[String] => IPactStubber = args => {
+      val settings = parseArgs(args)
+      val pacts = loadPacts(settings)
+      val withInterations = addInteractions(ConfigAndPacts(settings, pacts))
+      startUp(withInterations)
+    }
 
     pool.execute(new RunnableStubber(args, launch))
 

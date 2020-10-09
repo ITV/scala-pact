@@ -14,21 +14,17 @@ import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPac
 
 import scala.concurrent.duration.Duration
 
-object Verifier {
-  def verify[F[_]](
+class Verifier[F[_]](implicit pactReader: IPactReader,
+               pactWriter: IPactWriter,
+               sslContextMap: SslContextMap,
+               httpClient: IScalaPactHttpClient[F],
+               publisher: IResultPublisher) {
+  def verify(
       loadPactFiles: String => ScalaPactSettings => List[Pact],
       pactVerifySettings: PactVerifySettings
-  )(implicit pactReader: IPactReader,
-    pactWriter: IPactWriter,
-    sslContextMap: SslContextMap,
-    httpClient: IScalaPactHttpClient[F],
-    publisher: IResultPublisher): ScalaPactSettings => Boolean = arguments => {
+  )(arguments: ScalaPactSettings): Boolean = {
 
     val scalaPactLogPrefix = "[scala-pact] ".white
-
-    val providerPactsForVerificationUrl: Option[String] = pactVerifySettings.consumerVersionSelectors.headOption.map(_ => httpClient.fetchHALIndexSync).flatMap {
-      _._links.get("pb:provider-pacts-for-verification").map(_.href)
-    }
 
     val pacts: List[Pact] = if (arguments.localPactFilePath.isDefined) {
       PactLogger.message(
@@ -36,7 +32,7 @@ object Verifier {
       )
       loadPactFiles("pacts")(arguments)
     } else {
-      providerPactsForVerificationUrl match {
+      providerPactsForVerificationUrl(pactVerifySettings, arguments) match {
         case Some(url) => fetchFromPactsForVerification(url, pactVerifySettings, arguments)
         case None => prePactsForVerificationEndpointFetch(pactVerifySettings, arguments)
       }
@@ -87,7 +83,7 @@ object Verifier {
           }
         }
       )
-      JUnitWriter.writePactVerifyResults(result.pact.consumer.name)(result.pact.provider.name)(content.toString)
+      JUnitWriter.writePactVerifyResults(result.pact.consumer.name)(result.pact.provider.name)(content)
     }
 
     pactVerifyResults.foreach { result =>
@@ -125,8 +121,25 @@ object Verifier {
     testCount > 0 && failureCount == 0
   }
 
-  private def fetchFromPactsForVerification[F[_]](url: String, pactVerifySettings: PactVerifySettings, arguments: ScalaPactSettings)
-                                                 (implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F]) : List[Pact] = {
+  private def providerPactsForVerificationUrl(pactVerifySettings: PactVerifySettings, arguments: ScalaPactSettings): Option[String] = {
+    pactVerifySettings.consumerVersionSelectors.headOption.flatMap { _ =>
+      val request = SimpleRequest(
+        baseUrl = arguments.giveHost,
+        endPoint = "",
+        method = HttpMethod.GET,
+        sslContextName = None
+      )
+      httpClient.doRequestSync(request, arguments.giveClientTimeout) match {
+        case Right(resp) if resp.is2xx => resp.body.map(pactReader.jsonStringToHALIndex).flatMap {
+          case Right(index) => index._links.get("pb:provider-pacts-for-verification").map(_.href)
+          case Left(_) => ???
+        }
+        case Left(_) => ???
+      }
+    }
+  }
+
+  private def fetchFromPactsForVerification(url: String, pactVerifySettings: PactVerifySettings, arguments: ScalaPactSettings): List[Pact] = {
     val body = pactWriter.consumerVersionSelectorsToJsonString(pactVerifySettings.consumerVersionSelectors, pactVerifySettings.providerVersionTags)
     val request = SimpleRequest(
       baseUrl = url,
@@ -143,17 +156,16 @@ object Verifier {
           pactsForVerification.pacts.map(_.link).map { href =>
             fetchAndReadPact(href, pactVerifySettings.pactBrokerAuthorization, arguments.giveClientTimeout)
           }
-        case Left(err) => ???
+        case Left(_) => ???
       }.getOrElse {
         ???
       }
       case Right(_) => ???
-      case Left(err) => ???
+      case Left(_) => ???
     }
   }
 
-  private def prePactsForVerificationEndpointFetch[F[_]](pactVerifySettings: PactVerifySettings, arguments: ScalaPactSettings)
-                                                  (implicit IPactReader: IPactReader, httpClient: IScalaPactHttpClient[F]) : List[Pact] = {
+  private def prePactsForVerificationEndpointFetch(pactVerifySettings: PactVerifySettings, arguments: ScalaPactSettings): List[Pact] = {
     val versionConsumers = pactVerifySettings.consumerNames.map(c => VersionedConsumer(c, "/latest")) ++
       pactVerifySettings.versionedConsumerNames.map(vc => vc.copy(version = "/version/" + vc.version)) ++
       pactVerifySettings.taggedConsumerNames.flatMap(
@@ -184,9 +196,7 @@ object Verifier {
     latestPacts
   }
 
-  private def attemptMatch(strictMatching: Boolean, interactions: List[Interaction])(
-      implicit pactReader: IPactReader
-  ): Either[String, InteractionResponse] => Either[String, Interaction] = {
+  private def attemptMatch(strictMatching: Boolean, interactions: List[Interaction]): Either[String, InteractionResponse] => Either[String, Interaction] = {
     case Right(i) =>
       matchResponse(strictMatching, interactions)(pactReader)(i)
 
@@ -194,10 +204,7 @@ object Verifier {
       Left(s)
   }
 
-  private def doRequest[F[_]](arguments: ScalaPactSettings, maybeProviderState: Option[ProviderState])(
-      implicit sslContextMap: SslContextMap,
-      httpClient: IScalaPactHttpClient[F]
-  ): InteractionRequest => Either[String, InteractionResponse] =
+  private def doRequest(arguments: ScalaPactSettings, maybeProviderState: Option[ProviderState]): InteractionRequest => Either[String, InteractionResponse] =
     interactionRequest => {
       val baseUrl       = s"${arguments.giveProtocol}://" + arguments.giveHost + ":" + arguments.givePort.toString
       val clientTimeout = arguments.giveClientTimeout
@@ -262,11 +269,11 @@ object Verifier {
 
     }
 
-  private def fetchAndReadPact[F[_]](
+  private def fetchAndReadPact(
       address: String,
       pactBrokerAuthorization: Option[PactBrokerAuthorization],
       clientTimeout: Duration,
-  )(implicit pactReader: IPactReader, sslContextMap: SslContextMap, httpClient: IScalaPactHttpClient[F]): Pact = {
+  ): Pact = {
 
     PactLogger.message(s"Attempting to fetch pact from pact broker at: $address".white.bold)
 

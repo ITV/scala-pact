@@ -1,10 +1,12 @@
 package com.itv.scalapact.plugin
 
+import cats.effect.IO
 import com.itv.scalapact.json._
 import com.itv.scalapact.http._
 import com.itv.scalapact.plugin.shared._
 import com.itv.scalapact.shared.{PactBrokerAuthorization, ProviderStateResult, ScalaPactSettings}
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
+import com.itv.scalapactcore.verifier.Verifier
 import sbt.Keys._
 import sbt.plugins.JvmPlugin
 import sbt.{Def, _}
@@ -72,6 +74,12 @@ object ScalaPactPlugin extends AutoPlugin {
         "The name and list of tags of the services that consume the service to verify"
       )
 
+    val consumerVersionSelectors: SettingKey[Seq[(String, Option[String], Option[String], Option[Boolean])]] =
+      SettingKey("consumerVersionSelectors", "")
+
+    val providerVersionTags: SettingKey[Seq[String]] =
+      SettingKey[Seq[String]]("providerVersionTags", "")
+
     val pactContractVersion: SettingKey[String] =
       SettingKey[String](
         "pactContractVersion",
@@ -120,6 +128,8 @@ object ScalaPactPlugin extends AutoPlugin {
     consumerNames := Seq.empty[String],
     versionedConsumerNames := Seq.empty[(String, String)],
     taggedConsumerNames := Seq.empty[(String, Seq[String])],
+    consumerVersionSelectors := Seq.empty[(String, Option[String], Option[String], Option[Boolean])],
+    providerVersionTags := Seq.empty[String],
     pactContractVersion := "",
     pactContractTags := Seq.empty[String],
     allowSnapshotPublish := false,
@@ -129,17 +139,7 @@ object ScalaPactPlugin extends AutoPlugin {
   )
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  override lazy val projectSettings: Seq[Def.Setting[
-    _ >: Seq[(String, SetupProviderState)] with Seq[(String, String)] with Seq[(String, Seq[String])] with (
-        String,
-        String
-    ) with Boolean with ScalaPactEnv with Map[
-      String,
-      String
-    ] with String with Seq[String] with PartialFunction[String, ProviderStateResult] with Task[Unit] with InputTask[
-      Unit
-    ]
-  ]] = {
+  override lazy val projectSettings: Seq[Def.Setting[_]] = {
     pactSettings ++ Seq(
       // Tasks
       pactPack := pactPackTask.value,
@@ -178,7 +178,7 @@ object ScalaPactPlugin extends AutoPlugin {
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   def pactCheckTask: Def.Initialize[InputTask[Unit]] =
     Def.inputTask {
-      ScalaPactVerifyCommand.doPactVerify(
+      ScalaPactVerifyCommand.doPactVerify(new Verifier[IO])(
         scalaPactEnv.value.toSettings + ScalaPactSettings.parseArguments(spaceDelimited("<arg>").parsed),
         providerStates.value,
         providerStateMatcher.value,
@@ -188,6 +188,8 @@ object ScalaPactPlugin extends AutoPlugin {
         consumerNames.value,
         versionedConsumerNames.value,
         taggedConsumerNames.value,
+        consumerVersionSelectors.value,
+        providerVersionTags.value,
         PactBrokerAuthorization(pactBrokerCredentials.value, pactBrokerToken.value)
       )
     }
