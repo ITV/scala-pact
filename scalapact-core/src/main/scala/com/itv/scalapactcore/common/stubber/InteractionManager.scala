@@ -23,13 +23,10 @@ class InteractionManager extends IInteractionManager {
 
   def clearInteractions(): Unit = interactions = List.empty[Interaction]
 
-  def addToInteractionManager: ConfigAndPacts => ScalaPactSettings = configAndPacts => {
-    configAndPacts.pacts.foreach { p =>
+  def addToInteractionManager: List[Pact] => Unit =
+    _.foreach { p =>
       PactLogger.debug(("> Adding interactions:\n> - " + p.interactions.mkString("\n> - ")).blue)
       addInteractions(p.interactions)
     }
-
-    configAndPacts.scalaPactSettings
-  }
 
 }

@@ -2,7 +2,7 @@ package com.itv.scalapact.plugin.shared
 
 import com.itv.scalapact.shared.ColourOutput._
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter}
-import com.itv.scalapact.shared.{ConfigAndPacts, PactLogger, ScalaPactSettings, SslContextMap}
+import com.itv.scalapact.shared.{PactLogger, ScalaPactSettings, SslContextMap}
 import com.itv.scalapactcore.common.LocalPactFileLoader._
 import com.itv.scalapactcore.common.stubber.InteractionManager
 
@@ -36,9 +36,8 @@ object ScalaPactStubberCommand {
 
     @SuppressWarnings(Array("org.wartremover.warts.DiscardedNonUnitValue"))
     val launch: ScalaPactSettings => Unit = args => {
-      val pacts = loadPacts(args)
-      val addPacts = addToManager(ConfigAndPacts(args, pacts))
-      launchStub(addPacts)
+      addToManager(loadPacts(args))
+      launchStub(args)
       ()
     }
 
