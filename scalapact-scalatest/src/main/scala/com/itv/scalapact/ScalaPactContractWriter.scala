@@ -96,7 +96,6 @@ object ScalaPactContractWriter {
     }
 
     Interaction(
-      provider_state = None,
       providerState = i.providerState,
       description = i.description,
       request = InteractionRequest(

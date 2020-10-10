@@ -112,7 +112,7 @@ object PactImplicits {
       description <- cur.get[String]("description")
       request <- cur.get[InteractionRequest]("request")
       response <- cur.get[InteractionResponse]("response")
-    } yield Interaction(None, providerState.orElse(provider_state), description, request, response)
+    } yield Interaction(providerState.orElse(provider_state), description, request, response)
   }
 
   implicit lazy val InteractionCodecJson: EncodeJson[Interaction] = EncodeJson[Interaction] { i =>

@@ -60,7 +60,6 @@ object PactFileExamples {
     consumer = PactActor("consumer"),
     interactions = List(
       Interaction(
-        provider_state = None,
         providerState = None,
         description = "a simple request",
         request = InteractionRequest(
@@ -124,7 +123,6 @@ object PactFileExamples {
     consumer = PactActor("consumer"),
     interactions = List(
       Interaction(
-        provider_state = None,
         providerState = Option("a simple state"),
         description = "a simple request",
         request = InteractionRequest(
@@ -160,7 +158,6 @@ object PactFileExamples {
         )
       ),
       Interaction(
-        provider_state = None,
         providerState = Option("a simple state 2"),
         description = "a simple request 2",
         request = InteractionRequest(
@@ -621,7 +618,6 @@ object PactFileExamples {
     consumer = PactActor("consumer"),
     interactions = List(
       Interaction(
-        provider_state = None,
         providerState = Option("a simple state"),
         description = "a simple request",
         request = InteractionRequest(
@@ -657,7 +653,6 @@ object PactFileExamples {
         )
       ),
       Interaction(
-        provider_state = None,
         providerState = Option("a simple state 2"),
         description = "a simple request 2",
         request = InteractionRequest(

@@ -12,7 +12,6 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
       val decodedPact = pactReaderInstance.jsonStringToPact(PactFileExamples.simpleAsString).toOption
 
       val interaction1 = Interaction(
-        provider_state = None,
         providerState = Option("a simple state"),
         description = "a simple request",
         request = InteractionRequest(
@@ -48,7 +47,6 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
       )
 
       val interaction2 = Interaction(
-        provider_state = None,
         providerState = Option("a simple state 2"),
         description = "a simple request 2",
         request = InteractionRequest(
