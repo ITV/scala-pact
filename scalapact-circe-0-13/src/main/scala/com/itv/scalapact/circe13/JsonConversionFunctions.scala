@@ -9,11 +9,6 @@ import io.circe.parser._
 
 object JsonConversionFunctions extends IJsonConversionFunctions {
 
-  private val dropNullValuesPrinter: Printer = Printer.spaces2.copy(dropNullValues = true)
-  def prettyPrintDroppingNull(json: Json): String = {
-    dropNullValuesPrinter.print(json)
-  }
-
   def fromJSON(jsonString: String): Option[IrNode] =
     parse(jsonString).toOption.flatMap { json =>
       jsonRootToIrNode(json, IrNodePathEmpty)

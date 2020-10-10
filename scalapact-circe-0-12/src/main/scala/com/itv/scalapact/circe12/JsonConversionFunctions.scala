@@ -1,19 +1,13 @@
 package com.itv.scalapact.circe12
 
+import com.itv.scalapact.shared.ColourOutput._
+import com.itv.scalapact.shared.matchir.MatchIrConstants.{rootNodeLabel, unnamedNodeLabel}
+import com.itv.scalapact.shared.matchir._
+import com.itv.scalapact.shared.{IJsonConversionFunctions, PactLogger}
 import io.circe._
 import io.circe.parser._
-import com.itv.scalapact.shared.IJsonConversionFunctions
-import com.itv.scalapact.shared.matchir._
-import com.itv.scalapact.shared.matchir.MatchIrConstants.{rootNodeLabel, unnamedNodeLabel}
-import com.itv.scalapact.shared.ColourOutput._
-import com.itv.scalapact.shared.PactLogger
 
 object JsonConversionFunctions extends IJsonConversionFunctions {
-
-  private val dropNullValuesPrinter: Printer = Printer.spaces2.copy(dropNullValues = true)
-  def prettyPrintDroppingNull(json: Json): String = {
-    dropNullValuesPrinter.print(json)
-  }
 
   def fromJSON(jsonString: String): Option[IrNode] =
     parse(jsonString).toOption.flatMap { json =>

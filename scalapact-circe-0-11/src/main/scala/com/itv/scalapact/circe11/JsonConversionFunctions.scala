@@ -1,12 +1,11 @@
 package com.itv.scalapact.circe11
 
+import com.itv.scalapact.shared.ColourOutput._
+import com.itv.scalapact.shared.matchir.MatchIrConstants.{rootNodeLabel, unnamedNodeLabel}
+import com.itv.scalapact.shared.matchir._
+import com.itv.scalapact.shared.{IJsonConversionFunctions, PactLogger}
 import io.circe._
 import io.circe.parser._
-import com.itv.scalapact.shared.IJsonConversionFunctions
-import com.itv.scalapact.shared.matchir._
-import com.itv.scalapact.shared.matchir.MatchIrConstants.{rootNodeLabel, unnamedNodeLabel}
-import com.itv.scalapact.shared.ColourOutput._
-import com.itv.scalapact.shared.PactLogger
 
 object JsonConversionFunctions extends IJsonConversionFunctions {
 

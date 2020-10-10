@@ -1,30 +1,15 @@
 package com.itv.scalapact.circe09
 
 import com.itv.scalapact.shared._
-import org.scalatest.{FunSpec, Matchers}
 import com.itv.scalapact.test.PactFileExamples
+import org.scalatest.{FunSpec, Matchers}
 
 class RubyJsonHelperSpec extends FunSpec with Matchers {
 
   describe("Handling ruby json") {
 
-    it("should be able to extract the provider") {
-
-      JsonBodySpecialCaseHelper.extractPactActor("provider")(PactFileExamples.simpleAsString) shouldEqual Some(
-        PactActor("provider")
-      )
-
-    }
-
-    it("should be able to extract the consumer") {
-
-      JsonBodySpecialCaseHelper.extractPactActor("consumer")(PactFileExamples.simpleAsString) shouldEqual Some(
-        PactActor("consumer")
-      )
-
-    }
-
-    it("should be able to extract a list of interactions paired with their bodies") {
+    it("should be able to extract provider, consumer and list of interactions") {
+      val decodedPact = pactReaderInstance.jsonStringToPact(PactFileExamples.simpleAsString).toOption
 
       val interaction1 = Interaction(
         provider_state = None,
@@ -35,7 +20,7 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
           path = Option("/fetch-json"),
           query = Option("fish=chips"),
           headers = Option(Map("Content-Type" -> "text/plain")),
-          body = None,
+          body = Option("fish"),
           matchingRules = Option(
             Map(
               "$.headers.Accept"         -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
@@ -46,7 +31,13 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
         response = InteractionResponse(
           status = Option(200),
           headers = Option(Map("Content-Type" -> "application/json")),
-          body = None,
+          body = Option("""{
+                          |  "fish" : [
+                          |    "cod",
+                          |    "haddock",
+                          |    "flying"
+                          |  ]
+                          |}""".stripMargin),
           matchingRules = Option(
             Map(
               "$.headers.Accept"         -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
@@ -55,14 +46,6 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
           )
         )
       )
-      val interaction1RequestBody  = Option("fish")
-      val interaction1ResponseBody = Option("""{
-          |  "fish" : [
-          |    "cod",
-          |    "haddock",
-          |    "flying"
-          |  ]
-          |}""".stripMargin)
 
       val interaction2 = Interaction(
         provider_state = None,
@@ -73,34 +56,27 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
           path = Option("/fetch-json2"),
           query = None,
           headers = Option(Map("Content-Type" -> "text/plain")),
-          body = None,
+          body = Option("fish"),
           matchingRules = None
         ),
         response = InteractionResponse(
           status = Option(200),
           headers = Option(Map("Content-Type" -> "application/json")),
-          body = None,
+          body = Option("""{
+                          |  "chips" : true,
+                          |  "fish" : [
+                          |    "cod",
+                          |    "haddock"
+                          |  ]
+                          |}""".stripMargin),
           matchingRules = None
         )
       )
-      val interaction2RequestBody  = Option("fish")
-      val interaction2ResponseBody = Option("""{
-          |  "chips" : true,
-          |  "fish" : [
-          |    "cod",
-          |    "haddock"
-          |  ]
-          |}""".stripMargin)
 
-      val list = List(
-        (Some(interaction1), interaction1RequestBody, interaction1ResponseBody),
-        (Some(interaction2), interaction2RequestBody, interaction2ResponseBody)
-      )
-
-      JsonBodySpecialCaseHelper.extractInteractions(PactFileExamples.simpleAsString) shouldEqual Some(list)
+      decodedPact.map(_.provider) shouldEqual Some(PactActor("provider"))
+      decodedPact.map(_.consumer) shouldEqual Some(PactActor("consumer"))
+      decodedPact.map(_.interactions) shouldEqual Some(List(interaction1, interaction2))
 
     }
-
   }
-
 }

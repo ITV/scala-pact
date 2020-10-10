@@ -32,7 +32,7 @@ case class PactActor(name: String) {
 
 }
 
-case class Interaction(provider_state: Option[String],
+case class Interaction(provider_state: Option[String], //TODO remove this field should be a decoder implementation detail
                        providerState: Option[String],
                        description: String,
                        request: InteractionRequest,
