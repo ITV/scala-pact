@@ -17,4 +17,7 @@ class PactReader extends IPactReader {
       case None => Left(s"Could not read pact from json: $json")
     }
 
+  override def jsonStringToPactsForVerification(json: String): Either[String, PactsForVerification] = ???
+
+  override def jsonStringToHALIndex(json: String): Either[String, HALIndex] = ???
 }

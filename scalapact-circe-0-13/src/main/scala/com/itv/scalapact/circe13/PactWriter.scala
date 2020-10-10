@@ -1,7 +1,7 @@
 package com.itv.scalapact.circe13
 
 import com.itv.scalapact.shared.typeclasses.IPactWriter
-import com.itv.scalapact.shared.{Pact, PactMetaData, VersionMetaData}
+import com.itv.scalapact.shared.{ConsumerVersionSelector, Pact, PactMetaData, VersionMetaData}
 import io.circe.syntax._
 
 class PactWriter extends IPactWriter {
@@ -20,4 +20,6 @@ class PactWriter extends IPactWriter {
 
     pact.copy(metadata = updatedMetaData).asJson.deepDropNullValues.spaces2
   }
+
+  override def consumerVersionSelectorsToJsonString(selectors: List[ConsumerVersionSelector], providerVersionTags: List[String]): String = ???
 }
