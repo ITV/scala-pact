@@ -132,17 +132,26 @@ class Verifier[F[_]](implicit pactReader: IPactReader,
       httpClient.doRequestSync(request, arguments.giveClientTimeout) match {
         case Right(resp) if resp.is2xx => resp.body.map(pactReader.jsonStringToHALIndex).flatMap {
           case Right(index) => index._links.get("pb:provider-pacts-for-verification").map(_.href)
-          case Left(_) => ???
+          case Left(_) =>
+            PactLogger.error("HAL index missing from Pact Broker response")
+            throw new Exception("HAL index missing from Pact Broker response")
         }
-        case Left(_) => ???
+        case Right(_) =>
+          PactLogger.error(s"Failed to load HAL index from: ${arguments.giveHost}".red)
+          throw new Exception(s"Failed to load HAL index from: ${arguments.giveHost}")
+        case Left(e) =>
+          PactLogger.error(s"Error: ${e.getMessage}".red)
+          throw e
       }
     }
   }
 
-  private def fetchFromPactsForVerification(url: String, pactVerifySettings: PactVerifySettings, arguments: ScalaPactSettings): List[Pact] = {
-    val body = pactWriter.consumerVersionSelectorsToJsonString(pactVerifySettings.consumerVersionSelectors, pactVerifySettings.providerVersionTags)
+  private def fetchFromPactsForVerification(address: String, pactVerifySettings: PactVerifySettings, arguments: ScalaPactSettings): List[Pact] = {
+    val body = pactWriter.pactsForVerificationRequestToJsonString(
+      PactsForVerificationRequest(pactVerifySettings.consumerVersionSelectors, pactVerifySettings.providerVersionTags)
+    )
     val request = SimpleRequest(
-      baseUrl = url,
+      baseUrl = address,
       endPoint = "",
       method = HttpMethod.POST,
       headers = Map.empty[String, String],
@@ -153,15 +162,23 @@ class Verifier[F[_]](implicit pactReader: IPactReader,
     httpClient.doRequestSync(request, arguments.giveClientTimeout) match {
       case Right(resp) if resp.is2xx => resp.body.map(pactReader.jsonStringToPactsForVerification).map {
         case Right(pactsForVerification) =>
-          pactsForVerification.pacts.map(_.link).map { href =>
-            fetchAndReadPact(href, pactVerifySettings.pactBrokerAuthorization, arguments.giveClientTimeout)
+          pactsForVerification.pacts.map(_.href).flatMap {
+            case Some(href) => List(fetchAndReadPact(href, pactVerifySettings.pactBrokerAuthorization, arguments.giveClientTimeout))
+            case None => Nil //This shouldn't happen
           }
-        case Left(_) => ???
+        case Left(e) =>
+          PactLogger.error(e.red)
+          Nil
       }.getOrElse {
-        ???
+        PactLogger.error("Pact data missing from Pact Broker response")
+        throw new Exception("Pact data missing from Pact Broker response")
       }
-      case Right(_) => ???
-      case Left(_) => ???
+      case Right(_) =>
+        PactLogger.error(s"Failed to load pacts for verification from: $address".red)
+        throw new Exception(s"Failed to load pacts for verification from: $address")
+      case Left(e) =>
+        PactLogger.error(s"Error: ${e.getMessage}".red)
+        throw e
     }
   }
 

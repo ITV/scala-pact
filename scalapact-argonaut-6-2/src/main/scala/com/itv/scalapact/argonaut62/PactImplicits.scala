@@ -123,4 +123,41 @@ object PactImplicits {
       "response" -> i.response.asJson
     )
   }
+
+  implicit lazy val halIndexDecoder: DecodeJson[HALIndex] =
+    DecodeJson[HALIndex](_.downField("_links").as[Links].map(HALIndex))
+
+  implicit lazy val verificationPropertiesDecodeJson: DecodeJson[VerificationProperties] =
+    DecodeJson[VerificationProperties](_.downField("notices").as[List[Map[String, String]]].map(VerificationProperties))
+
+  implicit lazy val embeddedPactForVerificationDecodeJson: DecodeJson[EmbeddedPactForVerification] = DecodeJson[EmbeddedPactForVerification] { cur =>
+    for {
+      vp <- cur.downField("verificationProperties").as[VerificationProperties]
+      links <- cur.downField("_links").as[Links]
+    } yield EmbeddedPactForVerification(vp, links)
+  }
+
+  implicit lazy val pactsForVerificationDecoder: DecodeJson[PactsForVerificationResponse] = DecodeJson[PactsForVerificationResponse]{ cur =>
+    for {
+      pacts <- cur.downField("_embedded").downField("pacts").as[List[EmbeddedPactForVerification]]
+      links <- cur.downField("_links").as[Links]
+    } yield PactsForVerificationResponse(EmbeddedPactsForVerification(pacts), links)
+  }
+
+  implicit lazy val consumerVersionSelectorEncodeJson: EncodeJson[ConsumerVersionSelector] = EncodeJson[ConsumerVersionSelector]{ vs =>
+    Json.obj(
+      "tag" -> vs.tag.asJson,
+      "fallbackTag" -> vs.fallbackTag.asJson,
+      "consumer" -> vs.consumer.asJson,
+      "latest" -> vs.latest.asJson
+    )
+  }
+
+  implicit lazy val pactsForVerificationRequestEncoder: EncodeJson[PactsForVerificationRequest] = EncodeJson[PactsForVerificationRequest]{ r =>
+    Json.obj(
+      "consumerVersionSelectors" -> r.consumerVersionSelectors.asJson,
+      "providerVersionTags" -> r.providerVersionTags.asJson
+    )
+  }
+
 }

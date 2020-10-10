@@ -12,12 +12,17 @@ class PactReader extends IPactReader {
     JsonConversionFunctions.fromJSON(jsonString)
 
   def jsonStringToPact(json: String): Either[String, Pact] =
-    Parse.parse(json).toOption.flatMap(_.as[Pact].toOption) match {
-      case Some(p) => Right(p)
-      case None => Left(s"Could not read pact from json: $json")
+    readJson[Pact](json, "pact")
+
+  def jsonStringToPactsForVerification(json: String): Either[String, PactsForVerificationResponse] =
+    readJson[PactsForVerificationResponse](json, "pacts for verification")
+
+  def jsonStringToHALIndex(json: String): Either[String, HALIndex] =
+    readJson[HALIndex](json, "HAL index")
+
+  private def readJson[A: DecodeJson](json: String, dataType: String): Either[String, A] =
+    Parse.parse(json).toOption.flatMap(_.as[A].toOption) match {
+      case Some(a) => Right(a)
+      case None => Left(s"Could not read $dataType from json: $json")
     }
-
-  override def jsonStringToPactsForVerification(json: String): Either[String, PactsForVerification] = ???
-
-  override def jsonStringToHALIndex(json: String): Either[String, HALIndex] = ???
 }

@@ -3,7 +3,7 @@ package com.itv.scalapact.argonaut62
 import argonaut.Argonaut._
 import argonaut._
 import com.itv.scalapact.shared.typeclasses.IPactWriter
-import com.itv.scalapact.shared.{ConsumerVersionSelector, Pact, PactMetaData, VersionMetaData}
+import com.itv.scalapact.shared.{Pact, PactMetaData, PactsForVerificationRequest, VersionMetaData}
 
 class PactWriter extends IPactWriter {
   import PactImplicits._
@@ -22,5 +22,6 @@ class PactWriter extends IPactWriter {
     pact.copy(metadata = updatedMetaData).asJson.pretty(PrettyParams.spaces2.copy(dropNullKeys = true))
   }
 
-  def consumerVersionSelectorsToJsonString(selectors: List[ConsumerVersionSelector], providerVersionTags: List[String]): String = ???
+  def pactsForVerificationRequestToJsonString(request: PactsForVerificationRequest): String =
+    request.asJson.pretty(PrettyParams.spaces2.copy(dropNullKeys = true))
 }

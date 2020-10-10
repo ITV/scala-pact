@@ -94,4 +94,14 @@ object PactImplicits {
   }
 
   implicit val pactEncoder: Encoder[Pact] = deriveEncoder
+
+  implicit val halIndexDecoder: Decoder[HALIndex] = deriveDecoder
+
+  implicit val embeddedPactsForVerificationDecoder: Decoder[EmbeddedPactsForVerification] = deriveDecoder
+  implicit val embeddedPactForVerificationDecoder: Decoder[EmbeddedPactForVerification] = deriveDecoder
+  implicit val verificationPropertiesDecoder: Decoder[VerificationProperties] = deriveDecoder
+  implicit val pactsForVerificationDecoder: Decoder[PactsForVerificationResponse] = deriveDecoder
+
+  implicit val consumerVersionSelectorEncoder: Encoder[ConsumerVersionSelector] = deriveEncoder
+  implicit val pactsForVerificationRequestEncoder: Encoder[PactsForVerificationRequest] = deriveEncoder
 }
