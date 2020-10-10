@@ -77,7 +77,7 @@ object SpecReader {
   }
 
   val jsonStringToRequestSpec: String => Either[String, RequestSpec] = json =>
-    jsonStringToSpec[InteractionRequest](json)(PactImplicits.InteractionRequestCodecJson.Decoder) match {
+    jsonStringToSpec[InteractionRequest](json)(PactImplicits.InteractionRequestDecodeJson) match {
       case Right(bp) =>
         Right(RequestSpec(bp._1, bp._2, bp._3, bp._4))
 
@@ -86,7 +86,7 @@ object SpecReader {
   }
 
   val jsonStringToResponseSpec: String => Either[String, ResponseSpec] = json =>
-    jsonStringToSpec[InteractionResponse](json)(PactImplicits.InteractionResponseCodecJson.Decoder) match {
+    jsonStringToSpec[InteractionResponse](json)(PactImplicits.InteractionResponseDecodeJson) match {
       case Right(bp) =>
         Right(ResponseSpec(bp._1, bp._2, bp._3, bp._4))
 

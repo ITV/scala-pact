@@ -9,7 +9,6 @@ import scala.collection.mutable.ArrayBuffer
 class ResultPublisherSpec extends FunSpec with Matchers with BeforeAndAfter {
 
   private val simpleInteraction = Interaction(
-    provider_state = None,
     providerState = None,
     description = "a simple request",
     request = InteractionRequest(

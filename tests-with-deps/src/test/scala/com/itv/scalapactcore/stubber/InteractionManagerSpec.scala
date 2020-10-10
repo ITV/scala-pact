@@ -27,7 +27,6 @@ class InteractionManagerSpec extends FunSpec with Matchers {
       )
 
       val interaction = Interaction(
-        provider_state = None,
         providerState = None,
         description = "",
         request = InteractionRequest(
@@ -80,7 +79,6 @@ class InteractionManagerSpec extends FunSpec with Matchers {
       )
 
       val interaction = Interaction(
-        provider_state = None,
         providerState = None,
         description = "",
         request = InteractionRequest(
@@ -131,7 +129,6 @@ class InteractionManagerSpec extends FunSpec with Matchers {
       )
 
       val interaction = Interaction(
-        provider_state = None,
         providerState = None,
         description = "",
         request = InteractionRequest(
@@ -174,7 +171,6 @@ class InteractionManagerSpec extends FunSpec with Matchers {
       )
 
       val interaction = Interaction(
-        provider_state = None,
         providerState = None,
         description = "",
         request = InteractionRequest(
@@ -217,7 +213,6 @@ class InteractionManagerSpec extends FunSpec with Matchers {
       )
 
       val interaction = Interaction(
-        provider_state = None,
         providerState = None,
         description = "",
         request = InteractionRequest(
@@ -273,7 +268,6 @@ class InteractionManagerSpec extends FunSpec with Matchers {
       )
 
       val interaction = Interaction(
-        provider_state = None,
         providerState = None,
         description = "",
         request = InteractionRequest(
@@ -351,7 +345,6 @@ class InteractionManagerSpec extends FunSpec with Matchers {
       )
 
       val interaction = Interaction(
-        provider_state = None,
         providerState = None,
         description = "",
         request = InteractionRequest(

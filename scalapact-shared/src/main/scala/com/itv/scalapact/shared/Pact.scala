@@ -32,8 +32,7 @@ case class PactActor(name: String) {
 
 }
 
-case class Interaction(provider_state: Option[String],
-                       providerState: Option[String],
+case class Interaction(providerState: Option[String],
                        description: String,
                        request: InteractionRequest,
                        response: InteractionResponse) {
@@ -43,7 +42,7 @@ case class Interaction(provider_state: Option[String],
 
   def renderAsString: String =
     s"""Interaction
-       |  providerState: [${providerState.orElse(provider_state).getOrElse("<none>")}]
+       |  providerState: [${providerState.getOrElse("<none>")}]
        |  description:   [$description]
        |  ${request.renderAsString}
        |  ${response.renderAsString}

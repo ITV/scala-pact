@@ -26,7 +26,7 @@ trait PactSpecTester extends FunSpec with Matchers {
       val spec = specAndMode._1
       val mode = specAndMode._2
       val path = specAndMode._3
-      val i    = Interaction(None, None, "", spec.expected, InteractionResponse(None, None, None, None))
+      val i    = Interaction(None, "", spec.expected, InteractionResponse(None, None, None, None))
 
       mode match {
         case StrictOnly =>
@@ -85,7 +85,7 @@ trait PactSpecTester extends FunSpec with Matchers {
       val spec = specAndMode._1
       val mode = specAndMode._2
       val path = specAndMode._3
-      val i    = Interaction(None, None, "", InteractionRequest(None, None, None, None, None, None), spec.expected)
+      val i    = Interaction(None, "", InteractionRequest(None, None, None, None, None, None), spec.expected)
 
       mode match {
 
