@@ -18,6 +18,9 @@ class ProviderClientSpec extends FunSpec with Matchers {
 
   implicit val formats = DefaultFormats
 
+  val CONSUMER = "scala-pact-consumer"
+  val PROVIDER = "scala-pact-provider"
+
   describe("Connecting to the Provider service") {
 
     it("should be able to fetch results") {
@@ -32,8 +35,8 @@ class ProviderClientSpec extends FunSpec with Matchers {
       )
 
       forgePact
-        .between("Consumer")
-        .and("Provider")
+        .between(CONSUMER)
+        .and(PROVIDER)
         .addInteraction(
           interaction
             .description("Fetching results")
@@ -54,8 +57,8 @@ class ProviderClientSpec extends FunSpec with Matchers {
 
     it("should be able to get an auth token") {
       forgePact
-        .between("Consumer")
-        .and("Provider")
+        .between(CONSUMER)
+        .and(PROVIDER)
         .addInteraction(
           interaction
             .description("Fetching least secure auth token ever")
