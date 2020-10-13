@@ -174,7 +174,7 @@ object ScalaPactPlugin extends AutoPlugin {
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   def pactCheckTask: Def.Initialize[InputTask[Unit]] =
     Def.inputTask {
-      ScalaPactVerifyCommand.doPactVerify(new Verifier[IO])(
+      ScalaPactVerifyCommand.doPactVerify(Verifier[IO])(
         scalaPactEnv.value.toSettings + ScalaPactSettings.parseArguments(spaceDelimited("<arg>").parsed),
         providerStates.value,
         providerStateMatcher.value,

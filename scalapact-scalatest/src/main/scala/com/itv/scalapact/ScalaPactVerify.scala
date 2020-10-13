@@ -250,7 +250,7 @@ object ScalaPactVerify {
             makeScalaPactSettings(None, publishResultsEnabled)
         }
 
-        val v: ScalaPactSettings => Boolean = new Verifier[F].verify(LocalPactFileLoader.loadPactFiles(pactReader)(true), verifySettings)
+        val v: ScalaPactSettings => Boolean = Verifier[F].verify(LocalPactFileLoader.loadPactFiles(pactReader)(true), verifySettings)
 
         if (v(scalaPactSettings)) () else throw new ScalaPactVerifyFailed
       }
