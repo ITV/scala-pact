@@ -14,13 +14,6 @@ cd ..
 bash deliver.sh
 
 echo ""
-echo "> Another set of Consumer tests"
-cd consumer-two
-sbt +clean +update +compile
-sbt "+pactPublish --clientTimeout 5"
-cd ..
-
-echo ""
 echo "> Provider verification by test suite"
 cd provider_tests
 sbt +clean +update +compile +test
