@@ -95,7 +95,9 @@ object PactImplicits {
 
   implicit val pactEncoder: Encoder[Pact] = deriveEncoder
 
-  implicit val halIndexDecoder: Decoder[HALIndex] = deriveDecoder
+  implicit val halIndexDecoder: Decoder[HALIndex] = Decoder.instance { cur =>
+    cur.downField("_links").downField("curies").delete.as[Links].map(HALIndex)
+  }
 
   implicit val embeddedPactsForVerificationDecoder: Decoder[EmbeddedPactsForVerification] = deriveDecoder
   implicit val embeddedPactForVerificationDecoder: Decoder[EmbeddedPactForVerification] = deriveDecoder

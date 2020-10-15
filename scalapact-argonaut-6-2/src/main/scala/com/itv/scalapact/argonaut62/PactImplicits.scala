@@ -125,7 +125,7 @@ object PactImplicits {
   }
 
   implicit lazy val halIndexDecoder: DecodeJson[HALIndex] =
-    DecodeJson[HALIndex](_.downField("_links").as[Links].map(HALIndex))
+    DecodeJson[HALIndex](_.downField("_links").downField("curies").delete.as[Links].map(HALIndex))
 
   implicit lazy val verificationPropertiesDecodeJson: DecodeJson[VerificationProperties] =
     DecodeJson[VerificationProperties](_.downField("notices").as[List[Map[String, String]]].map(VerificationProperties))

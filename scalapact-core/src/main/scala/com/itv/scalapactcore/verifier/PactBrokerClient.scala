@@ -33,27 +33,30 @@ private[verifier] class PactBrokerClient[F[_]](implicit pactReader: IPactReader,
   private def providerPactsForVerificationUrl(pactVerifySettings: PactVerifySettings, arguments: ScalaPactSettings): Option[String] = {
     pactVerifySettings.consumerVersionSelectors.headOption.flatMap { _ =>
       val request = SimpleRequest(
-        baseUrl = arguments.giveHost,
+        baseUrl = pactVerifySettings.pactBrokerAddress,
         endPoint = "",
         method = HttpMethod.GET,
-        headers = Map("Accept" -> "application/hal+json"),
+        headers = Map("Accept" -> "application/hal+json") ++ pactVerifySettings.pactBrokerAuthorization.map(_.asHeader).toList,
         body = None,
         sslContextName = None
       )
-      httpClient.doRequestSync(request, arguments.giveClientTimeout) match {
+      PactLogger.message("Attempting to fetch relation 'pb:provider-pacts-for-verification' from broker".black)
+      val templateUrl = httpClient.doRequestSync(request, arguments.giveClientTimeout) match {
         case Right(resp) if resp.is2xx => resp.body.map(pactReader.jsonStringToHALIndex).flatMap {
           case Right(index) => index._links.get("pb:provider-pacts-for-verification").map(_.href)
           case Left(_) =>
-            PactLogger.error("HAL index missing from Pact Broker response")
+            PactLogger.error(s"HAL index missing from Pact Broker response".red)
             throw new Exception("HAL index missing from Pact Broker response")
         }
         case Right(_) =>
-          PactLogger.error(s"Failed to load HAL index from: ${arguments.giveHost}".red)
-          throw new Exception(s"Failed to load HAL index from: ${arguments.giveHost}")
+          PactLogger.error(s"Failed to load HAL index from: ${pactVerifySettings.pactBrokerAddress}".red)
+          throw new Exception(s"Failed to load HAL index from: ${pactVerifySettings.pactBrokerAddress}")
         case Left(e) =>
           PactLogger.error(s"Error: ${e.getMessage}".red)
           throw e
       }
+
+      templateUrl.map(_.replace("{provider}", pactVerifySettings.providerName))
     }
   }
 
@@ -65,7 +68,7 @@ private[verifier] class PactBrokerClient[F[_]](implicit pactReader: IPactReader,
       baseUrl = address,
       endPoint = "",
       method = HttpMethod.POST,
-      headers = Map("Accept" -> "application/hal+json", "Content-Type" -> "application/json"),
+      headers = Map("Accept" -> "application/hal+json", "Content-Type" -> "application/json") ++ pactVerifySettings.pactBrokerAuthorization.map(_.asHeader).toList,
       body = Some(body),
       sslContextName = None
     )
