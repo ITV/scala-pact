@@ -49,11 +49,10 @@ class ScalaPactHttpClient(fetcher: (SimpleRequest, Resource[IO, Client[IO]]) => 
         simpleRequestWithoutFakeHeader =>
           performRequest(
             simpleRequestWithoutFakeHeader, {
-              BlazeClientBuilder[IO](ExecutionContext.Implicits.global)
+              val client = BlazeClientBuilder[IO](ExecutionContext.Implicits.global)
                 .withMaxTotalConnections(maxTotalConnections)
                 .withRequestTimeout(clientTimeout)
-                .withSslContextOption(sslContext)
-                .resource
+              sslContext.fold(client)(s => client.withSslContext(s)).resource
             }
       )
     )
