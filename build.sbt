@@ -262,12 +262,11 @@ lazy val argonaut62 =
     .settings(
       name := "scalapact-argonaut-6-2",
       libraryDependencies ++= Seq(
-        "io.argonaut" %% "argonaut" % "6.2.3"
+        "io.argonaut" %% "argonaut" % "6.2.5"
       )
     )
     .dependsOn(shared)
     .dependsOn(testShared % "test->compile")
-    .settings(scala212OnlySettings)
 
 lazy val circe08 =
   (project in file("scalapact-circe-0-8"))
@@ -447,7 +446,7 @@ lazy val testsWithDeps =
         "org.json4s"             %% "json4s-native" % "3.6.9" % "test",
         "com.github.tomakehurst" % "wiremock"       % "1.56" % "test",
         "fr.hmil"                %% "roshttp"       % "2.1.0" % "test",
-        "io.argonaut"            %% "argonaut"      % "6.2.3"
+        "io.argonaut"            %% "argonaut"      % "6.2.5"
       ),
       skip in publish := true
     )
