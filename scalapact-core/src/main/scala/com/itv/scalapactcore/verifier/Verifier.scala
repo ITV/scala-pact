@@ -11,7 +11,6 @@ import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClient}
 
 class Verifier[F[_]](pactBrokerClient: PactBrokerClient[F])(implicit pactReader: IPactReader,
-                                                             sslContextMap: SslContextMap,
                                                              httpClient: IScalaPactHttpClient[F],
                                                              publisher: IResultPublisher) {
 
@@ -122,8 +121,6 @@ class Verifier[F[_]](pactBrokerClient: PactBrokerClient[F])(implicit pactReader:
   private def doRequest(arguments: ScalaPactSettings, maybeProviderState: Option[ProviderState]): InteractionRequest => Either[String, InteractionResponse] =
     interactionRequest => {
       val baseUrl       = s"${arguments.giveProtocol}://" + arguments.giveHost + ":" + arguments.givePort.toString
-      val clientTimeout = arguments.giveClientTimeout
-
       val finalRequest = try {
         maybeProviderState match {
           case Some(ps) =>
@@ -164,9 +161,7 @@ class Verifier[F[_]](pactBrokerClient: PactBrokerClient[F])(implicit pactReader:
         InteractionRequest.unapply(finalRequest) match {
           case Some((Some(_), Some(_), _, _, _, _)) =>
             httpClient.doInteractionRequestSync(baseUrl,
-                                                finalRequest.withoutSslContextHeader,
-                                                clientTimeout,
-                                                finalRequest.sslContextName) match {
+                                                finalRequest.withoutSslContextHeader) match {
               case Left(e) =>
                 PactLogger.error(s"Error in response: ${e.getMessage}".red)
                 Left(e.getMessage)

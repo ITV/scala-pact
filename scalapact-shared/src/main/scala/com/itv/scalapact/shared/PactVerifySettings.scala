@@ -4,6 +4,7 @@ import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 
 case class PactVerifySettings(providerStates: SetupProviderState,
                               pactBrokerAddress: String,
+                              sslContextName: Option[String],
                               projectVersion: String,
                               providerName: String,
                               consumerNames: List[String],
