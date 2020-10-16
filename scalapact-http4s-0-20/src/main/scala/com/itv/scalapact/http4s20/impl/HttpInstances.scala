@@ -1,8 +1,8 @@
-package com.itv.scalapact.http4s21.impl
+package com.itv.scalapact.http4s20.impl
 
 import cats.effect.IO
-import com.itv.scalapact.shared.{IResultPublisher, SslContextMap}
 import com.itv.scalapact.shared.typeclasses.{IPactStubber, IScalaPactHttpClientBuilder}
+import com.itv.scalapact.shared.{IResultPublisher, SslContextMap}
 
 import scala.concurrent.duration.Duration
 

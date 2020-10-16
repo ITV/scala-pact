@@ -1,17 +1,16 @@
 package com.itv.scalapact.plugin
 
-import cats.effect.IO
 import com.itv.scalapact.http._
 import com.itv.scalapact.json._
 import com.itv.scalapact.plugin.shared._
 import com.itv.scalapact.shared.{PactBrokerAuthorization, ProviderStateResult, ScalaPactSettings}
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
-import com.itv.scalapactcore.verifier.Verifier
 import sbt.Keys._
 import sbt.plugins.JvmPlugin
 import sbt.{Def, _}
 import complete.DefaultParsers._
 
+import scala.concurrent.duration._
 import scala.language.implicitConversions
 
 object ScalaPactPlugin extends AutoPlugin {
@@ -94,6 +93,18 @@ object ScalaPactPlugin extends AutoPlugin {
         "Flag to permit publishing of snapshot pact files to pact broker. Default is false."
       )
 
+    val pactBrokerClientTimeout: SettingKey[Duration] =
+      SettingKey[Duration](
+        "pactBrokerClientTimeout",
+        "The timeout for requests when communicating with the pact broker"
+      )
+
+    val sslContextName: SettingKey[Option[String]] =
+      SettingKey[Option[String]](
+        "sslContextName",
+        "The ssl context to extract from the defined `SslContextMap`"
+      )
+
     val scalaPactEnv: SettingKey[ScalaPactEnv] =
       SettingKey[ScalaPactEnv]("scalaPactEnv", "Settings used to config the running of tasks and commands")
 
@@ -131,7 +142,9 @@ object ScalaPactPlugin extends AutoPlugin {
     allowSnapshotPublish := false,
     scalaPactEnv := ScalaPactEnv.empty,
     pactBrokerCredentials := (("", ""): (String, String)),
-    pactBrokerToken := ""
+    pactBrokerToken := "",
+    pactBrokerClientTimeout := 2.seconds,
+    sslContextName := None
   )
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
@@ -167,14 +180,16 @@ object ScalaPactPlugin extends AutoPlugin {
         pactContractVersion.value,
         allowSnapshotPublish.value,
         pactContractTags.value,
-        PactBrokerAuthorization(pactBrokerCredentials.value, pactBrokerToken.value)
+        PactBrokerAuthorization(pactBrokerCredentials.value, pactBrokerToken.value),
+        pactBrokerClientTimeout.value,
+        sslContextName.value
       )
     }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   def pactCheckTask: Def.Initialize[InputTask[Unit]] =
     Def.inputTask {
-      ScalaPactVerifyCommand.doPactVerify(Verifier[IO])(
+      ScalaPactVerifyCommand.doPactVerify(
         scalaPactEnv.value.toSettings + ScalaPactSettings.parseArguments(spaceDelimited("<arg>").parsed),
         providerStates.value,
         providerStateMatcher.value,
@@ -186,7 +201,9 @@ object ScalaPactPlugin extends AutoPlugin {
         taggedConsumerNames.value,
         consumerVersionSelectors.value,
         providerVersionTags.value,
-        PactBrokerAuthorization(pactBrokerCredentials.value, pactBrokerToken.value)
+        PactBrokerAuthorization(pactBrokerCredentials.value, pactBrokerToken.value),
+        pactBrokerClientTimeout.value,
+        sslContextName.value
       )
     }
 

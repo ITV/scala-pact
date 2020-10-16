@@ -2,8 +2,6 @@ package com.itv.scalapact.shared.typeclasses
 
 import com.itv.scalapact.shared._
 
-import scala.concurrent.duration.Duration
-
 trait IScalaPactHttpClient[F[_]] {
   def doRequest(simpleRequest: SimpleRequest): F[SimpleResponse]
 

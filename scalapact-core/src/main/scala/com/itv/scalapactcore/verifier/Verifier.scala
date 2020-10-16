@@ -27,7 +27,7 @@ class Verifier[F[_]](pactBrokerClient: PactBrokerClient[F])(implicit pactReader:
           s"Attempting to use local pact files at: '${arguments.localPactFilePath.getOrElse("<path missing>")}'".white.bold
         )
         loadPactFiles("pacts")(arguments)
-      } else pactBrokerClient.fetchPacts(pactVerifySettings, arguments)
+      } else pactBrokerClient.fetchPacts(pactVerifySettings)
 
     PactLogger.message(
       s"Verifying against '${arguments.giveHost}' on port '${arguments.givePort}' with a timeout of ${arguments.giveClientTimeout.toSeconds.toString} second(s).".white.bold
@@ -182,7 +182,6 @@ class Verifier[F[_]](pactBrokerClient: PactBrokerClient[F])(implicit pactReader:
 object Verifier {
   def apply[F[_]](implicit pactReader: IPactReader,
                   pactWriter: IPactWriter,
-                  sslContextMap: SslContextMap,
                   httpClient: IScalaPactHttpClient[F],
                   publisher: IResultPublisher): Verifier[F] =
     new Verifier[F](new PactBrokerClient[F])

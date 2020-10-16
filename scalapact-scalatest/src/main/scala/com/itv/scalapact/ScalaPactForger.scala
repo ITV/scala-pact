@@ -4,7 +4,9 @@ import com.itv.scalapact.shared.{HttpMethod, SslContextMap}
 
 import scala.util.Properties
 import com.itv.scalapact.shared.Maps._
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter, IScalaPactHttpClient}
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter, IScalaPactHttpClient, IScalaPactHttpClientBuilder}
+
+import scala.concurrent.duration._
 
 object ScalaPactForger {
   implicit val options: ScalaPactOptions = ScalaPactOptions.DefaultOptions
@@ -47,11 +49,14 @@ object ScalaPactForger {
                                                                    sslContextMap: SslContextMap,
                                                                    pactReader: IPactReader,
                                                                    pactWriter: IPactWriter,
-                                                                   httpClient: IScalaPactHttpClient[F],
-                                                                   pactStubber: IPactStubber): A =
+                                                                   httpClientBuilder: IScalaPactHttpClientBuilder[F],
+                                                                   pactStubber: IPactStubber): A = {
+        implicit val client: IScalaPactHttpClient[F] =
+          httpClientBuilder.build(2.seconds, sslContextName)
         ScalaPactMock.runConsumerIntegrationTest(strict)(
           finalise(options)
         )(test)
+      }
 
       private def finalise(implicit options: ScalaPactOptions): ScalaPactDescriptionFinal =
         ScalaPactDescriptionFinal(
