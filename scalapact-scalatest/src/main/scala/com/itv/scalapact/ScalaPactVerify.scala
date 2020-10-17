@@ -13,7 +13,7 @@ import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 
 import scala.util.Try
 
-object ScalaPactVerify {
+trait ScalaPactVerifyDsl {
   private val defaultClientTimeout: Duration = 2.seconds
 
   object verifyPact {
@@ -389,3 +389,5 @@ object ScalaPactVerify {
 
   }
 }
+
+object ScalaPactVerify extends ScalaPactVerifyDsl
