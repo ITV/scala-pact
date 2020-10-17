@@ -8,7 +8,7 @@ import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWri
 
 import scala.concurrent.duration._
 
-object ScalaPactForger {
+trait ScalaPactForgerImpl {
   implicit val options: ScalaPactOptions = ScalaPactOptions.DefaultOptions
 
   object forgePact extends ForgePactElements {
@@ -253,3 +253,5 @@ object ScalaPactForger {
   val TRACE: HttpMethod = HttpMethod.TRACE
   val HEAD: HttpMethod = HttpMethod.HEAD
 }
+
+object ScalaPactForger extends ScalaPactForgerImpl

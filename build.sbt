@@ -410,6 +410,20 @@ lazy val framework =
     )
     .dependsOn(core)
 
+lazy val frameworkWithDeps =
+  (project in file("scalapact-scalatest-all"))
+    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
+    .settings(
+      name := "scalapact-scalatest",
+      mappings in (Compile, packageBin) ~= {
+        _.filterNot { case (_, fileName) => fileName == "logback.xml" || fileName == "log4j.properties" }
+      }
+    )
+    .dependsOn(framework)
+    .dependsOn(circe13)
+    .dependsOn(http4s021)
+
 lazy val standalone =
   (project in file("scalapact-standalone-stubber"))
     .settings(commonSettings: _*)
