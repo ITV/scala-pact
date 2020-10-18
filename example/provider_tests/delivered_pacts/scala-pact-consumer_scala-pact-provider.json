@@ -7,28 +7,6 @@
   },
   "interactions" : [
     {
-      "providerState" : "Results: Bob, Fred, Harry",
-      "description" : "Fetching results",
-      "request" : {
-        "method" : "GET",
-        "path" : "/results"
-      },
-      "response" : {
-        "status" : 200,
-        "headers" : {
-          "Pact" : "modifiedRequest"
-        },
-        "body" : {
-          "count" : 3,
-          "results" : [
-            "Bob",
-            "Fred",
-            "Harry"
-          ]
-        }
-      }
-    },
-    {
       "description" : "Fetching least secure auth token ever",
       "request" : {
         "method" : "GET",
@@ -57,6 +35,28 @@
             "match" : "regex",
             "regex" : "^([a-zA-Z0-9]+)$"
           }
+        }
+      }
+    },
+    {
+      "providerState" : "Results: Bob, Fred, Harry",
+      "description" : "Fetching results",
+      "request" : {
+        "method" : "GET",
+        "path" : "/results"
+      },
+      "response" : {
+        "status" : 200,
+        "headers" : {
+          "Pact" : "modifiedRequest"
+        },
+        "body" : {
+          "count" : 3,
+          "results" : [
+            "Bob",
+            "Fred",
+            "Harry"
+          ]
         }
       }
     }

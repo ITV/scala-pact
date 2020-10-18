@@ -1,16 +1,12 @@
 package com.example.provider
 
 import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
-import com.itv.scalapact.ScalaPactVerify._
+import com.itv.scalapact.PactVerifySuite
 import com.itv.scalapact.shared.{ConsumerVersionSelector, PactBrokerAuthorization, ProviderStateResult}
 
 import scala.concurrent.duration._
 
-class VerifyContractsSpec extends FunSpec with Matchers with BeforeAndAfterAll {
-
-  import com.itv.scalapact.circe13._
-  import com.itv.scalapact.http4s21._
-
+class VerifyContractsSpec extends FunSpec with Matchers with BeforeAndAfterAll with PactVerifySuite {
   val serverAllocated =
     AlternateStartupApproach.serverResource(_ => List("Bob", "Fred", "Harry"), _ => "abcABC123").allocated.unsafeRunSync()
 
@@ -37,7 +33,7 @@ class VerifyContractsSpec extends FunSpec with Matchers with BeforeAndAfterAll {
             None,
             //again, these are publicly known creds for a test pact-broker
             PactBrokerAuthorization(pactBrokerCredentials = ("dXfltyFMgNOFZAxr8io9wJ37iUpY42M", "O5AIZWxelWbLvqMd8PkAVycBJh2Psyg1"), ""),
-            None
+            Some(5.seconds)
           )
         )
         .setupProviderState("given") {
