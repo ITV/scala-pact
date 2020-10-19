@@ -8,10 +8,10 @@ import com.itv.scalapactcore.common._
 import scala.util.Left
 import com.itv.scalapact.shared.PactLogger
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClient}
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClient, IScalaPactHttpClientBuilder}
 
 class Verifier[F[_]](pactBrokerClient: PactBrokerClient[F])(implicit pactReader: IPactReader,
-                                                             httpClient: IScalaPactHttpClient[F],
+                                                             httpClientBuilder: IScalaPactHttpClientBuilder[F],
                                                              publisher: IResultPublisher) {
 
   def verify(
@@ -29,10 +29,11 @@ class Verifier[F[_]](pactBrokerClient: PactBrokerClient[F])(implicit pactReader:
         loadPactFiles("pacts")(arguments)
       } else pactBrokerClient.fetchPacts(pactVerifySettings)
 
-    val timeoutString = pactVerifySettings.pactBrokerClientTimeout.map(_.toSeconds.toString).getOrElse("2")
     PactLogger.message(
-      s"Verifying against '${arguments.giveHost}' on port '${arguments.givePort}' with a timeout of $timeoutString second(s).".white.bold
+      s"Verifying against '${arguments.giveHost}' on port '${arguments.givePort}' with a timeout of ${arguments.giveClientTimeout.toSeconds.toString} second(s).".white.bold
     )
+
+    val localVerifierClient = httpClientBuilder.build(arguments.giveClientTimeout, None)
 
     val startTime = System.currentTimeMillis().toDouble
 
@@ -45,7 +46,7 @@ class Verifier[F[_]](pactBrokerClient: PactBrokerClient[F])(implicit pactReader:
               .map(p => ProviderState(p, pactVerifySettings.providerStates))
 
           val result =
-            (doRequest(arguments, maybeProviderState) andThen attemptMatch(arguments.giveStrictMode,
+            (doRequest(localVerifierClient)(arguments, maybeProviderState) andThen attemptMatch(arguments.giveStrictMode,
                                                                            List(interaction)))(interaction.request)
 
           PactVerifyResultInContext(result, interaction.description)
@@ -119,7 +120,7 @@ class Verifier[F[_]](pactBrokerClient: PactBrokerClient[F])(implicit pactReader:
       Left(s)
   }
 
-  private def doRequest(arguments: ScalaPactSettings, maybeProviderState: Option[ProviderState]): InteractionRequest => Either[String, InteractionResponse] =
+  private def doRequest(client: IScalaPactHttpClient[F])(arguments: ScalaPactSettings, maybeProviderState: Option[ProviderState]): InteractionRequest => Either[String, InteractionResponse] =
     interactionRequest => {
       val baseUrl       = s"${arguments.giveProtocol}://" + arguments.giveHost + ":" + arguments.givePort.toString
       val finalRequest = try {
@@ -161,7 +162,7 @@ class Verifier[F[_]](pactBrokerClient: PactBrokerClient[F])(implicit pactReader:
       try {
         InteractionRequest.unapply(finalRequest) match {
           case Some((Some(_), Some(_), _, _, _, _)) =>
-            httpClient.doInteractionRequestSync(baseUrl,
+            client.doInteractionRequestSync(baseUrl,
                                                 finalRequest.withoutSslContextHeader) match {
               case Left(e) =>
                 PactLogger.error(s"Error in response: ${e.getMessage}".red)
@@ -183,7 +184,7 @@ class Verifier[F[_]](pactBrokerClient: PactBrokerClient[F])(implicit pactReader:
 object Verifier {
   def apply[F[_]](implicit pactReader: IPactReader,
                   pactWriter: IPactWriter,
-                  httpClient: IScalaPactHttpClient[F],
+                  httpClient: IScalaPactHttpClientBuilder[F],
                   publisher: IResultPublisher): Verifier[F] =
     new Verifier[F](new PactBrokerClient[F])
 }

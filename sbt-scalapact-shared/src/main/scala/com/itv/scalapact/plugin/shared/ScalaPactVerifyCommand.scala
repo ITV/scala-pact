@@ -3,7 +3,7 @@ package com.itv.scalapact.plugin.shared
 import com.itv.scalapact.shared.ColourOutput._
 import com.itv.scalapact.shared._
 import com.itv.scalapactcore.common.LocalPactFileLoader
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClient, IScalaPactHttpClientBuilder}
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClientBuilder}
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 import com.itv.scalapactcore.verifier.Verifier
 
@@ -49,11 +49,9 @@ object ScalaPactVerifyCommand {
       consumerVersionSelectors.toList,
       providerVersionTags.toList,
       pactBrokerAuthorization,
-      scalaPactSettings.clientTimeout.orElse(Some(pactBrokerClientTimeout)),
+      Some(pactBrokerClientTimeout),
       sslContextName
     )
-
-    implicit val httpClient: IScalaPactHttpClient[F] = httpClientBuilder.build(pactBrokerClientTimeout, sslContextName)
 
     val stringToSettingsToPacts = LocalPactFileLoader.loadPactFiles(pactReader)(true)
     val successfullyVerified = Verifier[F].verify(stringToSettingsToPacts, pactVerifySettings)(scalaPactSettings)
