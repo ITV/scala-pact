@@ -7,7 +7,7 @@ import java.io.{BufferedWriter, File, FileWriter}
 import com.itv.scalapact.shared._
 
 import scala.concurrent.duration._
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClientBuilder}
+import com.itv.scalapact.shared.typeclasses.{BrokerPublishData, IPactReader, IPactWriter, IResultPublisherBuilder, IScalaPactHttpClientBuilder}
 import com.itv.scalapact.shared.ProviderStateResult
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 
@@ -35,63 +35,63 @@ object ScalaPactVerify {
     ) {
       def runStrictVerificationAgainst[F[_]](
           port: Int
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisher): Unit =
+      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisherBuilder): Unit =
         doVerification("http", "localhost", port, defaultClientTimeout, strict = true)
 
       def runStrictVerificationAgainst[F[_]](
           port: Int,
           clientTimeout: Duration
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisher): Unit =
+      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisherBuilder): Unit =
         doVerification("http", "localhost", port, clientTimeout, strict = true)
 
       def runStrictVerificationAgainst[F[_]](
           host: String,
           port: Int
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisher): Unit =
+      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisherBuilder): Unit =
         doVerification("http", host, port, defaultClientTimeout, strict = true)
 
       def runStrictVerificationAgainst[F[_]](host: String, port: Int, clientTimeout: Duration)(
           implicit pactReader: IPactReader,
           pactWriter: IPactWriter,
           httpClientBuilder: IScalaPactHttpClientBuilder[F],
-          publisher: IResultPublisher
+          publisher: IResultPublisherBuilder
       ): Unit = doVerification("http", host, port, clientTimeout, strict = true)
 
       def runStrictVerificationAgainst[F[_]](protocol: String, host: String, port: Int)(
           implicit pactReader: IPactReader,
           pactWriter: IPactWriter,
           httpClientBuilder: IScalaPactHttpClientBuilder[F],
-          publisher: IResultPublisher
+          publisher: IResultPublisherBuilder
       ): Unit =
         doVerification(protocol, host, port, defaultClientTimeout, strict = true)
 
       def runStrictVerificationAgainst[F[_]](
           target: VerifyTargetConfig
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisher): Unit =
+      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisherBuilder): Unit =
         doVerification(target.protocol, target.host, target.port, target.clientTimeout, strict = true)
 
       def runVerificationAgainst[F[_]](
           port: Int
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisher): Unit =
+      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisherBuilder): Unit =
         doVerification("http", "localhost", port, defaultClientTimeout, strict = false)
 
       def runVerificationAgainst[F[_]](
           port: Int,
           clientTimeout: Duration
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisher): Unit =
+      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisherBuilder): Unit =
         doVerification("http", "localhost", port, clientTimeout, strict = false)
 
       def runVerificationAgainst[F[_]](
           host: String,
           port: Int
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisher): Unit =
+      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisherBuilder): Unit =
         doVerification("http", host, port, defaultClientTimeout, strict = false)
 
       def runVerificationAgainst[F[_]](host: String, port: Int, clientTimeout: Duration)(
           implicit pactReader: IPactReader,
           pactWriter: IPactWriter,
           httpClientBuilder: IScalaPactHttpClientBuilder[F],
-          publisher: IResultPublisher
+          publisher: IResultPublisherBuilder
       ): Unit =
         doVerification("http", host, port, clientTimeout, strict = false)
 
@@ -99,7 +99,7 @@ object ScalaPactVerify {
           implicit pactReader: IPactReader,
           pactWriter: IPactWriter,
           httpClientBuilder: IScalaPactHttpClientBuilder[F],
-          publisher: IResultPublisher
+          publisher: IResultPublisherBuilder
       ): Unit =
         doVerification(protocol, host, port, defaultClientTimeout, strict = false)
 
@@ -107,13 +107,13 @@ object ScalaPactVerify {
           implicit pactReader: IPactReader,
           pactWriter: IPactWriter,
           httpClientBuilder: IScalaPactHttpClientBuilder[F],
-          publisher: IResultPublisher
+          publisher: IResultPublisherBuilder
       ): Unit =
         doVerification(protocol, host, port, clientTimeout, strict = false)
 
       def runVerificationAgainst[F[_]](
           target: VerifyTargetConfig
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisher): Unit =
+      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisherBuilder): Unit =
         doVerification(target.protocol, target.host, target.port, target.clientTimeout, strict = false)
 
       private def doVerification[F[_]](
@@ -122,7 +122,7 @@ object ScalaPactVerify {
           port: Int,
           clientTimeout: Duration,
           strict: Boolean
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisher): Unit = {
+      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisherBuilder): Unit = {
 
         val providerStateFunc: SetupProviderState =
           given

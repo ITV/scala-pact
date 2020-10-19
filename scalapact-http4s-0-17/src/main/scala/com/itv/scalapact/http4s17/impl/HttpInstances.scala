@@ -1,7 +1,7 @@
 package com.itv.scalapact.http4s17.impl
 
-import com.itv.scalapact.shared.typeclasses.{IPactStubber, IScalaPactHttpClientBuilder}
-import com.itv.scalapact.shared.{IResultPublisher, SslContextMap}
+import com.itv.scalapact.shared.typeclasses.{IPactStubber, IResultPublisherBuilder, IScalaPactHttpClientBuilder}
+import com.itv.scalapact.shared.SslContextMap
 import fs2.Task
 
 import scala.concurrent.duration.Duration
@@ -16,5 +16,6 @@ trait HttpInstances {
   implicit def httpClientBuilder(implicit sslContextMap: SslContextMap): IScalaPactHttpClientBuilder[Task] =
     (clientTimeout: Duration, sslContextName: Option[String]) => ScalaPactHttpClient(clientTimeout, sslContextName)
 
-  implicit val resultPublisher: IResultPublisher = new ResultPublisher(Http4sClientHelper.doRequest)
+  implicit def resultPublisherBuilder(implicit sslContextMap: SslContextMap): IResultPublisherBuilder =
+    (clientTimeout: Duration, sslContextName: Option[String]) => ResultPublisher(clientTimeout, sslContextName)
 }
