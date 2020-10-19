@@ -411,11 +411,11 @@ lazy val framework =
     .dependsOn(core)
 
 lazy val frameworkWithDeps =
-  (project in file("scalapact-scalatest-all"))
+  (project in file("scalapact-scalatest-suite"))
     .settings(commonSettings: _*)
     .settings(publishSettings: _*)
     .settings(
-      name := "scalapact-scalatest-all",
+      name := "scalapact-scalatest-suite",
       mappings in (Compile, packageBin) ~= {
         _.filterNot { case (_, fileName) => fileName == "logback.xml" || fileName == "log4j.properties" }
       }
