@@ -2,7 +2,7 @@ package com.itv.scalapact.circe12
 
 import com.itv.scalapact.shared.Pact.Links
 import com.itv.scalapact.shared._
-import io.circe.generic.semiauto.{deriveCodec, deriveEncoder}
+import io.circe.generic.semiauto.{deriveCodec, deriveDecoder, deriveEncoder}
 import io.circe.syntax._
 import io.circe._
 
@@ -89,4 +89,16 @@ object PactImplicits {
   }
 
   implicit val pactEncoder: Encoder[Pact] = deriveEncoder
+
+  implicit val halIndexDecoder: Decoder[HALIndex] = Decoder.instance { cur =>
+    cur.downField("_links").downField("curies").delete.as[Links].map(HALIndex)
+  }
+
+  implicit val embeddedPactsForVerificationDecoder: Decoder[EmbeddedPactsForVerification] = deriveDecoder
+  implicit val embeddedPactForVerificationDecoder: Decoder[EmbeddedPactForVerification] = deriveDecoder
+  implicit val verificationPropertiesDecoder: Decoder[VerificationProperties] = deriveDecoder
+  implicit val pactsForVerificationDecoder: Decoder[PactsForVerificationResponse] = deriveDecoder
+
+  implicit val consumerVersionSelectorEncoder: Encoder[ConsumerVersionSelector] = deriveEncoder
+  implicit val pactsForVerificationRequestEncoder: Encoder[PactsForVerificationRequest] = deriveEncoder
 }

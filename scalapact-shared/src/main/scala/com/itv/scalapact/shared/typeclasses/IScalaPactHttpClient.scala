@@ -25,5 +25,4 @@ trait IScalaPactHttpClient[F[_]] {
       clientTimeout: Duration,
       sslContextName: Option[String]
   )(implicit sslContextMap: SslContextMap): Either[Throwable, InteractionResponse]
-
 }

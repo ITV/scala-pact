@@ -1,24 +1,27 @@
 {
   "provider" : {
-    "name" : "Provider"
+    "name" : "scala-pact-provider"
+  },
+  "consumer" : {
+    "name" : "scala-pact-consumer"
   },
   "interactions" : [
     {
+      "description" : "Fetching least secure auth token ever",
       "request" : {
         "method" : "GET",
         "path" : "/auth_token",
+        "headers" : {
+          "Accept" : "application/json",
+          "Name" : "Bob"
+        },
         "matchingRules" : {
           "$.headers.Name" : {
             "match" : "regex",
             "regex" : "^([a-zA-Z]+)$"
           }
-        },
-        "headers" : {
-          "Accept" : "application/json",
-          "Name" : "Bob"
         }
       },
-      "description" : "Fetching least secure auth token ever",
       "response" : {
         "status" : 202,
         "headers" : {
@@ -36,11 +39,12 @@
       }
     },
     {
+      "providerState" : "Results: Bob, Fred, Harry",
+      "description" : "Fetching results",
       "request" : {
         "method" : "GET",
         "path" : "/results"
       },
-      "description" : "Fetching results",
       "response" : {
         "status" : 200,
         "headers" : {
@@ -54,13 +58,9 @@
             "Harry"
           ]
         }
-      },
-      "providerState" : "Results: Bob, Fred, Harry"
+      }
     }
   ],
-  "consumer" : {
-    "name" : "Consumer"
-  },
   "metadata" : {
     "pactSpecification" : {
       "version" : "2.0.0"

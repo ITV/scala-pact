@@ -1,7 +1,7 @@
 package com.itv.scalapact.circe12
 
 import com.itv.scalapact.shared.typeclasses.IPactWriter
-import com.itv.scalapact.shared.{Pact, PactMetaData, VersionMetaData}
+import com.itv.scalapact.shared.{Pact, PactMetaData, PactsForVerificationRequest, VersionMetaData}
 import io.circe.Printer
 import io.circe.syntax._
 
@@ -21,4 +21,7 @@ class PactWriter extends IPactWriter {
 
     pact.copy(metadata = updatedMetaData).asJson.printWith(Printer.spaces2.copy(dropNullValues = true))
   }
+
+  def pactsForVerificationRequestToJsonString(request: PactsForVerificationRequest): String =
+    request.asJson.printWith(Printer.spaces2.copy(dropNullValues = true))
 }

@@ -2,7 +2,7 @@ package com.itv.scalapactcore.common
 
 import java.io.File
 
-import com.itv.scalapact.shared.{ConfigAndPacts, Pact, ScalaPactSettings}
+import com.itv.scalapact.shared.{Pact, ScalaPactSettings}
 import com.itv.scalapact.shared.ColourOutput._
 import com.itv.scalapact.shared.PactLogger
 import com.itv.scalapact.shared.typeclasses.IPactReader
@@ -70,7 +70,7 @@ object LocalPactFileLoader {
       }
       .collect { case Right(p) => p }
 
-  def loadPactFiles(implicit pactReader: IPactReader): Boolean => String => ScalaPactSettings => ConfigAndPacts =
+  def loadPactFiles(implicit pactReader: IPactReader): Boolean => String => ScalaPactSettings => List[Pact] =
     allowTmpFiles =>
       defaultLocation =>
         config => {
@@ -85,16 +85,14 @@ object LocalPactFileLoader {
               .getOrElse("")).white.bold
           )
 
-          val pacts = config.localPactFilePath.orElse(Option(defaultLocation)) match {
+          config.localPactFilePath.orElse(Option(defaultLocation)) match {
             case Some(path) =>
-              (recursiveJsonLoad(allowTmpFiles) andThen deserializeIntoPact(pactReader.jsonStringToPact))(
+              (recursiveJsonLoad(allowTmpFiles) andThen deserializeIntoPact(pactReader.jsonStringToPact)) (
                 new File(path)
               )
 
             case None => Nil
           }
-
-          ConfigAndPacts(config, pacts)
     }
 
 }

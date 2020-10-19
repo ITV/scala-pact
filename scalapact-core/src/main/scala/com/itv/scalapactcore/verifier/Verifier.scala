@@ -1,7 +1,5 @@
 package com.itv.scalapactcore.verifier
 
-import java.net.URLEncoder
-
 import com.itv.scalapact.shared._
 import com.itv.scalapactcore.common.matching.InteractionMatchers._
 import com.itv.scalapact.shared.ColourOutput._
@@ -10,63 +8,30 @@ import com.itv.scalapactcore.common._
 import scala.util.Left
 import com.itv.scalapact.shared.PactLogger
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IScalaPactHttpClient}
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClient}
 
-import scala.concurrent.duration.Duration
+class Verifier[F[_]](pactBrokerClient: PactBrokerClient[F])(implicit pactReader: IPactReader,
+                                                             sslContextMap: SslContextMap,
+                                                             httpClient: IScalaPactHttpClient[F],
+                                                             publisher: IResultPublisher) {
 
-object Verifier {
-  def verify[F[_]](
-      loadPactFiles: String => ScalaPactSettings => ConfigAndPacts,
+  def verify(
+      loadPactFiles: String => ScalaPactSettings => List[Pact],
       pactVerifySettings: PactVerifySettings
-  )(implicit pactReader: IPactReader,
-    sslContextMap: SslContextMap,
-    httpClient: IScalaPactHttpClient[F],
-    publisher: IResultPublisher): ScalaPactSettings => Boolean = arguments => {
+  )(arguments: ScalaPactSettings): Boolean = {
 
     val scalaPactLogPrefix = "[scala-pact] ".white
 
-    val pacts: List[Pact] = if (arguments.localPactFilePath.isDefined) {
-      PactLogger.message(
-        s"Attempting to use local pact files at: '${arguments.localPactFilePath.getOrElse("<path missing>")}'".white.bold
-      )
-      loadPactFiles("pacts")(arguments).pacts
-    } else {
-      val versionConsumers = pactVerifySettings.consumerNames.map(c => VersionedConsumer(c, "/latest")) ++
-        pactVerifySettings.versionedConsumerNames.map(vc => vc.copy(version = "/version/" + vc.version)) ++
-        pactVerifySettings.taggedConsumerNames.flatMap(
-          tc => tc.tags.map(t => VersionedConsumer(tc.name, "/latest/" + URLEncoder.encode(t, "UTF-8")))
+    val pacts: List[Pact] =
+      if (arguments.localPactFilePath.isDefined) {
+        PactLogger.message(
+          s"Attempting to use local pact files at: '${arguments.localPactFilePath.getOrElse("<path missing>")}'".white.bold
         )
-
-      val latestPacts: List[Pact] = versionConsumers
-        .flatMap { consumer =>
-          ValidatedDetails.buildFrom(
-            consumer.name,
-            pactVerifySettings.providerName,
-            pactVerifySettings.pactBrokerAddress,
-            consumer.version
-          ) match {
-            case Left(l) =>
-              PactLogger.error(l.red)
-              Nil
-
-            case Right(v) =>
-              List(
-                fetchAndReadPact(
-                  v.validatedAddress.address + "/pacts/provider/" + v.providerName + "/consumer/" + v.consumerName + v.consumerVersion,
-                  pactVerifySettings.pactBrokerAuthorization,
-                  arguments.giveClientTimeout
-                )
-              )
-          }
-        }
-
-      latestPacts
-    }
+        loadPactFiles("pacts")(arguments)
+      } else pactBrokerClient.fetchPacts(pactVerifySettings, arguments)
 
     PactLogger.message(
-      s"Verifying against '${arguments.giveHost}' on port '${arguments.givePort}' with a timeout of ${arguments.clientTimeout
-        .map(_.toSeconds.toString)
-        .getOrElse("<unspecified>")} second(s).".white.bold
+      s"Verifying against '${arguments.giveHost}' on port '${arguments.givePort}' with a timeout of ${arguments.giveClientTimeout.toSeconds.toString} second(s).".white.bold
     )
 
     val startTime = System.currentTimeMillis().toDouble
@@ -108,7 +73,7 @@ object Verifier {
           }
         }
       )
-      JUnitWriter.writePactVerifyResults(result.pact.consumer.name)(result.pact.provider.name)(content.toString)
+      JUnitWriter.writePactVerifyResults(result.pact.consumer.name)(result.pact.provider.name)(content)
     }
 
     pactVerifyResults.foreach { result =>
@@ -146,9 +111,7 @@ object Verifier {
     testCount > 0 && failureCount == 0
   }
 
-  private def attemptMatch(strictMatching: Boolean, interactions: List[Interaction])(
-      implicit pactReader: IPactReader
-  ): Either[String, InteractionResponse] => Either[String, Interaction] = {
+  private def attemptMatch(strictMatching: Boolean, interactions: List[Interaction]): Either[String, InteractionResponse] => Either[String, Interaction] = {
     case Right(i) =>
       matchResponse(strictMatching, interactions)(pactReader)(i)
 
@@ -156,10 +119,7 @@ object Verifier {
       Left(s)
   }
 
-  private def doRequest[F[_]](arguments: ScalaPactSettings, maybeProviderState: Option[ProviderState])(
-      implicit sslContextMap: SslContextMap,
-      httpClient: IScalaPactHttpClient[F]
-  ): InteractionRequest => Either[String, InteractionResponse] =
+  private def doRequest(arguments: ScalaPactSettings, maybeProviderState: Option[ProviderState]): InteractionRequest => Either[String, InteractionResponse] =
     interactionRequest => {
       val baseUrl       = s"${arguments.giveProtocol}://" + arguments.giveHost + ":" + arguments.givePort.toString
       val clientTimeout = arguments.giveClientTimeout
@@ -221,60 +181,23 @@ object Verifier {
         case e: Throwable =>
           Left(e.getMessage)
       }
-
     }
+}
 
-  private def fetchAndReadPact[F[_]](
-      address: String,
-      pactBrokerAuthorization: Option[PactBrokerAuthorization],
-      clientTimeout: Duration,
-  )(implicit pactReader: IPactReader, sslContextMap: SslContextMap, httpClient: IScalaPactHttpClient[F]): Pact = {
-
-    PactLogger.message(s"Attempting to fetch pact from pact broker at: $address".white.bold)
-
-    httpClient
-      .doRequestSync(
-        SimpleRequest(address,
-                      "",
-                      HttpMethod.GET,
-                      Map("Accept" -> "application/json") ++ pactBrokerAuthorization.map(_.asHeader).toList,
-                      None,
-                      sslContextName = None),
-        clientTimeout
-      ) match {
-      case Right(r: SimpleResponse) if r.is2xx =>
-        r.body
-          .map(pactReader.jsonStringToPact)
-          .map {
-            case Right(p) =>
-              p
-            case Left(msg) =>
-              PactLogger.error(s"Error: $msg".yellow)
-              PactLogger.error("Could not convert good response to Pact:\n" + r.body.getOrElse(""))
-              throw new Exception(s"Failed to load consumer pact from: $address")
-          }
-          .getOrElse {
-            PactLogger.error("Pact data missing from Pact Broker response")
-            throw new Exception("Pact data missing from Pact Broker response")
-          }
-
-      case Right(_) =>
-        PactLogger.error(s"Failed to load consumer pact from: $address".red)
-        throw new Exception(s"Failed to load consumer pact from: $address")
-
-      case Left(e) =>
-        PactLogger.error(s"Error: ${e.getMessage}".red)
-        throw e
-    }
-
-  }
-
+object Verifier {
+  def apply[F[_]](implicit pactReader: IPactReader,
+                  pactWriter: IPactWriter,
+                  sslContextMap: SslContextMap,
+                  httpClient: IScalaPactHttpClient[F],
+                  publisher: IResultPublisher): Verifier[F] =
+    new Verifier[F](new PactBrokerClient[F])
 }
 
 case class ProviderStateFailure(key: String) extends Exception()
 
 case class ProviderState(key: String, f: SetupProviderState)
 
+//TODO remove
 case class ValidatedDetails(validatedAddress: ValidPactBrokerAddress,
                             providerName: String,
                             consumerName: String,
@@ -286,24 +209,10 @@ object ValidatedDetails {
                 providerName: String,
                 pactBrokerAddress: String,
                 consumerVersion: String): Either[String, ValidatedDetails] = {
-
-    val values = (Helpers.urlEncode(consumerName),
-                  Helpers.urlEncode(providerName),
-                  PactBrokerAddressValidation.checkPactBrokerAddress(pactBrokerAddress))
-
-    values match {
-      case (Right(consumer), Right(provider), Right(validatedAddress)) =>
-        Right(ValidatedDetails(validatedAddress, provider, consumer, consumerVersion))
-
-      case (Left(e), _, _) =>
-        Left(e)
-
-      case (_, Left(e), _) =>
-        Left(e)
-
-      case (_, _, Left(e)) =>
-        Left(e)
-    }
+    for {
+      consumer <- Helpers.urlEncode(consumerName)
+      provider <- Helpers.urlEncode(providerName)
+      validatedAddress <- PactBrokerAddressValidation.checkPactBrokerAddress(pactBrokerAddress)
+    } yield ValidatedDetails(validatedAddress, provider, consumer, consumerVersion)
   }
-
 }

@@ -33,9 +33,7 @@ object ScalaPactMock {
     val protocol = pactDescription.serverSslContextName.fold("http")(_ => "https")
     val host = "localhost"
     val outputPath = pactDescription.options.outputPath
-
-    val configAndPacts: ConfigAndPacts = ConfigAndPacts(
-      scalaPactSettings = ScalaPactSettings(
+    val scalaPactSettings = ScalaPactSettings(
         protocol = Option(protocol),
         host = Option(host),
         port = Option(0), // `0` means "use any available port".
@@ -44,14 +42,16 @@ object ScalaPactMock {
         clientTimeout = Option(2.seconds), // Should never ever take this long. Used to make an http request against the local stub.
         outputPath = Option(outputPath),
         publishResultsEnabled = None // Nothing to publish
-      ),
-      pacts = List(ScalaPactContractWriter.producePactFromDescription(pactDescription))
     )
+    val pacts = List(ScalaPactContractWriter.producePactFromDescription(pactDescription))
 
     val startStub: ScalaPactSettings => IPactStubber =
       pactStubber.start(interactionManager, 5, pactDescription.serverSslContextName, None)
 
-    val server: IPactStubber = (interactionManager.addToInteractionManager andThen startStub)(configAndPacts)
+    val server: IPactStubber = {
+      interactionManager.addToInteractionManager(pacts)
+      startStub(scalaPactSettings)
+    }
 
     val port: Int = server.port.getOrElse {
       throw new IllegalStateException("Could not obtain the server port")
@@ -61,7 +61,7 @@ object ScalaPactMock {
 
     PactLogger.debug("> ScalaPact stub running at: " + mockConfig.baseUrl)
 
-    waitForServerThenTest(server, configAndPacts.scalaPactSettings.giveClientTimeout, mockConfig, test, pactDescription)
+    waitForServerThenTest(server, scalaPactSettings.giveClientTimeout, mockConfig, test, pactDescription)
   }
 
   private def waitForServerThenTest[F[_], A](

@@ -45,7 +45,7 @@ object ScalaPactPublishCommand {
 
       // Publish to other specified brokers
       val otherPublishResults: List[PublishResult] = for {
-        pactContract <- configAndPactFiles.pacts
+        pactContract <- configAndPactFiles
         broker       <- providerBrokerPublishMap.get(pactContract.provider.name).toList
         publishResult <- publishToBroker(
           httpClient.doRequestSync(_, scalaPactSettings.giveClientTimeout),
@@ -53,7 +53,7 @@ object ScalaPactPublishCommand {
           versionToPublishAs,
           tagsToPublishWith,
           pactBrokerAuthorization
-        )(pactWriter)(ConfigAndPacts(scalaPactSettings, List(pactContract)))
+        )(pactWriter)(List(pactContract))
       } yield publishResult
 
       evaluatePublishResults(mainPublishResults ++ otherPublishResults)

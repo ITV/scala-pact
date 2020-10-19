@@ -8,13 +8,20 @@ echo "***********************"
 echo ""
 echo "> Consumer tests"
 cd example/consumer
-sbt +clean +update +compile +pactTest
+sbt +clean +update +compile
+sbt "+pactPublish --clientTimeout 5"
 cd ..
 bash deliver.sh
 
 echo ""
 echo "> Provider verification by test suite"
 cd provider_tests
+sbt +clean +update +compile +test
+cd ..
+
+echo ""
+echo "> Provider verification using pact broker and pacts-for-verification endpoint"
+cd provider_pact-for-verification
 sbt +clean +update +compile +test
 cd ..
 

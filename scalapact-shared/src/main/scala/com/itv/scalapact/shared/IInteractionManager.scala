@@ -16,6 +16,6 @@ trait IInteractionManager {
 
   def clearInteractions(): Unit
 
-  def addToInteractionManager: ConfigAndPacts => ScalaPactSettings
+  def addToInteractionManager: List[Pact] => Unit
 
 }

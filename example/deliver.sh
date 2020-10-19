@@ -2,7 +2,7 @@
 
 echo "Attempting to deliver pact file"
 
-PACT_NAME="Consumer_Provider.json"
+PACT_NAME="scala-pact-consumer_scala-pact-provider.json"
 PACT_FILE="consumer/target/pacts/$PACT_NAME"
 
 if [ ! -f $PACT_FILE ]

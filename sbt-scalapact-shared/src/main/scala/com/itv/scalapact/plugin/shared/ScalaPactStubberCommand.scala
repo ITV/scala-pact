@@ -34,7 +34,10 @@ object ScalaPactStubberCommand {
       )(setting)
     }
 
-    val launch = loadPacts andThen addToManager andThen launchStub andThen { _ =>
+    @SuppressWarnings(Array("org.wartremover.warts.DiscardedNonUnitValue"))
+    val launch: ScalaPactSettings => Unit = args => {
+      addToManager(loadPacts(args))
+      launchStub(args)
       ()
     }
 

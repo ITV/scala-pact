@@ -14,6 +14,7 @@ lazy val pactVersionFile: SettingKey[File] = settingKey[File]("location of scala
 pactVersionFile := baseDirectory.value.getParentFile.getParentFile / "version.sbt"
 
 libraryDependencies ++= {
+    //A hack so we don't have to manually update the scala-pact version for the examples
     lazy val pactVersion = IO.read(pactVersionFile.value).split('"')(1)
     Seq(
         "com.itv" %% "scalapact-circe-0-13" % pactVersion % "test",

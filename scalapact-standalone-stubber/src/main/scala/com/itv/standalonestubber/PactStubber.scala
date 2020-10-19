@@ -39,8 +39,11 @@ object PactStubber {
       )(scalaPactSettings)
     }
 
-    val launch: Seq[String] => IPactStubber =
-      parseArgs andThen loadPacts andThen addInteractions andThen startUp
+    val launch: Seq[String] => IPactStubber = args => {
+      val settings = parseArgs(args)
+      addInteractions(loadPacts(settings))
+      startUp(settings)
+    }
 
     pool.execute(new RunnableStubber(args, launch))
 

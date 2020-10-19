@@ -53,7 +53,7 @@ object ScalaPactForger {
           finalise(options)
         )(test)
 
-      def finalise(implicit options: ScalaPactOptions): ScalaPactDescriptionFinal =
+      private def finalise(implicit options: ScalaPactOptions): ScalaPactDescriptionFinal =
         ScalaPactDescriptionFinal(
           consumer,
           provider,
