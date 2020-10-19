@@ -21,7 +21,7 @@ object ScalaPactVerifyCommand {
       consumerNames: Seq[String],
       versionedConsumerNames: Seq[(String, String)],
       taggedConsumerNames: Seq[(String, Seq[String])],
-      consumerVersionSelectors: Seq[(String, Option[String], Option[String], Option[Boolean])],
+      consumerVersionSelectors: Seq[ConsumerVersionSelector],
       providerVersionTags: Seq[String],
       pactBrokerAuthorization: Option[PactBrokerAuthorization],
       pactBrokerClientTimeout: Duration,
@@ -46,7 +46,7 @@ object ScalaPactVerifyCommand {
         .map(t => TaggedConsumer(t._1, t._2.toList)),
       versionedConsumerNames = versionedConsumerNames.toList
         .map(t => VersionedConsumer(t._1, t._2)),
-      consumerVersionSelectors.toList.map(v => ConsumerVersionSelector(v._1, v._2, v._3, v._4)),
+      consumerVersionSelectors.toList,
       providerVersionTags.toList,
       pactBrokerAuthorization,
       Some(pactBrokerClientTimeout),

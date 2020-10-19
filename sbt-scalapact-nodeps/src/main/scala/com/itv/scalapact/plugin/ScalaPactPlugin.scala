@@ -3,7 +3,7 @@ package com.itv.scalapact.plugin
 import com.itv.scalapact.http._
 import com.itv.scalapact.json._
 import com.itv.scalapact.plugin.shared._
-import com.itv.scalapact.shared.{PactBrokerAuthorization, ProviderStateResult, ScalaPactSettings}
+import com.itv.scalapact.shared.{ConsumerVersionSelector, PactBrokerAuthorization, ProviderStateResult, ScalaPactSettings}
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 import sbt.Keys._
 import sbt.plugins.JvmPlugin
@@ -69,11 +69,17 @@ object ScalaPactPlugin extends AutoPlugin {
         "The name and list of tags of the services that consume the service to verify"
       )
 
-    val consumerVersionSelectors: SettingKey[Seq[(String, Option[String], Option[String], Option[Boolean])]] =
-      SettingKey[Seq[(String, Option[String], Option[String], Option[Boolean])]]("consumerVersionSelectors", "")
+    val consumerVersionSelectors: SettingKey[Seq[ConsumerVersionSelector]] =
+      SettingKey[Seq[ConsumerVersionSelector]](
+        "consumerVersionSelectors",
+        "the consumer version selectors to fetch pacts using the `pacts-for-verification` endpoint"
+      )
 
     val providerVersionTags: SettingKey[Seq[String]] =
-      SettingKey[Seq[String]]("providerVersionTags", "")
+      SettingKey[Seq[String]](
+        "providerVersionTags",
+        "the tag name(s) for the provider application version that will be published with the verification results"
+      )
 
     val pactContractVersion: SettingKey[String] =
       SettingKey[String](
@@ -135,7 +141,7 @@ object ScalaPactPlugin extends AutoPlugin {
     consumerNames := Seq.empty[String],
     versionedConsumerNames := Seq.empty[(String, String)],
     taggedConsumerNames := Seq.empty[(String, Seq[String])],
-    consumerVersionSelectors := Seq.empty[(String, Option[String], Option[String], Option[Boolean])],
+    consumerVersionSelectors := Seq.empty[ConsumerVersionSelector],
     providerVersionTags := Seq.empty[String],
     pactContractVersion := "",
     pactContractTags := Seq.empty[String],
