@@ -49,7 +49,7 @@ object ScalaPactVerifyCommand {
       consumerVersionSelectors.toList,
       providerVersionTags.toList,
       pactBrokerAuthorization,
-      Some(pactBrokerClientTimeout),
+      scalaPactSettings.clientTimeout.orElse(Some(pactBrokerClientTimeout)),
       sslContextName
     )
 

@@ -29,8 +29,9 @@ class Verifier[F[_]](pactBrokerClient: PactBrokerClient[F])(implicit pactReader:
         loadPactFiles("pacts")(arguments)
       } else pactBrokerClient.fetchPacts(pactVerifySettings)
 
+    val timeoutString = pactVerifySettings.pactBrokerClientTimeout.map(_.toSeconds.toString).getOrElse("2")
     PactLogger.message(
-      s"Verifying against '${arguments.giveHost}' on port '${arguments.givePort}' with a timeout of ${arguments.giveClientTimeout.toSeconds.toString} second(s).".white.bold
+      s"Verifying against '${arguments.giveHost}' on port '${arguments.givePort}' with a timeout of $timeoutString second(s).".white.bold
     )
 
     val startTime = System.currentTimeMillis().toDouble
