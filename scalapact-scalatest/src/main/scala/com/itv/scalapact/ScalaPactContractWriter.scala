@@ -3,18 +3,12 @@ package com.itv.scalapact
 import java.io.{File, PrintWriter}
 import java.nio.charset.StandardCharsets
 
-import com.itv.scalapact.ScalaPactForger.{
-  ScalaPactDescriptionFinal,
-  ScalaPactInteractionFinal,
-  ScalaPactMatchingRule,
-  ScalaPactMatchingRuleArrayMinLength,
-  ScalaPactMatchingRuleRegex,
-  ScalaPactMatchingRuleType
-}
+import com.itv.scalapact.model.ScalaPactMatchingRule.{ScalaPactMatchingRuleArrayMinLength, ScalaPactMatchingRuleRegex, ScalaPactMatchingRuleType}
+import com.itv.scalapact.model.{ScalaPactDescriptionFinal, ScalaPactInteractionFinal, ScalaPactMatchingRule}
 import com.itv.scalapact.shared._
 import com.itv.scalapact.shared.typeclasses.IPactWriter
 
-object ScalaPactContractWriter {
+private[scalapact] object ScalaPactContractWriter {
   def writePactContracts(outputPath: String)(implicit pactWriter: IPactWriter): ScalaPactDescriptionFinal => Unit =
     pactDescription => {
       val dirFile = new File(outputPath)
@@ -74,7 +68,7 @@ object ScalaPactContractWriter {
       BuildInfo.version
     )
 
-  private[scalapact] def producePactFromDescription: ScalaPactDescriptionFinal => Pact =
+  def producePactFromDescription: ScalaPactDescriptionFinal => Pact =
     pactDescription =>
       Pact(
         provider = PactActor(pactDescription.provider),

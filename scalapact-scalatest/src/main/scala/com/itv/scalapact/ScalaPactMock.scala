@@ -1,11 +1,11 @@
 package com.itv.scalapact
 
-import com.itv.scalapact.ScalaPactForger._
+import com.itv.scalapact.model.ScalaPactDescriptionFinal
 import com.itv.scalapact.shared.{PactLogger, _}
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter, IScalaPactHttpClient}
 import com.itv.scalapactcore.common.stubber.InteractionManager
 
-object ScalaPactMock {
+private[scalapact] object ScalaPactMock {
 
   private def configuredTestRunner[A](
       pactDescription: ScalaPactDescriptionFinal

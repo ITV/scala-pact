@@ -1,4 +1,5 @@
 //For publishing to pact-broker test server (these credentials are public knowledge)
+import scala.concurrent.duration._
 
 import scala.concurrent.duration._
 

@@ -410,6 +410,20 @@ lazy val framework =
     )
     .dependsOn(core)
 
+lazy val frameworkWithDeps =
+  (project in file("scalapact-scalatest-suite"))
+    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
+    .settings(
+      name := "scalapact-scalatest-suite",
+      mappings in (Compile, packageBin) ~= {
+        _.filterNot { case (_, fileName) => fileName == "logback.xml" || fileName == "log4j.properties" }
+      }
+    )
+    .dependsOn(framework)
+    .dependsOn(circe13)
+    .dependsOn(http4s021)
+
 lazy val standalone =
   (project in file("scalapact-standalone-stubber"))
     .settings(commonSettings: _*)
@@ -480,7 +494,7 @@ lazy val scalaPactProject =
     .aggregate(shared, core, pluginShared, plugin, pluginNoDeps, framework, testShared)
     .aggregate(http4s016a, http4s017, http4s018, http4s020, http4s021)
     .aggregate(argonaut62, circe08, circe09, circe10, circe11, circe12, circe13)
-    .aggregate(standalone)
+    .aggregate(standalone, frameworkWithDeps)
     .aggregate(docs)
     .aggregate(pactSpec, testsWithDeps)
 
