@@ -7,7 +7,7 @@ import java.io.{BufferedWriter, File, FileWriter}
 import com.itv.scalapact.shared._
 
 import scala.concurrent.duration._
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClient}
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClientBuilder}
 import com.itv.scalapact.shared.ProviderStateResult
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 
@@ -19,10 +19,10 @@ object ScalaPactVerify {
   object verifyPact {
     def withPactSource(
         sourceType: PactSourceType
-    )(implicit sslContextMap: SslContextMap): ScalaPactVerifyProviderStates =
+    ): ScalaPactVerifyProviderStates =
       new ScalaPactVerifyProviderStates(sourceType)
 
-    class ScalaPactVerifyProviderStates(sourceType: PactSourceType)(implicit sslContextMap: SslContextMap) {
+    class ScalaPactVerifyProviderStates(sourceType: PactSourceType) {
       def setupProviderState(given: String)(setupProviderState: SetupProviderState): ScalaPactVerifyRunner =
         ScalaPactVerifyRunner(sourceType, given, setupProviderState)
       def noSetupRequired: ScalaPactVerifyRunner = new ScalaPactVerifyRunner(sourceType, None, None)
@@ -32,77 +32,88 @@ object ScalaPactVerify {
         sourceType: PactSourceType,
         given: Option[String],
         setupProviderState: Option[SetupProviderState]
-    )(implicit sslContextMap: SslContextMap) {
-
+    ) {
       def runStrictVerificationAgainst[F[_]](
           port: Int
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F], publisher: IResultPublisher): Unit =
+      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisher): Unit =
         doVerification("http", "localhost", port, defaultClientTimeout, strict = true)
+
       def runStrictVerificationAgainst[F[_]](
           port: Int,
           clientTimeout: Duration
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F], publisher: IResultPublisher): Unit =
+      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisher): Unit =
         doVerification("http", "localhost", port, clientTimeout, strict = true)
+
       def runStrictVerificationAgainst[F[_]](
           host: String,
           port: Int
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F], publisher: IResultPublisher): Unit =
+      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisher): Unit =
         doVerification("http", host, port, defaultClientTimeout, strict = true)
+
       def runStrictVerificationAgainst[F[_]](host: String, port: Int, clientTimeout: Duration)(
           implicit pactReader: IPactReader,
           pactWriter: IPactWriter,
-          httpClient: IScalaPactHttpClient[F],
+          httpClientBuilder: IScalaPactHttpClientBuilder[F],
           publisher: IResultPublisher
       ): Unit = doVerification("http", host, port, clientTimeout, strict = true)
+
       def runStrictVerificationAgainst[F[_]](protocol: String, host: String, port: Int)(
           implicit pactReader: IPactReader,
           pactWriter: IPactWriter,
-          httpClient: IScalaPactHttpClient[F],
+          httpClientBuilder: IScalaPactHttpClientBuilder[F],
           publisher: IResultPublisher
       ): Unit =
         doVerification(protocol, host, port, defaultClientTimeout, strict = true)
+
       def runStrictVerificationAgainst[F[_]](
           target: VerifyTargetConfig
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F], publisher: IResultPublisher): Unit =
+      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisher): Unit =
         doVerification(target.protocol, target.host, target.port, target.clientTimeout, strict = true)
+
       def runVerificationAgainst[F[_]](
           port: Int
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F], publisher: IResultPublisher): Unit =
+      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisher): Unit =
         doVerification("http", "localhost", port, defaultClientTimeout, strict = false)
+
       def runVerificationAgainst[F[_]](
           port: Int,
           clientTimeout: Duration
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F], publisher: IResultPublisher): Unit =
+      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisher): Unit =
         doVerification("http", "localhost", port, clientTimeout, strict = false)
+
       def runVerificationAgainst[F[_]](
           host: String,
           port: Int
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F], publisher: IResultPublisher): Unit =
+      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisher): Unit =
         doVerification("http", host, port, defaultClientTimeout, strict = false)
+
       def runVerificationAgainst[F[_]](host: String, port: Int, clientTimeout: Duration)(
           implicit pactReader: IPactReader,
           pactWriter: IPactWriter,
-          httpClient: IScalaPactHttpClient[F],
+          httpClientBuilder: IScalaPactHttpClientBuilder[F],
           publisher: IResultPublisher
       ): Unit =
         doVerification("http", host, port, clientTimeout, strict = false)
+
       def runVerificationAgainst[F[_]](protocol: String, host: String, port: Int)(
           implicit pactReader: IPactReader,
           pactWriter: IPactWriter,
-          httpClient: IScalaPactHttpClient[F],
+          httpClientBuilder: IScalaPactHttpClientBuilder[F],
           publisher: IResultPublisher
       ): Unit =
         doVerification(protocol, host, port, defaultClientTimeout, strict = false)
+
       def runVerificationAgainst[F[_]](protocol: String, host: String, port: Int, clientTimeout: Duration)(
           implicit pactReader: IPactReader,
           pactWriter: IPactWriter,
-          httpClient: IScalaPactHttpClient[F],
+          httpClientBuilder: IScalaPactHttpClientBuilder[F],
           publisher: IResultPublisher
       ): Unit =
         doVerification(protocol, host, port, clientTimeout, strict = false)
+
       def runVerificationAgainst[F[_]](
           target: VerifyTargetConfig
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F], publisher: IResultPublisher): Unit =
+      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisher): Unit =
         doVerification(target.protocol, target.host, target.port, target.clientTimeout, strict = false)
 
       private def doVerification[F[_]](
@@ -111,7 +122,7 @@ object ScalaPactVerify {
           port: Int,
           clientTimeout: Duration,
           strict: Boolean
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F], publisher: IResultPublisher): Unit = {
+      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F], publisher: IResultPublisher): Unit = {
 
         val providerStateFunc: SetupProviderState =
           given
@@ -150,7 +161,9 @@ object ScalaPactVerify {
               versionedConsumerNames = Nil,
               consumerVersionSelectors = Nil,
               providerVersionTags = Nil,
-              pactBrokerAuthorization = None
+              pactBrokerAuthorization = None,
+              pactBrokerClientTimeout = None,
+              sslContextName = None
             ) ->
               makeScalaPactSettings(Some(tmp.getAbsolutePath), None)
 
@@ -165,11 +178,13 @@ object ScalaPactVerify {
               versionedConsumerNames = Nil,
               consumerVersionSelectors = Nil,
               providerVersionTags = Nil,
-              pactBrokerAuthorization = None
+              pactBrokerAuthorization = None,
+              pactBrokerClientTimeout = None,
+              sslContextName = None
             ) ->
               makeScalaPactSettings(Some(path), None)
 
-          case pactBrokerUseLatest(url, providerName, consumerNames, publishResultsEnabled, pactBrokerAuthorization) =>
+          case pactBrokerUseLatest(url, providerName, consumerNames, publishResultsEnabled, pactBrokerAuthorization, pactBrokerClientTimeout) =>
             PactVerifySettings(
               providerStates = providerStateFunc,
               pactBrokerAddress = url,
@@ -180,7 +195,9 @@ object ScalaPactVerify {
               versionedConsumerNames = Nil,
               consumerVersionSelectors = Nil,
               providerVersionTags = Nil,
-              pactBrokerAuthorization = pactBrokerAuthorization
+              pactBrokerAuthorization = pactBrokerAuthorization,
+              pactBrokerClientTimeout = pactBrokerClientTimeout,
+              sslContextName = None
             ) ->
             makeScalaPactSettings(None, publishResultsEnabled)
 
@@ -189,7 +206,8 @@ object ScalaPactVerify {
               providerName,
           publishResultsEnabled,
               consumersWithTags,
-              pactBrokerAuthorization
+              pactBrokerAuthorization,
+              pactBrokerClientTimeout
               ) =>
             PactVerifySettings(
               providerStates = providerStateFunc,
@@ -201,7 +219,9 @@ object ScalaPactVerify {
               versionedConsumerNames = Nil,
               consumerVersionSelectors = Nil,
               providerVersionTags = Nil,
-              pactBrokerAuthorization = pactBrokerAuthorization
+              pactBrokerAuthorization = pactBrokerAuthorization,
+              pactBrokerClientTimeout = pactBrokerClientTimeout,
+              sslContextName = None
             ) ->
               makeScalaPactSettings(None, publishResultsEnabled)
 
@@ -211,7 +231,8 @@ object ScalaPactVerify {
               providerName,
               consumerNames,
               publishResultsEnabled,
-              pactBrokerAuthorization
+              pactBrokerAuthorization,
+              pactBrokerClientTimeout
               ) =>
             PactVerifySettings(
               providerStates = providerStateFunc,
@@ -223,7 +244,9 @@ object ScalaPactVerify {
               versionedConsumerNames = consumerNames.map(c => VersionedConsumer(c, version)),
               consumerVersionSelectors = Nil,
               providerVersionTags = Nil,
-              pactBrokerAuthorization = pactBrokerAuthorization
+              pactBrokerAuthorization = pactBrokerAuthorization,
+              pactBrokerClientTimeout = pactBrokerClientTimeout,
+              sslContextName = None
             ) ->
             makeScalaPactSettings(None, publishResultsEnabled)
 
@@ -233,7 +256,8 @@ object ScalaPactVerify {
               consumerVersionSelectors,
               providerVersionTags,
               publishResultsEnabled,
-              pactBrokerAuthorization
+              pactBrokerAuthorization,
+              pactBrokerClientTimeout
               ) =>
             PactVerifySettings(
               providerStates = providerStateFunc,
@@ -245,7 +269,9 @@ object ScalaPactVerify {
               versionedConsumerNames = Nil,
               consumerVersionSelectors = consumerVersionSelectors,
               providerVersionTags = providerVersionTags,
-              pactBrokerAuthorization = pactBrokerAuthorization
+              pactBrokerAuthorization = pactBrokerAuthorization,
+              pactBrokerClientTimeout = pactBrokerClientTimeout,
+              sslContextName = None
             ) ->
             makeScalaPactSettings(None, publishResultsEnabled)
         }
@@ -261,7 +287,7 @@ object ScalaPactVerify {
                  sourceType: PactSourceType,
                  given: String,
                  setupProviderState: SetupProviderState
-               )(implicit sslContextMap: SslContextMap): ScalaPactVerifyRunner = new ScalaPactVerifyRunner(sourceType, Some(given), Some(setupProviderState))
+               ): ScalaPactVerifyRunner = new ScalaPactVerifyRunner(sourceType, Some(given), Some(setupProviderState))
     }
 
   }
@@ -275,10 +301,16 @@ object ScalaPactVerify {
       provider: String,
       consumers: List[String],
       publishResultsEnabled: Option[BrokerPublishData],
-      pactBrokerAuthorization: Option[PactBrokerAuthorization]
+      pactBrokerAuthorization: Option[PactBrokerAuthorization],
+      pactBrokerClientTimeout: Option[Duration]
   ) extends PactSourceType {
     def withContractVersion(version: String): pactBrokerWithVersion =
-      pactBrokerWithVersion(url, version, provider, consumers, publishResultsEnabled, pactBrokerAuthorization)
+      pactBrokerWithVersion(url, version, provider, consumers, publishResultsEnabled, pactBrokerAuthorization, pactBrokerClientTimeout)
+  }
+
+  object pactBrokerUseLatest {
+    def apply(url: String, provider: String, consumers: List[String]): pactBrokerUseLatest =
+      pactBrokerUseLatest(url, provider, consumers, None, None, None)
   }
 
   case class pactBrokerWithTags(
@@ -286,8 +318,14 @@ object ScalaPactVerify {
       provider: String,
       publishResultsEnabled: Option[BrokerPublishData],
       consumerNamesWithTags: List[TaggedConsumer],
-      pactBrokerAuthorization: Option[PactBrokerAuthorization]
+      pactBrokerAuthorization: Option[PactBrokerAuthorization],
+      pactBrokerClientTimeout: Option[Duration]
   ) extends PactSourceType
+
+  object pactBrokerWithTags {
+    def apply(url: String, provider: String, consumers: List[TaggedConsumer]): pactBrokerWithTags =
+      pactBrokerWithTags(url, provider, None, consumers, None, None)
+  }
 
   case class pactBrokerWithVersion(
       url: String,
@@ -295,8 +333,13 @@ object ScalaPactVerify {
       provider: String,
       consumers: List[String],
       publishResultsEnabled: Option[BrokerPublishData],
-      pactBrokerAuthorization: Option[PactBrokerAuthorization]
+      pactBrokerAuthorization: Option[PactBrokerAuthorization],
+      pactBrokerClientTimeout: Option[Duration]
   ) extends PactSourceType
+
+  object pactBrokerWithVersion {
+    def apply(url: String, contractVersion: String, provider: String, consumers: List[String]): pactBrokerWithVersion = pactBrokerWithVersion(url, contractVersion, provider, consumers, None, None, None)
+  }
 
   case class pactBrokerWithVersionSelectors(
       url: String,
@@ -304,7 +347,8 @@ object ScalaPactVerify {
       consumerVersionSelectors: List[ConsumerVersionSelector],
       providerVersionTags: List[String],
       publishResultsEnabled: Option[BrokerPublishData],
-      pactBrokerAuthorization: Option[PactBrokerAuthorization]
+      pactBrokerAuthorization: Option[PactBrokerAuthorization],
+      pactBrokerClientTimeout: Option[Duration]
   ) extends PactSourceType
 
   case class pactAsJsonString(json: String) extends PactSourceType

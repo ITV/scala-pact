@@ -1,9 +1,11 @@
 package com.itv.scalapact.plugin.shared
 
 import com.itv.scalapact.shared.ColourOutput._
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClient}
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClientBuilder}
 import com.itv.scalapact.shared._
 import com.itv.scalapactcore.common.LocalPactFileLoader
+
+import scala.concurrent.duration._
 
 object ScalaPactPublishCommand {
 
@@ -15,9 +17,13 @@ object ScalaPactPublishCommand {
       pactContractVersion: String,
       allowSnapshotPublish: Boolean,
       tagsToPublishWith: Seq[String],
-      pactBrokerAuthorization: Option[PactBrokerAuthorization]
-  )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F]): Unit = {
+      pactBrokerAuthorization: Option[PactBrokerAuthorization],
+      pactBrokerClientTimeout: Duration,
+      sslContextName: Option[String]
+  )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F]): Unit = {
     import Publisher._
+
+    val httpClient = httpClientBuilder.build(pactBrokerClientTimeout, sslContextName)
 
     PactLogger.message("*************************************".white.bold)
     PactLogger.message("** ScalaPact: Publishing Contracts **".white.bold)
@@ -36,7 +42,7 @@ object ScalaPactPublishCommand {
 
       // Publish all to main broker
       val mainPublishResults: List[PublishResult] = publishToBroker(
-        httpClient.doRequestSync(_, scalaPactSettings.giveClientTimeout),
+        httpClient.doRequestSync,
         pactBrokerAddress,
         versionToPublishAs,
         tagsToPublishWith,
@@ -48,7 +54,7 @@ object ScalaPactPublishCommand {
         pactContract <- configAndPactFiles
         broker       <- providerBrokerPublishMap.get(pactContract.provider.name).toList
         publishResult <- publishToBroker(
-          httpClient.doRequestSync(_, scalaPactSettings.giveClientTimeout),
+          httpClient.doRequestSync,
           broker,
           versionToPublishAs,
           tagsToPublishWith,

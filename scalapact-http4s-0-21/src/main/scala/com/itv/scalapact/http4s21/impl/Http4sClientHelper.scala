@@ -24,7 +24,7 @@ object Http4sClientHelper {
     BlazeClientBuilder[IO](ExecutionContext.global)
       .withMaxTotalConnections(maxTotalConnections)
       .withRequestTimeout(clientTimeout)
-      .withSslContextOption(sslContext)
+      .withSslContext(sslContext.getOrElse(SSLContext.getDefault))
       .withUserAgentOption(Option(`User-Agent`(AgentProduct("scala-pact", Option(BuildInfo.version)))))
       .withCheckEndpointAuthentication(false)
       .resource

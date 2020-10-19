@@ -5,8 +5,6 @@ import com.itv.scalapact.shared.{PactLogger, _}
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter, IScalaPactHttpClient}
 import com.itv.scalapactcore.common.stubber.InteractionManager
 
-import scala.concurrent.duration._
-
 object ScalaPactMock {
 
   private def configuredTestRunner[A](
@@ -39,7 +37,7 @@ object ScalaPactMock {
         port = Option(0), // `0` means "use any available port".
         localPactFilePath = None,
         strictMode = Option(strict),
-        clientTimeout = Option(2.seconds), // Should never ever take this long. Used to make an http request against the local stub.
+        clientTimeout = None,
         outputPath = Option(outputPath),
         publishResultsEnabled = None // Nothing to publish
     )
@@ -61,19 +59,18 @@ object ScalaPactMock {
 
     PactLogger.debug("> ScalaPact stub running at: " + mockConfig.baseUrl)
 
-    waitForServerThenTest(server, scalaPactSettings.giveClientTimeout, mockConfig, test, pactDescription)
+    waitForServerThenTest(server, mockConfig, test, pactDescription)
   }
 
   private def waitForServerThenTest[F[_], A](
       server: IPactStubber,
-      clientTimeout: Duration,
       mockConfig: ScalaPactMockConfig,
       test: ScalaPactMockConfig => A,
       pactDescription: ScalaPactDescriptionFinal
-  )(implicit sslContextMap: SslContextMap, pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F]): A = {
+  )(implicit pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F]): A = {
     @scala.annotation.tailrec
     def rec(attemptsRemaining: Int, intervalMillis: Int): A =
-      if (isStubReady(mockConfig, clientTimeout, pactDescription.serverSslContextName)) {
+      if (isStubReady(mockConfig, pactDescription.serverSslContextName)) {
         val result = configuredTestRunner(pactDescription)(mockConfig)(test)
 
         server.shutdown()
@@ -92,17 +89,15 @@ object ScalaPactMock {
 
   private def isStubReady[F[_]](
       mockConfig: ScalaPactMockConfig,
-      clientTimeout: Duration,
       sslContextName: Option[String]
-  )(implicit sslContextMap: SslContextMap, httpClient: IScalaPactHttpClient[F]): Boolean =
+  )(implicit httpClient: IScalaPactHttpClient[F]): Boolean =
     httpClient.doRequestSync(
       SimpleRequest(mockConfig.baseUrl,
                     "/stub/status",
                     HttpMethod.GET,
                     Map("X-Pact-Admin" -> "true"),
                     None,
-                    sslContextName = sslContextName),
-      clientTimeout
+                    sslContextName = sslContextName)
     ) match {
       case Left(_) =>
         false
