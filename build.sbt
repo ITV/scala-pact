@@ -520,7 +520,7 @@ lazy val updateVersionsInReadme: ReleaseStep = { st: State =>
   st
 }
 
-lazy val commitAllVersionBumps: ReleaseStep = { st: State =>
+lazy val commitReadMeVersionBump: ReleaseStep = { st: State =>
   def vcs(st: State): Vcs = {
     st.extract.get(releaseVcs).getOrElse(sys.error("Aborting release. Working directory is not a repository of a recognized VCS."))
   }
@@ -530,15 +530,12 @@ lazy val commitAllVersionBumps: ReleaseStep = { st: State =>
     override def out(s: => String): Unit = st.log.info(s)
     override def buffer[T](f: => T): T = st.log.buffer(f)
   }
-  val buildVersionFile = st.extract.get(releaseVersionFile).getCanonicalFile
   val readmeFile = st.extract.get(readmeFileKey).getCanonicalFile
   val base = vcs(st).baseDir.getCanonicalFile
   val sign = st.extract.get(releaseVcsSign)
   val signOff = st.extract.get(releaseVcsSignOff)
-  val relativePathToBuildVersion = IO.relativize(base, buildVersionFile).getOrElse("Version file [%s] is outside of this VCS repository with base directory [%s]!" format(buildVersionFile, base))
   val relativePathToReadme = IO.relativize(base, readmeFile).getOrElse("Readme file [%s] is outside of this VCS repository with base directory [%s]!" format(readmeFile, base))
 
-  vcs(st).add(relativePathToBuildVersion) !! log
   vcs(st).add(relativePathToReadme) !! log
 
   val status = vcs(st).status.!!.trim
@@ -560,12 +557,13 @@ releaseProcess := Seq[ReleaseStep](
   runClean,
   runTest,
   updateVersionsInReadme,
+  commitReadMeVersionBump,
   setReleaseVersion,
   commitReleaseVersion,
   tagRelease,
   releaseStepCommandAndRemaining("+publishSigned"),
   releaseStepCommand("sonatypeBundleRelease"),
   setNextVersion,
-  commitAllVersionBumps,
+  commitNextVersion,
   pushChanges
 )
