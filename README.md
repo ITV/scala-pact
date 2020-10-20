@@ -32,6 +32,10 @@ One big change between 2.2.x and 2.3.x is that dependencies are now provided by 
 
 ### You're using SBT 1.x:
 
+There are two approaches to using the scala-pact dsl. The new approach uses a single dependency and mix-ins to use the dsl. The old approach allows more freedom in which http and json library versions are being used, but requires more dependencies and imports. 
+
+#### Mix-ins approach 
+
 Add the following lines to your `build.sbt` file to setup the test framework:
 ```scala
 
@@ -40,8 +44,31 @@ import com.itv.scalapact.plugin._
 enablePlugins(ScalaPactPlugin)
         
 libraryDependencies ++= Seq(
-  "com.itv"       %% "scalapact-circe-0-9"   % "2.4.0" % "test",
-  "com.itv"       %% "scalapact-http4s-0-18" % "2.4.0" % "test",
+  "com.itv"       %% "scalapact-scalatest-suite"   % "2.4.0" % "test",
+  "org.scalatest" %% "scalatest"             % "3.0.5"  % "test"
+)
+```
+
+Add this line to your `project/plugins.sbt` file to install the plugin:
+```scala
+addSbtPlugin("com.itv" % "sbt-scalapact" % "2.4.0")
+```
+
+Both the import and the plugin come pre-packaged with the latest JSON and Http libraries (http4s 0.21.x, and circe 0.13.x). 
+
+In your consumer test suites, have the test class extend `PactForgerSuite`, in you provider test suites, have the test class extend `PactVerifySuite`. 
+
+#### Without mix-ins
+If your project needs more control over the dependencies used by scala-pact, add the following lines to your `build.sbt` file to setup the test framework:
+```scala
+
+import com.itv.scalapact.plugin._
+
+enablePlugins(ScalaPactPlugin)
+        
+libraryDependencies ++= Seq(
+  "com.itv"       %% "scalapact-circe-0-13"   % "2.4.0" % "test",
+  "com.itv"       %% "scalapact-http4s-0-21" % "2.4.0" % "test",
   "com.itv"       %% "scalapact-scalatest"   % "2.4.0" % "test",
   "org.scalatest" %% "scalatest"             % "3.0.5"  % "test"
 )
@@ -57,7 +84,7 @@ Thanks to the way SBT works, that one plugin line will work in most cases, but i
 ```scala
  libraryDependencies ++= Seq(
    "com.itv" %% "scalapact-argonaut-6-2" % "2.4.0",
-   "com.itv" %% "scalapact-http4s-0-16a" % "2.4.0"
+   "com.itv" %% "scalapact-http4s-0-21" % "2.4.0"
  )
  
  addSbtPlugin("com.itv" % "sbt-scalapact-nodeps" % "2.4.0")
