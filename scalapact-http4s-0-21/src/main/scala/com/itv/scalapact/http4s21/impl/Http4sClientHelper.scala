@@ -1,8 +1,7 @@
 package com.itv.scalapact.http4s21.impl
 
 import cats.effect.{ContextShift, IO, Resource}
-import com.itv.scalapact.shared.{SimpleRequest, SimpleResponse}
-import javax.net.ssl.SSLContext
+import com.itv.scalapact.shared.{SimpleRequest, SimpleResponse, SslContextMap}
 import org.http4s._
 import org.http4s.client.Client
 import org.http4s.client.blaze.BlazeClientBuilder
@@ -18,16 +17,14 @@ object Http4sClientHelper {
 
   def buildPooledBlazeHttpClient(maxTotalConnections: Int,
                                  clientTimeout: Duration,
-                                 sslContext: Option[SSLContext]): Resource[IO, Client[IO]] = {
+                                 sslContextName: Option[String])(implicit sslContextMap: SslContextMap): Resource[IO, Client[IO]] = {
     implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
-
-    BlazeClientBuilder[IO](ExecutionContext.global)
+    val sslContext = sslContextMap(sslContextName)
+    val builder = BlazeClientBuilder[IO](ExecutionContext.Implicits.global)
       .withMaxTotalConnections(maxTotalConnections)
       .withRequestTimeout(clientTimeout)
-      .withSslContext(sslContext.getOrElse(SSLContext.getDefault))
       .withUserAgentOption(Option(`User-Agent`(AgentProduct("scala-pact", Option(BuildInfo.version)))))
-      .withCheckEndpointAuthentication(false)
-      .resource
+    sslContext.fold(builder)(s => builder.withSslContext(s)).resource
   }
 
   def doRequest(request: SimpleRequest, httpClient: Resource[IO, Client[IO]]): IO[SimpleResponse] =

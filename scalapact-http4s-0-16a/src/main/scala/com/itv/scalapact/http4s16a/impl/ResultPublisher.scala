@@ -2,20 +2,17 @@ package com.itv.scalapact.http4s16a.impl
 
 import com.itv.scalapact.shared.ColourOutput._
 import com.itv.scalapact.shared._
+import com.itv.scalapact.shared.typeclasses.{BrokerPublishData, IResultPublisher}
 import org.http4s.client.Client
 import scalaz.concurrent.Task
 
 import scala.concurrent.duration._
 
-class ResultPublisher(fetcher: (SimpleRequest, Client) => Task[SimpleResponse]) extends IResultPublisher {
-
-  val maxTotalConnections: Int = 2
-  private val clientTimeout = 10.seconds
-
+class ResultPublisher(client: Client)(fetcher: (SimpleRequest, Client) => Task[SimpleResponse]) extends IResultPublisher {
   override def publishResults(
     pactVerifyResults: List[PactVerifyResult],
     brokerPublishData: BrokerPublishData,
-    pactBrokerAuthorization: Option[PactBrokerAuthorization])(implicit sslContextMap: SslContextMap): Unit = {
+    pactBrokerAuthorization: Option[PactBrokerAuthorization]): Unit = {
     val list = pactVerifyResults.map { result =>
       result.pact._links.flatMap(_.get("pb:publish-verification-results")).map(_.href) match {
         case Some(link) =>
@@ -29,20 +26,15 @@ class ResultPublisher(fetcher: (SimpleRequest, Client) => Task[SimpleResponse]) 
             None
           )
 
-          SslContextMap(request)(
-            sslContext =>
-              simpleRequestWithoutFakeHeader => {
-                val client = Http4sClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, clientTimeout, sslContext)
-                fetcher(simpleRequestWithoutFakeHeader, client)
-                  .map { response =>
-                    if (response.is2xx) {
-                      PactLogger.message(s"Verification results published for provider ${result.pact.provider} and consumer ${result.pact.consumer}")
-                    } else {
-                      PactLogger.error(s"Publish verification results failed with ${response.statusCode}".red)
-                    }
-                  }
+          fetcher(request, client)
+            .map { response =>
+              if (response.is2xx) {
+                PactLogger.message(s"Verification results published for provider ${result.pact.provider} and consumer ${result.pact.consumer}")
+              } else {
+                PactLogger.error(s"Publish verification results failed with ${response.statusCode}".red)
               }
-          )
+            }
+
         case None =>
           Task.now(PactLogger.error("Unable to publish verification results as there is no pb:publish-verification-results link".red))
       }
@@ -54,5 +46,13 @@ class ResultPublisher(fetcher: (SimpleRequest, Client) => Task[SimpleResponse]) 
   private def body(brokerPublishData: BrokerPublishData, success: Boolean) = {
     val buildUrl = brokerPublishData.buildUrl.fold("")(u => s""", "buildUrl": "$u"""")
     Option(s"""{ "success": $success, "providerApplicationVersion": "${brokerPublishData.providerVersion}"$buildUrl }""")
+  }
+}
+
+object ResultPublisher {
+  def apply(clientTimeout: Duration, sslContextName: Option[String])(implicit sslContextMap: SslContextMap): IResultPublisher = {
+    val sslContext = sslContextMap(sslContextName)
+    val client = Http4sClientHelper.buildPooledBlazeHttpClient(2, clientTimeout, sslContext)
+    new ResultPublisher(client)(Http4sClientHelper.doRequest)
   }
 }

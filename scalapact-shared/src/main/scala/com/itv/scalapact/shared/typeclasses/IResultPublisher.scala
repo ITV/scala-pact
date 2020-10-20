@@ -1,11 +1,13 @@
-package com.itv.scalapact.shared
+package com.itv.scalapact.shared.typeclasses
+
+import com.itv.scalapact.shared.{PactBrokerAuthorization, PactVerifyResult}
 
 trait IResultPublisher {
   def publishResults(
       pactVerifyResults: List[PactVerifyResult],
       brokerPublishData: BrokerPublishData,
       pactBrokerAuthorization: Option[PactBrokerAuthorization]
-  )(implicit sslContextMap: SslContextMap): Unit
+  ): Unit
 }
 
 case class BrokerPublishData(providerVersion: String, buildUrl: Option[String])

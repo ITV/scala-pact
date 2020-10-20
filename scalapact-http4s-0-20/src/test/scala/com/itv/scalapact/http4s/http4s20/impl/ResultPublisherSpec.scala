@@ -3,6 +3,7 @@ package com.itv.scalapact.http4s.http4s20.impl
 import cats.effect.{IO, Resource}
 import com.itv.scalapact.http4s20.impl.ResultPublisher
 import com.itv.scalapact.shared._
+import com.itv.scalapact.shared.typeclasses.BrokerPublishData
 import org.http4s.client.Client
 import org.scalatest.{BeforeAndAfter, FunSpec, Matchers}
 
@@ -56,7 +57,7 @@ class ResultPublisherSpec extends FunSpec with Matchers with BeforeAndAfter {
     IO.pure(SimpleResponse(200))
   }
 
-  private val resultPublisher = new ResultPublisher(fakeCaller)
+  private val resultPublisher = new ResultPublisher(null)(fakeCaller)
 
   before {
     requests = ArrayBuffer.empty[SimpleRequest]

@@ -8,11 +8,13 @@ import com.itv.scalapactcore.common._
 import scala.util.Left
 import com.itv.scalapact.shared.PactLogger
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClient, IScalaPactHttpClientBuilder}
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IResultPublisherBuilder, IScalaPactHttpClient, IScalaPactHttpClientBuilder}
+
+import scala.concurrent.duration.DurationInt
 
 class Verifier[F[_]](pactBrokerClient: PactBrokerClient[F])(implicit pactReader: IPactReader,
                                                              httpClientBuilder: IScalaPactHttpClientBuilder[F],
-                                                             publisher: IResultPublisher) {
+                                                             publisherBuilder: IResultPublisherBuilder) {
 
   def verify(
       loadPactFiles: String => ScalaPactSettings => List[Pact],
@@ -105,9 +107,11 @@ class Verifier[F[_]](pactBrokerClient: PactBrokerClient[F])(implicit pactReader:
     else
       PactLogger.message(scalaPactLogPrefix + s"$failureCount Pact verify tests failed.".red)
 
-    arguments.publishResultsEnabled.foreach(
+    arguments.publishResultsEnabled.foreach {
+      val publisher = publisherBuilder
+        .build(pactVerifySettings.pactBrokerClientTimeout.getOrElse(2.seconds), pactVerifySettings.sslContextName)
       publisher.publishResults(pactVerifyResults, _, pactVerifySettings.pactBrokerAuthorization)
-    )
+    }
 
     testCount > 0 && failureCount == 0
   }
@@ -185,7 +189,7 @@ object Verifier {
   def apply[F[_]](implicit pactReader: IPactReader,
                   pactWriter: IPactWriter,
                   httpClient: IScalaPactHttpClientBuilder[F],
-                  publisher: IResultPublisher): Verifier[F] =
+                  publisher: IResultPublisherBuilder): Verifier[F] =
     new Verifier[F](new PactBrokerClient[F])
 }
 

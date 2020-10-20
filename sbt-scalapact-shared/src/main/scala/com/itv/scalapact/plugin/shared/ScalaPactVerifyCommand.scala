@@ -3,7 +3,7 @@ package com.itv.scalapact.plugin.shared
 import com.itv.scalapact.shared.ColourOutput._
 import com.itv.scalapact.shared._
 import com.itv.scalapactcore.common.LocalPactFileLoader
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClientBuilder}
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IResultPublisherBuilder, IScalaPactHttpClientBuilder}
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 import com.itv.scalapactcore.verifier.Verifier
 
@@ -29,7 +29,7 @@ object ScalaPactVerifyCommand {
   )(implicit pactReader: IPactReader,
     pactWriter: IPactWriter,
     httpClientBuilder: IScalaPactHttpClientBuilder[F],
-    publisher: IResultPublisher): Unit = {
+    publisher: IResultPublisherBuilder): Unit = {
     PactLogger.message("*************************************".white.bold)
     PactLogger.message("** ScalaPact: Running Verifier     **".white.bold)
     PactLogger.message("*************************************".white.bold)
