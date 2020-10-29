@@ -2,7 +2,6 @@ package com.itv.scalapact.plugin.shared
 
 import com.itv.scalapact.shared.ColourOutput._
 import com.itv.scalapact.shared._
-import com.itv.scalapactcore.common.LocalPactFileLoader
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IResultPublisherBuilder, IScalaPactHttpClientBuilder}
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 import com.itv.scalapactcore.verifier.Verifier
@@ -16,7 +15,6 @@ object ScalaPactVerifyCommand {
       providerStates: Seq[(String, SetupProviderState)],
       providerStateMatcher: PartialFunction[String, ProviderStateResult],
       pactBrokerAddress: String,
-      projectVersion: String,
       providerName: String,
       consumerNames: Seq[String],
       versionedConsumerNames: Seq[(String, String)],
@@ -25,7 +23,8 @@ object ScalaPactVerifyCommand {
       providerVersionTags: Seq[String],
       pactBrokerAuthorization: Option[PactBrokerAuthorization],
       pactBrokerClientTimeout: Duration,
-      sslContextName: Option[String]
+      sslContextName: Option[String],
+      includePendingStatus: Boolean
   )(implicit pactReader: IPactReader,
     pactWriter: IPactWriter,
     httpClientBuilder: IScalaPactHttpClientBuilder[F],
@@ -36,25 +35,38 @@ object ScalaPactVerifyCommand {
 
     val combinedPactStates = combineProviderStatesIntoTotalFunction(providerStates, providerStateMatcher)
 
-    val pactVerifySettings = PactVerifySettings(
-      combinedPactStates,
-      pactBrokerAddress,
-      projectVersion,
-      providerName,
-      consumerNames.toList,
-      taggedConsumerNames = taggedConsumerNames.toList
-        .map(t => TaggedConsumer(t._1, t._2.toList)),
-      versionedConsumerNames = versionedConsumerNames.toList
-        .map(t => VersionedConsumer(t._1, t._2)),
-      consumerVersionSelectors.toList,
-      providerVersionTags.toList,
-      pactBrokerAuthorization,
-      Some(pactBrokerClientTimeout),
-      sslContextName
-    )
+    val pactVerifySettings = {
+      if (scalaPactSettings.localPactFilePath.isDefined)
+        LocalPactVerifySettings(combinedPactStates)
+      else if (consumerVersionSelectors.nonEmpty)
+      PactsForVerificationSettings(
+        combinedPactStates,
+        pactBrokerAddress,
+        providerName,
+        consumerVersionSelectors.toList,
+        providerVersionTags.toList,
+        scalaPactSettings.enablePending.getOrElse(includePendingStatus),
+        pactBrokerAuthorization,
+        Some(pactBrokerClientTimeout),
+        sslContextName
+      ) else {
+        val versionedConsumers =
+          consumerNames.map(VersionedConsumer.fromName) ++
+            versionedConsumerNames.map(v => VersionedConsumer(v._1, v._2)) ++
+            taggedConsumerNames.flatMap(t => VersionedConsumer.fromNameAndTags(t._1, t._2.toList))
+        VersionedConsumerVerifySettings(
+          combinedPactStates,
+          pactBrokerAddress,
+          providerName,
+          versionedConsumers.toList,
+          pactBrokerAuthorization,
+          Some(pactBrokerClientTimeout),
+          sslContextName
+        )
+      }
+    }
 
-    val stringToSettingsToPacts = LocalPactFileLoader.loadPactFiles(pactReader)(true)
-    val successfullyVerified = Verifier[F].verify(stringToSettingsToPacts, pactVerifySettings)(scalaPactSettings)
+    val successfullyVerified = Verifier[F].verify(pactVerifySettings, scalaPactSettings)
 
     if (successfullyVerified) sys.exit(0) else sys.exit(1)
 

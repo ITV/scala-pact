@@ -12,7 +12,8 @@ case class ScalaPactEnv(protocol: Option[String],
                         strictMode: Option[Boolean],
                         clientTimeout: Option[Duration],
                         outputPath: Option[String],
-                        publishResultsEnabled: Option[BrokerPublishData]
+                        publishResultsEnabled: Option[BrokerPublishData],
+                        enablePending: Option[Boolean]
 ) {
   def +(other: ScalaPactEnv): ScalaPactEnv =
     ScalaPactEnv.append(this, other)
@@ -44,8 +45,10 @@ case class ScalaPactEnv(protocol: Option[String],
   def enablePublishResults(providerVersion: String, buildUrl: Option[String]): ScalaPactEnv =
     this.copy(publishResultsEnabled = Option(BrokerPublishData(providerVersion, buildUrl)))
 
+  def enablePendingStatus: ScalaPactEnv = this.copy(enablePending = Some(true))
+
   def toSettings: ScalaPactSettings =
-    ScalaPactSettings(protocol, host, port, localPactFilePath, strictMode, clientTimeout, outputPath, publishResultsEnabled)
+    ScalaPactSettings(protocol, host, port, localPactFilePath, strictMode, clientTimeout, outputPath, publishResultsEnabled, enablePending)
 
 }
 
@@ -62,13 +65,14 @@ object ScalaPactEnv {
       None, // false
       Option(Duration(1, SECONDS)),
       None, // "target/pacts"
+      None, // false
       None // false
     )
 
   def defaults: ScalaPactEnv =
     ScalaPactEnv("http", "localhost", 1234)
 
-  def empty: ScalaPactEnv = ScalaPactEnv(None, None, None, None, None, None, None, None)
+  def empty: ScalaPactEnv = ScalaPactEnv(None, None, None, None, None, None, None, None, None)
 
   def append(a: ScalaPactEnv, b: ScalaPactEnv): ScalaPactEnv =
     ScalaPactEnv(
@@ -79,6 +83,7 @@ object ScalaPactEnv {
       strictMode = b.strictMode.orElse(a.strictMode),
       clientTimeout = b.clientTimeout.orElse(a.clientTimeout),
       outputPath = b.outputPath.orElse(a.outputPath),
-      publishResultsEnabled = b.publishResultsEnabled.orElse(a.publishResultsEnabled)
+      publishResultsEnabled = b.publishResultsEnabled.orElse(a.publishResultsEnabled),
+      enablePending = b.enablePending.orElse(a.enablePending)
     )
 }

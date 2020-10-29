@@ -11,6 +11,7 @@ sbt
 pgp.sbt
 credentials.sbt
 .bloop/
+.bloop
 .metals/
 
 # Misc

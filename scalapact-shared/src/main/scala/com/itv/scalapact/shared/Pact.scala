@@ -112,8 +112,8 @@ case class MatchingRule(`match`: Option[String], regex: Option[String], min: Opt
         "pactSpecification": {
             "version": "2.0.0"
         },
-        "pact-jvm": {
-            "version": "3.2.11"
+        "scala-pact": {
+            "version": <current scala-pact version>
         }
     }
  */
