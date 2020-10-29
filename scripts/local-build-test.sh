@@ -38,6 +38,11 @@ bash scripts/test-verifier.sh
 echo "Taking a breather... (3)"
 simple_countdown 5
 
+bash scripts/test-pending-pacts.sh
+
+echo "Taking a breather... (4)"
+simple_countdown 5
+
 bash scripts/test-examples.sh
 
 END_TIME=$(date +%s)
