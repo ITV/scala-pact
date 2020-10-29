@@ -12,7 +12,8 @@ case class ScalaPactSettings(protocol: Option[String],
                              strictMode: Option[Boolean],
                              clientTimeout: Option[Duration],
                              outputPath: Option[String],
-                             publishResultsEnabled: Option[BrokerPublishData]
+                             publishResultsEnabled: Option[BrokerPublishData],
+                             enablePending: Option[Boolean]
                             ) {
   val giveHost: String            = host.getOrElse("localhost")
   val giveProtocol: String        = protocol.getOrElse("http")
@@ -20,6 +21,7 @@ case class ScalaPactSettings(protocol: Option[String],
   val giveStrictMode: Boolean     = strictMode.getOrElse(false)
   val giveClientTimeout: Duration = clientTimeout.getOrElse(Duration(1, SECONDS))
   val giveOutputPath: String      = outputPath.getOrElse(Properties.envOrElse("pact.rootDir", "target/pacts"))
+  val giveEnablePending: Boolean = enablePending.getOrElse(false)
 
   def +(other: ScalaPactSettings): ScalaPactSettings =
     ScalaPactSettings.append(this, other)
@@ -70,7 +72,7 @@ object ScalaPactSettings {
 
   def apply: ScalaPactSettings = default
 
-  def default: ScalaPactSettings = ScalaPactSettings(None, None, None, None, None, None, None, None)
+  def default: ScalaPactSettings = ScalaPactSettings(None, None, None, None, None, None, None, None, None)
 
   val parseArguments: Seq[String] => ScalaPactSettings = args => (Helpers.pair andThen convertToArguments)(args.toList)
 
@@ -83,7 +85,8 @@ object ScalaPactSettings {
       strictMode = b.strictMode.orElse(a.strictMode),
       clientTimeout = b.clientTimeout.orElse(a.clientTimeout),
       outputPath = b.outputPath.orElse(a.outputPath),
-      publishResultsEnabled = b.publishResultsEnabled.orElse(a.publishResultsEnabled)
+      publishResultsEnabled = b.publishResultsEnabled.orElse(a.publishResultsEnabled),
+      enablePending = b.enablePending.orElse(a.enablePending)
     )
 
   private lazy val convertToArguments: Map[String, String] => ScalaPactSettings = argMap =>
@@ -96,7 +99,8 @@ object ScalaPactSettings {
       clientTimeout =
         argMap.get("--clientTimeout").flatMap(Helpers.safeStringToLong).flatMap(i => Option(Duration(i, SECONDS))),
       outputPath = argMap.get("--out"),
-      publishResultsEnabled = calculateBrokerPublishData(argMap)
+      publishResultsEnabled = calculateBrokerPublishData(argMap),
+      enablePending = argMap.get("--enablePending").flatMap(Helpers.safeStringToBoolean)
   )
 
   private def calculateBrokerPublishData(argMap: Map[String, String]): Option[BrokerPublishData] = {

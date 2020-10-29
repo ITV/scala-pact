@@ -81,6 +81,12 @@ object ScalaPactPlugin extends AutoPlugin {
         "the tag name(s) for the provider application version that will be published with the verification results"
       )
 
+    val includePendingStatus: SettingKey[Boolean] =
+      SettingKey[Boolean](
+        "includePendingStatus",
+        ""
+      )
+
     val pactContractVersion: SettingKey[String] =
       SettingKey[String](
         "pactContractVersion",
@@ -150,7 +156,8 @@ object ScalaPactPlugin extends AutoPlugin {
     pactBrokerCredentials := (("", ""): (String, String)),
     pactBrokerToken := "",
     pactBrokerClientTimeout := 2.seconds,
-    sslContextName := None
+    sslContextName := None,
+    includePendingStatus := false
   )
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
@@ -200,7 +207,6 @@ object ScalaPactPlugin extends AutoPlugin {
         providerStates.value,
         providerStateMatcher.value,
         pactBrokerAddress.value,
-        version.value,
         providerName.value,
         consumerNames.value,
         versionedConsumerNames.value,
@@ -209,7 +215,8 @@ object ScalaPactPlugin extends AutoPlugin {
         providerVersionTags.value,
         PactBrokerAuthorization(pactBrokerCredentials.value, pactBrokerToken.value),
         pactBrokerClientTimeout.value,
-        sslContextName.value
+        sslContextName.value,
+        includePendingStatus.value
       )
     }
 

@@ -39,7 +39,8 @@ private[scalapact] object ScalaPactMock {
         strictMode = Option(strict),
         clientTimeout = None,
         outputPath = Option(outputPath),
-        publishResultsEnabled = None // Nothing to publish
+        publishResultsEnabled = None, // Nothing to publish
+        enablePending = None //This is determined by the pact broker
     )
     val pacts = List(ScalaPactContractWriter.producePactFromDescription(pactDescription))
 

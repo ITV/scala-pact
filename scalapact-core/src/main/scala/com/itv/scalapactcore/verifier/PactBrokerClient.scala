@@ -1,7 +1,5 @@
 package com.itv.scalapactcore.verifier
 
-import java.net.URLEncoder
-
 import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClient, IScalaPactHttpClientBuilder}
 import com.itv.scalapact.shared._
 import com.itv.scalapact.shared.ColourOutput._
@@ -9,27 +7,58 @@ import com.itv.scalapactcore.common.PactBrokerAddressValidation
 import com.itv.scalapactcore.verifier.PactBrokerHelpers._
 
 import scala.util.Left
-import scala.concurrent.duration._
 
-private[verifier] class PactBrokerClient[F[_]](implicit pactReader: IPactReader,
-                              pactWriter: IPactWriter,
-                              httpClientBuilder: IScalaPactHttpClientBuilder[F]) {
+private[verifier] class PactBrokerClient[F[_]](
+  implicit pactReader: IPactReader,
+  pactWriter: IPactWriter,
+  httpClientBuilder: IScalaPactHttpClientBuilder[F]) {
 
-  def fetchPacts(pactVerifySettings: PactVerifySettings): List[Pact] = {
-    val brokerClient = httpClientBuilder.build(pactVerifySettings.pactBrokerClientTimeout.getOrElse(2.seconds), pactVerifySettings.sslContextName)
-    if (pactVerifySettings.consumerVersionSelectors.nonEmpty) {
-      providerPactsForVerificationUrl(brokerClient)(pactVerifySettings) match {
-        case Some(url) =>
-          fetchFromPactsForVerification(brokerClient)(url, pactVerifySettings)
-        case None =>
-          //TODO this case needs to be handled more gracefully if possible.
-          PactLogger.warn(s"pb:provider-pacts-for-verification relation unavailable".yellow.bold)
-          Nil
+  def fetchFromPactsForVerification(pactVerifySettings: PactsForVerificationSettings): List[(Pact, VerificationProperties)] = {
+    val brokerClient = httpClientBuilder.buildWithDefaults(pactVerifySettings.pactBrokerClientTimeout, pactVerifySettings.sslContextName)
+
+    providerPactsForVerificationUrl(brokerClient)(pactVerifySettings).map { address =>
+      val body = pactWriter.pactsForVerificationRequestToJsonString(
+        PactsForVerificationRequest(pactVerifySettings.consumerVersionSelectors, pactVerifySettings.providerVersionTags, pactVerifySettings.includePendingStatus)
+      )
+      val request = SimpleRequest(
+        baseUrl = address,
+        endPoint = "",
+        method = HttpMethod.POST,
+        headers = Map("Accept" -> "application/hal+json", "Content-Type" -> "application/json") ++ pactVerifySettings.pactBrokerAuthorization.map(_.asHeader).toList,
+        body = Some(body),
+        sslContextName = None
+      )
+
+      brokerClient.doRequestSync(request) match {
+        case Right(resp) if resp.is2xx => resp.body.map(pactReader.jsonStringToPactsForVerification).map {
+          case Right(pactsForVerification) =>
+            pactsForVerification.pacts.flatMap {
+              case e@PactForVerification(props, _) =>
+                e.href.map { link =>
+                  List((fetchAndReadPact(brokerClient)(link, pactVerifySettings.pactBrokerAuthorization).getOrThrow, props))
+                }.getOrElse(Nil) //This shouldn't happen
+            }
+          case Left(e) =>
+            PactLogger.error(e.red)
+            Nil
+        }.getOrElse {
+          PactLogger.error("Pact data missing from Pact Broker response")
+          throw new Exception("Pact data missing from Pact Broker response")
+        }
+        case Right(_) =>
+          PactLogger.error(s"Failed to load pacts for verification from: $address".red)
+          throw new Exception(s"Failed to load pacts for verification from: $address")
+        case Left(e) =>
+          PactLogger.error(s"Error: ${e.getMessage}".red)
+          throw e
       }
-    } else prePactsForVerificationEndpointFetch(brokerClient)(pactVerifySettings)
+    }.getOrElse {
+      PactLogger.warn(s"pb:provider-pacts-for-verification relation unavailable".yellow.bold)
+      Nil
+    }
   }
 
-  private def providerPactsForVerificationUrl(brokerClient: IScalaPactHttpClient[F])(pactVerifySettings: PactVerifySettings): Option[String] = {
+  private def providerPactsForVerificationUrl(brokerClient: IScalaPactHttpClient[F])(pactVerifySettings: PactsForVerificationSettings): Option[String] = {
     pactVerifySettings.consumerVersionSelectors.headOption.flatMap { _ =>
       val request = SimpleRequest(
         baseUrl = pactVerifySettings.pactBrokerAddress,
@@ -59,50 +88,19 @@ private[verifier] class PactBrokerClient[F[_]](implicit pactReader: IPactReader,
     }
   }
 
-  private def fetchFromPactsForVerification(brokerClient: IScalaPactHttpClient[F])(address: String, pactVerifySettings: PactVerifySettings): List[Pact] = {
-    val body = pactWriter.pactsForVerificationRequestToJsonString(
-      PactsForVerificationRequest(pactVerifySettings.consumerVersionSelectors, pactVerifySettings.providerVersionTags)
-    )
-    val request = SimpleRequest(
-      baseUrl = address,
-      endPoint = "",
-      method = HttpMethod.POST,
-      headers = Map("Accept" -> "application/hal+json", "Content-Type" -> "application/json") ++ pactVerifySettings.pactBrokerAuthorization.map(_.asHeader).toList,
-      body = Some(body),
-      sslContextName = None
-    )
+  def prePactsForVerificationEndpointFetch(pactVerifySettings: PrePactsForVerificationSettings): List[Pact] = {
+    val brokerClient = httpClientBuilder.buildWithDefaults(pactVerifySettings.pactBrokerClientTimeout, pactVerifySettings.sslContextName)
 
-    brokerClient.doRequestSync(request) match {
-      case Right(resp) if resp.is2xx => resp.body.map(pactReader.jsonStringToPactsForVerification).map {
-        case Right(pactsForVerification) =>
-          pactsForVerification.pacts.map(_.href).flatMap {
-            case Some(href) => List(
-              fetchAndReadPact(brokerClient)(href, pactVerifySettings.pactBrokerAuthorization).getOrThrow
-            )
-            case None => Nil //This shouldn't happen
-          }
-        case Left(e) =>
-          PactLogger.error(e.red)
-          Nil
-      }.getOrElse {
-        PactLogger.error("Pact data missing from Pact Broker response")
-        throw new Exception("Pact data missing from Pact Broker response")
-      }
-      case Right(_) =>
-        PactLogger.error(s"Failed to load pacts for verification from: $address".red)
-        throw new Exception(s"Failed to load pacts for verification from: $address")
-      case Left(e) =>
-        PactLogger.error(s"Error: ${e.getMessage}".red)
-        throw e
+    val versionConsumers = pactVerifySettings match {
+      case LatestConsumerVerifySettings(_, _, _, consumerNames, _, _, _) =>
+        consumerNames.map(VersionedConsumer.fromName)
+      case TaggedConsumerVerifySettings(_, _, _, taggedConsumerNames, _, _, _) =>
+        taggedConsumerNames.flatMap(
+          tc => VersionedConsumer.fromNameAndTags(tc.name, tc.tags)
+        )
+      case VersionedConsumerVerifySettings(_, _, _, versionedConsumerNames, _, _, _) =>
+        versionedConsumerNames
     }
-  }
-
-  private def prePactsForVerificationEndpointFetch(brokerClient: IScalaPactHttpClient[F])(pactVerifySettings: PactVerifySettings): List[Pact] = {
-    val versionConsumers = pactVerifySettings.consumerNames.map(c => VersionedConsumer(c, "/latest")) ++
-      pactVerifySettings.versionedConsumerNames.map(vc => vc.copy(version = "/version/" + vc.version)) ++
-      pactVerifySettings.taggedConsumerNames.flatMap(
-        tc => tc.tags.map(t => VersionedConsumer(tc.name, "/latest/" + URLEncoder.encode(t, "UTF-8")))
-      )
 
     val maybePacts = for {
       providerName <- Helpers.urlEncode(pactVerifySettings.providerName)
@@ -116,7 +114,7 @@ private[verifier] class PactBrokerClient[F[_]](implicit pactReader: IPactReader,
           case Right(consumerName) =>
             List(
               fetchAndReadPact(brokerClient)(
-                validatedAddress.address + "/pacts/provider/" + providerName + "/consumer/" + consumerName + consumer.version,
+                validatedAddress.address + "/pacts/provider/" + providerName + "/consumer/" + consumerName + consumer.versionUrlPart.value,
                 pactVerifySettings.pactBrokerAuthorization
               ).getOrThrow
             )
@@ -132,9 +130,9 @@ private[verifier] class PactBrokerClient[F[_]](implicit pactReader: IPactReader,
   }
 
   private def fetchAndReadPact(brokerClient: IScalaPactHttpClient[F])(
-                                address: String,
-                                pactBrokerAuthorization: Option[PactBrokerAuthorization]
-                              ): Either[Throwable, Pact] = {
+    address: String,
+    pactBrokerAuthorization: Option[PactBrokerAuthorization]
+  ): Either[Throwable, Pact] = {
     PactLogger.message(s"Attempting to fetch pact from pact broker at: $address".white.bold)
 
     brokerClient

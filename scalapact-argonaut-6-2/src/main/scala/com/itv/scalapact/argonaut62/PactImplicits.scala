@@ -4,7 +4,12 @@ import argonaut.Argonaut._
 import argonaut._
 import com.itv.scalapact.shared._
 import argonaut.Parse
+import com.itv.scalapact.shared
+import com.itv.scalapact.shared.Notice.{AfterVerificationNotice, BeforeVerificationNotice, PendingStateNotice, SimpleNotice}
 import com.itv.scalapact.shared.Pact.Links
+import com.itv.scalapact.shared.VerificationProperties.{PendingStateVerificationProperties, SimpleVerificationProperties}
+
+import scala.util.{Failure, Success, Try}
 
 object PactImplicits {
 
@@ -127,19 +132,43 @@ object PactImplicits {
   implicit lazy val halIndexDecoder: DecodeJson[HALIndex] =
     DecodeJson[HALIndex](_.downField("_links").downField("curies").delete.as[Links].map(HALIndex))
 
-  implicit lazy val verificationPropertiesDecodeJson: DecodeJson[VerificationProperties] =
-    DecodeJson[VerificationProperties](_.downField("notices").as[List[Map[String, String]]].map(VerificationProperties))
+  implicit val simpleNoticeDecoder: DecodeJson[SimpleNotice] =
+    DecodeJson[SimpleNotice](_.get[String]("text").map(SimpleNotice))
+  implicit val pendingStateNoticeDecoder: DecodeJson[PendingStateNotice] = DecodeJson[PendingStateNotice] { cur =>
+    lazy val pattern = "after_verification:success_(true|false)_published_(true|false)".r
+    cur.get[String](s"text").flatMap { text =>
+      cur.get[String]("when").flatMap {
+        case "before_verification" => DecodeResult.ok(BeforeVerificationNotice(text))
+        case pattern(success, published) =>
+          (for {
+            suc <- Try(success.toBoolean)
+            pub <- Try(published.toBoolean)
+          } yield AfterVerificationNotice(text, suc, pub)) match {
+            case Failure(err) => DecodeResult.fail(err.getMessage, cur.history)
+            case Success(value) => DecodeResult.ok(value)
+          }
+        case other => DecodeResult.fail(s"$other is not a valid value for field 'when' of the notice.", cur.history)
+      }
+    }
+  }
 
-  implicit lazy val embeddedPactForVerificationDecodeJson: DecodeJson[EmbeddedPactForVerification] = DecodeJson[EmbeddedPactForVerification] { cur =>
+  implicit lazy val verificationPropertiesDecoder: DecodeJson[VerificationProperties] = DecodeJson[shared.VerificationProperties] { cur =>
+    cur.get[Option[Boolean]]("pending").flatMap {
+      case Some(pending) => cur.get[List[PendingStateNotice]]("notices").map(PendingStateVerificationProperties(pending, _))
+      case None => cur.get[List[SimpleNotice]]("notices").map(SimpleVerificationProperties)
+    }
+  }
+
+  implicit lazy val embeddedPactForVerificationDecodeJson: DecodeJson[PactForVerification] = DecodeJson[PactForVerification] { cur =>
     for {
       vp <- cur.downField("verificationProperties").as[VerificationProperties]
       links <- cur.downField("_links").as[Links]
-    } yield EmbeddedPactForVerification(vp, links)
+    } yield PactForVerification(vp, links)
   }
 
   implicit lazy val pactsForVerificationDecoder: DecodeJson[PactsForVerificationResponse] = DecodeJson[PactsForVerificationResponse]{ cur =>
     for {
-      pacts <- cur.downField("_embedded").downField("pacts").as[List[EmbeddedPactForVerification]]
+      pacts <- cur.downField("_embedded").downField("pacts").as[List[PactForVerification]]
       links <- cur.downField("_links").as[Links]
     } yield PactsForVerificationResponse(EmbeddedPactsForVerification(pacts), links)
   }
@@ -156,7 +185,8 @@ object PactImplicits {
   implicit lazy val pactsForVerificationRequestEncoder: EncodeJson[PactsForVerificationRequest] = EncodeJson[PactsForVerificationRequest]{ r =>
     Json.obj(
       "consumerVersionSelectors" -> r.consumerVersionSelectors.asJson,
-      "providerVersionTags" -> r.providerVersionTags.asJson
+      "providerVersionTags" -> r.providerVersionTags.asJson,
+      "includePendingStatus" -> r.includePendingStatus.asJson
     )
   }
 

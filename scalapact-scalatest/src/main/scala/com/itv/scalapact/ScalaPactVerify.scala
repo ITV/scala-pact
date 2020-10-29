@@ -1,6 +1,5 @@
 package com.itv.scalapact
 
-import com.itv.scalapactcore.common.LocalPactFileLoader
 import com.itv.scalapactcore.verifier.Verifier
 import java.io.{BufferedWriter, File, FileWriter}
 
@@ -137,7 +136,8 @@ trait ScalaPactVerifyDsl {
           strictMode = Some(strict),
           clientTimeout = Some(clientTimeout),
           outputPath = None,
-          publishResultsEnabled = publishResultsEnabled
+          publishResultsEnabled = publishResultsEnabled,
+          enablePending = None
         )
 
 
@@ -151,50 +151,17 @@ trait ScalaPactVerifyDsl {
             bw.write(json)
             bw.close()
 
-            PactVerifySettings(
-              providerStates = providerStateFunc,
-              pactBrokerAddress = "",
-              projectVersion = "",
-              providerName = "",
-              consumerNames = Nil,
-              taggedConsumerNames = Nil,
-              versionedConsumerNames = Nil,
-              consumerVersionSelectors = Nil,
-              providerVersionTags = Nil,
-              pactBrokerAuthorization = None,
-              pactBrokerClientTimeout = None,
-              sslContextName = None
-            ) ->
-              makeScalaPactSettings(Some(tmp.getAbsolutePath), None)
+            LocalPactVerifySettings(providerStateFunc) -> makeScalaPactSettings(Some(tmp.getAbsolutePath), None)
 
           case loadFromLocal(path) =>
-            PactVerifySettings(
-              providerStates = providerStateFunc,
-              pactBrokerAddress = "",
-              projectVersion = "",
-              providerName = "",
-              consumerNames = Nil,
-              taggedConsumerNames = Nil,
-              versionedConsumerNames = Nil,
-              consumerVersionSelectors = Nil,
-              providerVersionTags = Nil,
-              pactBrokerAuthorization = None,
-              pactBrokerClientTimeout = None,
-              sslContextName = None
-            ) ->
-              makeScalaPactSettings(Some(path), None)
+            LocalPactVerifySettings(providerStateFunc) -> makeScalaPactSettings(Some(path), None)
 
           case pactBrokerUseLatest(url, providerName, consumerNames, publishResultsEnabled, pactBrokerAuthorization, pactBrokerClientTimeout) =>
-            PactVerifySettings(
+            LatestConsumerVerifySettings(
               providerStates = providerStateFunc,
               pactBrokerAddress = url,
-              projectVersion = "",
               providerName = providerName,
               consumerNames = consumerNames,
-              taggedConsumerNames = Nil,
-              versionedConsumerNames = Nil,
-              consumerVersionSelectors = Nil,
-              providerVersionTags = Nil,
               pactBrokerAuthorization = pactBrokerAuthorization,
               pactBrokerClientTimeout = pactBrokerClientTimeout,
               sslContextName = None
@@ -209,16 +176,11 @@ trait ScalaPactVerifyDsl {
               pactBrokerAuthorization,
               pactBrokerClientTimeout
               ) =>
-            PactVerifySettings(
+            TaggedConsumerVerifySettings(
               providerStates = providerStateFunc,
               pactBrokerAddress = url,
-              projectVersion = "",
               providerName = providerName,
-              consumerNames = Nil,
               taggedConsumerNames = consumersWithTags,
-              versionedConsumerNames = Nil,
-              consumerVersionSelectors = Nil,
-              providerVersionTags = Nil,
               pactBrokerAuthorization = pactBrokerAuthorization,
               pactBrokerClientTimeout = pactBrokerClientTimeout,
               sslContextName = None
@@ -234,16 +196,11 @@ trait ScalaPactVerifyDsl {
               pactBrokerAuthorization,
               pactBrokerClientTimeout
               ) =>
-            PactVerifySettings(
+            VersionedConsumerVerifySettings(
               providerStates = providerStateFunc,
               pactBrokerAddress = url,
-              projectVersion = "",
               providerName = providerName,
-              consumerNames = Nil,
-              taggedConsumerNames = Nil,
               versionedConsumerNames = consumerNames.map(c => VersionedConsumer(c, version)),
-              consumerVersionSelectors = Nil,
-              providerVersionTags = Nil,
               pactBrokerAuthorization = pactBrokerAuthorization,
               pactBrokerClientTimeout = pactBrokerClientTimeout,
               sslContextName = None
@@ -255,18 +212,16 @@ trait ScalaPactVerifyDsl {
               providerName,
               consumerVersionSelectors,
               providerVersionTags,
+              includePendingStatus,
               publishResultsEnabled,
               pactBrokerAuthorization,
               pactBrokerClientTimeout
               ) =>
-            PactVerifySettings(
+            PactsForVerificationSettings(
               providerStates = providerStateFunc,
               pactBrokerAddress = url,
-              projectVersion = "",
               providerName = providerName,
-              consumerNames = Nil,
-              taggedConsumerNames = Nil,
-              versionedConsumerNames = Nil,
+              includePendingStatus = includePendingStatus,
               consumerVersionSelectors = consumerVersionSelectors,
               providerVersionTags = providerVersionTags,
               pactBrokerAuthorization = pactBrokerAuthorization,
@@ -276,9 +231,7 @@ trait ScalaPactVerifyDsl {
             makeScalaPactSettings(None, publishResultsEnabled)
         }
 
-        val v: ScalaPactSettings => Boolean = Verifier[F].verify(LocalPactFileLoader.loadPactFiles(pactReader)(true), verifySettings)
-
-        if (v(scalaPactSettings)) () else throw new ScalaPactVerifyFailed
+        if (Verifier[F].verify(verifySettings, scalaPactSettings)) () else throw new ScalaPactVerifyFailed
       }
     }
 
@@ -346,6 +299,7 @@ trait ScalaPactVerifyDsl {
       provider: String,
       consumerVersionSelectors: List[ConsumerVersionSelector],
       providerVersionTags: List[String],
+      includePendingStatus: Boolean,
       publishResultsEnabled: Option[BrokerPublishData],
       pactBrokerAuthorization: Option[PactBrokerAuthorization],
       pactBrokerClientTimeout: Option[Duration]
