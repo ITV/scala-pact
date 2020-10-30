@@ -1,0 +1,12 @@
+language: scala
+
+scala:
+  # We just keep the latest version here.  All scripts do their own cross-building (because they are supposed to do
+  # that locally.)
+  - 2.13.1
+
+script:
+  - bash ./scripts/local-build-test.sh
+
+after_success:
+  - echo "Build completed for commit $TRAVIS_COMMIT on branch $TRAVIS_BRANCH"

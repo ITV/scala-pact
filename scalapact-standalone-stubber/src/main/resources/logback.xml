@@ -1,0 +1,25 @@
+<configuration>
+
+    <appender name="STDOUT"
+              class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+                %d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+    <logger name="org.http4s" level="INFO"/>
+    <logger name="org.http4s.blaze.channel.ServerChannelGroup" level="WARN"/>
+    <logger name="org.http4s.blaze.channel.nio1.NIO1SocketServerGroup" level="WARN"/>
+    <logger name="org.http4s.blaze.channel.nio1.NIO1HeadStage" level="OFF"/>
+    <logger name="org.http4s.blaze.channel.nio1.SelectorLoop" level="OFF"/>
+    <logger name="org.http4s.server.blaze.Http1ServerStage" level="OFF"/>
+    <logger name="org.http4s.server.blaze.Http1ServerStage$$anon$1" level="OFF"/>
+    <logger name="org.http4s.client.PoolManager" level="OFF"/>
+
+</configuration>
