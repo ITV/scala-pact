@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+<title>SBT Commands · Scala-Pact</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content='scalapact-docs'/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:100normal,100italic,300normal,300italic,400normal,400italic,500normal,500italic,700normal,700italic,900normal,900italicc" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="../js/page.js"></script>
+<script type="text/javascript" src="../js/warnOldVersion.js"></script>
+<script type="text/javascript" src="../js/groups.js"></script>
+<link rel="stylesheet" type="text/css" href="../lib/normalize.css/normalize.css"/>
+<link rel="stylesheet" type="text/css" href="../lib/foundation/dist/foundation.min.css"/>
+<link rel="stylesheet" type="text/css" href="../css/page.css"/>
+
+<!--
+<link rel="shortcut icon" href="../images/favicon.ico" />
+-->
+</head>
+
+<body>
+<div class="off-canvas-wrapper">
+<div class="off-canvas-wrapper-inner" data-off-canvas-wrapper>
+
+<div class="off-canvas position-left" id="off-canvas-menu" data-off-canvas>
+<nav class="off-canvas-nav">
+<div class="nav-home">
+<a href="../index.html" >
+<span class="home-icon">⌂</span>Scala-Pact
+</a>
+<div class="version-number">
+2.4.1*
+</div>
+</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../setup.html" class="page">Setup guide</a></li>
+  <li><a href="../basics/index.html" class="page">Basic usage</a>
+  <ul>
+    <li><a href="../basics/sbt-tasks.html" class="page">SBT Tasks</a></li>
+    <li><a href="../basics/sbt-commands.html" class="active page">SBT Commands</a></li>
+    <li><a href="../basics/test-frameworks.html" class="page">Test frameworks</a></li>
+    <li><a href="../basics/pact-stubber.html" class="page">Pact Stubber</a></li>
+  </ul></li>
+  <li><a href="../advanced/index.html" class="page">Advanced usage</a>
+  <ul>
+    <li><a href="../advanced/provider-states.html" class="page">Provider states</a></li>
+    <li><a href="../advanced/strict-mode.html" class="page">Strict mode</a></li>
+    <li><a href="../advanced/matching-rules.html" class="page">Matching rules</a></li>
+    <li><a href="../advanced/pact-broker.html" class="page">Pact Broker</a></li>
+  </ul></li>
+  <li><a href="../articles/index.html" class="page">Articles</a>
+  <ul>
+    <li><a href="../articles/motivation.html" class="page">Motivation</a></li>
+    <li><a href="../articles/pact-vs-integration.html" class="page">Pact vs Integration</a></li>
+    <li><a href="../articles/verification-strategies.html" class="page">Verification strategies</a></li>
+  </ul></li>
+  <li><a href="../examples/index.html" class="page">Example projects</a>
+  <ul>
+    <li><a href="../examples/consumer.html" class="page">The Consumer</a></li>
+    <li><a href="../examples/provider.html" class="page">The Provider</a></li>
+  </ul></li>
+  <li><a href="../help.html" class="page">Get help</a></li>
+  <li><a href="../project-deps.html" class="page">Dependencies</a></li>
+  <li><a href="../roadmap.html" class="page">Roadmap</a></li>
+  <li><a href="../change-log.html" class="page">Change log</a></li>
+  <li><a href="../contributing.html" class="page">How to contribute</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div class="off-canvas-content" data-off-canvas-content>
+
+<header class="site-header expanded row">
+<div class="small-12 column">
+<a href="#" class="off-canvas-toggle hide-for-medium" data-toggle="off-canvas-menu"><svg class="svg-icon svg-icon-menu" version="1.1" id="Menu" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 20 20" enable-background="new 0 0 20 20" xml:space="preserve"> <path class="svg-icon-menu-path" fill="#53CDEC" d="M16.4,9H3.6C3.048,9,3,9.447,3,10c0,0.553,0.048,1,0.6,1H16.4c0.552,0,0.6-0.447,0.6-1C17,9.447,16.952,9,16.4,9z M16.4,13
+H3.6C3.048,13,3,13.447,3,14c0,0.553,0.048,1,0.6,1H16.4c0.552,0,0.6-0.447,0.6-1C17,13.447,16.952,13,16.4,13z M3.6,7H16.4
+C16.952,7,17,6.553,17,6c0-0.553-0.048-1-0.6-1H3.6C3.048,5,3,5.447,3,6C3,6.553,3.048,7,3.6,7z"/></svg>
+</a>
+<div class="title"><a href="../index.html">Scala-Pact</a></div>
+
+<!--
+<a href="https://www.example.com" class="logo show-for-medium">logo</a>
+-->
+</div>
+</header>
+
+<div class="expanded row">
+
+<div class="medium-3 large-2 show-for-medium column">
+<nav class="site-nav">
+<div class="nav-home">
+<a href="../index.html" >
+<span class="home-icon">⌂</span>Scala-Pact
+</a>
+<div class="version-number">
+2.4.1*
+</div>
+</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../setup.html" class="page">Setup guide</a></li>
+  <li><a href="../basics/index.html" class="page">Basic usage</a>
+  <ul>
+    <li><a href="../basics/sbt-tasks.html" class="page">SBT Tasks</a></li>
+    <li><a href="../basics/sbt-commands.html" class="active page">SBT Commands</a></li>
+    <li><a href="../basics/test-frameworks.html" class="page">Test frameworks</a></li>
+    <li><a href="../basics/pact-stubber.html" class="page">Pact Stubber</a></li>
+  </ul></li>
+  <li><a href="../advanced/index.html" class="page">Advanced usage</a>
+  <ul>
+    <li><a href="../advanced/provider-states.html" class="page">Provider states</a></li>
+    <li><a href="../advanced/strict-mode.html" class="page">Strict mode</a></li>
+    <li><a href="../advanced/matching-rules.html" class="page">Matching rules</a></li>
+    <li><a href="../advanced/pact-broker.html" class="page">Pact Broker</a></li>
+  </ul></li>
+  <li><a href="../articles/index.html" class="page">Articles</a>
+  <ul>
+    <li><a href="../articles/motivation.html" class="page">Motivation</a></li>
+    <li><a href="../articles/pact-vs-integration.html" class="page">Pact vs Integration</a></li>
+    <li><a href="../articles/verification-strategies.html" class="page">Verification strategies</a></li>
+  </ul></li>
+  <li><a href="../examples/index.html" class="page">Example projects</a>
+  <ul>
+    <li><a href="../examples/consumer.html" class="page">The Consumer</a></li>
+    <li><a href="../examples/provider.html" class="page">The Provider</a></li>
+  </ul></li>
+  <li><a href="../help.html" class="page">Get help</a></li>
+  <li><a href="../project-deps.html" class="page">Dependencies</a></li>
+  <li><a href="../roadmap.html" class="page">Roadmap</a></li>
+  <li><a href="../change-log.html" class="page">Change log</a></li>
+  <li><a href="../contributing.html" class="page">How to contribute</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div class="small-12 medium-9 large-10 column">
+<section class="site-content">
+
+<span id="version-warning"></span>
+
+<div class="page-header row">
+<div class="medium-12 show-for-medium column">
+<div class="nav-breadcrumbs">
+<ul>
+  <li><a href="../index.html">Scala-Pact</a></li>
+  <li><a href="../basics/index.html">Basic usage</a></li>
+  <li>SBT Commands</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="page-content row">
+<div class="small-12 large-9 column" id="docs">
+<h1><a href="#sbt-commands" name="sbt-commands" class="anchor"><span class="anchor-link"></span></a>SBT Commands</h1>
+<p>Scala-Pact commands are non-composable sbt processes that guarantee correctness at the cost of some duplicate effort.</p>
+<h2><a href="#configuration" name="configuration" class="anchor"><span class="anchor-link"></span></a>Configuration</h2>
+<p>Commands pick up their configuration from the plugin&rsquo;s sbt settings, but can in many cases be overridden by command line arguments as detailed below.</p>
+<h2><a href="#pact-test-pacttest" name="pact-test-pacttest" class="anchor"><span class="anchor-link"></span></a>pact-test / pactTest</h2>
+<p>You can run the Pact test cases just by executing <code>sbt test</code> as normal. Because of the way the library has been written, running the tests will generate a series of Pact JSON files, one for each interaction.</p>
+<p>The generated Pact files will be output to your target directory under <code>&lt;project root&gt;/target/pacts</code> by default.</p>
+<p>Usually it is desirable to condense the Pact files into one file per consumer / provider pair that contains all of the possible interactions.</p>
+<p>Entering <code>sbt pact-test</code> will:</p>
+<ol>
+  <li>Run clean to remove any lingering pact files</li>
+  <li>Run the tests as normal to generate the Pact files</li>
+  <li>Squash the Pact files into one per consumer / provider pair</li>
+</ol>
+<h2><a href="#pact-stubber-pactstubber" name="pact-stubber-pactstubber" class="anchor"><span class="anchor-link"></span></a>pact-stubber / pactStubber</h2>
+<p>In order to test your service in isolation, you&rsquo;ll need to be able to stub out your service&rsquo;s upstream dependancies. Luckily, you&rsquo;ve already defined all the behaviours you expect your provider to exhibit in your CDC Pact tests!</p>
+<p>Running <code>sbt pact-stubber</code> will re-run your Pact tests and then use the generated Pact files to create a running stub service. The stub will accept requests and deliver the responses you defined in your test cases giving you predictable, maintainable behaviour.</p>
+<p>You can also run the stubber using a combination of the following command line options, below are the defaults:</p>
+<p><code>sbt &quot;pact-stubber --host localhost --port 1234 --source target/pacts&quot;</code></p>
+<p><em>Note that files in the source folder are recursively loaded.</em></p>
+<h4><a href="#http-administration" name="http-administration" class="anchor"><span class="anchor-link"></span></a>HTTP Administration</h4>
+<p>If you prefer, you can use the stubber dynamically by adding and removing pacts using HTTP. All calls must be made with a special header:</p>
+<p><code>X-Pact-Admin=true</code></p>
+<ul>
+  <li><code>GET /stub/status</code> returns 200 every time, in case you just want to check it&rsquo;s running / accessible</li>
+  <li><code>GET /interactions</code> returns a list of all currently loaded interactions</li>
+  <li><code>POST | PUT /interactions</code> accepts a Pact JSON string and adds all the interactions to the pool it matches against</li>
+  <li><code>DELETE /interactions</code> Clears all the current interactions so you can start again</li>
+</ul>
+<h2><a href="#pact-publish-pactpublish" name="pact-publish-pactpublish" class="anchor"><span class="anchor-link"></span></a>pact-publish / pactPublish</h2>
+<p>If you plan to use pact testing as part of your CI pipeline you&rsquo;ll probably want to be able to share pact files efficiently between builds. For example a consumer project&rsquo;s build generates a new version of the projects Pact files and they are then used during the providers CI build.</p>
+<p>To achieve this we use the Ruby tool called Pact Broker (see below) and the publish command to update the files to it.</p>
+<h4><a href="#command-line-options" name="command-line-options" class="anchor"><span class="anchor-link"></span></a>Command Line Options</h4>
+<p>Before we can publish, we have to tell Scala-Pact where it can find a running instance of Pact Broker by adding the following line to either <code>build.sbt</code> or <code>pact.sbt</code>:</p>
+<p><code>pactBrokerAddress := &quot;http://my-pact-broker:4321&quot;</code></p>
+<p>If your broker uses basic authentication you can specify the credentials like so:</p>
+<p><code>pactBrokerCredentials := (&quot;username&quot;, &quot;password&quot;)</code></p>
+<p>You can also specify the version you wish to publish under by adding:</p>
+<p><code>pactContractVersion := &quot;1.0.0&quot;</code></p>
+<p>If you omit this variable or set it to an empty string, the main project version will be the version used to publish against.</p>
+<p>You can specify the tags of the contract by adding: <code>pactContractTags := List(&quot;tag1&quot;, &quot;tag2&quot;)</code></p>
+<p>If you omit this variable or set it to an empty list, the contract will not be tagged under publishing. </p>
+<p>You can then use the publish command to generate and upload your pact files to pact broker:</p>
+<p><code>sbt pact-publish</code></p>
+<p>Note that your Pact files will have the same version number as the normal project version defined in your <code>build.sbt</code> file, because you versioned that breaking API change - right?</p>
+<p>By default, Scala-Pact does not allow you to publish pact files from SNAPSHOT versions of your project (but takes into account the pactContractVersion if set). This is because it can confuse pact brokers understanding of the latest contract. If you wish to enable this behaviour, add the following line to your <code>pact.sbt</code> file:</p>
+<p><code>allowSnapshotPublish := true</code></p>
+<h2><a href="#pact-verify-pactverify" name="pact-verify-pactverify" class="anchor"><span class="anchor-link"></span></a>pact-verify / pactVerify</h2>
+<p>Once the consumer has defined the contract as CDC tests and exported them to Pact files, they&rsquo;ll deliver them to their provider. The provider then exercises their own API using the Pact files via a verifier.</p>
+<p>The verifier is quite a simple idea: load a Pact file, make all the requests and compare all the responses to the expected ones.</p>
+<p>The Scala-Pact verifier can be run by entering <code>sbt pact-verify</code>.</p>
+<p>The verifier will write out JUnit results to the <code>target/test-reports</code> directory in order to fail builds.</p>
+<p>You can also invoke the verifier via a <a href="../articles/verification-strategies.html">test case</a> if you prefer.</p>
+<h4><a href="#command-line-options" name="command-line-options" class="anchor"><span class="anchor-link"></span></a>Command Line Options</h4>
+<p>You can also run the verifier using a combination of the following command line options. Below are the defaults:</p>
+<p><code>sbt &quot;pact-verify --host localhost --protocol http --port 1234 --source pacts&quot;</code></p>
+<p><em>Note that files in the source folder are recursively loaded. Specifying a local source folder takes precedence over loading remote files from Pact Broker (see below)</em></p>
+<p>When verifying a contract the default timeout for client requests is 1 second. This can be set using the client timeout flag. <code>--clientTimeout 1</code></p>
+<h4><a href="#verifying-with-pact-broker-during-a-ci-build" name="verifying-with-pact-broker-during-a-ci-build" class="anchor"><span class="anchor-link"></span></a>Verifying with Pact Broker during a CI build</h4>
+<p>If you&rsquo;re using the publish command to send files to Pact Broker, you&rsquo;ll also want to know how to verify against them in the provider project.</p>
+<p>To do this, you need to add the following to either your <code>build.sbt</code> or <code>pact.sbt</code> file:</p>
+<pre><code>pactBrokerAddress := &quot;http://my-pact-broker:4321&quot;
+providerName := &quot;The Name Of This Service&quot;
+consumerNames := Seq(&quot;Consumer A&quot;, &quot;Consumer B&quot;)
+</code></pre>
+<p>Note: The names are <strong>keys</strong> and all have to line up. Downstream services must publish with the same names that you use to retrieve against.</p>
+<p>You then run verify as normal <strong>without</strong> specifying a local folder i.e.:</p>
+<p><code>sbt &quot;pact-verify --host localhost --port 1234&quot;</code></p>
+<p>This causes the verifier to try and load it&rsquo;s Pacts from Pact Broker ahead of the normal verification process.</p>
+<h2><a href="#other-considerations" name="other-considerations" class="anchor"><span class="anchor-link"></span></a>Other considerations</h2>
+<ol>
+  <li>Mock servers can only understand an endpoint being in one state. Mostly that isn&rsquo;t a problem - if you want to create a Pact describing the look up of documents that result in a 200 or a 404 you simply look up two different documents. Where you have something like a <code>/status</code> endpoint that could come back in different states that you care about, you would have to be a bit creative, or not describe that behaviour in a pact contract.</li>
+  <li>ScalaTest runs in parallel by default so even clearing the state of the stubber between tests could, and probably would, result in errors if you were using HTTP administration.</li>
+</ol>
+<div class="source-github">
+The source code for this page can be found <a href="https://github.com/ITV/scala-pact/tree/master/scalapact-docs/src/main/paradox/basics/sbt-commands.md">here</a>.
+</div>
+
+<div class="nav-next">
+<p><strong>Next:</strong> <a href="../basics/test-frameworks.html">Test frameworks</a></p>
+</div>
+</div>
+<div class="large-3 show-for-large column" data-sticky-container>
+<nav class="sidebar sticky" data-sticky data-anchor="docs" data-sticky-on="large">
+<div class="page-nav">
+<div class="nav-title">On this page:</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../basics/sbt-commands.html#sbt-commands" class="header">SBT Commands</a>
+  <ul>
+    <li><a href="../basics/sbt-commands.html#configuration" class="header">Configuration</a></li>
+    <li><a href="../basics/sbt-commands.html#pact-test-pacttest" class="header">pact-test / pactTest</a></li>
+    <li><a href="../basics/sbt-commands.html#pact-stubber-pactstubber" class="header">pact-stubber / pactStubber</a></li>
+    <li><a href="../basics/sbt-commands.html#pact-publish-pactpublish" class="header">pact-publish / pactPublish</a></li>
+    <li><a href="../basics/sbt-commands.html#pact-verify-pactverify" class="header">pact-verify / pactVerify</a></li>
+    <li><a href="../basics/sbt-commands.html#other-considerations" class="header">Other considerations</a></li>
+  </ul></li>
+</ul>
+</div>
+</div>
+</nav>
+</div>
+</div>
+
+</section>
+</div>
+
+</div>
+
+<footer class="site-footer">
+
+<section class="site-footer-nav">
+<div class="expanded row">
+<div class="small-12 large-offset-2 large-10 column">
+<div class="row site-footer-content">
+
+<div class="small-12 medium-4 large-3 text-center column">
+<div class="nav-links">
+<ul>
+<!-- <li><a href="https://www.example.com/products/">Products</a> -->
+</ul>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+
+<section class="site-footer-base">
+<div class="expanded row">
+<div class="small-12 large-offset-2 large-10 column">
+<div class="row site-footer-content">
+
+<div class="small-12 text-center large-9 column">
+
+<!--
+<div class="copyright">
+<span class="text">&copy; 2020</span>
+<a href="https://www.example.com" class="logo">logo</a>
+</div>
+-->
+</div>
+
+</div>
+</div>
+</div>
+</section>
+</footer>
+
+</div>
+</div>
+</div>
+</body>
+
+<script type="text/javascript" src="../lib/foundation/dist/foundation.min.js"></script>
+<script type="text/javascript">jQuery(document).foundation();</script>
+<script type="text/javascript" src="../js/magellan.js"></script>
+
+<style type="text/css">@import "../lib/prettify/prettify.css";</style>
+<script type="text/javascript" src="../lib/prettify/prettify.js"></script>
+<script type="text/javascript" src="../lib/prettify/lang-scala.js"></script>
+<script type="text/javascript">jQuery(function(){window.prettyPrint && prettyPrint()});</script>
+<script type="text/javascript">jQuery(function(jq){initOldVersionWarnings(jq, '2.4.1-SNAPSHOT', '')});</script>
+
+
+</html>

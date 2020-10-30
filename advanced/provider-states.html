@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+<title>Provider states · Scala-Pact</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content='scalapact-docs'/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:100normal,100italic,300normal,300italic,400normal,400italic,500normal,500italic,700normal,700italic,900normal,900italicc" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="../js/page.js"></script>
+<script type="text/javascript" src="../js/warnOldVersion.js"></script>
+<script type="text/javascript" src="../js/groups.js"></script>
+<link rel="stylesheet" type="text/css" href="../lib/normalize.css/normalize.css"/>
+<link rel="stylesheet" type="text/css" href="../lib/foundation/dist/foundation.min.css"/>
+<link rel="stylesheet" type="text/css" href="../css/page.css"/>
+
+<!--
+<link rel="shortcut icon" href="../images/favicon.ico" />
+-->
+</head>
+
+<body>
+<div class="off-canvas-wrapper">
+<div class="off-canvas-wrapper-inner" data-off-canvas-wrapper>
+
+<div class="off-canvas position-left" id="off-canvas-menu" data-off-canvas>
+<nav class="off-canvas-nav">
+<div class="nav-home">
+<a href="../index.html" >
+<span class="home-icon">⌂</span>Scala-Pact
+</a>
+<div class="version-number">
+2.4.1*
+</div>
+</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../setup.html" class="page">Setup guide</a></li>
+  <li><a href="../basics/index.html" class="page">Basic usage</a>
+  <ul>
+    <li><a href="../basics/sbt-tasks.html" class="page">SBT Tasks</a></li>
+    <li><a href="../basics/sbt-commands.html" class="page">SBT Commands</a></li>
+    <li><a href="../basics/test-frameworks.html" class="page">Test frameworks</a></li>
+    <li><a href="../basics/pact-stubber.html" class="page">Pact Stubber</a></li>
+  </ul></li>
+  <li><a href="../advanced/index.html" class="page">Advanced usage</a>
+  <ul>
+    <li><a href="../advanced/provider-states.html" class="active page">Provider states</a></li>
+    <li><a href="../advanced/strict-mode.html" class="page">Strict mode</a></li>
+    <li><a href="../advanced/matching-rules.html" class="page">Matching rules</a></li>
+    <li><a href="../advanced/pact-broker.html" class="page">Pact Broker</a></li>
+  </ul></li>
+  <li><a href="../articles/index.html" class="page">Articles</a>
+  <ul>
+    <li><a href="../articles/motivation.html" class="page">Motivation</a></li>
+    <li><a href="../articles/pact-vs-integration.html" class="page">Pact vs Integration</a></li>
+    <li><a href="../articles/verification-strategies.html" class="page">Verification strategies</a></li>
+  </ul></li>
+  <li><a href="../examples/index.html" class="page">Example projects</a>
+  <ul>
+    <li><a href="../examples/consumer.html" class="page">The Consumer</a></li>
+    <li><a href="../examples/provider.html" class="page">The Provider</a></li>
+  </ul></li>
+  <li><a href="../help.html" class="page">Get help</a></li>
+  <li><a href="../project-deps.html" class="page">Dependencies</a></li>
+  <li><a href="../roadmap.html" class="page">Roadmap</a></li>
+  <li><a href="../change-log.html" class="page">Change log</a></li>
+  <li><a href="../contributing.html" class="page">How to contribute</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div class="off-canvas-content" data-off-canvas-content>
+
+<header class="site-header expanded row">
+<div class="small-12 column">
+<a href="#" class="off-canvas-toggle hide-for-medium" data-toggle="off-canvas-menu"><svg class="svg-icon svg-icon-menu" version="1.1" id="Menu" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 20 20" enable-background="new 0 0 20 20" xml:space="preserve"> <path class="svg-icon-menu-path" fill="#53CDEC" d="M16.4,9H3.6C3.048,9,3,9.447,3,10c0,0.553,0.048,1,0.6,1H16.4c0.552,0,0.6-0.447,0.6-1C17,9.447,16.952,9,16.4,9z M16.4,13
+H3.6C3.048,13,3,13.447,3,14c0,0.553,0.048,1,0.6,1H16.4c0.552,0,0.6-0.447,0.6-1C17,13.447,16.952,13,16.4,13z M3.6,7H16.4
+C16.952,7,17,6.553,17,6c0-0.553-0.048-1-0.6-1H3.6C3.048,5,3,5.447,3,6C3,6.553,3.048,7,3.6,7z"/></svg>
+</a>
+<div class="title"><a href="../index.html">Scala-Pact</a></div>
+
+<!--
+<a href="https://www.example.com" class="logo show-for-medium">logo</a>
+-->
+</div>
+</header>
+
+<div class="expanded row">
+
+<div class="medium-3 large-2 show-for-medium column">
+<nav class="site-nav">
+<div class="nav-home">
+<a href="../index.html" >
+<span class="home-icon">⌂</span>Scala-Pact
+</a>
+<div class="version-number">
+2.4.1*
+</div>
+</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../setup.html" class="page">Setup guide</a></li>
+  <li><a href="../basics/index.html" class="page">Basic usage</a>
+  <ul>
+    <li><a href="../basics/sbt-tasks.html" class="page">SBT Tasks</a></li>
+    <li><a href="../basics/sbt-commands.html" class="page">SBT Commands</a></li>
+    <li><a href="../basics/test-frameworks.html" class="page">Test frameworks</a></li>
+    <li><a href="../basics/pact-stubber.html" class="page">Pact Stubber</a></li>
+  </ul></li>
+  <li><a href="../advanced/index.html" class="page">Advanced usage</a>
+  <ul>
+    <li><a href="../advanced/provider-states.html" class="active page">Provider states</a></li>
+    <li><a href="../advanced/strict-mode.html" class="page">Strict mode</a></li>
+    <li><a href="../advanced/matching-rules.html" class="page">Matching rules</a></li>
+    <li><a href="../advanced/pact-broker.html" class="page">Pact Broker</a></li>
+  </ul></li>
+  <li><a href="../articles/index.html" class="page">Articles</a>
+  <ul>
+    <li><a href="../articles/motivation.html" class="page">Motivation</a></li>
+    <li><a href="../articles/pact-vs-integration.html" class="page">Pact vs Integration</a></li>
+    <li><a href="../articles/verification-strategies.html" class="page">Verification strategies</a></li>
+  </ul></li>
+  <li><a href="../examples/index.html" class="page">Example projects</a>
+  <ul>
+    <li><a href="../examples/consumer.html" class="page">The Consumer</a></li>
+    <li><a href="../examples/provider.html" class="page">The Provider</a></li>
+  </ul></li>
+  <li><a href="../help.html" class="page">Get help</a></li>
+  <li><a href="../project-deps.html" class="page">Dependencies</a></li>
+  <li><a href="../roadmap.html" class="page">Roadmap</a></li>
+  <li><a href="../change-log.html" class="page">Change log</a></li>
+  <li><a href="../contributing.html" class="page">How to contribute</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div class="small-12 medium-9 large-10 column">
+<section class="site-content">
+
+<span id="version-warning"></span>
+
+<div class="page-header row">
+<div class="medium-12 show-for-medium column">
+<div class="nav-breadcrumbs">
+<ul>
+  <li><a href="../index.html">Scala-Pact</a></li>
+  <li><a href="../advanced/index.html">Advanced usage</a></li>
+  <li>Provider states</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="page-content row">
+<div class="small-12 large-9 column" id="docs">
+<h1><a href="#provider-states" name="provider-states" class="anchor"><span class="anchor-link"></span></a>Provider states</h1>
+<p>Scala-Pact currently offers limited support for provider states.</p>
+<p>Sometimes, you need to warn your provider that a contract relies on the providing system being in a particular state. For example, your contract describes requesting a document resource via a GET request with the document&rsquo;s id as a query parameter. If you send the Pact contract to your provider, but that document id doesn&rsquo;t exist on their system, then verification will fail through no-ones fault.</p>
+<p>To warn the provider about such requirements, we use provider states. In the tests these are simply strings in the <code>given()</code> method as below:</p>
+<pre><code>forgePact
+  .between(&quot;My Consumer&quot;)
+  .and(&quot;Their Provider Service&quot;)
+  .addInteraction(
+    interaction
+      .description(&quot;Fetching a specific ID&quot;)
+      .given(&quot;Resource with ID 1234 exists&quot;)
+      .uponReceiving(&quot;/document/lookup?id=1234&quot;)
+      .willRespondWith(200, &quot;ID: 1234 Exists&quot;)
+  )
+  .runConsumerTest { mockConfig =&gt;
+
+    val result = SimpleClient.doGetRequest(mockConfig.baseUrl, endPoint, Map.empty)
+
+    result.status should equal(200)
+    result.body should equal(&quot;ID: 1234 Exists&quot;)
+
+  }
+</code></pre>
+<p><a href="https://github.com/ITV/scalapact/blob/master/scalapact-scalatest/src/test/scala/com/itv/scalapact/ExampleSpec.scala">Example taken from the ExampleSpec test suite.</a></p>
+<p>The <code>given(&quot;Resource with ID 1234 exists&quot;)</code> string is actually a key that the provider can hook into! It shows up in the Pact contract under the <code>providerState</code> field like this:</p>
+<pre><code>{
+  &quot;provider&quot; : {
+    &quot;name&quot; : &quot;Their Provider Service&quot;
+  },
+  &quot;consumer&quot; : {
+    &quot;name&quot; : &quot;My Consumer&quot;
+  },
+  &quot;interactions&quot; : [
+    {
+      &quot;providerState&quot; : &quot;Resource with ID 1234 exists&quot;,
+      &quot;description&quot; : &quot;Fetching a specific ID&quot;,
+      &quot;request&quot; : {
+        &quot;method&quot; : &quot;GET&quot;,
+        &quot;path&quot; : &quot;/provider-state&quot;,
+        &quot;query&quot; : &quot;id=1234&quot;
+      },
+      &quot;response&quot; : {
+        &quot;status&quot; : 200,
+        &quot;body&quot; : &quot;ID: 1234 Exists&quot;
+      }
+    }
+  ]
+}
+</code></pre>
+<p>On the provider&rsquo;s side, before verification they can opt to take action on any of these keys.</p>
+<p>If they are performing verification based on a provider test case, this may not be necessary since setup could be done in a &ldquo;before and after&rdquo; way using your test framework of choise. The option remains to use provider states as well though, if you prefer.</p>
+<p>If verification is being done externally then the &ldquo;given&rdquo; <code>providerState</code> can be acted upon by adding a <code>pact.sbt</code> file to the root of their Scala project. Here is an example of the contents:</p>
+<pre><code>import com.itv.scalapact.plugin.ScalaPactPlugin._
+
+// New approach using a partial function to match the &quot;given&quot;.
+// Simple equality tests here but this is a normal pattern match so
+// you can do much more expressive matches should you so desire.
+providerStateMatcher := {
+  case key: String if key == &quot;Resource with ID 1234 exists&quot; =&gt;
+    println(&quot;Injecting key 1234 into the database...&quot;)
+
+    // Do some work to ensure the system under test is
+    // in an appropriate state before verification
+
+    true
+
+  case key: String if key == &quot;Something else&quot; =&gt;
+    // A different &#39;given&#39; provider state case
+    true
+}
+
+// Old approach, still valid
+providerStates := Seq(
+  (&quot;Resource with ID 1234 exists&quot;, (key: String) =&gt; {
+    println(&quot;Injecting key 1234 into the database...&quot;)
+    // Do some work to ensure the system under test is
+    // in an appropriate state before verification
+    true
+  })
+)
+</code></pre>
+<p><em>Notice it&rsquo;s the same string!</em></p>
+<p>Now when the provider runs the verification, the function they wrote will be invoked prior to the relevant interaction being verified.</p>
+<p>The providerStateMatcher settings function is a <code>PartialFunction[String, Boolean]</code> where the string is the given &ldquo;key&rdquo; and the rest is a function body that results in a boolean to indicate success or failure.</p>
+<p>The providerStates settings object is a <code>Seq[(String, String =&gt; Boolean)]</code> where the first string is the <code>key</code> and the <code>String =&gt; Boolean</code> is a function you describe that simply takes the <code>key</code> and returns whether your code ran successfully or not.</p>
+<p>The intention is to create helper objects in the future for running common tasks like executing shell scripts but at the moment the functions are pure Scala and it&rsquo;s up to you how you use them.</p>
+<div class="source-github">
+The source code for this page can be found <a href="https://github.com/ITV/scala-pact/tree/master/scalapact-docs/src/main/paradox/advanced/provider-states.md">here</a>.
+</div>
+
+<div class="nav-next">
+<p><strong>Next:</strong> <a href="../advanced/strict-mode.html">Strict mode</a></p>
+</div>
+</div>
+<div class="large-3 show-for-large column" data-sticky-container>
+</div>
+</div>
+
+</section>
+</div>
+
+</div>
+
+<footer class="site-footer">
+
+<section class="site-footer-nav">
+<div class="expanded row">
+<div class="small-12 large-offset-2 large-10 column">
+<div class="row site-footer-content">
+
+<div class="small-12 medium-4 large-3 text-center column">
+<div class="nav-links">
+<ul>
+<!-- <li><a href="https://www.example.com/products/">Products</a> -->
+</ul>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+
+<section class="site-footer-base">
+<div class="expanded row">
+<div class="small-12 large-offset-2 large-10 column">
+<div class="row site-footer-content">
+
+<div class="small-12 text-center large-9 column">
+
+<!--
+<div class="copyright">
+<span class="text">&copy; 2020</span>
+<a href="https://www.example.com" class="logo">logo</a>
+</div>
+-->
+</div>
+
+</div>
+</div>
+</div>
+</section>
+</footer>
+
+</div>
+</div>
+</div>
+</body>
+
+<script type="text/javascript" src="../lib/foundation/dist/foundation.min.js"></script>
+<script type="text/javascript">jQuery(document).foundation();</script>
+<script type="text/javascript" src="../js/magellan.js"></script>
+
+<style type="text/css">@import "../lib/prettify/prettify.css";</style>
+<script type="text/javascript" src="../lib/prettify/prettify.js"></script>
+<script type="text/javascript" src="../lib/prettify/lang-scala.js"></script>
+<script type="text/javascript">jQuery(function(){window.prettyPrint && prettyPrint()});</script>
+<script type="text/javascript">jQuery(function(jq){initOldVersionWarnings(jq, '2.4.1-SNAPSHOT', '')});</script>
+
+
+</html>

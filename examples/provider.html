@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+<title>The Provider · Scala-Pact</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content='scalapact-docs'/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:100normal,100italic,300normal,300italic,400normal,400italic,500normal,500italic,700normal,700italic,900normal,900italicc" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="../js/page.js"></script>
+<script type="text/javascript" src="../js/warnOldVersion.js"></script>
+<script type="text/javascript" src="../js/groups.js"></script>
+<link rel="stylesheet" type="text/css" href="../lib/normalize.css/normalize.css"/>
+<link rel="stylesheet" type="text/css" href="../lib/foundation/dist/foundation.min.css"/>
+<link rel="stylesheet" type="text/css" href="../css/page.css"/>
+
+<!--
+<link rel="shortcut icon" href="../images/favicon.ico" />
+-->
+</head>
+
+<body>
+<div class="off-canvas-wrapper">
+<div class="off-canvas-wrapper-inner" data-off-canvas-wrapper>
+
+<div class="off-canvas position-left" id="off-canvas-menu" data-off-canvas>
+<nav class="off-canvas-nav">
+<div class="nav-home">
+<a href="../index.html" >
+<span class="home-icon">⌂</span>Scala-Pact
+</a>
+<div class="version-number">
+2.4.1*
+</div>
+</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../setup.html" class="page">Setup guide</a></li>
+  <li><a href="../basics/index.html" class="page">Basic usage</a>
+  <ul>
+    <li><a href="../basics/sbt-tasks.html" class="page">SBT Tasks</a></li>
+    <li><a href="../basics/sbt-commands.html" class="page">SBT Commands</a></li>
+    <li><a href="../basics/test-frameworks.html" class="page">Test frameworks</a></li>
+    <li><a href="../basics/pact-stubber.html" class="page">Pact Stubber</a></li>
+  </ul></li>
+  <li><a href="../advanced/index.html" class="page">Advanced usage</a>
+  <ul>
+    <li><a href="../advanced/provider-states.html" class="page">Provider states</a></li>
+    <li><a href="../advanced/strict-mode.html" class="page">Strict mode</a></li>
+    <li><a href="../advanced/matching-rules.html" class="page">Matching rules</a></li>
+    <li><a href="../advanced/pact-broker.html" class="page">Pact Broker</a></li>
+  </ul></li>
+  <li><a href="../articles/index.html" class="page">Articles</a>
+  <ul>
+    <li><a href="../articles/motivation.html" class="page">Motivation</a></li>
+    <li><a href="../articles/pact-vs-integration.html" class="page">Pact vs Integration</a></li>
+    <li><a href="../articles/verification-strategies.html" class="page">Verification strategies</a></li>
+  </ul></li>
+  <li><a href="../examples/index.html" class="page">Example projects</a>
+  <ul>
+    <li><a href="../examples/consumer.html" class="page">The Consumer</a></li>
+    <li><a href="../examples/provider.html" class="active page">The Provider</a></li>
+  </ul></li>
+  <li><a href="../help.html" class="page">Get help</a></li>
+  <li><a href="../project-deps.html" class="page">Dependencies</a></li>
+  <li><a href="../roadmap.html" class="page">Roadmap</a></li>
+  <li><a href="../change-log.html" class="page">Change log</a></li>
+  <li><a href="../contributing.html" class="page">How to contribute</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div class="off-canvas-content" data-off-canvas-content>
+
+<header class="site-header expanded row">
+<div class="small-12 column">
+<a href="#" class="off-canvas-toggle hide-for-medium" data-toggle="off-canvas-menu"><svg class="svg-icon svg-icon-menu" version="1.1" id="Menu" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 20 20" enable-background="new 0 0 20 20" xml:space="preserve"> <path class="svg-icon-menu-path" fill="#53CDEC" d="M16.4,9H3.6C3.048,9,3,9.447,3,10c0,0.553,0.048,1,0.6,1H16.4c0.552,0,0.6-0.447,0.6-1C17,9.447,16.952,9,16.4,9z M16.4,13
+H3.6C3.048,13,3,13.447,3,14c0,0.553,0.048,1,0.6,1H16.4c0.552,0,0.6-0.447,0.6-1C17,13.447,16.952,13,16.4,13z M3.6,7H16.4
+C16.952,7,17,6.553,17,6c0-0.553-0.048-1-0.6-1H3.6C3.048,5,3,5.447,3,6C3,6.553,3.048,7,3.6,7z"/></svg>
+</a>
+<div class="title"><a href="../index.html">Scala-Pact</a></div>
+
+<!--
+<a href="https://www.example.com" class="logo show-for-medium">logo</a>
+-->
+</div>
+</header>
+
+<div class="expanded row">
+
+<div class="medium-3 large-2 show-for-medium column">
+<nav class="site-nav">
+<div class="nav-home">
+<a href="../index.html" >
+<span class="home-icon">⌂</span>Scala-Pact
+</a>
+<div class="version-number">
+2.4.1*
+</div>
+</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../setup.html" class="page">Setup guide</a></li>
+  <li><a href="../basics/index.html" class="page">Basic usage</a>
+  <ul>
+    <li><a href="../basics/sbt-tasks.html" class="page">SBT Tasks</a></li>
+    <li><a href="../basics/sbt-commands.html" class="page">SBT Commands</a></li>
+    <li><a href="../basics/test-frameworks.html" class="page">Test frameworks</a></li>
+    <li><a href="../basics/pact-stubber.html" class="page">Pact Stubber</a></li>
+  </ul></li>
+  <li><a href="../advanced/index.html" class="page">Advanced usage</a>
+  <ul>
+    <li><a href="../advanced/provider-states.html" class="page">Provider states</a></li>
+    <li><a href="../advanced/strict-mode.html" class="page">Strict mode</a></li>
+    <li><a href="../advanced/matching-rules.html" class="page">Matching rules</a></li>
+    <li><a href="../advanced/pact-broker.html" class="page">Pact Broker</a></li>
+  </ul></li>
+  <li><a href="../articles/index.html" class="page">Articles</a>
+  <ul>
+    <li><a href="../articles/motivation.html" class="page">Motivation</a></li>
+    <li><a href="../articles/pact-vs-integration.html" class="page">Pact vs Integration</a></li>
+    <li><a href="../articles/verification-strategies.html" class="page">Verification strategies</a></li>
+  </ul></li>
+  <li><a href="../examples/index.html" class="page">Example projects</a>
+  <ul>
+    <li><a href="../examples/consumer.html" class="page">The Consumer</a></li>
+    <li><a href="../examples/provider.html" class="active page">The Provider</a></li>
+  </ul></li>
+  <li><a href="../help.html" class="page">Get help</a></li>
+  <li><a href="../project-deps.html" class="page">Dependencies</a></li>
+  <li><a href="../roadmap.html" class="page">Roadmap</a></li>
+  <li><a href="../change-log.html" class="page">Change log</a></li>
+  <li><a href="../contributing.html" class="page">How to contribute</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div class="small-12 medium-9 large-10 column">
+<section class="site-content">
+
+<span id="version-warning"></span>
+
+<div class="page-header row">
+<div class="medium-12 show-for-medium column">
+<div class="nav-breadcrumbs">
+<ul>
+  <li><a href="../index.html">Scala-Pact</a></li>
+  <li><a href="../examples/index.html">Example projects</a></li>
+  <li>The Provider</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="page-content row">
+<div class="small-12 large-9 column" id="docs">
+<h1><a href="#the-provider" name="the-provider" class="anchor"><span class="anchor-link"></span></a>The Provider</h1>
+<p>In the <a href="consumer.html">consumer</a> example guide we generated our Pact contract. Now to see if it works!</p>
+<p>As previously mentioned, there are two <a href="../articles/verification-strategies.md">verification strategies</a> and both are demonstrated in the example projects.</p>
+<h2><a href="#strategy-1-external-verification" name="strategy-1-external-verification" class="anchor"><span class="anchor-link"></span></a>Strategy #1: External Verification</h2>
+<p>The advantage of this strategy is that it requires no special work inside your service. The drawback is that it does require you to be able to run the service locally and to be able to set up any state you might require using provider states or some other mechanism.</p>
+<p>You will need two terminal windows, both of which are open in the <code>provider</code> directory.</p>
+<p>In the first terminal window, run <code>sbt run</code> to start the service.</p>
+<p>In the second terminal window, run:</p>
+<pre><code>sbt &quot;pact-verify --source delivered_pacts/ --host localhost --port 8080 --clientTimeout 2&quot;
+</code></pre>
+<p><em>Note: the <code>--source delivered_pacts/</code> bit that tells the verifier you want to use local pact files in the directory specified.</em></p>
+<p>This will replay the request(s) in the Pact contract file against the service and check that the responses match.</p>
+<h2><a href="#strategy-2-internal-verification" name="strategy-2-internal-verification" class="anchor"><span class="anchor-link"></span></a>Strategy #2: Internal Verification</h2>
+<p>The advantage of this strategy is that setting up state is probably not an issue, you have full access to your project code base and running the verification is as simple as running your test cases (if you set it up correctly). The drawback is that you will need to do more work on your service to make sure your service can be run from inside a test case and that your core business logic can be mocked out.</p>
+<p>To run the verification, all you have to do is navigate to the <code>provider_tests</code> directory and run <code>sbt test</code>. That&rsquo;s it.</p>
+<h3><a href="#additionally-provider-states" name="additionally-provider-states" class="anchor"><span class="anchor-link"></span></a>Additionally&hellip; Provider States</h3>
+<p>This example setup contains one extra thing, which is an example of how to use provider states. The test suite declares a <code>given(&quot;...&quot;)</code> requirement and it is fulfilled during external verification by the function in the <code>pact.sbt</code> at the root of the provider project.</p>
+<p>The internal verification does not make use of provider states since the services setup happens during the <code>beforeAll()</code> and <code>afterAll()</code> functions. However, the mechanism for making use of provider states does exist, you just need to replace <code>.noSetupRequired</code> with something like:</p>
+<pre><code>.setupProviderState(&quot;given&quot;){
+  key =&gt;
+    key match {
+      case &quot;Document 1234 exists&quot; =&gt;
+        // Some code to inject document 1234
+        true
+      case _ =&gt;
+        // Didn&#39;t find the key, but maybe there wasn&#39;t one for this contract.
+        // So no point failing yet.
+        true
+    }
+}
+</code></pre>
+<p>The function signature is <code>String =&gt; ProviderStateResult</code> where the <code>String</code> is the key value of the pact contract, <code>ProviderStateResult.result</code> is a way for you to say if your setup operation was a success or a failure and <code>ProviderStateResult.modifyRequest</code> is a function to modify the request before sending it, for example in case that you need to add a header for authorization. There is an implicit to allow you write the function as <code>String =&gt; Boolean</code> if you dont have the need to modify the request.</p>
+<h2><a href="#things-to-note" name="things-to-note" class="anchor"><span class="anchor-link"></span></a>Things to note</h2>
+<ol>
+  <li>The consumer and provider scala projects both use different case classes to represent the data. This does not matter, only the Pact file matters.</li>
+  <li>The consumer and provider scala projects both use different json libraries to read/write the json. This does not matter either, the contract is in no way less solid for the difference in library or marshalling logic.</li>
+</ol>
+<div class="source-github">
+The source code for this page can be found <a href="https://github.com/ITV/scala-pact/tree/master/scalapact-docs/src/main/paradox/examples/provider.md">here</a>.
+</div>
+
+<div class="nav-next">
+<p><strong>Next:</strong> <a href="../help.html">Get help</a></p>
+</div>
+</div>
+<div class="large-3 show-for-large column" data-sticky-container>
+<nav class="sidebar sticky" data-sticky data-anchor="docs" data-sticky-on="large">
+<div class="page-nav">
+<div class="nav-title">On this page:</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../examples/provider.html#the-provider" class="header">The Provider</a>
+  <ul>
+    <li><a href="../examples/provider.html#strategy-1-external-verification" class="header">Strategy #1: External Verification</a></li>
+    <li><a href="../examples/provider.html#strategy-2-internal-verification" class="header">Strategy #2: Internal Verification</a></li>
+    <li><a href="../examples/provider.html#things-to-note" class="header">Things to note</a></li>
+  </ul></li>
+</ul>
+</div>
+</div>
+</nav>
+</div>
+</div>
+
+</section>
+</div>
+
+</div>
+
+<footer class="site-footer">
+
+<section class="site-footer-nav">
+<div class="expanded row">
+<div class="small-12 large-offset-2 large-10 column">
+<div class="row site-footer-content">
+
+<div class="small-12 medium-4 large-3 text-center column">
+<div class="nav-links">
+<ul>
+<!-- <li><a href="https://www.example.com/products/">Products</a> -->
+</ul>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+
+<section class="site-footer-base">
+<div class="expanded row">
+<div class="small-12 large-offset-2 large-10 column">
+<div class="row site-footer-content">
+
+<div class="small-12 text-center large-9 column">
+
+<!--
+<div class="copyright">
+<span class="text">&copy; 2020</span>
+<a href="https://www.example.com" class="logo">logo</a>
+</div>
+-->
+</div>
+
+</div>
+</div>
+</div>
+</section>
+</footer>
+
+</div>
+</div>
+</div>
+</body>
+
+<script type="text/javascript" src="../lib/foundation/dist/foundation.min.js"></script>
+<script type="text/javascript">jQuery(document).foundation();</script>
+<script type="text/javascript" src="../js/magellan.js"></script>
+
+<style type="text/css">@import "../lib/prettify/prettify.css";</style>
+<script type="text/javascript" src="../lib/prettify/prettify.js"></script>
+<script type="text/javascript" src="../lib/prettify/lang-scala.js"></script>
+<script type="text/javascript">jQuery(function(){window.prettyPrint && prettyPrint()});</script>
+<script type="text/javascript">jQuery(function(jq){initOldVersionWarnings(jq, '2.4.1-SNAPSHOT', '')});</script>
+
+
+</html>

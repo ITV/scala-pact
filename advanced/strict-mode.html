@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+<title>Strict mode · Scala-Pact</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content='scalapact-docs'/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:100normal,100italic,300normal,300italic,400normal,400italic,500normal,500italic,700normal,700italic,900normal,900italicc" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="../js/page.js"></script>
+<script type="text/javascript" src="../js/warnOldVersion.js"></script>
+<script type="text/javascript" src="../js/groups.js"></script>
+<link rel="stylesheet" type="text/css" href="../lib/normalize.css/normalize.css"/>
+<link rel="stylesheet" type="text/css" href="../lib/foundation/dist/foundation.min.css"/>
+<link rel="stylesheet" type="text/css" href="../css/page.css"/>
+
+<!--
+<link rel="shortcut icon" href="../images/favicon.ico" />
+-->
+</head>
+
+<body>
+<div class="off-canvas-wrapper">
+<div class="off-canvas-wrapper-inner" data-off-canvas-wrapper>
+
+<div class="off-canvas position-left" id="off-canvas-menu" data-off-canvas>
+<nav class="off-canvas-nav">
+<div class="nav-home">
+<a href="../index.html" >
+<span class="home-icon">⌂</span>Scala-Pact
+</a>
+<div class="version-number">
+2.4.1*
+</div>
+</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../setup.html" class="page">Setup guide</a></li>
+  <li><a href="../basics/index.html" class="page">Basic usage</a>
+  <ul>
+    <li><a href="../basics/sbt-tasks.html" class="page">SBT Tasks</a></li>
+    <li><a href="../basics/sbt-commands.html" class="page">SBT Commands</a></li>
+    <li><a href="../basics/test-frameworks.html" class="page">Test frameworks</a></li>
+    <li><a href="../basics/pact-stubber.html" class="page">Pact Stubber</a></li>
+  </ul></li>
+  <li><a href="../advanced/index.html" class="page">Advanced usage</a>
+  <ul>
+    <li><a href="../advanced/provider-states.html" class="page">Provider states</a></li>
+    <li><a href="../advanced/strict-mode.html" class="active page">Strict mode</a></li>
+    <li><a href="../advanced/matching-rules.html" class="page">Matching rules</a></li>
+    <li><a href="../advanced/pact-broker.html" class="page">Pact Broker</a></li>
+  </ul></li>
+  <li><a href="../articles/index.html" class="page">Articles</a>
+  <ul>
+    <li><a href="../articles/motivation.html" class="page">Motivation</a></li>
+    <li><a href="../articles/pact-vs-integration.html" class="page">Pact vs Integration</a></li>
+    <li><a href="../articles/verification-strategies.html" class="page">Verification strategies</a></li>
+  </ul></li>
+  <li><a href="../examples/index.html" class="page">Example projects</a>
+  <ul>
+    <li><a href="../examples/consumer.html" class="page">The Consumer</a></li>
+    <li><a href="../examples/provider.html" class="page">The Provider</a></li>
+  </ul></li>
+  <li><a href="../help.html" class="page">Get help</a></li>
+  <li><a href="../project-deps.html" class="page">Dependencies</a></li>
+  <li><a href="../roadmap.html" class="page">Roadmap</a></li>
+  <li><a href="../change-log.html" class="page">Change log</a></li>
+  <li><a href="../contributing.html" class="page">How to contribute</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div class="off-canvas-content" data-off-canvas-content>
+
+<header class="site-header expanded row">
+<div class="small-12 column">
+<a href="#" class="off-canvas-toggle hide-for-medium" data-toggle="off-canvas-menu"><svg class="svg-icon svg-icon-menu" version="1.1" id="Menu" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 20 20" enable-background="new 0 0 20 20" xml:space="preserve"> <path class="svg-icon-menu-path" fill="#53CDEC" d="M16.4,9H3.6C3.048,9,3,9.447,3,10c0,0.553,0.048,1,0.6,1H16.4c0.552,0,0.6-0.447,0.6-1C17,9.447,16.952,9,16.4,9z M16.4,13
+H3.6C3.048,13,3,13.447,3,14c0,0.553,0.048,1,0.6,1H16.4c0.552,0,0.6-0.447,0.6-1C17,13.447,16.952,13,16.4,13z M3.6,7H16.4
+C16.952,7,17,6.553,17,6c0-0.553-0.048-1-0.6-1H3.6C3.048,5,3,5.447,3,6C3,6.553,3.048,7,3.6,7z"/></svg>
+</a>
+<div class="title"><a href="../index.html">Scala-Pact</a></div>
+
+<!--
+<a href="https://www.example.com" class="logo show-for-medium">logo</a>
+-->
+</div>
+</header>
+
+<div class="expanded row">
+
+<div class="medium-3 large-2 show-for-medium column">
+<nav class="site-nav">
+<div class="nav-home">
+<a href="../index.html" >
+<span class="home-icon">⌂</span>Scala-Pact
+</a>
+<div class="version-number">
+2.4.1*
+</div>
+</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../setup.html" class="page">Setup guide</a></li>
+  <li><a href="../basics/index.html" class="page">Basic usage</a>
+  <ul>
+    <li><a href="../basics/sbt-tasks.html" class="page">SBT Tasks</a></li>
+    <li><a href="../basics/sbt-commands.html" class="page">SBT Commands</a></li>
+    <li><a href="../basics/test-frameworks.html" class="page">Test frameworks</a></li>
+    <li><a href="../basics/pact-stubber.html" class="page">Pact Stubber</a></li>
+  </ul></li>
+  <li><a href="../advanced/index.html" class="page">Advanced usage</a>
+  <ul>
+    <li><a href="../advanced/provider-states.html" class="page">Provider states</a></li>
+    <li><a href="../advanced/strict-mode.html" class="active page">Strict mode</a></li>
+    <li><a href="../advanced/matching-rules.html" class="page">Matching rules</a></li>
+    <li><a href="../advanced/pact-broker.html" class="page">Pact Broker</a></li>
+  </ul></li>
+  <li><a href="../articles/index.html" class="page">Articles</a>
+  <ul>
+    <li><a href="../articles/motivation.html" class="page">Motivation</a></li>
+    <li><a href="../articles/pact-vs-integration.html" class="page">Pact vs Integration</a></li>
+    <li><a href="../articles/verification-strategies.html" class="page">Verification strategies</a></li>
+  </ul></li>
+  <li><a href="../examples/index.html" class="page">Example projects</a>
+  <ul>
+    <li><a href="../examples/consumer.html" class="page">The Consumer</a></li>
+    <li><a href="../examples/provider.html" class="page">The Provider</a></li>
+  </ul></li>
+  <li><a href="../help.html" class="page">Get help</a></li>
+  <li><a href="../project-deps.html" class="page">Dependencies</a></li>
+  <li><a href="../roadmap.html" class="page">Roadmap</a></li>
+  <li><a href="../change-log.html" class="page">Change log</a></li>
+  <li><a href="../contributing.html" class="page">How to contribute</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div class="small-12 medium-9 large-10 column">
+<section class="site-content">
+
+<span id="version-warning"></span>
+
+<div class="page-header row">
+<div class="medium-12 show-for-medium column">
+<div class="nav-breadcrumbs">
+<ul>
+  <li><a href="../index.html">Scala-Pact</a></li>
+  <li><a href="../advanced/index.html">Advanced usage</a></li>
+  <li>Strict mode</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="page-content row">
+<div class="small-12 large-9 column" id="docs">
+<h1><a href="#strict-mode" name="strict-mode" class="anchor"><span class="anchor-link"></span></a>Strict mode</h1>
+<p>Scala-Pact was designed on a different set of choices than the original Pact implementations. The biggest but also least obvious of which is that Scala-Pact is subtly more forgiving by default in terms of how it matches.</p>
+<h4><a href="#formally-" name="formally-" class="anchor"><span class="anchor-link"></span></a>Formally:</h4>
+<p>Scala-Pact has two matching modes called strict and permissive. Strict mode follows the official Pact specification to the letter, and permissive follows a select sub-set of the specification that makes writing contract tests easier. Permissive is the default in Scala-Pact.</p>
+<p><strong>Important Note:</strong> When testing between Scala services that both use Scala-Pact, the default permissive mode is more convenient. However, <strong><em>when dealing with another Pact implementation you should ALWAYS use strict mode</em></strong> since that is what they are based on.</p>
+<h4><a href="#for-example" name="for-example" class="anchor"><span class="anchor-link"></span></a>For example&hellip;</h4>
+<p>Although the JSON specification states that arrays are ordered, you generally can&rsquo;t rely on that and your code should not be making that assumption. As such Scala-Pact considers the following a match:</p>
+<p><code>[&quot;red&quot;, &quot;blue&quot;] == [&quot;blue&quot;, &quot;red&quot;]</code></p>
+<p>Whereas the original Pact implementations consider that a mismatch and would need rules added for them to be acceptable.</p>
+<p>To take body matching as an example, Scala-Pact&rsquo;s matching process states that as long as the expected document exists within the actual document, they are a match. This is very powerful because it allows you to only describe the parts of the response object you care about (**without using body matching rules!**). For example these two nonsense JSON blobs are a match:</p>
+<p>Expected (the part of the contract we care about) data and structure:</p>
+<pre><code>{
+  &quot;id&quot;: &quot;abc123&quot;,
+  &quot;metadata&quot;: {
+    &quot;name&quot;: &quot;Bob&quot;
+  },
+  [
+    {
+      &quot;favouriteColour&quot;: &quot;red&quot;
+    }
+  ]
+}
+</code></pre>
+<p>Actual:</p>
+<pre><code>{
+  &quot;metadata&quot;: {
+    &quot;likesSports&quot;: true,
+    &quot;name&quot;: &quot;Bob&quot;,
+    &quot;employeeNumber&quot;: 15666884
+  },
+  &quot;id&quot;: &quot;abc123&quot;,
+  [
+    {
+      &quot;favouriteColour&quot;: &quot;green&quot;,
+      &quot;takesSugar&quot;: true
+    },
+    {
+      &quot;favouriteColour&quot;: &quot;red&quot;,
+      &quot;likesFishing&quot;: null
+    }
+  ]
+}
+</code></pre>
+<p>Notice that despite the extra data, the expected does fit perfectly inside the actual.</p>
+<p>On the other hand the original Pact matching process does not consider these a match. For anyone wishing to replicate that behaviour (and so we can call this library compliant!), a new strict mode has been introduced.</p>
+<p>Any of the usual commands will now take a <code>--strict true</code> or <code>--strict false</code> parameter that defaults to false.</p>
+<p>To use strict testing in the test frameworks you can use the <code>forgeStrictPact</code> initialiser in the consumer tests or do <code>.runStrictValidationTest(...)</code> in the verifier tests.</p>
+<p><strong>Please note</strong> that there is no such thing as a strict or non-strict Pact Contract file, the difference is entirely in the interpretation of the contract.</p>
+<h2><a href="#so-why-would-anyone-use-strict-mode-" name="so-why-would-anyone-use-strict-mode-" class="anchor"><span class="anchor-link"></span></a>So why would anyone use strict mode?</h2>
+<p>Two good reasons: 1. As previously mentioned, Scala-Pact is completely compatible with other Pact implementations but they only support what we call strict matching. When dealing with them, you should too so there are no misunderstandings! 2. You get better error messages on match failure. Since strict matching is less forgiving, Scala-Pact can do a better job of telling you where contracts were misaligned.</p>
+<h2><a href="#wait-then-why-would-anyone-use-permissive-matching-" name="wait-then-why-would-anyone-use-permissive-matching-" class="anchor"><span class="anchor-link"></span></a>Wait! Then why would anyone use permissive matching?!</h2>
+<p>Provided both the services are using Scala-Pact for their CDC testing, permissive matching is much easier to use and understand, you can almost get away with no matching rules.</p>
+<div class="source-github">
+The source code for this page can be found <a href="https://github.com/ITV/scala-pact/tree/master/scalapact-docs/src/main/paradox/advanced/strict-mode.md">here</a>.
+</div>
+
+<div class="nav-next">
+<p><strong>Next:</strong> <a href="../advanced/matching-rules.html">Matching rules</a></p>
+</div>
+</div>
+<div class="large-3 show-for-large column" data-sticky-container>
+<nav class="sidebar sticky" data-sticky data-anchor="docs" data-sticky-on="large">
+<div class="page-nav">
+<div class="nav-title">On this page:</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../advanced/strict-mode.html#strict-mode" class="header">Strict mode</a>
+  <ul>
+    <li><a href="../advanced/strict-mode.html#formally-" class="header">Formally:</a></li>
+    <li><a href="../advanced/strict-mode.html#for-example" class="header">For example&hellip;</a></li>
+    <li><a href="../advanced/strict-mode.html#so-why-would-anyone-use-strict-mode-" class="header">So why would anyone use strict mode?</a></li>
+    <li><a href="../advanced/strict-mode.html#wait-then-why-would-anyone-use-permissive-matching-" class="header">Wait! Then why would anyone use permissive matching?!</a></li>
+  </ul></li>
+</ul>
+</div>
+</div>
+</nav>
+</div>
+</div>
+
+</section>
+</div>
+
+</div>
+
+<footer class="site-footer">
+
+<section class="site-footer-nav">
+<div class="expanded row">
+<div class="small-12 large-offset-2 large-10 column">
+<div class="row site-footer-content">
+
+<div class="small-12 medium-4 large-3 text-center column">
+<div class="nav-links">
+<ul>
+<!-- <li><a href="https://www.example.com/products/">Products</a> -->
+</ul>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+
+<section class="site-footer-base">
+<div class="expanded row">
+<div class="small-12 large-offset-2 large-10 column">
+<div class="row site-footer-content">
+
+<div class="small-12 text-center large-9 column">
+
+<!--
+<div class="copyright">
+<span class="text">&copy; 2020</span>
+<a href="https://www.example.com" class="logo">logo</a>
+</div>
+-->
+</div>
+
+</div>
+</div>
+</div>
+</section>
+</footer>
+
+</div>
+</div>
+</div>
+</body>
+
+<script type="text/javascript" src="../lib/foundation/dist/foundation.min.js"></script>
+<script type="text/javascript">jQuery(document).foundation();</script>
+<script type="text/javascript" src="../js/magellan.js"></script>
+
+<style type="text/css">@import "../lib/prettify/prettify.css";</style>
+<script type="text/javascript" src="../lib/prettify/prettify.js"></script>
+<script type="text/javascript" src="../lib/prettify/lang-scala.js"></script>
+<script type="text/javascript">jQuery(function(){window.prettyPrint && prettyPrint()});</script>
+<script type="text/javascript">jQuery(function(jq){initOldVersionWarnings(jq, '2.4.1-SNAPSHOT', '')});</script>
+
+
+</html>

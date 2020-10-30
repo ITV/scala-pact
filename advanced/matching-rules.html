@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+<title>Matching rules · Scala-Pact</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content='scalapact-docs'/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:100normal,100italic,300normal,300italic,400normal,400italic,500normal,500italic,700normal,700italic,900normal,900italicc" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="../js/page.js"></script>
+<script type="text/javascript" src="../js/warnOldVersion.js"></script>
+<script type="text/javascript" src="../js/groups.js"></script>
+<link rel="stylesheet" type="text/css" href="../lib/normalize.css/normalize.css"/>
+<link rel="stylesheet" type="text/css" href="../lib/foundation/dist/foundation.min.css"/>
+<link rel="stylesheet" type="text/css" href="../css/page.css"/>
+
+<!--
+<link rel="shortcut icon" href="../images/favicon.ico" />
+-->
+</head>
+
+<body>
+<div class="off-canvas-wrapper">
+<div class="off-canvas-wrapper-inner" data-off-canvas-wrapper>
+
+<div class="off-canvas position-left" id="off-canvas-menu" data-off-canvas>
+<nav class="off-canvas-nav">
+<div class="nav-home">
+<a href="../index.html" >
+<span class="home-icon">⌂</span>Scala-Pact
+</a>
+<div class="version-number">
+2.4.1*
+</div>
+</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../setup.html" class="page">Setup guide</a></li>
+  <li><a href="../basics/index.html" class="page">Basic usage</a>
+  <ul>
+    <li><a href="../basics/sbt-tasks.html" class="page">SBT Tasks</a></li>
+    <li><a href="../basics/sbt-commands.html" class="page">SBT Commands</a></li>
+    <li><a href="../basics/test-frameworks.html" class="page">Test frameworks</a></li>
+    <li><a href="../basics/pact-stubber.html" class="page">Pact Stubber</a></li>
+  </ul></li>
+  <li><a href="../advanced/index.html" class="page">Advanced usage</a>
+  <ul>
+    <li><a href="../advanced/provider-states.html" class="page">Provider states</a></li>
+    <li><a href="../advanced/strict-mode.html" class="page">Strict mode</a></li>
+    <li><a href="../advanced/matching-rules.html" class="active page">Matching rules</a></li>
+    <li><a href="../advanced/pact-broker.html" class="page">Pact Broker</a></li>
+  </ul></li>
+  <li><a href="../articles/index.html" class="page">Articles</a>
+  <ul>
+    <li><a href="../articles/motivation.html" class="page">Motivation</a></li>
+    <li><a href="../articles/pact-vs-integration.html" class="page">Pact vs Integration</a></li>
+    <li><a href="../articles/verification-strategies.html" class="page">Verification strategies</a></li>
+  </ul></li>
+  <li><a href="../examples/index.html" class="page">Example projects</a>
+  <ul>
+    <li><a href="../examples/consumer.html" class="page">The Consumer</a></li>
+    <li><a href="../examples/provider.html" class="page">The Provider</a></li>
+  </ul></li>
+  <li><a href="../help.html" class="page">Get help</a></li>
+  <li><a href="../project-deps.html" class="page">Dependencies</a></li>
+  <li><a href="../roadmap.html" class="page">Roadmap</a></li>
+  <li><a href="../change-log.html" class="page">Change log</a></li>
+  <li><a href="../contributing.html" class="page">How to contribute</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div class="off-canvas-content" data-off-canvas-content>
+
+<header class="site-header expanded row">
+<div class="small-12 column">
+<a href="#" class="off-canvas-toggle hide-for-medium" data-toggle="off-canvas-menu"><svg class="svg-icon svg-icon-menu" version="1.1" id="Menu" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 20 20" enable-background="new 0 0 20 20" xml:space="preserve"> <path class="svg-icon-menu-path" fill="#53CDEC" d="M16.4,9H3.6C3.048,9,3,9.447,3,10c0,0.553,0.048,1,0.6,1H16.4c0.552,0,0.6-0.447,0.6-1C17,9.447,16.952,9,16.4,9z M16.4,13
+H3.6C3.048,13,3,13.447,3,14c0,0.553,0.048,1,0.6,1H16.4c0.552,0,0.6-0.447,0.6-1C17,13.447,16.952,13,16.4,13z M3.6,7H16.4
+C16.952,7,17,6.553,17,6c0-0.553-0.048-1-0.6-1H3.6C3.048,5,3,5.447,3,6C3,6.553,3.048,7,3.6,7z"/></svg>
+</a>
+<div class="title"><a href="../index.html">Scala-Pact</a></div>
+
+<!--
+<a href="https://www.example.com" class="logo show-for-medium">logo</a>
+-->
+</div>
+</header>
+
+<div class="expanded row">
+
+<div class="medium-3 large-2 show-for-medium column">
+<nav class="site-nav">
+<div class="nav-home">
+<a href="../index.html" >
+<span class="home-icon">⌂</span>Scala-Pact
+</a>
+<div class="version-number">
+2.4.1*
+</div>
+</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../setup.html" class="page">Setup guide</a></li>
+  <li><a href="../basics/index.html" class="page">Basic usage</a>
+  <ul>
+    <li><a href="../basics/sbt-tasks.html" class="page">SBT Tasks</a></li>
+    <li><a href="../basics/sbt-commands.html" class="page">SBT Commands</a></li>
+    <li><a href="../basics/test-frameworks.html" class="page">Test frameworks</a></li>
+    <li><a href="../basics/pact-stubber.html" class="page">Pact Stubber</a></li>
+  </ul></li>
+  <li><a href="../advanced/index.html" class="page">Advanced usage</a>
+  <ul>
+    <li><a href="../advanced/provider-states.html" class="page">Provider states</a></li>
+    <li><a href="../advanced/strict-mode.html" class="page">Strict mode</a></li>
+    <li><a href="../advanced/matching-rules.html" class="active page">Matching rules</a></li>
+    <li><a href="../advanced/pact-broker.html" class="page">Pact Broker</a></li>
+  </ul></li>
+  <li><a href="../articles/index.html" class="page">Articles</a>
+  <ul>
+    <li><a href="../articles/motivation.html" class="page">Motivation</a></li>
+    <li><a href="../articles/pact-vs-integration.html" class="page">Pact vs Integration</a></li>
+    <li><a href="../articles/verification-strategies.html" class="page">Verification strategies</a></li>
+  </ul></li>
+  <li><a href="../examples/index.html" class="page">Example projects</a>
+  <ul>
+    <li><a href="../examples/consumer.html" class="page">The Consumer</a></li>
+    <li><a href="../examples/provider.html" class="page">The Provider</a></li>
+  </ul></li>
+  <li><a href="../help.html" class="page">Get help</a></li>
+  <li><a href="../project-deps.html" class="page">Dependencies</a></li>
+  <li><a href="../roadmap.html" class="page">Roadmap</a></li>
+  <li><a href="../change-log.html" class="page">Change log</a></li>
+  <li><a href="../contributing.html" class="page">How to contribute</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div class="small-12 medium-9 large-10 column">
+<section class="site-content">
+
+<span id="version-warning"></span>
+
+<div class="page-header row">
+<div class="medium-12 show-for-medium column">
+<div class="nav-breadcrumbs">
+<ul>
+  <li><a href="../index.html">Scala-Pact</a></li>
+  <li><a href="../advanced/index.html">Advanced usage</a></li>
+  <li>Matching rules</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="page-content row">
+<div class="small-12 large-9 column" id="docs">
+<h1><a href="#matching-rules" name="matching-rules" class="anchor"><span class="anchor-link"></span></a>Matching rules</h1>
+<p>Pact testing at it&rsquo;s heart, is about testing the behaviour of systems that are in a <strong><em>known state</em></strong>.</p>
+<p>The known state in the consumer tests is provided by you while you write the test.</p>
+<p>The known state during verification is achieved through <a href="provider-states.html">provider states</a> (external verification) or using beforeAndAfter clauses in your test suite (internal verification). Read up on <a href="../articles/verification-strategies.html">verification strategies</a> for more details.</p>
+<p>Sometimes however, achieving a good known state during verification is difficult. For example, if a field in a JSON body is based on the current time, it may be hard to set up your service with a fixed time in order to verify by a straight comparison approach.</p>
+<p>To help matters, we have matching rules, which in the pact contracts, look like this:</p>
+<pre><code>&quot;$.body.alligator.name&quot;: {&quot;match&quot;: &quot;regex&quot;, &quot;regex&quot;: &quot;\\w+&quot;}
+</code></pre>
+<p>What we have there is a path to a field in a body, and a requirement that if a normal comparison fails, as long as the fields value fits this regex, then it can be considered a pass.</p>
+<h2><a href="#rule-application" name="rule-application" class="anchor"><span class="anchor-link"></span></a>Rule application</h2>
+<p>Rules can be applied to both requests and responses.</p>
+<p>The way to think of them is:</p>
+<ul>
+  <li><strong>Request</strong> matching rules are <strong>stubbing</strong> rules</li>
+  <li><strong>Response</strong> matching rules are <strong>verification</strong> rules</li>
+</ul>
+<h2><a href="#rule-syntax-examples" name="rule-syntax-examples" class="anchor"><span class="anchor-link"></span></a>Rule syntax examples</h2>
+<p>Example response matching rules:</p>
+<pre><code>.willRespondWith(
+  ...
+  matchingRules =
+    headerRegexRule(&quot;fieldA&quot;, &quot;\\w+&quot;)
+    ~&gt; bodyTypeRule(&quot;path[&quot;to&quot;].fieldB&quot;)
+    ~&gt; bodyRegexRule(&quot;path.to[*].fieldC&quot;, &quot;\\w+&quot;)
+    ~&gt; bodyArrayMinimumLengthRule(&quot;path.to.fieldD&quot;, 2)
+)
+</code></pre>
+<p><strong>Note:</strong> Unlike the JSON representation above, the rule paths do not start with <code>$.body.</code>.</p>
+<h2><a href="#pactpath-spoiler-its-jsonpath-with-extra-bits-" name="pactpath-spoiler-its-jsonpath-with-extra-bits-" class="anchor"><span class="anchor-link"></span></a>PactPath (spoiler, it&rsquo;s JsonPath with extra bits.)</h2>
+<p>To the experienced eye, the path syntax may look like JsonPath&hellip; and that&rsquo;s because it is JsonPath. Mostly.</p>
+<p>In fact it&rsquo;s a subset of JsonPath with a few extra bits bolted on top to allow for XML bodies. The bolt ons are:</p>
+<ul>
+  <li>Text elements e.g. <code>fish.chips[*].ketchup[&#39;#text&#39;]</code></li>
+  <li>Attributes e.g. <code>fish.chips[*].ketchup[&#39;@applied&#39;]</code></li>
+</ul>
+<h2><a href="#types-of-matching-rule" name="types-of-matching-rule" class="anchor"><span class="anchor-link"></span></a>Types of Matching Rule</h2>
+<h4><a href="#regex-rules" name="regex-rules" class="anchor"><span class="anchor-link"></span></a>Regex Rules</h4>
+<p>Probably the most obvious rule is the regex rule. Does the value match this regex?</p>
+<p>Note that attempts are made to satisfy this requirement in non-obvious ways. For example if the regex is a &ldquo;\d&rdquo; then we will convert a numeric field to a string to test it.</p>
+<h4><a href="#type-rules-considered-dangerous-" name="type-rules-considered-dangerous-" class="anchor"><span class="anchor-link"></span></a>Type Rules (considered dangerous)</h4>
+<p>I think of this really as a structural check. Does the structure under this path match the structure of the provided example (numbers are numbers, strings are strings, object are objects etc.) regardless of the values.</p>
+<p>Best practice: Use type rules as close to the leaf nodes of documents as possible.</p>
+<h4><a href="#minimum-array-length" name="minimum-array-length" class="anchor"><span class="anchor-link"></span></a>Minimum array length</h4>
+<p>As you&rsquo;d expect, the received array must be of at least this length.</p>
+<h2><a href="#matching-rule-best-practices" name="matching-rule-best-practices" class="anchor"><span class="anchor-link"></span></a>Matching Rule Best Practices</h2>
+<p>Matching rules excel in areas that are prone to vary by environment, are non-deterministic in someway, or that vary over time.</p>
+<p>Excellent uses for matching rules include:</p>
+<ul>
+  <li>Time dependent fields and date matching</li>
+  <li>Checking generated tokens</li>
+  <li>Url&rsquo;s where the host varies but the end point remains constant.</li>
+  <li>Search query results where the number of results doesn&rsquo;t matter, as long at the structure is correct.</li>
+</ul>
+<h2><a href="#permissive-vs-strict" name="permissive-vs-strict" class="anchor"><span class="anchor-link"></span></a>Permissive vs Strict</h2>
+<p>The matching rules apply in both modes, but really matching rules were designed to be used with strict mode. Generally speaking you can get away with far less rules if you can use permissive matching in the first place.</p>
+<p>For example: Minimum array length is not an issue in permissive matching as long as the array items in the expected document exist within the received document.</p>
+<p>In effect, matching rule largely make up for the lack of flexibility that strict mode provides (with the caveat that strict mode does give better error reports if you&rsquo;re prepared to put the work in).</p>
+<h2><a href="#words-of-caution" name="words-of-caution" class="anchor"><span class="anchor-link"></span></a>Words of caution&hellip;</h2>
+<p>If you can avoid rules, do.</p>
+<p>Rules overlap other rules, and rules are all tested in no particular order, and the more rules you have the more chances you have of accidentally matching when you shouldn&rsquo;t (or vice versa).</p>
+<p>The most dangerous rule is the type rule. Consider this made up document:</p>
+<pre><code>{
+  &quot;person&quot;: {
+    &quot;names&quot;: {
+      &quot;first&quot;: &quot;hello&quot;
+    }
+  }
+}
+</code></pre>
+<p>If you had a regex that required <code>person.names.first</code> to equal &ldquo;Sally&rdquo; or &ldquo;Fred&rdquo; (i.e. <code>bodyRegexRule(&quot;person.names.first&quot;, &quot;Sally|Fred&quot;)</code>) it would fail on &ldquo;hello&rdquo;.</p>
+<p>However, if you also had a type rule on names like <code>bodyTypeRule(&quot;person.names&quot;)</code> or <code>bodyTypeRule(&quot;person.names.*&quot;)</code> &hellip;should the match pass or fail?</p>
+<p>As it is, it would fail and that may seem obvious, but hopefully you can see how test cases can become difficult to reason about the more rules you add.</p>
+<div class="source-github">
+The source code for this page can be found <a href="https://github.com/ITV/scala-pact/tree/master/scalapact-docs/src/main/paradox/advanced/matching-rules.md">here</a>.
+</div>
+
+<div class="nav-next">
+<p><strong>Next:</strong> <a href="../advanced/pact-broker.html">Pact Broker</a></p>
+</div>
+</div>
+<div class="large-3 show-for-large column" data-sticky-container>
+<nav class="sidebar sticky" data-sticky data-anchor="docs" data-sticky-on="large">
+<div class="page-nav">
+<div class="nav-title">On this page:</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../advanced/matching-rules.html#matching-rules" class="header">Matching rules</a>
+  <ul>
+    <li><a href="../advanced/matching-rules.html#rule-application" class="header">Rule application</a></li>
+    <li><a href="../advanced/matching-rules.html#rule-syntax-examples" class="header">Rule syntax examples</a></li>
+    <li><a href="../advanced/matching-rules.html#pactpath-spoiler-its-jsonpath-with-extra-bits-" class="header">PactPath (spoiler, it&rsquo;s JsonPath with extra bits.)</a></li>
+    <li><a href="../advanced/matching-rules.html#types-of-matching-rule" class="header">Types of Matching Rule</a></li>
+    <li><a href="../advanced/matching-rules.html#matching-rule-best-practices" class="header">Matching Rule Best Practices</a></li>
+    <li><a href="../advanced/matching-rules.html#permissive-vs-strict" class="header">Permissive vs Strict</a></li>
+    <li><a href="../advanced/matching-rules.html#words-of-caution" class="header">Words of caution&hellip;</a></li>
+  </ul></li>
+</ul>
+</div>
+</div>
+</nav>
+</div>
+</div>
+
+</section>
+</div>
+
+</div>
+
+<footer class="site-footer">
+
+<section class="site-footer-nav">
+<div class="expanded row">
+<div class="small-12 large-offset-2 large-10 column">
+<div class="row site-footer-content">
+
+<div class="small-12 medium-4 large-3 text-center column">
+<div class="nav-links">
+<ul>
+<!-- <li><a href="https://www.example.com/products/">Products</a> -->
+</ul>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+
+<section class="site-footer-base">
+<div class="expanded row">
+<div class="small-12 large-offset-2 large-10 column">
+<div class="row site-footer-content">
+
+<div class="small-12 text-center large-9 column">
+
+<!--
+<div class="copyright">
+<span class="text">&copy; 2020</span>
+<a href="https://www.example.com" class="logo">logo</a>
+</div>
+-->
+</div>
+
+</div>
+</div>
+</div>
+</section>
+</footer>
+
+</div>
+</div>
+</div>
+</body>
+
+<script type="text/javascript" src="../lib/foundation/dist/foundation.min.js"></script>
+<script type="text/javascript">jQuery(document).foundation();</script>
+<script type="text/javascript" src="../js/magellan.js"></script>
+
+<style type="text/css">@import "../lib/prettify/prettify.css";</style>
+<script type="text/javascript" src="../lib/prettify/prettify.js"></script>
+<script type="text/javascript" src="../lib/prettify/lang-scala.js"></script>
+<script type="text/javascript">jQuery(function(){window.prettyPrint && prettyPrint()});</script>
+<script type="text/javascript">jQuery(function(jq){initOldVersionWarnings(jq, '2.4.1-SNAPSHOT', '')});</script>
+
+
+</html>

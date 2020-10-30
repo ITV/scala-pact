@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+<title>Setup guide · Scala-Pact</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content='scalapact-docs'/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:100normal,100italic,300normal,300italic,400normal,400italic,500normal,500italic,700normal,700italic,900normal,900italicc" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="js/page.js"></script>
+<script type="text/javascript" src="js/warnOldVersion.js"></script>
+<script type="text/javascript" src="js/groups.js"></script>
+<link rel="stylesheet" type="text/css" href="lib/normalize.css/normalize.css"/>
+<link rel="stylesheet" type="text/css" href="lib/foundation/dist/foundation.min.css"/>
+<link rel="stylesheet" type="text/css" href="css/page.css"/>
+
+<!--
+<link rel="shortcut icon" href="images/favicon.ico" />
+-->
+</head>
+
+<body>
+<div class="off-canvas-wrapper">
+<div class="off-canvas-wrapper-inner" data-off-canvas-wrapper>
+
+<div class="off-canvas position-left" id="off-canvas-menu" data-off-canvas>
+<nav class="off-canvas-nav">
+<div class="nav-home">
+<a href="index.html" >
+<span class="home-icon">⌂</span>Scala-Pact
+</a>
+<div class="version-number">
+2.4.1*
+</div>
+</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="setup.html" class="active page">Setup guide</a></li>
+  <li><a href="basics/index.html" class="page">Basic usage</a>
+  <ul>
+    <li><a href="basics/sbt-tasks.html" class="page">SBT Tasks</a></li>
+    <li><a href="basics/sbt-commands.html" class="page">SBT Commands</a></li>
+    <li><a href="basics/test-frameworks.html" class="page">Test frameworks</a></li>
+    <li><a href="basics/pact-stubber.html" class="page">Pact Stubber</a></li>
+  </ul></li>
+  <li><a href="advanced/index.html" class="page">Advanced usage</a>
+  <ul>
+    <li><a href="advanced/provider-states.html" class="page">Provider states</a></li>
+    <li><a href="advanced/strict-mode.html" class="page">Strict mode</a></li>
+    <li><a href="advanced/matching-rules.html" class="page">Matching rules</a></li>
+    <li><a href="advanced/pact-broker.html" class="page">Pact Broker</a></li>
+  </ul></li>
+  <li><a href="articles/index.html" class="page">Articles</a>
+  <ul>
+    <li><a href="articles/motivation.html" class="page">Motivation</a></li>
+    <li><a href="articles/pact-vs-integration.html" class="page">Pact vs Integration</a></li>
+    <li><a href="articles/verification-strategies.html" class="page">Verification strategies</a></li>
+  </ul></li>
+  <li><a href="examples/index.html" class="page">Example projects</a>
+  <ul>
+    <li><a href="examples/consumer.html" class="page">The Consumer</a></li>
+    <li><a href="examples/provider.html" class="page">The Provider</a></li>
+  </ul></li>
+  <li><a href="help.html" class="page">Get help</a></li>
+  <li><a href="project-deps.html" class="page">Dependencies</a></li>
+  <li><a href="roadmap.html" class="page">Roadmap</a></li>
+  <li><a href="change-log.html" class="page">Change log</a></li>
+  <li><a href="contributing.html" class="page">How to contribute</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div class="off-canvas-content" data-off-canvas-content>
+
+<header class="site-header expanded row">
+<div class="small-12 column">
+<a href="#" class="off-canvas-toggle hide-for-medium" data-toggle="off-canvas-menu"><svg class="svg-icon svg-icon-menu" version="1.1" id="Menu" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 20 20" enable-background="new 0 0 20 20" xml:space="preserve"> <path class="svg-icon-menu-path" fill="#53CDEC" d="M16.4,9H3.6C3.048,9,3,9.447,3,10c0,0.553,0.048,1,0.6,1H16.4c0.552,0,0.6-0.447,0.6-1C17,9.447,16.952,9,16.4,9z M16.4,13
+H3.6C3.048,13,3,13.447,3,14c0,0.553,0.048,1,0.6,1H16.4c0.552,0,0.6-0.447,0.6-1C17,13.447,16.952,13,16.4,13z M3.6,7H16.4
+C16.952,7,17,6.553,17,6c0-0.553-0.048-1-0.6-1H3.6C3.048,5,3,5.447,3,6C3,6.553,3.048,7,3.6,7z"/></svg>
+</a>
+<div class="title"><a href="index.html">Scala-Pact</a></div>
+
+<!--
+<a href="https://www.example.com" class="logo show-for-medium">logo</a>
+-->
+</div>
+</header>
+
+<div class="expanded row">
+
+<div class="medium-3 large-2 show-for-medium column">
+<nav class="site-nav">
+<div class="nav-home">
+<a href="index.html" >
+<span class="home-icon">⌂</span>Scala-Pact
+</a>
+<div class="version-number">
+2.4.1*
+</div>
+</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="setup.html" class="active page">Setup guide</a></li>
+  <li><a href="basics/index.html" class="page">Basic usage</a>
+  <ul>
+    <li><a href="basics/sbt-tasks.html" class="page">SBT Tasks</a></li>
+    <li><a href="basics/sbt-commands.html" class="page">SBT Commands</a></li>
+    <li><a href="basics/test-frameworks.html" class="page">Test frameworks</a></li>
+    <li><a href="basics/pact-stubber.html" class="page">Pact Stubber</a></li>
+  </ul></li>
+  <li><a href="advanced/index.html" class="page">Advanced usage</a>
+  <ul>
+    <li><a href="advanced/provider-states.html" class="page">Provider states</a></li>
+    <li><a href="advanced/strict-mode.html" class="page">Strict mode</a></li>
+    <li><a href="advanced/matching-rules.html" class="page">Matching rules</a></li>
+    <li><a href="advanced/pact-broker.html" class="page">Pact Broker</a></li>
+  </ul></li>
+  <li><a href="articles/index.html" class="page">Articles</a>
+  <ul>
+    <li><a href="articles/motivation.html" class="page">Motivation</a></li>
+    <li><a href="articles/pact-vs-integration.html" class="page">Pact vs Integration</a></li>
+    <li><a href="articles/verification-strategies.html" class="page">Verification strategies</a></li>
+  </ul></li>
+  <li><a href="examples/index.html" class="page">Example projects</a>
+  <ul>
+    <li><a href="examples/consumer.html" class="page">The Consumer</a></li>
+    <li><a href="examples/provider.html" class="page">The Provider</a></li>
+  </ul></li>
+  <li><a href="help.html" class="page">Get help</a></li>
+  <li><a href="project-deps.html" class="page">Dependencies</a></li>
+  <li><a href="roadmap.html" class="page">Roadmap</a></li>
+  <li><a href="change-log.html" class="page">Change log</a></li>
+  <li><a href="contributing.html" class="page">How to contribute</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div class="small-12 medium-9 large-10 column">
+<section class="site-content">
+
+<span id="version-warning"></span>
+
+<div class="page-header row">
+<div class="medium-12 show-for-medium column">
+<div class="nav-breadcrumbs">
+<ul>
+  <li><a href="index.html">Scala-Pact</a></li>
+  <li>Setup guide</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="page-content row">
+<div class="small-12 large-9 column" id="docs">
+<h1><a href="#setup-guide" name="setup-guide" class="anchor"><span class="anchor-link"></span></a>Setup guide</h1>
+<p>Scala-Pact is comprised of two parts:</p>
+<ol>
+  <li>The test framework - used for writing CDC tests in ScalaTest</li>
+  <li>The plugin - used for running Scala-Pact&rsquo;s tasks and commands</li>
+</ol>
+<p>As of version 2.2.0, both the test framework and the plugin require you to specify which versions of the Http and JSON libraries you require.</p>
+<p>Scala-Pact now has two branches based on SBT requirements.</p>
+<h4><a href="#sbt-1-x-compatible-latest-2-3-9-" name="sbt-1-x-compatible-latest-2-3-9-" class="anchor"><span class="anchor-link"></span></a>SBT 1.x compatible (Latest 2.3.9)</h4>
+<p>The all development going forward begins at <code>2.3.x</code> and resides on the <code>master</code> branch. For the sake of the maintainer&rsquo;s sanity, version 2.3.x and beyond will only support Scala 2.12 and SBT 1.x or greater.</p>
+<h4><a href="#sbt-0-13-x-compatible-latest-2-2-5-" name="sbt-0-13-x-compatible-latest-2-2-5-" class="anchor"><span class="anchor-link"></span></a>SBT 0.13.x compatible (Latest 2.2.5)</h4>
+<p>The reluctantly maintained EOL maintenance version of Scala-Pact lives on a branch called <code>v2.2.x</code>. These versions support Scala 2.10, 2.11, and 2.12 but are limited by only supporting SBT 0.13.x.</p>
+<h2><a href="#getting-setup" name="getting-setup" class="anchor"><span class="anchor-link"></span></a>Getting setup</h2>
+<p>Scala-Pact goes to great lengths to help you avoid or work around dependency conflicts.</p>
+<p>This is achieved by splitting the core functionality out of the library requirements which are provided separately. This allows you to align or avoid conflicting dependencies e.g. If your project uses a specific version of Circe, tell Scala-Pact to use Argonaut!</p>
+<p>One big change between 2.2.x and 2.3.x is that dependencies are now provided by TypeClass rather than just static linking. Please refer to the <a href="https://github.com/ITV/scala-pact/tree/master/example">example setup</a>.</p>
+<h3><a href="#youre-using-sbt-1-x-or-higher-" name="youre-using-sbt-1-x-or-higher-" class="anchor"><span class="anchor-link"></span></a>You&rsquo;re using SBT 1.x or higher:</h3>
+<p>Add the following lines to your <code>build.sbt</code> file to setup the test framework:</p>
+<pre><code>import com.itv.scalapact.plugin._
+
+enablePlugins(ScalaPactPlugin)
+        
+libraryDependencies ++= Seq(
+  &quot;com.itv&quot;       %% &quot;scalapact-circe-0-9&quot;     % &quot;2.3.9&quot; % &quot;test&quot;,
+  &quot;com.itv&quot;       %% &quot;scalapact-http4s-0-18&quot;   % &quot;2.3.9&quot; % &quot;test&quot;,
+  &quot;com.itv&quot;       %% &quot;scalapact-scalatest&quot;     % &quot;2.3.9&quot; % &quot;test&quot;,
+  &quot;org.scalatest&quot; %% &quot;scalatest&quot;               % &quot;3.0.5&quot; % &quot;test&quot;
+)
+</code></pre>
+<p>Add this line to your <code>project/plugins.sbt</code> file to install the plugin:</p>
+<pre><code>addSbtPlugin(&quot;com.itv&quot; % &quot;sbt-scalapact&quot; % &quot;2.3.9&quot;)
+</code></pre>
+<p>This version of the plugin comes pre-packaged with the latest JSON and Http libraries. Thanks to the way SBT works, that one plugin line will work in most cases, but if you&rsquo;re still having conflicts, you can also do this to use your preferred libraries:</p>
+<pre><code> libraryDependencies ++= Seq(
+   &quot;com.itv&quot; %% &quot;scalapact-argonaut-6-2&quot; % &quot;2.3.9&quot;,
+   &quot;com.itv&quot; %% &quot;scalapact-http4s-0-16a&quot; % &quot;2.3.9&quot;
+ )
+ 
+ addSbtPlugin(&quot;com.itv&quot; % &quot;sbt-scalapact-nodeps&quot; % &quot;2.3.9&quot;)
+</code></pre>
+<p>In your test suite, you will need the following imports:</p>
+<p>The DSL/builder import for Consumer tests:</p>
+<pre><code>  import com.itv.scalapact.ScalaPactForger._
+</code></pre>
+<p>Or this one for Verification tests:</p>
+<pre><code>  import com.itv.scalapact.ScalaPactVerify._
+</code></pre>
+<p>You&rsquo;ll also need to reference the json and http libraries specified in the <code>build.sbt</code> file:</p>
+<pre><code>  import com.itv.scalapact.circe09._
+  import com.itv.scalapact.http4s18._
+</code></pre>
+<p>Alternatively, these are also valid if you prefer:</p>
+<pre><code>  import com.itv.scalapact.json._
+  import com.itv.scalapact.http._
+</code></pre>
+<h4><a href="#other-sbt-1-x-pluggable-dependency-options" name="other-sbt-1-x-pluggable-dependency-options" class="anchor"><span class="anchor-link"></span></a>Other SBT 1.x pluggable dependency options</h4>
+<p>Please check the <a href="project-deps.html">compatibility matrix</a> before using.</p>
+<p>JSON Libraries</p>
+<pre><code>&quot;com.itv&quot; %% &quot;scalapact-argonaut-6-2&quot;  % &quot;2.3.9&quot;
+&quot;com.itv&quot; %% &quot;scalapact-circe-0-8&quot;     % &quot;2.3.9&quot;
+&quot;com.itv&quot; %% &quot;scalapact-circe-0-9&quot;     % &quot;2.3.9&quot;
+&quot;com.itv&quot; %% &quot;scalapact-circe-0-10&quot;    % &quot;2.3.9&quot;
+</code></pre>
+<p>HTTP Libraries</p>
+<pre><code>&quot;com.itv&quot; %% &quot;scalapact-http4s-0-16a&quot;  % &quot;2.3.9&quot;
+&quot;com.itv&quot; %% &quot;scalapact-http4s-0-17&quot;   % &quot;2.3.9&quot;
+&quot;com.itv&quot; %% &quot;scalapact-http4s-0-18&quot;   % &quot;2.3.9&quot;
+</code></pre>
+<h3><a href="#youre-using-sbt-0-13-17-or-lower-" name="youre-using-sbt-0-13-17-or-lower-" class="anchor"><span class="anchor-link"></span></a>You&rsquo;re using SBT 0.13.17 or lower:</h3>
+<p>Add the following lines to your <code>build.sbt</code> file to setup the test framework:</p>
+<pre><code>import com.itv.scalapact.plugin._
+
+enablePlugins(ScalaPactPlugin)
+        
+libraryDependencies ++= Seq(
+  &quot;com.itv&quot;       %% &quot;scalapact-circe-0-9&quot;     % &quot;2.2.5&quot; % &quot;test&quot;,
+  &quot;com.itv&quot;       %% &quot;scalapact-http4s-0-18-0&quot; % &quot;2.2.5&quot; % &quot;test&quot;,
+  &quot;com.itv&quot;       %% &quot;scalapact-scalatest&quot;     % &quot;2.2.5&quot; % &quot;test&quot;,
+  &quot;org.scalatest&quot; %% &quot;scalatest&quot;               % &quot;3.0.5&quot; % &quot;test&quot;
+)
+</code></pre>
+<p>Add these lines to your <code>project/plugins.sbt</code> file to install the plugin:</p>
+<pre><code>libraryDependencies ++= Seq(
+  &quot;com.itv&quot; %% &quot;scalapact-argonaut-6-2&quot;  % &quot;2.2.5&quot;,
+  &quot;com.itv&quot; %% &quot;scalapact-http4s-0-16-2&quot; % &quot;2.2.5&quot;
+)
+
+addSbtPlugin(&quot;com.itv&quot; % &quot;sbt-scalapact&quot; % &quot;2.2.5&quot;)
+</code></pre>
+<p>In you&rsquo;re test suite, you will need the following import for Consumer tests:</p>
+<pre><code>  import com.itv.scalapact.ScalaPactForger._
+</code></pre>
+<p>Or this one for Verification tests:</p>
+<pre><code>  import com.itv.scalapact.ScalaPactVerify._
+</code></pre>
+<p>Note that you can use different versions of Scala-Pact with the plugin and the testing framework, which can make Scala 2.10 compat issues easier to work around while we get the SBT 1.0 release sorted out.</p>
+<h4><a href="#other-sbt-0-13-17-pluggable-dependency-options" name="other-sbt-0-13-17-pluggable-dependency-options" class="anchor"><span class="anchor-link"></span></a>Other SBT 0.13.17 pluggable dependency options</h4>
+<p>Please check the <a href="project-deps.html">compatibility matrix</a> before using.</p>
+<p>JSON Libraries</p>
+<pre><code>&quot;com.itv&quot; %% &quot;scalapact-argonaut-6-1&quot;  % &quot;2.2.0&quot;
+&quot;com.itv&quot; %% &quot;scalapact-argonaut-6-2&quot;  % &quot;2.2.0&quot;
+&quot;com.itv&quot; %% &quot;scalapact-circe-0-8&quot;     % &quot;2.2.0&quot;
+&quot;com.itv&quot; %% &quot;scalapact-circe-0-9&quot;     % &quot;2.2.0&quot;
+&quot;com.itv&quot; %% &quot;scalapact-circe-0-10&quot;    % &quot;2.2.0&quot;
+</code></pre>
+<p>HTTP Libraries</p>
+<pre><code>&quot;com.itv&quot; %% &quot;scalapact-http4s-0-15-0a&quot;  % &quot;2.2.0&quot;
+&quot;com.itv&quot; %% &quot;scalapact-http4s-0-16-2&quot;   % &quot;2.2.0&quot;
+&quot;com.itv&quot; %% &quot;scalapact-http4s-0-16-2a&quot;  % &quot;2.2.0&quot;
+&quot;com.itv&quot; %% &quot;scalapact-http4s-0-17-0&quot;   % &quot;2.2.0&quot;
+&quot;com.itv&quot; %% &quot;scalapact-http4s-0-18-0&quot;   % &quot;2.2.0&quot;
+</code></pre>
+<div class="source-github">
+The source code for this page can be found <a href="https://github.com/ITV/scala-pact/tree/master/scalapact-docs/src/main/paradox/setup.md">here</a>.
+</div>
+
+<div class="nav-next">
+<p><strong>Next:</strong> <a href="basics/index.html">Basic usage</a></p>
+</div>
+</div>
+<div class="large-3 show-for-large column" data-sticky-container>
+<nav class="sidebar sticky" data-sticky data-anchor="docs" data-sticky-on="large">
+<div class="page-nav">
+<div class="nav-title">On this page:</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="setup.html#setup-guide" class="header">Setup guide</a>
+  <ul>
+    <li><a href="setup.html#sbt-1-x-compatible-latest-2-3-9-" class="header">SBT 1.x compatible (Latest 2.3.9)</a></li>
+    <li><a href="setup.html#sbt-0-13-x-compatible-latest-2-2-5-" class="header">SBT 0.13.x compatible (Latest 2.2.5)</a></li>
+    <li><a href="setup.html#getting-setup" class="header">Getting setup</a></li>
+  </ul></li>
+</ul>
+</div>
+</div>
+</nav>
+</div>
+</div>
+
+</section>
+</div>
+
+</div>
+
+<footer class="site-footer">
+
+<section class="site-footer-nav">
+<div class="expanded row">
+<div class="small-12 large-offset-2 large-10 column">
+<div class="row site-footer-content">
+
+<div class="small-12 medium-4 large-3 text-center column">
+<div class="nav-links">
+<ul>
+<!-- <li><a href="https://www.example.com/products/">Products</a> -->
+</ul>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+
+<section class="site-footer-base">
+<div class="expanded row">
+<div class="small-12 large-offset-2 large-10 column">
+<div class="row site-footer-content">
+
+<div class="small-12 text-center large-9 column">
+
+<!--
+<div class="copyright">
+<span class="text">&copy; 2020</span>
+<a href="https://www.example.com" class="logo">logo</a>
+</div>
+-->
+</div>
+
+</div>
+</div>
+</div>
+</section>
+</footer>
+
+</div>
+</div>
+</div>
+</body>
+
+<script type="text/javascript" src="lib/foundation/dist/foundation.min.js"></script>
+<script type="text/javascript">jQuery(document).foundation();</script>
+<script type="text/javascript" src="js/magellan.js"></script>
+
+<style type="text/css">@import "lib/prettify/prettify.css";</style>
+<script type="text/javascript" src="lib/prettify/prettify.js"></script>
+<script type="text/javascript" src="lib/prettify/lang-scala.js"></script>
+<script type="text/javascript">jQuery(function(){window.prettyPrint && prettyPrint()});</script>
+<script type="text/javascript">jQuery(function(jq){initOldVersionWarnings(jq, '2.4.1-SNAPSHOT', '')});</script>
+
+
+</html>

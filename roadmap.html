@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+<title>Roadmap · Scala-Pact</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content='scalapact-docs'/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:100normal,100italic,300normal,300italic,400normal,400italic,500normal,500italic,700normal,700italic,900normal,900italicc" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="js/page.js"></script>
+<script type="text/javascript" src="js/warnOldVersion.js"></script>
+<script type="text/javascript" src="js/groups.js"></script>
+<link rel="stylesheet" type="text/css" href="lib/normalize.css/normalize.css"/>
+<link rel="stylesheet" type="text/css" href="lib/foundation/dist/foundation.min.css"/>
+<link rel="stylesheet" type="text/css" href="css/page.css"/>
+
+<!--
+<link rel="shortcut icon" href="images/favicon.ico" />
+-->
+</head>
+
+<body>
+<div class="off-canvas-wrapper">
+<div class="off-canvas-wrapper-inner" data-off-canvas-wrapper>
+
+<div class="off-canvas position-left" id="off-canvas-menu" data-off-canvas>
+<nav class="off-canvas-nav">
+<div class="nav-home">
+<a href="index.html" >
+<span class="home-icon">⌂</span>Scala-Pact
+</a>
+<div class="version-number">
+2.4.1*
+</div>
+</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="setup.html" class="page">Setup guide</a></li>
+  <li><a href="basics/index.html" class="page">Basic usage</a>
+  <ul>
+    <li><a href="basics/sbt-tasks.html" class="page">SBT Tasks</a></li>
+    <li><a href="basics/sbt-commands.html" class="page">SBT Commands</a></li>
+    <li><a href="basics/test-frameworks.html" class="page">Test frameworks</a></li>
+    <li><a href="basics/pact-stubber.html" class="page">Pact Stubber</a></li>
+  </ul></li>
+  <li><a href="advanced/index.html" class="page">Advanced usage</a>
+  <ul>
+    <li><a href="advanced/provider-states.html" class="page">Provider states</a></li>
+    <li><a href="advanced/strict-mode.html" class="page">Strict mode</a></li>
+    <li><a href="advanced/matching-rules.html" class="page">Matching rules</a></li>
+    <li><a href="advanced/pact-broker.html" class="page">Pact Broker</a></li>
+  </ul></li>
+  <li><a href="articles/index.html" class="page">Articles</a>
+  <ul>
+    <li><a href="articles/motivation.html" class="page">Motivation</a></li>
+    <li><a href="articles/pact-vs-integration.html" class="page">Pact vs Integration</a></li>
+    <li><a href="articles/verification-strategies.html" class="page">Verification strategies</a></li>
+  </ul></li>
+  <li><a href="examples/index.html" class="page">Example projects</a>
+  <ul>
+    <li><a href="examples/consumer.html" class="page">The Consumer</a></li>
+    <li><a href="examples/provider.html" class="page">The Provider</a></li>
+  </ul></li>
+  <li><a href="help.html" class="page">Get help</a></li>
+  <li><a href="project-deps.html" class="page">Dependencies</a></li>
+  <li><a href="roadmap.html" class="active page">Roadmap</a></li>
+  <li><a href="change-log.html" class="page">Change log</a></li>
+  <li><a href="contributing.html" class="page">How to contribute</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div class="off-canvas-content" data-off-canvas-content>
+
+<header class="site-header expanded row">
+<div class="small-12 column">
+<a href="#" class="off-canvas-toggle hide-for-medium" data-toggle="off-canvas-menu"><svg class="svg-icon svg-icon-menu" version="1.1" id="Menu" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 20 20" enable-background="new 0 0 20 20" xml:space="preserve"> <path class="svg-icon-menu-path" fill="#53CDEC" d="M16.4,9H3.6C3.048,9,3,9.447,3,10c0,0.553,0.048,1,0.6,1H16.4c0.552,0,0.6-0.447,0.6-1C17,9.447,16.952,9,16.4,9z M16.4,13
+H3.6C3.048,13,3,13.447,3,14c0,0.553,0.048,1,0.6,1H16.4c0.552,0,0.6-0.447,0.6-1C17,13.447,16.952,13,16.4,13z M3.6,7H16.4
+C16.952,7,17,6.553,17,6c0-0.553-0.048-1-0.6-1H3.6C3.048,5,3,5.447,3,6C3,6.553,3.048,7,3.6,7z"/></svg>
+</a>
+<div class="title"><a href="index.html">Scala-Pact</a></div>
+
+<!--
+<a href="https://www.example.com" class="logo show-for-medium">logo</a>
+-->
+</div>
+</header>
+
+<div class="expanded row">
+
+<div class="medium-3 large-2 show-for-medium column">
+<nav class="site-nav">
+<div class="nav-home">
+<a href="index.html" >
+<span class="home-icon">⌂</span>Scala-Pact
+</a>
+<div class="version-number">
+2.4.1*
+</div>
+</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="setup.html" class="page">Setup guide</a></li>
+  <li><a href="basics/index.html" class="page">Basic usage</a>
+  <ul>
+    <li><a href="basics/sbt-tasks.html" class="page">SBT Tasks</a></li>
+    <li><a href="basics/sbt-commands.html" class="page">SBT Commands</a></li>
+    <li><a href="basics/test-frameworks.html" class="page">Test frameworks</a></li>
+    <li><a href="basics/pact-stubber.html" class="page">Pact Stubber</a></li>
+  </ul></li>
+  <li><a href="advanced/index.html" class="page">Advanced usage</a>
+  <ul>
+    <li><a href="advanced/provider-states.html" class="page">Provider states</a></li>
+    <li><a href="advanced/strict-mode.html" class="page">Strict mode</a></li>
+    <li><a href="advanced/matching-rules.html" class="page">Matching rules</a></li>
+    <li><a href="advanced/pact-broker.html" class="page">Pact Broker</a></li>
+  </ul></li>
+  <li><a href="articles/index.html" class="page">Articles</a>
+  <ul>
+    <li><a href="articles/motivation.html" class="page">Motivation</a></li>
+    <li><a href="articles/pact-vs-integration.html" class="page">Pact vs Integration</a></li>
+    <li><a href="articles/verification-strategies.html" class="page">Verification strategies</a></li>
+  </ul></li>
+  <li><a href="examples/index.html" class="page">Example projects</a>
+  <ul>
+    <li><a href="examples/consumer.html" class="page">The Consumer</a></li>
+    <li><a href="examples/provider.html" class="page">The Provider</a></li>
+  </ul></li>
+  <li><a href="help.html" class="page">Get help</a></li>
+  <li><a href="project-deps.html" class="page">Dependencies</a></li>
+  <li><a href="roadmap.html" class="active page">Roadmap</a></li>
+  <li><a href="change-log.html" class="page">Change log</a></li>
+  <li><a href="contributing.html" class="page">How to contribute</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div class="small-12 medium-9 large-10 column">
+<section class="site-content">
+
+<span id="version-warning"></span>
+
+<div class="page-header row">
+<div class="medium-12 show-for-medium column">
+<div class="nav-breadcrumbs">
+<ul>
+  <li><a href="index.html">Scala-Pact</a></li>
+  <li>Roadmap</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="page-content row">
+<div class="small-12 large-9 column" id="docs">
+<h1><a href="#roadmap" name="roadmap" class="anchor"><span class="anchor-link"></span></a>Roadmap</h1>
+<p>This is a brief outline of the intended sequence of upcoming work that will result in a 3.0.0 release.</p>
+<h2><a href="#phase-5-amqp-pact-version-3-or-4-" name="phase-5-amqp-pact-version-3-or-4-" class="anchor"><span class="anchor-link"></span></a><strong>[NEXT]</strong> Phase 5 - AMQP? Pact version 3 or 4?</h2>
+<p>I think I could characterise the previous three phases as &ldquo;Stop it and tidy up&rdquo;. That may seem a little dull but I&rsquo;d rather we were doing a good there first before we move on.</p>
+<p>Up next is almost certainly related to adding support for AMQP and seeing where that takes us in relation to keeping up with the Pact standards.</p>
+<h2><a href="#phase-4-sbt-1-x-compatibility" name="phase-4-sbt-1-x-compatibility" class="anchor"><span class="anchor-link"></span></a><strong>[COMPLETE]</strong> Phase 4 - SBT 1.x Compatibility</h2>
+<p>SBT 1.0.x has arrived, and Scala-Pact is not yet compatible with it. The most pressing thing is to rework the cross compilation / publishing so that the plugin works with the latest versions of SBT while remaining backward compatible.</p>
+<h2><a href="#phase-3-fix-the-dependencies" name="phase-3-fix-the-dependencies" class="anchor"><span class="anchor-link"></span></a><strong>[COMPLETE]</strong> Phase 3 - Fix the dependencies</h2>
+<p>The aim here is to push out as many dependencies on other libraries as possible, so that we don&rsquo;t interfere with existing projects people want to use Scala-Pact with. The big one is Http4s, because it drags in versions of Scalaz and Argonaut. Pushing these out (into modules perhaps?) might mean we ultimately need more SBT dependencies again, but hopefully better planned ones!</p>
+<h2><a href="#phase-2-ironing-out-the-niggles" name="phase-2-ironing-out-the-niggles" class="anchor"><span class="anchor-link"></span></a><strong>[COMPLETE*]</strong> Phase 2 - Ironing out the niggles</h2>
+<p>Two parts to this really:</p>
+<ol>
+  <li>There&rsquo;s a bunch of outstanding issues raised against the project that need some form of attention.</li>
+  <li>The project needs some hygiene maintenance which mostly means moving to a multi-project build and considering whether we need three Scala-Pact SBT library dependencies or whether we could get away with less. Certainly two seems possible (plugin and test framework).</li>
+</ol>
+<p>(* Mostly complete&hellip; there are and will always be minor on going issues to resolve.)</p>
+<h2><a href="#phase-1-better-errors" name="phase-1-better-errors" class="anchor"><span class="anchor-link"></span></a><strong>[COMPLETE]</strong> Phase 1 - Better errors</h2>
+<p>Scala-Pact&rsquo;s major pain point at the moment, is efficiently tracking down exactly where a match failed. It&rsquo;s laborious and manual. During early development this was seen as low priority since we were often testing small payloads and initially there was no support for matching rules - spotting issues was pretty trivial.</p>
+<p>It feels important to fix this before any other big lumps of work are undertaken, such as adding support for AMQP.</p>
+<p>Order of work:</p>
+<ol>
+  <li>Rework the matching logic (in progress)</li>
+  <li>Add in the ability to aggregate failures</li>
+  <li>Find a nice way to present them</li>
+</ol>
+<div class="source-github">
+The source code for this page can be found <a href="https://github.com/ITV/scala-pact/tree/master/scalapact-docs/src/main/paradox/roadmap.md">here</a>.
+</div>
+
+<div class="nav-next">
+<p><strong>Next:</strong> <a href="change-log.html">Change log</a></p>
+</div>
+</div>
+<div class="large-3 show-for-large column" data-sticky-container>
+<nav class="sidebar sticky" data-sticky data-anchor="docs" data-sticky-on="large">
+<div class="page-nav">
+<div class="nav-title">On this page:</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="roadmap.html#roadmap" class="header">Roadmap</a>
+  <ul>
+    <li><a href="roadmap.html#phase-5-amqp-pact-version-3-or-4-" class="header"><strong>[NEXT]</strong> Phase 5 - AMQP? Pact version 3 or 4?</a></li>
+    <li><a href="roadmap.html#phase-4-sbt-1-x-compatibility" class="header"><strong>[COMPLETE]</strong> Phase 4 - SBT 1.x Compatibility</a></li>
+    <li><a href="roadmap.html#phase-3-fix-the-dependencies" class="header"><strong>[COMPLETE]</strong> Phase 3 - Fix the dependencies</a></li>
+    <li><a href="roadmap.html#phase-2-ironing-out-the-niggles" class="header"><strong>[COMPLETE*]</strong> Phase 2 - Ironing out the niggles</a></li>
+    <li><a href="roadmap.html#phase-1-better-errors" class="header"><strong>[COMPLETE]</strong> Phase 1 - Better errors</a></li>
+  </ul></li>
+</ul>
+</div>
+</div>
+</nav>
+</div>
+</div>
+
+</section>
+</div>
+
+</div>
+
+<footer class="site-footer">
+
+<section class="site-footer-nav">
+<div class="expanded row">
+<div class="small-12 large-offset-2 large-10 column">
+<div class="row site-footer-content">
+
+<div class="small-12 medium-4 large-3 text-center column">
+<div class="nav-links">
+<ul>
+<!-- <li><a href="https://www.example.com/products/">Products</a> -->
+</ul>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+
+<section class="site-footer-base">
+<div class="expanded row">
+<div class="small-12 large-offset-2 large-10 column">
+<div class="row site-footer-content">
+
+<div class="small-12 text-center large-9 column">
+
+<!--
+<div class="copyright">
+<span class="text">&copy; 2020</span>
+<a href="https://www.example.com" class="logo">logo</a>
+</div>
+-->
+</div>
+
+</div>
+</div>
+</div>
+</section>
+</footer>
+
+</div>
+</div>
+</div>
+</body>
+
+<script type="text/javascript" src="lib/foundation/dist/foundation.min.js"></script>
+<script type="text/javascript">jQuery(document).foundation();</script>
+<script type="text/javascript" src="js/magellan.js"></script>
+
+<style type="text/css">@import "lib/prettify/prettify.css";</style>
+<script type="text/javascript" src="lib/prettify/prettify.js"></script>
+<script type="text/javascript" src="lib/prettify/lang-scala.js"></script>
+<script type="text/javascript">jQuery(function(){window.prettyPrint && prettyPrint()});</script>
+<script type="text/javascript">jQuery(function(jq){initOldVersionWarnings(jq, '2.4.1-SNAPSHOT', '')});</script>
+
+
+</html>

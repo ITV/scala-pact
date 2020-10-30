@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+<title>Change log · Scala-Pact</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content='scalapact-docs'/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:100normal,100italic,300normal,300italic,400normal,400italic,500normal,500italic,700normal,700italic,900normal,900italicc" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="js/page.js"></script>
+<script type="text/javascript" src="js/warnOldVersion.js"></script>
+<script type="text/javascript" src="js/groups.js"></script>
+<link rel="stylesheet" type="text/css" href="lib/normalize.css/normalize.css"/>
+<link rel="stylesheet" type="text/css" href="lib/foundation/dist/foundation.min.css"/>
+<link rel="stylesheet" type="text/css" href="css/page.css"/>
+
+<!--
+<link rel="shortcut icon" href="images/favicon.ico" />
+-->
+</head>
+
+<body>
+<div class="off-canvas-wrapper">
+<div class="off-canvas-wrapper-inner" data-off-canvas-wrapper>
+
+<div class="off-canvas position-left" id="off-canvas-menu" data-off-canvas>
+<nav class="off-canvas-nav">
+<div class="nav-home">
+<a href="index.html" >
+<span class="home-icon">⌂</span>Scala-Pact
+</a>
+<div class="version-number">
+2.4.1*
+</div>
+</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="setup.html" class="page">Setup guide</a></li>
+  <li><a href="basics/index.html" class="page">Basic usage</a>
+  <ul>
+    <li><a href="basics/sbt-tasks.html" class="page">SBT Tasks</a></li>
+    <li><a href="basics/sbt-commands.html" class="page">SBT Commands</a></li>
+    <li><a href="basics/test-frameworks.html" class="page">Test frameworks</a></li>
+    <li><a href="basics/pact-stubber.html" class="page">Pact Stubber</a></li>
+  </ul></li>
+  <li><a href="advanced/index.html" class="page">Advanced usage</a>
+  <ul>
+    <li><a href="advanced/provider-states.html" class="page">Provider states</a></li>
+    <li><a href="advanced/strict-mode.html" class="page">Strict mode</a></li>
+    <li><a href="advanced/matching-rules.html" class="page">Matching rules</a></li>
+    <li><a href="advanced/pact-broker.html" class="page">Pact Broker</a></li>
+  </ul></li>
+  <li><a href="articles/index.html" class="page">Articles</a>
+  <ul>
+    <li><a href="articles/motivation.html" class="page">Motivation</a></li>
+    <li><a href="articles/pact-vs-integration.html" class="page">Pact vs Integration</a></li>
+    <li><a href="articles/verification-strategies.html" class="page">Verification strategies</a></li>
+  </ul></li>
+  <li><a href="examples/index.html" class="page">Example projects</a>
+  <ul>
+    <li><a href="examples/consumer.html" class="page">The Consumer</a></li>
+    <li><a href="examples/provider.html" class="page">The Provider</a></li>
+  </ul></li>
+  <li><a href="help.html" class="page">Get help</a></li>
+  <li><a href="project-deps.html" class="page">Dependencies</a></li>
+  <li><a href="roadmap.html" class="page">Roadmap</a></li>
+  <li><a href="change-log.html" class="active page">Change log</a></li>
+  <li><a href="contributing.html" class="page">How to contribute</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div class="off-canvas-content" data-off-canvas-content>
+
+<header class="site-header expanded row">
+<div class="small-12 column">
+<a href="#" class="off-canvas-toggle hide-for-medium" data-toggle="off-canvas-menu"><svg class="svg-icon svg-icon-menu" version="1.1" id="Menu" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 20 20" enable-background="new 0 0 20 20" xml:space="preserve"> <path class="svg-icon-menu-path" fill="#53CDEC" d="M16.4,9H3.6C3.048,9,3,9.447,3,10c0,0.553,0.048,1,0.6,1H16.4c0.552,0,0.6-0.447,0.6-1C17,9.447,16.952,9,16.4,9z M16.4,13
+H3.6C3.048,13,3,13.447,3,14c0,0.553,0.048,1,0.6,1H16.4c0.552,0,0.6-0.447,0.6-1C17,13.447,16.952,13,16.4,13z M3.6,7H16.4
+C16.952,7,17,6.553,17,6c0-0.553-0.048-1-0.6-1H3.6C3.048,5,3,5.447,3,6C3,6.553,3.048,7,3.6,7z"/></svg>
+</a>
+<div class="title"><a href="index.html">Scala-Pact</a></div>
+
+<!--
+<a href="https://www.example.com" class="logo show-for-medium">logo</a>
+-->
+</div>
+</header>
+
+<div class="expanded row">
+
+<div class="medium-3 large-2 show-for-medium column">
+<nav class="site-nav">
+<div class="nav-home">
+<a href="index.html" >
+<span class="home-icon">⌂</span>Scala-Pact
+</a>
+<div class="version-number">
+2.4.1*
+</div>
+</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="setup.html" class="page">Setup guide</a></li>
+  <li><a href="basics/index.html" class="page">Basic usage</a>
+  <ul>
+    <li><a href="basics/sbt-tasks.html" class="page">SBT Tasks</a></li>
+    <li><a href="basics/sbt-commands.html" class="page">SBT Commands</a></li>
+    <li><a href="basics/test-frameworks.html" class="page">Test frameworks</a></li>
+    <li><a href="basics/pact-stubber.html" class="page">Pact Stubber</a></li>
+  </ul></li>
+  <li><a href="advanced/index.html" class="page">Advanced usage</a>
+  <ul>
+    <li><a href="advanced/provider-states.html" class="page">Provider states</a></li>
+    <li><a href="advanced/strict-mode.html" class="page">Strict mode</a></li>
+    <li><a href="advanced/matching-rules.html" class="page">Matching rules</a></li>
+    <li><a href="advanced/pact-broker.html" class="page">Pact Broker</a></li>
+  </ul></li>
+  <li><a href="articles/index.html" class="page">Articles</a>
+  <ul>
+    <li><a href="articles/motivation.html" class="page">Motivation</a></li>
+    <li><a href="articles/pact-vs-integration.html" class="page">Pact vs Integration</a></li>
+    <li><a href="articles/verification-strategies.html" class="page">Verification strategies</a></li>
+  </ul></li>
+  <li><a href="examples/index.html" class="page">Example projects</a>
+  <ul>
+    <li><a href="examples/consumer.html" class="page">The Consumer</a></li>
+    <li><a href="examples/provider.html" class="page">The Provider</a></li>
+  </ul></li>
+  <li><a href="help.html" class="page">Get help</a></li>
+  <li><a href="project-deps.html" class="page">Dependencies</a></li>
+  <li><a href="roadmap.html" class="page">Roadmap</a></li>
+  <li><a href="change-log.html" class="active page">Change log</a></li>
+  <li><a href="contributing.html" class="page">How to contribute</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div class="small-12 medium-9 large-10 column">
+<section class="site-content">
+
+<span id="version-warning"></span>
+
+<div class="page-header row">
+<div class="medium-12 show-for-medium column">
+<div class="nav-breadcrumbs">
+<ul>
+  <li><a href="index.html">Scala-Pact</a></li>
+  <li>Change log</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="page-content row">
+<div class="small-12 large-9 column" id="docs">
+<h1><a href="#change-log" name="change-log" class="anchor"><span class="anchor-link"></span></a>Change log</h1>
+<p>All notable changes and releases to this project will be documented here.</p>
+<p>With thanks to all contributors!</p>
+<ul>
+  <li><a href="https://github.com/itsDanOades">itsDanOades</a></li>
+  <li><a href="https://github.com/smithleej">smithleej</a></li>
+  <li><a href="https://github.com/iulian-antohe">Iulian-Antohe</a></li>
+  <li><a href="https://github.com/blake-boesinger">blake-boesinger</a></li>
+  <li><a href="https://github.com/agustafson">agustafson</a></li>
+  <li><a href="https://github.com/raoulk">raoulk</a></li>
+  <li><a href="https://github.com/BenParker22">BenParker22</a></li>
+  <li><a href="https://github.com/jtsmith0107">jtsmith0107</a></li>
+  <li><a href="https://github.com/yasuba">yasuba</a></li>
+  <li><a href="https://github.com/phil-rice">phil-rice</a></li>
+  <li><a href="https://github.com/fergusstrange">fergusstrange</a></li>
+  <li><a href="https://github.com/cjwebb">cjwebb</a></li>
+  <li><a href="https://github.com/benivf">benivf</a></li>
+  <li><a href="https://github.com/afiore">afiore</a></li>
+  <li><a href="https://github.com/pgordon9">pgordon9</a></li>
+  <li><a href="https://github.com/gcvt">gcvt</a></li>
+  <li><a href="https://github.com/dandxy89">dandxy89</a></li>
+  <li><a href="https://github.com/orium">orium</a></li>
+  <li><a href="https://github.com/opbokel">opbokel</a></li>
+  <li><a href="https://github.com/garraspin">garraspin</a></li>
+  <li><a href="https://github.com/Paulymorph">Paulymorph</a></li>
+  <li><a href="https://github.com/jnatten">jnatten</a></li>
+  <li><a href="https://github.com/randbw">randbw</a></li>
+  <li><a href="https://github.com/ShahOdin">ShahOdin</a></li>
+  <li><a href="https://github.com/aggenebbisj">aggenebbisj</a></li>
+  <li><a href="https://github.com/mcarolan">mcarolan</a></li>
+  <li><a href="https://github.com/cmcmteixeira">cmcmteixeira</a></li>
+  <li><a href="https://github.com/chrischivers">chrischivers</a></li>
+  <li><a href="https://github.com/jacemale">jacemale</a></li>
+  <li><a href="https://github.com/dantb">dantb</a></li>
+  <li><a href="https://github.com/razerno">razerno</a></li>
+  <li><a href="https://github.com/jatcwang">jatcwang</a></li>
+  <li>&hellip;your name here? :-)</li>
+</ul>
+<p>Maintained by <a href="https://github.com/davesmith00000">davesmith00000</a>.</p>
+<h2><a href="#2-3-14-2020-01-20" name="2-3-14-2020-01-20" class="anchor"><span class="anchor-link"></span></a>2.3.14 - 2020-01-20</h2>
+<ul>
+  <li>Fix publishing of sbt plugin. (<a href="https://github.com/orium">orium</a>)</li>
+</ul>
+<h2><a href="#2-3-13-2020-01-16" name="2-3-13-2020-01-16" class="anchor"><span class="anchor-link"></span></a>2.3.13 - 2020-01-16</h2>
+<ul>
+  <li>Cross compile for Scala 2.13. (<a href="https://github.com/orium">orium</a>)</li>
+</ul>
+<h2><a href="#2-3-12-2019-10-16" name="2-3-12-2019-10-16" class="anchor"><span class="anchor-link"></span></a>2.3.12 - 2019-10-16</h2>
+<ul>
+  <li>Exit with error if any pact push operations fail (not API breaking, but potentially CI breaking) (<a href="https://github.com/dantb">dantb</a>)</li>
+</ul>
+<h2><a href="#2-3-11-2019-10-04" name="2-3-11-2019-10-04" class="anchor"><span class="anchor-link"></span></a>2.3.11 - 2019-10-04</h2>
+<ul>
+  <li>Added support for Circe 0.12.1 (<a href="https://github.com/agustafson">agustafson</a>, <a href="https://github.com/jatcwang">jatcwang</a>)</li>
+</ul>
+<h2><a href="#2-3-9-2019-06-27" name="2-3-9-2019-06-27" class="anchor"><span class="anchor-link"></span></a>2.3.9 - 2019-06-27</h2>
+<ul>
+  <li>Add pact metadata to generated contracts (Fixes <a href="https://github.com/ITV/scala-pact/issues/84">#84</a>) (<a href="https://github.com/davesmith00000">davesmith00000</a>)</li>
+  <li>Support finalising a <code>ScalaPactDescription</code> within the <code>ScalaPactForger</code> DSL (Fixes <a href="https://github.com/ITV/scala-pact/issues/134">#134</a>) (<a href="https://github.com/razerno">razerno</a>)</li>
+  <li>Refactored squashPactFiles method in SBT plugin (<a href="https://github.com/dantb">dantb</a>)</li>
+  <li>Added support for token based Pact Broker authentication (Fixes <a href="https://github.com/ITV/scala-pact/issues/140">#140</a>) (<a href="https://github.com/dantb">dantb</a>)</li>
+</ul>
+<h2><a href="#2-3-8-2019-04-26" name="2-3-8-2019-04-26" class="anchor"><span class="anchor-link"></span></a>2.3.8 - 2019-04-26</h2>
+<ul>
+  <li>Added support for Http4s 0.20.0 (<a href="https://github.com/jacemale">jacemale</a>)</li>
+</ul>
+<h2><a href="#2-3-6-2019-04-13" name="2-3-6-2019-04-13" class="anchor"><span class="anchor-link"></span></a>2.3.6 - 2019-04-13</h2>
+<ul>
+  <li>Bugfix: Use correct <code>Headers</code> apply function in <code>Http4sRequestResponseFactory</code> (<a href="https://github.com/davesmith00000">davesmith00000</a>)</li>
+  <li>Use recommended scalafix SBT JVM memory settings (<a href="https://github.com/davesmith00000">davesmith00000</a>)</li>
+  <li>Added Http4s 0.20.0-M4 support (<a href="https://github.com/chrischivers">chrischivers</a>)</li>
+  <li>Fix handling of URL parameter lists in <code>PactStubService</code> (<a href="https://github.com/cmcmteixeira">cmcmteixeira</a>)</li>
+</ul>
+<h2><a href="#2-3-5-2019-02-15" name="2-3-5-2019-02-15" class="anchor"><span class="anchor-link"></span></a>2.3.5 - 2019-02-15</h2>
+<ul>
+  <li>Added support for Circe 0.11 (<a href="https://github.com/mcarolan">mcarolan</a>)</li>
+  <li>Fix typo in <code>ScalaPactVerify</code> (<a href="https://github.com/aggenebbisj">aggenebbisj</a>)</li>
+  <li>Documentation corrections (<a href="https://github.com/ShahOdin">ShahOdin</a>)</li>
+  <li>Remove milestone version from package name (<a href="https://github.com/randbw">randbw</a>)</li>
+</ul>
+<h2><a href="#2-3-4-2018-12-31" name="2-3-4-2018-12-31" class="anchor"><span class="anchor-link"></span></a>2.3.4 - 2018-12-31</h2>
+<ul>
+  <li>Adds support for http basic authentication (Fixes <a href="https://github.com/ITV/scala-pact/issues/110">#110</a>) (<a href="https://github.com/jnatten">jnatten</a>)</li>
+  <li>Adds support for tagging pacts while publishing and verifying (Fixes <a href="https://github.com/ITV/scala-pact/issues/107">#107</a>) (<a href="https://github.com/jnatten">jnatten</a>)</li>
+  <li>Added Http4s 0.20 support (version 0.20.0-M4) (<a href="https://github.com/randbw">randbw</a>)</li>
+  <li>Fixed ScalaPactMatchingRuleArrayMinLength writing (Fixes <a href="https://github.com/ITV/scala-pact/issues/108">#108</a>) (<a href="https://github.com/Paulymorph">Paulymorph</a>)</li>
+  <li>Fix spelling of ColourOutput object (<a href="https://github.com/randbw">randbw</a>)</li>
+  <li>Circe upgraded to 0.10.1 (<a href="https://github.com/dandxy89">dandxy89</a>)</li>
+</ul>
+<h2><a href="#2-3-3-2018-10-24" name="2-3-3-2018-10-24" class="anchor"><span class="anchor-link"></span></a>2.3.3 - 2018-10-24</h2>
+<ul>
+  <li>Added ability publish verification results (Fixes <a href="https://github.com/ITV/scala-pact/issues/71">#71</a>) (<a href="https://github.com/garraspin">garraspin</a>)</li>
+  <li>Added support for Circe 0.10 (<a href="https://github.com/dandxy89">dandxy89</a>)</li>
+</ul>
+<h2><a href="#2-3-2-2018-08-12" name="2-3-2-2018-08-12" class="anchor"><span class="anchor-link"></span></a>2.3.2 - 2018-08-12</h2>
+<ul>
+  <li>Added missing HTTP methods (<a href="https://github.com/opbokel">opbokel</a>)</li>
+  <li>Added ability to modify requests during Provider State setup (<a href="https://github.com/garraspin">garraspin</a>)</li>
+  <li>Failed Pact Broker calls now fail spectacularly (rather than silently)</li>
+  <li>Pact verifications that perform no tests exit with non-zero code</li>
+</ul>
+<h2><a href="#2-3-1-2018-07-05" name="2-3-1-2018-07-05" class="anchor"><span class="anchor-link"></span></a>2.3.1 - 2018-07-05</h2>
+<ul>
+  <li>Fixed find free port race condition (<a href="https://github.com/orium">orium</a>)</li>
+</ul>
+<h2><a href="#2-3-0-rc1-2018-05-03" name="2-3-0-rc1-2018-05-03" class="anchor"><span class="anchor-link"></span></a>2.3.0-RC1 - 2018-05-03</h2>
+<ul>
+  <li>Static dependencies converted to Typeclasses</li>
+  <li>SBT 1.x support</li>
+  <li>Verification test summary (<a href="https://github.com/dandxy89">dandxy89</a>)</li>
+  <li>Documentation corrections (<a href="https://github.com/pgordon9">pgordon9</a>)</li>
+  <li>Exclude logback.xml and log4j.properties from published jar (<a href="https://github.com/cjwebb">cjwebb</a>)</li>
+  <li>Documentation corrections (<a href="https://github.com/cjwebb">cjwebb</a>)</li>
+  <li>Bugfix: http client in 0-18 ignoring clientTimeout (<a href="https://github.com/gcvt">gcvt</a>)</li>
+</ul>
+<h2><a href="#2-2-3-2018-02-19" name="2-2-3-2018-02-19" class="anchor"><span class="anchor-link"></span></a>2.2.3 - 2018-02-19</h2>
+<ul>
+  <li>Update to stable Http4s 0.18 (<a href="https://github.com/benivf">benivf</a>)</li>
+  <li>BUGFIX: Http4s interface incompatibility issue corrected (<a href="https://github.com/afiore">afiore</a>)</li>
+  <li>Work to improve pact logging levels (<a href="https://github.com/phil-rice">phil-rice</a>)</li>
+</ul>
+<h2><a href="#2-2-2-2018-01-17" name="2-2-2-2018-01-17" class="anchor"><span class="anchor-link"></span></a>2.2.2 - 2018-01-17</h2>
+<ul>
+  <li>SSL support added! (<a href="https://github.com/phil-rice">phil-rice</a>)</li>
+  <li>Http4s 0.18.0-M8 milestone release support added (<a href="https://github.com/benivf">benivf</a>, <a href="https://github.com/afiore">afiore</a>)</li>
+  <li>Circe 0.9 support added</li>
+  <li>BUGFIX: Nasty lingering argonaut hard dependency has been removed.</li>
+</ul>
+<h2><a href="#2-2-1-2017-10-14" name="2-2-1-2017-10-14" class="anchor"><span class="anchor-link"></span></a>2.2.1 - 2017-10-14</h2>
+<ul>
+  <li>BUGFIX: Pact publishing works again</li>
+  <li>BUGFIX: Client timeout is supplied in seconds but is a duration after that.</li>
+  <li>Added more compiler flags and wart remover</li>
+  <li>Publisher will not publish files ending in tmp.json (protection for pactPush task)</li>
+  <li>Verification failures now show the description for the interaction that failed</li>
+  <li>Finding closest match now done by a points system</li>
+</ul>
+<h2><a href="#2-2-0-2017-10-05" name="2-2-0-2017-10-05" class="anchor"><span class="anchor-link"></span></a>2.2.0 - 2017-10-05</h2>
+<p><strong>Breaking changes.</strong></p>
+<p>With thanks to <a href="https://github.com/yasuba">yasuba</a> and <a href="https://github.com/itsDanOades">itsDanOades</a> for assisting with this release.</p>
+<p>Highlights:</p>
+<ul>
+  <li>Accepts basic auth for Pact Broker addresses (<a href="https://github.com/phil-rice">phil-rice</a>)</li>
+  <li>Output dir (target/pacts) is now configurable via SBT config and environment variable &ldquo;pact.rootDir&rdquo; (<a href="https://github.com/fergusstrange">fergusstrange</a>)</li>
+  <li>Publish to multiple provider pact brokers</li>
+  <li><strong>[BREAKING]</strong> Matching logic completely rewritten (this could break existing tests in one or two cases, but once fixed they will be correct by the Pact Specification)</li>
+  <li><strong>[BREAKING]</strong> No more dependency conflicts
+    <ul>
+      <li>No external lib dependancies in any of the core libraries.</li>
+      <li>You must tell Scala-Pact which Http and JSON libraries to use (see setup guide).</li>
+      <li>JSON support via either Argonaut 6.1, Argonaut 6.2, or Circe 0.8.0</li>
+      <li>HTTP support via Http4s versions 0.15.0a, 0.16.2, 0.16.2a, or 0.17.0</li>
+      <li>Example projects use a range of Scala and lib combinations to prove they work (to be expanded)</li>
+    </ul>
+  </li>
+  <li><strong>[BREAKING]</strong> Renamed sbt plugin to sbt-scalapact</li>
+  <li>Composable SBT Tasks (pactPack, packPush, pactStub, and pactCheck)</li>
+  <li>Scala-Pact env config (e.g. port and local dir) is now defined in the build sbt file.</li>
+  <li>Commands inherit and can override via the usual command line arguments.</li>
+</ul>
+<p>Bug fixes:</p>
+<ul>
+  <li>Scala-Pact can now be used reliably inside SBT to avoid constantly starting SBT from cold.</li>
+  <li>Issues with matching rules and how they deal with deep or multiple layers of wildcards have been resolved.</li>
+  <li>Regex matching of values no longer expects an exact match, instead expects to find at least one match.</li>
+</ul>
+<p>Other improvements for contributors:</p>
+<ul>
+  <li>Converted to multi-project build</li>
+  <li>Many more modules, improved separation of concerns</li>
+  <li>Extending support for alternate HTTP and JSON frameworks is now easy.</li>
+  <li>Better build / test scripts include testing cross compilation</li>
+  <li>Simpler project version management</li>
+  <li>Release script improvements</li>
+</ul>
+<h2><a href="#2-1-3-2017-03-24" name="2-1-3-2017-03-24" class="anchor"><span class="anchor-link"></span></a>2.1.3 - 2017-03-24</h2>
+<ul>
+  <li>Convert SBT plugin to AutoPlugin (<a href="https://github.com/yasuba">yasuba</a>)</li>
+  <li>Ability to set a client timeout on verification (<a href="https://github.com/itsDanOades">itsDanOades</a>)</li>
+  <li>XML matching rules now work as expected</li>
+  <li>Pact match failures against the stubber now return a 598 status, NOT a misleading 404.</li>
+  <li>BUGFIX: Pact stubber now accepts chunked requests</li>
+  <li>BUGFIX: Pact broker addresses can now include a port number</li>
+  <li>BUGFIX: Bad test case fixed that would previously always succeed (<a href="https://github.com/yasuba">yasuba</a>)</li>
+</ul>
+<h2><a href="#2-1-2-2017-01-25" name="2-1-2-2017-01-25" class="anchor"><span class="anchor-link"></span></a>2.1.2 - 2017-01-25</h2>
+<ul>
+  <li>BUGFIX: Small issue that slipped through testing: In order for providerStates to work you had to declare a providerStateMatcher somewhere even if you already have a normal providerState setting. This has been resolved.</li>
+</ul>
+<h2><a href="#2-1-1-2017-01-24" name="2-1-1-2017-01-24" class="anchor"><span class="anchor-link"></span></a>2.1.1 - 2017-01-24</h2>
+<ul>
+  <li>Accept <code>provider_state</code> on Pact file read to support old Pact formats (<a href="https://github.com/itsDanOades">itsDanOades</a>)</li>
+  <li>Added new <code>providerStateMatcher</code> partial function as a slicker, more useful alternative to the old mechanism. (<a href="https://github.com/jtsmith0107">jtsmith0107</a>)</li>
+</ul>
+<h2><a href="#2-1-0-2016-12-16" name="2-1-0-2016-12-16" class="anchor"><span class="anchor-link"></span></a>2.1.0 - 2016-12-16</h2>
+<ul>
+  <li>Scala 2.12 release
+    <ul>
+      <li>Depends on http4s 0.15.0a which is bundled with argonaut 6.2-RC1 and scalaz 7.2.7</li>
+    </ul>
+  </li>
+  <li>Fixed intermittent bug that failed otherwise good tests</li>
+  <li>Improved test speed</li>
+  <li>Fixed issue where having a large number of pact tests in one suite caused a failure (with thanks to <a href="https://github.com/BenParker22">BenParker22</a>)</li>
+  <li>Increased performance / capacity of pact stubber</li>
+  <li>Provider state failures now fail noisily</li>
+  <li>runConsumerTest returns a result instead of Unit (<a href="https://github.com/agustafson">agustafson</a>)</li>
+</ul>
+<h2><a href="#2-0-0-2016-11-01" name="2-0-0-2016-11-01" class="anchor"><span class="anchor-link"></span></a>2.0.0 - 2016-11-01</h2>
+<ul>
+  <li>Full Pact Specification Version 2.0 Compliance</li>
+  <li>Body matching rules</li>
+  <li>Provider verification test framework</li>
+  <li>Strict mode</li>
+  <li>Reduced library dependencies</li>
+  <li>Improved mock config object</li>
+  <li>Handle lowercase method during verify (<a href="https://github.com/smithleej">smithleej</a>)</li>
+</ul>
+<h2><a href="#1-0-2-2016-10-04" name="1-0-2-2016-10-04" class="anchor"><span class="anchor-link"></span></a>1.0.2 - 2016-10-04</h2>
+<ul>
+  <li>Remove logging implementation dependencies (<a href="https://github.com/agustafson">agustafson</a>)</li>
+  <li>Added example projects</li>
+  <li>Scala-PactContractWriter creates directories &lsquo;target&rsquo; and &lsquo;pacts&rsquo; if they don&rsquo;t exist (<a href="https://github.com/raoulk">raoulk</a>)</li>
+  <li>Add preflight request operation (OPTIONS) (<a href="https://github.com/itsDanOades">itsDanOades</a>)</li>
+  <li>Codified testing process in a shell script.</li>
+</ul>
+<h2><a href="#1-0-1-2016-07-19" name="1-0-1-2016-07-19" class="anchor"><span class="anchor-link"></span></a>1.0.1 - 2016-07-19</h2>
+<ul>
+  <li>Verifier does not post data if body is empty</li>
+  <li>Added the ability to specify a pact version when verifying (<a href="https://github.com/itsDanOades">itsDanOades</a>)</li>
+</ul>
+<h2><a href="#1-0-0-2016-05-26" name="1-0-0-2016-05-26" class="anchor"><span class="anchor-link"></span></a>1.0.0 - 2016-05-26</h2>
+<ul>
+  <li>Initial public release following a number of in house only dev and milestone versions. (<a href="https://github.com/davesmith00000">davesmith00000</a>, <a href="https://github.com/iulian-antohe">Iulian-Antohe</a>, <a href="https://github.com/smithleej">smithleej</a>, <a href="https://github.com/blake-boesinger">blake-boesinger</a>)</li>
+</ul>
+<div class="source-github">
+The source code for this page can be found <a href="https://github.com/ITV/scala-pact/tree/master/scalapact-docs/src/main/paradox/change-log.md">here</a>.
+</div>
+
+<div class="nav-next">
+<p><strong>Next:</strong> <a href="contributing.html">How to contribute</a></p>
+</div>
+</div>
+<div class="large-3 show-for-large column" data-sticky-container>
+<nav class="sidebar sticky" data-sticky data-anchor="docs" data-sticky-on="large">
+<div class="page-nav">
+<div class="nav-title">On this page:</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="change-log.html#change-log" class="header">Change log</a>
+  <ul>
+    <li><a href="change-log.html#2-3-14-2020-01-20" class="header">2.3.14 - 2020-01-20</a></li>
+    <li><a href="change-log.html#2-3-13-2020-01-16" class="header">2.3.13 - 2020-01-16</a></li>
+    <li><a href="change-log.html#2-3-12-2019-10-16" class="header">2.3.12 - 2019-10-16</a></li>
+    <li><a href="change-log.html#2-3-11-2019-10-04" class="header">2.3.11 - 2019-10-04</a></li>
+    <li><a href="change-log.html#2-3-9-2019-06-27" class="header">2.3.9 - 2019-06-27</a></li>
+    <li><a href="change-log.html#2-3-8-2019-04-26" class="header">2.3.8 - 2019-04-26</a></li>
+    <li><a href="change-log.html#2-3-6-2019-04-13" class="header">2.3.6 - 2019-04-13</a></li>
+    <li><a href="change-log.html#2-3-5-2019-02-15" class="header">2.3.5 - 2019-02-15</a></li>
+    <li><a href="change-log.html#2-3-4-2018-12-31" class="header">2.3.4 - 2018-12-31</a></li>
+    <li><a href="change-log.html#2-3-3-2018-10-24" class="header">2.3.3 - 2018-10-24</a></li>
+    <li><a href="change-log.html#2-3-2-2018-08-12" class="header">2.3.2 - 2018-08-12</a></li>
+    <li><a href="change-log.html#2-3-1-2018-07-05" class="header">2.3.1 - 2018-07-05</a></li>
+    <li><a href="change-log.html#2-3-0-rc1-2018-05-03" class="header">2.3.0-RC1 - 2018-05-03</a></li>
+    <li><a href="change-log.html#2-2-3-2018-02-19" class="header">2.2.3 - 2018-02-19</a></li>
+    <li><a href="change-log.html#2-2-2-2018-01-17" class="header">2.2.2 - 2018-01-17</a></li>
+    <li><a href="change-log.html#2-2-1-2017-10-14" class="header">2.2.1 - 2017-10-14</a></li>
+    <li><a href="change-log.html#2-2-0-2017-10-05" class="header">2.2.0 - 2017-10-05</a></li>
+    <li><a href="change-log.html#2-1-3-2017-03-24" class="header">2.1.3 - 2017-03-24</a></li>
+    <li><a href="change-log.html#2-1-2-2017-01-25" class="header">2.1.2 - 2017-01-25</a></li>
+    <li><a href="change-log.html#2-1-1-2017-01-24" class="header">2.1.1 - 2017-01-24</a></li>
+    <li><a href="change-log.html#2-1-0-2016-12-16" class="header">2.1.0 - 2016-12-16</a></li>
+    <li><a href="change-log.html#2-0-0-2016-11-01" class="header">2.0.0 - 2016-11-01</a></li>
+    <li><a href="change-log.html#1-0-2-2016-10-04" class="header">1.0.2 - 2016-10-04</a></li>
+    <li><a href="change-log.html#1-0-1-2016-07-19" class="header">1.0.1 - 2016-07-19</a></li>
+    <li><a href="change-log.html#1-0-0-2016-05-26" class="header">1.0.0 - 2016-05-26</a></li>
+  </ul></li>
+</ul>
+</div>
+</div>
+</nav>
+</div>
+</div>
+
+</section>
+</div>
+
+</div>
+
+<footer class="site-footer">
+
+<section class="site-footer-nav">
+<div class="expanded row">
+<div class="small-12 large-offset-2 large-10 column">
+<div class="row site-footer-content">
+
+<div class="small-12 medium-4 large-3 text-center column">
+<div class="nav-links">
+<ul>
+<!-- <li><a href="https://www.example.com/products/">Products</a> -->
+</ul>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+
+<section class="site-footer-base">
+<div class="expanded row">
+<div class="small-12 large-offset-2 large-10 column">
+<div class="row site-footer-content">
+
+<div class="small-12 text-center large-9 column">
+
+<!--
+<div class="copyright">
+<span class="text">&copy; 2020</span>
+<a href="https://www.example.com" class="logo">logo</a>
+</div>
+-->
+</div>
+
+</div>
+</div>
+</div>
+</section>
+</footer>
+
+</div>
+</div>
+</div>
+</body>
+
+<script type="text/javascript" src="lib/foundation/dist/foundation.min.js"></script>
+<script type="text/javascript">jQuery(document).foundation();</script>
+<script type="text/javascript" src="js/magellan.js"></script>
+
+<style type="text/css">@import "lib/prettify/prettify.css";</style>
+<script type="text/javascript" src="lib/prettify/prettify.js"></script>
+<script type="text/javascript" src="lib/prettify/lang-scala.js"></script>
+<script type="text/javascript">jQuery(function(){window.prettyPrint && prettyPrint()});</script>
+<script type="text/javascript">jQuery(function(jq){initOldVersionWarnings(jq, '2.4.1-SNAPSHOT', '')});</script>
+
+
+</html>
