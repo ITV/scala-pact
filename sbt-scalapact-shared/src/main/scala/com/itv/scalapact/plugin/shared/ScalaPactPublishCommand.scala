@@ -37,7 +37,7 @@ object ScalaPactPublishCommand {
       PactLogger.error("Pact broker does not cope well with snapshot contracts.".yellow)
       PactLogger.error("To enable this feature, add \"allowSnapshotPublish := true\" to your pact.sbt file.".yellow)
     } else {
-      val publishSettings = shared.PactPublishSettings(
+      val publishSettings = PactPublishSettings(
         pactBrokerAddress,
         providerBrokerPublishMap,
         versionToPublishAs,

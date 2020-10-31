@@ -5,7 +5,6 @@ import java.util.concurrent.Executors
 import cats.data.OptionT
 import cats.effect._
 import cats.implicits._
-import com.itv.scalapact.shared
 import com.itv.scalapact.shared.http.SslContextMap
 import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
 import com.itv.scalapact.shared.{ScalaPactSettings, _}
@@ -79,7 +78,7 @@ object PactStubService {
         IO(interactionManager.clearInteractions()).flatMap { _ =>
           val output =
             pactWriter.pactToJsonString(
-              shared.Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None, None),
+              Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None, None),
               BuildInfo.version
             )
           Ok(JsonString(output))
@@ -99,7 +98,7 @@ object PactStubService {
 
             val output =
               pactWriter.pactToJsonString(
-                shared.Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None, None),
+                Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None, None),
                 BuildInfo.version
               )
             Ok(JsonString(output))

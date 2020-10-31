@@ -1,6 +1,5 @@
 package com.itv.scalapactcore.verifier
 
-import com.itv.scalapact.shared
 import com.itv.scalapact.shared.utils.ColourOutput.ColouredString
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 import com.itv.scalapact.shared._
@@ -22,7 +21,7 @@ object VerificationSteps {
 
       PactVerifyResultInContext(result, interaction.description)
     }
-    shared.PactVerifyResult(pact, results)
+    PactVerifyResult(pact, results)
   }
 
   def writeToJUnit(results: List[PactVerifyResult], start: Long, end: Long, testCount: Int, failureCount: Int): Unit = results.foreach { result =>

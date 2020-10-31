@@ -2,7 +2,6 @@ package com.itv.scalapactcore.common
 
 import java.net.URLEncoder
 
-import com.itv.scalapact.shared
 import com.itv.scalapact.shared.utils.ColourOutput._
 import com.itv.scalapact.shared._
 import com.itv.scalapact.shared.http.{HttpMethod, IScalaPactHttpClient, IScalaPactHttpClientBuilder, SimpleRequest, SimpleResponse}
@@ -24,7 +23,7 @@ class PactBrokerClient(
 
     providerPactsForVerificationUrl(brokerClient)(pactVerifySettings).map { address =>
       val body = pactWriter.pactsForVerificationRequestToJsonString(
-        shared.PactsForVerificationRequest(pactVerifySettings.consumerVersionSelectors, pactVerifySettings.providerVersionTags, pactVerifySettings.includePendingStatus)
+        PactsForVerificationRequest(pactVerifySettings.consumerVersionSelectors, pactVerifySettings.providerVersionTags, pactVerifySettings.includePendingStatus)
       )
       val request = SimpleRequest(
         baseUrl = address,

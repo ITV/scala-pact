@@ -70,7 +70,7 @@ private[scalapact] object ScalaPactContractWriter {
 
   def producePactFromDescription: ScalaPactDescriptionFinal => Pact =
     pactDescription =>
-      shared.Pact(
+      Pact(
         provider = PactActor(pactDescription.provider),
         consumer = PactActor(pactDescription.consumer),
         interactions = pactDescription.interactions.map(convertInteractionsFinalToInteractions),
