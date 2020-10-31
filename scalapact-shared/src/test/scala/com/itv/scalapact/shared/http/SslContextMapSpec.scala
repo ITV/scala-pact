@@ -1,5 +1,6 @@
-package com.itv.scalapact.shared
+package com.itv.scalapact.shared.http
 
+import com.itv.scalapact.shared.http.SslContextMap.SslContextNotFoundException
 import javax.net.ssl.SSLContext
 
 //import org.scalatest.easymock.EasyMockSugar
@@ -19,7 +20,7 @@ class SslContextMapSpec extends FunSpec with Matchers {
 
     it("should pass a request without ssl context to the block") {
       var called: Int = 0
-      SslContextMap(requestWithNoSslContext) { ssl => req =>
+      SslContextMap(requestWithNoSslContext) { ssl =>req =>
         called += 1
         ssl shouldEqual None
         req shouldEqual requestWithNoSslContext
@@ -29,7 +30,7 @@ class SslContextMapSpec extends FunSpec with Matchers {
 
     it("should pass a request to the block with SSL if it is present") {
       var called: Int = 0
-      SslContextMap(requestWithName) { ssl => req =>
+      SslContextMap(requestWithName) { ssl =>req =>
         called += 1
         ssl shouldEqual Some(someSslContext)
         req shouldEqual requestWithName

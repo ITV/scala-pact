@@ -2,7 +2,7 @@ package com.itv.scalapact
 
 import com.itv.scalapact.model.ScalaPactMatchingRule.{ScalaPactMatchingRuleArrayMinLength, ScalaPactMatchingRuleRegex, ScalaPactMatchingRuleType}
 import com.itv.scalapact.model.{ScalaPactDescription, ScalaPactInteraction, ScalaPactMatchingRules, ScalaPactOptions, ScalaPactRequest, ScalaPactResponse}
-import com.itv.scalapact.shared.HttpMethod
+import com.itv.scalapact.shared.http.HttpMethod
 
 trait ScalaPactForgerDsl {
   implicit val options: ScalaPactOptions = ScalaPactOptions.DefaultOptions

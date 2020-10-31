@@ -1,13 +1,10 @@
 package com.itv.scalapact.argonaut62
 
 import argonaut.Argonaut._
-import argonaut._
-import com.itv.scalapact.shared._
-import argonaut.Parse
-import com.itv.scalapact.shared
+import argonaut.{Parse, _}
 import com.itv.scalapact.shared.Notice.{AfterVerificationNotice, BeforeVerificationNotice, PendingStateNotice, SimpleNotice}
-import com.itv.scalapact.shared.Pact.Links
 import com.itv.scalapact.shared.VerificationProperties.{PendingStateVerificationProperties, SimpleVerificationProperties}
+import com.itv.scalapact.shared._
 
 import scala.util.{Failure, Success, Try}
 
@@ -152,7 +149,7 @@ object PactImplicits {
     }
   }
 
-  implicit lazy val verificationPropertiesDecoder: DecodeJson[VerificationProperties] = DecodeJson[shared.VerificationProperties] { cur =>
+  implicit lazy val verificationPropertiesDecoder: DecodeJson[VerificationProperties] = DecodeJson[VerificationProperties] { cur =>
     cur.get[Option[Boolean]]("pending").flatMap {
       case Some(pending) => cur.get[List[PendingStateNotice]]("notices").map(PendingStateVerificationProperties(pending, _))
       case None => cur.get[List[SimpleNotice]]("notices").map(SimpleVerificationProperties)

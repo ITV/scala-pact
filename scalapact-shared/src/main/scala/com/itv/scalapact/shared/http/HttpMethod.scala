@@ -1,4 +1,4 @@
-package com.itv.scalapact.shared
+package com.itv.scalapact.shared.http
 
 sealed abstract class HttpMethod(val name: String)
 

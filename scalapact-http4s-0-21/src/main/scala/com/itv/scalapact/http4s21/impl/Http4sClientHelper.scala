@@ -1,7 +1,7 @@
 package com.itv.scalapact.http4s21.impl
 
 import cats.effect.{ContextShift, IO, Resource}
-import com.itv.scalapact.shared.{SimpleRequest, SimpleResponse, SslContextMap}
+import com.itv.scalapact.shared.http.{SimpleRequest, SimpleResponse, SslContextMap}
 import org.http4s._
 import org.http4s.client.Client
 import org.http4s.client.blaze.BlazeClientBuilder
@@ -24,6 +24,7 @@ object Http4sClientHelper {
       .withMaxTotalConnections(maxTotalConnections)
       .withRequestTimeout(clientTimeout)
       .withUserAgentOption(Option(`User-Agent`(AgentProduct("scala-pact", Option(BuildInfo.version)))))
+
     sslContext.fold(builder)(s => builder.withSslContext(s)).resource
   }
 

@@ -1,31 +1,16 @@
 package com.itv.scalapact.shared.matchir
 
 import com.itv.scalapact.shared.MatchingRule
+import com.itv.scalapact.shared.matchir.IrNodeEqualityResult.{IrNodesEqual, IrNodesNotEqual}
+import com.itv.scalapact.shared.matchir.IrNodePath.IrNodePathEmpty
+import com.itv.scalapact.shared.matchir.IrNodeRule.{IrNodeMinArrayLengthRule, IrNodeRegexRule, IrNodeTypeRule}
 import com.itv.scalapact.shared.matchir.PactPathParseResult.{PactPathParseFailure, PactPathParseSuccess}
+import com.itv.scalapact.shared.utils.PactLogger
 
 import scala.annotation.tailrec
 import scala.util.Random
-import com.itv.scalapact.shared.PactLogger
 
-case class RuleProcessTracing(enabled: Boolean, id: String, context: Option[String]) {
-  def withContext(ctx: String): RuleProcessTracing = this.copy(context = Option(ctx))
-}
-
-object RuleProcessTracing {
-  val disabled: RuleProcessTracing = RuleProcessTracing(enabled = false, id = "", context = None)
-  def enabled: RuleProcessTracing =
-    RuleProcessTracing(enabled = true, id = Random.alphanumeric.take(5).mkString, context = None)
-
-  def log(message: String)(implicit ruleProcessTracing: RuleProcessTracing): Unit =
-    if (ruleProcessTracing.enabled)
-      PactLogger.message(
-        s"""  [${ruleProcessTracing.id}] ${ruleProcessTracing.context.map(ctx => s"[$ctx] ").getOrElse("")}$message"""
-      )
-    else
-      ()
-}
-
-case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcessTracing) {
+final case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcessTracing) {
 
   implicit private val ruleProcessTracing: RuleProcessTracing = withTracing
 
@@ -159,8 +144,7 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
 
     } else if (expected.isXml && findForPath(path.parent, expected.isXml).exists(_.isTypeRule)) {
       List(
-        IrNodesNotEqual(s"Expected XML node type '${expected.label}' was not the same as actual type '${actual.label}'",
-                        path)
+        IrNodesNotEqual(s"Expected XML node type '${expected.label}' was not the same as actual type '${actual.label}'", path)
       )
     } else {
       Nil
@@ -168,23 +152,18 @@ case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleProcess
   }
 
   def findAncestralTypeRule(path: IrNodePath, isXml: Boolean): IrNodeMatchingRules = {
-    RuleProcessTracing.log("Finding ancestral type rule")
-
-    val res: List[IrNodeRule] = (path, findForPath(path.parent, isXml).find(p => p.isTypeRule).toList) match {
-      case (IrNodePathEmpty, l) =>
-        l
-
-      case (p, Nil) =>
-        findAncestralTypeRule(p.parent, isXml).rules
-
-      case (_, l) =>
-        l
+    @tailrec def rec(path: IrNodePath): (IrNodePath, List[IrNodeRule]) = {
+      RuleProcessTracing.log("Finding ancestral type rule")
+      (path, findForPath(path.parent, isXml).find(p => p.isTypeRule).toList) match {
+        case (IrNodePathEmpty, l) => (path, l)
+        case (p, Nil) => rec(p.parent)
+        case (_, l) => (path, l)
+      }
     }
-
+    val (p, res) = rec(path)
     RuleProcessTracing.log(
-      s"findAncestralTypeRule [${path.renderAsString}]: " + res.map(_.renderAsString).mkString(", ")
+      s"findAncestralTypeRule [${p.renderAsString}]: " + res.map(_.renderAsString).mkString(", ")
     )
-
     IrNodeMatchingRules(res, withTracing)
   }
 
@@ -376,6 +355,24 @@ object IrNodeMatchingRules {
 
 }
 
+final case class RuleProcessTracing(enabled: Boolean, id: String, context: Option[String]) {
+  def withContext(ctx: String): RuleProcessTracing = this.copy(context = Option(ctx))
+}
+
+object RuleProcessTracing {
+  val disabled: RuleProcessTracing = RuleProcessTracing(enabled = false, id = "", context = None)
+  def enabled: RuleProcessTracing =
+    RuleProcessTracing(enabled = true, id = Random.alphanumeric.take(5).mkString, context = None)
+
+  def log(message: String)(implicit ruleProcessTracing: RuleProcessTracing): Unit =
+    if (ruleProcessTracing.enabled)
+      PactLogger.message(
+        s"""  [${ruleProcessTracing.id}] ${ruleProcessTracing.context.map(ctx => s"[$ctx] ").getOrElse("")}$message"""
+      )
+    else
+      ()
+}
+
 sealed trait IrNodeRule {
   val path: IrNodePath
 
@@ -396,18 +393,25 @@ sealed trait IrNodeRule {
     }
 
 }
-case class IrNodeTypeRule(path: IrNodePath) extends IrNodeRule {
-  def isTypeRule: Boolean           = true
-  def isRegexRule: Boolean          = false
-  def isMinArrayLengthRule: Boolean = false
-}
-case class IrNodeRegexRule(regex: String, path: IrNodePath) extends IrNodeRule {
-  def isTypeRule: Boolean           = false
-  def isRegexRule: Boolean          = true
-  def isMinArrayLengthRule: Boolean = false
-}
-case class IrNodeMinArrayLengthRule(length: Int, path: IrNodePath) extends IrNodeRule {
-  def isTypeRule: Boolean           = false
-  def isRegexRule: Boolean          = false
-  def isMinArrayLengthRule: Boolean = true
+
+object IrNodeRule {
+
+  final case class IrNodeTypeRule(path: IrNodePath) extends IrNodeRule {
+    def isTypeRule: Boolean = true
+    def isRegexRule: Boolean = false
+    def isMinArrayLengthRule: Boolean = false
+  }
+
+  final case class IrNodeRegexRule(regex: String, path: IrNodePath) extends IrNodeRule {
+    def isTypeRule: Boolean = false
+    def isRegexRule: Boolean = true
+    def isMinArrayLengthRule: Boolean = false
+  }
+
+  final case class IrNodeMinArrayLengthRule(length: Int, path: IrNodePath) extends IrNodeRule {
+    def isTypeRule: Boolean = false
+    def isRegexRule: Boolean = false
+    def isMinArrayLengthRule: Boolean = true
+  }
+
 }

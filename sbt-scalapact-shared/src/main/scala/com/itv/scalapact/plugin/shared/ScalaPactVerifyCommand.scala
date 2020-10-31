@@ -1,9 +1,11 @@
 package com.itv.scalapact.plugin.shared
 
-import com.itv.scalapact.shared.ColourOutput._
+import com.itv.scalapact.shared.utils.ColourOutput._
 import com.itv.scalapact.shared._
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClientBuilder}
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
+import com.itv.scalapact.shared.http.IScalaPactHttpClientBuilder
+import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
+import com.itv.scalapact.shared.utils.PactLogger
 import com.itv.scalapactcore.verifier.Verifier
 
 import scala.concurrent.duration._

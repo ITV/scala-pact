@@ -1,7 +1,7 @@
 package com.itv.scalapact.http4s21.impl
 
-import com.itv.scalapact.shared.SslContextMap
-import com.itv.scalapact.shared.typeclasses.{IPactStubber, IScalaPactHttpClientBuilder}
+import com.itv.scalapact.shared.IPactStubber
+import com.itv.scalapact.shared.http.{IScalaPactHttpClientBuilder, SslContextMap}
 
 import scala.concurrent.duration.Duration
 

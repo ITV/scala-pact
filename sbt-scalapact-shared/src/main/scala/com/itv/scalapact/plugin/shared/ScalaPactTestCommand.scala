@@ -2,12 +2,12 @@ package com.itv.scalapact.plugin.shared
 
 import java.io.File
 
-import com.itv.scalapact.shared.{BuildInfo, Pact, PactLogger, ScalaPactSettings}
-import com.itv.scalapact.shared.ColourOutput._
+import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
+import com.itv.scalapact.shared.{BuildInfo, Pact, ScalaPactSettings}
+import com.itv.scalapact.shared.utils.ColourOutput._
+import com.itv.scalapact.shared.utils.PactLogger
 
 import scala.io.Source
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter}
-
 import scala.util.Try
 
 object ScalaPactTestCommand {

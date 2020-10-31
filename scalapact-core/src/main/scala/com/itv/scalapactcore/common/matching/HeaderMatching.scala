@@ -1,7 +1,11 @@
 package com.itv.scalapactcore.common.matching
 
 import com.itv.scalapact.shared.MatchingRule
+import com.itv.scalapact.shared.matchir.IrNodePath.IrNodePathEmpty
+import com.itv.scalapact.shared.matchir.IrNodeRule.{IrNodeMinArrayLengthRule, IrNodeRegexRule, IrNodeTypeRule}
 import com.itv.scalapact.shared.matchir._
+
+import scala.annotation.tailrec
 
 object HeaderMatching {
 
@@ -76,6 +80,7 @@ object HeaderMatching {
       }
 
       val noRuleMatchResult: MatchOutcome = {
+        @tailrec
         def rec(remaining: List[(String, String)],
                 received: List[(String, String)],
                 acc: List[MatchOutcome]): List[MatchOutcome] =
@@ -88,7 +93,7 @@ object HeaderMatching {
                 xs,
                 received,
                 MatchOutcome.fromPredicate(
-                  received.exists(_ == standardiseHeader(x)), // exists for 2.10 compat
+                  received.contains(standardiseHeader(x)),
                   s"Missing header called '${x._1}' with value '${x._2}'",
                   1
                 ) :: acc

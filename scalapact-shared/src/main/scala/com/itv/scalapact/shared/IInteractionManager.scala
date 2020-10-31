@@ -1,6 +1,6 @@
 package com.itv.scalapact.shared
 
-import com.itv.scalapact.shared.typeclasses.IPactReader
+import com.itv.scalapact.shared.json.IPactReader
 
 trait IInteractionManager {
 

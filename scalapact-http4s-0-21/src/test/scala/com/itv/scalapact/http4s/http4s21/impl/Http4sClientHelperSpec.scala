@@ -5,7 +5,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import com.itv.scalapact.http4s21.impl.Http4sClientHelper
-import com.itv.scalapact.shared.{HttpMethod, SimpleRequest}
+import com.itv.scalapact.shared.http.{HttpMethod, SimpleRequest}
 import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
 
 class Http4sClientHelperSpec extends FunSpec with Matchers with BeforeAndAfterAll {

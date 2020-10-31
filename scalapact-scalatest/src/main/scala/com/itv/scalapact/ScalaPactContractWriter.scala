@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets
 import com.itv.scalapact.model.ScalaPactMatchingRule.{ScalaPactMatchingRuleArrayMinLength, ScalaPactMatchingRuleRegex, ScalaPactMatchingRuleType}
 import com.itv.scalapact.model.{ScalaPactDescriptionFinal, ScalaPactInteractionFinal, ScalaPactMatchingRule}
 import com.itv.scalapact.shared._
-import com.itv.scalapact.shared.typeclasses.IPactWriter
+import com.itv.scalapact.shared.json.IPactWriter
 
 private[scalapact] object ScalaPactContractWriter {
   def writePactContracts(outputPath: String)(implicit pactWriter: IPactWriter): ScalaPactDescriptionFinal => Unit =

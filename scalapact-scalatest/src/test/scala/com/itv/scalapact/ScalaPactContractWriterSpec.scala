@@ -1,8 +1,8 @@
 package com.itv.scalapact
 
+import com.itv.scalapact.ScalaPactForger._
 import com.itv.scalapact.model.ScalaPactMatchingRule.ScalaPactMatchingRuleArrayMinLength
 import com.itv.scalapact.model.{ScalaPactDescriptionFinal, ScalaPactInteractionFinal, ScalaPactOptions, ScalaPactRequest, ScalaPactResponse}
-import com.itv.scalapact.shared.HttpMethod.GET
 import com.itv.scalapact.shared.MatchingRule
 import org.scalatest.{FunSpec, Matchers}
 

@@ -1,4 +1,4 @@
-package com.itv.scalapact.shared
+package com.itv.scalapact.shared.utils
 
 import org.scalatest.{FunSpec, Matchers}
 

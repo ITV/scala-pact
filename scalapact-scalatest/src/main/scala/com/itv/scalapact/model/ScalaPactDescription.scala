@@ -1,9 +1,10 @@
 package com.itv.scalapact.model
 
+import com.itv.scalapact.shared.IPactStubber
 import com.itv.scalapact.{ScalaPactMock, ScalaPactMockConfig}
-import com.itv.scalapact.shared.SslContextMap
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter, IScalaPactHttpClient, IScalaPactHttpClientBuilder}
-import com.itv.scalapact.shared.Maps._
+import com.itv.scalapact.shared.utils.Maps._
+import com.itv.scalapact.shared.http.{IScalaPactHttpClient, IScalaPactHttpClientBuilder, SslContextMap}
+import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
 
 import scala.concurrent.duration._
 

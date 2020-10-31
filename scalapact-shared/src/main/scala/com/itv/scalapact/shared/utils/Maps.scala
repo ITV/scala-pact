@@ -1,6 +1,5 @@
-package com.itv.scalapact.shared
+package com.itv.scalapact.shared.utils
 
-//TOOD: Appears to only be used by the Test Suite - move to there?
 object Maps {
 
   implicit class MapPimper[K, V](map: Map[K, V]) {

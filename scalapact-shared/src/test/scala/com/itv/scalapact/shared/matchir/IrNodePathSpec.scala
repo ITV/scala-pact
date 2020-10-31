@@ -1,5 +1,6 @@
 package com.itv.scalapact.shared.matchir
 
+import com.itv.scalapact.shared.matchir.IrNodePath.{IrNodePathEmpty, IrNodePathField, IrNodePathFieldAttribute, IrNodePathTextElement}
 import com.itv.scalapact.shared.matchir.PactPathParseResult.{PactPathParseFailure, PactPathParseSuccess}
 import org.scalatest.{FunSpec, Matchers}
 

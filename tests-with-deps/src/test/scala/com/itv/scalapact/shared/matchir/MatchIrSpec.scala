@@ -1,6 +1,8 @@
 package com.itv.scalapact.shared.matchir
 
-import com.itv.scalapact.json.JsonConversionFunctions
+import com.itv.scalapact.circe13.JsonConversionFunctions
+import com.itv.scalapact.shared.matchir.IrNodeEqualityResult.{IrNodesEqual, IrNodesNotEqual}
+import com.itv.scalapact.shared.matchir.IrNodePath.IrNodePathEmpty
 import org.scalatest.{FunSpec, Matchers}
 
 class MatchIrSpec extends FunSpec with Matchers {

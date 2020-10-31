@@ -3,12 +3,12 @@ package pactspec.util
 import argonaut.Argonaut._
 import argonaut.{CodecJson, Json}
 import com.itv.scalapact.argonaut62.PactImplicits
+import com.itv.scalapact.shared.utils.PactLogger
 import com.itv.scalapact.shared.{InteractionRequest, InteractionResponse}
 
 import scala.io.Source
 import scala.language.implicitConversions
-import com.itv.scalapact.shared.RightBiasEither._
-import com.itv.scalapact.shared.PactLogger
+import com.itv.scalapact.shared.utils.RightBiasEither._
 
 object PactSpecLoader {
 
@@ -29,12 +29,14 @@ object PactSpecLoader {
       "actual"
     )
 
-  def fromResource(version: String, path: String): String =
+  def fromResource(version: String, path: String): String = {
     //PactLogger.message("Loading spec: " + s"/pact-specification-version-$version/testcases$path")
-    Source
+    val source = Source
       .fromURL(getClass.getResource(s"/pact-specification-version-$version/testcases$path"))
-      .getLines()
-      .mkString("\n")
+    val res = source.getLines().mkString("\n")
+    source.close()
+    res
+  }
 
   def deserializeRequestSpec(json: String): Option[RequestSpec] =
     SpecReader.jsonStringToRequestSpec(json) match {
@@ -100,12 +102,12 @@ object JsonBodySpecialCaseHelper {
 
   val extractMatches: String => Either[String, Boolean] = json =>
     json.parse
-      .map(j => (j.hcursor --\ "match").focus.flatMap(_.bool).exists(_ == true)) //Uses exists for 2.10 compt
+      .map(j => (j.hcursor --\ "match").focus.flatMap(_.bool).contains(true))
       .leftMap(e => "Extracting 'match': " + e)
 
   val extractComment: String => Either[String, String] = json =>
     json.parse
-      .map(j => (j.hcursor --\ "comment").focus.flatMap(_.string).map(_.toString()).getOrElse("<missing comment>"))
+      .map(j => (j.hcursor --\ "comment").focus.flatMap(_.string).getOrElse("<missing comment>"))
       .leftMap(e => "Extracting 'comment': " + e)
 
   def extractInteractionRequestOrResponse[I]

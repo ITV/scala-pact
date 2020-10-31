@@ -1,7 +1,8 @@
 package com.itv.scalapactcore.common
 
 import com.itv.scalapact.shared._
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClient, IScalaPactHttpClientBuilder}
+import com.itv.scalapact.shared.http.{HttpMethod, IScalaPactHttpClient, IScalaPactHttpClientBuilder, SimpleRequest, SimpleResponse}
+import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
 import org.scalatest.{BeforeAndAfter, FunSpec, Matchers}
 
 import scala.collection.mutable.ArrayBuffer

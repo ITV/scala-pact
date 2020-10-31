@@ -1,13 +1,8 @@
 package com.itv.scalapact.shared
-import com.itv.scalapact.shared.Pact.Links
 
-case class LinkValues(title: Option[String], name: Option[String], href: String, templated: Option[Boolean])
+import com.itv.scalapact.shared.http.SslContextMap
 
-object Pact {
-  type Links = Map[String, LinkValues]
-}
-
-case class Pact(provider: PactActor,
+final case class Pact(provider: PactActor,
                 consumer: PactActor,
                 interactions: List[Interaction],
                 _links: Option[Links],
@@ -25,14 +20,14 @@ case class Pact(provider: PactActor,
 
 }
 
-case class PactActor(name: String) {
+final case class PactActor(name: String) extends AnyVal {
 
   def renderAsString: String =
     s"""$name"""
 
 }
 
-case class Interaction(providerState: Option[String],
+final case class Interaction(providerState: Option[String],
                        description: String,
                        request: InteractionRequest,
                        response: InteractionResponse) {
@@ -50,17 +45,12 @@ case class Interaction(providerState: Option[String],
 
 }
 
-case class InteractionRequest(method: Option[String],
+final case class InteractionRequest(method: Option[String],
                               path: Option[String],
                               query: Option[String],
                               headers: Option[Map[String, String]],
                               body: Option[String],
                               matchingRules: Option[Map[String, MatchingRule]]) {
-  def unapply: Option[(Option[String], Option[String], Option[String], Option[Map[String, String]], Option[String])] =
-    Some {
-      (method, path, query, headers, body)
-    }
-
   def withoutSslContextHeader: InteractionRequest = copy(headers = headers.map(_ - SslContextMap.sslContextHeaderName))
 
   def sslContextName: Option[String] = headers.flatMap(_.get(SslContextMap.sslContextHeaderName))
@@ -79,10 +69,9 @@ case class InteractionRequest(method: Option[String],
        |${body.getOrElse("[no body]")}
        |
      """.stripMargin
-
 }
 
-case class InteractionResponse(status: Option[Int],
+final case class InteractionResponse(status: Option[Int],
                                headers: Option[Map[String, String]],
                                body: Option[String],
                                matchingRules: Option[Map[String, MatchingRule]]) {
@@ -102,7 +91,7 @@ case class InteractionResponse(status: Option[Int],
 
 }
 
-case class MatchingRule(`match`: Option[String], regex: Option[String], min: Option[Int]) {
+final case class MatchingRule(`match`: Option[String], regex: Option[String], min: Option[Int]) {
   def renderAsString: String =
     s"Rule type: '${`match`.getOrElse("<missing>")}'  regex: '${regex.getOrElse("n/a")}'  min: '${min.map(_.toString).getOrElse("n/a")}'"
 }
@@ -117,5 +106,5 @@ case class MatchingRule(`match`: Option[String], regex: Option[String], min: Opt
         }
     }
  */
-case class PactMetaData(pactSpecification: Option[VersionMetaData], `scala-pact`: Option[VersionMetaData])
-case class VersionMetaData(version: String)
+final case class PactMetaData(pactSpecification: Option[VersionMetaData], `scala-pact`: Option[VersionMetaData])
+final case class VersionMetaData(version: String) extends AnyVal

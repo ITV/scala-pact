@@ -3,7 +3,6 @@ package com.itv.scalapactcore.stubber
 import com.itv.scalapact.shared.{Interaction, InteractionRequest, InteractionResponse, MatchingRule}
 import com.itv.scalapactcore.common.stubber.InteractionManager
 import org.scalatest.{FunSpec, Matchers}
-
 import com.itv.scalapact.json._
 
 import scala.language.implicitConversions

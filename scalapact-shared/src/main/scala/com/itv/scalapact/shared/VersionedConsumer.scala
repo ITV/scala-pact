@@ -4,7 +4,7 @@ import java.net.URLEncoder
 
 sealed abstract case class VersionedConsumer(name: String, versionUrlPart: VersionUrlPart)
 
-final case class VersionUrlPart(value: String)
+final case class VersionUrlPart(value: String) extends AnyVal
 
 object VersionedConsumer {
   def apply(name: String, version: String): VersionedConsumer = new VersionedConsumer(name, VersionUrlPart(s"/version/$version")) {}

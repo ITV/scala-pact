@@ -1,8 +1,10 @@
 package com.itv.scalapact
 
 import com.itv.scalapact.model.ScalaPactDescriptionFinal
-import com.itv.scalapact.shared.{PactLogger, _}
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter, IScalaPactHttpClient}
+import com.itv.scalapact.shared.http.{HttpMethod, IScalaPactHttpClient, SimpleRequest, SslContextMap}
+import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
+import com.itv.scalapact.shared.utils.PactLogger
+import com.itv.scalapact.shared.{IPactStubber, ScalaPactSettings}
 import com.itv.scalapactcore.common.stubber.InteractionManager
 
 private[scalapact] object ScalaPactMock {

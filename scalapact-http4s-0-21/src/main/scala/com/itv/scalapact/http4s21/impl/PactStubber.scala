@@ -1,8 +1,9 @@
 package com.itv.scalapact.http4s21.impl
 
 import cats.effect._
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter}
-import com.itv.scalapact.shared.{IInteractionManager, ScalaPactSettings, SslContextMap}
+import com.itv.scalapact.shared.http.SslContextMap
+import com.itv.scalapact.shared.{IInteractionManager, IPactStubber, ScalaPactSettings}
+import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
 import org.http4s.server.blaze.BlazeServerBuilder
 
 import scala.concurrent.ExecutionContext

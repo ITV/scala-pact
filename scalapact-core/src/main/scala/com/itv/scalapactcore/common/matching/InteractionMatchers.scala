@@ -1,9 +1,11 @@
 package com.itv.scalapactcore.common.matching
 
 import com.itv.scalapact.shared._
+import com.itv.scalapact.shared.json.IPactReader
 import com.itv.scalapact.shared.matchir.IrNodeMatchingRules
-import com.itv.scalapact.shared.typeclasses.IPactReader
 import com.itv.scalapactcore.common.matching.PathMatching.PathAndQuery
+
+import scala.annotation.tailrec
 
 object InteractionMatchers {
 
@@ -38,6 +40,7 @@ object InteractionMatchers {
   def matchOrFindClosestRequest(strictMatching: Boolean, interactions: List[Interaction], received: InteractionRequest)(
       implicit pactReader: IPactReader
   ): Option[OutcomeAndInteraction] = {
+    @tailrec
     def rec(strict: Boolean,
             remaining: List[Interaction],
             actual: InteractionRequest,
@@ -99,6 +102,7 @@ object InteractionMatchers {
       interactions: List[Interaction],
       received: InteractionResponse
   )(implicit pactReader: IPactReader): Option[OutcomeAndInteraction] = {
+    @tailrec
     def rec(strict: Boolean,
             remaining: List[Interaction],
             actual: InteractionResponse,
