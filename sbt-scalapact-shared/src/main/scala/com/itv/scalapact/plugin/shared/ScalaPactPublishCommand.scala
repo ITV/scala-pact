@@ -1,6 +1,5 @@
 package com.itv.scalapact.plugin.shared
 
-import com.itv.scalapact.shared
 import com.itv.scalapact.shared.utils.ColourOutput._
 import com.itv.scalapact.shared._
 import com.itv.scalapact.shared.http.IScalaPactHttpClientBuilder
