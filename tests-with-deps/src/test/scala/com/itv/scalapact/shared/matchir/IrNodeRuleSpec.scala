@@ -1,7 +1,11 @@
 package com.itv.scalapact.shared.matchir
 
-import com.itv.scalapact.json.JsonConversionFunctions
-import com.itv.scalapact.shared.{MatchingRule, PactLogger}
+import com.itv.scalapact.circe13.JsonConversionFunctions
+import com.itv.scalapact.shared.MatchingRule
+import com.itv.scalapact.shared.matchir.IrNodeEqualityResult.{IrNodesEqual, IrNodesNotEqual}
+import com.itv.scalapact.shared.matchir.IrNodePath.IrNodePathEmpty
+import com.itv.scalapact.shared.matchir.IrNodeRule.{IrNodeMinArrayLengthRule, IrNodeRegexRule, IrNodeTypeRule}
+import com.itv.scalapact.shared.utils.PactLogger
 import org.scalatest.{FunSpec, Matchers}
 
 import scala.language.postfixOps

@@ -2,10 +2,10 @@ package com.itv.scalapact
 
 import java.io.File
 import java.net.{HttpURLConnection, URL}
-import javax.net.ssl.HttpsURLConnection
 
+import javax.net.ssl.HttpsURLConnection
 import com.itv.scalapact.ScalaPactForger.{headerRegexRule, _}
-import com.itv.scalapact.shared.SslContextMap
+import com.itv.scalapact.shared.http.SslContextMap
 import org.json4s.DefaultFormats
 import org.json4s.native.JsonParser._
 import org.json4s.native.Serialization._

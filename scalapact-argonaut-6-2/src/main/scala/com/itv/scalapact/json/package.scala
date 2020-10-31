@@ -1,7 +1,7 @@
 package com.itv.scalapact
 
 import com.itv.scalapact.argonaut62.{PactReader, PactWriter}
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter}
+import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
 
 package object json {
   implicit val pactReaderInstance: IPactReader =
@@ -9,6 +9,4 @@ package object json {
 
   implicit val pactWriterInstance: IPactWriter =
     new PactWriter
-
-  val JsonConversionFunctions: argonaut62.JsonConversionFunctions.type = argonaut62.JsonConversionFunctions
 }

@@ -3,9 +3,10 @@ package com.itv.scalapact.http4s21.impl
 import java.nio.charset.StandardCharsets
 
 import cats.effect.IO
-import com.itv.scalapact.shared.HttpMethod._
-import com.itv.scalapact.shared.{HttpMethod, SimpleRequest}
+import com.itv.scalapact.shared.http.HttpMethod._
+import com.itv.scalapact.shared.http.{HttpMethod, SimpleRequest}
 import fs2.Chunk
+import org.http4s.Method
 import org.http4s._
 import scodec.bits.ByteVector
 

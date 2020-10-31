@@ -1,6 +1,6 @@
 package com.itv.scalapact.model
 
-import com.itv.scalapact.shared.HttpMethod
+import com.itv.scalapact.shared.http.HttpMethod
 
 case class ScalaPactRequest(method: HttpMethod,
                             path: String,

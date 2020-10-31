@@ -1,4 +1,4 @@
-package com.itv.scalapact.shared.typeclasses
+package com.itv.scalapact.shared.http
 
 import scala.concurrent.duration.{Duration, DurationInt}
 

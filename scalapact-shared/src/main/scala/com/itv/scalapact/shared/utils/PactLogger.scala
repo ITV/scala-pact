@@ -1,4 +1,4 @@
-package com.itv.scalapact.shared
+package com.itv.scalapact.shared.utils
 
 trait PactLogger {
   def message(s: Any): Unit

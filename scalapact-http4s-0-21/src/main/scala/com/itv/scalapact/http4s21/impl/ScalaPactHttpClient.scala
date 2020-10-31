@@ -2,7 +2,7 @@ package com.itv.scalapact.http4s21.impl
 
 import cats.effect._
 import com.itv.scalapact.shared._
-import com.itv.scalapact.shared.typeclasses.IScalaPactHttpClient
+import com.itv.scalapact.shared.http.{HttpMethod, IScalaPactHttpClient, SimpleRequest, SimpleResponse, SslContextMap}
 import org.http4s.client.Client
 
 import scala.concurrent.duration._

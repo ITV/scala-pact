@@ -2,8 +2,8 @@ package com.itv.scalapact.argonaut62
 
 import argonaut.Argonaut._
 import argonaut._
-import com.itv.scalapact.shared.typeclasses.IPactWriter
 import com.itv.scalapact.shared.{Pact, PactMetaData, PactsForVerificationRequest, VersionMetaData}
+import com.itv.scalapact.shared.json.IPactWriter
 
 class PactWriter extends IPactWriter {
   import PactImplicits._

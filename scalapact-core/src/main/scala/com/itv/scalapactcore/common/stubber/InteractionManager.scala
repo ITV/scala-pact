@@ -1,9 +1,9 @@
 package com.itv.scalapactcore.common.stubber
 
 import com.itv.scalapact.shared._
-import ColourOutput._
-import com.itv.scalapact.shared.PactLogger
-import com.itv.scalapact.shared.typeclasses.IPactReader
+import com.itv.scalapact.shared.utils.ColourOutput._
+import com.itv.scalapact.shared.json.IPactReader
+import com.itv.scalapact.shared.utils.PactLogger
 
 class InteractionManager extends IInteractionManager {
 

@@ -2,8 +2,8 @@ package com.itv.scalapact.argonaut62
 
 import argonaut._
 import com.itv.scalapact.shared._
+import com.itv.scalapact.shared.json.IPactReader
 import com.itv.scalapact.shared.matchir.IrNode
-import com.itv.scalapact.shared.typeclasses.IPactReader
 
 class PactReader extends IPactReader {
   import PactImplicits._

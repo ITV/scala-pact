@@ -1,8 +1,10 @@
 package com.itv.scalapact.plugin.shared
 
-import com.itv.scalapact.shared.ColourOutput._
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactStubber, IPactWriter}
-import com.itv.scalapact.shared.{PactLogger, ScalaPactSettings, SslContextMap}
+import com.itv.scalapact.shared.{IPactStubber, ScalaPactSettings}
+import com.itv.scalapact.shared.utils.ColourOutput._
+import com.itv.scalapact.shared.http.SslContextMap
+import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
+import com.itv.scalapact.shared.utils.PactLogger
 import com.itv.scalapactcore.common.LocalPactFileLoader._
 import com.itv.scalapactcore.common.stubber.InteractionManager
 

@@ -1,9 +1,8 @@
 package com.itv.scalapact.circe13
 
 import com.itv.scalapact.shared.Notice.{AfterVerificationNotice, BeforeVerificationNotice, PendingStateNotice, SimpleNotice}
-import com.itv.scalapact.shared.Pact.Links
 import com.itv.scalapact.shared.VerificationProperties.{PendingStateVerificationProperties, SimpleVerificationProperties}
-import com.itv.scalapact.shared.{ConsumerVersionSelector, PactForVerification, EmbeddedPactsForVerification, HALIndex, Interaction, InteractionRequest, InteractionResponse, LinkValues, MatchingRule, Pact, PactActor, PactMetaData, PactsForVerificationRequest, PactsForVerificationResponse, VerificationProperties, VersionMetaData}
+import com.itv.scalapact.shared._
 import io.circe.{Codec, Decoder, DecodingFailure, Encoder, Json, parser}
 import io.circe.generic.semiauto.{deriveCodec, deriveDecoder, deriveEncoder}
 import io.circe.syntax._

@@ -1,7 +1,6 @@
 package com.itv.scalapact.shared
 
 import com.itv.scalapact.shared.Notice.{PendingStateNotice, SimpleNotice}
-import com.itv.scalapact.shared.Pact.Links
 
 /*
 {

@@ -1,4 +1,4 @@
-package com.itv.scalapact.shared
+package com.itv.scalapact.shared.json
 
 import com.itv.scalapact.shared.matchir.IrNode
 

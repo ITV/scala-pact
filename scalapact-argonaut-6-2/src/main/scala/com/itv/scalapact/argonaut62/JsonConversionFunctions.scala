@@ -1,10 +1,12 @@
 package com.itv.scalapact.argonaut62
 
 import argonaut._
-import com.itv.scalapact.shared.ColourOutput._
-import com.itv.scalapact.shared.{IJsonConversionFunctions, PactLogger}
+import com.itv.scalapact.shared.utils.ColourOutput._
+import com.itv.scalapact.shared.json.IJsonConversionFunctions
+import com.itv.scalapact.shared.matchir.IrNodePath.IrNodePathEmpty
 import com.itv.scalapact.shared.matchir.MatchIrConstants.{rootNodeLabel, unnamedNodeLabel}
 import com.itv.scalapact.shared.matchir._
+import com.itv.scalapact.shared.utils.PactLogger
 
 object JsonConversionFunctions extends IJsonConversionFunctions {
 
@@ -13,7 +15,7 @@ object JsonConversionFunctions extends IJsonConversionFunctions {
       jsonRootToIrNode(json, IrNodePathEmpty)
     }
 
-  def jsonToIrNode(label: String, json: Json, pathToParent: IrNodePath): IrNode =
+  private def jsonToIrNode(label: String, json: Json, pathToParent: IrNodePath): IrNode =
     json match {
       case j: Json if j.isArray =>
         IrNode(label, jsonArrayToIrNodeList(label, j, pathToParent)).withPath(pathToParent).markAsArray
@@ -34,7 +36,7 @@ object JsonConversionFunctions extends IJsonConversionFunctions {
         IrNode(label, j.string.map(IrStringNode)).withPath(pathToParent)
     }
 
-  def jsonObjectToIrNodeList(json: Json, pathToParent: IrNodePath): List[IrNode] =
+  private def jsonObjectToIrNodeList(json: Json, pathToParent: IrNodePath): List[IrNode] =
     json.objectFieldsOrEmpty
       .map(l => if (l.isEmpty) unnamedNodeLabel else l)
       .map { l =>
@@ -44,11 +46,11 @@ object JsonConversionFunctions extends IJsonConversionFunctions {
       }
       .collect { case Some(s) => s }
 
-  def jsonArrayToIrNodeList(parentLabel: String, json: Json, pathToParent: IrNodePath): List[IrNode] =
+  private def jsonArrayToIrNodeList(parentLabel: String, json: Json, pathToParent: IrNodePath): List[IrNode] =
     json.arrayOrEmpty.zipWithIndex
       .map(j => jsonToIrNode(parentLabel, j._1, pathToParent <~ j._2))
 
-  def jsonRootToIrNode(json: Json, initialPath: IrNodePath): Option[IrNode] =
+  private def jsonRootToIrNode(json: Json, initialPath: IrNodePath): Option[IrNode] =
     json match {
       case j: Json if j.isArray =>
         Option(

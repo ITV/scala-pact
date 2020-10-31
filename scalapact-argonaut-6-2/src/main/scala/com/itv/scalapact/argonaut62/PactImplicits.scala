@@ -1,13 +1,11 @@
 package com.itv.scalapact.argonaut62
 
 import argonaut.Argonaut._
-import argonaut._
-import com.itv.scalapact.shared._
-import argonaut.Parse
+import argonaut.{Parse, _}
 import com.itv.scalapact.shared
 import com.itv.scalapact.shared.Notice.{AfterVerificationNotice, BeforeVerificationNotice, PendingStateNotice, SimpleNotice}
-import com.itv.scalapact.shared.Pact.Links
 import com.itv.scalapact.shared.VerificationProperties.{PendingStateVerificationProperties, SimpleVerificationProperties}
+import com.itv.scalapact.shared._
 
 import scala.util.{Failure, Success, Try}
 
@@ -66,7 +64,7 @@ object PactImplicits {
       query <- cur.get[Option[String]]("query")
       headers <- cur.get[Option[Map[String, String]]]("headers")
       matchingRules <- cur.get[Option[Map[String, MatchingRule]]]("matchingRules")
-    } yield InteractionRequest(method, path, query, headers, body, matchingRules)
+    } yield shared.InteractionRequest(method, path, query, headers, body, matchingRules)
   }
 
   implicit lazy val interactionRequestEncodeJson: EncodeJson[InteractionRequest] = EncodeJson[InteractionRequest] { r =>
@@ -90,7 +88,7 @@ object PactImplicits {
       status <- cur.get[Option[Int]]("status")
       headers <- cur.get[Option[Map[String, String]]]("headers")
       matchingRules <- cur.get[Option[Map[String, MatchingRule]]]("matchingRules")
-    } yield InteractionResponse(status, headers, body, matchingRules)
+    } yield shared.InteractionResponse(status, headers, body, matchingRules)
   }
 
   implicit lazy val InteractionResponseEncodeJson: EncodeJson[InteractionResponse] = EncodeJson[InteractionResponse] { r =>
@@ -117,7 +115,7 @@ object PactImplicits {
       description <- cur.get[String]("description")
       request <- cur.get[InteractionRequest]("request")
       response <- cur.get[InteractionResponse]("response")
-    } yield Interaction(providerState.orElse(provider_state), description, request, response)
+    } yield shared.Interaction(providerState.orElse(provider_state), description, request, response)
   }
 
   implicit lazy val InteractionCodecJson: EncodeJson[Interaction] = EncodeJson[Interaction] { i =>
@@ -152,7 +150,7 @@ object PactImplicits {
     }
   }
 
-  implicit lazy val verificationPropertiesDecoder: DecodeJson[VerificationProperties] = DecodeJson[shared.VerificationProperties] { cur =>
+  implicit lazy val verificationPropertiesDecoder: DecodeJson[VerificationProperties] = DecodeJson[VerificationProperties] { cur =>
     cur.get[Option[Boolean]]("pending").flatMap {
       case Some(pending) => cur.get[List[PendingStateNotice]]("notices").map(PendingStateVerificationProperties(pending, _))
       case None => cur.get[List[SimpleNotice]]("notices").map(SimpleVerificationProperties)

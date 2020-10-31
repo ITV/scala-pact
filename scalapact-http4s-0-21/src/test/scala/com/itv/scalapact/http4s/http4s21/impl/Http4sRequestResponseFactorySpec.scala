@@ -1,7 +1,7 @@
 package com.itv.scalapact.http4s.http4s21.impl
 
 import com.itv.scalapact.http4s21.impl.{Http4sRequestResponseFactory, IntAndReason}
-import com.itv.scalapact.shared.{HttpMethod, SimpleRequest}
+import com.itv.scalapact.shared.http.{HttpMethod, SimpleRequest}
 import org.scalatest.{FunSpec, Matchers}
 
 class Http4sRequestResponseFactorySpec extends FunSpec with Matchers {

@@ -1,7 +1,10 @@
-package com.itv.scalapact.shared
+package com.itv.scalapact.shared.http
 
 import java.io.FileInputStream
 import java.security.KeyStore
+
+import com.itv.scalapact.shared.http.SslContextMap.SslContextNotFoundException
+import com.itv.scalapact.shared.utils.PactLogger
 import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
 
 class SslContextMap(map: Map[String, SSLContext]) extends (Option[String] => Option[SSLContext]) {
@@ -27,9 +30,6 @@ class SslContextMap(map: Map[String, SSLContext]) extends (Option[String] => Opt
   override def toString() =
     s"SslContextMap($map)"
 }
-
-class SslContextNotFoundException(name: String, sslContextMap: SslContextMap)
-    extends Exception(s"SslContext [$name] not found. Legal values are [${sslContextMap.legalValues}]")
 
 object SslContextMap {
   val sslContextHeaderName: String = "pact-ssl-context"
@@ -66,4 +66,6 @@ object SslContextMap {
     sslContext
   }
 
+  class SslContextNotFoundException(name: String, sslContextMap: SslContextMap)
+    extends Exception(s"SslContext [$name] not found. Legal values are [${sslContextMap.legalValues}]")
 }

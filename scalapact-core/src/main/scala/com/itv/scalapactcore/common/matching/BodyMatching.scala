@@ -1,7 +1,9 @@
 package com.itv.scalapactcore.common.matching
 
+import com.itv.scalapact.shared.json.IPactReader
+import com.itv.scalapact.shared.matchir.IrNodeEqualityResult.{IrNodesEqual, IrNodesNotEqual}
+import com.itv.scalapact.shared.matchir.IrNodeMatchPermissivity.{NonPermissive, Permissive}
 import com.itv.scalapact.shared.matchir._
-import com.itv.scalapact.shared.typeclasses.IPactReader
 
 object BodyMatching {
 
@@ -24,10 +26,9 @@ object BodyMatching {
       case (Some(ee), Some(rr))
           if ee.nonEmpty && hasJsonHeader(headers) || stringIsProbablyJson(ee) && stringIsProbablyJson(rr) =>
         val predicate: (String, String) => MatchOutcome = (e, r) =>
-          MatchIr
-            .fromJSON(pactReader.fromJSON)(e)
+          pactReader.fromJSON(e)
             .flatMap { ee =>
-              MatchIr.fromJSON(pactReader.fromJSON)(r).map { rr =>
+              pactReader.fromJSON(r).map { rr =>
                 nodeMatchToMatchResult(ee =~ rr, rules, isXml = false)
               }
             }

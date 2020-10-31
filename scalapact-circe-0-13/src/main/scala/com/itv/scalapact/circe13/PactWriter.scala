@@ -1,7 +1,7 @@
 package com.itv.scalapact.circe13
 
-import com.itv.scalapact.shared.typeclasses.IPactWriter
 import com.itv.scalapact.shared.{Pact, PactMetaData, PactsForVerificationRequest, VersionMetaData}
+import com.itv.scalapact.shared.json.IPactWriter
 import io.circe.syntax._
 
 class PactWriter extends IPactWriter {

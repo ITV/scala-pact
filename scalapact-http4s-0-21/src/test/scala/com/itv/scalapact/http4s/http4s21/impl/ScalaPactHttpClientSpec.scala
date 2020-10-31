@@ -3,6 +3,7 @@ package com.itv.scalapact.http4s.http4s21.impl
 import cats.effect.{IO, Resource}
 import com.itv.scalapact.http4s21.impl.ScalaPactHttpClient
 import com.itv.scalapact.shared._
+import com.itv.scalapact.shared.http.{SimpleRequest, SimpleResponse}
 import org.http4s.client.Client
 import org.scalatest.{FunSpec, Matchers}
 

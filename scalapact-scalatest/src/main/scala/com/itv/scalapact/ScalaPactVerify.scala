@@ -1,15 +1,15 @@
 package com.itv.scalapact
 
-import com.itv.scalapactcore.verifier.Verifier
 import java.io.{BufferedWriter, File, FileWriter}
 
+import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 import com.itv.scalapact.shared._
+import com.itv.scalapact.shared.http.IScalaPactHttpClientBuilder
+import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
+import com.itv.scalapact.shared.utils.{Helpers, PactLogger}
+import com.itv.scalapactcore.verifier.Verifier
 
 import scala.concurrent.duration._
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClientBuilder}
-import com.itv.scalapact.shared.ProviderStateResult
-import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
-
 import scala.util.Try
 
 trait ScalaPactVerifyDsl {

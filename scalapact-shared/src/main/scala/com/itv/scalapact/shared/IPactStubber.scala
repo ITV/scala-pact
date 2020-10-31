@@ -1,6 +1,7 @@
-package com.itv.scalapact.shared.typeclasses
+package com.itv.scalapact.shared
 
-import com.itv.scalapact.shared.{IInteractionManager, ScalaPactSettings, SslContextMap}
+import com.itv.scalapact.shared.http.SslContextMap
+import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
 
 trait IPactStubber {
 

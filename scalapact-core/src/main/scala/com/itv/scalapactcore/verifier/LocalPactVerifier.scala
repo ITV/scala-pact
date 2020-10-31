@@ -1,8 +1,10 @@
 package com.itv.scalapactcore.verifier
 
-import com.itv.scalapact.shared.ColourOutput.ColouredString
-import com.itv.scalapact.shared.{LocalPactVerifySettings, PactLogger, ScalaPactSettings}
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IScalaPactHttpClient}
+import com.itv.scalapact.shared.{LocalPactVerifySettings, ScalaPactSettings}
+import com.itv.scalapact.shared.utils.ColourOutput.ColouredString
+import com.itv.scalapact.shared.http.IScalaPactHttpClient
+import com.itv.scalapact.shared.json.IPactReader
+import com.itv.scalapact.shared.utils.PactLogger
 import com.itv.scalapactcore.common.LocalPactFileLoader
 
 import scala.util.Left

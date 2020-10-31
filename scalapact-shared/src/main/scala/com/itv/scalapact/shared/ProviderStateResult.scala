@@ -1,6 +1,6 @@
 package com.itv.scalapact.shared
 
-case class ProviderStateResult(result: Boolean, modifyRequest: InteractionRequest => InteractionRequest)
+final case class ProviderStateResult(result: Boolean, modifyRequest: InteractionRequest => InteractionRequest)
 
 object ProviderStateResult {
   def apply(): ProviderStateResult                = new ProviderStateResult(false, identity[InteractionRequest])

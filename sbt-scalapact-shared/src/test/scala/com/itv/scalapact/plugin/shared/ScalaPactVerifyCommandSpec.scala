@@ -67,7 +67,7 @@ class ScalaPactVerifyCommandSpec extends FunSpec with Matchers {
         )
       )
 
-      val patternMatchedStates: PartialFunction[String, ProviderStateResult] = { case (_: String) => ProviderStateResult() }
+      val patternMatchedStates: PartialFunction[String, ProviderStateResult] = { case _: String => ProviderStateResult() }
 
       val combined =
         ScalaPactVerifyCommand.combineProviderStatesIntoTotalFunction(directPactStates, patternMatchedStates)
@@ -122,7 +122,7 @@ class ScalaPactVerifyCommandSpec extends FunSpec with Matchers {
       var result = ""
 
       val directPactStates: Seq[(String, SetupProviderState)]     = Seq()
-      val patternMatchedStates: PartialFunction[String, ProviderStateResult] = { case (_: String) => ProviderStateResult() }
+      val patternMatchedStates: PartialFunction[String, ProviderStateResult] = { case _: String => ProviderStateResult() }
 
       val combined =
         ScalaPactVerifyCommand.combineProviderStatesIntoTotalFunction(directPactStates, patternMatchedStates)

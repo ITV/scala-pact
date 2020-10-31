@@ -1,6 +1,6 @@
 package com.itv.scalapact.model
 
-import com.itv.scalapact.shared._
+import com.itv.scalapact.shared.http.HttpMethod
 
 class ScalaPactInteraction(description: String,
                            providerState: Option[String],

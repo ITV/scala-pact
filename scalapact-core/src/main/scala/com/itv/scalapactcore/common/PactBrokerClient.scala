@@ -2,9 +2,12 @@ package com.itv.scalapactcore.common
 
 import java.net.URLEncoder
 
-import com.itv.scalapact.shared.ColourOutput._
+import com.itv.scalapact.shared
+import com.itv.scalapact.shared.utils.ColourOutput._
 import com.itv.scalapact.shared._
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClient, IScalaPactHttpClientBuilder}
+import com.itv.scalapact.shared.http.{HttpMethod, IScalaPactHttpClient, IScalaPactHttpClientBuilder, SimpleRequest, SimpleResponse}
+import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
+import com.itv.scalapact.shared.utils.{Helpers, PactLogger}
 import com.itv.scalapactcore.common.PactBrokerHelpers._
 import com.itv.scalapactcore.publisher.{PublishFailed, PublishResult, PublishSuccess}
 
@@ -21,7 +24,7 @@ class PactBrokerClient(
 
     providerPactsForVerificationUrl(brokerClient)(pactVerifySettings).map { address =>
       val body = pactWriter.pactsForVerificationRequestToJsonString(
-        PactsForVerificationRequest(pactVerifySettings.consumerVersionSelectors, pactVerifySettings.providerVersionTags, pactVerifySettings.includePendingStatus)
+        shared.PactsForVerificationRequest(pactVerifySettings.consumerVersionSelectors, pactVerifySettings.providerVersionTags, pactVerifySettings.includePendingStatus)
       )
       val request = SimpleRequest(
         baseUrl = address,
@@ -198,7 +201,7 @@ class PactBrokerClient(
             case Right(response) =>
               if (response.is2xx) {
                 PactLogger.message(
-                  s"Verification results published for provider ${result.pact.provider} and consumer ${result.pact.consumer}"
+                  s"Verification results published for provider '${result.pact.provider.name}' and consumer '${result.pact.consumer.name}'"
                 )
               } else {
                 PactLogger.error(s"Publish verification results failed with ${response.statusCode}".red)

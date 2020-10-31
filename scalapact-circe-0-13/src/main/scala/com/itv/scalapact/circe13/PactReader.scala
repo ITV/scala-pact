@@ -1,8 +1,8 @@
 package com.itv.scalapact.circe13
 
 import com.itv.scalapact.shared._
+import com.itv.scalapact.shared.json.IPactReader
 import com.itv.scalapact.shared.matchir.IrNode
-import com.itv.scalapact.shared.typeclasses.IPactReader
 import io.circe.Decoder
 import io.circe.parser._
 

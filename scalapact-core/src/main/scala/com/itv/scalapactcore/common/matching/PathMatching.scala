@@ -3,7 +3,7 @@ package com.itv.scalapactcore.common.matching
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
-import com.itv.scalapact.shared.Helpers
+import com.itv.scalapact.shared.utils.Helpers
 
 object PathMatching {
 

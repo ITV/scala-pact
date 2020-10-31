@@ -5,14 +5,16 @@ import java.util.concurrent.Executors
 import cats.data.OptionT
 import cats.effect._
 import cats.implicits._
-import com.itv.scalapact.shared._
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter}
+import com.itv.scalapact.shared
+import com.itv.scalapact.shared.http.SslContextMap
+import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
+import com.itv.scalapact.shared.{ScalaPactSettings, _}
 import javax.net.ssl.SSLContext
 import org.http4s.dsl.io._
+import org.http4s.implicits._
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.util.CaseInsensitiveString
-import org.http4s.{HttpApp, HttpRoutes, Request, Response, Status}
-import org.http4s.implicits._
+import org.http4s.{BuildInfo => _, _}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -77,7 +79,7 @@ object PactStubService {
         IO(interactionManager.clearInteractions()).flatMap { _ =>
           val output =
             pactWriter.pactToJsonString(
-              Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None, None),
+              shared.Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None, None),
               BuildInfo.version
             )
           Ok(JsonString(output))
@@ -97,7 +99,7 @@ object PactStubService {
 
             val output =
               pactWriter.pactToJsonString(
-                Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None, None),
+                shared.Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None, None),
                 BuildInfo.version
               )
             Ok(JsonString(output))

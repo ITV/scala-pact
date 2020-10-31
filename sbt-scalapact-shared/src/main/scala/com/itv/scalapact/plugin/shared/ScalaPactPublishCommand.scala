@@ -1,8 +1,11 @@
 package com.itv.scalapact.plugin.shared
 
-import com.itv.scalapact.shared.ColourOutput._
+import com.itv.scalapact.shared
+import com.itv.scalapact.shared.utils.ColourOutput._
 import com.itv.scalapact.shared._
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClientBuilder}
+import com.itv.scalapact.shared.http.IScalaPactHttpClientBuilder
+import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
+import com.itv.scalapact.shared.utils.PactLogger
 import com.itv.scalapactcore.publisher.{PublishFailed, PublishResult, PublishSuccess, Publisher}
 
 import scala.concurrent.duration._
@@ -34,7 +37,7 @@ object ScalaPactPublishCommand {
       PactLogger.error("Pact broker does not cope well with snapshot contracts.".yellow)
       PactLogger.error("To enable this feature, add \"allowSnapshotPublish := true\" to your pact.sbt file.".yellow)
     } else {
-      val publishSettings = PactPublishSettings(
+      val publishSettings = shared.PactPublishSettings(
         pactBrokerAddress,
         providerBrokerPublishMap,
         versionToPublishAs,
