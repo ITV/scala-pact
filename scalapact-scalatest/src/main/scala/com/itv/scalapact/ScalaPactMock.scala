@@ -18,12 +18,12 @@ private[scalapact] object ScalaPactMock {
     test(config)
   }
 
-  def runConsumerIntegrationTest[F[_], A](
+  def runConsumerIntegrationTest[A](
       strict: Boolean
   )(pactDescription: ScalaPactDescriptionFinal)(test: ScalaPactMockConfig => A)(implicit sslContextMap: SslContextMap,
                                                                                 pactReader: IPactReader,
                                                                                 pactWriter: IPactWriter,
-                                                                                httpClient: IScalaPactHttpClient[F],
+                                                                                httpClient: IScalaPactHttpClient,
                                                                                 pactStubber: IPactStubber): A = {
 
     val interactionManager: InteractionManager = new InteractionManager
@@ -63,12 +63,12 @@ private[scalapact] object ScalaPactMock {
     waitForServerThenTest(server, mockConfig, test, pactDescription)
   }
 
-  private def waitForServerThenTest[F[_], A](
+  private def waitForServerThenTest[A](
       server: IPactStubber,
       mockConfig: ScalaPactMockConfig,
       test: ScalaPactMockConfig => A,
       pactDescription: ScalaPactDescriptionFinal
-  )(implicit pactWriter: IPactWriter, httpClient: IScalaPactHttpClient[F]): A = {
+  )(implicit pactWriter: IPactWriter, httpClient: IScalaPactHttpClient): A = {
     @scala.annotation.tailrec
     def rec(attemptsRemaining: Int, intervalMillis: Int): A =
       if (isStubReady(mockConfig, pactDescription.serverSslContextName)) {
@@ -88,11 +88,11 @@ private[scalapact] object ScalaPactMock {
     rec(5, 100)
   }
 
-  private def isStubReady[F[_]](
+  private def isStubReady(
       mockConfig: ScalaPactMockConfig,
       sslContextName: Option[String]
-  )(implicit httpClient: IScalaPactHttpClient[F]): Boolean =
-    httpClient.doRequestSync(
+  )(implicit httpClient: IScalaPactHttpClient): Boolean =
+    httpClient.doRequest(
       SimpleRequest(mockConfig.baseUrl,
                     "/stub/status",
                     HttpMethod.GET,

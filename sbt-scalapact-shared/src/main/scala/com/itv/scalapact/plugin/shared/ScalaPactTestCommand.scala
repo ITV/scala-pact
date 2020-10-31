@@ -58,7 +58,7 @@ object ScalaPactTestCommand {
       .collect { case Some(pact) => pact }
       .reduceOption(combinePacts)
       .foreach { combined =>
-        PactContractWriter.writePactContracts(outputPath)(combined.provider.name)(combined.consumer.name)(
+        PactContractWriter.writePactToFile(outputPath)(combined.provider.name)(combined.consumer.name)(
           pactWriter.pactToJsonString(combined, BuildInfo.version)
         )
       }
@@ -68,7 +68,9 @@ object ScalaPactTestCommand {
 
   private def fileToJsonString(file: File): Option[String] =
     Try {
-      val contents = Source.fromFile(file).getLines().mkString
+      val source = Source.fromFile(file)
+      val contents = source.getLines().mkString
+      source.close()
       file.delete()
       contents
     }.toOption.orElse {

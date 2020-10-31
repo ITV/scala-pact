@@ -25,14 +25,14 @@ class ScalaPactDescription(strict: Boolean,
   def addSslContextForServer(name: String): ScalaPactDescription =
     new ScalaPactDescription(strict, consumer, provider, Some(name), interactions)
 
-  def runConsumerTest[F[_], A](test: ScalaPactMockConfig => A)(implicit options: ScalaPactOptions,
+  def runConsumerTest[A](test: ScalaPactMockConfig => A)(implicit options: ScalaPactOptions,
                                                                sslContextMap: SslContextMap,
                                                                pactReader: IPactReader,
                                                                pactWriter: IPactWriter,
-                                                               httpClientBuilder: IScalaPactHttpClientBuilder[F],
+                                                               httpClientBuilder: IScalaPactHttpClientBuilder,
                                                                pactStubber: IPactStubber): A = {
-    implicit val client: IScalaPactHttpClient[F] =
-      httpClientBuilder.build(2.seconds, sslContextName)
+    implicit val client: IScalaPactHttpClient =
+      httpClientBuilder.build(2.seconds, sslContextName, 1)
     ScalaPactMock.runConsumerIntegrationTest(strict)(
       finalise
     )(test)

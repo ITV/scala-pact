@@ -1,7 +1,6 @@
 package com.itv.scalapact.plugin
 
-import com.itv.scalapact.shared.ScalaPactSettings
-import com.itv.scalapact.shared.typeclasses.BrokerPublishData
+import com.itv.scalapact.shared.{BrokerPublishData, ScalaPactSettings}
 
 import scala.concurrent.duration._
 

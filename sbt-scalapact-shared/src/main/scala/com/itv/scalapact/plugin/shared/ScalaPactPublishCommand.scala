@@ -1,15 +1,15 @@
 package com.itv.scalapact.plugin.shared
 
 import com.itv.scalapact.shared.ColourOutput._
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClientBuilder}
 import com.itv.scalapact.shared._
-import com.itv.scalapactcore.common.LocalPactFileLoader
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClientBuilder}
+import com.itv.scalapactcore.publisher.{PublishFailed, PublishResult, PublishSuccess, Publisher}
 
 import scala.concurrent.duration._
 
 object ScalaPactPublishCommand {
 
-  def doPactPublish[F[_]](
+  def doPactPublish(
       scalaPactSettings: ScalaPactSettings,
       pactBrokerAddress: String,
       providerBrokerPublishMap: Map[String, String],
@@ -20,10 +20,7 @@ object ScalaPactPublishCommand {
       pactBrokerAuthorization: Option[PactBrokerAuthorization],
       pactBrokerClientTimeout: Duration,
       sslContextName: Option[String]
-  )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder[F]): Unit = {
-    import Publisher._
-
-    val httpClient = httpClientBuilder.build(pactBrokerClientTimeout, sslContextName)
+  )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder): Unit = {
 
     PactLogger.message("*************************************".white.bold)
     PactLogger.message("** ScalaPact: Publishing Contracts **".white.bold)
@@ -37,32 +34,19 @@ object ScalaPactPublishCommand {
       PactLogger.error("Pact broker does not cope well with snapshot contracts.".yellow)
       PactLogger.error("To enable this feature, add \"allowSnapshotPublish := true\" to your pact.sbt file.".yellow)
     } else {
-      val configAndPactFiles =
-        LocalPactFileLoader.loadPactFiles(pactReader)(false)(scalaPactSettings.giveOutputPath)(scalaPactSettings)
-
-      // Publish all to main broker
-      val mainPublishResults: List[PublishResult] = publishToBroker(
-        httpClient.doRequestSync,
+      val publishSettings = PactPublishSettings(
         pactBrokerAddress,
+        providerBrokerPublishMap,
         versionToPublishAs,
-        tagsToPublishWith,
-        pactBrokerAuthorization
-      )(pactWriter)(configAndPactFiles)
-
-      // Publish to other specified brokers
-      val otherPublishResults: List[PublishResult] = for {
-        pactContract <- configAndPactFiles
-        broker       <- providerBrokerPublishMap.get(pactContract.provider.name).toList
-        publishResult <- publishToBroker(
-          httpClient.doRequestSync,
-          broker,
-          versionToPublishAs,
-          tagsToPublishWith,
-          pactBrokerAuthorization
-        )(pactWriter)(List(pactContract))
-      } yield publishResult
-
-      evaluatePublishResults(mainPublishResults ++ otherPublishResults)
+        pactContractVersion,
+        allowSnapshotPublish,
+        tagsToPublishWith.toList,
+        pactBrokerAuthorization,
+        pactBrokerClientTimeout,
+        sslContextName
+      )
+      val publishResults = Publisher.apply.publishPacts(publishSettings, scalaPactSettings)
+      evaluatePublishResults(publishResults)
     }
   }
 
@@ -72,9 +56,7 @@ object ScalaPactPublishCommand {
       case result: PublishFailed  => PactLogger.error(result.renderAsString)
     }
 
-    val noErrors = publishResults.collectFirst { case _: PublishFailed => () }.isEmpty
-
-    if (noErrors) exitSuccess()
+    if (publishResults.forall(_.isSuccess)) exitSuccess()
     else exitFailure()
   }
 

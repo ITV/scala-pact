@@ -7,8 +7,8 @@ import com.itv.scalapactcore.common.LocalPactFileLoader
 
 import scala.util.Left
 
-private [verifier] class LocalPactVerifier[F[_]](
-  localVerifierClient: IScalaPactHttpClient[F])(
+private [verifier] class LocalPactVerifier(
+  localVerifierClient: IScalaPactHttpClient)(
   implicit pactReader: IPactReader) {
 
   def verify(pactVerifySettings: LocalPactVerifySettings, scalaPactSettings: ScalaPactSettings): Boolean = {
