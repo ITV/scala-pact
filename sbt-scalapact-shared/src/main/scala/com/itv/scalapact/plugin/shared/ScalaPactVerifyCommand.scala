@@ -2,7 +2,7 @@ package com.itv.scalapact.plugin.shared
 
 import com.itv.scalapact.shared.ColourOutput._
 import com.itv.scalapact.shared._
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IResultPublisherBuilder, IScalaPactHttpClientBuilder}
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClientBuilder}
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 import com.itv.scalapactcore.verifier.Verifier
 
@@ -10,7 +10,7 @@ import scala.concurrent.duration._
 
 object ScalaPactVerifyCommand {
 
-  def doPactVerify[F[_]](
+  def doPactVerify(
       scalaPactSettings: ScalaPactSettings,
       providerStates: Seq[(String, SetupProviderState)],
       providerStateMatcher: PartialFunction[String, ProviderStateResult],
@@ -27,8 +27,7 @@ object ScalaPactVerifyCommand {
       includePendingStatus: Boolean
   )(implicit pactReader: IPactReader,
     pactWriter: IPactWriter,
-    httpClientBuilder: IScalaPactHttpClientBuilder[F],
-    publisher: IResultPublisherBuilder): Unit = {
+    httpClientBuilder: IScalaPactHttpClientBuilder): Unit = {
     PactLogger.message("*************************************".white.bold)
     PactLogger.message("** ScalaPact: Running Verifier     **".white.bold)
     PactLogger.message("*************************************".white.bold)
@@ -66,7 +65,7 @@ object ScalaPactVerifyCommand {
       }
     }
 
-    val successfullyVerified = Verifier[F].verify(pactVerifySettings, scalaPactSettings)
+    val successfullyVerified = Verifier.apply.verify(pactVerifySettings, scalaPactSettings)
 
     if (successfullyVerified) sys.exit(0) else sys.exit(1)
 

@@ -2,7 +2,7 @@ package com.itv.scalapactcore.common
 
 object PactBrokerAddressValidation {
 
-  lazy val checkPactBrokerAddress: String => Either[String, ValidPactBrokerAddress] = {
+  def checkPactBrokerAddress(address: String): Either[String, ValidPactBrokerAddress] = address match {
     case a: String if a.isEmpty =>
       Left(
         "Pact broker address not set, you need to add the following line to you SBT file: \npactBrokerAddress := \"http://pactbroker.myserver.com\""

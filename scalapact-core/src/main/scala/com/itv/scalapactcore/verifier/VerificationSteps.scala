@@ -2,16 +2,15 @@ package com.itv.scalapactcore.verifier
 
 import com.itv.scalapact.shared.ColourOutput.ColouredString
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
-import com.itv.scalapact.shared.typeclasses.{BrokerPublishData, IPactReader, IResultPublisherBuilder, IScalaPactHttpClient}
-import com.itv.scalapact.shared.{InteractionRequest, InteractionResponse, Pact, PactBrokerAuthorization, PactLogger, PactVerifyResult, PactVerifyResultInContext, ProviderStateResult, ScalaPactSettings}
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IScalaPactHttpClient}
+import com.itv.scalapact.shared._
 import com.itv.scalapactcore.common.matching.InteractionMatchers.matchResponse
 
-import scala.concurrent.duration._
 import scala.util.Left
 
 object VerificationSteps {
-  def runVerificationAgainst[F[_]](
-    client: IScalaPactHttpClient[F],
+  def runVerificationAgainst(
+    client: IScalaPactHttpClient,
     arguments: ScalaPactSettings,
     providerStates: SetupProviderState)(pact: Pact)(implicit pactReader: IPactReader): PactVerifyResult = {
     val results = pact.interactions.map { interaction =>
@@ -41,18 +40,6 @@ object VerificationSteps {
     )
   }
 
-  def publishResults(
-                      publishResultsEnabled: Option[BrokerPublishData],
-                      clientTimeout: Option[Duration],
-                      sslContextName: Option[String],
-                      auth: Option[PactBrokerAuthorization],
-                      results: List[PactVerifyResult])(implicit publisherBuilder: IResultPublisherBuilder): Boolean =
-    publishResultsEnabled.exists { publishData =>
-      publisherBuilder.buildWithDefaults(clientTimeout, sslContextName)
-        .publishResults(results, publishData, auth)
-      true
-    }
-
   def logVerificationResults(startTime: Long, endTime: Long, successCount: Int, failureCount: Int, pendingCount: Int): Unit = {
     val testCount = {successCount + failureCount + pendingCount}
     val scalaPactLogPrefix = "[scala-pact] ".white
@@ -70,8 +57,8 @@ object VerificationSteps {
       PactLogger.message(scalaPactLogPrefix + s"$failureCount Pact verify tests failed.".red)
   }
 
-  private def runInteractionRequest[F[_]](
-    client: IScalaPactHttpClient[F],
+  private def runInteractionRequest(
+    client: IScalaPactHttpClient,
     arguments: ScalaPactSettings,
     maybeProviderState: Option[ProviderState],
     interactionRequest: InteractionRequest): Either[String, InteractionResponse] = {
@@ -115,7 +102,7 @@ object VerificationSteps {
       try {
         InteractionRequest.unapply(finalRequest) match {
           case Some((Some(_), Some(_), _, _, _, _)) =>
-            client.doInteractionRequestSync(baseUrl,
+            client.doInteractionRequest(baseUrl,
               finalRequest.withoutSslContextHeader) match {
               case Left(e) =>
                 PactLogger.error(s"Error in response: ${e.getMessage}".red)

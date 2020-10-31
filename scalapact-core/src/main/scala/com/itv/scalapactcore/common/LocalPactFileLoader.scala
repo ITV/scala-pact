@@ -32,7 +32,10 @@ object LocalPactFileLoader {
 
           case x :: xs if x.isFile && x.getName.endsWith("_tmp.json") && allowTmpFiles =>
             PactLogger.debug(("Loading pact file: " + x.getName).bold)
-            rec(xs, scala.io.Source.fromURL(x.toURI.toURL).getLines().mkString("\n") :: acc)
+            val source = scala.io.Source.fromURL(x.toURI.toURL)
+            val lines = source.getLines().mkString("\n")
+            source.close()
+            rec(xs, lines :: acc)
 
           case x :: xs if x.isFile && x.getName.endsWith("_tmp.json") && !allowTmpFiles =>
             PactLogger.error(("Ignoring temp pact file (did you run pactPack?): " + x.getName).yellow.bold)
@@ -40,7 +43,10 @@ object LocalPactFileLoader {
 
           case x :: xs if x.isFile && x.getName.endsWith(".json") =>
             PactLogger.debug(("Loading pact file: " + x.getName).bold)
-            rec(xs, scala.io.Source.fromURL(x.toURI.toURL).getLines().mkString("\n") :: acc)
+            val source = scala.io.Source.fromURL(x.toURI.toURL)
+            val lines  =source.getLines().mkString("\n")
+            source.close()
+            rec(xs, lines :: acc)
 
           case x :: xs =>
             PactLogger.warn(("Ignoring non-JSON file: " + x.getName).yellow)

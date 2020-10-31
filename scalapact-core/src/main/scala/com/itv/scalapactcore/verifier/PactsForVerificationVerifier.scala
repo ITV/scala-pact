@@ -3,19 +3,19 @@ package com.itv.scalapactcore.verifier
 import com.itv.scalapact.shared.ColourOutput.ColouredString
 import com.itv.scalapact.shared.Notice.{AfterVerificationNotice, BeforeVerificationNotice, SimpleNotice}
 import com.itv.scalapact.shared.{PactLogger, PactVerifyResult, PactVerifyResultInContext, PactsForVerificationSettings, ScalaPactSettings, VerificationProperties}
-import com.itv.scalapact.shared.typeclasses.{IPactReader, IResultPublisherBuilder, IScalaPactHttpClient}
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IScalaPactHttpClient}
+import com.itv.scalapactcore.common.PactBrokerClient
 import com.itv.scalapactcore.verifier.PactsForVerificationVerifier.VerificationResult
 
 import scala.util.Left
 
-private [verifier] class PactsForVerificationVerifier[F[_]](
-  pactBrokerClient: PactBrokerClient[F],
-  localVerifierClient: IScalaPactHttpClient[F])(
-  implicit pactReader: IPactReader,
-  publisherBuilder: IResultPublisherBuilder) {
+private [verifier] class PactsForVerificationVerifier(
+  pactBrokerClient: PactBrokerClient,
+  localVerifierClient: IScalaPactHttpClient)(
+  implicit pactReader: IPactReader) {
   def verify(verificationSettings: PactsForVerificationSettings, scalaPactSettings: ScalaPactSettings): Boolean = {
 
-    val pactsAndProperties = pactBrokerClient.fetchFromPactsForVerification(verificationSettings)
+    val pactsAndProperties = pactBrokerClient.fetchPactsFromPactsForVerification(verificationSettings)
 
     PactLogger.message(
       s"Verifying against '${scalaPactSettings.giveHost}' on port '${scalaPactSettings.givePort}' with a timeout of ${scalaPactSettings.giveClientTimeout.toSeconds.toString} second(s).".white.bold
@@ -29,13 +29,16 @@ private [verifier] class PactsForVerificationVerifier[F[_]](
 
     val end = System.currentTimeMillis()
 
-    val published = VerificationSteps.publishResults(
-      scalaPactSettings.publishResultsEnabled,
-      verificationSettings.pactBrokerClientTimeout,
-      verificationSettings.sslContextName,
-      verificationSettings.pactBrokerAuthorization,
-      resultsAndProperties.map(_._1)
-    )
+    val published = scalaPactSettings.publishResultsEnabled.exists { publishData =>
+      pactBrokerClient.publishVerificationResults(
+        resultsAndProperties.map(_._1),
+        publishData,
+        verificationSettings.pactBrokerAuthorization,
+        verificationSettings.pactBrokerClientTimeout,
+        verificationSettings.sslContextName
+      )
+      true
+    }
 
     val testCount = resultsAndProperties.length
 

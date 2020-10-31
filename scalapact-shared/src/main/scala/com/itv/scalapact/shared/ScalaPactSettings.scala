@@ -1,7 +1,5 @@
 package com.itv.scalapact.shared
 
-import com.itv.scalapact.shared.typeclasses.BrokerPublishData
-
 import scala.concurrent.duration.{Duration, SECONDS}
 import scala.util.Properties
 

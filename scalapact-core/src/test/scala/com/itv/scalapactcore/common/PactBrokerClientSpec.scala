@@ -1,15 +1,13 @@
-package com.itv.scalapact.http4s.http4s21.impl
+package com.itv.scalapactcore.common
 
-import cats.effect.{IO, Resource}
-import com.itv.scalapact.http4s21.impl.ResultPublisher
 import com.itv.scalapact.shared._
-import com.itv.scalapact.shared.typeclasses.BrokerPublishData
-import org.http4s.client.Client
+import com.itv.scalapact.shared.typeclasses.{IPactReader, IPactWriter, IScalaPactHttpClient, IScalaPactHttpClientBuilder}
 import org.scalatest.{BeforeAndAfter, FunSpec, Matchers}
 
 import scala.collection.mutable.ArrayBuffer
+import scala.concurrent.duration.Duration
 
-class ResultPublisherSpec extends FunSpec with Matchers with BeforeAndAfter {
+class PactBrokerClientSpec extends FunSpec with Matchers with BeforeAndAfter {
 
   private val simpleInteraction = Interaction(
     providerState = None,
@@ -52,18 +50,26 @@ class ResultPublisherSpec extends FunSpec with Matchers with BeforeAndAfter {
 
   private var requests: ArrayBuffer[SimpleRequest] = _
 
-  private val fakeCaller: (SimpleRequest, Resource[IO, Client[IO]]) => IO[SimpleResponse] = (req, _) => {
-    requests += req
-    IO.pure(SimpleResponse(200))
+  implicit val clientBuilder: IScalaPactHttpClientBuilder = new IScalaPactHttpClientBuilder {
+    def build(clientTimeout: Duration, sslContextName: Option[String], maxTotalConnections: Int): IScalaPactHttpClient =
+      new IScalaPactHttpClient {
+        override def doRequest(simpleRequest: SimpleRequest): Either[Throwable, SimpleResponse] = {
+          requests += simpleRequest
+          Right(SimpleResponse(200))
+        }
+        override def doInteractionRequest(url: String, ir: InteractionRequest): Either[Throwable, InteractionResponse] = ???
+      }
   }
+  implicit val reader: IPactReader = null
+  implicit val writer: IPactWriter = null
 
-  private val resultPublisher = new ResultPublisher(null)(fakeCaller)
+  private val resultPublisher: PactBrokerClient = new PactBrokerClient
 
   before {
     requests = ArrayBuffer.empty[SimpleRequest]
   }
 
-  describe("resultPublisher") {
+  describe("pact broker client verification results publishing") {
     val brokerPublishData           = BrokerPublishData("1.0.0", Option("http://buildUrl.com"))
     val brokerPublishDataNoBuildUrl = BrokerPublishData("1.0.0", None)
     val successfulResult            = PactVerifyResultInContext(Right(simpleInteraction), "context")
@@ -76,7 +82,7 @@ class ResultPublisherSpec extends FunSpec with Matchers with BeforeAndAfter {
       val results           = successfulResults
       val pactVerifyResults = List(PactVerifyResult(simpleWithLinks, results))
 
-      resultPublisher.publishResults(pactVerifyResults, brokerPublishData, None)
+      resultPublisher.publishVerificationResults(pactVerifyResults, brokerPublishData, None, None, None)
 
       val successfulRequest = SimpleRequest(
         publishUrl,
@@ -93,7 +99,7 @@ class ResultPublisherSpec extends FunSpec with Matchers with BeforeAndAfter {
       val results           = successfulResults
       val pactVerifyResults = List(PactVerifyResult(simpleWithLinks, results))
 
-      resultPublisher.publishResults(pactVerifyResults, brokerPublishDataNoBuildUrl, None)
+      resultPublisher.publishVerificationResults(pactVerifyResults, brokerPublishDataNoBuildUrl, None, None, None)
 
       val successfulRequest = SimpleRequest(
         publishUrl,
@@ -109,7 +115,7 @@ class ResultPublisherSpec extends FunSpec with Matchers with BeforeAndAfter {
     it("should publish failure results") {
       val pactVerifyResults = List(PactVerifyResult(simpleWithLinks, failedResults))
 
-      resultPublisher.publishResults(pactVerifyResults, brokerPublishData, None)
+      resultPublisher.publishVerificationResults(pactVerifyResults, brokerPublishData, None, None, None)
 
       val failedRequest = SimpleRequest(
         publishUrl,
@@ -126,7 +132,7 @@ class ResultPublisherSpec extends FunSpec with Matchers with BeforeAndAfter {
       val results           = successfulResults
       val pactVerifyResults = List(PactVerifyResult(simple, results))
 
-      resultPublisher.publishResults(pactVerifyResults, brokerPublishData, None)
+      resultPublisher.publishVerificationResults(pactVerifyResults, brokerPublishData, None, None, None)
 
       requests shouldBe ArrayBuffer.empty[SimpleRequest]
     }
@@ -136,7 +142,7 @@ class ResultPublisherSpec extends FunSpec with Matchers with BeforeAndAfter {
       val expectedHeader = ("Authorization" -> "Basic dXNlcm5hbWU6cGFzc3dvcmQ=")
       val pactVerifyResults = List(PactVerifyResult(simpleWithLinks, results))
 
-      resultPublisher.publishResults(pactVerifyResults, brokerPublishData, PactBrokerAuthorization(("username", "password"), ""))
+      resultPublisher.publishVerificationResults(pactVerifyResults, brokerPublishData, PactBrokerAuthorization(("username", "password"), ""), None, None)
 
       val successfulRequest = SimpleRequest(
         publishUrl, "", HttpMethod.POST, Map("Content-Type" -> "application/json; charset=UTF-8") + expectedHeader, Option("""{ "success": true, "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""), None
@@ -148,7 +154,7 @@ class ResultPublisherSpec extends FunSpec with Matchers with BeforeAndAfter {
       val token = "fakeToken"
       val expectedHeader = ("Authorization" -> s"Bearer $token")
 
-      resultPublisher.publishResults(pactVerifyResults, brokerPublishData, PactBrokerAuthorization(("", ""), token))
+      resultPublisher.publishVerificationResults(pactVerifyResults, brokerPublishData, PactBrokerAuthorization(("", ""), token), None, None)
 
       val successfulRequest = SimpleRequest(
         publishUrl, "", HttpMethod.POST, Map("Content-Type" -> "application/json; charset=UTF-8") + expectedHeader, Option("""{ "success": true, "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""), None
@@ -157,7 +163,7 @@ class ResultPublisherSpec extends FunSpec with Matchers with BeforeAndAfter {
     }
 
     it("should have no Authorization header when no auth config is provided") {
-      resultPublisher.publishResults(pactVerifyResults, brokerPublishData, None)
+      resultPublisher.publishVerificationResults(pactVerifyResults, brokerPublishData, None, None, None)
 
       val successfulRequest = SimpleRequest(
         publishUrl, "", HttpMethod.POST, Map("Content-Type" -> "application/json; charset=UTF-8"), Option("""{ "success": true, "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""), None
