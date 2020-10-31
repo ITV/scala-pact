@@ -1,7 +1,13 @@
 package com.itv.scalapactcore.common
 
 import com.itv.scalapact.shared._
-import com.itv.scalapact.shared.http.{HttpMethod, IScalaPactHttpClient, IScalaPactHttpClientBuilder, SimpleRequest, SimpleResponse}
+import com.itv.scalapact.shared.http.{
+  HttpMethod,
+  IScalaPactHttpClient,
+  IScalaPactHttpClientBuilder,
+  SimpleRequest,
+  SimpleResponse
+}
 import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
 import org.scalatest.{BeforeAndAfter, FunSpec, Matchers}
 
@@ -58,7 +64,8 @@ class PactBrokerClientSpec extends FunSpec with Matchers with BeforeAndAfter {
           requests += simpleRequest
           Right(SimpleResponse(200))
         }
-        override def doInteractionRequest(url: String, ir: InteractionRequest): Either[Throwable, InteractionResponse] = ???
+        override def doInteractionRequest(url: String, ir: InteractionRequest): Either[Throwable, InteractionResponse] =
+          ???
       }
   }
   implicit val reader: IPactReader = null
@@ -77,7 +84,7 @@ class PactBrokerClientSpec extends FunSpec with Matchers with BeforeAndAfter {
     val successfulResults           = List(successfulResult)
     val failedResult                = PactVerifyResultInContext(Left("failed"), "context")
     val failedResults               = List(successfulResult, failedResult)
-    val pactVerifyResults = List(PactVerifyResult(simpleWithLinks, successfulResults))
+    val pactVerifyResults           = List(PactVerifyResult(simpleWithLinks, successfulResults))
 
     it("should publish successful results") {
       val results           = successfulResults
@@ -139,26 +146,48 @@ class PactBrokerClientSpec extends FunSpec with Matchers with BeforeAndAfter {
     }
 
     it("should add basic auth header if credentials is specified") {
-      val results = successfulResults
-      val expectedHeader = ("Authorization" -> "Basic dXNlcm5hbWU6cGFzc3dvcmQ=")
+      val results           = successfulResults
+      val expectedHeader    = "Authorization" -> "Basic dXNlcm5hbWU6cGFzc3dvcmQ="
       val pactVerifyResults = List(PactVerifyResult(simpleWithLinks, results))
 
-      resultPublisher.publishVerificationResults(pactVerifyResults, brokerPublishData, PactBrokerAuthorization(("username", "password"), ""), None, None)
+      resultPublisher.publishVerificationResults(
+        pactVerifyResults,
+        brokerPublishData,
+        PactBrokerAuthorization(("username", "password"), ""),
+        None,
+        None
+      )
 
       val successfulRequest = SimpleRequest(
-        publishUrl, "", HttpMethod.POST, Map("Content-Type" -> "application/json; charset=UTF-8") + expectedHeader, Option("""{ "success": true, "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""), None
+        publishUrl,
+        "",
+        HttpMethod.POST,
+        Map("Content-Type" -> "application/json; charset=UTF-8") + expectedHeader,
+        Option("""{ "success": true, "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""),
+        None
       )
       requests shouldBe ArrayBuffer(successfulRequest)
     }
 
     it("should add bearer token header if a token is specified") {
-      val token = "fakeToken"
-      val expectedHeader = ("Authorization" -> s"Bearer $token")
+      val token          = "fakeToken"
+      val expectedHeader = "Authorization" -> s"Bearer $token"
 
-      resultPublisher.publishVerificationResults(pactVerifyResults, brokerPublishData, PactBrokerAuthorization(("", ""), token), None, None)
+      resultPublisher.publishVerificationResults(
+        pactVerifyResults,
+        brokerPublishData,
+        PactBrokerAuthorization(("", ""), token),
+        None,
+        None
+      )
 
       val successfulRequest = SimpleRequest(
-        publishUrl, "", HttpMethod.POST, Map("Content-Type" -> "application/json; charset=UTF-8") + expectedHeader, Option("""{ "success": true, "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""), None
+        publishUrl,
+        "",
+        HttpMethod.POST,
+        Map("Content-Type" -> "application/json; charset=UTF-8") + expectedHeader,
+        Option("""{ "success": true, "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""),
+        None
       )
       requests shouldBe ArrayBuffer(successfulRequest)
     }
@@ -167,7 +196,12 @@ class PactBrokerClientSpec extends FunSpec with Matchers with BeforeAndAfter {
       resultPublisher.publishVerificationResults(pactVerifyResults, brokerPublishData, None, None, None)
 
       val successfulRequest = SimpleRequest(
-        publishUrl, "", HttpMethod.POST, Map("Content-Type" -> "application/json; charset=UTF-8"), Option("""{ "success": true, "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""), None
+        publishUrl,
+        "",
+        HttpMethod.POST,
+        Map("Content-Type" -> "application/json; charset=UTF-8"),
+        Option("""{ "success": true, "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""),
+        None
       )
       requests shouldBe ArrayBuffer(successfulRequest)
     }

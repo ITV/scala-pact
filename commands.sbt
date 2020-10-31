@@ -12,6 +12,7 @@ addCommandAlias(
 addCommandAlias(
   "localPublishScalaPact",
   List(
+    "scalafmtCheckAll",
     "+clean",
     "+update",
     "+compile",

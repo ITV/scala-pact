@@ -274,8 +274,10 @@ object IrNodePath {
 
       }
 
-    deduplicate(rec(path.invert.split, IrNodePath.empty, Nil).map(_.invert) ++ rec(path.split, IrNodePath.empty, Nil),
-                Nil)
+    deduplicate(
+      rec(path.invert.split, IrNodePath.empty, Nil).map(_.invert) ++ rec(path.split, IrNodePath.empty, Nil),
+      Nil
+    )
   }
 
   def split(path: IrNodePath): List[IrNodePath] = {

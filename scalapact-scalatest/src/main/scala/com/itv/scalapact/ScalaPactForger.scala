@@ -1,13 +1,13 @@
 package com.itv.scalapact
 
-import com.itv.scalapact.model.ScalaPactMatchingRule.{ScalaPactMatchingRuleArrayMinLength, ScalaPactMatchingRuleRegex, ScalaPactMatchingRuleType}
-import com.itv.scalapact.model.{ScalaPactDescription, ScalaPactInteraction, ScalaPactMatchingRules, ScalaPactOptions, ScalaPactRequest, ScalaPactResponse}
+import com.itv.scalapact.model.ScalaPactMatchingRule._
+import com.itv.scalapact.model._
 import com.itv.scalapact.shared.http.HttpMethod
 
 trait ScalaPactForgerDsl {
   implicit val options: ScalaPactOptions = ScalaPactOptions.DefaultOptions
 
-  object forgePact extends ForgePactElements(strict = false)
+  object forgePact       extends ForgePactElements(strict = false)
   object forgeStrictPact extends ForgePactElements(strict = true)
 
   sealed class ForgePactElements(strict: Boolean) {
@@ -47,15 +47,15 @@ trait ScalaPactForgerDsl {
     )
   }
 
-  val GET: HttpMethod = HttpMethod.GET
-  val POST: HttpMethod = HttpMethod.POST
-  val PUT: HttpMethod = HttpMethod.PUT
-  val DELETE: HttpMethod = HttpMethod.DELETE
+  val GET: HttpMethod     = HttpMethod.GET
+  val POST: HttpMethod    = HttpMethod.POST
+  val PUT: HttpMethod     = HttpMethod.PUT
+  val DELETE: HttpMethod  = HttpMethod.DELETE
   val OPTIONS: HttpMethod = HttpMethod.OPTIONS
-  val PATCH: HttpMethod = HttpMethod.PATCH
+  val PATCH: HttpMethod   = HttpMethod.PATCH
   val CONNECT: HttpMethod = HttpMethod.CONNECT
-  val TRACE: HttpMethod = HttpMethod.TRACE
-  val HEAD: HttpMethod = HttpMethod.HEAD
+  val TRACE: HttpMethod   = HttpMethod.TRACE
+  val HEAD: HttpMethod    = HttpMethod.HEAD
 }
 
 object ScalaPactForger extends ScalaPactForgerDsl

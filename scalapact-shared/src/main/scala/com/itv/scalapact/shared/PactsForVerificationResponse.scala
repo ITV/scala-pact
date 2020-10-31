@@ -30,8 +30,7 @@ import com.itv.scalapact.shared.Notice.{PendingStateNotice, SimpleNotice}
     }
   }
 }
-*/
-
+ */
 
 final case class PactsForVerificationResponse(_embedded: EmbeddedPactsForVerification, _links: Links) {
   def pacts: List[PactForVerification] = _embedded.pacts
@@ -53,11 +52,12 @@ object VerificationProperties {
   sealed trait VerificationPropertiesAux[A0 <: Notice] extends VerificationProperties { type A = A0 }
 
   final case class SimpleVerificationProperties(notices: List[SimpleNotice])
-    extends VerificationPropertiesAux[SimpleNotice] {
+      extends VerificationPropertiesAux[SimpleNotice] {
     val pending = false
   }
 
-  final case class PendingStateVerificationProperties(pending: Boolean, notices: List[PendingStateNotice]) extends VerificationPropertiesAux[PendingStateNotice]
+  final case class PendingStateVerificationProperties(pending: Boolean, notices: List[PendingStateNotice])
+      extends VerificationPropertiesAux[PendingStateNotice]
 
 }
 
@@ -66,8 +66,9 @@ sealed trait Notice {
 }
 
 object Notice {
-  final case class SimpleNotice(text: String) extends Notice
-  sealed trait PendingStateNotice extends Notice
+  final case class SimpleNotice(text: String)             extends Notice
+  sealed trait PendingStateNotice                         extends Notice
   final case class BeforeVerificationNotice(text: String) extends PendingStateNotice
-  final case class AfterVerificationNotice(text: String, success: Boolean, published: Boolean) extends PendingStateNotice
+  final case class AfterVerificationNotice(text: String, success: Boolean, published: Boolean)
+      extends PendingStateNotice
 }

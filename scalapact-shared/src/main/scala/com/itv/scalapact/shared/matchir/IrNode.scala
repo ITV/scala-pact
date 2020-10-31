@@ -3,44 +3,55 @@ package com.itv.scalapact.shared.matchir
 import com.itv.scalapact.shared.matchir.IrNodeEqualityResult.{IrNodesEqual, IrNodesNotEqual}
 import com.itv.scalapact.shared.matchir.IrNodePath.IrNodePathEmpty
 
-final case class IrNode(label: String,
-                  value: Option[IrNodePrimitive],
-                  children: List[IrNode],
-                  ns: Option[String],
-                  attributes: IrNodeAttributes,
-                  isArray: Boolean,
-                  isXml: Boolean,
-                  path: IrNodePath) {
+final case class IrNode(
+    label: String,
+    value: Option[IrNodePrimitive],
+    children: List[IrNode],
+    ns: Option[String],
+    attributes: IrNodeAttributes,
+    isArray: Boolean,
+    isXml: Boolean,
+    path: IrNodePath
+) {
 
   import IrNodeEqualityResult._
 
   def =~(other: IrNode)(implicit rules: IrNodeMatchingRules): IrNodeEqualityResult =
     isEqualTo(other, strict = false, rules, bePermissive = false)
-  def =<>=(other: IrNode)(implicit rules: IrNodeMatchingRules,
-                          permissive: IrNodeMatchPermissivity): IrNodeEqualityResult =
+  def =<>=(
+      other: IrNode
+  )(implicit rules: IrNodeMatchingRules, permissive: IrNodeMatchPermissivity): IrNodeEqualityResult =
     isEqualTo(other, strict = true, rules, bePermissive = permissive.bePermissive)
 
-  def isEqualTo(other: IrNode,
-                strict: Boolean,
-                rules: IrNodeMatchingRules,
-                bePermissive: Boolean): IrNodeEqualityResult = {
+  def isEqualTo(
+      other: IrNode,
+      strict: Boolean,
+      rules: IrNodeMatchingRules,
+      bePermissive: Boolean
+  ): IrNodeEqualityResult = {
 
     val nodeEquality = check[Boolean](nodeType(other.path, this.isXml), this.isArray, other.isArray) +
       check[String](labelTest(other.path), this.label, other.label) +
-      check[Option[IrNodePrimitive]](valueTest(strict, this.isXml, other.path, rules, this, other),
-                                     this.value,
-                                     other.value) +
+      check[Option[IrNodePrimitive]](
+        valueTest(strict, this.isXml, other.path, rules, this, other),
+        this.value,
+        other.value
+      ) +
       check[Option[String]](namespaceTest(other.path), this.ns, other.ns) +
-      check[IrNodeAttributes](attributesTest(strict, this.isXml, bePermissive, other.path, rules),
-                              this.attributes,
-                              other.attributes) +
+      check[IrNodeAttributes](
+        attributesTest(strict, this.isXml, bePermissive, other.path, rules),
+        this.attributes,
+        other.attributes
+      ) +
       check[IrNodePath](pathTest(other.path), this.path, other.path)
 
     val ruleResults = RuleChecks.checkForNode(rules, other.path, this, other)
 
-    val childEquality = check[List[IrNode]](childrenTest(strict, other.path, isXml, bePermissive, rules, this, other),
-                                            this.children,
-                                            other.children)
+    val childEquality = check[List[IrNode]](
+      childrenTest(strict, other.path, isXml, bePermissive, rules, this, other),
+      this.children,
+      other.children
+    )
 
     ruleResults
       .map(_ + childEquality)
@@ -171,18 +182,22 @@ object RuleChecks {
         Some(xs.foldLeft(x)(_ + _))
     }
 
-  def checkForNode(rules: IrNodeMatchingRules,
-                   path: IrNodePath,
-                   expected: IrNode,
-                   actual: IrNode): Option[IrNodeEqualityResult] =
+  def checkForNode(
+      rules: IrNodeMatchingRules,
+      path: IrNodePath,
+      expected: IrNode,
+      actual: IrNode
+  ): Option[IrNodeEqualityResult] =
     foldResults(rules.validateNode(path, expected, actual))
 
-  def checkForPrimitive(rules: IrNodeMatchingRules,
-                        path: IrNodePath,
-                        expected: Option[IrNodePrimitive],
-                        actual: Option[IrNodePrimitive],
-                        checkParentTypeRule: Boolean,
-                        isXml: Boolean): Option[IrNodeEqualityResult] =
+  def checkForPrimitive(
+      rules: IrNodeMatchingRules,
+      path: IrNodePath,
+      expected: Option[IrNodePrimitive],
+      actual: Option[IrNodePrimitive],
+      checkParentTypeRule: Boolean,
+      isXml: Boolean
+  ): Option[IrNodeEqualityResult] =
     (expected, actual) match {
       case (Some(e), Some(a)) =>
         foldResults(rules.validatePrimitive(path, e, a, checkParentTypeRule, isXml))
@@ -205,5 +220,5 @@ object IrNodeMatchPermissivity {
   implicit val defaultPermissivity: IrNodeMatchPermissivity = NonPermissive
 
   case object NonPermissive extends IrNodeMatchPermissivity(false)
-  case object Permissive extends IrNodeMatchPermissivity(true)
+  case object Permissive    extends IrNodeMatchPermissivity(true)
 }

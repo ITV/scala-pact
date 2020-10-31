@@ -24,6 +24,6 @@ class PactReader extends IPactReader {
   private def readJson[A: Decoder](json: String, dataType: String): Either[String, A] =
     parse(json).flatMap(_.as[A]) match {
       case Right(a) => Right(a)
-      case Left(_) => Left(s"Could not read $dataType from json: $json")
+      case Left(_)  => Left(s"Could not read $dataType from json: $json")
     }
 }

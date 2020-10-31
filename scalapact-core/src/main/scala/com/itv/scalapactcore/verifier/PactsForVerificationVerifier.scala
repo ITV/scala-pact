@@ -5,16 +5,16 @@ import com.itv.scalapact.shared.Notice.{AfterVerificationNotice, BeforeVerificat
 import com.itv.scalapact.shared.http.IScalaPactHttpClient
 import com.itv.scalapact.shared.json.IPactReader
 import com.itv.scalapact.shared.utils.PactLogger
-import com.itv.scalapact.shared.{PactVerifyResult, PactVerifyResultInContext, PactsForVerificationSettings, ScalaPactSettings, VerificationProperties}
+import com.itv.scalapact.shared._
 import com.itv.scalapactcore.common.PactBrokerClient
 import com.itv.scalapactcore.verifier.PactsForVerificationVerifier.VerificationResult
 
 import scala.util.Left
 
-private [verifier] class PactsForVerificationVerifier(
-  pactBrokerClient: PactBrokerClient,
-  localVerifierClient: IScalaPactHttpClient)(
-  implicit pactReader: IPactReader) {
+private[verifier] class PactsForVerificationVerifier(
+    pactBrokerClient: PactBrokerClient,
+    localVerifierClient: IScalaPactHttpClient
+)(implicit pactReader: IPactReader) {
   def verify(verificationSettings: PactsForVerificationSettings, scalaPactSettings: ScalaPactSettings): Boolean = {
 
     val pactsAndProperties = pactBrokerClient.fetchPactsFromPactsForVerification(verificationSettings)
@@ -26,7 +26,14 @@ private [verifier] class PactsForVerificationVerifier(
     val start = System.currentTimeMillis()
 
     val resultsAndProperties = pactsAndProperties.map { case (pact, properties) =>
-      (VerificationSteps.runVerificationAgainst(localVerifierClient, scalaPactSettings, verificationSettings.providerStates)(pact), properties)
+      (
+        VerificationSteps.runVerificationAgainst(
+          localVerifierClient,
+          scalaPactSettings,
+          verificationSettings.providerStates
+        )(pact),
+        properties
+      )
     }
 
     val end = System.currentTimeMillis()
@@ -45,9 +52,9 @@ private [verifier] class PactsForVerificationVerifier(
     val testCount = resultsAndProperties.length
 
     val formattedResult = formatResults(resultsAndProperties, published)
-    val successCount = formattedResult.collect {case _: VerificationResult.Success.type => true }.length
-    val failureCount = formattedResult.collect {case _: VerificationResult.Failed.type => true }.length
-    val pendingCount = testCount - successCount - failureCount
+    val successCount    = formattedResult.collect { case _: VerificationResult.Success.type => true }.length
+    val failureCount    = formattedResult.collect { case _: VerificationResult.Failed.type => true }.length
+    val pendingCount    = testCount - successCount - failureCount
 
     VerificationSteps.writeToJUnit(resultsAndProperties.map(_._1), start, end, testCount, failureCount)
     VerificationSteps.logVerificationResults(start, end, successCount, failureCount, pendingCount)
@@ -55,17 +62,21 @@ private [verifier] class PactsForVerificationVerifier(
     testCount > 0 && failureCount == 0
   }
 
-  private def formatResults(results: List[(PactVerifyResult, VerificationProperties)], published: Boolean): List[VerificationResult] = {
+  private def formatResults(
+      results: List[(PactVerifyResult, VerificationProperties)],
+      published: Boolean
+  ): List[VerificationResult] =
     results.map { case (result, properties) =>
       PactLogger.message(
         ("--------------------\n" +
-        "Results for pact between " + result.pact.consumer.name + " and " + result.pact.provider.name + " - \n").white.bold
+          "Results for pact between " + result.pact.consumer.name + " and " + result.pact.provider.name + " - \n").white.bold
       )
       val allInteractionsSucceeded: Boolean = result.results.forall(_.result.isRight)
-      val isStillPending: Boolean = properties.pending && ((allInteractionsSucceeded && !published) || !allInteractionsSucceeded)
+      val isStillPending: Boolean =
+        properties.pending && ((allInteractionsSucceeded && !published) || !allInteractionsSucceeded)
       val beforeVerificationNotices = properties.notices.collect {
         case n: BeforeVerificationNotice => n.text
-        case n: SimpleNotice => n.text
+        case n: SimpleNotice             => n.text
       }
       val afterVerificationNotice = properties.notices.collectFirst {
         case AfterVerificationNotice(text, s, p) if s == allInteractionsSucceeded && p == published => text
@@ -90,10 +101,9 @@ private [verifier] class PactsForVerificationVerifier(
       else if (allInteractionsSucceeded) VerificationResult.Success
       else VerificationResult.Failed
     }
-  }
 }
 
-private [verifier] object PactsForVerificationVerifier {
+private[verifier] object PactsForVerificationVerifier {
   sealed trait VerificationResult extends Product with Serializable
 
   object VerificationResult {

@@ -3,9 +3,8 @@ package com.itv.scalapact
 import com.itv.scalapact.ScalaPactForger._
 import org.scalatest.{FunSpec, Matchers}
 
-/**
-  * Strict and non-strict pacts cannot be mixed.
- **/
+/** Strict and non-strict pacts cannot be mixed.
+  */
 class StrictExampleSpec extends FunSpec with Matchers {
 
   import com.itv.scalapact.json._
@@ -27,7 +26,7 @@ class StrictExampleSpec extends FunSpec with Matchers {
           |  "colours" : [${colours.map(s => "\"" + s + "\"").mkString(", ")}]
           |}
         """.stripMargin
-      }
+          }
 
       // Different builder
       forgeStrictPact
@@ -41,12 +40,12 @@ class StrictExampleSpec extends FunSpec with Matchers {
               path = endPoint,
               query = None,
               headers = Map.empty,
-              body = json("Fred")(10)(List("red", "blue")),
+              body = json("Fred")(10)(List("red", "blue"))
             )
             .willRespondWith(
               status = 200,
               headers = Map.empty,
-              body = "Success",
+              body = "Success"
             )
         )
         .runConsumerTest { mockConfig =>

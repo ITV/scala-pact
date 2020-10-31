@@ -11,32 +11,26 @@ object PathMatching {
 
   def matchPaths(expected: PathAndQuery, received: PathAndQuery): MatchOutcome =
     matchPathsWithPredicate(expected, received) { (ex: PathStructure, re: PathStructure) =>
-      {
+      MatchOutcome.fromPredicate(
+        ex.path == re.path,
+        s"Paths '${ex.path}' and '${re.path}' did not match",
+        25
+      ) + equalListsOfParameters(ex.params, re.params)
 
-        MatchOutcome.fromPredicate(
-          ex.path == re.path,
-          s"Paths '${ex.path}' and '${re.path}' did not match",
-          25
-        ) + equalListsOfParameters(ex.params, re.params)
-
-      }
     }
 
   def matchPathsStrict(expected: PathAndQuery, received: PathAndQuery): MatchOutcome =
     matchPathsWithPredicate(expected, received) { (ex: PathStructure, re: PathStructure) =>
-      {
+      MatchOutcome.fromPredicate(
+        ex.path == re.path,
+        s"Paths '${ex.path}' and '${re.path}' did not match",
+        20
+      ) + MatchOutcome.fromPredicate(
+        ex.params.length == re.params.length,
+        s"Paths contained different numbers of parameters. Expected '${ex.params.length}' but got '${re.params.length}'",
+        5
+      ) + equalListsOfParameters(ex.params, re.params)
 
-        MatchOutcome.fromPredicate(
-          ex.path == re.path,
-          s"Paths '${ex.path}' and '${re.path}' did not match",
-          20
-        ) + MatchOutcome.fromPredicate(
-          ex.params.length == re.params.length,
-          s"Paths contained different numbers of parameters. Expected '${ex.params.length}' but got '${re.params.length}'",
-          5
-        ) + equalListsOfParameters(ex.params, re.params)
-
-      }
     }
 
   private def matchPathsWithPredicate(expected: PathAndQuery, received: PathAndQuery)(
@@ -59,7 +53,7 @@ object PathMatching {
 
         case x :: xs =>
           List(x, xs.filter(!_.isEmpty).mkString("&")).mkString("?")
-    }
+      }
 
   private case class PathStructure(path: String, params: List[(String, String)])
 
@@ -86,13 +80,15 @@ object PathMatching {
               )
             )
         }
-    }
+      }
 
   private def equalListsOfParameters(listA: List[(String, String)], listB: List[(String, String)]): MatchOutcome = {
     @annotation.tailrec
-    def rec(remaining: List[((String, String), Int)],
-            compare: List[((String, String), Int)],
-            acc: List[MatchOutcome]): List[MatchOutcome] =
+    def rec(
+        remaining: List[((String, String), Int)],
+        compare: List[((String, String), Int)],
+        acc: List[MatchOutcome]
+    ): List[MatchOutcome] =
       remaining match {
         case Nil =>
           acc

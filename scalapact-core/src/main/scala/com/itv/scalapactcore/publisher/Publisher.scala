@@ -7,17 +7,22 @@ import com.itv.scalapact.shared.utils.ColourOutput.ColouredString
 import com.itv.scalapactcore.common.{LocalPactFileLoader, PactBrokerClient}
 
 class Publisher(pactBrokerClient: PactBrokerClient)(implicit pactReader: IPactReader) {
-  def publishPacts(pactPublishSettings: PactPublishSettings, scalaPactSettings: ScalaPactSettings): List[PublishResult] = {
-    val pacts = LocalPactFileLoader.loadPactFiles(pactReader)(false)(scalaPactSettings.giveOutputPath)(scalaPactSettings)
+  def publishPacts(
+      pactPublishSettings: PactPublishSettings,
+      scalaPactSettings: ScalaPactSettings
+  ): List[PublishResult] = {
+    val pacts =
+      LocalPactFileLoader.loadPactFiles(pactReader)(false)(scalaPactSettings.giveOutputPath)(scalaPactSettings)
     pactBrokerClient.publishPacts(pacts, pactPublishSettings)
   }
 }
 
 object Publisher {
-  def apply(
-    implicit httpClientBuilder: IScalaPactHttpClientBuilder,
-    pactWriter: IPactWriter,
-    pactReader: IPactReader): Publisher = new Publisher(new PactBrokerClient)
+  def apply(implicit
+      httpClientBuilder: IScalaPactHttpClientBuilder,
+      pactWriter: IPactWriter,
+      pactReader: IPactReader
+  ): Publisher = new Publisher(new PactBrokerClient)
 }
 
 sealed abstract class PublishResult(val isSuccess: Boolean) {

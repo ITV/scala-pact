@@ -21,5 +21,6 @@ class PactWriter extends IPactWriter {
     pact.copy(metadata = updatedMetaData).asJson.deepDropNullValues.spaces2
   }
 
-  def pactsForVerificationRequestToJsonString(request: PactsForVerificationRequest): String = request.asJson.deepDropNullValues.spaces2
+  def pactsForVerificationRequestToJsonString(request: PactsForVerificationRequest): String =
+    request.asJson.deepDropNullValues.spaces2
 }

@@ -7,9 +7,9 @@ import scala.annotation.tailrec
 sealed abstract class IrNodeEqualityResult(val isEqual: Boolean) {
   def +(other: IrNodeEqualityResult): IrNodeEqualityResult =
     (this, other) match {
-      case (IrNodesEqual, IrNodesEqual) => IrNodesEqual
-      case (IrNodesEqual, r@IrNodesNotEqual(_)) => r
-      case (l@IrNodesNotEqual(_), IrNodesEqual) => l
+      case (IrNodesEqual, IrNodesEqual)               => IrNodesEqual
+      case (IrNodesEqual, r @ IrNodesNotEqual(_))     => r
+      case (l @ IrNodesNotEqual(_), IrNodesEqual)     => l
       case (IrNodesNotEqual(d1), IrNodesNotEqual(d2)) => IrNodesNotEqual(d1 ++ d2)
     }
 
@@ -85,47 +85,46 @@ object IrNodeEqualityResult {
       }
 
   val valueTest: (Boolean, Boolean, IrNodePath, IrNodeMatchingRules, IrNode, IrNode) => (
-    Option[IrNodePrimitive],
+      Option[IrNodePrimitive],
       Option[IrNodePrimitive]
-    ) => IrNodeEqualityResult = { (strict, isXml, path, rules, parentA, parentB) =>
-    (a, b) =>
-      if (parentA.path.lastSegmentLabel == parentB.path.lastSegmentLabel) {
-        val equality: IrNodeEqualityResult = if (strict) {
-          (a, b) match {
-            case (Some(v1: IrNodePrimitive), Some(v2: IrNodePrimitive)) =>
-              if (v1 == v2) IrNodesEqual
-              else IrNodesNotEqual(s"Value '${v1.renderAsString}' did not match '${v2.renderAsString}'", path)
+  ) => IrNodeEqualityResult = { (strict, isXml, path, rules, parentA, parentB) => (a, b) =>
+    if (parentA.path.lastSegmentLabel == parentB.path.lastSegmentLabel) {
+      val equality: IrNodeEqualityResult = if (strict) {
+        (a, b) match {
+          case (Some(v1: IrNodePrimitive), Some(v2: IrNodePrimitive)) =>
+            if (v1 == v2) IrNodesEqual
+            else IrNodesNotEqual(s"Value '${v1.renderAsString}' did not match '${v2.renderAsString}'", path)
 
-            case (Some(v1: IrNodePrimitive), None) =>
-              IrNodesNotEqual(s"Value '${v1.renderAsString}' did not match empty value", path)
+          case (Some(v1: IrNodePrimitive), None) =>
+            IrNodesNotEqual(s"Value '${v1.renderAsString}' did not match empty value", path)
 
-            case (None, Some(v2: IrNodePrimitive)) =>
-              IrNodesNotEqual(s"Empty value did not match '${v2.renderAsString}'", path)
+          case (None, Some(v2: IrNodePrimitive)) =>
+            IrNodesNotEqual(s"Empty value did not match '${v2.renderAsString}'", path)
 
-            case (None, None) =>
-              IrNodesEqual
-          }
-        } else {
-          (a, b) match {
-            case (Some(v1: IrNodePrimitive), Some(v2: IrNodePrimitive)) =>
-              if (v1 == v2) IrNodesEqual
-              else IrNodesNotEqual(s"Value '${v1.renderAsString}' did not match '${v2.renderAsString}'", path)
-
-            case (Some(v1: IrNodePrimitive), None) =>
-              IrNodesNotEqual(s"Value '${v1.renderAsString}' did not match empty value", path)
-
-            case (None, Some(_: IrNodePrimitive)) =>
-              IrNodesEqual
-
-            case (None, None) =>
-              IrNodesEqual
-          }
+          case (None, None) =>
+            IrNodesEqual
         }
-
-        RuleChecks.checkForPrimitive(rules, path, a, b, checkParentTypeRule = true, isXml).getOrElse(equality)
       } else {
-        IrNodesEqual
+        (a, b) match {
+          case (Some(v1: IrNodePrimitive), Some(v2: IrNodePrimitive)) =>
+            if (v1 == v2) IrNodesEqual
+            else IrNodesNotEqual(s"Value '${v1.renderAsString}' did not match '${v2.renderAsString}'", path)
+
+          case (Some(v1: IrNodePrimitive), None) =>
+            IrNodesNotEqual(s"Value '${v1.renderAsString}' did not match empty value", path)
+
+          case (None, Some(_: IrNodePrimitive)) =>
+            IrNodesEqual
+
+          case (None, None) =>
+            IrNodesEqual
+        }
       }
+
+      RuleChecks.checkForPrimitive(rules, path, a, b, checkParentTypeRule = true, isXml).getOrElse(equality)
+    } else {
+      IrNodesEqual
+    }
   }
 
   val namespaceTest: IrNodePath => (Option[String], Option[String]) => IrNodeEqualityResult = path => {
@@ -153,31 +152,37 @@ object IrNodeEqualityResult {
 
   private def foldResults(l: List[IrNodeEqualityResult]): IrNodeEqualityResult =
     l match {
-      case Nil => IrNodesEqual
+      case Nil     => IrNodesEqual
       case x :: xs => xs.foldLeft(x)(_ + _)
     }
 
-  private def strictCheckChildren(path: IrNodePath,
-                                  strict: Boolean,
-                                  bePermissive: Boolean,
-                                  rules: IrNodeMatchingRules,
-                                  a: List[IrNode],
-                                  b: List[IrNode],
-                                  ignoreLength: Boolean): IrNodeEqualityResult =
+  private def strictCheckChildren(
+      path: IrNodePath,
+      strict: Boolean,
+      bePermissive: Boolean,
+      rules: IrNodeMatchingRules,
+      a: List[IrNode],
+      b: List[IrNode],
+      ignoreLength: Boolean
+  ): IrNodeEqualityResult =
     if (!ignoreLength && a.length != b.length)
-      IrNodesNotEqual(s"Differing number of children, cannot check equality. Expected ${a.length} got ${b.length}",
-        path)
+      IrNodesNotEqual(
+        s"Differing number of children, cannot check equality. Expected ${a.length} got ${b.length}",
+        path
+      )
     else {
       foldResults(a.zip(b).map { p =>
         p._1.isEqualTo(p._2, strict, rules, bePermissive)
       })
     }
 
-  private def findClosestMatch(expected: IrNode,
-                               possibleMatches: List[IrNode],
-                               strict: Boolean,
-                               rules: IrNodeMatchingRules,
-                               bePermissive: Boolean): IrNodeEqualityResult = {
+  private def findClosestMatch(
+      expected: IrNode,
+      possibleMatches: List[IrNode],
+      strict: Boolean,
+      rules: IrNodeMatchingRules,
+      bePermissive: Boolean
+  ): IrNodeEqualityResult = {
     @tailrec
     def rec(e: IrNode, remaining: List[IrNode], fails: List[IrNodesNotEqual]): IrNodeEqualityResult =
       remaining match {
@@ -193,10 +198,10 @@ object IrNodeEqualityResult {
 
         case a :: as =>
           e.isEqualTo(a, strict, rules, bePermissive) match {
-            case success@IrNodesEqual =>
+            case success @ IrNodesEqual =>
               success
 
-            case failure@IrNodesNotEqual(_) =>
+            case failure @ IrNodesNotEqual(_) =>
               rec(e, as, failure :: fails)
           }
       }
@@ -204,19 +209,21 @@ object IrNodeEqualityResult {
     rec(expected, possibleMatches, Nil)
   }
 
-  private def permissiveCheckChildren(strict: Boolean,
-                                      bePermissive: Boolean,
-                                      rules: IrNodeMatchingRules,
-                                      a: List[IrNode],
-                                      b: List[IrNode]): IrNodeEqualityResult =
+  private def permissiveCheckChildren(
+      strict: Boolean,
+      bePermissive: Boolean,
+      rules: IrNodeMatchingRules,
+      a: List[IrNode],
+      b: List[IrNode]
+  ): IrNodeEqualityResult =
     foldResults(a.map { actual =>
       findClosestMatch(actual, b, strict, rules, bePermissive)
     })
 
   val childrenTest: (Boolean, IrNodePath, Boolean, Boolean, IrNodeMatchingRules, IrNode, IrNode) => (
-    List[IrNode],
+      List[IrNode],
       List[IrNode]
-    ) => IrNodeEqualityResult =
+  ) => IrNodeEqualityResult =
     (strict, path, isXml, bePermissive, rules, parentA, parentB) =>
       (a, b) => {
         if (strict) {
@@ -258,8 +265,8 @@ object IrNodeEqualityResult {
               .map { p =>
                 RuleChecks.checkForNode(rules, p._2.path, p._1, p._2)
               }
-              .collect {
-                case Some(d@IrNodesNotEqual(_)) => d
+              .collect { case Some(d @ IrNodesNotEqual(_)) =>
+                d
               } match {
               case Nil =>
                 None
@@ -287,8 +294,8 @@ object IrNodeEqualityResult {
             .map { p =>
               RuleChecks.checkForNode(rules, p._2.path, p._1, p._2)
             }
-            .collect {
-              case Some(d@IrNodesNotEqual(_)) => d
+            .collect { case Some(d @ IrNodesNotEqual(_)) =>
+              d
             } match {
             case Nil =>
               None
@@ -304,7 +311,7 @@ object IrNodeEqualityResult {
       }
 
   private val checkAttributesTest
-  : (IrNodePath, Boolean, IrNodeMatchingRules) => (IrNodeAttributes, IrNodeAttributes) => IrNodeEqualityResult =
+      : (IrNodePath, Boolean, IrNodeMatchingRules) => (IrNodeAttributes, IrNodeAttributes) => IrNodeEqualityResult =
     (path, isXml, rules) =>
       (a, b) =>
         foldResults(a.attributes.toList.map { p =>
@@ -335,14 +342,14 @@ object IrNodeEqualityResult {
         })
 
   val attributesTest: (Boolean, Boolean, Boolean, IrNodePath, IrNodeMatchingRules) => (
-    IrNodeAttributes,
+      IrNodeAttributes,
       IrNodeAttributes
-    ) => IrNodeEqualityResult =
+  ) => IrNodeEqualityResult =
     (strict, isXml, bePermissive, path, rules) =>
       (a, b) =>
         if (strict) {
-          val as = a.attributes.toList
-          val bs = b.attributes.toList
+          val as      = a.attributes.toList
+          val bs      = b.attributes.toList
           val asNames = as.map(_._1)
           val bsNames = bs.map(_._1)
 

@@ -83,9 +83,7 @@ class ExampleSpec extends FunSpec with Matchers {
             con.setReadTimeout(5000)
             val status = con.getResponseCode
             status shouldBe 200
-          } finally {
-            HttpsURLConnection.setDefaultSSLSocketFactory(f)
-          }
+          } finally HttpsURLConnection.setDefaultSSLSocketFactory(f)
 
         }
 
@@ -251,8 +249,7 @@ class ExampleSpec extends FunSpec with Matchers {
               query = None,
               headers = Map("fish" -> "chips", "sauce" -> "ketchup"),
               body = None,
-              matchingRules =
-                headerRegexRule("fish", "\\w+") ~> headerRegexRule("sauce", "\\w+")
+              matchingRules = headerRegexRule("fish", "\\w+") ~> headerRegexRule("sauce", "\\w+")
             )
             .willRespondWith(
               status = 200,
@@ -285,7 +282,7 @@ class ExampleSpec extends FunSpec with Matchers {
            |  "colours" : [${colours.map(s => "\"" + s + "\"").mkString(", ")}]
            |}
           """.stripMargin
-      }
+          }
 
       forgePact
         .between("My Consumer")
@@ -299,16 +296,15 @@ class ExampleSpec extends FunSpec with Matchers {
               query = None,
               headers = Map.empty,
               body = Some(json("Fred")(10)(List("red", "blue"))),
-              matchingRules =
-                bodyRegexRule("name", "\\w+")
-                  ~> bodyTypeRule("count")
-                  ~> bodyArrayMinimumLengthRule("colours", 1)
-                  ~> bodyRegexRule("colours[*]", "red|blue")
+              matchingRules = bodyRegexRule("name", "\\w+")
+                ~> bodyTypeRule("count")
+                ~> bodyArrayMinimumLengthRule("colours", 1)
+                ~> bodyRegexRule("colours[*]", "red|blue")
             )
             .willRespondWith(
               status = 200,
               headers = Map.empty,
-              body = "Success",
+              body = "Success"
             )
         )
         .runConsumerTest { mockConfig =>
@@ -327,8 +323,7 @@ class ExampleSpec extends FunSpec with Matchers {
 
 case class Person(name: String, age: Int, location: String, hobbies: List[String])
 
-/**
-  * The point of these tests are that you create your test using a piece of client code
+/** The point of these tests are that you create your test using a piece of client code
   * that does the real call to a mocked endpoint. This is a dummy client used here as an
   * example of what that might look like.
   */

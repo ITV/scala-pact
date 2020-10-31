@@ -12,38 +12,48 @@ import scala.util.Left
 
 object VerificationSteps {
   def runVerificationAgainst(
-    client: IScalaPactHttpClient,
-    arguments: ScalaPactSettings,
-    providerStates: SetupProviderState)(pact: Pact)(implicit pactReader: IPactReader): PactVerifyResult = {
+      client: IScalaPactHttpClient,
+      arguments: ScalaPactSettings,
+      providerStates: SetupProviderState
+  )(pact: Pact)(implicit pactReader: IPactReader): PactVerifyResult = {
     val results = pact.interactions.map { interaction =>
       val maybeProviderState = interaction.providerState.map(p => ProviderState(p, providerStates))
-      val result = runInteractionRequest(client, arguments, maybeProviderState, interaction.request).flatMap(matchResponse(arguments.giveStrictMode, List(interaction))(pactReader))
+      val result = runInteractionRequest(client, arguments, maybeProviderState, interaction.request).flatMap(
+        matchResponse(arguments.giveStrictMode, List(interaction))(pactReader)
+      )
 
       PactVerifyResultInContext(result, interaction.description)
     }
     PactVerifyResult(pact, results)
   }
 
-  def writeToJUnit(results: List[PactVerifyResult], start: Long, end: Long, testCount: Int, failureCount: Int): Unit = results.foreach { result =>
-    JUnitXmlBuilder.xml(
-      name = result.pact.consumer.name + " - " + result.pact.provider.name,
-      tests = testCount,
-      failures = failureCount,
-      time = end.toDouble - start.toDouble / 1000,
-      testCases = result.results.map { res =>
-        res.result match {
-          case Right(_) =>
-            JUnitXmlBuilder.testCasePass(res.context)
+  def writeToJUnit(results: List[PactVerifyResult], start: Long, end: Long, testCount: Int, failureCount: Int): Unit =
+    results.foreach { result =>
+      JUnitXmlBuilder.xml(
+        name = result.pact.consumer.name + " - " + result.pact.provider.name,
+        tests = testCount,
+        failures = failureCount,
+        time = end.toDouble - start.toDouble / 1000,
+        testCases = result.results.map { res =>
+          res.result match {
+            case Right(_) =>
+              JUnitXmlBuilder.testCasePass(res.context)
 
-          case Left(l) =>
-            JUnitXmlBuilder.testCaseFail("Failure: " + res.context, l)
+            case Left(l) =>
+              JUnitXmlBuilder.testCaseFail("Failure: " + res.context, l)
+          }
         }
-      }
-    )
-  }
+      )
+    }
 
-  def logVerificationResults(startTime: Long, endTime: Long, successCount: Int, failureCount: Int, pendingCount: Int): Unit = {
-    val testCount = {successCount + failureCount + pendingCount}
+  def logVerificationResults(
+      startTime: Long,
+      endTime: Long,
+      successCount: Int,
+      failureCount: Int,
+      pendingCount: Int
+  ): Unit = {
+    val testCount = { successCount + failureCount + pendingCount }
     val scalaPactLogPrefix = "[scala-pact] ".white
     PactLogger.message(scalaPactLogPrefix + s"Run completed in: ${endTime - startTime} ms".yellow)
     PactLogger.message(scalaPactLogPrefix + s"Total number of test run: $testCount".yellow)
@@ -60,35 +70,35 @@ object VerificationSteps {
   }
 
   private def runInteractionRequest(
-    client: IScalaPactHttpClient,
-    arguments: ScalaPactSettings,
-    maybeProviderState: Option[ProviderState],
-    interactionRequest: InteractionRequest): Either[String, InteractionResponse] = {
-      val baseUrl       = s"${arguments.giveProtocol}://" + arguments.giveHost + ":" + arguments.givePort.toString
-      val finalRequest = try {
-        maybeProviderState match {
-          case Some(ps) =>
-            PactLogger.message("--------------------".yellow.bold)
-            PactLogger.message(s"Attempting to run provider state: ${ps.key}".yellow.bold)
+      client: IScalaPactHttpClient,
+      arguments: ScalaPactSettings,
+      maybeProviderState: Option[ProviderState],
+      interactionRequest: InteractionRequest
+  ): Either[String, InteractionResponse] = {
+    val baseUrl = s"${arguments.giveProtocol}://" + arguments.giveHost + ":" + arguments.givePort.toString
+    val finalRequest =
+      try maybeProviderState match {
+        case Some(ps) =>
+          PactLogger.message("--------------------".yellow.bold)
+          PactLogger.message(s"Attempting to run provider state: ${ps.key}".yellow.bold)
 
-            val ProviderStateResult(success, modifyRequest) = ps.f(ps.key)
+          val ProviderStateResult(success, modifyRequest) = ps.f(ps.key)
 
-            if (success)
-              PactLogger.message(s"Provider state ran successfully".yellow.bold)
-            else
-              PactLogger.error(s"Provider state run failed".red.bold)
+          if (success)
+            PactLogger.message(s"Provider state ran successfully".yellow.bold)
+          else
+            PactLogger.error(s"Provider state run failed".red.bold)
 
-            PactLogger.message("--------------------".yellow.bold)
+          PactLogger.message("--------------------".yellow.bold)
 
-            if (!success) {
-              throw ProviderStateFailure(ps.key)
-            }
+          if (!success) {
+            throw ProviderStateFailure(ps.key)
+          }
 
-            modifyRequest(interactionRequest)
-          case None =>
-            // No provider state run needed
-            interactionRequest
-        }
+          modifyRequest(interactionRequest)
+        case None =>
+          // No provider state run needed
+          interactionRequest
       } catch {
         case t: Throwable =>
           if (maybeProviderState.isDefined) {
@@ -101,25 +111,22 @@ object VerificationSteps {
           throw t
       }
 
-      try {
-        InteractionRequest.unapply(finalRequest) match {
-          case Some((Some(_), Some(_), _, _, _, _)) =>
-            client.doInteractionRequest(baseUrl,
-              finalRequest.withoutSslContextHeader) match {
-              case Left(e) =>
-                PactLogger.error(s"Error in response: ${e.getMessage}".red)
-                Left(e.getMessage)
-              case Right(r) =>
-                Right(r)
-            }
-
-          case _ => Left("Invalid request was missing either method or path: " + interactionRequest.renderAsString)
-
+    try InteractionRequest.unapply(finalRequest) match {
+      case Some((Some(_), Some(_), _, _, _, _)) =>
+        client.doInteractionRequest(baseUrl, finalRequest.withoutSslContextHeader) match {
+          case Left(e) =>
+            PactLogger.error(s"Error in response: ${e.getMessage}".red)
+            Left(e.getMessage)
+          case Right(r) =>
+            Right(r)
         }
-      } catch {
-        case e: Throwable =>
-          Left(e.getMessage)
-      }
+
+      case _ => Left("Invalid request was missing either method or path: " + interactionRequest.renderAsString)
+
+    } catch {
+      case e: Throwable =>
+        Left(e.getMessage)
     }
+  }
 
 }

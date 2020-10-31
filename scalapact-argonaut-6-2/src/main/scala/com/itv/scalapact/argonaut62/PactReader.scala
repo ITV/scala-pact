@@ -23,6 +23,6 @@ class PactReader extends IPactReader {
   private def readJson[A: DecodeJson](json: String, dataType: String): Either[String, A] =
     Parse.parse(json).toOption.flatMap(_.as[A].toOption) match {
       case Some(a) => Right(a)
-      case None => Left(s"Could not read $dataType from json: $json")
+      case None    => Left(s"Could not read $dataType from json: $json")
     }
 }

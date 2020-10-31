@@ -14,8 +14,12 @@ This is used when there is an API that has multiple consumers, one of which is a
 The deployed service only needs the latest production pact verified, where as the mobile consumer may want all the production pacts verified.
  */
 
-
-final case class ConsumerVersionSelector(tag: String, fallbackTag: Option[String], consumer: Option[String], latest: Option[Boolean]) //TODO check whether this can be non-optional
+final case class ConsumerVersionSelector(
+    tag: String,
+    fallbackTag: Option[String],
+    consumer: Option[String],
+    latest: Option[Boolean]
+) //TODO check whether this can be non-optional
 
 object ConsumerVersionSelector {
   def apply(tag: String): ConsumerVersionSelector = ConsumerVersionSelector(tag, None, None, None)

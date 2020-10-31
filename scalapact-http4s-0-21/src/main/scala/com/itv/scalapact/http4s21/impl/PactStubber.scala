@@ -11,7 +11,7 @@ import scala.concurrent.ExecutionContext
 class PactStubber extends IPactStubber {
 
   private var instance: Option[CancelToken[IO]] = None
-  private var _port: Option[Int] = None
+  private var _port: Option[Int]                = None
 
   private def blazeServerBuilder(
       scalaPactSettings: ScalaPactSettings,
@@ -28,22 +28,31 @@ class PactStubber extends IPactStubber {
       scalaPactSettings
     )
 
-  def start(interactionManager: IInteractionManager,
-            connectionPoolSize: Int,
-            sslContextName: Option[String],
-            port: Option[Int])(implicit pactReader: IPactReader,
-                               pactWriter: IPactWriter,
-                               sslContextMap: SslContextMap): ScalaPactSettings => IPactStubber =
+  def start(
+      interactionManager: IInteractionManager,
+      connectionPoolSize: Int,
+      sslContextName: Option[String],
+      port: Option[Int]
+  )(implicit
+      pactReader: IPactReader,
+      pactWriter: IPactWriter,
+      sslContextMap: SslContextMap
+  ): ScalaPactSettings => IPactStubber =
     scalaPactSettings => {
       instance match {
         case Some(_) =>
           this
 
         case None =>
-        implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
+          implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
           instance = Some(
-            blazeServerBuilder(scalaPactSettings, interactionManager, connectionPoolSize, sslContextName, _port)
-              .resource
+            blazeServerBuilder(
+              scalaPactSettings,
+              interactionManager,
+              connectionPoolSize,
+              sslContextName,
+              _port
+            ).resource
               .use { server =>
                 IO { _port = Some(server.address.getPort) } *> IO.never
               }

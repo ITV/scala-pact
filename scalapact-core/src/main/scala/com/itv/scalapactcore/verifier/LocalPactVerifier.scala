@@ -9,9 +9,7 @@ import com.itv.scalapactcore.common.LocalPactFileLoader
 
 import scala.util.Left
 
-private [verifier] class LocalPactVerifier(
-  localVerifierClient: IScalaPactHttpClient)(
-  implicit pactReader: IPactReader) {
+private[verifier] class LocalPactVerifier(localVerifierClient: IScalaPactHttpClient)(implicit pactReader: IPactReader) {
 
   def verify(pactVerifySettings: LocalPactVerifySettings, scalaPactSettings: ScalaPactSettings): Boolean = {
 
@@ -27,7 +25,13 @@ private [verifier] class LocalPactVerifier(
 
     val startTime = System.currentTimeMillis()
 
-    val pactVerifyResults = pacts.map(VerificationSteps.runVerificationAgainst(localVerifierClient, scalaPactSettings, pactVerifySettings.providerStates))
+    val pactVerifyResults = pacts.map(
+      VerificationSteps.runVerificationAgainst(
+        localVerifierClient,
+        scalaPactSettings,
+        pactVerifySettings.providerStates
+      )
+    )
 
     val endTime      = System.currentTimeMillis()
     val testCount    = pactVerifyResults.flatMap(_.results).length

@@ -15,9 +15,9 @@ object NullPactLogger extends PactLogger {
 }
 object QuietPactLogger extends PactLogger {
   def message(s: Any): Unit = println(s)
-  def debug(s: Any): Unit   = {}
-  def warn(s: Any): Unit    = println(s)
-  def error(s: Any): Unit   = println(s)
+  def debug(s: Any): Unit = {}
+  def warn(s: Any): Unit  = println(s)
+  def error(s: Any): Unit = println(s)
 }
 
 object NoisyPactLogger extends PactLogger {

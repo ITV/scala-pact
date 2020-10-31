@@ -20,7 +20,7 @@ class SslContextMapSpec extends FunSpec with Matchers {
 
     it("should pass a request without ssl context to the block") {
       var called: Int = 0
-      SslContextMap(requestWithNoSslContext) { ssl =>req =>
+      SslContextMap(requestWithNoSslContext) { ssl => req =>
         called += 1
         ssl shouldEqual None
         req shouldEqual requestWithNoSslContext
@@ -30,7 +30,7 @@ class SslContextMapSpec extends FunSpec with Matchers {
 
     it("should pass a request to the block with SSL if it is present") {
       var called: Int = 0
-      SslContextMap(requestWithName) { ssl =>req =>
+      SslContextMap(requestWithName) { ssl => req =>
         called += 1
         ssl shouldEqual Some(someSslContext)
         req shouldEqual requestWithName
@@ -40,7 +40,9 @@ class SslContextMapSpec extends FunSpec with Matchers {
 
     it("should throw a SslContextNotFoundException if the Ssl Context is not found") {
 //      var called: Int = 0
-      intercept[SslContextNotFoundException](SslContextMap(requestWithWrongName)(_ => _ => fail())).getMessage shouldBe "SslContext [invalidSslName] not found. Legal values are [List(someSslName)]"
+      intercept[SslContextNotFoundException](
+        SslContextMap(requestWithWrongName)(_ => _ => fail())
+      ).getMessage shouldBe "SslContext [invalidSslName] not found. Legal values are [List(someSslName)]"
     }
   }
 

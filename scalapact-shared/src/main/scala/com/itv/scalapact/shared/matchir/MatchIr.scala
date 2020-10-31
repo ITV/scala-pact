@@ -1,7 +1,12 @@
 package com.itv.scalapact.shared.matchir
 
 import com.itv.scalapact.shared.matchir.IrNodePath.IrNodePathEmpty
-import com.itv.scalapact.shared.utils.Helpers.{isBooleanValueRegex, isNumericValueRegex, safeStringToBoolean, safeStringToDouble}
+import com.itv.scalapact.shared.utils.Helpers.{
+  isBooleanValueRegex,
+  isNumericValueRegex,
+  safeStringToBoolean,
+  safeStringToDouble
+}
 
 import scala.util.Try
 import scala.xml.{Elem, Node, XML}
@@ -59,14 +64,16 @@ object MatchIr {
   private def nodeToIrNode(node: Node, initialPath: IrNodePath): IrNode =
     extractNodeValue(node) match {
       case nodeValue: Some[IrNodePrimitive] =>
-        IrNode(node.label,
-               nodeValue,
-               Nil,
-               Option(node.prefix),
-               convertAttributes(node.attributes.asAttrMap, initialPath <~ node.label),
-               isArray = false,
-               isXml = true,
-               initialPath <~ node.label)
+        IrNode(
+          node.label,
+          nodeValue,
+          Nil,
+          Option(node.prefix),
+          convertAttributes(node.attributes.asAttrMap, initialPath <~ node.label),
+          isArray = false,
+          isXml = true,
+          initialPath <~ node.label
+        )
 
       case None =>
         val children = extractNodeChildren(node, initialPath <~ node.label)

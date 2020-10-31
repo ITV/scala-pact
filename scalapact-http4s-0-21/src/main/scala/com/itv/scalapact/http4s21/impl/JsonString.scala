@@ -8,5 +8,8 @@ final case class JsonString(value: String)
 
 object JsonString {
   implicit val entityEncoder: EntityEncoder[IO, JsonString] =
-    EntityEncoder.stringEncoder[IO].contramap[JsonString](_.value).withContentType(`Content-Type`(MediaType.application.json))
+    EntityEncoder
+      .stringEncoder[IO]
+      .contramap[JsonString](_.value)
+      .withContentType(`Content-Type`(MediaType.application.json))
 }

@@ -5,7 +5,7 @@ import java.io.{File, PrintWriter}
 import scala.xml.Elem
 
 //TODO: Figure out where this should live.
-private [verifier] object JUnitWriter {
+private[verifier] object JUnitWriter {
 
   private val simplifyName: String => String = name => "[^a-zA-Z0-9-]".r.replaceAllIn(name.replace(" ", "-"), "")
 
@@ -34,11 +34,11 @@ private [verifier] object JUnitWriter {
         }
 
         ()
-  }
+      }
 
 }
 
-private [verifier] object JUnitXmlBuilder {
+private[verifier] object JUnitXmlBuilder {
 
   def testCasePass(name: String): Elem =
     <testcase classname="" name={name} time="0.0"></testcase>
@@ -50,7 +50,9 @@ private [verifier] object JUnitXmlBuilder {
 
   def xml(name: String, tests: Int, failures: Int, time: Double, testCases: List[Elem]): String =
     """<?xml version='1.0' encoding='UTF-8'?>""" +
-      <testsuite hostname="" name={name} tests={tests.toString} errors="0" failures={failures.toString} time={time.toString}>
+      <testsuite hostname="" name={name} tests={tests.toString} errors="0" failures={failures.toString} time={
+        time.toString
+      }>
         <properties></properties>{testCases}<system-out></system-out>
         <system-err></system-err>
       </testsuite>.toString()

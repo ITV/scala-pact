@@ -144,7 +144,10 @@ final case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleP
 
     } else if (expected.isXml && findForPath(path.parent, expected.isXml).exists(_.isTypeRule)) {
       List(
-        IrNodesNotEqual(s"Expected XML node type '${expected.label}' was not the same as actual type '${actual.label}'", path)
+        IrNodesNotEqual(
+          s"Expected XML node type '${expected.label}' was not the same as actual type '${actual.label}'",
+          path
+        )
       )
     } else {
       Nil
@@ -156,8 +159,8 @@ final case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleP
       RuleProcessTracing.log("Finding ancestral type rule")
       (path, findForPath(path.parent, isXml).find(p => p.isTypeRule).toList) match {
         case (IrNodePathEmpty, l) => (path, l)
-        case (p, Nil) => rec(p.parent)
-        case (_, l) => (path, l)
+        case (p, Nil)             => rec(p.parent)
+        case (_, l)               => (path, l)
       }
     }
     val (p, res) = rec(path)
@@ -167,11 +170,13 @@ final case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleP
     IrNodeMatchingRules(res, withTracing)
   }
 
-  def validatePrimitive(path: IrNodePath,
-                        expected: IrNodePrimitive,
-                        actual: IrNodePrimitive,
-                        checkParentTypeRule: Boolean,
-                        isXml: Boolean): List[IrNodeEqualityResult] = {
+  def validatePrimitive(
+      path: IrNodePath,
+      expected: IrNodePrimitive,
+      actual: IrNodePrimitive,
+      checkParentTypeRule: Boolean,
+      isXml: Boolean
+  ): List[IrNodeEqualityResult] = {
     RuleProcessTracing.log(s"validatePrimitive (checkParentTypeRule=$checkParentTypeRule) at: " + path.renderAsString)
     val parentTypeRules = if (checkParentTypeRule) findAncestralTypeRule(path, isXml).rules else Nil
 
@@ -278,7 +283,9 @@ object IrNodeMatchingRules {
 
       case (PactPathParseSuccess(path), MatchingRule(Some("type"), Some(regex), Some(len))) =>
         Right(
-          IrNodeMatchingRules(IrNodeTypeRule(path)) + IrNodeMatchingRules(IrNodeRegexRule(regex, path)) + IrNodeMatchingRules(
+          IrNodeMatchingRules(IrNodeTypeRule(path)) + IrNodeMatchingRules(
+            IrNodeRegexRule(regex, path)
+          ) + IrNodeMatchingRules(
             IrNodeMinArrayLengthRule(len, path)
           )
         )
@@ -333,9 +340,11 @@ object IrNodeMatchingRules {
     }
 
     @tailrec
-    def rec(remaining: List[Either[String, IrNodeMatchingRules]],
-            errorAcc: List[String],
-            rulesAcc: IrNodeMatchingRules): Either[String, IrNodeMatchingRules] =
+    def rec(
+        remaining: List[Either[String, IrNodeMatchingRules]],
+        errorAcc: List[String],
+        rulesAcc: IrNodeMatchingRules
+    ): Either[String, IrNodeMatchingRules] =
       remaining match {
         case Nil if errorAcc.nonEmpty =>
           Left("Pact rule conversion errors:\n" + errorAcc.mkString("\n"))
@@ -397,20 +406,20 @@ sealed trait IrNodeRule {
 object IrNodeRule {
 
   final case class IrNodeTypeRule(path: IrNodePath) extends IrNodeRule {
-    def isTypeRule: Boolean = true
-    def isRegexRule: Boolean = false
+    def isTypeRule: Boolean           = true
+    def isRegexRule: Boolean          = false
     def isMinArrayLengthRule: Boolean = false
   }
 
   final case class IrNodeRegexRule(regex: String, path: IrNodePath) extends IrNodeRule {
-    def isTypeRule: Boolean = false
-    def isRegexRule: Boolean = true
+    def isTypeRule: Boolean           = false
+    def isRegexRule: Boolean          = true
     def isMinArrayLengthRule: Boolean = false
   }
 
   final case class IrNodeMinArrayLengthRule(length: Int, path: IrNodePath) extends IrNodeRule {
-    def isTypeRule: Boolean = false
-    def isRegexRule: Boolean = false
+    def isTypeRule: Boolean           = false
+    def isRegexRule: Boolean          = false
     def isMinArrayLengthRule: Boolean = true
   }
 

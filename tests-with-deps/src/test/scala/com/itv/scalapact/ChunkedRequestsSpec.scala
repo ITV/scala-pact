@@ -12,9 +12,8 @@ import fr.hmil.roshttp.response.SimpleHttpResponse
 import scala.concurrent.duration._
 import scala.concurrent.Await
 
-/**
-  * Strict and non-strict pacts cannot be mixed.
- **/
+/** Strict and non-strict pacts cannot be mixed.
+  */
 class ChunkedRequestsSpec extends FunSpec with Matchers {
 
   import com.itv.scalapact.json._
@@ -37,7 +36,7 @@ class ChunkedRequestsSpec extends FunSpec with Matchers {
               path = endPoint,
               query = None,
               headers = Map.empty,
-              body = xml,
+              body = xml
             )
             .willRespondWith(
               status = 200,
@@ -77,16 +76,18 @@ class ChunkedRequestsSpec extends FunSpec with Matchers {
               method = POST,
               path = endPoint,
               query = None,
-              headers = Map("SOAPAction"   -> "process",
-                            "Accept"       -> "text/xml",
-                            "Content-Type" -> "text/xml; charset=utf-8",
-                            "User-Agent"   -> "scala-pact-test"),
-              body = xml,
+              headers = Map(
+                "SOAPAction"   -> "process",
+                "Accept"       -> "text/xml",
+                "Content-Type" -> "text/xml; charset=utf-8",
+                "User-Agent"   -> "scala-pact-test"
+              ),
+              body = xml
             )
             .willRespondWith(
               status = 200,
               headers = Map.empty,
-              body = "Success",
+              body = "Success"
             )
         )
         .runConsumerTest { mockConfig =>
@@ -99,10 +100,12 @@ class ChunkedRequestsSpec extends FunSpec with Matchers {
               )
               .withURL(mockConfig.baseUrl)
               .withPath(endPoint)
-              .withHeaders("SOAPAction"   -> "process",
-                           "Accept"       -> "text/xml",
-                           "Content-Type" -> "text/xml",
-                           "User-Agent"   -> "scala-pact-test")
+              .withHeaders(
+                "SOAPAction"   -> "process",
+                "Accept"       -> "text/xml",
+                "Content-Type" -> "text/xml",
+                "User-Agent"   -> "scala-pact-test"
+              )
               .withMethod(fr.hmil.roshttp.Method.POST)
               .withBody(XmlBody(xml))
 

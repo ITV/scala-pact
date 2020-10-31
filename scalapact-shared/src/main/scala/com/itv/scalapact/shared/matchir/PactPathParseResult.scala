@@ -27,7 +27,7 @@ object PactPathParseResult {
   final case class PactPathParseSuccess(irNodePath: IrNodePath) extends PactPathParseResult
 
   final case class PactPathParseFailure(original: String, lookingAt: String, specificError: Option[String])
-    extends PactPathParseResult {
+      extends PactPathParseResult {
     def errorString: String =
       s"${specificError.getOrElse("Failed to parse PactPath")}. Was looking at '$lookingAt' in '$original'"
   }

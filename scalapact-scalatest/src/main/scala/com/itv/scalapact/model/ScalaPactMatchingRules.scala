@@ -20,7 +20,7 @@ final case class ScalaPactMatchingRules(rules: List[ScalaPactMatchingRule]) {
   )
   def toOption: Option[List[ScalaPactMatchingRule]] = rules match {
     case Nil => None
-    case rs => Some(rs)
+    case rs  => Some(rs)
   }
 }
 

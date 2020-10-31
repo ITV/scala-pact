@@ -7,16 +7,17 @@ import org.http4s.client.Client
 
 import scala.concurrent.duration._
 
-class ScalaPactHttpClient(client: Resource[IO, Client[IO]])(fetcher: (SimpleRequest, Resource[IO, Client[IO]]) => IO[SimpleResponse])
-  extends IScalaPactHttpClient {
+class ScalaPactHttpClient(client: Resource[IO, Client[IO]])(
+    fetcher: (SimpleRequest, Resource[IO, Client[IO]]) => IO[SimpleResponse]
+) extends IScalaPactHttpClient {
 
   def doRequest(simpleRequest: SimpleRequest): Either[Throwable, SimpleResponse] =
     doRequestIO(simpleRequest).attempt.unsafeRunSync()
 
   def doInteractionRequest(
-                                url: String,
-                                ir: InteractionRequest,
-                              ): Either[Throwable, InteractionResponse] =
+      url: String,
+      ir: InteractionRequest
+  ): Either[Throwable, InteractionResponse] =
     doInteractionRequestIO(url, ir).attempt.unsafeRunSync()
 
   def doRequestIO(simpleRequest: SimpleRequest): IO[SimpleResponse] = fetcher(simpleRequest, client)
@@ -29,7 +30,7 @@ class ScalaPactHttpClient(client: Resource[IO, Client[IO]])(fetcher: (SimpleRequ
         HttpMethod.maybeMethodToMethod(ir.method),
         ir.headers.getOrElse(Map.empty[String, String]),
         ir.body,
-        None,
+        None
       )
     fetcher(request, client).map { r =>
       InteractionResponse(
@@ -46,7 +47,9 @@ class ScalaPactHttpClient(client: Resource[IO, Client[IO]])(fetcher: (SimpleRequ
 }
 
 object ScalaPactHttpClient {
-  def apply(clientTimeout: Duration, sslContextName: Option[String], maxTotalConnections: Int)(implicit sslContextMap: SslContextMap): IScalaPactHttpClient = {
+  def apply(clientTimeout: Duration, sslContextName: Option[String], maxTotalConnections: Int)(implicit
+      sslContextMap: SslContextMap
+  ): IScalaPactHttpClient = {
     val client = Http4sClientHelper.buildPooledBlazeHttpClient(maxTotalConnections, clientTimeout, sslContextName)
     new ScalaPactHttpClient(client)(Http4sClientHelper.doRequest)
   }

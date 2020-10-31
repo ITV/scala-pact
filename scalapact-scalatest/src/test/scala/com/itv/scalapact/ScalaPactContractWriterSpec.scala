@@ -2,7 +2,7 @@ package com.itv.scalapact
 
 import com.itv.scalapact.ScalaPactForger._
 import com.itv.scalapact.model.ScalaPactMatchingRule.ScalaPactMatchingRuleArrayMinLength
-import com.itv.scalapact.model.{ScalaPactDescriptionFinal, ScalaPactInteractionFinal, ScalaPactOptions, ScalaPactRequest, ScalaPactResponse}
+import com.itv.scalapact.model._
 import com.itv.scalapact.shared.MatchingRule
 import org.scalatest.{FunSpec, Matchers}
 
@@ -42,7 +42,7 @@ class ScalaPactContractWriterSpec extends FunSpec with Matchers {
       )
 
       val pactFromDescription = ScalaPactContractWriter.producePactFromDescription(description)
-      val resultInteraction = pactFromDescription.interactions.head
+      val resultInteraction   = pactFromDescription.interactions.head
 
       val requestMatchingRules = resultInteraction.request.matchingRules
       requestMatchingRules.get("root") shouldBe MatchingRule(Some("type"), None, Some(10))

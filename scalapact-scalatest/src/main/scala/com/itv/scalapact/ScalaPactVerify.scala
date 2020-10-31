@@ -34,29 +34,41 @@ trait ScalaPactVerifyDsl {
     ) {
       def runStrictVerificationAgainst(
           port: Int
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder): Unit =
+      )(implicit
+          pactReader: IPactReader,
+          pactWriter: IPactWriter,
+          httpClientBuilder: IScalaPactHttpClientBuilder
+      ): Unit =
         doVerification("http", "localhost", port, defaultClientTimeout, strict = true)
 
       def runStrictVerificationAgainst(
           port: Int,
           clientTimeout: Duration
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder): Unit =
+      )(implicit
+          pactReader: IPactReader,
+          pactWriter: IPactWriter,
+          httpClientBuilder: IScalaPactHttpClientBuilder
+      ): Unit =
         doVerification("http", "localhost", port, clientTimeout, strict = true)
 
       def runStrictVerificationAgainst(
           host: String,
           port: Int
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder): Unit =
+      )(implicit
+          pactReader: IPactReader,
+          pactWriter: IPactWriter,
+          httpClientBuilder: IScalaPactHttpClientBuilder
+      ): Unit =
         doVerification("http", host, port, defaultClientTimeout, strict = true)
 
-      def runStrictVerificationAgainst(host: String, port: Int, clientTimeout: Duration)(
-          implicit pactReader: IPactReader,
+      def runStrictVerificationAgainst(host: String, port: Int, clientTimeout: Duration)(implicit
+          pactReader: IPactReader,
           pactWriter: IPactWriter,
           httpClientBuilder: IScalaPactHttpClientBuilder
       ): Unit = doVerification("http", host, port, clientTimeout, strict = true)
 
-      def runStrictVerificationAgainst(protocol: String, host: String, port: Int)(
-          implicit pactReader: IPactReader,
+      def runStrictVerificationAgainst(protocol: String, host: String, port: Int)(implicit
+          pactReader: IPactReader,
           pactWriter: IPactWriter,
           httpClientBuilder: IScalaPactHttpClientBuilder
       ): Unit =
@@ -64,42 +76,58 @@ trait ScalaPactVerifyDsl {
 
       def runStrictVerificationAgainst(
           target: VerifyTargetConfig
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder): Unit =
+      )(implicit
+          pactReader: IPactReader,
+          pactWriter: IPactWriter,
+          httpClientBuilder: IScalaPactHttpClientBuilder
+      ): Unit =
         doVerification(target.protocol, target.host, target.port, target.clientTimeout, strict = true)
 
       def runVerificationAgainst(
           port: Int
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder): Unit =
+      )(implicit
+          pactReader: IPactReader,
+          pactWriter: IPactWriter,
+          httpClientBuilder: IScalaPactHttpClientBuilder
+      ): Unit =
         doVerification("http", "localhost", port, defaultClientTimeout, strict = false)
 
       def runVerificationAgainst(
           port: Int,
           clientTimeout: Duration
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder): Unit =
+      )(implicit
+          pactReader: IPactReader,
+          pactWriter: IPactWriter,
+          httpClientBuilder: IScalaPactHttpClientBuilder
+      ): Unit =
         doVerification("http", "localhost", port, clientTimeout, strict = false)
 
       def runVerificationAgainst(
           host: String,
           port: Int
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder): Unit =
+      )(implicit
+          pactReader: IPactReader,
+          pactWriter: IPactWriter,
+          httpClientBuilder: IScalaPactHttpClientBuilder
+      ): Unit =
         doVerification("http", host, port, defaultClientTimeout, strict = false)
 
-      def runVerificationAgainst(host: String, port: Int, clientTimeout: Duration)(
-          implicit pactReader: IPactReader,
+      def runVerificationAgainst(host: String, port: Int, clientTimeout: Duration)(implicit
+          pactReader: IPactReader,
           pactWriter: IPactWriter,
           httpClientBuilder: IScalaPactHttpClientBuilder
       ): Unit =
         doVerification("http", host, port, clientTimeout, strict = false)
 
-      def runVerificationAgainst(protocol: String, host: String, port: Int)(
-          implicit pactReader: IPactReader,
+      def runVerificationAgainst(protocol: String, host: String, port: Int)(implicit
+          pactReader: IPactReader,
           pactWriter: IPactWriter,
           httpClientBuilder: IScalaPactHttpClientBuilder
       ): Unit =
         doVerification(protocol, host, port, defaultClientTimeout, strict = false)
 
-      def runVerificationAgainst(protocol: String, host: String, port: Int, clientTimeout: Duration)(
-          implicit pactReader: IPactReader,
+      def runVerificationAgainst(protocol: String, host: String, port: Int, clientTimeout: Duration)(implicit
+          pactReader: IPactReader,
           pactWriter: IPactWriter,
           httpClientBuilder: IScalaPactHttpClientBuilder
       ): Unit =
@@ -107,7 +135,11 @@ trait ScalaPactVerifyDsl {
 
       def runVerificationAgainst(
           target: VerifyTargetConfig
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder): Unit =
+      )(implicit
+          pactReader: IPactReader,
+          pactWriter: IPactWriter,
+          httpClientBuilder: IScalaPactHttpClientBuilder
+      ): Unit =
         doVerification(target.protocol, target.host, target.port, target.clientTimeout, strict = false)
 
       private def doVerification(
@@ -116,14 +148,21 @@ trait ScalaPactVerifyDsl {
           port: Int,
           clientTimeout: Duration,
           strict: Boolean
-      )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder): Unit = {
+      )(implicit
+          pactReader: IPactReader,
+          pactWriter: IPactWriter,
+          httpClientBuilder: IScalaPactHttpClientBuilder
+      ): Unit = {
 
         val providerStateFunc: SetupProviderState =
           given
             .flatMap(_ => setupProviderState)
             .getOrElse(_ => ProviderStateResult(true))
 
-        def makeScalaPactSettings(localPactFilePath: Option[String], publishResultsEnabled: Option[BrokerPublishData]): ScalaPactSettings = ScalaPactSettings(
+        def makeScalaPactSettings(
+            localPactFilePath: Option[String],
+            publishResultsEnabled: Option[BrokerPublishData]
+        ): ScalaPactSettings = ScalaPactSettings(
           host = Some(host),
           protocol = Some(protocol),
           port = Some(port),
@@ -134,7 +173,6 @@ trait ScalaPactVerifyDsl {
           publishResultsEnabled = publishResultsEnabled,
           enablePending = None
         )
-
 
         val (verifySettings, scalaPactSettings) = sourceType match {
           case pactAsJsonString(json) =>
@@ -151,7 +189,14 @@ trait ScalaPactVerifyDsl {
           case loadFromLocal(path) =>
             LocalPactVerifySettings(providerStateFunc) -> makeScalaPactSettings(Some(path), None)
 
-          case pactBrokerUseLatest(url, providerName, consumerNames, publishResultsEnabled, pactBrokerAuthorization, pactBrokerClientTimeout) =>
+          case pactBrokerUseLatest(
+                url,
+                providerName,
+                consumerNames,
+                publishResultsEnabled,
+                pactBrokerAuthorization,
+                pactBrokerClientTimeout
+              ) =>
             LatestConsumerVerifySettings(
               providerStates = providerStateFunc,
               pactBrokerAddress = url,
@@ -161,15 +206,15 @@ trait ScalaPactVerifyDsl {
               pactBrokerClientTimeout = pactBrokerClientTimeout,
               sslContextName = None
             ) ->
-            makeScalaPactSettings(None, publishResultsEnabled)
+              makeScalaPactSettings(None, publishResultsEnabled)
 
           case pactBrokerWithTags(
-              url,
-              providerName,
-          publishResultsEnabled,
-              consumersWithTags,
-              pactBrokerAuthorization,
-              pactBrokerClientTimeout
+                url,
+                providerName,
+                publishResultsEnabled,
+                consumersWithTags,
+                pactBrokerAuthorization,
+                pactBrokerClientTimeout
               ) =>
             TaggedConsumerVerifySettings(
               providerStates = providerStateFunc,
@@ -183,13 +228,13 @@ trait ScalaPactVerifyDsl {
               makeScalaPactSettings(None, publishResultsEnabled)
 
           case pactBrokerWithVersion(
-              url,
-              version,
-              providerName,
-              consumerNames,
-              publishResultsEnabled,
-              pactBrokerAuthorization,
-              pactBrokerClientTimeout
+                url,
+                version,
+                providerName,
+                consumerNames,
+                publishResultsEnabled,
+                pactBrokerAuthorization,
+                pactBrokerClientTimeout
               ) =>
             VersionedConsumerVerifySettings(
               providerStates = providerStateFunc,
@@ -200,17 +245,17 @@ trait ScalaPactVerifyDsl {
               pactBrokerClientTimeout = pactBrokerClientTimeout,
               sslContextName = None
             ) ->
-            makeScalaPactSettings(None, publishResultsEnabled)
+              makeScalaPactSettings(None, publishResultsEnabled)
 
           case pactBrokerWithVersionSelectors(
-              url,
-              providerName,
-              consumerVersionSelectors,
-              providerVersionTags,
-              includePendingStatus,
-              publishResultsEnabled,
-              pactBrokerAuthorization,
-              pactBrokerClientTimeout
+                url,
+                providerName,
+                consumerVersionSelectors,
+                providerVersionTags,
+                includePendingStatus,
+                publishResultsEnabled,
+                pactBrokerAuthorization,
+                pactBrokerClientTimeout
               ) =>
             PactsForVerificationSettings(
               providerStates = providerStateFunc,
@@ -223,7 +268,7 @@ trait ScalaPactVerifyDsl {
               pactBrokerClientTimeout = pactBrokerClientTimeout,
               sslContextName = None
             ) ->
-            makeScalaPactSettings(None, publishResultsEnabled)
+              makeScalaPactSettings(None, publishResultsEnabled)
         }
 
         if (Verifier.apply.verify(verifySettings, scalaPactSettings)) () else throw new ScalaPactVerifyFailed
@@ -232,10 +277,10 @@ trait ScalaPactVerifyDsl {
 
     object ScalaPactVerifyRunner {
       def apply(
-                 sourceType: PactSourceType,
-                 given: String,
-                 setupProviderState: SetupProviderState
-               ): ScalaPactVerifyRunner = new ScalaPactVerifyRunner(sourceType, Some(given), Some(setupProviderState))
+          sourceType: PactSourceType,
+          given: String,
+          setupProviderState: SetupProviderState
+      ): ScalaPactVerifyRunner = new ScalaPactVerifyRunner(sourceType, Some(given), Some(setupProviderState))
     }
 
   }
@@ -253,7 +298,15 @@ trait ScalaPactVerifyDsl {
       pactBrokerClientTimeout: Option[Duration]
   ) extends PactSourceType {
     def withContractVersion(version: String): pactBrokerWithVersion =
-      pactBrokerWithVersion(url, version, provider, consumers, publishResultsEnabled, pactBrokerAuthorization, pactBrokerClientTimeout)
+      pactBrokerWithVersion(
+        url,
+        version,
+        provider,
+        consumers,
+        publishResultsEnabled,
+        pactBrokerAuthorization,
+        pactBrokerClientTimeout
+      )
   }
 
   object pactBrokerUseLatest {
@@ -286,7 +339,8 @@ trait ScalaPactVerifyDsl {
   ) extends PactSourceType
 
   object pactBrokerWithVersion {
-    def apply(url: String, contractVersion: String, provider: String, consumers: List[String]): pactBrokerWithVersion = pactBrokerWithVersion(url, contractVersion, provider, consumers, None, None, None)
+    def apply(url: String, contractVersion: String, provider: String, consumers: List[String]): pactBrokerWithVersion =
+      pactBrokerWithVersion(url, contractVersion, provider, consumers, None, None, None)
   }
 
   case class pactBrokerWithVersionSelectors(
@@ -305,9 +359,9 @@ trait ScalaPactVerifyDsl {
   class ScalaPactVerifyFailed extends Exception
 
   case class VerifyTargetConfig(protocol: String, host: String, port: Int, clientTimeout: Duration) {
-    def withProtocol(protocol: String): VerifyTargetConfig = this.copy(protocol = protocol)
-    def withHost(host: String): VerifyTargetConfig         = this.copy(host = host)
-    def withPort(port: Int): VerifyTargetConfig            = this.copy(port = port)
+    def withProtocol(protocol: String): VerifyTargetConfig             = this.copy(protocol = protocol)
+    def withHost(host: String): VerifyTargetConfig                     = this.copy(host = host)
+    def withPort(port: Int): VerifyTargetConfig                        = this.copy(port = port)
     def withClientTimeout(clientTimeout: Duration): VerifyTargetConfig = this.copy(clientTimeout = clientTimeout)
 
     @deprecated("Use `withClientTimeout` instead", "2.3.19")
@@ -317,13 +371,17 @@ trait ScalaPactVerifyDsl {
 
   object VerifyTargetConfig {
     def apply(port: Int): VerifyTargetConfig = VerifyTargetConfig("http", "localhost", port, defaultClientTimeout)
-    def apply(port: Int, clientTimeout: Duration): VerifyTargetConfig = VerifyTargetConfig("http", "localhost", port, clientTimeout)
-    def apply(host: String, port: Int): VerifyTargetConfig = VerifyTargetConfig("http", host, port, defaultClientTimeout)
-    def apply(protocol: String, host: String, port: Int): VerifyTargetConfig = VerifyTargetConfig(protocol, host, port, defaultClientTimeout)
-    def apply(host: String, port: Int, clientTimeout: Duration): VerifyTargetConfig = VerifyTargetConfig("http", host, port, clientTimeout)
+    def apply(port: Int, clientTimeout: Duration): VerifyTargetConfig =
+      VerifyTargetConfig("http", "localhost", port, clientTimeout)
+    def apply(host: String, port: Int): VerifyTargetConfig =
+      VerifyTargetConfig("http", host, port, defaultClientTimeout)
+    def apply(protocol: String, host: String, port: Int): VerifyTargetConfig =
+      VerifyTargetConfig(protocol, host, port, defaultClientTimeout)
+    def apply(host: String, port: Int, clientTimeout: Duration): VerifyTargetConfig =
+      VerifyTargetConfig("http", host, port, clientTimeout)
 
     def fromUrl(url: String): Option[VerifyTargetConfig] = fromUrl(url, defaultClientTimeout)
-    def fromUrl(url: String, clientTimeout: Duration): Option[VerifyTargetConfig] = {
+    def fromUrl(url: String, clientTimeout: Duration): Option[VerifyTargetConfig] =
       Try {
         val pattern                       = """^([a-z]+)://([a-z0-9.\-_]+):(\d+).*""".r
         val pattern(protocol, host, port) = url.toLowerCase
@@ -334,7 +392,6 @@ trait ScalaPactVerifyDsl {
         )
         None
       }
-    }
 
   }
 }

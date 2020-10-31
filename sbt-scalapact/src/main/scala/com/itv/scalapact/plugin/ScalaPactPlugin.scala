@@ -3,7 +3,7 @@ package com.itv.scalapact.plugin
 import com.itv.scalapact.http._
 import com.itv.scalapact.json._
 import com.itv.scalapact.plugin.shared._
-import com.itv.scalapact.shared.{ConsumerVersionSelector, PactBrokerAuthorization, ProviderStateResult, ScalaPactSettings}
+import com.itv.scalapact.shared._
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 import sbt.Keys._
 import sbt.plugins.JvmPlugin
