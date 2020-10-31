@@ -10,9 +10,9 @@ import com.itv.scalapactcore.common.PactBrokerClient
 import scala.util.Left
 
 private[verifier] class PrePactsForVerificationVerifier(
-  brokerClient: PactBrokerClient,
-  localVerifierClient: IScalaPactHttpClient)(
-  implicit pactReader: IPactReader) {
+    brokerClient: PactBrokerClient,
+    localVerifierClient: IScalaPactHttpClient
+)(implicit pactReader: IPactReader) {
 
   def verify(pactVerifySettings: PrePactsForVerificationSettings, scalaPactSettings: ScalaPactSettings): Boolean = {
 
@@ -24,7 +24,13 @@ private[verifier] class PrePactsForVerificationVerifier(
 
     val startTime = System.currentTimeMillis()
 
-    val pactVerifyResults = pacts.map(VerificationSteps.runVerificationAgainst(localVerifierClient, scalaPactSettings, pactVerifySettings.providerStates))
+    val pactVerifyResults = pacts.map(
+      VerificationSteps.runVerificationAgainst(
+        localVerifierClient,
+        scalaPactSettings,
+        pactVerifySettings.providerStates
+      )
+    )
 
     val endTime      = System.currentTimeMillis()
     val testCount    = pactVerifyResults.flatMap(_.results).length

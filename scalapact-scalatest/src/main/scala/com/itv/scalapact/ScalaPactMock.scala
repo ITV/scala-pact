@@ -22,27 +22,29 @@ private[scalapact] object ScalaPactMock {
 
   def runConsumerIntegrationTest[A](
       strict: Boolean
-  )(pactDescription: ScalaPactDescriptionFinal)(test: ScalaPactMockConfig => A)(implicit sslContextMap: SslContextMap,
-                                                                                pactReader: IPactReader,
-                                                                                pactWriter: IPactWriter,
-                                                                                httpClient: IScalaPactHttpClient,
-                                                                                pactStubber: IPactStubber): A = {
+  )(pactDescription: ScalaPactDescriptionFinal)(test: ScalaPactMockConfig => A)(implicit
+      sslContextMap: SslContextMap,
+      pactReader: IPactReader,
+      pactWriter: IPactWriter,
+      httpClient: IScalaPactHttpClient,
+      pactStubber: IPactStubber
+  ): A = {
 
     val interactionManager: InteractionManager = new InteractionManager
 
-    val protocol = pactDescription.serverSslContextName.fold("http")(_ => "https")
-    val host = "localhost"
+    val protocol   = pactDescription.serverSslContextName.fold("http")(_ => "https")
+    val host       = "localhost"
     val outputPath = pactDescription.options.outputPath
     val scalaPactSettings = ScalaPactSettings(
-        protocol = Option(protocol),
-        host = Option(host),
-        port = Option(0), // `0` means "use any available port".
-        localPactFilePath = None,
-        strictMode = Option(strict),
-        clientTimeout = None,
-        outputPath = Option(outputPath),
-        publishResultsEnabled = None, // Nothing to publish
-        enablePending = None //This is determined by the pact broker
+      protocol = Option(protocol),
+      host = Option(host),
+      port = Option(0), // `0` means "use any available port".
+      localPactFilePath = None,
+      strictMode = Option(strict),
+      clientTimeout = None,
+      outputPath = Option(outputPath),
+      publishResultsEnabled = None, // Nothing to publish
+      enablePending = None          //This is determined by the pact broker
     )
     val pacts = List(ScalaPactContractWriter.producePactFromDescription(pactDescription))
 
@@ -95,12 +97,14 @@ private[scalapact] object ScalaPactMock {
       sslContextName: Option[String]
   )(implicit httpClient: IScalaPactHttpClient): Boolean =
     httpClient.doRequest(
-      SimpleRequest(mockConfig.baseUrl,
-                    "/stub/status",
-                    HttpMethod.GET,
-                    Map("X-Pact-Admin" -> "true"),
-                    None,
-                    sslContextName = sslContextName)
+      SimpleRequest(
+        mockConfig.baseUrl,
+        "/stub/status",
+        HttpMethod.GET,
+        Map("X-Pact-Admin" -> "true"),
+        None,
+        sslContextName = sslContextName
+      )
     ) match {
       case Left(_) =>
         false

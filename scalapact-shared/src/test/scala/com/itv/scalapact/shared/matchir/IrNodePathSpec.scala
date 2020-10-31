@@ -1,6 +1,11 @@
 package com.itv.scalapact.shared.matchir
 
-import com.itv.scalapact.shared.matchir.IrNodePath.{IrNodePathEmpty, IrNodePathField, IrNodePathFieldAttribute, IrNodePathTextElement}
+import com.itv.scalapact.shared.matchir.IrNodePath.{
+  IrNodePathEmpty,
+  IrNodePathField,
+  IrNodePathFieldAttribute,
+  IrNodePathTextElement
+}
 import com.itv.scalapact.shared.matchir.PactPathParseResult.{PactPathParseFailure, PactPathParseSuccess}
 import org.scalatest.{FunSpec, Matchers}
 
@@ -309,8 +314,10 @@ class IrNodePathSpec extends FunSpec with Matchers {
 
     it("should check equality with wildcards") {
 
-      (IrNodePath.fromPactPath("$.body.animals[*].children[*].*").toEither,
-       IrNodePath.fromPactPath("$.body.animals[0].children[0].age").toEither) match {
+      (
+        IrNodePath.fromPactPath("$.body.animals[*].children[*].*").toEither,
+        IrNodePath.fromPactPath("$.body.animals[0].children[0].age").toEither
+      ) match {
         case (Right(rulePath), Right(nodePath)) =>
           rulePath === nodePath shouldEqual true
         case (Left(e), _) =>

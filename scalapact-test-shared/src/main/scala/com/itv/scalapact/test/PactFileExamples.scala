@@ -147,8 +147,7 @@ object PactFileExamples {
             |    "haddock",
             |    "flying"
             |  ]
-            |}""".stripMargin
-          ),
+            |}""".stripMargin),
           matchingRules = Option(
             Map(
               "$.headers.Accept"         -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
@@ -177,8 +176,7 @@ object PactFileExamples {
             |    "cod",
             |    "haddock"
             |  ]
-            |}""".stripMargin
-          ),
+            |}""".stripMargin),
           matchingRules = None
         )
       )
@@ -642,8 +640,7 @@ object PactFileExamples {
             |    "haddock",
             |    "flying"
             |  ]
-            |}""".stripMargin
-          ),
+            |}""".stripMargin),
           matchingRules = Option(
             Map(
               "$.headers.Accept"         -> MatchingRule(`match` = Option("regex"), regex = Option("\\w+"), min = None),
@@ -672,8 +669,7 @@ object PactFileExamples {
             |    "cod",
             |    "haddock"
             |  ]
-            |}""".stripMargin
-          ),
+            |}""".stripMargin),
           matchingRules = None
         )
       )

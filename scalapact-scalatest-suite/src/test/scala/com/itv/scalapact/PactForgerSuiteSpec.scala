@@ -11,5 +11,6 @@ class PactForgerSuiteSpec extends PactForgerSuite {
           .description("")
           .uponReceiving(GET, "")
           .willRespondWith(200)
-      ).runConsumerTest(_ => ())
+      )
+      .runConsumerTest(_ => ())
 }

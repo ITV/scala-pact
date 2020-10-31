@@ -7,9 +7,11 @@ import com.itv.scalapact.shared.matchir._
 
 object BodyMatching {
 
-  def nodeMatchToMatchResult(irNodeEqualityResult: IrNodeEqualityResult,
-                             rules: IrNodeMatchingRules,
-                             isXml: Boolean): MatchOutcome =
+  def nodeMatchToMatchResult(
+      irNodeEqualityResult: IrNodeEqualityResult,
+      rules: IrNodeMatchingRules,
+      isXml: Boolean
+  ): MatchOutcome =
     irNodeEqualityResult match {
       case IrNodesEqual =>
         MatchOutcomeSuccess
@@ -18,15 +20,16 @@ object BodyMatching {
         MatchOutcomeFailed(e.renderDifferencesListWithRules(rules, isXml), e.differences.length * 1)
     }
 
-  def matchBodies(headers: Option[Map[String, String]], expected: Option[String], received: Option[String])(
-      implicit rules: IrNodeMatchingRules,
+  def matchBodies(headers: Option[Map[String, String]], expected: Option[String], received: Option[String])(implicit
+      rules: IrNodeMatchingRules,
       pactReader: IPactReader
   ): MatchOutcome =
     (expected, received) match {
       case (Some(ee), Some(rr))
           if ee.nonEmpty && hasJsonHeader(headers) || stringIsProbablyJson(ee) && stringIsProbablyJson(rr) =>
         val predicate: (String, String) => MatchOutcome = (e, r) =>
-          pactReader.fromJSON(e)
+          pactReader
+            .fromJSON(e)
             .flatMap { ee =>
               pactReader.fromJSON(r).map { rr =>
                 nodeMatchToMatchResult(ee =~ rr, rules, isXml = false)
@@ -51,10 +54,12 @@ object BodyMatching {
         GeneralMatcher.generalMatcher(expected, received, MatchOutcomeFailed("Body mismatch", 50), predicate)
 
       case _ =>
-        GeneralMatcher.generalMatcher(expected,
-                                      received,
-                                      MatchOutcomeFailed("Body mismatch", 50),
-                                      (e: String, r: String) => PlainTextEquality.checkOutcome(e, r))
+        GeneralMatcher.generalMatcher(
+          expected,
+          received,
+          MatchOutcomeFailed("Body mismatch", 50),
+          (e: String, r: String) => PlainTextEquality.checkOutcome(e, r)
+        )
     }
 
   def matchBodiesStrict(
@@ -95,10 +100,12 @@ object BodyMatching {
         GeneralMatcher.generalMatcher(expected, received, MatchOutcomeFailed("Body mismatch", 50), predicate)
 
       case _ =>
-        GeneralMatcher.generalMatcher(expected,
-                                      received,
-                                      MatchOutcomeFailed("Body mismatch", 50),
-                                      (e: String, r: String) => PlainTextEquality.checkOutcome(e, r))
+        GeneralMatcher.generalMatcher(
+          expected,
+          received,
+          MatchOutcomeFailed("Body mismatch", 50),
+          (e: String, r: String) => PlainTextEquality.checkOutcome(e, r)
+        )
     }
   }
 
@@ -120,7 +127,7 @@ object BodyMatching {
   lazy val stringIsProbablyJson: String => Boolean = str =>
     ((s: String) => s.nonEmpty && ((s.startsWith("{") && s.endsWith("}")) || (s.startsWith("[") && s.endsWith("]"))))(
       str.trim
-  )
+    )
 
   lazy val stringIsProbablyXml: String => Boolean = str =>
     ((s: String) => s.nonEmpty && s.startsWith("<") && s.endsWith(">"))(str.trim)

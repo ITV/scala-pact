@@ -3,7 +3,7 @@ package com.itv.scalapact
 import java.io.{File, PrintWriter}
 import java.nio.charset.StandardCharsets
 
-import com.itv.scalapact.model.ScalaPactMatchingRule.{ScalaPactMatchingRuleArrayMinLength, ScalaPactMatchingRuleRegex, ScalaPactMatchingRuleType}
+import com.itv.scalapact.model.ScalaPactMatchingRule._
 import com.itv.scalapact.model.{ScalaPactDescriptionFinal, ScalaPactInteractionFinal, ScalaPactMatchingRule}
 import com.itv.scalapact.shared._
 import com.itv.scalapact.shared.json.IPactWriter
@@ -81,7 +81,7 @@ private[scalapact] object ScalaPactContractWriter {
             `scala-pact` = Option(VersionMetaData(BuildInfo.version))
           )
         )
-    )
+      )
 
   private def convertInteractionsFinalToInteractions: ScalaPactInteractionFinal => Interaction = i => {
     val pathAndQuery: (String, String) = i.request.path.split('?').toList ++ List(i.request.query.getOrElse("")) match {
@@ -114,15 +114,15 @@ private[scalapact] object ScalaPactContractWriter {
   ): Option[Map[String, MatchingRule]] =
     rules.map { rs =>
       rs.foldLeft(Map.empty[String, MatchingRule]) {
-          case (mrs, ScalaPactMatchingRuleType(key)) =>
-            mrs + (key -> MatchingRule(Some("type"), None, None))
+        case (mrs, ScalaPactMatchingRuleType(key)) =>
+          mrs + (key -> MatchingRule(Some("type"), None, None))
 
-          case (mrs, ScalaPactMatchingRuleRegex(key, regex)) =>
-            mrs + (key -> MatchingRule(Some("regex"), regex.toOption, None))
+        case (mrs, ScalaPactMatchingRuleRegex(key, regex)) =>
+          mrs + (key -> MatchingRule(Some("regex"), regex.toOption, None))
 
-          case (mrs, ScalaPactMatchingRuleArrayMinLength(key, min)) =>
-            mrs + (key -> MatchingRule(Some("type"), None, min.positive))
+        case (mrs, ScalaPactMatchingRuleArrayMinLength(key, min)) =>
+          mrs + (key -> MatchingRule(Some("type"), None, min.positive))
 
-        }
+      }
     }
 }

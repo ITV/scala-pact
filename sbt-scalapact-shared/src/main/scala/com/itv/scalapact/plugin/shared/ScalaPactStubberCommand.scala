@@ -14,8 +14,8 @@ object ScalaPactStubberCommand {
 
   def interactionManagerInstance: InteractionManager = new InteractionManager
 
-  def runStubber(scalaPactSettings: ScalaPactSettings, interactionManager: InteractionManager)(
-      implicit pactReader: IPactReader,
+  def runStubber(scalaPactSettings: ScalaPactSettings, interactionManager: InteractionManager)(implicit
+      pactReader: IPactReader,
       pactWriter: IPactWriter,
       pactStubber: IPactStubber,
       sslContextMap: SslContextMap

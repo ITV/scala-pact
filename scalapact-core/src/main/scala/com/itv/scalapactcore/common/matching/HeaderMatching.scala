@@ -34,9 +34,11 @@ object HeaderMatching {
         xs.foldLeft(x)(_ + _)
     }
 
-  def matchHeaders(matchingRules: Option[Map[String, MatchingRule]],
-                   expected: Option[Map[String, String]],
-                   received: Option[Map[String, String]]): MatchOutcome = {
+  def matchHeaders(
+      matchingRules: Option[Map[String, MatchingRule]],
+      expected: Option[Map[String, String]],
+      received: Option[Map[String, String]]
+  ): MatchOutcome = {
 
     val rules = findAndCleanupApplicableMatchingRules(matchingRules)
 
@@ -81,9 +83,11 @@ object HeaderMatching {
 
       val noRuleMatchResult: MatchOutcome = {
         @tailrec
-        def rec(remaining: List[(String, String)],
-                received: List[(String, String)],
-                acc: List[MatchOutcome]): List[MatchOutcome] =
+        def rec(
+            remaining: List[(String, String)],
+            received: List[(String, String)],
+            acc: List[MatchOutcome]
+        ): List[MatchOutcome] =
           remaining match {
             case Nil =>
               acc

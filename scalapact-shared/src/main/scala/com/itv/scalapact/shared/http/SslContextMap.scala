@@ -14,9 +14,8 @@ class SslContextMap(map: Map[String, SSLContext]) extends (Option[String] => Opt
     PactLogger.debug(s"SslContextMap($optName) ==> $result")
 
     if (SslContextMap.debugNones && optName.isEmpty) {
-      try {
-        throw new RuntimeException
-      } catch {
+      try throw new RuntimeException
+      catch {
         case e: Exception => e.printStackTrace()
       }
     }
@@ -67,5 +66,5 @@ object SslContextMap {
   }
 
   class SslContextNotFoundException(name: String, sslContextMap: SslContextMap)
-    extends Exception(s"SslContext [$name] not found. Legal values are [${sslContextMap.legalValues}]")
+      extends Exception(s"SslContext [$name] not found. Legal values are [${sslContextMap.legalValues}]")
 }

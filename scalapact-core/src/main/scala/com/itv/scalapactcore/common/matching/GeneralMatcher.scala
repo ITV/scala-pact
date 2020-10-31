@@ -2,10 +2,12 @@ package com.itv.scalapactcore.common.matching
 
 object GeneralMatcher {
 
-  def generalMatcher[A](expected: Option[A],
-                        received: Option[A],
-                        defaultFailure: MatchOutcomeFailed,
-                        predicate: (A, A) => MatchOutcome): MatchOutcome =
+  def generalMatcher[A](
+      expected: Option[A],
+      received: Option[A],
+      defaultFailure: MatchOutcomeFailed,
+      predicate: (A, A) => MatchOutcome
+  ): MatchOutcome =
     (expected, received) match {
       case (None, None) => MatchOutcomeSuccess
 

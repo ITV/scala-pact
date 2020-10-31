@@ -8,14 +8,15 @@ import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
 
 import scala.concurrent.duration._
 
-class ScalaPactDescription(strict: Boolean,
-                           consumer: String,
-                           provider: String,
-                           sslContextName: Option[String],
-                           interactions: List[ScalaPactInteraction]) {
+class ScalaPactDescription(
+    strict: Boolean,
+    consumer: String,
+    provider: String,
+    sslContextName: Option[String],
+    interactions: List[ScalaPactInteraction]
+) {
 
-  /**
-    * Adds interactions to the Pact. Interactions should be created using the helper object 'interaction'
+  /** Adds interactions to the Pact. Interactions should be created using the helper object 'interaction'
     *
     * @param interaction [ScalaPactInteraction] definition
     * @return [ScalaPactDescription] to allow the builder to continue
@@ -26,12 +27,14 @@ class ScalaPactDescription(strict: Boolean,
   def addSslContextForServer(name: String): ScalaPactDescription =
     new ScalaPactDescription(strict, consumer, provider, Some(name), interactions)
 
-  def runConsumerTest[A](test: ScalaPactMockConfig => A)(implicit options: ScalaPactOptions,
-                                                               sslContextMap: SslContextMap,
-                                                               pactReader: IPactReader,
-                                                               pactWriter: IPactWriter,
-                                                               httpClientBuilder: IScalaPactHttpClientBuilder,
-                                                               pactStubber: IPactStubber): A = {
+  def runConsumerTest[A](test: ScalaPactMockConfig => A)(implicit
+      options: ScalaPactOptions,
+      sslContextMap: SslContextMap,
+      pactReader: IPactReader,
+      pactWriter: IPactWriter,
+      httpClientBuilder: IScalaPactHttpClientBuilder,
+      pactStubber: IPactStubber
+  ): A = {
     implicit val client: IScalaPactHttpClient =
       httpClientBuilder.build(2.seconds, sslContextName, 1)
     ScalaPactMock.runConsumerIntegrationTest(strict)(
@@ -49,19 +52,20 @@ class ScalaPactDescription(strict: Boolean,
     )
 }
 
-final case class ScalaPactDescriptionFinal(consumer: String,
-                                     provider: String,
-                                     serverSslContextName: Option[String],
-                                     interactions: List[ScalaPactInteractionFinal],
-                                     options: ScalaPactOptions) {
+final case class ScalaPactDescriptionFinal(
+    consumer: String,
+    provider: String,
+    serverSslContextName: Option[String],
+    interactions: List[ScalaPactInteractionFinal],
+    options: ScalaPactOptions
+) {
   def withHeaderForSsl: ScalaPactDescriptionFinal =
     copy(
-      interactions = interactions.map(
-        i =>
-          i.copy(
-            request = i.request
-              .copy(headers = i.request.headers addOpt (SslContextMap.sslContextHeaderName -> i.sslContextName))
-          )
+      interactions = interactions.map(i =>
+        i.copy(
+          request = i.request
+            .copy(headers = i.request.headers addOpt (SslContextMap.sslContextHeaderName -> i.sslContextName))
+        )
       )
     )
 }

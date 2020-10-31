@@ -5,23 +5,24 @@ import com.itv.scalapact.shared.utils.Helpers
 import scala.concurrent.duration.{Duration, SECONDS}
 import scala.util.Properties
 
-case class ScalaPactSettings(protocol: Option[String],
-                             host: Option[String],
-                             port: Option[Int],
-                             localPactFilePath: Option[String],
-                             strictMode: Option[Boolean],
-                             clientTimeout: Option[Duration],
-                             outputPath: Option[String],
-                             publishResultsEnabled: Option[BrokerPublishData],
-                             enablePending: Option[Boolean]
-                            ) {
+case class ScalaPactSettings(
+    protocol: Option[String],
+    host: Option[String],
+    port: Option[Int],
+    localPactFilePath: Option[String],
+    strictMode: Option[Boolean],
+    clientTimeout: Option[Duration],
+    outputPath: Option[String],
+    publishResultsEnabled: Option[BrokerPublishData],
+    enablePending: Option[Boolean]
+) {
   val giveHost: String            = host.getOrElse("localhost")
   val giveProtocol: String        = protocol.getOrElse("http")
   val givePort: Int               = port.getOrElse(1234)
   val giveStrictMode: Boolean     = strictMode.getOrElse(false)
   val giveClientTimeout: Duration = clientTimeout.getOrElse(Duration(1, SECONDS))
   val giveOutputPath: String      = outputPath.getOrElse(Properties.envOrElse("pact.rootDir", "target/pacts"))
-  val giveEnablePending: Boolean = enablePending.getOrElse(false)
+  val giveEnablePending: Boolean  = enablePending.getOrElse(false)
 
   def +(other: ScalaPactSettings): ScalaPactSettings =
     ScalaPactSettings.append(this, other)
@@ -101,7 +102,7 @@ object ScalaPactSettings {
       outputPath = argMap.get("--out"),
       publishResultsEnabled = calculateBrokerPublishData(argMap),
       enablePending = argMap.get("--enablePending").flatMap(Helpers.safeStringToBoolean)
-  )
+    )
 
   private def calculateBrokerPublishData(argMap: Map[String, String]): Option[BrokerPublishData] = {
     val buildUrl = argMap.get("--publishResultsBuildUrl")

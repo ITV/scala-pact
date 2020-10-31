@@ -85,7 +85,7 @@ object SpecReader {
 
       case Left(s) =>
         Left(s)
-  }
+    }
 
   val jsonStringToResponseSpec: String => Either[String, ResponseSpec] = json =>
     jsonStringToSpec[InteractionResponse](json)(PactImplicits.InteractionResponseDecodeJson) match {
@@ -94,7 +94,7 @@ object SpecReader {
 
       case Left(s) =>
         Left(s)
-  }
+    }
 
 }
 
@@ -111,27 +111,28 @@ object JsonBodySpecialCaseHelper {
       .leftMap(e => "Extracting 'comment': " + e)
 
   def extractInteractionRequestOrResponse[I]
-    : String => String => argonaut.DecodeJson[I] => Either[String, (I, Option[String])] =
+      : String => String => argonaut.DecodeJson[I] => Either[String, (I, Option[String])] =
     field =>
-      json => { implicit decoder =>
-        separateRequestResponseFromBody(field)(json).flatMap(RequestResponseAndBody.unapply) match {
-          case Some((Some(requestResponseMinusBody), maybeBody)) =>
-            requestResponseMinusBody.toString
-              .decodeEither[I]
-              .map(i => (i, maybeBody))
-              .leftMap(e => "Extracting 'expected or actual': " + e)
+      json => {
+        implicit decoder =>
+          separateRequestResponseFromBody(field)(json).flatMap(RequestResponseAndBody.unapply) match {
+            case Some((Some(requestResponseMinusBody), maybeBody)) =>
+              requestResponseMinusBody.toString
+                .decodeEither[I]
+                .map(i => (i, maybeBody))
+                .leftMap(e => "Extracting 'expected or actual': " + e)
 
-          case Some((None, _)) =>
-            val msg = s"Could not convert request to Json object: $json"
-            PactLogger.error(msg)
-            Left(msg)
+            case Some((None, _)) =>
+              val msg = s"Could not convert request to Json object: $json"
+              PactLogger.error(msg)
+              Left(msg)
 
-          case None =>
-            val msg = s"Problem splitting request from body in: $json"
-            PactLogger.error(msg)
-            Left(msg)
-        }
-    }
+            case None =>
+              val msg = s"Problem splitting request from body in: $json"
+              PactLogger.error(msg)
+              Left(msg)
+          }
+      }
 
   private lazy val separateRequestResponseFromBody: String => String => Option[RequestResponseAndBody] = field =>
     json =>
@@ -146,7 +147,7 @@ object JsonBodySpecialCaseHelper {
         }
 
         RequestResponseAndBody(minusBody, requestBody)
-  }
+      }
 
   final case class RequestResponseAndBody(requestMinusBody: Option[Json], body: Option[String])
 

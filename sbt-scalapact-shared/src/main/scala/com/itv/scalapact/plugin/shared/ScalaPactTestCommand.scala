@@ -12,8 +12,9 @@ import scala.util.Try
 
 object ScalaPactTestCommand {
 
-  def doPactPack(scalaPactSettings: ScalaPactSettings)(implicit pactReader: IPactReader,
-                                                       pactWriter: IPactWriter): Unit = {
+  def doPactPack(
+      scalaPactSettings: ScalaPactSettings
+  )(implicit pactReader: IPactReader, pactWriter: IPactWriter): Unit = {
     PactLogger.message("*************************************".white.bold)
     PactLogger.message("** ScalaPact: Squashing Pact Files **".white.bold)
     PactLogger.message("*************************************".white.bold)
@@ -45,8 +46,10 @@ object ScalaPactTestCommand {
     }
   }
 
-  private def squashPactFiles(outputPath: String, files: List[File])(implicit pactReader: IPactReader,
-                                                                     pactWriter: IPactWriter): Int = {
+  private def squashPactFiles(outputPath: String, files: List[File])(implicit
+      pactReader: IPactReader,
+      pactWriter: IPactWriter
+  ): Int = {
     val jsonStringToPact: String => Option[Pact] = pactReader.jsonStringToPact(_).toOption
 
     val (failed, squashedPacts) =
@@ -68,7 +71,7 @@ object ScalaPactTestCommand {
 
   private def fileToJsonString(file: File): Option[String] =
     Try {
-      val source = Source.fromFile(file)
+      val source   = Source.fromFile(file)
       val contents = source.getLines().mkString
       source.close()
       file.delete()

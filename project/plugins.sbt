@@ -21,3 +21,5 @@ addSbtPlugin("ch.epfl.scala" % "sbt-bloop" % "1.0.0")
 addSbtPlugin("com.dwijnand" % "sbt-travisci" % "1.2.0")
 
 addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.13")
+
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.4.2")

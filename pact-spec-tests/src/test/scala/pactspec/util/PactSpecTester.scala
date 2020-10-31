@@ -15,11 +15,13 @@ trait PactSpecTester extends FunSpec with Matchers {
 
   protected val fetchRequestSpec: String => StrictTestMode => (RequestSpec, StrictTestMode, String) = path =>
     testMode =>
-      (PactSpecLoader
-         .deserializeRequestSpec(PactSpecLoader.fromResource(pactSpecVersion, path))
-         .getOrElse(throw new Exception("Failed to deserialise request spec")),
-       testMode,
-       fileNameFromPath(path))
+      (
+        PactSpecLoader
+          .deserializeRequestSpec(PactSpecLoader.fromResource(pactSpecVersion, path))
+          .getOrElse(throw new Exception("Failed to deserialise request spec")),
+        testMode,
+        fileNameFromPath(path)
+      )
 
   protected def testRequestSpecs(specFiles: List[(RequestSpec, StrictTestMode, String)]): Unit =
     specFiles.foreach { specAndMode =>
@@ -40,45 +42,52 @@ trait PactSpecTester extends FunSpec with Matchers {
 
     }
 
-  private def doRequestMatch(spec: RequestSpec,
-                             i: Interaction,
-                             strictMatching: Boolean,
-                             shouldMatch: Boolean,
-                             path: String): Unit =
+  private def doRequestMatch(
+      spec: RequestSpec,
+      i: Interaction,
+      strictMatching: Boolean,
+      shouldMatch: Boolean,
+      path: String
+  ): Unit =
     matchSingleRequest(strictMatching, i.request.matchingRules, i.request, spec.actual) match {
       case MatchOutcomeSuccess =>
-
         if (!shouldMatch)
           fail(
-            makeErrorString(shouldMatch,
-                            path,
-                            spec.comment,
-                            strictMatching,
-                            spec.actual.renderAsString,
-                            spec.expected.renderAsString,
-                            "")
+            makeErrorString(
+              shouldMatch,
+              path,
+              spec.comment,
+              strictMatching,
+              spec.actual.renderAsString,
+              spec.expected.renderAsString,
+              ""
+            )
           )
 
       case e: MatchOutcomeFailed =>
         if (shouldMatch)
           fail(
-            makeErrorString(shouldMatch,
-                            path,
-                            spec.comment,
-                            strictMatching,
-                            spec.actual.renderAsString,
-                            spec.expected.renderAsString,
-                            e.renderDifferences)
+            makeErrorString(
+              shouldMatch,
+              path,
+              spec.comment,
+              strictMatching,
+              spec.actual.renderAsString,
+              spec.expected.renderAsString,
+              e.renderDifferences
+            )
           )
     }
 
   protected val fetchResponseSpec: String => StrictTestMode => (ResponseSpec, StrictTestMode, String) = path =>
     testMode =>
-      (PactSpecLoader
-         .deserializeResponseSpec(PactSpecLoader.fromResource(pactSpecVersion, path))
-         .getOrElse(throw new Exception("Failed to deserialise response spec")),
-       testMode,
-       fileNameFromPath(path))
+      (
+        PactSpecLoader
+          .deserializeResponseSpec(PactSpecLoader.fromResource(pactSpecVersion, path))
+          .getOrElse(throw new Exception("Failed to deserialise response spec")),
+        testMode,
+        fileNameFromPath(path)
+      )
 
   protected def testResponseSpecs(specFiles: List[(ResponseSpec, StrictTestMode, String)]): Unit =
     specFiles.foreach { specAndMode =>
@@ -100,44 +109,52 @@ trait PactSpecTester extends FunSpec with Matchers {
 
     }
 
-  private def doResponseMatch(spec: ResponseSpec,
-                              i: Interaction,
-                              strictMatching: Boolean,
-                              shouldMatch: Boolean,
-                              path: String): Unit =
+  private def doResponseMatch(
+      spec: ResponseSpec,
+      i: Interaction,
+      strictMatching: Boolean,
+      shouldMatch: Boolean,
+      path: String
+  ): Unit =
     matchSingleResponse(strictMatching, i.response.matchingRules, i.response, spec.actual) match {
       case MatchOutcomeSuccess =>
         if (!shouldMatch)
           fail(
-            makeErrorString(shouldMatch,
-                            path,
-                            spec.comment,
-                            strictMatching,
-                            spec.actual.renderAsString,
-                            spec.expected.renderAsString,
-                            "")
+            makeErrorString(
+              shouldMatch,
+              path,
+              spec.comment,
+              strictMatching,
+              spec.actual.renderAsString,
+              spec.expected.renderAsString,
+              ""
+            )
           )
 
       case e: MatchOutcomeFailed =>
         if (shouldMatch)
           fail(
-            makeErrorString(shouldMatch,
-                            path,
-                            spec.comment,
-                            strictMatching,
-                            spec.actual.renderAsString,
-                            spec.expected.renderAsString,
-                            e.renderDifferences)
+            makeErrorString(
+              shouldMatch,
+              path,
+              spec.comment,
+              strictMatching,
+              spec.actual.renderAsString,
+              spec.expected.renderAsString,
+              e.renderDifferences
+            )
           )
     }
 
-  private def makeErrorString(shouldMatch: Boolean,
-                              path: String,
-                              comment: String,
-                              strictMatching: Boolean,
-                              actual: String,
-                              expected: String,
-                              differences: String): String =
+  private def makeErrorString(
+      shouldMatch: Boolean,
+      path: String,
+      comment: String,
+      strictMatching: Boolean,
+      actual: String,
+      expected: String,
+      differences: String
+  ): String =
     s"Expected match: $shouldMatch\n[$path] " + comment + "\nStrict matching: '" + strictMatching + "'\n\nExpected:\n" + expected + "\nActual:\n" + actual + "\nMatch Errors: [\n" + differences + "\n]"
 
 }

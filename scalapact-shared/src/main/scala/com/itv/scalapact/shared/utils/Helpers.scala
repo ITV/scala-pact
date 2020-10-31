@@ -13,10 +13,9 @@ object Helpers {
 
   implicit class OptionOps[A](val value: Option[A]) extends AnyVal {
     def whenEmpty(todo: => Unit): Option[A] = value match {
-      case None => {
+      case None =>
         todo
         None
-      }
       case x => x
     }
   }
@@ -27,8 +26,8 @@ object Helpers {
     @tailrec
     def rec(l: List[A], acc: List[(A, A)]): List[(A, A)] =
       l match {
-        case Nil => acc
-        case _ :: Nil => acc
+        case Nil         => acc
+        case _ :: Nil    => acc
         case x :: y :: _ => rec(l.drop(2), (x, y) :: acc)
       }
 
@@ -55,18 +54,17 @@ object Helpers {
   )
 
   val urlEncode: String => Either[String, String] = str => {
-    try {
-      Right(
-        URLEncoder
-          .encode(str, StandardCharsets.UTF_8.toString)
-          .replace("+", "%20")
-          .replace("%21", "!")
-          .replace("%27", "'")
-          .replace("%28", "(")
-          .replace("%29", ")")
-          .replace("%7E", "~")
-      )
-    } catch {
+    try Right(
+      URLEncoder
+        .encode(str, StandardCharsets.UTF_8.toString)
+        .replace("+", "%20")
+        .replace("%21", "!")
+        .replace("%27", "'")
+        .replace("%28", "(")
+        .replace("%29", ")")
+        .replace("%7E", "~")
+    )
+    catch {
       case NonFatal(_) =>
         Left(s"Failed to url encode: $str")
     }

@@ -33,7 +33,7 @@ object LocalPactFileLoader {
           case x :: xs if x.isFile && x.getName.endsWith("_tmp.json") && allowTmpFiles =>
             PactLogger.debug(("Loading pact file: " + x.getName).bold)
             val source = scala.io.Source.fromURL(x.toURI.toURL)
-            val lines = source.getLines().mkString("\n")
+            val lines  = source.getLines().mkString("\n")
             source.close()
             rec(xs, lines :: acc)
 
@@ -44,7 +44,7 @@ object LocalPactFileLoader {
           case x :: xs if x.isFile && x.getName.endsWith(".json") =>
             PactLogger.debug(("Loading pact file: " + x.getName).bold)
             val source = scala.io.Source.fromURL(x.toURI.toURL)
-            val lines  =source.getLines().mkString("\n")
+            val lines  = source.getLines().mkString("\n")
             source.close()
             rec(xs, lines :: acc)
 
@@ -57,9 +57,8 @@ object LocalPactFileLoader {
             Nil
         }
 
-      try {
-        rec(List(file), Nil)
-      } catch {
+      try rec(List(file), Nil)
+      catch {
         case e: SecurityException =>
           PactLogger.error(("Did not have permission to access the provided path, message:\n" + e.getMessage).red)
           Nil
@@ -67,7 +66,7 @@ object LocalPactFileLoader {
           PactLogger.error(("Problem reading from supplied path, message:\n" + e.getMessage).red)
           Nil
       }
-  }
+    }
 
   private def deserializeIntoPact(readPact: String => Either[String, Pact])(pactJsonStrings: List[String]): List[Pact] =
     pactJsonStrings
@@ -93,12 +92,12 @@ object LocalPactFileLoader {
 
           config.localPactFilePath.orElse(Option(defaultLocation)) match {
             case Some(path) =>
-              (recursiveJsonLoad(allowTmpFiles) andThen deserializeIntoPact(pactReader.jsonStringToPact)) (
+              (recursiveJsonLoad(allowTmpFiles) andThen deserializeIntoPact(pactReader.jsonStringToPact))(
                 new File(path)
               )
 
             case None => Nil
           }
-    }
+        }
 
 }

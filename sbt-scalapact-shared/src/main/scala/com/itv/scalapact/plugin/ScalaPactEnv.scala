@@ -4,15 +4,16 @@ import com.itv.scalapact.shared.{BrokerPublishData, ScalaPactSettings}
 
 import scala.concurrent.duration._
 
-case class ScalaPactEnv(protocol: Option[String],
-                        host: Option[String],
-                        port: Option[Int],
-                        localPactFilePath: Option[String],
-                        strictMode: Option[Boolean],
-                        clientTimeout: Option[Duration],
-                        outputPath: Option[String],
-                        publishResultsEnabled: Option[BrokerPublishData],
-                        enablePending: Option[Boolean]
+case class ScalaPactEnv(
+    protocol: Option[String],
+    host: Option[String],
+    port: Option[Int],
+    localPactFilePath: Option[String],
+    strictMode: Option[Boolean],
+    clientTimeout: Option[Duration],
+    outputPath: Option[String],
+    publishResultsEnabled: Option[BrokerPublishData],
+    enablePending: Option[Boolean]
 ) {
   def +(other: ScalaPactEnv): ScalaPactEnv =
     ScalaPactEnv.append(this, other)
@@ -47,7 +48,17 @@ case class ScalaPactEnv(protocol: Option[String],
   def enablePendingStatus: ScalaPactEnv = this.copy(enablePending = Some(true))
 
   def toSettings: ScalaPactSettings =
-    ScalaPactSettings(protocol, host, port, localPactFilePath, strictMode, clientTimeout, outputPath, publishResultsEnabled, enablePending)
+    ScalaPactSettings(
+      protocol,
+      host,
+      port,
+      localPactFilePath,
+      strictMode,
+      clientTimeout,
+      outputPath,
+      publishResultsEnabled,
+      enablePending
+    )
 
 }
 
@@ -65,7 +76,7 @@ object ScalaPactEnv {
       Option(Duration(1, SECONDS)),
       None, // "target/pacts"
       None, // false
-      None // false
+      None  // false
     )
 
   def defaults: ScalaPactEnv =

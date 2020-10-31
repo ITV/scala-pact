@@ -23,10 +23,9 @@ class ScalaPactVerifyCommandSpec extends FunSpec with Matchers {
         )
       )
 
-      val patternMatchedStates: PartialFunction[String, ProviderStateResult] = {
-        case "def" =>
-          result = "def"
-          ProviderStateResult(true)
+      val patternMatchedStates: PartialFunction[String, ProviderStateResult] = { case "def" =>
+        result = "def"
+        ProviderStateResult(true)
       }
 
       val combined =
@@ -67,7 +66,9 @@ class ScalaPactVerifyCommandSpec extends FunSpec with Matchers {
         )
       )
 
-      val patternMatchedStates: PartialFunction[String, ProviderStateResult] = { case _: String => ProviderStateResult() }
+      val patternMatchedStates: PartialFunction[String, ProviderStateResult] = { case _: String =>
+        ProviderStateResult()
+      }
 
       val combined =
         ScalaPactVerifyCommand.combineProviderStatesIntoTotalFunction(directPactStates, patternMatchedStates)
@@ -93,10 +94,9 @@ class ScalaPactVerifyCommandSpec extends FunSpec with Matchers {
 
       val directPactStates: Seq[(String, SetupProviderState)] = Seq()
 
-      val patternMatchedStates: PartialFunction[String, ProviderStateResult] = {
-        case "def" =>
-          result = "def"
-          ProviderStateResult(true)
+      val patternMatchedStates: PartialFunction[String, ProviderStateResult] = { case "def" =>
+        result = "def"
+        ProviderStateResult(true)
       }
 
       val combined =
@@ -121,8 +121,10 @@ class ScalaPactVerifyCommandSpec extends FunSpec with Matchers {
       // We perform a side effect just to prove the function is being called.
       var result = ""
 
-      val directPactStates: Seq[(String, SetupProviderState)]     = Seq()
-      val patternMatchedStates: PartialFunction[String, ProviderStateResult] = { case _: String => ProviderStateResult() }
+      val directPactStates: Seq[(String, SetupProviderState)] = Seq()
+      val patternMatchedStates: PartialFunction[String, ProviderStateResult] = { case _: String =>
+        ProviderStateResult()
+      }
 
       val combined =
         ScalaPactVerifyCommand.combineProviderStatesIntoTotalFunction(directPactStates, patternMatchedStates)

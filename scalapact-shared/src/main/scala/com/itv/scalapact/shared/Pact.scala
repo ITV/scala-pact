@@ -2,11 +2,13 @@ package com.itv.scalapact.shared
 
 import com.itv.scalapact.shared.http.SslContextMap
 
-final case class Pact(provider: PactActor,
-                consumer: PactActor,
-                interactions: List[Interaction],
-                _links: Option[Links],
-                metadata: Option[PactMetaData]) {
+final case class Pact(
+    provider: PactActor,
+    consumer: PactActor,
+    interactions: List[Interaction],
+    _links: Option[Links],
+    metadata: Option[PactMetaData]
+) {
 
   def withoutSslHeader: Pact = copy(interactions = interactions.map(_.withoutSslHeader))
 
@@ -27,10 +29,12 @@ final case class PactActor(name: String) extends AnyVal {
 
 }
 
-final case class Interaction(providerState: Option[String],
-                       description: String,
-                       request: InteractionRequest,
-                       response: InteractionResponse) {
+final case class Interaction(
+    providerState: Option[String],
+    description: String,
+    request: InteractionRequest,
+    response: InteractionResponse
+) {
 
   def withoutSslHeader: Interaction =
     copy(request = request.copy(headers = request.headers.map(_ - SslContextMap.sslContextHeaderName)))
@@ -45,12 +49,14 @@ final case class Interaction(providerState: Option[String],
 
 }
 
-final case class InteractionRequest(method: Option[String],
-                              path: Option[String],
-                              query: Option[String],
-                              headers: Option[Map[String, String]],
-                              body: Option[String],
-                              matchingRules: Option[Map[String, MatchingRule]]) {
+final case class InteractionRequest(
+    method: Option[String],
+    path: Option[String],
+    query: Option[String],
+    headers: Option[Map[String, String]],
+    body: Option[String],
+    matchingRules: Option[Map[String, MatchingRule]]
+) {
   def withoutSslContextHeader: InteractionRequest = copy(headers = headers.map(_ - SslContextMap.sslContextHeaderName))
 
   def sslContextName: Option[String] = headers.flatMap(_.get(SslContextMap.sslContextHeaderName))
@@ -60,30 +66,32 @@ final case class InteractionRequest(method: Option[String],
        |  path:           [${path.getOrElse("<missing path>")}]
        |  query:          [${query.getOrElse("<missing path>")}]
        |  headers:        [${headers
-         .map(_.toList.map(p => p._1 + "=" + p._2).mkString(",\n                   "))
-         .getOrElse("")}]
+      .map(_.toList.map(p => p._1 + "=" + p._2).mkString(",\n                   "))
+      .getOrElse("")}]
        |  matching rules: [${matchingRules
-         .map(_.toList.map(p => p._1 + " -> (" + p._2.renderAsString + ")").mkString(",\n                   "))
-         .getOrElse("")}]
+      .map(_.toList.map(p => p._1 + " -> (" + p._2.renderAsString + ")").mkString(",\n                   "))
+      .getOrElse("")}]
        |  body:
        |${body.getOrElse("[no body]")}
        |
      """.stripMargin
 }
 
-final case class InteractionResponse(status: Option[Int],
-                               headers: Option[Map[String, String]],
-                               body: Option[String],
-                               matchingRules: Option[Map[String, MatchingRule]]) {
+final case class InteractionResponse(
+    status: Option[Int],
+    headers: Option[Map[String, String]],
+    body: Option[String],
+    matchingRules: Option[Map[String, MatchingRule]]
+) {
 
   def renderAsString: String =
     s"""Response          [${status.map(_.toString).getOrElse("<missing status>")}]
        |  headers:        [${headers
-         .map(_.toList.map(p => p._1 + "=" + p._2).mkString(",\\n                   \""))
-         .getOrElse("")}]
+      .map(_.toList.map(p => p._1 + "=" + p._2).mkString(",\\n                   \""))
+      .getOrElse("")}]
        |  matching rules: [${matchingRules
-         .map(_.toList.map(p => p._1 + " -> (" + p._2.renderAsString + ")").mkString(",\n                   "))
-         .getOrElse("")}]
+      .map(_.toList.map(p => p._1 + " -> (" + p._2.renderAsString + ")").mkString(",\n                   "))
+      .getOrElse("")}]
        |  body:
        |${body.getOrElse("[no body]")}
        |

@@ -59,15 +59,14 @@ object PactStubService {
       else OptionT.none
     }
 
-    def statusRoutes: HttpRoutes[IO] = HttpRoutes.of[IO] {
-      case GET -> Root / "stub" / "status" =>
-        Ok()
+    def statusRoutes: HttpRoutes[IO] = HttpRoutes.of[IO] { case GET -> Root / "stub" / "status" =>
+      Ok()
     }
 
     def interactionsRoutes: HttpRoutes[IO] = HttpRoutes.of[IO] {
       case req @ POST -> Root / "interactions" => putOrPostAdminInteraction(req)
-      case req @ PUT  -> Root / "interactions" => putOrPostAdminInteraction(req)
-      case GET  -> Root / "interactions" =>
+      case req @ PUT -> Root / "interactions"  => putOrPostAdminInteraction(req)
+      case GET -> Root / "interactions" =>
         val output =
           pactWriter.pactToJsonString(
             Pact(PactActor(""), PactActor(""), interactionManager.getInteractions, None, None),
@@ -107,43 +106,52 @@ object PactStubService {
             InternalServerError(l)
         }
 
-
-    def pactRoutes: HttpRoutes[IO] = HttpRoutes.of[IO] {
-      case req =>
-        req.attemptAs[String].toOption.value.flatMap { maybeBody =>
-          interactionManager.findMatchingInteraction(
-            InteractionRequest(
-              method = Option(req.method.name.toUpperCase),
-              headers = Option(req.headers.toMap),
-              query =
-                if (req.params.isEmpty) None else Option(req.multiParams.toList.flatMap { case (key, values) => values.map((key, _)) }.map(p => p._1 + "=" + p._2).mkString("&")),
-              path = Option(req.pathInfo),
-              body = maybeBody,
-              matchingRules = None
-            ),
-            strictMatching = strictMatching
-          ) match {
-            case Right(ir) =>
-              Status.fromInt(ir.response.status.getOrElse(200)) match {
-                case Right(_) =>
-                  IO(Http4sRequestResponseFactory.buildResponse(
+    def pactRoutes: HttpRoutes[IO] = HttpRoutes.of[IO] { case req =>
+      req.attemptAs[String].toOption.value.flatMap { maybeBody =>
+        interactionManager.findMatchingInteraction(
+          InteractionRequest(
+            method = Option(req.method.name.toUpperCase),
+            headers = Option(req.headers.toMap),
+            query =
+              if (req.params.isEmpty) None
+              else
+                Option(
+                  req.multiParams.toList
+                    .flatMap { case (key, values) => values.map((key, _)) }
+                    .map(p => p._1 + "=" + p._2)
+                    .mkString("&")
+                ),
+            path = Option(req.pathInfo),
+            body = maybeBody,
+            matchingRules = None
+          ),
+          strictMatching = strictMatching
+        ) match {
+          case Right(ir) =>
+            Status.fromInt(ir.response.status.getOrElse(200)) match {
+              case Right(_) =>
+                IO(
+                  Http4sRequestResponseFactory.buildResponse(
                     status = IntAndReason(ir.response.status.getOrElse(200), None),
                     headers = ir.response.headers.getOrElse(Map.empty),
                     body = ir.response.body
-                  ))
+                  )
+                )
 
-                case Left(l) =>
-                  InternalServerError(l.sanitized)
-              }
+              case Left(l) =>
+                InternalServerError(l.sanitized)
+            }
 
-            case Left(message) =>
-              IO(Http4sRequestResponseFactory.buildResponse(
+          case Left(message) =>
+            IO(
+              Http4sRequestResponseFactory.buildResponse(
                 status = IntAndReason(598, Some("Pact Match Failure")),
                 headers = Map("X-Pact-Admin" -> "Pact Match Failure"),
                 body = Option(message)
-              ))
-          }
+              )
+            )
         }
+      }
     }
 
     (admin(statusRoutes) <+> admin(interactionsRoutes) <+> pactRoutes).orNotFound

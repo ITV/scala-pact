@@ -27,9 +27,7 @@ object ScalaPactVerifyCommand {
       pactBrokerClientTimeout: Duration,
       sslContextName: Option[String],
       includePendingStatus: Boolean
-  )(implicit pactReader: IPactReader,
-    pactWriter: IPactWriter,
-    httpClientBuilder: IScalaPactHttpClientBuilder): Unit = {
+  )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder): Unit = {
     PactLogger.message("*************************************".white.bold)
     PactLogger.message("** ScalaPact: Running Verifier     **".white.bold)
     PactLogger.message("*************************************".white.bold)
@@ -40,17 +38,18 @@ object ScalaPactVerifyCommand {
       if (scalaPactSettings.localPactFilePath.isDefined)
         LocalPactVerifySettings(combinedPactStates)
       else if (consumerVersionSelectors.nonEmpty)
-      PactsForVerificationSettings(
-        combinedPactStates,
-        pactBrokerAddress,
-        providerName,
-        consumerVersionSelectors.toList,
-        providerVersionTags.toList,
-        scalaPactSettings.enablePending.getOrElse(includePendingStatus),
-        pactBrokerAuthorization,
-        Some(pactBrokerClientTimeout),
-        sslContextName
-      ) else {
+        PactsForVerificationSettings(
+          combinedPactStates,
+          pactBrokerAddress,
+          providerName,
+          consumerVersionSelectors.toList,
+          providerVersionTags.toList,
+          scalaPactSettings.enablePending.getOrElse(includePendingStatus),
+          pactBrokerAuthorization,
+          Some(pactBrokerClientTimeout),
+          sslContextName
+        )
+      else {
         val versionedConsumers =
           consumerNames.map(VersionedConsumer.fromName) ++
             versionedConsumerNames.map(v => VersionedConsumer(v._1, v._2)) ++

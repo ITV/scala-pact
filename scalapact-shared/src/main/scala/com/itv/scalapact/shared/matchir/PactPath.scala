@@ -6,8 +6,7 @@ import com.itv.scalapact.shared.matchir.PactPathParseResult.{PactPathParseFailur
 import scala.annotation.tailrec
 import scala.util.matching.Regex
 
-/**
-  * PactPath (defined in the pact standard) is JsonPath with a few tweaks to support
+/** PactPath (defined in the pact standard) is JsonPath with a few tweaks to support
   * querying XML with a nearly JsonPath-like syntax. Specific modifications to JsonPath are:
   *
   * - names match to element names ($.body.animals maps to <animals>)
@@ -78,9 +77,8 @@ object PactPath {
   }
 
   private lazy val safeStringToInt: String => Option[Int] = str =>
-    try {
-      Option(str.toInt)
-    } catch {
+    try Option(str.toInt)
+    catch {
       case _: Throwable => None
     }
 
@@ -90,7 +88,8 @@ object PactPath {
 
     // Fields
     val fieldNamePrefix: Regex = """^(\.|\[[\'|\"])(.*)$""".r
-    val fieldName: Regex       = """^([a-zA-Z0-9:\-_]+)(.*)$""".r // TODO: This is very limited, technically any escaped string is valid
+    val fieldName: Regex =
+      """^([a-zA-Z0-9:\-_]+)(.*)$""".r // TODO: This is very limited, technically any escaped string is valid
     val fieldNameSuffix: Regex = """^([\'|\"]\])(.*)$""".r
 
     // Arrays

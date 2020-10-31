@@ -13,7 +13,7 @@ import scodec.bits.ByteVector
 object Http4sRequestResponseFactory {
 
   implicit val enc: EntityEncoder[IO, String] =
-    EntityEncoder.simple[IO, String](){ str =>
+    EntityEncoder.simple[IO, String]() { str =>
       Chunk.bytes(ByteVector(str.getBytes(StandardCharsets.UTF_8)).toArray)
     }
 
@@ -63,7 +63,7 @@ object Http4sRequestResponseFactory {
     buildUri(request.baseUrl, request.endPoint).flatMap { uri =>
       val r = Request[IO](
         method = httpMethodToMethod(request.method),
-        uri = uri,
+        uri = uri
       ).withHeaders(
         request.headers.toHttp4sHeaders
       )
