@@ -42,8 +42,7 @@ class ScalaPactDescription(
     )(test)
   }
 
-  /**
-    * Writes pacts described by this ScalaPactDescription to file without running any consumer tests
+  /** Writes pacts described by this ScalaPactDescription to file without running any consumer tests
     */
   def writePactsToFile(implicit options: ScalaPactOptions, pactWriter: IPactWriter): Unit = {
     val pactDescription = finalise(options)
