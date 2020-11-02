@@ -42,7 +42,7 @@ class ProviderClientSpec extends PactForgerSuite with FunSpecLike with Matchers 
             .uponReceiving("/results")
             .willRespondWith(200, expectedBody)
         )
-        .runConsumerTest(_ => ())
+        .writePactsToFile
     }
 
     it("an updated pact for a different consumer") {
@@ -63,7 +63,7 @@ class ProviderClientSpec extends PactForgerSuite with FunSpecLike with Matchers 
             .uponReceiving("/results2")
             .willRespondWith(200, expectedBody)
         )
-        .runConsumerTest(_ => ())
+        .writePactsToFile
     }
   }
 

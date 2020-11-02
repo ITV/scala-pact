@@ -1,7 +1,7 @@
 package com.itv.scalapact.model
 
 import com.itv.scalapact.shared.IPactStubber
-import com.itv.scalapact.{ScalaPactMock, ScalaPactMockConfig}
+import com.itv.scalapact.{ScalaPactContractWriter, ScalaPactMock, ScalaPactMockConfig}
 import com.itv.scalapact.shared.utils.Maps._
 import com.itv.scalapact.shared.http.{IScalaPactHttpClient, IScalaPactHttpClientBuilder, SslContextMap}
 import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
@@ -40,6 +40,13 @@ class ScalaPactDescription(
     ScalaPactMock.runConsumerIntegrationTest(strict)(
       finalise
     )(test)
+  }
+
+  /** Writes pacts described by this ScalaPactDescription to file without running any consumer tests
+    */
+  def writePactsToFile(implicit options: ScalaPactOptions, pactWriter: IPactWriter): Unit = {
+    val pactDescription = finalise(options)
+    ScalaPactContractWriter.writePactContracts(options.outputPath)(pactWriter)(pactDescription.withHeaderForSsl)
   }
 
   private def finalise(implicit options: ScalaPactOptions): ScalaPactDescriptionFinal =
