@@ -64,8 +64,7 @@ object PactStubService {
     }
 
     def interactionsRoutes: HttpRoutes[IO] = HttpRoutes.of[IO] {
-      case req @ POST -> Root / "interactions" => putOrPostAdminInteraction(req)
-      case req @ PUT -> Root / "interactions"  => putOrPostAdminInteraction(req)
+      case req @ (PUT | POST) -> Root / "interactions" => putOrPostAdminInteraction(req)
       case GET -> Root / "interactions" =>
         val output =
           pactWriter.pactToJsonString(
