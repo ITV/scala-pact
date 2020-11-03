@@ -40,14 +40,14 @@ final case class PactForVerification(verificationProperties: VerificationPropert
   def href: Option[String] = _links.get("self").map(_.href)
 }
 
-final case class  VerificationProperties(pending: Boolean, notices: List[Notice])
+final case class VerificationProperties(pending: Boolean, notices: List[Notice])
 
 sealed trait Notice {
   def text: String
 }
 
 object Notice {
-  final case class SimpleNotice(text: String)             extends Notice
-  final case class BeforeVerificationNotice(text: String) extends Notice
+  final case class SimpleNotice(text: String)                                                  extends Notice
+  final case class BeforeVerificationNotice(text: String)                                      extends Notice
   final case class AfterVerificationNotice(text: String, success: Boolean, published: Boolean) extends Notice
 }
