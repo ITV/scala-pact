@@ -99,7 +99,6 @@ object PactImplicits {
   implicit val embeddedPactsForVerificationDecoder: Decoder[EmbeddedPactsForVerification] = deriveDecoder
   implicit val embeddedPactForVerificationDecoder: Decoder[PactForVerification]           = deriveDecoder
 
-  implicit val simpleNoticeDecoder: Decoder[SimpleNotice] = deriveDecoder
   implicit val pendingStateNoticeDecoder: Decoder[Notice] = Decoder.instance { cur =>
     lazy val pattern = "after_verification:success_(true|false)_published_(true|false)".r
     cur.get[String](s"text").flatMap { text =>
