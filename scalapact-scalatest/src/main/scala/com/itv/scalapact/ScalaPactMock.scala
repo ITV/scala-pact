@@ -19,6 +19,28 @@ private[scalapact] object ScalaPactMock {
     test(config)
   }
 
+  def runTestWithWarmedUpStubber[A](
+   strict: Boolean
+ )(pactDescription: ScalaPactDescriptionFinal)(test: ScalaPactMockConfig => A)(implicit
+                                                                               sslContextMap: SslContextMap,
+                                                                               pactReader: IPactReader,
+                                                                               pactWriter: IPactWriter,
+                                                                               httpClient: IScalaPactHttpClient,
+                                                                               pactStubber: IPactStubber
+ ): A = {
+    val pact = ScalaPactContractWriter.producePactFromDescription(pactDescription)
+    pactStubber.interactionManager.addToInteractionManager(List((pact, strict)))
+
+    val protocol   = pactDescription.serverSslContextName.fold("http")(_ => "https")
+    val host       = "localhost"
+    val outputPath = pactDescription.options.outputPath
+    val port: Int = pactStubber.port.getOrElse {
+      throw new IllegalStateException("Could not obtain the server port")
+    }
+    val config = ScalaPactMockConfig(protocol, host, port, outputPath)
+    configuredTestRunner(pactDescription)(config)(test)
+  }
+
   def runConsumerIntegrationTest[A](
       strict: Boolean
   )(pactDescription: ScalaPactDescriptionFinal)(test: ScalaPactMockConfig => A)(implicit
@@ -42,13 +64,13 @@ private[scalapact] object ScalaPactMock {
       publishResultsEnabled = None, // Nothing to publish
       enablePending = None          //This is determined by the pact broker
     )
-    val pacts = List(ScalaPactContractWriter.producePactFromDescription(pactDescription))
+    val pact = ScalaPactContractWriter.producePactFromDescription(pactDescription)
 
     val startStub: ScalaPactSettings => IPactStubber =
       pactStubber.start( 5, pactDescription.serverSslContextName, None)
 
     val server: IPactStubber = {
-      pactStubber.interactionManager.addToInteractionManager(pacts)
+      pactStubber.interactionManager.addToInteractionManager(List((pact, strict)))
       startStub(scalaPactSettings)
     }
 

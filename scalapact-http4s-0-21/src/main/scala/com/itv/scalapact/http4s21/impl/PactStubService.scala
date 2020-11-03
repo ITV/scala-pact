@@ -92,7 +92,7 @@ object PactStubService {
         }
         .flatMap {
           case Right(r) =>
-            interactionManager.addInteractions(r.interactions)
+            interactionManager.addInteractions(r.interactions.map(InteractionWithStrictness(_, strictMatching)))
 
             val output =
               pactWriter.pactToJsonString(
@@ -123,8 +123,7 @@ object PactStubService {
             path = Option(req.pathInfo),
             body = maybeBody,
             matchingRules = None
-          ),
-          strictMatching = strictMatching
+          )
         ) match {
           case Right(ir) =>
             Status.fromInt(ir.response.status.getOrElse(200)) match {

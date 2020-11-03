@@ -29,6 +29,8 @@ final case class PactActor(name: String) extends AnyVal {
 
 }
 
+final case class InteractionWithStrictness(interaction: Interaction, strictMatching: Boolean)
+
 final case class Interaction(
     providerState: Option[String],
     description: String,

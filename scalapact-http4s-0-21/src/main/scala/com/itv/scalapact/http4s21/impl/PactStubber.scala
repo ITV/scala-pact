@@ -8,14 +8,13 @@ import org.http4s.server.blaze.BlazeServerBuilder
 
 import scala.concurrent.ExecutionContext
 
-class PactStubber extends IPactStubber {
+class PactStubber(val interactionManager: IInteractionManager) extends IPactStubber {
 
   private var instance: Option[CancelToken[IO]] = None
   private var _port: Option[Int]                = None
 
   private def blazeServerBuilder(
       scalaPactSettings: ScalaPactSettings,
-      interactionManager: IInteractionManager,
       connectionPoolSize: Int,
       sslContextName: Option[String],
       port: Option[Int]
@@ -29,7 +28,6 @@ class PactStubber extends IPactStubber {
     )
 
   def start(
-      interactionManager: IInteractionManager,
       connectionPoolSize: Int,
       sslContextName: Option[String],
       port: Option[Int]
@@ -48,7 +46,6 @@ class PactStubber extends IPactStubber {
           instance = Some(
             blazeServerBuilder(
               scalaPactSettings,
-              interactionManager,
               connectionPoolSize,
               sslContextName,
               _port

@@ -1,14 +1,9 @@
 package com.itv.scalapact.model
 
-import com.itv.scalapact.shared.IPactStubber
-import com.itv.scalapact.{ScalaPactContractWriter, ScalaPactMock, ScalaPactMockConfig}
+import com.itv.scalapact.shared.http.SslContextMap
 import com.itv.scalapact.shared.utils.Maps._
-import com.itv.scalapact.shared.http.{IScalaPactHttpClient, IScalaPactHttpClientBuilder, SslContextMap}
-import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
 
-import scala.concurrent.duration._
-
-class ScalaPactDescription(
+final case class ScalaPactDescription(
     strict: Boolean,
     consumer: String,
     provider: String,
@@ -22,44 +17,13 @@ class ScalaPactDescription(
     * @return [ScalaPactDescription] to allow the builder to continue
     */
   def addInteraction(interaction: ScalaPactInteraction): ScalaPactDescription =
-    new ScalaPactDescription(strict, consumer, provider, sslContextName, interactions :+ interaction)
+    ScalaPactDescription(strict, consumer, provider, sslContextName, interactions :+ interaction)
 
   def addSslContextForServer(name: String): ScalaPactDescription =
-    new ScalaPactDescription(strict, consumer, provider, Some(name), interactions)
-
-  def runConsumerTest[A](test: ScalaPactMockConfig => A)(implicit
-      options: ScalaPactOptions,
-      sslContextMap: SslContextMap,
-      pactReader: IPactReader,
-      pactWriter: IPactWriter,
-      httpClientBuilder: IScalaPactHttpClientBuilder,
-      pactStubber: IPactStubber
-  ): A = {
-    implicit val client: IScalaPactHttpClient =
-      httpClientBuilder.build(2.seconds, sslContextName, 1)
-    ScalaPactMock.runConsumerIntegrationTest(strict)(
-      finalise
-    )(test)
-  }
-
-  /** Writes pacts described by this ScalaPactDescription to file without running any consumer tests
-    */
-  def writePactsToFile(implicit options: ScalaPactOptions, pactWriter: IPactWriter): Unit = {
-    val pactDescription = finalise(options)
-    ScalaPactContractWriter.writePactContracts(options.outputPath)(pactWriter)(pactDescription.withHeaderForSsl)
-  }
-
-  private def finalise(implicit options: ScalaPactOptions): ScalaPactDescriptionFinal =
-    ScalaPactDescriptionFinal(
-      consumer,
-      provider,
-      sslContextName,
-      interactions.map(i => i.finalise),
-      options
-    )
+    ScalaPactDescription(strict, consumer, provider, Some(name), interactions)
 }
 
-final case class ScalaPactDescriptionFinal(
+final case class ScalaPactDescriptionFinal private[scalapact] (
     consumer: String,
     provider: String,
     serverSslContextName: Option[String],

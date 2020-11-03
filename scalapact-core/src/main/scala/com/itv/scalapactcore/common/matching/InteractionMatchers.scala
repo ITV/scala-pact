@@ -39,13 +39,12 @@ object InteractionMatchers {
         )
     }
 
-  def matchOrFindClosestRequest(strictMatching: Boolean, interactions: List[Interaction], received: InteractionRequest)(
+  def matchOrFindClosestRequest(interactions: List[InteractionWithStrictness], received: InteractionRequest)(
       implicit pactReader: IPactReader
   ): Option[OutcomeAndInteraction] = {
     @tailrec
     def rec(
-        strict: Boolean,
-        remaining: List[Interaction],
+        remaining: List[InteractionWithStrictness],
         actual: InteractionRequest,
         fails: List[(MatchOutcomeFailed, Interaction)]
     ): Option[OutcomeAndInteraction] =
@@ -53,26 +52,26 @@ object InteractionMatchers {
         case Nil =>
           fails.sortBy(_._1.drift).headOption.map(f => OutcomeAndInteraction(f._1, f._2))
 
-        case x :: xs =>
-          matchSingleRequest(strict, x.request.matchingRules, x.request, actual) match {
+        case InteractionWithStrictness(i, strict) :: xs =>
+          matchSingleRequest(strict, i.request.matchingRules, i.request, actual) match {
             case success @ MatchOutcomeSuccess =>
-              Option(OutcomeAndInteraction(success, x))
+              Option(OutcomeAndInteraction(success, i))
 
             case failure @ MatchOutcomeFailed(_, _) =>
-              rec(strict, xs, actual, (failure, x) :: fails)
+              rec(xs, actual, (failure, i) :: fails)
           }
       }
 
-    rec(strictMatching, interactions, received, Nil)
+    rec(interactions, received, Nil)
   }
 
-  def matchRequest(strictMatching: Boolean, interactions: List[Interaction], received: InteractionRequest)(implicit
+  def matchRequest(interactions: List[InteractionWithStrictness], received: InteractionRequest)(implicit
       pactReader: IPactReader
   ): Either[String, Interaction] =
     if (interactions.isEmpty) Left("No interactions to compare with.")
     else
       renderOutcome(
-        matchOrFindClosestRequest(strictMatching, interactions, received),
+        matchOrFindClosestRequest(interactions, received),
         received.renderAsString,
         RequestSubject
       )
