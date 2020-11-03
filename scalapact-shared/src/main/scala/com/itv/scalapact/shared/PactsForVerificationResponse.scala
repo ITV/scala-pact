@@ -1,7 +1,5 @@
 package com.itv.scalapact.shared
 
-import com.itv.scalapact.shared.Notice.{PendingStateNotice, SimpleNotice}
-
 /*
 {
   "_embedded": {
@@ -42,33 +40,14 @@ final case class PactForVerification(verificationProperties: VerificationPropert
   def href: Option[String] = _links.get("self").map(_.href)
 }
 
-sealed trait VerificationProperties {
-  type A <: Notice
-  def pending: Boolean
-  def notices: List[A]
-}
-
-object VerificationProperties {
-  sealed trait VerificationPropertiesAux[A0 <: Notice] extends VerificationProperties { type A = A0 }
-
-  final case class SimpleVerificationProperties(notices: List[SimpleNotice])
-      extends VerificationPropertiesAux[SimpleNotice] {
-    val pending = false
-  }
-
-  final case class PendingStateVerificationProperties(pending: Boolean, notices: List[PendingStateNotice])
-      extends VerificationPropertiesAux[PendingStateNotice]
-
-}
+final case class VerificationProperties(pending: Boolean, notices: List[Notice])
 
 sealed trait Notice {
   def text: String
 }
 
 object Notice {
-  final case class SimpleNotice(text: String)             extends Notice
-  sealed trait PendingStateNotice                         extends Notice
-  final case class BeforeVerificationNotice(text: String) extends PendingStateNotice
-  final case class AfterVerificationNotice(text: String, success: Boolean, published: Boolean)
-      extends PendingStateNotice
+  final case class SimpleNotice(text: String)                                                  extends Notice
+  final case class BeforeVerificationNotice(text: String)                                      extends Notice
+  final case class AfterVerificationNotice(text: String, success: Boolean, published: Boolean) extends Notice
 }

@@ -1,7 +1,6 @@
 package com.itv.scalapact.circe13
 
 import com.itv.scalapact.shared.Notice._
-import com.itv.scalapact.shared.VerificationProperties._
 import com.itv.scalapact.shared._
 import io.circe.{Codec, Decoder, DecodingFailure, Encoder, Json, parser}
 import io.circe.generic.semiauto.{deriveCodec, deriveDecoder, deriveEncoder}
@@ -100,13 +99,12 @@ object PactImplicits {
   implicit val embeddedPactsForVerificationDecoder: Decoder[EmbeddedPactsForVerification] = deriveDecoder
   implicit val embeddedPactForVerificationDecoder: Decoder[PactForVerification]           = deriveDecoder
 
-  implicit val simpleNoticeDecoder: Decoder[SimpleNotice] = deriveDecoder
-  implicit val pendingStateNoticeDecoder: Decoder[PendingStateNotice] = Decoder.instance { cur =>
+  implicit val pendingStateNoticeDecoder: Decoder[Notice] = Decoder.instance { cur =>
     lazy val pattern = "after_verification:success_(true|false)_published_(true|false)".r
     cur.get[String](s"text").flatMap { text =>
-      cur.get[String]("when").flatMap {
-        case "before_verification" => Right(BeforeVerificationNotice(text))
-        case pattern(success, published) =>
+      cur.get[Option[String]]("when").flatMap {
+        case Some("before_verification") => Right(BeforeVerificationNotice(text))
+        case Some(pattern(success, published)) =>
           (for {
             suc <- Try(success.toBoolean)
             pub <- Try(published.toBoolean)
@@ -114,17 +112,16 @@ object PactImplicits {
             case Failure(err)   => Left(DecodingFailure.fromThrowable(err, cur.history))
             case Success(value) => Right(value)
           }
-        case other => Left(DecodingFailure(s"$other is not a valid value for field 'when' of the notice.", cur.history))
+        case _ => Right(SimpleNotice(text))
       }
     }
   }
 
   implicit val verificationPropertiesDecoder: Decoder[VerificationProperties] = Decoder.instance { cur =>
-    cur.get[Option[Boolean]]("pending").flatMap {
-      case Some(pending) =>
-        cur.get[List[PendingStateNotice]]("notices").map(PendingStateVerificationProperties(pending, _))
-      case None => cur.get[List[SimpleNotice]]("notices").map(SimpleVerificationProperties)
-    }
+    for {
+      pending <- cur.getOrElse[Boolean]("pending")(false)
+      notices <- cur.get[List[Notice]]("notices")
+    } yield VerificationProperties(pending, notices)
   }
 
   implicit val pactsForVerificationDecoder: Decoder[PactsForVerificationResponse] = deriveDecoder

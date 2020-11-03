@@ -3,7 +3,6 @@ package com.itv.scalapact.argonaut62
 import argonaut.Argonaut._
 import argonaut.{Parse, _}
 import com.itv.scalapact.shared.Notice._
-import com.itv.scalapact.shared.VerificationProperties._
 import com.itv.scalapact.shared._
 
 import scala.util.{Failure, Success, Try}
@@ -132,14 +131,12 @@ object PactImplicits {
   implicit lazy val halIndexDecoder: DecodeJson[HALIndex] =
     DecodeJson[HALIndex](_.downField("_links").downField("curies").delete.as[Links].map(HALIndex))
 
-  implicit val simpleNoticeDecoder: DecodeJson[SimpleNotice] =
-    DecodeJson[SimpleNotice](_.get[String]("text").map(SimpleNotice))
-  implicit val pendingStateNoticeDecoder: DecodeJson[PendingStateNotice] = DecodeJson[PendingStateNotice] { cur =>
+  implicit val pendingStateNoticeDecoder: DecodeJson[Notice] = DecodeJson[Notice] { cur =>
     lazy val pattern = "after_verification:success_(true|false)_published_(true|false)".r
     cur.get[String](s"text").flatMap { text =>
-      cur.get[String]("when").flatMap {
-        case "before_verification" => DecodeResult.ok(BeforeVerificationNotice(text))
-        case pattern(success, published) =>
+      cur.get[Option[String]]("when").flatMap {
+        case Some("before_verification") => DecodeResult.ok(BeforeVerificationNotice(text))
+        case Some(pattern(success, published)) =>
           (for {
             suc <- Try(success.toBoolean)
             pub <- Try(published.toBoolean)
@@ -147,17 +144,16 @@ object PactImplicits {
             case Failure(err)   => DecodeResult.fail(err.getMessage, cur.history)
             case Success(value) => DecodeResult.ok(value)
           }
-        case other => DecodeResult.fail(s"$other is not a valid value for field 'when' of the notice.", cur.history)
+        case _ => DecodeResult.ok(SimpleNotice(text))
       }
     }
   }
 
   implicit lazy val verificationPropertiesDecoder: DecodeJson[VerificationProperties] =
     DecodeJson[VerificationProperties] { cur =>
-      cur.get[Option[Boolean]]("pending").flatMap {
-        case Some(pending) =>
-          cur.get[List[PendingStateNotice]]("notices").map(PendingStateVerificationProperties(pending, _))
-        case None => cur.get[List[SimpleNotice]]("notices").map(SimpleVerificationProperties)
+      val pending = cur.get[Boolean]("pending").getOr(false)
+      cur.get[List[Notice]]("notices").map { ns =>
+        VerificationProperties(pending, ns)
       }
     }
 
