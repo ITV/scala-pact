@@ -274,7 +274,8 @@ lazy val frameworkWithDeps =
       name := "scalapact-scalatest-suite",
       mappings in (Compile, packageBin) ~= {
         _.filterNot { case (_, fileName) => fileName == "logback.xml" || fileName == "log4j.properties" }
-      }
+      },
+      libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8"
     )
     .dependsOn(framework)
     .dependsOn(circe13)

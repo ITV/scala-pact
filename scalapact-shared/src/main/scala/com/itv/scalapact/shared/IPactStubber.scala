@@ -5,8 +5,9 @@ import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
 
 trait IPactStubber {
 
+  def interactionManager: IInteractionManager
+
   def start(
-      interactionManager: IInteractionManager,
       connectionPoolSize: Int,
       sslContextName: Option[String],
       port: Option[Int]

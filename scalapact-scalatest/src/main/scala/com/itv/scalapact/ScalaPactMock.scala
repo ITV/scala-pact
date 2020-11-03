@@ -5,7 +5,6 @@ import com.itv.scalapact.shared.http.{HttpMethod, IScalaPactHttpClient, SimpleRe
 import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
 import com.itv.scalapact.shared.utils.PactLogger
 import com.itv.scalapact.shared.{IPactStubber, ScalaPactSettings}
-import com.itv.scalapactcore.common.stubber.InteractionManager
 
 private[scalapact] object ScalaPactMock {
 
@@ -29,9 +28,6 @@ private[scalapact] object ScalaPactMock {
       httpClient: IScalaPactHttpClient,
       pactStubber: IPactStubber
   ): A = {
-
-    val interactionManager: InteractionManager = new InteractionManager
-
     val protocol   = pactDescription.serverSslContextName.fold("http")(_ => "https")
     val host       = "localhost"
     val outputPath = pactDescription.options.outputPath
@@ -49,10 +45,10 @@ private[scalapact] object ScalaPactMock {
     val pacts = List(ScalaPactContractWriter.producePactFromDescription(pactDescription))
 
     val startStub: ScalaPactSettings => IPactStubber =
-      pactStubber.start(interactionManager, 5, pactDescription.serverSslContextName, None)
+      pactStubber.start( 5, pactDescription.serverSslContextName, None)
 
     val server: IPactStubber = {
-      interactionManager.addToInteractionManager(pacts)
+      pactStubber.interactionManager.addToInteractionManager(pacts)
       startStub(scalaPactSettings)
     }
 
