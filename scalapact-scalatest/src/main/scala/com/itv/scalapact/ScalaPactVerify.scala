@@ -1,6 +1,7 @@
 package com.itv.scalapact
 
 import java.io.{BufferedWriter, File, FileWriter}
+import java.time.OffsetDateTime
 
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 import com.itv.scalapact.shared._
@@ -171,7 +172,8 @@ trait ScalaPactVerifyDsl {
           clientTimeout = Some(clientTimeout),
           outputPath = None,
           publishResultsEnabled = publishResultsEnabled,
-          enablePending = None
+          enablePending = None,
+          includeWipPactsSince = None
         )
 
         val (verifySettings, scalaPactSettings) = sourceType match {
@@ -253,6 +255,7 @@ trait ScalaPactVerifyDsl {
                 consumerVersionSelectors,
                 providerVersionTags,
                 includePendingStatus,
+                includeWipPactsSince,
                 publishResultsEnabled,
                 pactBrokerAuthorization,
                 pactBrokerClientTimeout
@@ -262,6 +265,7 @@ trait ScalaPactVerifyDsl {
               pactBrokerAddress = url,
               providerName = providerName,
               includePendingStatus = includePendingStatus,
+              includeWipPactsSince = includeWipPactsSince,
               consumerVersionSelectors = consumerVersionSelectors,
               providerVersionTags = providerVersionTags,
               pactBrokerAuthorization = pactBrokerAuthorization,
@@ -349,6 +353,7 @@ trait ScalaPactVerifyDsl {
       consumerVersionSelectors: List[ConsumerVersionSelector],
       providerVersionTags: List[String],
       includePendingStatus: Boolean,
+      includeWipPactsSince: Option[OffsetDateTime],
       publishResultsEnabled: Option[BrokerPublishData],
       pactBrokerAuthorization: Option[PactBrokerAuthorization],
       pactBrokerClientTimeout: Option[Duration]

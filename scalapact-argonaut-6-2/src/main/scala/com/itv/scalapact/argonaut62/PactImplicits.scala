@@ -1,5 +1,7 @@
 package com.itv.scalapact.argonaut62
 
+import java.time.format.DateTimeFormatter
+
 import argonaut.Argonaut._
 import argonaut.{Parse, _}
 import com.itv.scalapact.shared.Notice._
@@ -185,10 +187,12 @@ object PactImplicits {
 
   implicit lazy val pactsForVerificationRequestEncoder: EncodeJson[PactsForVerificationRequest] =
     EncodeJson[PactsForVerificationRequest] { r =>
+      val wipPactString = r.includeWipPactsSince.map(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format)
       Json.obj(
         "consumerVersionSelectors" -> r.consumerVersionSelectors.asJson,
         "providerVersionTags"      -> r.providerVersionTags.asJson,
-        "includePendingStatus"     -> r.includePendingStatus.asJson
+        "includePendingStatus"     -> r.includePendingStatus.asJson,
+        "includeWipPactsSince"     -> wipPactString.asJson
       )
     }
 

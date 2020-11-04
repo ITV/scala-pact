@@ -1,5 +1,7 @@
 package com.itv.scalapact.shared
 
+import java.time.OffsetDateTime
+
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 
 import scala.concurrent.duration.Duration
@@ -25,6 +27,7 @@ final case class PactsForVerificationSettings(
     consumerVersionSelectors: List[ConsumerVersionSelector],
     providerVersionTags: List[String],
     includePendingStatus: Boolean,
+    includeWipPactsSince: Option[OffsetDateTime],
     pactBrokerAuthorization: Option[PactBrokerAuthorization],
     pactBrokerClientTimeout: Option[Duration],
     sslContextName: Option[String]

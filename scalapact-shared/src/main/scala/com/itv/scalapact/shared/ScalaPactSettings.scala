@@ -1,5 +1,7 @@
 package com.itv.scalapact.shared
 
+import java.time.OffsetDateTime
+
 import com.itv.scalapact.shared.utils.Helpers
 
 import scala.concurrent.duration.{Duration, SECONDS}
@@ -14,7 +16,8 @@ case class ScalaPactSettings(
     clientTimeout: Option[Duration],
     outputPath: Option[String],
     publishResultsEnabled: Option[BrokerPublishData],
-    enablePending: Option[Boolean]
+    enablePending: Option[Boolean],
+    includeWipPactsSince: Option[OffsetDateTime]
 ) {
   val giveHost: String            = host.getOrElse("localhost")
   val giveProtocol: String        = protocol.getOrElse("http")
@@ -73,7 +76,7 @@ object ScalaPactSettings {
 
   def apply: ScalaPactSettings = default
 
-  def default: ScalaPactSettings = ScalaPactSettings(None, None, None, None, None, None, None, None, None)
+  def default: ScalaPactSettings = ScalaPactSettings(None, None, None, None, None, None, None, None, None, None)
 
   val parseArguments: Seq[String] => ScalaPactSettings = args => (Helpers.pair andThen convertToArguments)(args.toList)
 
@@ -87,7 +90,8 @@ object ScalaPactSettings {
       clientTimeout = b.clientTimeout.orElse(a.clientTimeout),
       outputPath = b.outputPath.orElse(a.outputPath),
       publishResultsEnabled = b.publishResultsEnabled.orElse(a.publishResultsEnabled),
-      enablePending = b.enablePending.orElse(a.enablePending)
+      enablePending = b.enablePending.orElse(a.enablePending),
+      includeWipPactsSince = b.includeWipPactsSince.orElse(a.includeWipPactsSince)
     )
 
   private lazy val convertToArguments: Map[String, String] => ScalaPactSettings = argMap =>
@@ -101,7 +105,8 @@ object ScalaPactSettings {
         argMap.get("--clientTimeout").flatMap(Helpers.safeStringToLong).flatMap(i => Option(Duration(i, SECONDS))),
       outputPath = argMap.get("--out"),
       publishResultsEnabled = calculateBrokerPublishData(argMap),
-      enablePending = argMap.get("--enablePending").flatMap(Helpers.safeStringToBoolean)
+      enablePending = argMap.get("--enablePending").flatMap(Helpers.safeStringToBoolean),
+      includeWipPactsSince = argMap.get("--includeWipPactsSince").flatMap(Helpers.safeStringToDateTime)
     )
 
   private def calculateBrokerPublishData(argMap: Map[String, String]): Option[BrokerPublishData] = {

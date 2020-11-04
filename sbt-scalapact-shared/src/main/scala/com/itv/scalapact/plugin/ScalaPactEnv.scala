@@ -1,5 +1,7 @@
 package com.itv.scalapact.plugin
 
+import java.time.OffsetDateTime
+
 import com.itv.scalapact.shared.{BrokerPublishData, ScalaPactSettings}
 
 import scala.concurrent.duration._
@@ -13,7 +15,8 @@ case class ScalaPactEnv(
     clientTimeout: Option[Duration],
     outputPath: Option[String],
     publishResultsEnabled: Option[BrokerPublishData],
-    enablePending: Option[Boolean]
+    enablePending: Option[Boolean],
+    includeWipPactsSince: Option[OffsetDateTime]
 ) {
   def +(other: ScalaPactEnv): ScalaPactEnv =
     ScalaPactEnv.append(this, other)
@@ -57,7 +60,8 @@ case class ScalaPactEnv(
       clientTimeout,
       outputPath,
       publishResultsEnabled,
-      enablePending
+      enablePending,
+      includeWipPactsSince
     )
 
 }
@@ -76,13 +80,14 @@ object ScalaPactEnv {
       Option(Duration(1, SECONDS)),
       None, // "target/pacts"
       None, // false
-      None  // false
+      None,  // false
+      None
     )
 
   def defaults: ScalaPactEnv =
     ScalaPactEnv("http", "localhost", 1234)
 
-  def empty: ScalaPactEnv = ScalaPactEnv(None, None, None, None, None, None, None, None, None)
+  def empty: ScalaPactEnv = ScalaPactEnv(None, None, None, None, None, None, None, None, None, None)
 
   def append(a: ScalaPactEnv, b: ScalaPactEnv): ScalaPactEnv =
     ScalaPactEnv(
@@ -94,6 +99,7 @@ object ScalaPactEnv {
       clientTimeout = b.clientTimeout.orElse(a.clientTimeout),
       outputPath = b.outputPath.orElse(a.outputPath),
       publishResultsEnabled = b.publishResultsEnabled.orElse(a.publishResultsEnabled),
-      enablePending = b.enablePending.orElse(a.enablePending)
+      enablePending = b.enablePending.orElse(a.enablePending),
+      includeWipPactsSince = b.includeWipPactsSince.orElse(a.includeWipPactsSince)
     )
 }

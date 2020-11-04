@@ -2,6 +2,7 @@ package com.itv.scalapact.shared.utils
 
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import java.time.OffsetDateTime
 
 import com.itv.scalapact.shared.utils.ColourOutput.ColouredString
 
@@ -11,7 +12,7 @@ import scala.util.control.NonFatal
 
 object Helpers {
 
-  implicit class OptionOps[A](val value: Option[A]) extends AnyVal {
+  implicit class TryOps[A](val value: Option[A]) extends AnyVal {
     def whenEmpty(todo: => Unit): Option[A] = value match {
       case None =>
         todo
@@ -51,6 +52,10 @@ object Helpers {
   )
   def safeStringToDouble(str: String): Option[Double] = Try(str.toDouble).toOption.whenEmpty(
     PactLogger.error(s"Failed to convert string '$str' to number (double)".red)
+  )
+
+  def safeStringToDateTime(str: String): Option[OffsetDateTime] = Try(OffsetDateTime.parse(str)).toOption.whenEmpty(
+    PactLogger.error(s"Failed to convert string '$str' to date (OffsetDateTime).".red)
   )
 
   val urlEncode: String => Either[String, String] = str => {
