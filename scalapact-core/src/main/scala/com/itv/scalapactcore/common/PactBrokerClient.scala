@@ -110,7 +110,8 @@ class PactBrokerClient(implicit
               throw new Exception("HAL index missing from Pact Broker response")
           }
         case Right(r) =>
-          val message = prettifyBrokerError(s"Failed to load HAL index from: ${pactVerifySettings.pactBrokerAddress}.", r)
+          val message =
+            prettifyBrokerError(s"Failed to load HAL index from: ${pactVerifySettings.pactBrokerAddress}.", r)
           PactLogger.error(message)
           throw new Exception(message)
         case Left(e) =>
