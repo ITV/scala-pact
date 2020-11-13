@@ -21,7 +21,7 @@ trait HttpInstances {
   implicit def httpClientBuilder(implicit sslContextMap: SslContextMap): IScalaPactHttpClientBuilder = {
     (clientTimeout: Duration, sslContextName: Option[String], maxTotalConnections: Int) =>
       val clientConfig = ClientConfig(clientTimeout, sslContextName, maxTotalConnections, sslContextMap)
-      PactLogger.message(s"Checking client cache for config $clientConfig, cache size is ${clients.size}")
+      PactLogger.debug(s"Checking client cache for config $clientConfig, cache size is ${clients.size}")
       clients.computeIfAbsent(
         clientConfig,
         _ => ScalaPactHttpClient(clientTimeout, sslContextName, maxTotalConnections)

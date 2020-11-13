@@ -26,7 +26,7 @@ object Http4sClientHelper {
       .withRequestTimeout(clientTimeout)
       .withUserAgentOption(Option(`User-Agent`(AgentProduct("scala-pact", Option(BuildInfo.version)))))
 
-    PactLogger.message(
+    PactLogger.debug(
       s"Creating http4s client: connections $maxTotalConnections, timeout $clientTimeout, sslContextName: $sslContextName, sslContextMap: $sslContextMap"
     )
 
