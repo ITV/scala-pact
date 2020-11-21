@@ -122,23 +122,14 @@ class PactBrokerClient(implicit
       templateUrl.map(_.replace("{provider}", pactVerifySettings.providerName))
     }
 
-  def fetchPactsOldWorld(pactVerifySettings: PrePactsForVerificationSettings): List[Pact] = {
+  def fetchPactsOldWorld(pactVerifySettings: ConsumerVerifySettings): List[Pact] = {
     val brokerClient =
       httpClientBuilder.buildWithDefaults(pactVerifySettings.pactBrokerClientTimeout, pactVerifySettings.sslContextName)
-
-    val versionConsumers = pactVerifySettings match {
-      case LatestConsumerVerifySettings(_, _, _, consumerNames, _, _, _) =>
-        consumerNames.map(VersionedConsumer.fromName)
-      case TaggedConsumerVerifySettings(_, _, _, taggedConsumerNames, _, _, _) =>
-        taggedConsumerNames.flatMap(tc => VersionedConsumer.fromNameAndTags(tc.name, tc.tags))
-      case VersionedConsumerVerifySettings(_, _, _, versionedConsumerNames, _, _, _) =>
-        versionedConsumerNames
-    }
 
     val maybePacts = for {
       providerName     <- Helpers.urlEncode(pactVerifySettings.providerName)
       validatedAddress <- PactBrokerAddressValidation.checkPactBrokerAddress(pactVerifySettings.pactBrokerAddress)
-    } yield versionConsumers.flatMap { consumer =>
+    } yield pactVerifySettings.versionedConsumerNames.flatMap { consumer =>
       Helpers.urlEncode(consumer.name) match {
         case Left(l) =>
           PactLogger.error(l.red)

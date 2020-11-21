@@ -30,29 +30,7 @@ final case class PactsForVerificationSettings(
     sslContextName: Option[String]
 ) extends BrokerPactVerifySettings
 
-sealed trait PrePactsForVerificationSettings extends BrokerPactVerifySettings
-
-final case class LatestConsumerVerifySettings(
-    providerStates: SetupProviderState,
-    pactBrokerAddress: String,
-    providerName: String,
-    consumerNames: List[String],
-    pactBrokerAuthorization: Option[PactBrokerAuthorization],
-    pactBrokerClientTimeout: Option[Duration],
-    sslContextName: Option[String]
-) extends PrePactsForVerificationSettings
-
-final case class TaggedConsumerVerifySettings(
-    providerStates: SetupProviderState,
-    pactBrokerAddress: String,
-    providerName: String,
-    taggedConsumerNames: List[TaggedConsumer],
-    pactBrokerAuthorization: Option[PactBrokerAuthorization],
-    pactBrokerClientTimeout: Option[Duration],
-    sslContextName: Option[String]
-) extends PrePactsForVerificationSettings
-
-final case class VersionedConsumerVerifySettings(
+final case class ConsumerVerifySettings(
     providerStates: SetupProviderState,
     pactBrokerAddress: String,
     providerName: String,
@@ -60,4 +38,4 @@ final case class VersionedConsumerVerifySettings(
     pactBrokerAuthorization: Option[PactBrokerAuthorization],
     pactBrokerClientTimeout: Option[Duration],
     sslContextName: Option[String]
-) extends PrePactsForVerificationSettings
+) extends BrokerPactVerifySettings
