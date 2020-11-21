@@ -80,7 +80,7 @@ object ScalaPactEnv {
       Option(Duration(1, SECONDS)),
       None, // "target/pacts"
       None, // false
-      None,  // false
+      None, // false
       None
     )
 
