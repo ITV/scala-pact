@@ -72,9 +72,10 @@ class PactBrokerClient(implicit
                 PactLogger.error("Pact data missing from Pact Broker response")
                 throw new Exception("Pact data missing from Pact Broker response")
               }
-          case Right(_) =>
-            PactLogger.error(s"Failed to load pacts for verification from: $address".red)
-            throw new Exception(s"Failed to load pacts for verification from: $address")
+          case Right(r) =>
+            val message = prettifyBrokerError(s"Failed to load pacts for verification from: $address.", r)
+            PactLogger.error(message)
+            throw new Exception(message)
           case Left(e) =>
             PactLogger.error(s"Error: ${e.getMessage}".red)
             throw e
@@ -108,9 +109,11 @@ class PactBrokerClient(implicit
               PactLogger.error(s"HAL index missing from Pact Broker response".red)
               throw new Exception("HAL index missing from Pact Broker response")
           }
-        case Right(_) =>
-          PactLogger.error(s"Failed to load HAL index from: ${pactVerifySettings.pactBrokerAddress}".red)
-          throw new Exception(s"Failed to load HAL index from: ${pactVerifySettings.pactBrokerAddress}")
+        case Right(r) =>
+          val message =
+            prettifyBrokerError(s"Failed to load HAL index from: ${pactVerifySettings.pactBrokerAddress}.", r)
+          PactLogger.error(message)
+          throw new Exception(message)
         case Left(e) =>
           PactLogger.error(s"Error: ${e.getMessage}".red)
           throw e
@@ -191,9 +194,10 @@ class PactBrokerClient(implicit
             Left(new Exception("Pact data missing from Pact Broker response"))
           }
 
-      case Right(_) =>
-        PactLogger.error(s"Failed to load consumer pact from: $address".red)
-        Left(new Exception(s"Failed to load consumer pact from: $address"))
+      case Right(r) =>
+        val message = prettifyBrokerError(s"Failed to load consumer pact from: $address", r)
+        PactLogger.error(message)
+        Left(new Exception(message))
 
       case Left(e) =>
         PactLogger.error(s"Error: ${e.getMessage}".red)
@@ -229,7 +233,7 @@ class PactBrokerClient(implicit
                   s"Verification results published for provider '${result.pact.provider.name}' and consumer '${result.pact.consumer.name}'"
                 )
               } else {
-                PactLogger.error(s"Publish verification results failed with ${response.statusCode}".red)
+                PactLogger.error(prettifyBrokerError("Publish verification results failed.", response))
               }
             case Left(err) => PactLogger.error(s"Unable to publish verification results: $err".red)
           }
@@ -330,7 +334,7 @@ class PactBrokerClient(implicit
             case Left(e) =>
               PublishFailed(context, s"Failed with error: ${e.getMessage}".red)
             case Right(r) if !r.is2xx =>
-              PublishFailed(context, s"$r\nFailed: ${r.statusCode}, ${r.body}".red)
+              PublishFailed(context, prettifyResponse(r))
           }
           .getOrElse {
             httpClient.doRequest(
@@ -347,7 +351,7 @@ class PactBrokerClient(implicit
                 PublishSuccess(context)
 
               case Right(r) =>
-                PublishFailed(context, s"$r\nFailed: ${r.statusCode}, ${r.body}".red)
+                PublishFailed(context, prettifyResponse(r))
 
               case Left(e) =>
                 PublishFailed(context, s"Failed with error: ${e.getMessage}".red)
@@ -356,6 +360,12 @@ class PactBrokerClient(implicit
 
     }
   }
+
+  private def prettifyBrokerError(context: String, simpleResponse: SimpleResponse): String =
+    s"$context ${prettifyResponse(simpleResponse)}".red
+
+  private def prettifyResponse(response: SimpleResponse): String =
+    s"Failed with ${response.statusCode}${response.body.collect { case b if b.nonEmpty => s", $b" }.getOrElse("")}".red
 
 }
 
