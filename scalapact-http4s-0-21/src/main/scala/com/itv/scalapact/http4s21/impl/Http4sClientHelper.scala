@@ -2,6 +2,7 @@ package com.itv.scalapact.http4s21.impl
 
 import cats.effect.{ContextShift, IO, Resource}
 import com.itv.scalapact.shared.http.{SimpleRequest, SimpleResponse, SslContextMap}
+import com.itv.scalapact.shared.utils.PactLogger
 import org.http4s._
 import org.http4s.client.Client
 import org.http4s.client.blaze.BlazeClientBuilder
@@ -25,12 +26,17 @@ object Http4sClientHelper {
       .withRequestTimeout(clientTimeout)
       .withUserAgentOption(Option(`User-Agent`(AgentProduct("scala-pact", Option(BuildInfo.version)))))
 
+    PactLogger.debug(
+      s"Creating http4s client: connections $maxTotalConnections, timeout $clientTimeout, sslContextName: $sslContextName, sslContextMap: $sslContextMap"
+    )
+
     sslContext.fold(builder)(s => builder.withSslContext(s)).resource
   }
 
   def doRequest(request: SimpleRequest, httpClient: Resource[IO, Client[IO]]): IO[SimpleResponse] =
     for {
       request <- Http4sRequestResponseFactory.buildRequest(request)
+      _       <- IO(PactLogger.message(s"cURL for request: ${request.asCurl()}"))
       response <- httpClient.use { c =>
         c.run(request).use { r: Response[IO] =>
           r.bodyText.compile.toVector
