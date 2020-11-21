@@ -44,8 +44,8 @@ object ScalaPactVerifyCommand {
           providerName,
           consumerVersionSelectors.toList,
           providerVersionTags.toList,
-          scalaPactSettings.enablePending.getOrElse(includePendingStatus),
-          scalaPactSettings.includeWipPactsSince,
+          scalaPactSettings.pendingPactSettings.enablePending.getOrElse(includePendingStatus),
+          scalaPactSettings.pendingPactSettings.includeWipPactsSince,
           pactBrokerAuthorization,
           Some(pactBrokerClientTimeout),
           sslContextName

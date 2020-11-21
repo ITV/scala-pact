@@ -2,7 +2,7 @@ package com.itv.scalapact.plugin
 
 import java.time.OffsetDateTime
 
-import com.itv.scalapact.shared.{BrokerPublishData, ScalaPactSettings}
+import com.itv.scalapact.shared.{BrokerPublishData, PendingPactSettings, ScalaPactSettings}
 
 import scala.concurrent.duration._
 
@@ -60,8 +60,7 @@ case class ScalaPactEnv(
       clientTimeout,
       outputPath,
       publishResultsEnabled,
-      enablePending,
-      includeWipPactsSince
+      PendingPactSettings(enablePending, includeWipPactsSince)
     )
 
 }

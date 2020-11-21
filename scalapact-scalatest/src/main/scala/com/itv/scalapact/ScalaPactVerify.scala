@@ -172,8 +172,7 @@ trait ScalaPactVerifyDsl {
           clientTimeout = Some(clientTimeout),
           outputPath = None,
           publishResultsEnabled = publishResultsEnabled,
-          enablePending = None,
-          includeWipPactsSince = None
+          pendingPactSettings = PendingPactSettings.empty
         )
 
         val (verifySettings, scalaPactSettings) = sourceType match {
@@ -347,7 +346,7 @@ trait ScalaPactVerifyDsl {
       pactBrokerWithVersion(url, contractVersion, provider, consumers, None, None, None)
   }
 
-  case class pactBrokerWithVersionSelectors(
+  sealed abstract case class pactBrokerWithVersionSelectors(
       url: String,
       provider: String,
       consumerVersionSelectors: List[ConsumerVersionSelector],
@@ -357,7 +356,94 @@ trait ScalaPactVerifyDsl {
       publishResultsEnabled: Option[BrokerPublishData],
       pactBrokerAuthorization: Option[PactBrokerAuthorization],
       pactBrokerClientTimeout: Option[Duration]
-  ) extends PactSourceType
+  ) extends PactSourceType {
+    @SuppressWarnings(Array("org.wartremover.warts.DefaultArguments"))
+    private def copy(
+        publishResultsEnabled: Option[BrokerPublishData] = this.publishResultsEnabled,
+        pactBrokerAuthorization: Option[PactBrokerAuthorization] = this.pactBrokerAuthorization,
+        pactBrokerClientTimeout: Option[Duration] = this.pactBrokerClientTimeout
+    ) =
+      new pactBrokerWithVersionSelectors(
+        url,
+        provider,
+        consumerVersionSelectors,
+        providerVersionTags,
+        includePendingStatus,
+        includeWipPactsSince,
+        publishResultsEnabled,
+        pactBrokerAuthorization,
+        pactBrokerClientTimeout
+      ) {}
+    def withBrokerClientTimeout(duration: Duration): pactBrokerWithVersionSelectors =
+      this.copy(pactBrokerClientTimeout = Some(duration))
+    def withPactBrokerAuth(auth: PactBrokerAuthorization): pactBrokerWithVersionSelectors =
+      this.copy(pactBrokerAuthorization = Some(auth))
+    def withPublishDate(data: BrokerPublishData): pactBrokerWithVersionSelectors =
+      this.copy(publishResultsEnabled = Some(data))
+  }
+
+  object pactBrokerWithVersionSelectors {
+    def apply(
+        url: String,
+        provider: String,
+        consumerVersionSelectors: List[ConsumerVersionSelector],
+        providerVersionTags: List[String],
+        includePendingStatus: Boolean
+    ): pactBrokerWithVersionSelectors =
+      new pactBrokerWithVersionSelectors(
+        url,
+        provider,
+        consumerVersionSelectors,
+        providerVersionTags,
+        includePendingStatus,
+        None,
+        None,
+        None,
+        None
+      ) {}
+
+    def apply(
+        url: String,
+        provider: String,
+        consumerVersionSelectors: List[ConsumerVersionSelector],
+        providerVersionTags: List[String],
+        includeWipPactsSince: OffsetDateTime
+    ): pactBrokerWithVersionSelectors =
+      new pactBrokerWithVersionSelectors(
+        url,
+        provider,
+        consumerVersionSelectors,
+        providerVersionTags,
+        true,
+        Some(includeWipPactsSince),
+        None,
+        None,
+        None
+      ) {}
+
+    def apply(
+        url: String,
+        provider: String,
+        consumerVersionSelectors: List[ConsumerVersionSelector],
+        providerVersionTags: List[String],
+        includeWipPactsSince: OffsetDateTime,
+        publishResultsEnabled: Option[BrokerPublishData],
+        pactBrokerAuthorization: Option[PactBrokerAuthorization],
+        pactBrokerClientTimeout: Option[Duration]
+    ): pactBrokerWithVersionSelectors =
+      new pactBrokerWithVersionSelectors(
+        url,
+        provider,
+        consumerVersionSelectors,
+        providerVersionTags,
+        true,
+        Some(includeWipPactsSince),
+        publishResultsEnabled,
+        pactBrokerAuthorization,
+        pactBrokerClientTimeout
+      ) {}
+
+  }
 
   case class pactAsJsonString(json: String) extends PactSourceType
 
