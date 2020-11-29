@@ -197,11 +197,11 @@ trait ScalaPactVerifyDsl {
                 pactBrokerAuthorization,
                 pactBrokerClientTimeout
               ) =>
-            LatestConsumerVerifySettings(
+            ConsumerVerifySettings(
               providerStates = providerStateFunc,
               pactBrokerAddress = url,
               providerName = providerName,
-              consumerNames = consumerNames,
+              versionedConsumerNames = consumerNames.map(VersionedConsumer.fromName),
               pactBrokerAuthorization = pactBrokerAuthorization,
               pactBrokerClientTimeout = pactBrokerClientTimeout,
               sslContextName = None
@@ -216,11 +216,11 @@ trait ScalaPactVerifyDsl {
                 pactBrokerAuthorization,
                 pactBrokerClientTimeout
               ) =>
-            TaggedConsumerVerifySettings(
+            ConsumerVerifySettings(
               providerStates = providerStateFunc,
               pactBrokerAddress = url,
               providerName = providerName,
-              taggedConsumerNames = consumersWithTags,
+              versionedConsumerNames = consumersWithTags.flatMap(_.toVersionedConsumers),
               pactBrokerAuthorization = pactBrokerAuthorization,
               pactBrokerClientTimeout = pactBrokerClientTimeout,
               sslContextName = None
@@ -236,7 +236,7 @@ trait ScalaPactVerifyDsl {
                 pactBrokerAuthorization,
                 pactBrokerClientTimeout
               ) =>
-            VersionedConsumerVerifySettings(
+            ConsumerVerifySettings(
               providerStates = providerStateFunc,
               pactBrokerAddress = url,
               providerName = providerName,

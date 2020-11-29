@@ -16,7 +16,7 @@ class Verifier(pactBrokerClient: PactBrokerClient)(implicit
     pactVerifySettings match {
       case settings: LocalPactVerifySettings =>
         new LocalPactVerifier(localVerificationClient).verify(settings, scalaPactSettings)
-      case settings: PrePactsForVerificationSettings =>
+      case settings: ConsumerVerifySettings =>
         new PrePactsForVerificationVerifier(pactBrokerClient, localVerificationClient)
           .verify(settings, scalaPactSettings)
       case settings: PactsForVerificationSettings =>

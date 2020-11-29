@@ -54,7 +54,7 @@ object ScalaPactVerifyCommand {
           consumerNames.map(VersionedConsumer.fromName) ++
             versionedConsumerNames.map(v => VersionedConsumer(v._1, v._2)) ++
             taggedConsumerNames.flatMap(t => VersionedConsumer.fromNameAndTags(t._1, t._2.toList))
-        VersionedConsumerVerifySettings(
+        ConsumerVerifySettings(
           combinedPactStates,
           pactBrokerAddress,
           providerName,

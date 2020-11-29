@@ -1,6 +1,6 @@
 package com.itv.scalapactcore.verifier
 
-import com.itv.scalapact.shared.{PrePactsForVerificationSettings, ScalaPactSettings}
+import com.itv.scalapact.shared.{ConsumerVerifySettings, ScalaPactSettings}
 import com.itv.scalapact.shared.utils.ColourOutput.ColouredString
 import com.itv.scalapact.shared.http.IScalaPactHttpClient
 import com.itv.scalapact.shared.json.IPactReader
@@ -14,7 +14,7 @@ private[verifier] class PrePactsForVerificationVerifier(
     localVerifierClient: IScalaPactHttpClient
 )(implicit pactReader: IPactReader) {
 
-  def verify(pactVerifySettings: PrePactsForVerificationSettings, scalaPactSettings: ScalaPactSettings): Boolean = {
+  def verify(pactVerifySettings: ConsumerVerifySettings, scalaPactSettings: ScalaPactSettings): Boolean = {
 
     val pacts = brokerClient.fetchPactsOldWorld(pactVerifySettings)
 
