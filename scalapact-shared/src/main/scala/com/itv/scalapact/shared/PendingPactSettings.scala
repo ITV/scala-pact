@@ -16,10 +16,12 @@ sealed abstract case class PendingPactSettings(
 
 object PendingPactSettings {
   def empty: PendingPactSettings = new PendingPactSettings(None, None) {}
-  def apply(enablePending: Option[Boolean], includeWipPactsSince: Option[OffsetDateTime]): PendingPactSettings = includeWipPactsSince match {
-    case Some(wipSince) => apply(wipSince)
-    case None           => apply(enablePending: Option[Boolean])
-  }
+  def apply(enablePending: Option[Boolean], includeWipPactsSince: Option[OffsetDateTime]): PendingPactSettings =
+    includeWipPactsSince match {
+      case Some(wipSince) => apply(wipSince)
+      case None           => apply(enablePending: Option[Boolean])
+    }
   def apply(enablePending: Option[Boolean]): PendingPactSettings = new PendingPactSettings(enablePending, None) {}
-  def apply(wipPactsSince: OffsetDateTime): PendingPactSettings  = new PendingPactSettings(Some(true), Some(wipPactsSince)) {}
+  def apply(wipPactsSince: OffsetDateTime): PendingPactSettings =
+    new PendingPactSettings(Some(true), Some(wipPactsSince)) {}
 }

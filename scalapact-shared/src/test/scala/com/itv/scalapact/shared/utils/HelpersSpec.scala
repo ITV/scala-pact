@@ -22,7 +22,7 @@ class HelpersSpec extends FunSpec with Matchers {
     it("should parse various date strings") {
       Helpers.safeStringToDateTime("2020-08-06").isDefined shouldBe true
       Helpers.safeStringToDateTime("2020-08-06T10:30:30").isDefined shouldBe true
-      Helpers.safeStringToDateTime("2020-08-06T10:30:30.001+1:00").isDefined shouldBe true
+      Helpers.safeStringToDateTime("2020-08-06T10:30:30+01:00").isDefined shouldBe true
     }
 
   }

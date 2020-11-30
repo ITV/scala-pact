@@ -290,7 +290,8 @@ trait ScalaPactVerifyDsl {
 
   sealed trait PactSourceType
 
-  case class loadFromLocal(path: String) extends PactSourceType
+  case class loadFromLocal(path: String)    extends PactSourceType
+  case class pactAsJsonString(json: String) extends PactSourceType
 
   case class pactBrokerUseLatest(
       url: String,
@@ -378,7 +379,7 @@ trait ScalaPactVerifyDsl {
       this.copy(pactBrokerClientTimeout = Some(duration))
     def withPactBrokerAuth(auth: PactBrokerAuthorization): pactBrokerWithVersionSelectors =
       this.copy(pactBrokerAuthorization = Some(auth))
-    def withPublishDate(data: BrokerPublishData): pactBrokerWithVersionSelectors =
+    def withPublishData(data: BrokerPublishData): pactBrokerWithVersionSelectors =
       this.copy(publishResultsEnabled = Some(data))
   }
 
@@ -400,6 +401,28 @@ trait ScalaPactVerifyDsl {
         None,
         None,
         None
+      ) {}
+
+    def apply(
+        url: String,
+        provider: String,
+        consumerVersionSelectors: List[ConsumerVersionSelector],
+        providerVersionTags: List[String],
+        includePendingStatus: Boolean,
+        publishResultsEnabled: Option[BrokerPublishData],
+        pactBrokerAuthorization: Option[PactBrokerAuthorization],
+        pactBrokerClientTimeout: Option[Duration]
+    ): pactBrokerWithVersionSelectors =
+      new pactBrokerWithVersionSelectors(
+        url,
+        provider,
+        consumerVersionSelectors,
+        providerVersionTags,
+        includePendingStatus,
+        None,
+        publishResultsEnabled,
+        pactBrokerAuthorization,
+        pactBrokerClientTimeout
       ) {}
 
     def apply(
@@ -444,8 +467,6 @@ trait ScalaPactVerifyDsl {
       ) {}
 
   }
-
-  case class pactAsJsonString(json: String) extends PactSourceType
 
   class ScalaPactVerifyFailed extends Exception
 
