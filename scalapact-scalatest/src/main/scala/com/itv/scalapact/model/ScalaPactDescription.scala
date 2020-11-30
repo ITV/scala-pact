@@ -22,7 +22,7 @@ class ScalaPactDescription(
     * @return [ScalaPactDescription] to allow the builder to continue
     */
   def addInteraction(interaction: ScalaPactInteraction): ScalaPactDescription =
-    new ScalaPactDescription(strict, consumer, provider, sslContextName, interactions :+ interaction)
+    new ScalaPactDescription(strict, consumer, provider, sslContextName, interaction :: interactions)
 
   def addSslContextForServer(name: String): ScalaPactDescription =
     new ScalaPactDescription(strict, consumer, provider, Some(name), interactions)

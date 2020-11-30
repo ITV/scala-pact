@@ -68,7 +68,7 @@ def compilerOptionsVersion(scalaVersion: String) =
   })
 
 lazy val scalaVersion212: String = "2.12.12"
-lazy val scalaVersion213: String = "2.13.3"
+lazy val scalaVersion213: String = "2.13.4"
 lazy val supportedScalaVersions = List(scalaVersion212, scalaVersion213)
 
 ThisBuild / scalaVersion := scalaVersion212
@@ -93,7 +93,10 @@ lazy val commonSettings = Seq(
     Wart.LeakingSealed,
     Wart.Null,
     Wart.Var,
-    Wart.StringPlusAny
+    Wart.StringPlusAny,
+    Wart.PlatformDefault,
+    Wart.ListUnapply,
+    Wart.GlobalExecutionContext
   ),
   parallelExecution in Test := false,
 //  javaOptions in Test ++= Seq(
