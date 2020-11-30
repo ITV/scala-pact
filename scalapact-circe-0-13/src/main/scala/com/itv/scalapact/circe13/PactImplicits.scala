@@ -67,9 +67,9 @@ object PactImplicits {
       providerState  <- cur.get[Option[String]]("providerState")
       provider_state <- cur.get[Option[String]]("provider_state")
       ps = providerState.orElse(provider_state).filterNot(_.isEmpty)
-      description    <- cur.get[String]("description")
-      request        <- cur.get[InteractionRequest]("request")
-      response       <- cur.get[InteractionResponse]("response")
+      description <- cur.get[String]("description")
+      request     <- cur.get[InteractionRequest]("request")
+      response    <- cur.get[InteractionResponse]("response")
     } yield Interaction(ps, description, request, response)
   }
 

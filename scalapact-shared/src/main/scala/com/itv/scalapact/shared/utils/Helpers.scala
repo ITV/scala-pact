@@ -12,7 +12,7 @@ import scala.util.control.NonFatal
 
 object Helpers {
 
-  implicit class TryOps[A](val value: Option[A]) extends AnyVal {
+  implicit class OptionOps[A](val value: Option[A]) extends AnyVal {
     def whenEmpty(todo: => Unit): Option[A] = value match {
       case None =>
         todo
