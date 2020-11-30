@@ -18,6 +18,6 @@ sbt clean update test
 echo "Testing using the CLI with --includeWipPactsSince"
 sbt run &
 echo "warming things up..."
-simple_countdown 30
-sbt "pactVerify --enablePending true --includeWipPactsSince 2020-11-11T00:42Z --port 8080"
+simple_countdown 10
+sbt "pactVerify --enablePending true --includeWipPactsSince 2020-11-11T00:42Z --host localhost --port 8080 --clientTimeout 5"
 cd ../..
