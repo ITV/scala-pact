@@ -21,3 +21,5 @@ echo "warming things up..."
 simple_countdown 10
 sbt "pactVerify --enablePending true --includeWipPactsSince 2020-11-11T00:42Z --host localhost --port 8080 --clientTimeout 5"
 cd ../..
+
+pkill -1 -f sbt-launch.jar
