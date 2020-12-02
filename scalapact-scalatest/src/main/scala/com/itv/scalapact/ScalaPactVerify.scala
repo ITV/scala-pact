@@ -1,7 +1,6 @@
 package com.itv.scalapact
 
 import java.io.{BufferedWriter, File, FileWriter}
-import java.time.OffsetDateTime
 
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 import com.itv.scalapact.shared._
@@ -172,7 +171,7 @@ trait ScalaPactVerifyDsl {
           clientTimeout = Some(clientTimeout),
           outputPath = None,
           publishResultsEnabled = publishResultsEnabled,
-          pendingPactSettings = PendingPactSettings.empty
+          pendingPactSettings = None
         )
 
         val (verifySettings, scalaPactSettings) = sourceType match {
@@ -253,8 +252,7 @@ trait ScalaPactVerifyDsl {
                 providerName,
                 consumerVersionSelectors,
                 providerVersionTags,
-                includePendingStatus,
-                includeWipPactsSince,
+                pendingPactSettings,
                 publishResultsEnabled,
                 pactBrokerAuthorization,
                 pactBrokerClientTimeout
@@ -263,8 +261,7 @@ trait ScalaPactVerifyDsl {
               providerStates = providerStateFunc,
               pactBrokerAddress = url,
               providerName = providerName,
-              includePendingStatus = includePendingStatus,
-              includeWipPactsSince = includeWipPactsSince,
+              pendingPactSettings = pendingPactSettings,
               consumerVersionSelectors = consumerVersionSelectors,
               providerVersionTags = providerVersionTags,
               pactBrokerAuthorization = pactBrokerAuthorization,
@@ -347,34 +344,18 @@ trait ScalaPactVerifyDsl {
       pactBrokerWithVersion(url, contractVersion, provider, consumers, None, None, None)
   }
 
-  sealed abstract case class pactBrokerWithVersionSelectors(
+  case class pactBrokerWithVersionSelectors(
       url: String,
       provider: String,
       consumerVersionSelectors: List[ConsumerVersionSelector],
       providerVersionTags: List[String],
-      includePendingStatus: Boolean,
-      includeWipPactsSince: Option[OffsetDateTime],
+      pendingPactSettings: PendingPactSettings,
       publishResultsEnabled: Option[BrokerPublishData],
       pactBrokerAuthorization: Option[PactBrokerAuthorization],
       pactBrokerClientTimeout: Option[Duration]
   ) extends PactSourceType {
-    @SuppressWarnings(Array("org.wartremover.warts.DefaultArguments"))
-    private def copy(
-        publishResultsEnabled: Option[BrokerPublishData] = this.publishResultsEnabled,
-        pactBrokerAuthorization: Option[PactBrokerAuthorization] = this.pactBrokerAuthorization,
-        pactBrokerClientTimeout: Option[Duration] = this.pactBrokerClientTimeout
-    ) =
-      new pactBrokerWithVersionSelectors(
-        url,
-        provider,
-        consumerVersionSelectors,
-        providerVersionTags,
-        includePendingStatus,
-        includeWipPactsSince,
-        publishResultsEnabled,
-        pactBrokerAuthorization,
-        pactBrokerClientTimeout
-      ) {}
+    def withPendingPactSettings(settings: PendingPactSettings): pactBrokerWithVersionSelectors =
+      this.copy(pendingPactSettings = settings)
     def withBrokerClientTimeout(duration: Duration): pactBrokerWithVersionSelectors =
       this.copy(pactBrokerClientTimeout = Some(duration))
     def withPactBrokerAuth(auth: PactBrokerAuthorization): pactBrokerWithVersionSelectors =
@@ -388,84 +369,18 @@ trait ScalaPactVerifyDsl {
         url: String,
         provider: String,
         consumerVersionSelectors: List[ConsumerVersionSelector],
-        providerVersionTags: List[String],
-        includePendingStatus: Boolean
+        providerVersionTags: List[String]
     ): pactBrokerWithVersionSelectors =
-      new pactBrokerWithVersionSelectors(
+      pactBrokerWithVersionSelectors(
         url,
         provider,
         consumerVersionSelectors,
         providerVersionTags,
-        includePendingStatus,
-        None,
+        PendingPactSettings.PendingDisabled,
         None,
         None,
         None
-      ) {}
-
-    def apply(
-        url: String,
-        provider: String,
-        consumerVersionSelectors: List[ConsumerVersionSelector],
-        providerVersionTags: List[String],
-        includePendingStatus: Boolean,
-        publishResultsEnabled: Option[BrokerPublishData],
-        pactBrokerAuthorization: Option[PactBrokerAuthorization],
-        pactBrokerClientTimeout: Option[Duration]
-    ): pactBrokerWithVersionSelectors =
-      new pactBrokerWithVersionSelectors(
-        url,
-        provider,
-        consumerVersionSelectors,
-        providerVersionTags,
-        includePendingStatus,
-        None,
-        publishResultsEnabled,
-        pactBrokerAuthorization,
-        pactBrokerClientTimeout
-      ) {}
-
-    def apply(
-        url: String,
-        provider: String,
-        consumerVersionSelectors: List[ConsumerVersionSelector],
-        providerVersionTags: List[String],
-        includeWipPactsSince: OffsetDateTime
-    ): pactBrokerWithVersionSelectors =
-      new pactBrokerWithVersionSelectors(
-        url,
-        provider,
-        consumerVersionSelectors,
-        providerVersionTags,
-        true,
-        Some(includeWipPactsSince),
-        None,
-        None,
-        None
-      ) {}
-
-    def apply(
-        url: String,
-        provider: String,
-        consumerVersionSelectors: List[ConsumerVersionSelector],
-        providerVersionTags: List[String],
-        includeWipPactsSince: OffsetDateTime,
-        publishResultsEnabled: Option[BrokerPublishData],
-        pactBrokerAuthorization: Option[PactBrokerAuthorization],
-        pactBrokerClientTimeout: Option[Duration]
-    ): pactBrokerWithVersionSelectors =
-      new pactBrokerWithVersionSelectors(
-        url,
-        provider,
-        consumerVersionSelectors,
-        providerVersionTags,
-        true,
-        Some(includeWipPactsSince),
-        publishResultsEnabled,
-        pactBrokerAuthorization,
-        pactBrokerClientTimeout
-      ) {}
-
+      )
   }
 
   class ScalaPactVerifyFailed extends Exception

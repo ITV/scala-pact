@@ -15,7 +15,7 @@ case class ScalaPactSettings(
     clientTimeout: Option[Duration],
     outputPath: Option[String],
     publishResultsEnabled: Option[BrokerPublishData],
-    pendingPactSettings: PendingPactSettings
+    pendingPactSettings: Option[PendingPactSettings]
 ) {
   val giveHost: String            = host.getOrElse("localhost")
   val giveProtocol: String        = protocol.getOrElse("http")
@@ -74,11 +74,11 @@ object ScalaPactSettings {
   def apply: ScalaPactSettings = default
 
   def default: ScalaPactSettings =
-    ScalaPactSettings(None, None, None, None, None, None, None, None, PendingPactSettings.empty)
+    ScalaPactSettings(None, None, None, None, None, None, None, None, None)
 
   val parseArguments: Seq[String] => ScalaPactSettings = args => (Helpers.pair andThen convertToArguments)(args.toList)
 
-  def append(a: ScalaPactSettings, b: ScalaPactSettings): ScalaPactSettings =
+  def append(a: ScalaPactSettings, b: ScalaPactSettings): ScalaPactSettings = {
     ScalaPactSettings(
       host = b.host.orElse(a.host),
       protocol = b.protocol.orElse(a.protocol),
@@ -88,8 +88,9 @@ object ScalaPactSettings {
       clientTimeout = b.clientTimeout.orElse(a.clientTimeout),
       outputPath = b.outputPath.orElse(a.outputPath),
       publishResultsEnabled = b.publishResultsEnabled.orElse(a.publishResultsEnabled),
-      pendingPactSettings = b.pendingPactSettings.append(a.pendingPactSettings)
+      pendingPactSettings = a.pendingPactSettings.orElse(b.pendingPactSettings)
     )
+  }
 
   private lazy val convertToArguments: Map[String, String] => ScalaPactSettings = argMap =>
     ScalaPactSettings(
@@ -110,7 +111,7 @@ object ScalaPactSettings {
     argMap.get("--publishResultsVersion").map(BrokerPublishData(_, buildUrl))
   }
 
-  private def calculatePendingPactSettings(argMap: Map[String, String]): PendingPactSettings = {
+  private def calculatePendingPactSettings(argMap: Map[String, String]): Option[PendingPactSettings] = {
     val wipSince      = argMap.get("--includeWipPactsSince").flatMap(Helpers.safeStringToDateTime)
     val enablePending = argMap.get("--enablePending").flatMap(Helpers.safeStringToBoolean)
     (wipSince, enablePending) match {
@@ -118,11 +119,13 @@ object ScalaPactSettings {
         PactLogger.warn(
           "WIP pacts cannot be retrieved if --enablePending is set to false. Setting --enablePending to true."
         )
-        PendingPactSettings(wipSince)
+        Some(PendingPactSettings.IncludeWipPacts(wipSince))
       case (Some(wipSince), _) =>
-        PendingPactSettings(wipSince)
-      case (_, ep) =>
-        PendingPactSettings(ep)
+        Some(PendingPactSettings.IncludeWipPacts(wipSince))
+      case (_, Some(true)) =>
+        Some(PendingPactSettings.PendingEnabled)
+      case (_, Some(false)) => Some(PendingPactSettings.PendingDisabled)
+      case (_, _) => None
     }
   }
 }

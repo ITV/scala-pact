@@ -4,7 +4,7 @@ import com.itv.scalapact.model.ScalaPactDescriptionFinal
 import com.itv.scalapact.shared.http.{HttpMethod, IScalaPactHttpClient, SimpleRequest, SslContextMap}
 import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
 import com.itv.scalapact.shared.utils.PactLogger
-import com.itv.scalapact.shared.{IPactStubber, PendingPactSettings, ScalaPactSettings}
+import com.itv.scalapact.shared.{IPactStubber, ScalaPactSettings}
 import com.itv.scalapactcore.common.stubber.InteractionManager
 
 private[scalapact] object ScalaPactMock {
@@ -44,7 +44,7 @@ private[scalapact] object ScalaPactMock {
       clientTimeout = None,
       outputPath = Option(outputPath),
       publishResultsEnabled = None, // Nothing to publish
-      pendingPactSettings = PendingPactSettings.empty
+      pendingPactSettings = None
     )
     val pacts = List(ScalaPactContractWriter.producePactFromDescription(pactDescription))
 
