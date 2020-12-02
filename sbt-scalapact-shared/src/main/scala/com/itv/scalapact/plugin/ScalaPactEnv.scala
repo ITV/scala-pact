@@ -45,7 +45,8 @@ case class ScalaPactEnv(
   def enablePublishResults(providerVersion: String, buildUrl: Option[String]): ScalaPactEnv =
     this.copy(publishResultsEnabled = Option(BrokerPublishData(providerVersion, buildUrl)))
 
-  def withPendingPactSettings(settings: PendingPactSettings): ScalaPactEnv = this.copy(pendingPactSettings = Some(settings))
+  def withPendingPactSettings(settings: PendingPactSettings): ScalaPactEnv =
+    this.copy(pendingPactSettings = Some(settings))
 
   def toSettings: ScalaPactSettings =
     ScalaPactSettings(

@@ -10,17 +10,17 @@ sealed trait PendingPactSettings {
 object PendingPactSettings {
 
   case object PendingDisabled extends PendingPactSettings {
-    val enablePending: Boolean = false
+    val enablePending: Boolean                       = false
     val includeWipPactsSince: Option[OffsetDateTime] = None
   }
 
   case object PendingEnabled extends PendingPactSettings {
-    val enablePending: Boolean = true
+    val enablePending: Boolean                       = true
     val includeWipPactsSince: Option[OffsetDateTime] = None
   }
 
   case class IncludeWipPacts(wipPactsSince: OffsetDateTime) extends PendingPactSettings {
-    val enablePending: Boolean = true
+    val enablePending: Boolean                       = true
     val includeWipPactsSince: Option[OffsetDateTime] = Some(wipPactsSince)
   }
 }

@@ -78,7 +78,7 @@ object ScalaPactSettings {
 
   val parseArguments: Seq[String] => ScalaPactSettings = args => (Helpers.pair andThen convertToArguments)(args.toList)
 
-  def append(a: ScalaPactSettings, b: ScalaPactSettings): ScalaPactSettings = {
+  def append(a: ScalaPactSettings, b: ScalaPactSettings): ScalaPactSettings =
     ScalaPactSettings(
       host = b.host.orElse(a.host),
       protocol = b.protocol.orElse(a.protocol),
@@ -90,7 +90,6 @@ object ScalaPactSettings {
       publishResultsEnabled = b.publishResultsEnabled.orElse(a.publishResultsEnabled),
       pendingPactSettings = a.pendingPactSettings.orElse(b.pendingPactSettings)
     )
-  }
 
   private lazy val convertToArguments: Map[String, String] => ScalaPactSettings = argMap =>
     ScalaPactSettings(
@@ -125,7 +124,7 @@ object ScalaPactSettings {
       case (_, Some(true)) =>
         Some(PendingPactSettings.PendingEnabled)
       case (_, Some(false)) => Some(PendingPactSettings.PendingDisabled)
-      case (_, _) => None
+      case (_, _)           => None
     }
   }
 }

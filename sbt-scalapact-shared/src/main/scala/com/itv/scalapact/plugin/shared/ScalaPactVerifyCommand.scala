@@ -40,7 +40,7 @@ object ScalaPactVerifyCommand {
       else if (consumerVersionSelectors.nonEmpty) {
         val pendingPactSettings = scalaPactSettings.pendingPactSettings.getOrElse {
           includePendingStatus match {
-            case true => PendingPactSettings.PendingEnabled
+            case true  => PendingPactSettings.PendingEnabled
             case false => PendingPactSettings.PendingDisabled
           }
         }
