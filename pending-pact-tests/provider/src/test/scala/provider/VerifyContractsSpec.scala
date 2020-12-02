@@ -2,7 +2,7 @@ package provider
 
 import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
 import com.itv.scalapact.PactVerifySuite
-import com.itv.scalapact.shared.{ConsumerVersionSelector, PactBrokerAuthorization, ProviderStateResult, PendingPactSetttings}
+import com.itv.scalapact.shared.{ConsumerVersionSelector, PactBrokerAuthorization, PendingPactSettings}
 
 import scala.concurrent.duration._
 
