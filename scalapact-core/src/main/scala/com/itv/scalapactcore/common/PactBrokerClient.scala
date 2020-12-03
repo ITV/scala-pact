@@ -31,7 +31,8 @@ class PactBrokerClient(implicit
           PactsForVerificationRequest(
             pactVerifySettings.consumerVersionSelectors,
             pactVerifySettings.providerVersionTags,
-            pactVerifySettings.includePendingStatus
+            pactVerifySettings.pendingPactSettings.enablePending,
+            pactVerifySettings.pendingPactSettings.includeWipPactsSince
           )
         )
         val request = SimpleRequest(

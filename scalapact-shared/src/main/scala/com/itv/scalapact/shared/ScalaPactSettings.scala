@@ -1,10 +1,11 @@
 package com.itv.scalapact.shared
 
-import com.itv.scalapact.shared.utils.Helpers
+import com.itv.scalapact.shared.utils.{Helpers, PactLogger}
 
 import scala.concurrent.duration.{Duration, SECONDS}
 import scala.util.Properties
 
+//Command line settings - these should override any corresponding sbt settings
 case class ScalaPactSettings(
     protocol: Option[String],
     host: Option[String],
@@ -14,7 +15,7 @@ case class ScalaPactSettings(
     clientTimeout: Option[Duration],
     outputPath: Option[String],
     publishResultsEnabled: Option[BrokerPublishData],
-    enablePending: Option[Boolean]
+    pendingPactSettings: Option[PendingPactSettings]
 ) {
   val giveHost: String            = host.getOrElse("localhost")
   val giveProtocol: String        = protocol.getOrElse("http")
@@ -22,7 +23,6 @@ case class ScalaPactSettings(
   val giveStrictMode: Boolean     = strictMode.getOrElse(false)
   val giveClientTimeout: Duration = clientTimeout.getOrElse(Duration(1, SECONDS))
   val giveOutputPath: String      = outputPath.getOrElse(Properties.envOrElse("pact.rootDir", "target/pacts"))
-  val giveEnablePending: Boolean  = enablePending.getOrElse(false)
 
   def +(other: ScalaPactSettings): ScalaPactSettings =
     ScalaPactSettings.append(this, other)
@@ -73,7 +73,8 @@ object ScalaPactSettings {
 
   def apply: ScalaPactSettings = default
 
-  def default: ScalaPactSettings = ScalaPactSettings(None, None, None, None, None, None, None, None, None)
+  def default: ScalaPactSettings =
+    ScalaPactSettings(None, None, None, None, None, None, None, None, None)
 
   val parseArguments: Seq[String] => ScalaPactSettings = args => (Helpers.pair andThen convertToArguments)(args.toList)
 
@@ -87,7 +88,7 @@ object ScalaPactSettings {
       clientTimeout = b.clientTimeout.orElse(a.clientTimeout),
       outputPath = b.outputPath.orElse(a.outputPath),
       publishResultsEnabled = b.publishResultsEnabled.orElse(a.publishResultsEnabled),
-      enablePending = b.enablePending.orElse(a.enablePending)
+      pendingPactSettings = a.pendingPactSettings.orElse(b.pendingPactSettings)
     )
 
   private lazy val convertToArguments: Map[String, String] => ScalaPactSettings = argMap =>
@@ -101,11 +102,29 @@ object ScalaPactSettings {
         argMap.get("--clientTimeout").flatMap(Helpers.safeStringToLong).flatMap(i => Option(Duration(i, SECONDS))),
       outputPath = argMap.get("--out"),
       publishResultsEnabled = calculateBrokerPublishData(argMap),
-      enablePending = argMap.get("--enablePending").flatMap(Helpers.safeStringToBoolean)
+      pendingPactSettings = calculatePendingPactSettings(argMap)
     )
 
   private def calculateBrokerPublishData(argMap: Map[String, String]): Option[BrokerPublishData] = {
     val buildUrl = argMap.get("--publishResultsBuildUrl")
     argMap.get("--publishResultsVersion").map(BrokerPublishData(_, buildUrl))
+  }
+
+  private def calculatePendingPactSettings(argMap: Map[String, String]): Option[PendingPactSettings] = {
+    val wipSince      = argMap.get("--includeWipPactsSince").flatMap(Helpers.safeStringToDateTime)
+    val enablePending = argMap.get("--enablePending").flatMap(Helpers.safeStringToBoolean)
+    (wipSince, enablePending) match {
+      case (Some(wipSince), Some(false)) =>
+        PactLogger.warn(
+          "WIP pacts cannot be retrieved if --enablePending is set to false. Setting --enablePending to true."
+        )
+        Some(PendingPactSettings.IncludeWipPacts(wipSince))
+      case (Some(wipSince), _) =>
+        Some(PendingPactSettings.IncludeWipPacts(wipSince))
+      case (_, Some(true)) =>
+        Some(PendingPactSettings.PendingEnabled)
+      case (_, Some(false)) => Some(PendingPactSettings.PendingDisabled)
+      case (_, _)           => None
+    }
   }
 }

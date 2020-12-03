@@ -24,7 +24,7 @@ final case class PactsForVerificationSettings(
     providerName: String,
     consumerVersionSelectors: List[ConsumerVersionSelector],
     providerVersionTags: List[String],
-    includePendingStatus: Boolean,
+    pendingPactSettings: PendingPactSettings,
     pactBrokerAuthorization: Option[PactBrokerAuthorization],
     pactBrokerClientTimeout: Option[Duration],
     sslContextName: Option[String]

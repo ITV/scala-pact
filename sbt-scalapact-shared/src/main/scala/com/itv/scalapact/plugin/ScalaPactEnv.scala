@@ -1,6 +1,6 @@
 package com.itv.scalapact.plugin
 
-import com.itv.scalapact.shared.{BrokerPublishData, ScalaPactSettings}
+import com.itv.scalapact.shared.{BrokerPublishData, PendingPactSettings, ScalaPactSettings}
 
 import scala.concurrent.duration._
 
@@ -13,7 +13,7 @@ case class ScalaPactEnv(
     clientTimeout: Option[Duration],
     outputPath: Option[String],
     publishResultsEnabled: Option[BrokerPublishData],
-    enablePending: Option[Boolean]
+    pendingPactSettings: Option[PendingPactSettings]
 ) {
   def +(other: ScalaPactEnv): ScalaPactEnv =
     ScalaPactEnv.append(this, other)
@@ -45,7 +45,8 @@ case class ScalaPactEnv(
   def enablePublishResults(providerVersion: String, buildUrl: Option[String]): ScalaPactEnv =
     this.copy(publishResultsEnabled = Option(BrokerPublishData(providerVersion, buildUrl)))
 
-  def enablePendingStatus: ScalaPactEnv = this.copy(enablePending = Some(true))
+  def withPendingPactSettings(settings: PendingPactSettings): ScalaPactEnv =
+    this.copy(pendingPactSettings = Some(settings))
 
   def toSettings: ScalaPactSettings =
     ScalaPactSettings(
@@ -57,7 +58,7 @@ case class ScalaPactEnv(
       clientTimeout,
       outputPath,
       publishResultsEnabled,
-      enablePending
+      pendingPactSettings
     )
 
 }
@@ -76,7 +77,7 @@ object ScalaPactEnv {
       Option(Duration(1, SECONDS)),
       None, // "target/pacts"
       None, // false
-      None  // false
+      None
     )
 
   def defaults: ScalaPactEnv =
@@ -94,6 +95,6 @@ object ScalaPactEnv {
       clientTimeout = b.clientTimeout.orElse(a.clientTimeout),
       outputPath = b.outputPath.orElse(a.outputPath),
       publishResultsEnabled = b.publishResultsEnabled.orElse(a.publishResultsEnabled),
-      enablePending = b.enablePending.orElse(a.enablePending)
+      pendingPactSettings = b.pendingPactSettings.orElse(a.pendingPactSettings)
     )
 }

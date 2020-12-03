@@ -1,5 +1,7 @@
 package com.itv.scalapact.argonaut62
 
+import java.time.format.DateTimeFormatter
+
 import argonaut.Argonaut._
 import argonaut.{Parse, _}
 import com.itv.scalapact.shared.Notice._
@@ -113,10 +115,11 @@ object PactImplicits {
     for {
       providerState  <- cur.get[Option[String]]("providerState")
       provider_state <- cur.get[Option[String]]("provider_state")
-      description    <- cur.get[String]("description")
-      request        <- cur.get[InteractionRequest]("request")
-      response       <- cur.get[InteractionResponse]("response")
-    } yield Interaction(providerState.orElse(provider_state), description, request, response)
+      ps = providerState.orElse(provider_state).filterNot(_.isEmpty)
+      description <- cur.get[String]("description")
+      request     <- cur.get[InteractionRequest]("request")
+      response    <- cur.get[InteractionResponse]("response")
+    } yield Interaction(ps, description, request, response)
   }
 
   implicit lazy val InteractionCodecJson: EncodeJson[Interaction] = EncodeJson[Interaction] { i =>
@@ -185,10 +188,12 @@ object PactImplicits {
 
   implicit lazy val pactsForVerificationRequestEncoder: EncodeJson[PactsForVerificationRequest] =
     EncodeJson[PactsForVerificationRequest] { r =>
+      val wipPactString = r.includeWipPactsSince.map(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format)
       Json.obj(
         "consumerVersionSelectors" -> r.consumerVersionSelectors.asJson,
         "providerVersionTags"      -> r.providerVersionTags.asJson,
-        "includePendingStatus"     -> r.includePendingStatus.asJson
+        "includePendingStatus"     -> r.includePendingStatus.asJson,
+        "includeWipPactsSince"     -> wipPactString.asJson
       )
     }
 

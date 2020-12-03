@@ -2,6 +2,7 @@ package com.itv.scalapact.shared.utils
 
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import java.time.{LocalDate, LocalDateTime, OffsetDateTime, OffsetTime, ZoneOffset}
 
 import com.itv.scalapact.shared.utils.ColourOutput.ColouredString
 
@@ -52,6 +53,15 @@ object Helpers {
   def safeStringToDouble(str: String): Option[Double] = Try(str.toDouble).toOption.whenEmpty(
     PactLogger.error(s"Failed to convert string '$str' to number (double)".red)
   )
+
+  def safeStringToDateTime(str: String): Option[OffsetDateTime] =
+    (Try(OffsetDateTime.parse(str)) orElse
+      Try(LocalDate.parse(str).atTime(OffsetTime.parse("00:00Z"))) orElse
+      Try(LocalDateTime.parse(str).atOffset(ZoneOffset.UTC))).toOption.whenEmpty(
+      PactLogger.error(
+        s"Failed to convert string '$str' to date. Should be one of OffsetDateTime, LocalDateTime, LocalDate.".red
+      )
+    )
 
   val urlEncode: String => Either[String, String] = str => {
     try Right(

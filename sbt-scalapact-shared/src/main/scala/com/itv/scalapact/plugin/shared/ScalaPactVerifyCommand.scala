@@ -37,19 +37,25 @@ object ScalaPactVerifyCommand {
     val pactVerifySettings = {
       if (scalaPactSettings.localPactFilePath.isDefined)
         LocalPactVerifySettings(combinedPactStates)
-      else if (consumerVersionSelectors.nonEmpty)
+      else if (consumerVersionSelectors.nonEmpty) {
+        val pendingPactSettings = scalaPactSettings.pendingPactSettings.getOrElse {
+          includePendingStatus match {
+            case true  => PendingPactSettings.PendingEnabled
+            case false => PendingPactSettings.PendingDisabled
+          }
+        }
         PactsForVerificationSettings(
           combinedPactStates,
           pactBrokerAddress,
           providerName,
           consumerVersionSelectors.toList,
           providerVersionTags.toList,
-          scalaPactSettings.enablePending.getOrElse(includePendingStatus),
+          pendingPactSettings,
           pactBrokerAuthorization,
           Some(pactBrokerClientTimeout),
           sslContextName
         )
-      else {
+      } else {
         val versionedConsumers =
           consumerNames.map(VersionedConsumer.fromName) ++
             versionedConsumerNames.map(v => VersionedConsumer(v._1, v._2)) ++

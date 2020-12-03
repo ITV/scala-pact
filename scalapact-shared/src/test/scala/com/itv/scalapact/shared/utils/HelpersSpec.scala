@@ -1,5 +1,7 @@
 package com.itv.scalapact.shared.utils
 
+import java.time.{OffsetDateTime, ZoneOffset}
+
 import org.scalatest.{FunSpec, Matchers}
 
 class HelpersSpec extends FunSpec with Matchers {
@@ -17,6 +19,15 @@ class HelpersSpec extends FunSpec with Matchers {
       Helpers.pairTuples(List(1, 2, 3, 4)) shouldEqual List((1, 2), (3, 4))
       Helpers.pairTuples(List("a", "b", "c")) shouldEqual List(("a", "b"))
 
+    }
+
+    it("should parse various date strings") {
+      Helpers.safeStringToDateTime("2020-08-06") shouldBe
+        Some(OffsetDateTime.of(2020, 8, 6, 0, 0, 0, 0, ZoneOffset.UTC))
+      Helpers.safeStringToDateTime("2020-08-06T10:30:30") shouldBe
+        Some(OffsetDateTime.of(2020, 8, 6, 10, 30, 30, 0, ZoneOffset.UTC))
+      Helpers.safeStringToDateTime("2020-08-06T10:30:30+01:00") shouldBe
+        Some(OffsetDateTime.of(2020, 8, 6, 10, 30, 30, 0, ZoneOffset.ofHours(1)))
     }
 
   }

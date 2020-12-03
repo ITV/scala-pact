@@ -2,7 +2,7 @@ package com.example.provider
 
 import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
 import com.itv.scalapact.PactVerifySuite
-import com.itv.scalapact.shared.{ConsumerVersionSelector, PactBrokerAuthorization, ProviderStateResult}
+import com.itv.scalapact.shared.{ConsumerVersionSelector, PactBrokerAuthorization, ProviderStateResult, PendingPactSettings}
 
 import scala.concurrent.duration._
 
@@ -30,7 +30,7 @@ class VerifyContractsSpec extends FunSpec with Matchers with BeforeAndAfterAll w
             "scala-pact-provider",
             List(consumer),
             List(),
-            includePendingStatus = false,
+            PendingPactSettings.PendingDisabled,
             None,
             //again, these are publicly known creds for a test pact-broker
             PactBrokerAuthorization(pactBrokerCredentials = ("dXfltyFMgNOFZAxr8io9wJ37iUpY42M", "O5AIZWxelWbLvqMd8PkAVycBJh2Psyg1"), ""),

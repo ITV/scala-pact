@@ -171,7 +171,7 @@ trait ScalaPactVerifyDsl {
           clientTimeout = Some(clientTimeout),
           outputPath = None,
           publishResultsEnabled = publishResultsEnabled,
-          enablePending = None
+          pendingPactSettings = None
         )
 
         val (verifySettings, scalaPactSettings) = sourceType match {
@@ -252,7 +252,7 @@ trait ScalaPactVerifyDsl {
                 providerName,
                 consumerVersionSelectors,
                 providerVersionTags,
-                includePendingStatus,
+                pendingPactSettings,
                 publishResultsEnabled,
                 pactBrokerAuthorization,
                 pactBrokerClientTimeout
@@ -261,7 +261,7 @@ trait ScalaPactVerifyDsl {
               providerStates = providerStateFunc,
               pactBrokerAddress = url,
               providerName = providerName,
-              includePendingStatus = includePendingStatus,
+              pendingPactSettings = pendingPactSettings,
               consumerVersionSelectors = consumerVersionSelectors,
               providerVersionTags = providerVersionTags,
               pactBrokerAuthorization = pactBrokerAuthorization,
@@ -287,7 +287,8 @@ trait ScalaPactVerifyDsl {
 
   sealed trait PactSourceType
 
-  case class loadFromLocal(path: String) extends PactSourceType
+  case class loadFromLocal(path: String)    extends PactSourceType
+  case class pactAsJsonString(json: String) extends PactSourceType
 
   case class pactBrokerUseLatest(
       url: String,
@@ -348,13 +349,39 @@ trait ScalaPactVerifyDsl {
       provider: String,
       consumerVersionSelectors: List[ConsumerVersionSelector],
       providerVersionTags: List[String],
-      includePendingStatus: Boolean,
+      pendingPactSettings: PendingPactSettings,
       publishResultsEnabled: Option[BrokerPublishData],
       pactBrokerAuthorization: Option[PactBrokerAuthorization],
       pactBrokerClientTimeout: Option[Duration]
-  ) extends PactSourceType
+  ) extends PactSourceType {
+    def withPendingPactSettings(settings: PendingPactSettings): pactBrokerWithVersionSelectors =
+      this.copy(pendingPactSettings = settings)
+    def withBrokerClientTimeout(duration: Duration): pactBrokerWithVersionSelectors =
+      this.copy(pactBrokerClientTimeout = Some(duration))
+    def withPactBrokerAuth(auth: PactBrokerAuthorization): pactBrokerWithVersionSelectors =
+      this.copy(pactBrokerAuthorization = Some(auth))
+    def withPublishData(data: BrokerPublishData): pactBrokerWithVersionSelectors =
+      this.copy(publishResultsEnabled = Some(data))
+  }
 
-  case class pactAsJsonString(json: String) extends PactSourceType
+  object pactBrokerWithVersionSelectors {
+    def apply(
+        url: String,
+        provider: String,
+        consumerVersionSelectors: List[ConsumerVersionSelector],
+        providerVersionTags: List[String]
+    ): pactBrokerWithVersionSelectors =
+      pactBrokerWithVersionSelectors(
+        url,
+        provider,
+        consumerVersionSelectors,
+        providerVersionTags,
+        PendingPactSettings.PendingDisabled,
+        None,
+        None,
+        None
+      )
+  }
 
   class ScalaPactVerifyFailed extends Exception
 
