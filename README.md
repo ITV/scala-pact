@@ -6,12 +6,18 @@ Scala-Pact is intended for Scala developers who are looking for a better way to 
 
 ## Latest version is 2.4.0
 
-Scala-Pact now has two branches based on SBT requirements.
+Scala-Pact currently only supports [v2 of the pact specification](https://github.com/pact-foundation/pact-specification/tree/version-2). Support for v3 is a future goal of the project. 
+
+### Scala-Pact >= 3.0.x 
+
+Before this version, the project versioning did not follow semantic versioning. From this point onwards, the version format will be `major.minor.patch`, and it should be noted that the `3` in the version number does *not* correspond to the version supporting v3 of the pact spec (for the time-being, at least).
+
+Scala-Pact now has two branches based on SBT requirements. 
 
 #### SBT 1.x compatible (Latest 2.4.0)
 
 All development going forward begins at `2.3.x` and resides on the `master` branch.
-For the sake of the maintainer's sanity, version 2.3.x and beyond will only support Scala 2.12 and SBT 1.x or greater.
+For the sake of the maintainer's sanity, version 2.3.x and beyond will only support Scala 2.12 and SBT 1.x or greater. The project is currently cross-compiled across scala 2.12.12 and 2.13.4. 
 
 #### SBT 0.13.x compatible (Latest 2.2.5)
 
@@ -45,7 +51,7 @@ enablePlugins(ScalaPactPlugin)
         
 libraryDependencies ++= Seq(
   "com.itv"       %% "scalapact-scalatest-suite"   % "2.4.0" % "test",
-  "org.scalatest" %% "scalatest"             % "3.0.5"  % "test"
+  "org.scalatest" %% "scalatest"                   % "3.0.5"  % "test"
 )
 ```
 
@@ -68,9 +74,9 @@ enablePlugins(ScalaPactPlugin)
         
 libraryDependencies ++= Seq(
   "com.itv"       %% "scalapact-circe-0-13"   % "2.4.0" % "test",
-  "com.itv"       %% "scalapact-http4s-0-21" % "2.4.0" % "test",
-  "com.itv"       %% "scalapact-scalatest"   % "2.4.0" % "test",
-  "org.scalatest" %% "scalatest"             % "3.0.5"  % "test"
+  "com.itv"       %% "scalapact-http4s-0-21"  % "2.4.0" % "test",
+  "com.itv"       %% "scalapact-scalatest"    % "2.4.0" % "test",
+  "org.scalatest" %% "scalatest"              % "3.0.5" % "test"
 )
 ```
 
@@ -84,7 +90,7 @@ Thanks to the way SBT works, that one plugin line will work in most cases, but i
 ```scala
  libraryDependencies ++= Seq(
    "com.itv" %% "scalapact-argonaut-6-2" % "2.4.0",
-   "com.itv" %% "scalapact-http4s-0-21" % "2.4.0"
+   "com.itv" %% "scalapact-http4s-0-21"  % "2.4.0"
  )
  
  addSbtPlugin("com.itv" % "sbt-scalapact-nodeps" % "2.4.0")

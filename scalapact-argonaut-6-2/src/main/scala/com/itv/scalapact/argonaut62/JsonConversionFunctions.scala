@@ -23,9 +23,6 @@ object JsonConversionFunctions extends IJsonConversionFunctions {
       case j: Json if j.isObject =>
         IrNode(label, jsonObjectToIrNodeList(j, pathToParent)).withPath(pathToParent)
 
-      case j: Json if j.isNull =>
-        IrNode(label, IrNullNode).withPath(pathToParent)
-
       case j: Json if j.isNumber =>
         IrNode(label, j.number.flatMap(_.toDouble).map(d => IrNumberNode(d))).withPath(pathToParent)
 
@@ -34,6 +31,9 @@ object JsonConversionFunctions extends IJsonConversionFunctions {
 
       case j: Json if j.isString =>
         IrNode(label, j.string.map(IrStringNode)).withPath(pathToParent)
+
+      case _ =>
+        IrNode(label, IrNullNode).withPath(pathToParent)
     }
 
   private def jsonObjectToIrNodeList(json: Json, pathToParent: IrNodePath): List[IrNode] =
