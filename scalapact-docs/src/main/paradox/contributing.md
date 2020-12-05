@@ -46,7 +46,7 @@ This should help us keep a clean linear history.
 #### Code formatting
 We now use Scalafmt to format the code base, the main reason is practical, in that it reduces the diffs in code submissions.
 
-Please install Scalafmt and run it before submitting your code review.
+Please install Scalafmt and run it before submitting your code review. Your build will fail if you have not done this!
 
 #### Testing Scala-Pact
 
