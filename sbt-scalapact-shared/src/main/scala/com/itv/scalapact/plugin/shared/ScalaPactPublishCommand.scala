@@ -32,9 +32,7 @@ object ScalaPactPublishCommand {
 
     if (versionToPublishAs.contains("SNAPSHOT") && !allowSnapshotPublish) {
       PactLogger.error("Snapshot pact file publishing not permitted".red.bold)
-      PactLogger.error("Publishing of pact contracts against snapshot versions is not allowed by default.".yellow)
-      PactLogger.error("Pact broker does not cope well with snapshot contracts.".yellow)
-      PactLogger.error("To enable this feature, add \"allowSnapshotPublish := true\" to your pact.sbt file.".yellow)
+      PactLogger.error("To enable this feature, remove \"allowSnapshotPublish := false\" from your pact.sbt file.".yellow)
     } else {
       val publishSettings = PactPublishSettings(
         pactBrokerAddress,

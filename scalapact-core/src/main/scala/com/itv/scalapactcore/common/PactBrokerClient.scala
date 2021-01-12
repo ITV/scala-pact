@@ -260,12 +260,11 @@ class PactBrokerClient(implicit
     PactBrokerAddressValidation.checkPactBrokerAddress(brokerAddress) match {
       case Left(err) => List(PublishFailed("Validation error", err))
       case Right(address) =>
-        val version = settings.projectVersion.replace("-SNAPSHOT", ".x")
         pacts.map(
           publishSinglePact(
             client,
             address,
-            version,
+            settings.projectVersion,
             settings.tagsToPublishWith,
             settings.sslContextName,
             settings.pactBrokerAuthorization

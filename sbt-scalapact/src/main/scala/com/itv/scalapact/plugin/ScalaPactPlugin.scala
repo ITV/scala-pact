@@ -102,7 +102,7 @@ object ScalaPactPlugin extends AutoPlugin {
     val allowSnapshotPublish: SettingKey[Boolean] =
       SettingKey[Boolean](
         "allowSnapshotPublish",
-        "Flag to permit publishing of snapshot pact files to pact broker. Default is false."
+        "Flag to permit publishing of snapshot pact files to pact broker. Default is true."
       )
 
     val pactBrokerClientTimeout: SettingKey[Duration] =
@@ -151,7 +151,7 @@ object ScalaPactPlugin extends AutoPlugin {
     providerVersionTags := Seq.empty[String],
     pactContractVersion := "",
     pactContractTags := Seq.empty[String],
-    allowSnapshotPublish := false,
+    allowSnapshotPublish := true,
     scalaPactEnv := ScalaPactEnv.empty,
     pactBrokerCredentials := (("", ""): (String, String)),
     pactBrokerToken := "",
