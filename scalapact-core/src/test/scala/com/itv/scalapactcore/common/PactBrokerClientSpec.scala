@@ -11,6 +11,7 @@ import com.itv.scalapact.shared.http.{
 import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
 import org.scalatest.{BeforeAndAfter, FunSpec, Matchers}
 
+import java.net.URLEncoder
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration.Duration
 
@@ -42,9 +43,19 @@ class PactBrokerClientSpec extends FunSpec with Matchers with BeforeAndAfter {
     metadata = None
   )
 
+  private val providerUrl = "http://localhost/pacticipants/provider-service"
+  def getProviderUrl(providerVersion: String, tag: String): String =
+    providerUrl + "/versions/" + providerVersion + "/tags/" + URLEncoder.encode(tag, "UTF-8")
+
   private val publishUrl = "http://localhost/pacts/provider/provider-service/consumer/consumer-service/latest/{tag}"
 
   private val _links = Map(
+    "pb:provider" -> LinkValues(
+      title = Option("Provider url"),
+      name = None,
+      href = providerUrl,
+      templated = Option(true)
+    ),
     "pb:publish-verification-results" -> LinkValues(
       title = Option("Publish result url"),
       name = None,
@@ -85,12 +96,13 @@ class PactBrokerClientSpec extends FunSpec with Matchers with BeforeAndAfter {
     val failedResult                = PactVerifyResultInContext(Left("failed"), "context")
     val failedResults               = List(successfulResult, failedResult)
     val pactVerifyResults           = List(PactVerifyResult(simpleWithLinks, successfulResults))
+    val providerVersionTags         = List("master")
 
     it("should publish successful results") {
       val results           = successfulResults
       val pactVerifyResults = List(PactVerifyResult(simpleWithLinks, results))
 
-      resultPublisher.publishVerificationResults(pactVerifyResults, brokerPublishData, None, None, None)
+      resultPublisher.publishVerificationResults(pactVerifyResults, brokerPublishData, Nil, None, None, None)
 
       val successfulRequest = SimpleRequest(
         publishUrl,
@@ -103,11 +115,43 @@ class PactBrokerClientSpec extends FunSpec with Matchers with BeforeAndAfter {
       requests shouldBe ArrayBuffer(successfulRequest)
     }
 
+    it("should publish successful results with provider version tags") {
+      val results           = successfulResults
+      val pactVerifyResults = List(PactVerifyResult(simpleWithLinks, results))
+
+      resultPublisher.publishVerificationResults(
+        pactVerifyResults,
+        brokerPublishData,
+        providerVersionTags,
+        pactBrokerAuthorization = None,
+        brokerClientTimeout = None,
+        sslContextName = None
+      )
+
+      val successfulTagRequest = SimpleRequest(
+        baseUrl = getProviderUrl(brokerPublishData.providerVersion, providerVersionTags.head),
+        endPoint = "",
+        method = HttpMethod.POST,
+        headers = Map("Content-Type" -> "application/json; charset=UTF-8"),
+        body = None,
+        sslContextName = None
+      )
+      val successfulVerificationRequest = SimpleRequest(
+        publishUrl,
+        "",
+        HttpMethod.POST,
+        Map("Content-Type" -> "application/json; charset=UTF-8"),
+        Option("""{ "success": true, "providerApplicationVersion": "1.0.0", "buildUrl": "http://buildUrl.com" }"""),
+        None
+      )
+      requests shouldBe ArrayBuffer(successfulTagRequest, successfulVerificationRequest)
+    }
+
     it("should publish successful results without buildUrl") {
       val results           = successfulResults
       val pactVerifyResults = List(PactVerifyResult(simpleWithLinks, results))
 
-      resultPublisher.publishVerificationResults(pactVerifyResults, brokerPublishDataNoBuildUrl, None, None, None)
+      resultPublisher.publishVerificationResults(pactVerifyResults, brokerPublishDataNoBuildUrl, Nil, None, None, None)
 
       val successfulRequest = SimpleRequest(
         publishUrl,
@@ -123,7 +167,7 @@ class PactBrokerClientSpec extends FunSpec with Matchers with BeforeAndAfter {
     it("should publish failure results") {
       val pactVerifyResults = List(PactVerifyResult(simpleWithLinks, failedResults))
 
-      resultPublisher.publishVerificationResults(pactVerifyResults, brokerPublishData, None, None, None)
+      resultPublisher.publishVerificationResults(pactVerifyResults, brokerPublishData, Nil, None, None, None)
 
       val failedRequest = SimpleRequest(
         publishUrl,
@@ -136,11 +180,30 @@ class PactBrokerClientSpec extends FunSpec with Matchers with BeforeAndAfter {
       requests shouldBe ArrayBuffer(failedRequest)
     }
 
-    it("should not publish if no _links available") {
-      val results           = successfulResults
-      val pactVerifyResults = List(PactVerifyResult(simple, results))
+    it("should not publish if no pb:publish-verification-results available in _links") {
+      val results = successfulResults
+      val pactVerifyResults = List(
+        PactVerifyResult(
+          simple.copy(_links = Option(_links.filterNot(_._1 == "pb:publish-verification-results"))),
+          results
+        )
+      )
 
-      resultPublisher.publishVerificationResults(pactVerifyResults, brokerPublishData, None, None, None)
+      resultPublisher.publishVerificationResults(pactVerifyResults, brokerPublishData, Nil, None, None, None)
+
+      requests shouldBe ArrayBuffer.empty[SimpleRequest]
+    }
+
+    it("should not publish if no pb:provider available in _links") {
+      val results = successfulResults
+      val pactVerifyResults = List(
+        PactVerifyResult(
+          simple.copy(_links = Option(_links.filterNot(_._1 == "pb:provider"))),
+          results
+        )
+      )
+
+      resultPublisher.publishVerificationResults(pactVerifyResults, brokerPublishData, Nil, None, None, None)
 
       requests shouldBe ArrayBuffer.empty[SimpleRequest]
     }
@@ -153,6 +216,7 @@ class PactBrokerClientSpec extends FunSpec with Matchers with BeforeAndAfter {
       resultPublisher.publishVerificationResults(
         pactVerifyResults,
         brokerPublishData,
+        Nil,
         PactBrokerAuthorization(("username", "password"), ""),
         None,
         None
@@ -176,6 +240,7 @@ class PactBrokerClientSpec extends FunSpec with Matchers with BeforeAndAfter {
       resultPublisher.publishVerificationResults(
         pactVerifyResults,
         brokerPublishData,
+        Nil,
         PactBrokerAuthorization(("", ""), token),
         None,
         None
@@ -193,7 +258,7 @@ class PactBrokerClientSpec extends FunSpec with Matchers with BeforeAndAfter {
     }
 
     it("should have no Authorization header when no auth config is provided") {
-      resultPublisher.publishVerificationResults(pactVerifyResults, brokerPublishData, None, None, None)
+      resultPublisher.publishVerificationResults(pactVerifyResults, brokerPublishData, Nil, None, None, None)
 
       val successfulRequest = SimpleRequest(
         publishUrl,

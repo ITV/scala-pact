@@ -265,29 +265,33 @@ class PactBrokerClient(implicit
       providerVersion: String,
       providerVersionTags: List[String],
       pactBrokerAuthorization: Option[PactBrokerAuthorization]
-  ): Boolean = providerVersionTags
-    .map { tag =>
-      client.doRequest(
-        SimpleRequest(
-          baseUrl = providerUrl + "/versions/" + providerVersion + "/tags/" + URLEncoder.encode(tag, "UTF-8"),
-          endPoint = "",
-          method = HttpMethod.POST,
-          headers =
-            Map("Content-Type" -> "application/json; charset=UTF-8") ++ pactBrokerAuthorization.map(_.asHeader).toList,
-          body = None,
-          sslContextName = None
+  ): Boolean = {
+    val tagResponses = providerVersionTags
+      .map { tag =>
+        val response = client.doRequest(
+          SimpleRequest(
+            baseUrl = providerUrl + "/versions/" + providerVersion + "/tags/" + URLEncoder.encode(tag, "UTF-8"),
+            endPoint = "",
+            method = HttpMethod.POST,
+            headers = Map("Content-Type" -> "application/json; charset=UTF-8") ++ pactBrokerAuthorization
+              .map(_.asHeader)
+              .toList,
+            body = None,
+            sslContextName = None
+          )
         )
-      )
-    }
-    .collectFirst[Boolean] {
-      case Left(e) =>
-        PactLogger.error(s"Unable to tag verification result: ${e.getMessage}".red)
-        false
-      case Right(r) if !r.is2xx =>
-        PactLogger.error(prettifyBrokerError("Tagging of verification results failed.", r))
-        false
-    }
-    .getOrElse(true)
+        response match {
+          case Left(e) =>
+            PactLogger.error(s"Unable to tag verification result: ${e.getMessage}".red)
+          case Right(r) if !r.is2xx =>
+            PactLogger.error(prettifyBrokerError("Tagging of verification results failed.", r))
+          case Right(_) =>
+            PactLogger.message(s"Created tag $tag for provider version $providerVersion.")
+        }
+        response
+      }
+    tagResponses.forall(_.exists(_.is2xx))
+  }
 
   private def body(brokerPublishData: BrokerPublishData, success: Boolean): Option[String] = {
     val buildUrl = brokerPublishData.buildUrl.fold("")(u => s""", "buildUrl": "$u"""")

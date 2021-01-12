@@ -57,11 +57,12 @@ private[verifier] class PrePactsForVerificationVerifier(
 
     scalaPactSettings.publishResultsEnabled.foreach { publishData =>
       brokerClient.publishVerificationResults(
-        pactVerifyResults,
-        publishData,
-        pactVerifySettings.pactBrokerAuthorization,
-        pactVerifySettings.pactBrokerClientTimeout,
-        pactVerifySettings.sslContextName
+        pactVerifyResults = pactVerifyResults,
+        brokerPublishData = publishData,
+        providerVersionTags = Nil,
+        pactBrokerAuthorization = pactVerifySettings.pactBrokerAuthorization,
+        brokerClientTimeout = pactVerifySettings.pactBrokerClientTimeout,
+        sslContextName = pactVerifySettings.sslContextName
       )
     }
 
