@@ -201,41 +201,93 @@ class PactBrokerClient(implicit
   def publishVerificationResults(
       pactVerifyResults: List[PactVerifyResult],
       brokerPublishData: BrokerPublishData,
+      providerVersionTags: List[String],
       pactBrokerAuthorization: Option[PactBrokerAuthorization],
       brokerClientTimeout: Option[Duration],
       sslContextName: Option[String]
   ): Unit = {
     val httpClient = httpClientBuilder.build(brokerClientTimeout.getOrElse(2.seconds), sslContextName, 2)
     pactVerifyResults.foreach { result =>
-      result.pact._links.flatMap(_.get("pb:publish-verification-results")).map(_.href) match {
-        case Some(link) =>
-          val success = !result.results.exists(_.result.isLeft)
-          val request = SimpleRequest(
-            link,
-            "",
-            HttpMethod.POST,
-            Map("Content-Type" -> "application/json; charset=UTF-8") ++ pactBrokerAuthorization.map(_.asHeader).toList,
-            body(brokerPublishData, success),
-            None
+      val publishedVerificationTags = result.pact._links
+        .flatMap(_.get("pb:provider"))
+        .map(_.href)
+        .map { providerUrl =>
+          publishVerificationResultTags(
+            httpClient,
+            providerUrl,
+            brokerPublishData.providerVersion,
+            providerVersionTags,
+            pactBrokerAuthorization
           )
-          httpClient.doRequest(request) match {
-            case Right(response) =>
-              if (response.is2xx) {
-                PactLogger.message(
-                  s"Verification results published for provider '${result.pact.provider.name}' and consumer '${result.pact.consumer.name}'"
-                )
-              } else {
-                PactLogger.error(prettifyBrokerError("Publish verification results failed.", response))
-              }
-            case Left(err) => PactLogger.error(s"Unable to publish verification results: $err".red)
-          }
-        case None =>
-          PactLogger.error(
-            "Unable to publish verification results as there is no pb:publish-verification-results link".red
-          )
+        }
+        .getOrElse {
+          PactLogger.error("Unable to publish verification results as there is no pb:provider link".red)
+          false
+        }
+
+      if (publishedVerificationTags) {
+        result.pact._links.flatMap(_.get("pb:publish-verification-results")).map(_.href) match {
+          case Some(link) =>
+            val success = !result.results.exists(_.result.isLeft)
+            val request = SimpleRequest(
+              link,
+              "",
+              HttpMethod.POST,
+              Map("Content-Type" -> "application/json; charset=UTF-8") ++ pactBrokerAuthorization
+                .map(_.asHeader)
+                .toList,
+              body(brokerPublishData, success),
+              None
+            )
+            httpClient.doRequest(request) match {
+              case Right(response) =>
+                if (response.is2xx) {
+                  PactLogger.message(
+                    s"Verification results published for provider '${result.pact.provider.name}' and consumer '${result.pact.consumer.name}'"
+                  )
+                } else {
+                  PactLogger.error(prettifyBrokerError("Publish verification results failed.", response))
+                }
+              case Left(err) => PactLogger.error(s"Unable to publish verification results: $err".red)
+            }
+          case None =>
+            PactLogger.error(
+              "Unable to publish verification results as there is no pb:publish-verification-results link".red
+            )
+        }
       }
     }
   }
+
+  private def publishVerificationResultTags(
+      client: IScalaPactHttpClient,
+      providerUrl: String,
+      providerVersion: String,
+      providerVersionTags: List[String],
+      pactBrokerAuthorization: Option[PactBrokerAuthorization]
+  ): Boolean = providerVersionTags
+    .map { tag =>
+      client.doRequest(
+        SimpleRequest(
+          baseUrl = providerUrl + "/versions/" + providerVersion + "/tags/" + URLEncoder.encode(tag, "UTF-8"),
+          endPoint = "",
+          method = HttpMethod.POST,
+          headers =
+            Map("Content-Type" -> "application/json; charset=UTF-8") ++ pactBrokerAuthorization.map(_.asHeader).toList,
+          body = None,
+          sslContextName = None
+        )
+      )
+    }
+    .collectFirst[Boolean] {
+      case Left(e) =>
+        PactLogger.error(s"Unable to tag verification result: ${e.getMessage}".red)
+        false
+      case Right(r) if !r.is2xx =>
+        PactLogger.error(prettifyBrokerError("Tagging of verification results failed.", r))
+        false
+    }
+    .getOrElse(true)
 
   private def body(brokerPublishData: BrokerPublishData, success: Boolean): Option[String] = {
     val buildUrl = brokerPublishData.buildUrl.fold("")(u => s""", "buildUrl": "$u"""")

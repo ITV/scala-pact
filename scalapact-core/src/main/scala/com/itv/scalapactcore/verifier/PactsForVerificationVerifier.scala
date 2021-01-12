@@ -42,6 +42,7 @@ private[verifier] class PactsForVerificationVerifier(
       pactBrokerClient.publishVerificationResults(
         resultsAndProperties.map(_._1),
         publishData,
+        verificationSettings.providerVersionTags,
         verificationSettings.pactBrokerAuthorization,
         verificationSettings.pactBrokerClientTimeout,
         verificationSettings.sslContextName
