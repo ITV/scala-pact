@@ -2,7 +2,7 @@ package provider
 
 import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
 import com.itv.scalapact.PactVerifySuite
-import com.itv.scalapact.shared.{BrokerPublishData, ConsumerVersionSelector, PactBrokerAuthorization, PendingPactSettings, ProviderStateResult}
+import com.itv.scalapact.shared.{BrokerPublishData, ConsumerVersionSelector, PactBrokerAuthorization, PendingPactSettings}
 import scalaj.http._
 
 import scala.concurrent.duration._
@@ -25,7 +25,6 @@ class VerifyContractsSpec extends FunSpec with Matchers with BeforeAndAfterAll w
       .header(authHeader._1, authHeader._2)
   }
   override def beforeAll(): Unit = {
-    val authHeader = brokerAuth.map(_.asHeader).get
     val _ = tagRequest.method("DELETE").asString
     ()
   }
@@ -60,7 +59,8 @@ class VerifyContractsSpec extends FunSpec with Matchers with BeforeAndAfterAll w
 
       val fetchTag = tagRequest.asString
 
-      fetchTag.code shouldBe 200
+      //check tag exists in broker
+      fetchTag.code shouldBe 204
     }
   }
 
