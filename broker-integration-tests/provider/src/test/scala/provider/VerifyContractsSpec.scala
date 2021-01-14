@@ -20,9 +20,7 @@ class VerifyContractsSpec extends FunSpec with Matchers with BeforeAndAfterAll w
     val authHeader = brokerAuth.map(_.asHeader).get
     Http(
       s"https://test.pact.dius.com.au/pacticipants/$providerName/versions/$providerVersion/tags/$providerTag"
-    )
-      .method("DELETE")
-      .header(authHeader._1, authHeader._2)
+    ).header(authHeader._1, authHeader._2)
   }
   override def beforeAll(): Unit = {
     val _ = tagRequest.method("DELETE").asString
