@@ -272,7 +272,7 @@ class PactBrokerClient(implicit
           SimpleRequest(
             baseUrl = providerUrl + "/versions/" + providerVersion + "/tags/" + URLEncoder.encode(tag, "UTF-8"),
             endPoint = "",
-            method = HttpMethod.POST,
+            method = HttpMethod.PUT,
             headers = Map("Content-Type" -> "application/json; charset=UTF-8") ++ pactBrokerAuthorization
               .map(_.asHeader)
               .toList,

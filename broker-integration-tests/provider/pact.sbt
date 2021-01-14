@@ -6,5 +6,5 @@ pactBrokerAddress := "https://test.pact.dius.com.au"
 pactBrokerCredentials := ("dXfltyFMgNOFZAxr8io9wJ37iUpY42M", "O5AIZWxelWbLvqMd8PkAVycBJh2Psyg1")
 consumerVersionSelectors := Seq(ConsumerVersionSelector("test", latest = true))
 providerVersionTags := List("master")
-providerName := "scala-pact-pending-test-provider"
+providerName := "scala-pact-integration-test-provider"
 pactBrokerClientTimeout := 5.seconds
