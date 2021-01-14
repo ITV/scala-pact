@@ -4,10 +4,10 @@ set -e
 
 source scripts/test-header.sh
 
-echo "Checking pending pacts tests"
+echo "Checking broker integration tests"
 echo "***********************"
 
-cd pending-pact-tests/consumer
+cd broker-integration-tests/consumer
 sbt clean update
 sbt "pactPublish --clientTimeout 5"
 cd ..
@@ -15,7 +15,7 @@ cd ..
 cd provider
 sbt clean update test
 
-echo "Testing using the CLI with --includeWipPactsSince"
+echo "Testing pending pacts using the CLI with --includeWipPactsSince"
 sbt run &
 echo "warming things up..."
 simple_countdown 10

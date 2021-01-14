@@ -17,6 +17,7 @@ libraryDependencies ++= {
     "org.slf4j"     % "slf4j-simple"               % "1.6.4",
     "org.scalatest" %% "scalatest"                 % "3.0.8" % "test",
     "com.itv"       %% "scalapact-scalatest-suite" % pactVersion % "test",
+    "org.scalaj"    %% "scalaj-http"               % "2.4.2" % "test",
     "io.circe"      %% "circe-parser"              % "0.13.0"
   )
 }

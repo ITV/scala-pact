@@ -9,8 +9,8 @@ import scala.io.{BufferedSource, Source}
 
 class ProviderClientSpec extends PactForgerSuite with FunSpecLike with Matchers {
 
-  val CONSUMER = "scala-pact-pending-test-consumer"
-  val PROVIDER = "scala-pact-pending-test-provider"
+  val CONSUMER = "scala-pact-integration-test-consumer"
+  val PROVIDER = "scala-pact-integration-test-provider"
 
   describe("Connecting to the Provider service") {
 

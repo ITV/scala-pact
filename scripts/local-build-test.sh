@@ -38,7 +38,7 @@ bash scripts/test-verifier.sh
 echo "Taking a breather... (3)"
 simple_countdown 5
 
-bash scripts/test-pending-pacts.sh
+bash scripts/broker-integration-tests.sh
 
 echo "Taking a breather... (4)"
 simple_countdown 5

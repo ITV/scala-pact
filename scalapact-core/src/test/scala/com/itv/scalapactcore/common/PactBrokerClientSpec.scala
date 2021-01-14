@@ -131,7 +131,7 @@ class PactBrokerClientSpec extends FunSpec with Matchers with BeforeAndAfter {
       val successfulTagRequest = SimpleRequest(
         baseUrl = getProviderUrl(brokerPublishData.providerVersion, providerVersionTags.head),
         endPoint = "",
-        method = HttpMethod.POST,
+        method = HttpMethod.PUT,
         headers = Map("Content-Type" -> "application/json; charset=UTF-8"),
         body = None,
         sslContextName = None
