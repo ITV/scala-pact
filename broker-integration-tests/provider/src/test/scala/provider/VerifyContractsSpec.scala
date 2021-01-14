@@ -58,7 +58,7 @@ class VerifyContractsSpec extends FunSpec with Matchers with BeforeAndAfterAll w
       val fetchTag = tagRequest.asString
 
       //check tag exists in broker
-      fetchTag.code shouldBe 204
+      fetchTag.code shouldBe 200
     }
   }
 
