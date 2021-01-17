@@ -1,11 +1,13 @@
 import java.io.File
+import com.itv.scalapact.plugin._
 
 organization := "com.example"
 
 name := "provider_pacts-for-verification"
 
-
 scalaVersion := "2.13.3"
+
+enablePlugins(ScalaPactPlugin)
 
 lazy val pactVersionFile: SettingKey[File] = settingKey[File]("location of scala-pact version for examples")
 pactVersionFile := baseDirectory.value.getParentFile.getParentFile / "version.sbt"

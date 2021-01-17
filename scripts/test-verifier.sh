@@ -15,6 +15,8 @@ echo "addSbtPlugin(\"com.itv\" % \"sbt-scalapact\" % \"$CORE_VERSION\")" >> $PLU
 cat > $PACT_CONFIG_FILE <<EOL
 import com.itv.scalapact.plugin.ScalaPactPlugin._
 
+enablePlugins(ScalaPactPlugin)
+
 providerStates := Seq(
 ("Resource with ID 1234 exists", (_: String) => {
  println("Injecting key 1234 into the database...")
