@@ -1,7 +1,7 @@
 package com.itv.scalapact.model
 
 import com.itv.scalapact.shared.IPactStubber
-import com.itv.scalapact.{ScalaPactContractWriter, ScalaPactMock, ScalaPactMockConfig}
+import com.itv.scalapact.{ScalaPactContractWriter, ScalaPactMock, ScalaPactMockConfig, ScalaPactMockServer}
 import com.itv.scalapact.shared.utils.Maps._
 import com.itv.scalapact.shared.http.{IScalaPactHttpClient, IScalaPactHttpClientBuilder, SslContextMap}
 import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
@@ -37,9 +37,29 @@ class ScalaPactDescription(
   ): A = {
     implicit val client: IScalaPactHttpClient =
       httpClientBuilder.build(2.seconds, sslContextName, 1)
-    ScalaPactMock.runConsumerIntegrationTest(strict)(
-      finalise
-    )(test)
+    ScalaPactMock.runConsumerIntegrationTest(strict)(finalise)(test)
+  }
+
+  /** Starts the `ScalaPactMockServer`, which tests can then be run against. It is important that the server be
+    * shutdown when no longer needed by invoking `stop()`.
+    */
+  def startServer()(implicit
+      httpClientBuilder: IScalaPactHttpClientBuilder,
+      options: ScalaPactOptions,
+      pactReader: IPactReader,
+      pactWriter: IPactWriter,
+      pactStubber: IPactStubber
+  ): ScalaPactMockServer = {
+    implicit val client: IScalaPactHttpClient =
+      httpClientBuilder.build(2.seconds, sslContextName, 1)
+    val pactDescriptionFinal = finalise(options)
+    val server               = ScalaPactMock.startServer(strict, pactDescriptionFinal)
+    if (pactDescriptionFinal.options.writePactFiles) {
+      ScalaPactContractWriter.writePactContracts(server.config.outputPath)(pactWriter)(
+        pactDescriptionFinal.withHeaderForSsl
+      )
+    }
+    server
   }
 
   /** Writes pacts described by this ScalaPactDescription to file without running any consumer tests
