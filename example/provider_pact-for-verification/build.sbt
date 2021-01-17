@@ -1,5 +1,4 @@
 import java.io.File
-import com.itv.scalapact.plugin._
 
 organization := "com.example"
 
