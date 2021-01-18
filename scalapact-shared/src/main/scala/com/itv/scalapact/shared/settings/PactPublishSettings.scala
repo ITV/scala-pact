@@ -1,4 +1,6 @@
-package com.itv.scalapact.shared
+package com.itv.scalapact.shared.settings
+
+import com.itv.scalapact.shared.PactBrokerAuthorization
 
 import scala.concurrent.duration.Duration
 

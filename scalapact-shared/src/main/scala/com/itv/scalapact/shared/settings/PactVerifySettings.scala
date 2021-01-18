@@ -1,6 +1,7 @@
-package com.itv.scalapact.shared
+package com.itv.scalapact.shared.settings
 
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
+import com.itv.scalapact.shared.{ConsumerVersionSelector, PactBrokerAuthorization, VersionedConsumer}
 
 import scala.concurrent.duration.Duration
 

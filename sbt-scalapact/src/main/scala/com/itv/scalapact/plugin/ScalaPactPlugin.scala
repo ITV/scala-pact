@@ -5,6 +5,7 @@ import com.itv.scalapact.json._
 import com.itv.scalapact.plugin.shared._
 import com.itv.scalapact.shared._
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
+import com.itv.scalapact.shared.settings.ScalaPactSettings
 import sbt.Keys._
 import sbt.plugins.JvmPlugin
 import sbt.{Def, _}

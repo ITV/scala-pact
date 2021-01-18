@@ -1,8 +1,8 @@
 package com.itv.scalapactcore.publisher
 
-import com.itv.scalapact.shared.{PactPublishSettings, ScalaPactSettings}
 import com.itv.scalapact.shared.http.IScalaPactHttpClientBuilder
 import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
+import com.itv.scalapact.shared.settings.{PactPublishSettings, ScalaPactSettings}
 import com.itv.scalapact.shared.utils.ColourOutput.ColouredString
 import com.itv.scalapactcore.common.{LocalPactFileLoader, PactBrokerClient}
 

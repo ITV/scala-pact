@@ -1,5 +1,6 @@
-package com.itv.scalapact.shared
+package com.itv.scalapact.shared.settings
 
+import com.itv.scalapact.shared.BrokerPublishData
 import com.itv.scalapact.shared.utils.{Helpers, PactLogger}
 
 import scala.concurrent.duration.{Duration, SECONDS}

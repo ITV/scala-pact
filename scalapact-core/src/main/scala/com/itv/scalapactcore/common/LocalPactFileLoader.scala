@@ -2,9 +2,10 @@ package com.itv.scalapactcore.common
 
 import java.io.File
 
-import com.itv.scalapact.shared.{Pact, ScalaPactSettings}
+import com.itv.scalapact.shared.Pact
 import com.itv.scalapact.shared.utils.ColourOutput._
 import com.itv.scalapact.shared.json.IPactReader
+import com.itv.scalapact.shared.settings.ScalaPactSettings
 import com.itv.scalapact.shared.utils.PactLogger
 
 object LocalPactFileLoader {

@@ -1,9 +1,9 @@
 package com.itv.scalapactcore.verifier
 
-import com.itv.scalapact.shared.{ConsumerVerifySettings, ScalaPactSettings}
 import com.itv.scalapact.shared.utils.ColourOutput.ColouredString
 import com.itv.scalapact.shared.http.IScalaPactHttpClient
 import com.itv.scalapact.shared.json.IPactReader
+import com.itv.scalapact.shared.settings.{ConsumerVerifySettings, ScalaPactSettings}
 import com.itv.scalapact.shared.utils.PactLogger
 import com.itv.scalapactcore.common.PactBrokerClient
 

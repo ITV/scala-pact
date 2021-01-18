@@ -1,4 +1,4 @@
-package com.itv.scalapact.shared
+package com.itv.scalapact.shared.settings
 
 import java.time.OffsetDateTime
 

@@ -6,6 +6,7 @@ import com.itv.scalapact.shared.http.IScalaPactHttpClient
 import com.itv.scalapact.shared.json.IPactReader
 import com.itv.scalapact.shared.utils.PactLogger
 import com.itv.scalapact.shared._
+import com.itv.scalapact.shared.settings.{PactsForVerificationSettings, ScalaPactSettings}
 import com.itv.scalapactcore.common.PactBrokerClient
 import com.itv.scalapactcore.verifier.PactsForVerificationVerifier.VerificationResult
 

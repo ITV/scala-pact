@@ -7,7 +7,8 @@ import cats.effect._
 import cats.implicits._
 import com.itv.scalapact.shared.http.SslContextMap
 import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
-import com.itv.scalapact.shared.{ScalaPactSettings, _}
+import com.itv.scalapact.shared._
+import com.itv.scalapact.shared.settings.ScalaPactSettings
 import javax.net.ssl.SSLContext
 import org.http4s.dsl.io._
 import org.http4s.implicits._

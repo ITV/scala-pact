@@ -5,6 +5,7 @@ import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 import com.itv.scalapact.shared._
 import com.itv.scalapact.shared.http.IScalaPactHttpClient
 import com.itv.scalapact.shared.json.IPactReader
+import com.itv.scalapact.shared.settings.ScalaPactSettings
 import com.itv.scalapact.shared.utils.PactLogger
 import com.itv.scalapactcore.common.matching.InteractionMatchers.matchResponse
 

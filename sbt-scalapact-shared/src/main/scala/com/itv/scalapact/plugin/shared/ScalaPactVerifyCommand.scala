@@ -5,6 +5,7 @@ import com.itv.scalapact.shared._
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
 import com.itv.scalapact.shared.http.IScalaPactHttpClientBuilder
 import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
+import com.itv.scalapact.shared.settings.{ConsumerVerifySettings, LocalPactVerifySettings, PactsForVerificationSettings, ScalaPactSettings}
 import com.itv.scalapact.shared.utils.PactLogger
 import com.itv.scalapactcore.verifier.Verifier
 

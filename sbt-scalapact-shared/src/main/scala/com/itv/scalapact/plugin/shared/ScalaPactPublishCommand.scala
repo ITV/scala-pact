@@ -4,6 +4,7 @@ import com.itv.scalapact.shared.utils.ColourOutput._
 import com.itv.scalapact.shared._
 import com.itv.scalapact.shared.http.IScalaPactHttpClientBuilder
 import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
+import com.itv.scalapact.shared.settings.{PactPublishSettings, ScalaPactSettings}
 import com.itv.scalapact.shared.utils.PactLogger
 import com.itv.scalapactcore.publisher.{PublishFailed, PublishResult, PublishSuccess, Publisher}
 

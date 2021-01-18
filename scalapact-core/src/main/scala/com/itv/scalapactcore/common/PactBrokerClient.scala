@@ -6,6 +6,7 @@ import com.itv.scalapact.shared.utils.ColourOutput._
 import com.itv.scalapact.shared._
 import com.itv.scalapact.shared.http._
 import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
+import com.itv.scalapact.shared.settings.{ConsumerVerifySettings, PactPublishSettings, PactsForVerificationSettings}
 import com.itv.scalapact.shared.utils.{Helpers, PactLogger}
 import com.itv.scalapactcore.common.PactBrokerHelpers._
 import com.itv.scalapactcore.publisher.{PublishFailed, PublishResult, PublishSuccess}
@@ -217,7 +218,8 @@ class PactBrokerClient(implicit
             providerUrl,
             brokerPublishData.providerVersion,
             providerVersionTags,
-            pactBrokerAuthorization
+            pactBrokerAuthorization,
+            sslContextName
           )
         }
         .getOrElse {
@@ -264,22 +266,14 @@ class PactBrokerClient(implicit
       providerUrl: String,
       providerVersion: String,
       providerVersionTags: List[String],
-      pactBrokerAuthorization: Option[PactBrokerAuthorization]
+      pactBrokerAuthorization: Option[PactBrokerAuthorization],
+      sslContextName: Option[String]
   ): Boolean = {
     val tagResponses = providerVersionTags
       .map { tag =>
-        val response = client.doRequest(
-          SimpleRequest(
-            baseUrl = providerUrl + "/versions/" + providerVersion + "/tags/" + URLEncoder.encode(tag, "UTF-8"),
-            endPoint = "",
-            method = HttpMethod.PUT,
-            headers = Map("Content-Type" -> "application/json; charset=UTF-8") ++ pactBrokerAuthorization
-              .map(_.asHeader)
-              .toList,
-            body = None,
-            sslContextName = None
-          )
-        )
+        val response = tagEndpointRequest(
+          client
+        )(providerUrl, providerVersion, tag, HttpMethod.PUT, pactBrokerAuthorization, sslContextName)
         response match {
           case Left(e) =>
             PactLogger.error(s"Unable to tag verification result: ${e.getMessage}".red)
@@ -293,6 +287,60 @@ class PactBrokerClient(implicit
     tagResponses.forall(_.exists(_.is2xx))
   }
 
+  def deletePacticipantTag(
+      brokerUrl: String,
+      pacticipant: String,
+      version: String,
+      tag: String,
+      pactBrokerAuthorization: Option[PactBrokerAuthorization],
+      brokerClientTimeout: Duration,
+      sslContextName: Option[String]
+  ): Unit = {
+    PactBrokerAddressValidation.checkPactBrokerAddress(brokerUrl) match {
+      case Left(e) => PactLogger.error(e.red)
+      case Right(validAddress) =>
+        val brokerClient   = httpClientBuilder.build(brokerClientTimeout, sslContextName, 1)
+        val pacticipactUrl = validAddress.address + "/pacticipants/" + pacticipant
+        val response = tagEndpointRequest(brokerClient)(
+          pacticipactUrl,
+          version,
+          tag,
+          HttpMethod.DELETE,
+          pactBrokerAuthorization,
+          sslContextName
+        )
+        response match {
+          case Left(e) =>
+            PactLogger.error(s"Deletion of tag $tag for pacticipant $pacticipant failed: ${e.getMessage}".red)
+          case Right(r) if !r.is2xx =>
+            PactLogger.error(prettifyBrokerError(s"Deletion of tag $tag for pacticipant $pacticipant failed.", r))
+          case Right(_) =>
+            PactLogger.message(s"Deleted tag $tag for pacticipant $pacticipant with version $version.".green)
+        }
+    }
+  }
+
+  private def tagEndpointRequest(client: IScalaPactHttpClient)(
+      pacticipantUrl: String,
+      version: String,
+      tag: String,
+      method: HttpMethod,
+      pactBrokerAuthorization: Option[PactBrokerAuthorization],
+      sslContextName: Option[String]
+  ): Either[Throwable, SimpleResponse] =
+    client.doRequest(
+      SimpleRequest(
+        baseUrl = pacticipantUrl,
+        endPoint = "/versions/" + version + "/tags/" + URLEncoder.encode(tag, "UTF-8"),
+        method = method,
+        headers = Map("Content-Type" -> "application/json; charset=UTF-8") ++ pactBrokerAuthorization
+          .map(_.asHeader)
+          .toList,
+        body = None,
+        sslContextName = sslContextName
+      )
+    )
+
   private def body(brokerPublishData: BrokerPublishData, success: Boolean): Option[String] = {
     val buildUrl = brokerPublishData.buildUrl.fold("")(u => s""", "buildUrl": "$u"""")
     Some(s"""{ "success": $success, "providerApplicationVersion": "${brokerPublishData.providerVersion}"$buildUrl }""")
@@ -300,7 +348,7 @@ class PactBrokerClient(implicit
 
   def publishPacts(pacts: List[Pact], settings: PactPublishSettings): List[PublishResult] = {
     val client = httpClientBuilder.build(settings.pactBrokerClientTimeout, settings.sslContextName, 2)
-    publishToBroker(client, pacts, settings, settings.pactBrokerAddress) ++ publishToOtherBrokers(
+    publishToBroker(client, pacts, settings) ++ publishToOtherBrokers(
       client,
       pacts,
       settings
@@ -310,10 +358,9 @@ class PactBrokerClient(implicit
   private def publishToBroker(
       client: IScalaPactHttpClient,
       pacts: List[Pact],
-      settings: PactPublishSettings,
-      brokerAddress: String
+      settings: PactPublishSettings
   ): List[PublishResult] =
-    PactBrokerAddressValidation.checkPactBrokerAddress(brokerAddress) match {
+    PactBrokerAddressValidation.checkPactBrokerAddress(settings.pactBrokerAddress) match {
       case Left(err) => List(PublishFailed("Validation error", err))
       case Right(address) =>
         val version = settings.projectVersion.replace("-SNAPSHOT", ".x")
@@ -354,26 +401,19 @@ class PactBrokerClient(implicit
     names match {
       case Left(err) => PublishFailed("Validation error", err)
       case Right((consumer, provider)) =>
-        val tagAddresses = tagsToPublishWith.map { t =>
-          pactBrokerAddress.address + "/pacticipants/" + consumer + "/versions/" + version + "/tags/" + URLEncoder
-            .encode(t, "UTF-8")
-        }
         val address =
           pactBrokerAddress.address + "/pacts/provider/" + provider + "/consumer/" + consumer + "/version/" + version
-        val tagContext = if (tagAddresses.nonEmpty) s" (With tags: ${tagsToPublishWith.mkString(", ")})" else ""
+        val tagContext = if (tagsToPublishWith.nonEmpty) s" (With tags: ${tagsToPublishWith.mkString(", ")})" else ""
         val context    = s"Publishing '$consumer -> $provider'$tagContext to:\n > $address".yellow
-        val tagResponses = tagAddresses.map { tagAddress =>
-          httpClient.doRequest(
-            SimpleRequest(
-              tagAddress,
-              "",
-              HttpMethod.PUT,
-              Map("Content-Type" -> "application/json", "Content-Length" -> "0") ++ pactBrokerAuthorization
-                .map(_.asHeader)
-                .toList,
-              Option(pactWriter.pactToJsonString(pact, BuildInfo.version)),
-              sslContextName = sslContextName
-            )
+        val tagResponses = tagsToPublishWith.map { tag =>
+          val consumerUrl = pactBrokerAddress.address + "/pacticipants/" + consumer
+          tagEndpointRequest(httpClient)(
+            consumerUrl,
+            version,
+            tag,
+            HttpMethod.PUT,
+            pactBrokerAuthorization,
+            sslContextName
           )
         }
 
