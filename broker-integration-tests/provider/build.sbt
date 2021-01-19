@@ -4,6 +4,8 @@ name := "provider"
 
 scalaVersion := "2.13.3"
 
+enablePlugins(ScalaPactPlugin)
+
 lazy val pactVersionFile: SettingKey[File] = settingKey[File]("location of scala-pact version for these tests")
 pactVersionFile := baseDirectory.value.getParentFile.getParentFile / "version.sbt"
 

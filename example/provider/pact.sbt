@@ -7,6 +7,8 @@ import com.itv.scalapact.shared.ProviderStateResult
 
 import scala.concurrent.duration._
 
+enablePlugins(ScalaPactPlugin)
+
 scalaPactEnv :=
   ScalaPactEnv.defaults
     .withPort(8080)

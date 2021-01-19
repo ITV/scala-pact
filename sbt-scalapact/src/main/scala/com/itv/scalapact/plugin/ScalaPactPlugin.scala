@@ -15,7 +15,7 @@ import scala.language.implicitConversions
 
 object ScalaPactPlugin extends AutoPlugin {
   override def requires: JvmPlugin.type = plugins.JvmPlugin
-  override def trigger: PluginTrigger   = allRequirements
+  override def trigger: PluginTrigger   = noTrigger
 
   @SuppressWarnings(Array("org.wartremover.warts.ImplicitConversion"))
   implicit def booleanToProviderStateResult(bool: Boolean): ProviderStateResult = ProviderStateResult(bool)
