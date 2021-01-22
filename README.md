@@ -4,7 +4,7 @@ A Consumer Driven Contract testing library for Scala and [ScalaTest](http://www.
 
 Scala-Pact is intended for Scala developers who are looking for a better way to manage the HTTP contracts between their services.
 
-## Latest version is 3.0.1
+## Latest version is 3.1.0
 
 Scala-Pact currently only supports [v2 of the pact specification](https://github.com/pact-foundation/pact-specification/tree/version-2). Support for v3 is a future goal of the project. 
 
@@ -14,7 +14,7 @@ Before this version, the project versioning did not follow semantic versioning. 
 
 Scala-Pact now has two branches based on SBT requirements. 
 
-#### SBT 1.x compatible (Latest 3.0.1)
+#### SBT 1.x compatible (Latest 3.1.0)
 
 All development going forward begins at `2.3.x` and resides on the `master` branch.
 For the sake of the maintainer's sanity, version 2.3.x and beyond will only support Scala 2.12 and SBT 1.x or greater. The project is currently cross-compiled across scala 2.12.12 and 2.13.4. 
@@ -50,14 +50,14 @@ import com.itv.scalapact.plugin._
 enablePlugins(ScalaPactPlugin)
         
 libraryDependencies ++= Seq(
-  "com.itv"       %% "scalapact-scalatest-suite"   % "3.0.1" % "test",
+  "com.itv"       %% "scalapact-scalatest-suite"   % "3.1.0" % "test",
   "org.scalatest" %% "scalatest"                   % "3.0.5"  % "test"
 )
 ```
 
 Add this line to your `project/plugins.sbt` file to install the plugin:
 ```scala
-addSbtPlugin("com.itv" % "sbt-scalapact" % "3.0.1")
+addSbtPlugin("com.itv" % "sbt-scalapact" % "3.1.0")
 ```
 
 Both the import and the plugin come pre-packaged with the latest JSON and Http libraries (http4s 0.21.x, and circe 0.13.x). 
@@ -73,27 +73,27 @@ import com.itv.scalapact.plugin._
 enablePlugins(ScalaPactPlugin)
         
 libraryDependencies ++= Seq(
-  "com.itv"       %% "scalapact-circe-0-13"   % "3.0.1" % "test",
-  "com.itv"       %% "scalapact-http4s-0-21"  % "3.0.1" % "test",
-  "com.itv"       %% "scalapact-scalatest"    % "3.0.1" % "test",
+  "com.itv"       %% "scalapact-circe-0-13"   % "3.1.0" % "test",
+  "com.itv"       %% "scalapact-http4s-0-21"  % "3.1.0" % "test",
+  "com.itv"       %% "scalapact-scalatest"    % "3.1.0" % "test",
   "org.scalatest" %% "scalatest"              % "3.0.5" % "test"
 )
 ```
 
 Add this line to your `project/plugins.sbt` file to install the plugin:
 ```scala
-addSbtPlugin("com.itv" % "sbt-scalapact" % "3.0.1")
+addSbtPlugin("com.itv" % "sbt-scalapact" % "3.1.0")
 ```
 This version of the plugin comes pre-packaged with the latest JSON and Http libraries.
 Thanks to the way SBT works, that one plugin line will work in most cases, but if you're still having conflicts, you can also do this to use your preferred libraries:
 
 ```scala
  libraryDependencies ++= Seq(
-   "com.itv" %% "scalapact-argonaut-6-2" % "3.0.1",
-   "com.itv" %% "scalapact-http4s-0-21"  % "3.0.1"
+   "com.itv" %% "scalapact-argonaut-6-2" % "3.1.0",
+   "com.itv" %% "scalapact-http4s-0-21"  % "3.1.0"
  )
  
- addSbtPlugin("com.itv" % "sbt-scalapact-nodeps" % "3.0.1")
+ addSbtPlugin("com.itv" % "sbt-scalapact-nodeps" % "3.1.0")
 ```
 
 In your test suite, you will need the following imports:
