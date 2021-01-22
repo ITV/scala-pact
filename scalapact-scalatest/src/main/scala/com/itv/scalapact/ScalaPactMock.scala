@@ -22,10 +22,7 @@ private[scalapact] object ScalaPactMock {
   def runTestWithWarmedUpStubber[A](
    strict: Boolean
  )(pactDescription: ScalaPactDescriptionFinal)(test: ScalaPactMockConfig => A)(implicit
-                                                                               sslContextMap: SslContextMap,
-                                                                               pactReader: IPactReader,
                                                                                pactWriter: IPactWriter,
-                                                                               httpClient: IScalaPactHttpClient,
                                                                                pactStubber: IPactStubber
  ): A = {
     val pact = ScalaPactContractWriter.producePactFromDescription(pactDescription)

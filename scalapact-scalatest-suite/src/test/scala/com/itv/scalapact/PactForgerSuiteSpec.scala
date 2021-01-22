@@ -1,16 +1,31 @@
 package com.itv.scalapact
 
-//should compile
-class PactForgerSuiteSpec extends PactForgerSuite {
-  val pact =
+import org.scalatest.FlatSpec
+
+class PactForgerSuiteSpec extends FlatSpec with PactForgerSuite {
+  it should "run a test" in {
     forgePact
       .between("consumer")
       .and("provider")
       .addInteraction(
         interaction
           .description("")
-          .uponReceiving(GET, "")
+          .uponReceiving(GET, "foo")
           .willRespondWith(200)
       )
       .runConsumerTest(_ => ())
+  }
+
+  it should "run another test" in {
+    forgePact
+      .between("consumer")
+      .and("provider")
+      .addInteraction(
+        interaction
+          .description("another test")
+          .uponReceiving(GET, "bar")
+          .willRespondWith(200)
+      )
+      .runConsumerTest(_ => ())
+  }
 }

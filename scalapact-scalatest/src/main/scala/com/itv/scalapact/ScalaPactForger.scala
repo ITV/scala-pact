@@ -9,7 +9,7 @@ import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
 import scala.concurrent.duration.DurationInt
 import scala.language.implicitConversions
 
-sealed abstract class ScalaPactForgerDsl[PactOps <: PactDescriptionOps] {
+abstract class ScalaPactForgerDsl[PactOps <: PactDescriptionOps] {
   implicit val options: ScalaPactOptions = ScalaPactOptions.DefaultOptions
 
   object forgePact       extends ForgePactElements(strict = false)
@@ -103,14 +103,9 @@ final class PactDescriptionImportOps(description: ScalaPactDescription) extends 
 final class PactDescriptionMixinOps(description: ScalaPactDescription) extends PactDescriptionOps(description) {
   def runConsumerTest[A](test: ScalaPactMockConfig => A)(implicit
                                                          options: ScalaPactOptions,
-                                                         sslContextMap: SslContextMap,
-                                                         pactReader: IPactReader,
                                                          pactWriter: IPactWriter,
-                                                         httpClientBuilder: IScalaPactHttpClientBuilder,
                                                          pactStubber: IPactStubber
   ): A = {
-    implicit val client: IScalaPactHttpClient =
-      httpClientBuilder.build(2.seconds, description.sslContextName, 1)
     ScalaPactMock.runTestWithWarmedUpStubber(description.strict)(
       finalise
     )(test)

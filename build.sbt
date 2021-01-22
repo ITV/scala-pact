@@ -180,6 +180,7 @@ lazy val http4s021 =
       )
     )
     .dependsOn(shared)
+    .dependsOn(core)
 
 lazy val testShared =
   (project in file("scalapact-test-shared"))
