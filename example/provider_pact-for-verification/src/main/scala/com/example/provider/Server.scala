@@ -10,7 +10,7 @@ import org.http4s.server._
 import scala.concurrent.ExecutionContext
 
 object AlternateStartupApproach extends IOApp {
-  val executionContext = ExecutionContext.fromExecutor(
+  override val executionContext = ExecutionContext.fromExecutor(
     Executors.newFixedThreadPool(Runtime.getRuntime.availableProcessors())
   )
 
