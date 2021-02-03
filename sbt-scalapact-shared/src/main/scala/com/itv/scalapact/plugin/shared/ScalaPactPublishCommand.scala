@@ -58,11 +58,8 @@ object ScalaPactPublishCommand {
       case result: PublishFailed  => PactLogger.error(result.renderAsString)
     }
 
-    if (publishResults.forall(_.isSuccess)) exitSuccess()
-    else exitFailure()
+    if (!publishResults.forall(_.isSuccess)) exitFailure()
   }
-
-  private def exitSuccess(): Unit = sys.exit(0)
 
   private def exitFailure(): Unit = sys.exit(1)
 }
