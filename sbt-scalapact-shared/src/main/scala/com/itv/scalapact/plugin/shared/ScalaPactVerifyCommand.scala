@@ -73,9 +73,7 @@ object ScalaPactVerifyCommand {
     }
 
     val successfullyVerified = Verifier.apply.verify(pactVerifySettings, scalaPactSettings)
-
-    if (successfullyVerified) sys.exit(0) else sys.exit(1)
-
+    if (!successfullyVerified) sys.exit(1)
   }
 
   def combineProviderStatesIntoTotalFunction(
