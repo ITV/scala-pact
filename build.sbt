@@ -176,9 +176,9 @@ lazy val http4s021 =
     .settings(
       name := "scalapact-http4s-0-21",
       libraryDependencies ++= Seq(
-        "org.http4s"             %% "http4s-blaze-server" % "0.21.7" exclude("org.scala-lang.modules", "scala-xml"),
-        "org.http4s"             %% "http4s-blaze-client" % "0.21.7" exclude("org.scala-lang.modules", "scala-xml"),
-        "org.http4s"             %% "http4s-dsl"          % "0.21.7",
+        "org.http4s"             %% "http4s-blaze-server" % "0.21.18" exclude("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"             %% "http4s-blaze-client" % "0.21.18" exclude("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"             %% "http4s-dsl"          % "0.21.18",
         "com.github.tomakehurst" % "wiremock"             % "2.25.1" % "test"
       )
     )
