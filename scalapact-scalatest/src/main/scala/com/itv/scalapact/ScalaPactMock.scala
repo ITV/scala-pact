@@ -20,16 +20,16 @@ private[scalapact] object ScalaPactMock {
     test(config)
   }
 
-  def runConsumerIntegrationTest[A](
-      strict: Boolean
-  )(pactDescription: ScalaPactDescriptionFinal)(test: ScalaPactMockConfig => A)(implicit
-      sslContextMap: SslContextMap,
+  def startServer(
+      strict: Boolean,
+      pactDescription: ScalaPactDescriptionFinal
+  )(implicit
+      httpClient: IScalaPactHttpClient,
       pactReader: IPactReader,
       pactWriter: IPactWriter,
-      httpClient: IScalaPactHttpClient,
-      pactStubber: IPactStubber
-  ): A = {
-
+      pactStubber: IPactStubber,
+      sslContextMap: SslContextMap
+  ): ScalaPactMockServer = {
     val interactionManager: InteractionManager = new InteractionManager
 
     val protocol   = pactDescription.serverSslContextName.fold("http")(_ => "https")
@@ -64,23 +64,34 @@ private[scalapact] object ScalaPactMock {
 
     PactLogger.debug("> ScalaPact stub running at: " + mockConfig.baseUrl)
 
-    waitForServerThenTest(server, mockConfig, test, pactDescription)
+    val mockServer = new ScalaPactMockServer(server, mockConfig)
+    waitForServer(mockConfig, pactDescription.serverSslContextName)
+    mockServer
   }
 
-  private def waitForServerThenTest[A](
-      server: IPactStubber,
+  def runConsumerIntegrationTest[A](
+      strict: Boolean
+  )(pactDescription: ScalaPactDescriptionFinal)(test: ScalaPactMockConfig => A)(implicit
+      sslContextMap: SslContextMap,
+      pactReader: IPactReader,
+      pactWriter: IPactWriter,
+      httpClient: IScalaPactHttpClient,
+      pactStubber: IPactStubber
+  ): A = {
+    val server = startServer(strict, pactDescription)
+    val result = configuredTestRunner(pactDescription)(server.config)(test)
+    server.stop()
+    result
+  }
+
+  private def waitForServer(
       mockConfig: ScalaPactMockConfig,
-      test: ScalaPactMockConfig => A,
-      pactDescription: ScalaPactDescriptionFinal
-  )(implicit pactWriter: IPactWriter, httpClient: IScalaPactHttpClient): A = {
+      serverSslContextName: Option[String]
+  )(implicit httpClient: IScalaPactHttpClient): Unit = {
     @scala.annotation.tailrec
-    def rec(attemptsRemaining: Int, intervalMillis: Int): A =
-      if (isStubReady(mockConfig, pactDescription.serverSslContextName)) {
-        val result = configuredTestRunner(pactDescription)(mockConfig)(test)
-
-        server.shutdown()
-
-        result
+    def rec(attemptsRemaining: Int, intervalMillis: Int): Unit =
+      if (isStubReady(mockConfig, serverSslContextName)) {
+        PactLogger.debug("Stub server is ready.")
       } else if (attemptsRemaining == 0) {
         throw new Exception("Could not connect to stub at: " + mockConfig.baseUrl)
       } else {
@@ -117,4 +128,11 @@ private[scalapact] object ScalaPactMock {
 
 case class ScalaPactMockConfig(protocol: String, host: String, port: Int, outputPath: String) {
   val baseUrl: String = protocol + "://" + host + ":" + port.toString
+}
+
+class ScalaPactMockServer(
+    underlying: IPactStubber,
+    val config: ScalaPactMockConfig
+) {
+  def stop(): Unit = underlying.shutdown()
 }
