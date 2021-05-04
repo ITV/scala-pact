@@ -298,13 +298,15 @@ class PactBrokerClient(implicit
     Some(s"""{ "success": $success, "providerApplicationVersion": "${brokerPublishData.providerVersion}"$buildUrl }""")
   }
 
-  def publishPacts(pacts: List[Pact], settings: PactPublishSettings): List[PublishResult] = {
-    val client = httpClientBuilder.build(settings.pactBrokerClientTimeout, settings.sslContextName, 2)
-    publishToBroker(client, pacts, settings, settings.pactBrokerAddress) ++ publishToOtherBrokers(
-      client,
-      pacts,
-      settings
-    )
+  def publishPacts(pacts: List[Pact], settings: PactPublishSettings): List[PublishResult] = pacts match {
+    case Nil => Nil
+    case pacts =>
+      val client = httpClientBuilder.build(settings.pactBrokerClientTimeout, settings.sslContextName, 2)
+      publishToBroker(client, pacts, settings, settings.pactBrokerAddress) ++ publishToOtherBrokers(
+        client,
+        pacts,
+        settings
+      )
   }
 
   private def publishToBroker(
