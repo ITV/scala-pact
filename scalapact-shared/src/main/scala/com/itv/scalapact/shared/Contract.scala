@@ -2,13 +2,20 @@ package com.itv.scalapact.shared
 
 import com.itv.scalapact.shared.http.SslContextMap
 
+sealed trait Contract {
+  def consumer: PactActor
+  def provider: PactActor
+}
+
+final case class JvmPact(consumer: PactActor, provider: PactActor, rawContents: String) extends Contract
+
 final case class Pact(
     provider: PactActor,
     consumer: PactActor,
     interactions: List[Interaction],
     _links: Option[Links],
     metadata: Option[PactMetaData]
-) {
+) extends Contract {
 
   def withoutSslHeader: Pact = copy(interactions = interactions.map(_.withoutSslHeader))
 

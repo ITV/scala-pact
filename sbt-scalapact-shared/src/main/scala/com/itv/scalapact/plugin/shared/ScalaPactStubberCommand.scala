@@ -1,9 +1,9 @@
 package com.itv.scalapact.plugin.shared
 
-import com.itv.scalapact.shared.{IPactStubber, ScalaPactSettings}
+import com.itv.scalapact.shared.{IPactStubber, Pact, ScalaPactSettings}
 import com.itv.scalapact.shared.utils.ColourOutput._
 import com.itv.scalapact.shared.http.SslContextMap
-import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
+import com.itv.scalapact.shared.json.{ContractDeserializer, IPactReader, IPactWriter}
 import com.itv.scalapact.shared.utils.PactLogger
 import com.itv.scalapactcore.common.LocalPactFileLoader._
 import com.itv.scalapactcore.common.stubber.InteractionManager
@@ -18,10 +18,11 @@ object ScalaPactStubberCommand {
       pactReader: IPactReader,
       pactWriter: IPactWriter,
       pactStubber: IPactStubber,
-      sslContextMap: SslContextMap
+      sslContextMap: SslContextMap,
+      pactDeserializer: ContractDeserializer[Pact]
   ): Unit = {
-    val loadPacts    = loadPactFiles(pactReader)(true)(scalaPactSettings.giveOutputPath)
-    val addToManager = interactionManager.addToInteractionManager
+    val loadPacts: ScalaPactSettings => List[Pact] = loadPactFiles[Pact](true, scalaPactSettings.giveOutputPath)
+    val addToManager                               = interactionManager.addToInteractionManager
 
     val launchStub: ScalaPactSettings => IPactStubber = setting => {
       PactLogger.message(

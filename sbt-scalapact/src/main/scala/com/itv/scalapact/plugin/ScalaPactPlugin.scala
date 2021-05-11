@@ -120,6 +120,11 @@ object ScalaPactPlugin extends AutoPlugin {
     val scalaPactEnv: SettingKey[ScalaPactEnv] =
       SettingKey[ScalaPactEnv]("scalaPactEnv", "Settings used to config the running of tasks and commands")
 
+    val areScalaPactContracts: SettingKey[Boolean] = SettingKey[Boolean](
+      "scalaPactContracts",
+      "Whether the pacts to be published are scala-pact contracts, or pact-jvm contracts"
+    )
+
     // Tasks
     val pactPack: TaskKey[Unit]   = taskKey[Unit]("Pack up Pact contract files")
     val pactPush: InputKey[Unit]  = inputKey[Unit]("Push Pact contract files to Pact Broker")
@@ -157,7 +162,8 @@ object ScalaPactPlugin extends AutoPlugin {
     pactBrokerToken := "",
     pactBrokerClientTimeout := 2.seconds,
     sslContextName := None,
-    includePendingStatus := false
+    includePendingStatus := false,
+    areScalaPactContracts := true
   )
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
@@ -195,7 +201,8 @@ object ScalaPactPlugin extends AutoPlugin {
         pactContractTags.value,
         PactBrokerAuthorization(pactBrokerCredentials.value, pactBrokerToken.value),
         pactBrokerClientTimeout.value,
-        sslContextName.value
+        sslContextName.value,
+        areScalaPactContracts.value
       )
     }
 

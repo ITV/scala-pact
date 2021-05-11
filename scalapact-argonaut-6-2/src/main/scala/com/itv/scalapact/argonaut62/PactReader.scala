@@ -11,8 +11,10 @@ class PactReader extends IPactReader {
   def fromJSON(jsonString: String): Option[IrNode] =
     JsonConversionFunctions.fromJSON(jsonString)
 
-  def jsonStringToPact(json: String): Either[String, Pact] =
-    readJson[Pact](json, "pact")
+  def jsonStringToScalaPact(json: String): Either[String, Pact] =
+    readJson[Pact](json, "scala-pact pact")
+
+  def jsonStringToJvmPact(json: String): Either[String, JvmPact] = readJson[JvmPact](json, "pact-jvm pact")
 
   def jsonStringToPactsForVerification(json: String): Either[String, PactsForVerificationResponse] =
     readJson[PactsForVerificationResponse](json, "pacts for verification")

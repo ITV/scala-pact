@@ -172,7 +172,7 @@ class PactBrokerClient(implicit
       ) match {
       case Right(r: SimpleResponse) if r.is2xx =>
         r.body
-          .map(pactReader.jsonStringToPact)
+          .map(pactReader.jsonStringToScalaPact)
           .map {
             case Right(p) =>
               Right(p)
@@ -298,7 +298,7 @@ class PactBrokerClient(implicit
     Some(s"""{ "success": $success, "providerApplicationVersion": "${brokerPublishData.providerVersion}"$buildUrl }""")
   }
 
-  def publishPacts(pacts: List[Pact], settings: PactPublishSettings): List[PublishResult] = pacts match {
+  def publishPacts(pacts: List[Contract], settings: PactPublishSettings): List[PublishResult] = pacts match {
     case Nil => Nil
     case pacts =>
       val client = httpClientBuilder.build(settings.pactBrokerClientTimeout, settings.sslContextName, 2)
@@ -311,7 +311,7 @@ class PactBrokerClient(implicit
 
   private def publishToBroker(
       client: IScalaPactHttpClient,
-      pacts: List[Pact],
+      pacts: List[Contract],
       settings: PactPublishSettings,
       brokerAddress: String
   ): List[PublishResult] =
@@ -333,7 +333,7 @@ class PactBrokerClient(implicit
 
   private def publishToOtherBrokers(
       client: IScalaPactHttpClient,
-      pacts: List[Pact],
+      pacts: List[Contract],
       settings: PactPublishSettings
   ): List[PublishResult] =
     pacts
@@ -348,7 +348,7 @@ class PactBrokerClient(implicit
       tagsToPublishWith: List[String],
       sslContextName: Option[String],
       pactBrokerAuthorization: Option[PactBrokerAuthorization]
-  )(pact: Pact): PublishResult = {
+  )(pact: Contract): PublishResult = {
     val names = for {
       consumer <- Helpers.urlEncode(pact.consumer.name)
       provider <- Helpers.urlEncode(pact.provider.name)

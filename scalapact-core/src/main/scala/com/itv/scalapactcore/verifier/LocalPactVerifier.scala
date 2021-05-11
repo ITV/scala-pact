@@ -1,6 +1,6 @@
 package com.itv.scalapactcore.verifier
 
-import com.itv.scalapact.shared.{LocalPactVerifySettings, ScalaPactSettings}
+import com.itv.scalapact.shared.{LocalPactVerifySettings, Pact, ScalaPactSettings}
 import com.itv.scalapact.shared.utils.ColourOutput.ColouredString
 import com.itv.scalapact.shared.http.IScalaPactHttpClient
 import com.itv.scalapact.shared.json.IPactReader
@@ -17,7 +17,7 @@ private[verifier] class LocalPactVerifier(localVerifierClient: IScalaPactHttpCli
       s"Attempting to use local pact files at: '${scalaPactSettings.localPactFilePath.getOrElse("<path missing>")}'".white.bold
     )
 
-    val pacts = LocalPactFileLoader.loadPactFiles(pactReader)(true)("pacts")(scalaPactSettings)
+    val pacts = LocalPactFileLoader.loadPactFiles[Pact](allowTmpFiles = true, "pacts")(scalaPactSettings)
 
     PactLogger.message(
       s"Verifying against '${scalaPactSettings.giveHost}' on port '${scalaPactSettings.givePort}' with a timeout of ${scalaPactSettings.giveClientTimeout.toSeconds.toString} second(s).".white.bold

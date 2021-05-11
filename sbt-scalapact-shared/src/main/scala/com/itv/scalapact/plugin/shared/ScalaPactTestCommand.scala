@@ -1,7 +1,6 @@
 package com.itv.scalapact.plugin.shared
 
 import java.io.File
-
 import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
 import com.itv.scalapact.shared.{BuildInfo, Pact, ScalaPactSettings}
 import com.itv.scalapact.shared.utils.ColourOutput._
@@ -50,7 +49,7 @@ object ScalaPactTestCommand {
       pactReader: IPactReader,
       pactWriter: IPactWriter
   ): Int = {
-    val jsonStringToPact: String => Option[Pact] = pactReader.jsonStringToPact(_).toOption
+    val jsonStringToPact: String => Option[Pact] = pactReader.jsonStringToScalaPact(_).toOption
 
     val (failed, squashedPacts) =
       files
