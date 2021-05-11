@@ -21,7 +21,8 @@ object ScalaPactPublishCommand {
       tagsToPublishWith: Seq[String],
       pactBrokerAuthorization: Option[PactBrokerAuthorization],
       pactBrokerClientTimeout: Duration,
-      sslContextName: Option[String]
+      sslContextName: Option[String],
+      isScalaPactContract: Boolean
   )(implicit pactReader: IPactReader, pactWriter: IPactWriter, httpClientBuilder: IScalaPactHttpClientBuilder): Unit = {
 
     PactLogger.message("*************************************".white.bold)
@@ -45,7 +46,8 @@ object ScalaPactPublishCommand {
         tagsToPublishWith.toList,
         pactBrokerAuthorization,
         pactBrokerClientTimeout,
-        sslContextName
+        sslContextName,
+        isScalaPactContract
       )
       val publishResults = Publisher.apply.publishPacts(publishSettings, scalaPactSettings)
       evaluatePublishResults(publishResults)

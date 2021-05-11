@@ -81,7 +81,7 @@ object PactImplicits {
 
   implicit val pactMetaDataDecoder: Codec[PactMetaData] = deriveCodec
 
-  implicit val pactDecoder: Decoder[Pact] = Decoder.instance { cur =>
+  implicit val scalaPactDecoder: Decoder[Pact] = Decoder.instance { cur =>
     for {
       provider     <- cur.get[PactActor]("provider")
       consumer     <- cur.get[PactActor]("consumer")
@@ -91,7 +91,22 @@ object PactImplicits {
     } yield Pact(provider, consumer, interactions, _links, metadata)
   }
 
-  implicit val pactEncoder: Encoder[Pact] = deriveEncoder
+  implicit val jvmPactDecoder: Decoder[JvmPact] = Decoder.instance { cur =>
+    for {
+      consumer <- cur.get[PactActor]("consumer")
+      provider <- cur.get[PactActor]("provider")
+      body = cur.value.noSpaces
+    } yield JvmPact(consumer, provider, body)
+  }
+
+  implicit val scalaPactEncoder: Encoder[Pact] = deriveEncoder
+
+  implicit val jvmPactEncoder: Encoder[JvmPact] = Encoder.instance { jvmPact =>
+    io.circe.parser.parse(jvmPact.rawContents) match {
+      case Right(value) => value
+      case Left(error)  => throw new Exception(s"Generated pact is not valid json: ${error}")
+    }
+  }
 
   implicit val halIndexDecoder: Decoder[HALIndex] = Decoder.instance { cur =>
     cur.downField("_links").downField("curies").delete.as[Links].map(HALIndex)

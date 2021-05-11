@@ -11,5 +11,6 @@ final case class PactPublishSettings(
     tagsToPublishWith: List[String],
     pactBrokerAuthorization: Option[PactBrokerAuthorization],
     pactBrokerClientTimeout: Duration,
-    sslContextName: Option[String]
+    sslContextName: Option[String],
+    isScalaPactContract: Boolean
 )

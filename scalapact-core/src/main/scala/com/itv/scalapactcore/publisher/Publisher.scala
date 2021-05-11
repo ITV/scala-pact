@@ -1,6 +1,6 @@
 package com.itv.scalapactcore.publisher
 
-import com.itv.scalapact.shared.{PactPublishSettings, ScalaPactSettings}
+import com.itv.scalapact.shared.{Contract, JvmPact, Pact, PactPublishSettings, ScalaPactSettings}
 import com.itv.scalapact.shared.http.IScalaPactHttpClientBuilder
 import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
 import com.itv.scalapact.shared.utils.ColourOutput.ColouredString
@@ -11,8 +11,16 @@ class Publisher(pactBrokerClient: PactBrokerClient)(implicit pactReader: IPactRe
       pactPublishSettings: PactPublishSettings,
       scalaPactSettings: ScalaPactSettings
   ): List[PublishResult] = {
-    val pacts =
-      LocalPactFileLoader.loadPactFiles(pactReader)(false)(scalaPactSettings.giveOutputPath)(scalaPactSettings)
+    val pacts: List[Contract] = {
+      if (pactPublishSettings.isScalaPactContract)
+        LocalPactFileLoader.loadPactFiles[Pact](allowTmpFiles = false, scalaPactSettings.giveOutputPath)(
+          scalaPactSettings
+        )
+      else
+        LocalPactFileLoader.loadPactFiles[JvmPact](allowTmpFiles = false, scalaPactSettings.giveOutputPath)(
+          scalaPactSettings
+        )
+    }
     pactBrokerClient.publishPacts(pacts, pactPublishSettings)
   }
 }

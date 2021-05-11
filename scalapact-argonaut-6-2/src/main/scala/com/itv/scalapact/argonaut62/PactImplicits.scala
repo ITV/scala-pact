@@ -18,7 +18,7 @@ object PactImplicits {
     "templated"
   )
 
-  implicit lazy val pactDecodeJson: DecodeJson[Pact] = DecodeJson[Pact] { cur =>
+  implicit lazy val scalaPactDecodeJson: DecodeJson[Pact] = DecodeJson[Pact] { cur =>
     for {
       provider     <- cur.get[PactActor]("provider")
       consumer     <- cur.get[PactActor]("consumer")
@@ -28,7 +28,7 @@ object PactImplicits {
     } yield Pact(provider, consumer, interactions, _links, metadata)
   }
 
-  implicit lazy val PactEncodeJson: EncodeJson[Pact] = EncodeJson { p =>
+  implicit lazy val scalaPactEncodeJson: EncodeJson[Pact] = EncodeJson { p =>
     Json.obj(
       "provider"     -> p.provider.asJson,
       "consumer"     -> p.consumer.asJson,
@@ -36,6 +36,21 @@ object PactImplicits {
       "_links"       -> p._links.asJson,
       "metadata"     -> p.metadata.asJson
     )
+  }
+
+  implicit val jvmPactDecoder: DecodeJson[JvmPact] = DecodeJson { cur =>
+    for {
+      consumer <- cur.get[PactActor]("consumer")
+      provider <- cur.get[PactActor]("provider")
+      body = cur.focus.nospaces
+    } yield JvmPact(consumer, provider, body)
+  }
+
+  implicit val jvmPactEncoder: EncodeJson[JvmPact] = EncodeJson { jvmPact =>
+    Parse.parse(jvmPact.rawContents) match {
+      case Right(value) => value
+      case Left(error)  => throw new Exception(s"Generated pact is not valid json: ${error}")
+    }
   }
 
   implicit lazy val PactActorCodecJson: CodecJson[PactActor] = casecodec1(PactActor.apply, PactActor.unapply)(

@@ -7,6 +7,38 @@
   },
   "interactions" : [
     {
+      "description" : "Fetching least secure auth token ever",
+      "request" : {
+        "method" : "GET",
+        "path" : "/auth_token",
+        "headers" : {
+          "Accept" : "application/json",
+          "Name" : "Bob"
+        },
+        "matchingRules" : {
+          "$.headers.Name" : {
+            "match" : "regex",
+            "regex" : "^([a-zA-Z]+)$"
+          }
+        }
+      },
+      "response" : {
+        "status" : 202,
+        "headers" : {
+          "Content-Type" : "application/json; charset=UTF-8"
+        },
+        "body" : {
+          "token" : "abcABC123"
+        },
+        "matchingRules" : {
+          "$.body.token" : {
+            "match" : "regex",
+            "regex" : "^([a-zA-Z0-9]+)$"
+          }
+        }
+      }
+    },
+    {
       "providerState" : "Results: Bob, Fred, Harry",
       "description" : "Fetching results",
       "request" : {
@@ -59,6 +91,28 @@
           }
         }
       }
+    },
+    {
+      "providerState" : "Results: Bob, Fred, Harry",
+      "description" : "Fetching results",
+      "request" : {
+        "method" : "GET",
+        "path" : "/results"
+      },
+      "response" : {
+        "status" : 200,
+        "headers" : {
+          "Pact" : "modifiedRequest"
+        },
+        "body" : {
+          "count" : 3,
+          "results" : [
+            "Bob",
+            "Fred",
+            "Harry"
+          ]
+        }
+      }
     }
   ],
   "metadata" : {
@@ -66,7 +120,7 @@
       "version" : "2.0.0"
     },
     "scala-pact" : {
-      "version" : "3.0.2-SNAPSHOT"
+      "version" : "3.2.2-SNAPSHOT"
     }
   }
 }

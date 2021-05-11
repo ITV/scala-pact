@@ -1,10 +1,9 @@
 package com.itv.scalapactcore.common
 
 import java.io.File
-
-import com.itv.scalapact.shared.{Pact, ScalaPactSettings}
+import com.itv.scalapact.shared.{Contract, ScalaPactSettings}
 import com.itv.scalapact.shared.utils.ColourOutput._
-import com.itv.scalapact.shared.json.IPactReader
+import com.itv.scalapact.shared.json.ContractDeserializer
 import com.itv.scalapact.shared.utils.PactLogger
 
 object LocalPactFileLoader {
@@ -68,36 +67,32 @@ object LocalPactFileLoader {
       }
     }
 
-  private def deserializeIntoPact(readPact: String => Either[String, Pact])(pactJsonStrings: List[String]): List[Pact] =
+  private def deserializeIntoPact[P <: Contract: ContractDeserializer](pactJsonStrings: List[String]): List[P] =
     pactJsonStrings
       .map { json =>
-        readPact(json)
+        ContractDeserializer[P].read(json)
       }
       .collect { case Right(p) => p }
 
-  def loadPactFiles(implicit pactReader: IPactReader): Boolean => String => ScalaPactSettings => List[Pact] =
-    allowTmpFiles =>
-      defaultLocation =>
-        config => {
-          // Side effecting, might as well be since the pacts are held statefully /
-          // mutably so that they can be updated. The only way around this, I think,
-          // would be to start new servers on update? Or some sort of foldp to update
-          // the model?
+  def loadPactFiles[P <: Contract: ContractDeserializer](allowTmpFiles: Boolean, defaultLocation: String)(
+      config: ScalaPactSettings
+  ): List[P] = {
+    // Side effecting, might as well be since the pacts are held statefully /
+    // mutably so that they can be updated. The only way around this, I think,
+    // would be to start new servers on update? Or some sort of foldp to update
+    // the model?
+    PactLogger.debug(
+      ("Looking for pact files in: " + config.localPactFilePath
+        .orElse(Option(defaultLocation))
+        .getOrElse("")).white.bold
+    )
 
-          PactLogger.debug(
-            ("Looking for pact files in: " + config.localPactFilePath
-              .orElse(Option(defaultLocation))
-              .getOrElse("")).white.bold
-          )
+    config.localPactFilePath.orElse(Option(defaultLocation)) match {
+      case Some(path) =>
+        deserializeIntoPact[P](recursiveJsonLoad(allowTmpFiles)(new File(path)))
 
-          config.localPactFilePath.orElse(Option(defaultLocation)) match {
-            case Some(path) =>
-              (recursiveJsonLoad(allowTmpFiles) andThen deserializeIntoPact(pactReader.jsonStringToPact))(
-                new File(path)
-              )
-
-            case None => Nil
-          }
-        }
+      case None => Nil
+    }
+  }
 
 }

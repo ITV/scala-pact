@@ -1,10 +1,9 @@
 package com.itv.standalonestubber
 
 import java.util.concurrent.{ExecutorService, Executors}
-
 import com.itv.scalapact.http.serverInstance
 import com.itv.scalapact.json.{pactReaderInstance, pactWriterInstance}
-import com.itv.scalapact.shared.{IPactStubber, ScalaPactSettings}
+import com.itv.scalapact.shared.{IPactStubber, Pact, ScalaPactSettings}
 import com.itv.scalapact.shared.utils.ColourOutput._
 import com.itv.scalapact.shared.http.SslContextMap
 import com.itv.scalapact.shared.utils.PactLogger
@@ -23,9 +22,9 @@ object PactStubber {
 
     val interactionManager = new InteractionManager
 
-    val parseArgs       = ScalaPactSettings.parseArguments
-    val loadPacts       = loadPactFiles(pactReaderInstance)(true)("pacts")
-    val addInteractions = interactionManager.addToInteractionManager
+    val parseArgs                                  = ScalaPactSettings.parseArguments
+    val loadPacts: ScalaPactSettings => List[Pact] = loadPactFiles[Pact](true, "pacts")
+    val addInteractions                            = interactionManager.addToInteractionManager
 
     val startUp: ScalaPactSettings => IPactStubber = scalaPactSettings => {
       PactLogger.message(

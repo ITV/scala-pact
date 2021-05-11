@@ -9,7 +9,7 @@ class RubyJsonHelperSpec extends FunSpec with Matchers {
   describe("Handling ruby json") {
 
     it("should be able to extract provider, consumer and list of interactions") {
-      val decodedPact = pactReaderInstance.jsonStringToPact(PactFileExamples.simpleAsString).toOption
+      val decodedPact = pactReaderInstance.jsonStringToScalaPact(PactFileExamples.simpleAsString).toOption
 
       val interaction1 = Interaction(
         providerState = Option("a simple state"),

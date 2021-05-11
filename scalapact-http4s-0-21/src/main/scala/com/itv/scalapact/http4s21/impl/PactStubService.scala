@@ -88,7 +88,7 @@ object PactStubService {
         .attemptAs[String]
         .fold(_ => None, Option.apply)
         .map { x =>
-          pactReader.jsonStringToPact(x.getOrElse(""))
+          pactReader.jsonStringToScalaPact(x.getOrElse(""))
         }
         .flatMap {
           case Right(r) =>
