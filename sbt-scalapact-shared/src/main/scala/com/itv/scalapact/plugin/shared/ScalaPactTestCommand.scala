@@ -31,12 +31,15 @@ object ScalaPactTestCommand {
         f.getName.split("_").take(2).mkString("_")
       }.toList
 
-      val errorCount = {
+      val errorCount: Int = {
         if (areScalaPactContracts)
           groupedFileList.map { g =>
             squashPactFiles(scalaPactSettings.giveOutputPath, g._2)
           }.sum
-        else PactLogger.message("Expecting pact-jvm contracts, so not combining pact files.")
+        else {
+          PactLogger.message("Expecting pact-jvm contracts, so not combining pact files.")
+          0
+        }
       }
 
       PactLogger.message(("> " + groupedFileList.length.toString + " pacts found:").white.bold)
