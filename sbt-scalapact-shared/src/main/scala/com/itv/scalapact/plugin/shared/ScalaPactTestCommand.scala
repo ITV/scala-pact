@@ -12,7 +12,8 @@ import scala.util.Try
 object ScalaPactTestCommand {
 
   def doPactPack(
-      scalaPactSettings: ScalaPactSettings
+      scalaPactSettings: ScalaPactSettings,
+      areScalaPactContracts: Boolean
   )(implicit pactReader: IPactReader, pactWriter: IPactWriter): Unit = {
     PactLogger.message("*************************************".white.bold)
     PactLogger.message("** ScalaPact: Squashing Pact Files **".white.bold)
@@ -30,9 +31,13 @@ object ScalaPactTestCommand {
         f.getName.split("_").take(2).mkString("_")
       }.toList
 
-      val errorCount = groupedFileList.map { g =>
-        squashPactFiles(scalaPactSettings.giveOutputPath, g._2)
-      }.sum
+      val errorCount = {
+        if (areScalaPactContracts)
+          groupedFileList.map { g =>
+            squashPactFiles(scalaPactSettings.giveOutputPath, g._2)
+          }.sum
+        else PactLogger.message("Expecting pact-jvm contracts, so not combining pact files.")
+      }
 
       PactLogger.message(("> " + groupedFileList.length.toString + " pacts found:").white.bold)
       PactLogger.message(groupedFileList.map(g => "> - " + g._1.replace("_", " -> ") + "\n").mkString)
