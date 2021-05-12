@@ -185,7 +185,7 @@ object ScalaPactPlugin extends AutoPlugin {
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   lazy val pactPackTask: Def.Initialize[Task[Unit]] =
     Def.task {
-      ScalaPactTestCommand.doPactPack(scalaPactEnv.value.toSettings)
+      ScalaPactTestCommand.doPactPack(scalaPactEnv.value.toSettings, areScalaPactContracts.value)
     }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
