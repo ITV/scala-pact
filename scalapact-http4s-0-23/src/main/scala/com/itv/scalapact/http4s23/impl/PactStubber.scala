@@ -12,15 +12,15 @@ import scala.concurrent.Future
 class PactStubber extends IPactStubber {
 
   private var instance: Option[() => Future[Unit]] = None
-  private var _port: Option[Int]                = None
+  private var _port: Option[Int]                   = None
 
   private def blazeServerBuilder(
-                                  scalaPactSettings: ScalaPactSettings,
-                                  interactionManager: IInteractionManager,
-                                  connectionPoolSize: Int,
-                                  sslContextName: Option[String],
-                                  port: Option[Int]
-                                )(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): BlazeServerBuilder[IO] =
+      scalaPactSettings: ScalaPactSettings,
+      interactionManager: IInteractionManager,
+      connectionPoolSize: Int,
+      sslContextName: Option[String],
+      port: Option[Int]
+  )(implicit pactReader: IPactReader, pactWriter: IPactWriter, sslContextMap: SslContextMap): BlazeServerBuilder[IO] =
     PactStubService.createServer(
       interactionManager,
       connectionPoolSize,
@@ -30,15 +30,15 @@ class PactStubber extends IPactStubber {
     )
 
   def start(
-             interactionManager: IInteractionManager,
-             connectionPoolSize: Int,
-             sslContextName: Option[String],
-             port: Option[Int]
-           )(implicit
-             pactReader: IPactReader,
-             pactWriter: IPactWriter,
-             sslContextMap: SslContextMap
-           ): ScalaPactSettings => IPactStubber =
+      interactionManager: IInteractionManager,
+      connectionPoolSize: Int,
+      sslContextName: Option[String],
+      port: Option[Int]
+  )(implicit
+      pactReader: IPactReader,
+      pactWriter: IPactWriter,
+      sslContextMap: SslContextMap
+  ): ScalaPactSettings => IPactStubber =
     scalaPactSettings => {
       instance match {
         case Some(_) =>
