@@ -19,7 +19,7 @@ object Http4sClientHelper {
   def buildPooledBlazeHttpClient(maxTotalConnections: Int, clientTimeout: Duration, sslContextName: Option[String])(
       implicit sslContextMap: SslContextMap
   ): Resource[IO, Client[IO]] = {
-    val sslContext                    = sslContextMap(sslContextName)
+    val sslContext = sslContextMap(sslContextName)
     val builder = BlazeClientBuilder[IO](ExecutionContext.Implicits.global)
       .withMaxTotalConnections(maxTotalConnections)
       .withRequestTimeout(clientTimeout)
