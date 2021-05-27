@@ -67,8 +67,8 @@ def compilerOptionsVersion(scalaVersion: String) =
     case _               => Nil
   })
 
-lazy val scalaVersion212: String = "2.12.12"
-lazy val scalaVersion213: String = "2.13.4"
+lazy val scalaVersion212: String = "2.12.13"
+lazy val scalaVersion213: String = "2.13.6"
 lazy val supportedScalaVersions = List(scalaVersion212, scalaVersion213)
 
 ThisBuild / scalaVersion := scalaVersion212
@@ -78,7 +78,7 @@ lazy val commonSettings = Seq(
   crossScalaVersions := supportedScalaVersions,
   scalacOptions ++= compilerOptionsVersion(scalaVersion.value),
   libraryDependencies ++= Seq(
-    "org.scalatest" %% "scalatest" % "3.0.8" % "test"
+    "org.scalatest" %% "scalatest" % "3.0.9" % "test"
   ),
   wartremoverWarnings in (Compile, compile) ++= Warts.allBut(
     Wart.Any,
@@ -179,6 +179,21 @@ lazy val http4s021 =
         "org.http4s"             %% "http4s-blaze-server" % "0.21.18" exclude("org.scala-lang.modules", "scala-xml"),
         "org.http4s"             %% "http4s-blaze-client" % "0.21.18" exclude("org.scala-lang.modules", "scala-xml"),
         "org.http4s"             %% "http4s-dsl"          % "0.21.18",
+        "com.github.tomakehurst" % "wiremock"             % "2.25.1" % "test"
+      )
+    )
+    .dependsOn(shared)
+
+lazy val http4s023 =
+  (project in file("scalapact-http4s-0-23"))
+    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
+    .settings(
+      name := "scalapact-http4s-0-23",
+      libraryDependencies ++= Seq(
+        "org.http4s"             %% "http4s-blaze-server" % "0.23.0-RC1" exclude("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"             %% "http4s-blaze-client" % "0.23.0-RC1" exclude("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"             %% "http4s-dsl"          % "0.23.0-RC1",
         "com.github.tomakehurst" % "wiremock"             % "2.25.1" % "test"
       )
     )
@@ -316,7 +331,7 @@ lazy val testsWithDeps =
     .settings(
       libraryDependencies ++= Seq(
         "org.scalaj"             %% "scalaj-http"   % "2.4.2" % "test",
-        "org.json4s"             %% "json4s-native" % "3.6.9" % "test",
+        "org.json4s"             %% "json4s-native" % "3.6.11" % "test",
         "com.github.tomakehurst" % "wiremock"       % "1.56" % "test",
         "fr.hmil"                %% "roshttp"       % "2.1.0" % "test",
         "io.argonaut"            %% "argonaut"      % "6.2.5"
@@ -351,7 +366,7 @@ lazy val scalaPactProject =
       crossScalaVersions := Nil
     )
     .aggregate(shared, core, pluginShared, plugin, pluginNoDeps, framework, testShared)
-    .aggregate(http4s021)
+    .aggregate(http4s021, http4s023)
     .aggregate(argonaut62, circe13)
     .aggregate(standalone, frameworkWithDeps)
     .aggregate(docs)
