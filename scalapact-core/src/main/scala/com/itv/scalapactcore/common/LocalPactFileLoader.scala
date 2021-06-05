@@ -8,10 +8,9 @@ import com.itv.scalapact.shared.utils.PactLogger
 
 object LocalPactFileLoader {
 
-  private val recursiveJsonLoad: Boolean => File => List[String] = allowTmpFiles =>
-    file => {
+  private def recursiveDeserialize[P <: Contract: ContractDeserializer](allowTmpFiles: Boolean, file: File): List[P] = {
       @annotation.tailrec
-      def rec(files: List[File], acc: List[String]): List[String] =
+      def rec(files: List[File], acc: List[P]): List[P] =
         files match {
           case Nil =>
             if (acc.isEmpty) {
@@ -29,23 +28,16 @@ object LocalPactFileLoader {
             PactLogger.debug("Found directory: " + x.getCanonicalPath)
             rec(x.listFiles().toList ++ xs, acc)
 
-          case x :: xs if x.isFile && x.getName.endsWith("_tmp.json") && allowTmpFiles =>
+          case x :: xs if x.isFile && (x.getName.endsWith("_tmp.json") && allowTmpFiles) || x.getName.endsWith(".json") =>
             PactLogger.debug(("Loading pact file: " + x.getName).bold)
             val source = scala.io.Source.fromURL(x.toURI.toURL)
             val lines  = source.getLines().mkString("\n")
             source.close()
-            rec(xs, lines :: acc)
+            rec(xs, deserializeIntoPact(x.getName, lines).toList ::: acc)
 
           case x :: xs if x.isFile && x.getName.endsWith("_tmp.json") && !allowTmpFiles =>
             PactLogger.error(("Ignoring temp pact file (did you run pactPack?): " + x.getName).yellow.bold)
             rec(xs, acc)
-
-          case x :: xs if x.isFile && x.getName.endsWith(".json") =>
-            PactLogger.debug(("Loading pact file: " + x.getName).bold)
-            val source = scala.io.Source.fromURL(x.toURI.toURL)
-            val lines  = source.getLines().mkString("\n")
-            source.close()
-            rec(xs, lines :: acc)
 
           case x :: xs =>
             PactLogger.warn(("Ignoring non-JSON file: " + x.getName).yellow)
@@ -67,12 +59,13 @@ object LocalPactFileLoader {
       }
     }
 
-  private def deserializeIntoPact[P <: Contract: ContractDeserializer](pactJsonStrings: List[String]): List[P] =
-    pactJsonStrings
-      .map { json =>
-        ContractDeserializer[P].read(json)
-      }
-      .collect { case Right(p) => p }
+  private def deserializeIntoPact[P <: Contract: ContractDeserializer](fileName: String, pactJsonString: String): Option[P] = {
+    val jsonOrError = ContractDeserializer[P].read(pactJsonString)
+    jsonOrError.fold(error => {
+      PactLogger.error((s"Problem deserializing pact file '$fileName':\n$error").red)
+      None
+    }, c => Option(c))
+  }
 
   def loadPactFiles[P <: Contract: ContractDeserializer](allowTmpFiles: Boolean, defaultLocation: String)(
       config: ScalaPactSettings
@@ -89,7 +82,7 @@ object LocalPactFileLoader {
 
     config.localPactFilePath.orElse(Option(defaultLocation)) match {
       case Some(path) =>
-        deserializeIntoPact[P](recursiveJsonLoad(allowTmpFiles)(new File(path)))
+        recursiveDeserialize[P](allowTmpFiles, new File(path))
 
       case None => Nil
     }
