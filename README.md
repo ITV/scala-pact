@@ -4,6 +4,8 @@ A Consumer Driven Contract testing library for Scala and [ScalaTest](http://www.
 
 Scala-Pact is intended for Scala developers who are looking for a better way to manage the HTTP contracts between their services.
 
+If you are just starting out on your pact journey in scala, we recommend checking out [pact4s](https://github.com/jbwheatley/pact4s). This is built directly on top of pact-jvm, and provides support for writing and verifying contracts using [scalaTest](https://github.com/scalatest/scalatest), [weaver-test](https://github.com/disneystreaming/weaver-test), and [munit-cats-effect-3](https://github.com/typelevel/munit-cats-effect). 
+
 ## Latest version is 3.3.1
 
 Scala-Pact currently only supports [v2 of the pact specification](https://github.com/pact-foundation/pact-specification/tree/version-2). Support for v3 is a future goal of the project. 
