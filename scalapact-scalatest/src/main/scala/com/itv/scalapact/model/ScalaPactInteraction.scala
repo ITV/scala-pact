@@ -49,11 +49,14 @@ class ScalaPactInteraction(
       body: Option[String],
       matchingRules: ScalaPactMatchingRules
   ): ScalaPactInteraction =
+    uponReceiving(ScalaPactRequest(method, path, query, headers, body, matchingRules.toOption))
+
+  def uponReceiving(request: ScalaPactRequest): ScalaPactInteraction =
     new ScalaPactInteraction(
       description,
       providerState,
       sslContextName,
-      ScalaPactRequest(method, path, query, headers, body, matchingRules.toOption),
+      request,
       response
     )
 
@@ -72,12 +75,15 @@ class ScalaPactInteraction(
       body: Option[String],
       matchingRules: ScalaPactMatchingRules
   ): ScalaPactInteraction =
+    willRespondWith(ScalaPactResponse(status, headers, body, matchingRules.toOption))
+
+  def willRespondWith(response: ScalaPactResponse): ScalaPactInteraction =
     new ScalaPactInteraction(
       description,
       providerState,
       sslContextName,
       request,
-      ScalaPactResponse(status, headers, body, matchingRules.toOption)
+      response
     )
 
   private[scalapact] def finalise: ScalaPactInteractionFinal =
