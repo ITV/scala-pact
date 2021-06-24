@@ -7,9 +7,9 @@ import com.itv.scalapact.shared.{IInteractionManager, IPactStubber, ScalaPactSet
 import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
 import org.http4s.blaze.server.BlazeServerBuilder
 
-class PactStubber extends IPactStubber {
+private final case class PortAndShutdownTask(port: Int, shutdown: IO[Unit])
 
-  private final case class PortAndShutdownTask(port: Int, shutdown: IO[Unit])
+class PactStubber extends IPactStubber {
 
   private var instance: Option[PortAndShutdownTask] = None
 
