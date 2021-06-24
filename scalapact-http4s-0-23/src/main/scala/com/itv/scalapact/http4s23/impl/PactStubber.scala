@@ -7,12 +7,11 @@ import com.itv.scalapact.shared.{IInteractionManager, IPactStubber, ScalaPactSet
 import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
 import org.http4s.blaze.server.BlazeServerBuilder
 
-import scala.concurrent.Future
-
 class PactStubber extends IPactStubber {
 
-  private var instance: Option[() => Future[Unit]] = None
-  private var _port: Option[Int]                   = None
+  private final case class PortAndShutdownTask(port: Int, shutdown: IO[Unit])
+
+  private var instance: Option[PortAndShutdownTask] = None
 
   private def blazeServerBuilder(
       scalaPactSettings: ScalaPactSettings,
@@ -46,27 +45,24 @@ class PactStubber extends IPactStubber {
 
         case None =>
           instance = Some(
-            blazeServerBuilder(
-              scalaPactSettings,
-              interactionManager,
-              connectionPoolSize,
-              sslContextName,
-              _port
-            ).resource
-              .use { server =>
-                IO { _port = Some(server.address.getPort) } *> IO.never
-              }
-              .unsafeRunCancelable()
+            PortAndShutdownTask.tupled(
+              blazeServerBuilder(
+                scalaPactSettings,
+                interactionManager,
+                connectionPoolSize,
+                sslContextName,
+                instance.map(_.port)
+              ).resource.map(_.address.getPort).allocated.unsafeRunSync()
+            )
           )
           this
       }
     }
 
   def shutdown(): Unit = {
-    instance.foreach(_())
+    instance.foreach(_.shutdown.unsafeRunSync())
     instance = None
-    _port = None
   }
 
-  def port: Option[Int] = _port
+  def port: Option[Int] = instance.map(_.port)
 }
