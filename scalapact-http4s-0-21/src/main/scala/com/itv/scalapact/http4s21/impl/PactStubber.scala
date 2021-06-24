@@ -8,10 +8,11 @@ import org.http4s.server.blaze.BlazeServerBuilder
 
 import scala.concurrent.ExecutionContext
 
+private final case class PortAndShutdownTask(port: Int, shutdown: IO[Unit])
+
 class PactStubber extends IPactStubber {
 
-  private var instance: Option[CancelToken[IO]] = None
-  private var _port: Option[Int]                = None
+  private var instance: Option[PortAndShutdownTask] = None
 
   private def blazeServerBuilder(
       scalaPactSettings: ScalaPactSettings,
@@ -46,28 +47,24 @@ class PactStubber extends IPactStubber {
         case None =>
           implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
           instance = Some(
-            blazeServerBuilder(
-              scalaPactSettings,
-              interactionManager,
-              connectionPoolSize,
-              sslContextName,
-              _port
-            ).resource
-              .use { server =>
-                IO { _port = Some(server.address.getPort) } *> IO.never
-              }
-              .runCancelable(_ => IO.unit)
-              .unsafeRunSync()
+            PortAndShutdownTask.tupled(
+              blazeServerBuilder(
+                scalaPactSettings,
+                interactionManager,
+                connectionPoolSize,
+                sslContextName,
+                instance.map(_.port)
+              ).resource.map(_.address.getPort).allocated.unsafeRunSync()
+            )
           )
           this
       }
     }
 
   def shutdown(): Unit = {
-    instance.foreach(_.unsafeRunSync())
+    instance.foreach(_.shutdown.unsafeRunSync())
     instance = None
-    _port = None
   }
 
-  def port: Option[Int] = _port
+  def port: Option[Int] = instance.map(_.port)
 }

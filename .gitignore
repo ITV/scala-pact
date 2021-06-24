@@ -13,6 +13,7 @@ credentials.sbt
 .bloop/
 .bloop
 .metals/
+metals.sbt
 
 # Misc
 .DS_Store
@@ -24,6 +25,9 @@ credentials.sbt
 .idea
 .idea_modules
 *.iml
+.history
+.vscode
+
 
 # Ruby
 *.gem
