@@ -14,7 +14,7 @@ object Tapir {
 
   private def findSchema(schema: ReferenceOr[Schema], components: Components): Option[Schema] =
     schema match {
-      case Left(reference) => components.schemas.get(reference.$ref).flatMap(findSchema(_, components))
+      case Left(reference) => components.schemas.get(reference.$ref.split('/').last).flatMap(findSchema(_, components))
       case Right(schema)   => schema.some
     }
   private def pathPatternToRegex(pathPattern: String): Regex =
