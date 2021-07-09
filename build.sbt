@@ -184,6 +184,7 @@ lazy val http4s021 =
     )
     .dependsOn(shared)
 
+
 lazy val http4s023 =
   (project in file("scalapact-http4s-0-23"))
     .settings(commonSettings: _*)
@@ -358,6 +359,21 @@ lazy val docs =
     )
     .settings(scala212OnlySettings)
 
+lazy val tapir =
+  (project in file("scalapact-tapir"))
+    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
+    .settings(
+      name := "scalapact-tapir",
+      libraryDependencies := Seq(
+        "com.softwaremill.sttp.tapir" %% "tapir-openapi-model" % "0.17.20",
+        "org.scalatest" %% "scalatest" % "3.2.9" % Test,
+        "org.scalatestplus" %% "scalacheck-1-15" % "3.2.9.0" % Test,
+        "org.scalacheck" %% "scalacheck" % "1.15.4" % Test
+      )
+    )
+    .dependsOn(shared)
+
 lazy val scalaPactProject =
   (project in file("."))
     .settings(commonSettings: _*)
@@ -370,6 +386,7 @@ lazy val scalaPactProject =
     .aggregate(argonaut62, circe13)
     .aggregate(standalone, frameworkWithDeps)
     .aggregate(docs)
+    .aggregate(tapir)
     .aggregate(pactSpec, testsWithDeps)
 
 import ReleaseTransformations._
