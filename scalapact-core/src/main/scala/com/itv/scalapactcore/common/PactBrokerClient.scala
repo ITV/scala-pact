@@ -373,7 +373,7 @@ class PactBrokerClient(implicit
               Map("Content-Type" -> "application/json", "Content-Length" -> "0") ++ pactBrokerAuthorization
                 .map(_.asHeader)
                 .toList,
-              Option(pactWriter.pactToJsonString(pact, BuildInfo.version)),
+              Option(pactWriter.pactToJsonString(pact, "1.0")), //TODO revert this
               sslContextName = sslContextName
             )
           )
@@ -393,7 +393,7 @@ class PactBrokerClient(implicit
                 "",
                 HttpMethod.PUT,
                 Map("Content-Type" -> "application/json") ++ pactBrokerAuthorization.map(_.asHeader).toList,
-                Option(pactWriter.pactToJsonString(pact, BuildInfo.version)),
+                Option(pactWriter.pactToJsonString(pact, "1.0")), //TODO revert this
                 sslContextName = sslContextName
               )
             ) match {

@@ -20,16 +20,16 @@ lazy val compilerOptions212 = Seq(
 )
 
 lazy val compilerOptions213 = Seq(
-  "-Xlint:adapted-args",     // Warn if an argument list is modified to match the receiver.
-  "-Xlint:inaccessible",     // Warn about inaccessible types in method signatures.
-  "-Xlint:infer-any",        // Warn when a type argument is inferred to be Any.
-  "-Xlint:nullary-unit",     // Warn when nullary methods return Unit.
-  "-Xlint:unused",           // Enable -Ywarn-unused:imports,privates,locals,implicits.
-  "-Wdead-code",             // Warn when dead code is identified.
-  "-Wextra-implicit",        // Warn when more than one implicit parameter section is defined.
-  "-Wnumeric-widen",         // Warn when numerics are widened.
-  "-Wunused:patvars",        // Warn if a variable bound in a pattern is unused.
-  "-Wvalue-discard"          // Warn when non-Unit expression results are unused.
+  "-Xlint:adapted-args", // Warn if an argument list is modified to match the receiver.
+  "-Xlint:inaccessible", // Warn about inaccessible types in method signatures.
+  "-Xlint:infer-any",    // Warn when a type argument is inferred to be Any.
+  "-Xlint:nullary-unit", // Warn when nullary methods return Unit.
+  "-Xlint:unused",       // Enable -Ywarn-unused:imports,privates,locals,implicits.
+  "-Wdead-code",         // Warn when dead code is identified.
+  "-Wextra-implicit",    // Warn when more than one implicit parameter section is defined.
+  "-Wnumeric-widen",     // Warn when numerics are widened.
+  "-Wunused:patvars",    // Warn if a variable bound in a pattern is unused.
+  "-Wvalue-discard"      // Warn when non-Unit expression results are unused.
 )
 
 lazy val compilerOptionsAll = Seq(
@@ -69,7 +69,7 @@ def compilerOptionsVersion(scalaVersion: String) =
 
 lazy val scalaVersion212: String = "2.12.13"
 lazy val scalaVersion213: String = "2.13.6"
-lazy val supportedScalaVersions = List(scalaVersion212, scalaVersion213)
+lazy val supportedScalaVersions  = List(scalaVersion212, scalaVersion213)
 
 ThisBuild / scalaVersion := scalaVersion212
 
@@ -176,14 +176,13 @@ lazy val http4s021 =
     .settings(
       name := "scalapact-http4s-0-21",
       libraryDependencies ++= Seq(
-        "org.http4s"             %% "http4s-blaze-server" % "0.21.18" exclude("org.scala-lang.modules", "scala-xml"),
-        "org.http4s"             %% "http4s-blaze-client" % "0.21.18" exclude("org.scala-lang.modules", "scala-xml"),
-        "org.http4s"             %% "http4s-dsl"          % "0.21.18",
-        "com.github.tomakehurst" % "wiremock"             % "2.25.1" % "test"
+        "org.http4s"            %% "http4s-blaze-server" % "0.21.18" exclude ("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"            %% "http4s-blaze-client" % "0.21.18" exclude ("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"            %% "http4s-dsl"          % "0.21.18",
+        "com.github.tomakehurst" % "wiremock"            % "2.25.1" % "test"
       )
     )
     .dependsOn(shared)
-
 
 lazy val http4s023 =
   (project in file("scalapact-http4s-0-23"))
@@ -192,10 +191,10 @@ lazy val http4s023 =
     .settings(
       name := "scalapact-http4s-0-23",
       libraryDependencies ++= Seq(
-        "org.http4s"             %% "http4s-blaze-server" % "0.23.0-RC1" exclude("org.scala-lang.modules", "scala-xml"),
-        "org.http4s"             %% "http4s-blaze-client" % "0.23.0-RC1" exclude("org.scala-lang.modules", "scala-xml"),
-        "org.http4s"             %% "http4s-dsl"          % "0.23.0-RC1",
-        "com.github.tomakehurst" % "wiremock"             % "2.25.1" % "test"
+        "org.http4s"            %% "http4s-blaze-server" % "0.23.0-RC1" exclude ("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"            %% "http4s-blaze-client" % "0.23.0-RC1" exclude ("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"            %% "http4s-dsl"          % "0.23.0-RC1",
+        "com.github.tomakehurst" % "wiremock"            % "2.25.1" % "test"
       )
     )
     .dependsOn(shared)
@@ -253,7 +252,7 @@ lazy val plugin =
     .settings(publishSettings: _*)
     .settings(
       name := "sbt-scalapact",
-      sbtPlugin := true,
+      sbtPlugin := true
     )
     .dependsOn(pluginShared)
     .dependsOn(circe13)
@@ -266,7 +265,7 @@ lazy val pluginNoDeps =
     .settings(publishSettings: _*)
     .settings(
       name := "sbt-scalapact-nodeps",
-      sbtPlugin := true,
+      sbtPlugin := true
     )
     .dependsOn(pluginShared)
     .dependsOn(circe13 % "provided")
@@ -331,11 +330,11 @@ lazy val testsWithDeps =
     .settings(commonSettings: _*)
     .settings(
       libraryDependencies ++= Seq(
-        "org.scalaj"             %% "scalaj-http"   % "2.4.2" % "test",
-        "org.json4s"             %% "json4s-native" % "3.6.11" % "test",
-        "com.github.tomakehurst" % "wiremock"       % "1.56" % "test",
-        "fr.hmil"                %% "roshttp"       % "2.1.0" % "test",
-        "io.argonaut"            %% "argonaut"      % "6.2.5"
+        "org.scalaj"            %% "scalaj-http"   % "2.4.2"  % "test",
+        "org.json4s"            %% "json4s-native" % "3.6.11" % "test",
+        "com.github.tomakehurst" % "wiremock"      % "1.56"   % "test",
+        "fr.hmil"               %% "roshttp"       % "2.1.0"  % "test",
+        "io.argonaut"           %% "argonaut"      % "6.2.5"
       ),
       skip in publish := true
     )
@@ -359,6 +358,7 @@ lazy val docs =
     )
     .settings(scala212OnlySettings)
 
+val TapirVersion = "0.17.20"
 lazy val tapir =
   (project in file("scalapact-tapir"))
     .settings(commonSettings: _*)
@@ -366,10 +366,21 @@ lazy val tapir =
     .settings(
       name := "scalapact-tapir",
       libraryDependencies := Seq(
-        "com.softwaremill.sttp.tapir" %% "tapir-openapi-model" % "0.17.20",
-        "org.scalatest" %% "scalatest" % "3.2.9" % Test,
-        "org.scalatestplus" %% "scalacheck-1-15" % "3.2.9.0" % Test,
-        "org.scalacheck" %% "scalacheck" % "1.15.4" % Test
+        "com.softwaremill.sttp.tapir" %% "tapir-openapi-model"      % TapirVersion,
+        "io.circe"                    %% "circe-core"               % "0.14.1",
+        "io.circe"                    %% "circe-parser"             % "0.14.1",
+        "com.softwaremill.sttp.tapir" %% "tapir-core"               % TapirVersion % Test,
+        "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"      % TapirVersion % Test,
+        "com.softwaremill.sttp.tapir" %% "tapir-json-circe"         % TapirVersion % Test,
+        "com.softwaremill.sttp.tapir" %% "tapir-openapi-docs"       % TapirVersion % Test,
+        "com.softwaremill.sttp.tapir" %% "tapir-openapi-circe-yaml" % TapirVersion % Test,
+        "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-http4s"  % TapirVersion % Test,
+        "com.softwaremill.sttp.tapir" %% "tapir-redoc-http4s"       % TapirVersion % Test,
+        "com.softwaremill.sttp.tapir" %% "tapir-cats"               % TapirVersion % Test,
+        "com.softwaremill.sttp.tapir" %% "tapir-enumeratum"         % TapirVersion % Test,
+        "org.scalatest"               %% "scalatest"                % "3.2.9"      % Test,
+        "org.scalatestplus"           %% "scalacheck-1-15"          % "3.2.9.0"    % Test,
+        "org.scalacheck"              %% "scalacheck"               % "1.15.4"     % Test
       )
     )
     .dependsOn(shared)
@@ -398,34 +409,41 @@ val readmeFileKey = settingKey[File]("The location of the readme")
 readmeFileKey := baseDirectory.value / "README.md"
 
 lazy val updateVersionsInReadme: ReleaseStep = { st: State =>
-  st.get(ReleaseKeys.versions).flatMap { case (newVersion, _) =>
-    val readmeFile = st.extract.get(readmeFileKey).getCanonicalFile
-    val readmeLines = IO.readLines(readmeFile)
-    val versionPrefix = "## Latest version is "
-    val currentVersion = readmeLines.collectFirst { case s if s.startsWith(versionPrefix) => s.replace(versionPrefix, "").dropWhile(_.isWhitespace)}
-    currentVersion.map { cv =>
-      IO.writeLines(readmeFile, readmeLines.map(_.replaceAll(cv, newVersion)))
+  st.get(ReleaseKeys.versions)
+    .flatMap { case (newVersion, _) =>
+      val readmeFile    = st.extract.get(readmeFileKey).getCanonicalFile
+      val readmeLines   = IO.readLines(readmeFile)
+      val versionPrefix = "## Latest version is "
+      val currentVersion = readmeLines.collectFirst {
+        case s if s.startsWith(versionPrefix) => s.replace(versionPrefix, "").dropWhile(_.isWhitespace)
+      }
+      currentVersion.map { cv =>
+        IO.writeLines(readmeFile, readmeLines.map(_.replaceAll(cv, newVersion)))
+      }
     }
-  }.getOrElse(())
+    .getOrElse(())
 
   st
 }
 
 lazy val commitReadMeVersionBump: ReleaseStep = { st: State =>
-  def vcs(st: State): Vcs = {
-    st.extract.get(releaseVcs).getOrElse(sys.error("Aborting release. Working directory is not a repository of a recognized VCS."))
-  }
+  def vcs(st: State): Vcs =
+    st.extract
+      .get(releaseVcs)
+      .getOrElse(sys.error("Aborting release. Working directory is not a repository of a recognized VCS."))
   val commitMessage: TaskKey[String] = releaseNextCommitMessage
   val log = new ProcessLogger {
     override def err(s: => String): Unit = st.log.info(s)
     override def out(s: => String): Unit = st.log.info(s)
-    override def buffer[T](f: => T): T = st.log.buffer(f)
+    override def buffer[T](f: => T): T   = st.log.buffer(f)
   }
   val readmeFile = st.extract.get(readmeFileKey).getCanonicalFile
-  val base = vcs(st).baseDir.getCanonicalFile
-  val sign = st.extract.get(releaseVcsSign)
-  val signOff = st.extract.get(releaseVcsSignOff)
-  val relativePathToReadme = IO.relativize(base, readmeFile).getOrElse("Readme file [%s] is outside of this VCS repository with base directory [%s]!" format(readmeFile, base))
+  val base       = vcs(st).baseDir.getCanonicalFile
+  val sign       = st.extract.get(releaseVcsSign)
+  val signOff    = st.extract.get(releaseVcsSignOff)
+  val relativePathToReadme = IO
+    .relativize(base, readmeFile)
+    .getOrElse("Readme file [%s] is outside of this VCS repository with base directory [%s]!" format (readmeFile, base))
 
   vcs(st).add(relativePathToReadme) !! log
 
