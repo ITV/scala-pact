@@ -43,7 +43,7 @@ EOL
 sbt "testsWithDeps/pactTest"
 sbt "standalone/run --port 1234 --source target/pacts" &
 
-COUNTDOWN=15
+COUNTDOWN=30
 
 echo "...giving the stubber a $COUNTDOWN second head start to warm up..."
 simple_countdown $COUNTDOWN

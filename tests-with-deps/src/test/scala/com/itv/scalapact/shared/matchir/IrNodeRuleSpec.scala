@@ -1,6 +1,6 @@
 package com.itv.scalapact.shared.matchir
 
-import com.itv.scalapact.circe13.JsonConversionFunctions
+import com.itv.scalapact.circe14.JsonConversionFunctions
 import com.itv.scalapact.shared.MatchingRule
 import com.itv.scalapact.shared.matchir.IrNodeEqualityResult.{IrNodesEqual, IrNodesNotEqual}
 import com.itv.scalapact.shared.matchir.IrNodePath.IrNodePathEmpty
