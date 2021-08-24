@@ -15,10 +15,8 @@ class IrNodeRuleSpec extends AnyFunSpec with Matchers {
 
   def check(res: IrNodeEqualityResult): Unit =
     res match {
-      case p @ IrNodesEqual =>
-        p shouldEqual IrNodesEqual
-        ()
-      case e: IrNodesNotEqual => fail(e.renderDifferences)
+      case p: IrNodesEqual.type => ()
+      case e: IrNodesNotEqual   => fail(e.renderDifferences)
     }
 
   describe("creating a rule set") {

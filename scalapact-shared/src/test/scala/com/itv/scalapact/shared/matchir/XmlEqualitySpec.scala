@@ -15,8 +15,7 @@ class XmlEqualitySpec extends AnyFunSpec with Matchers {
 
   def check(res: IrNodeEqualityResult): Unit =
     res match {
-      case p @ IrNodesEqual =>
-        p shouldEqual IrNodesEqual
+      case p: IrNodesEqual.type =>
         ()
 
       case e: IrNodesNotEqual =>

@@ -71,6 +71,8 @@ class ExampleVerification extends AnyFunSpec with Matchers with BeforeAndAfterAl
     wireMockServer.stubFor(
       get(urlEqualTo("/strict")).willReturn(response2)
     )
+    
+    ()
   }
 
   override def afterAll(): Unit =
