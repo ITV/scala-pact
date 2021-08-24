@@ -113,8 +113,9 @@ object PactImplicits {
     cur.downField("_links").downField("curies").delete.as[Links].map(HALIndex.apply)
   }
 
-  implicit val embeddedPactForVerificationDecoder: Decoder[PactForVerification]           = deriveDecoder
-  implicit val embeddedPactsForVerificationDecoder: Decoder[EmbeddedPactsForVerification] = Decoder.decodeList[PactForVerification].map(EmbeddedPactsForVerification.apply)
+  implicit val embeddedPactForVerificationDecoder: Decoder[PactForVerification] = deriveDecoder
+  implicit val embeddedPactsForVerificationDecoder: Decoder[EmbeddedPactsForVerification] =
+    Decoder.decodeList[PactForVerification].map(EmbeddedPactsForVerification.apply)
 
   implicit val pendingStateNoticeDecoder: Decoder[Notice] = Decoder.instance { cur =>
     lazy val pattern = "after_verification:success_(true|false)_published_(true|false)".r
