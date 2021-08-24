@@ -1,6 +1,5 @@
 package com.itv.scalapact
 
-
 import ScalaPactForger._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers

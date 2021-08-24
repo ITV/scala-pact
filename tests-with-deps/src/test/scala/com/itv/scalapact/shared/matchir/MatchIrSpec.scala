@@ -6,6 +6,8 @@ import com.itv.scalapact.shared.matchir.IrNodePath.IrNodePathEmpty
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
+// scalafmt can't handle this
+// format: off
 class MatchIrSpec extends AnyFunSpec with Matchers {
 
   def check(res: IrNodeEqualityResult): Unit =
@@ -350,6 +352,7 @@ class MatchIrSpec extends AnyFunSpec with Matchers {
             ).withPath(IrNodePathEmpty <~ "riverbank" <~ "flowers").markAsArray
           ).withPath(IrNodePathEmpty <~ "riverbank")
         ).withPath(IrNodePathEmpty)
+        // format: on
 
 //      check(MatchIr.fromJSON(json).get =<>= expected)
       (expected =<>= MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(json).get).isEqual shouldEqual false
