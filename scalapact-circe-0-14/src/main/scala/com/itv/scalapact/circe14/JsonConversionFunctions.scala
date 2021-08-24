@@ -28,10 +28,10 @@ object JsonConversionFunctions extends IJsonConversionFunctions {
         IrNode(label, j.asNumber.map(_.toDouble).map(d => IrNumberNode(d))).withPath(pathToParent)
 
       case j: Json if j.isBoolean =>
-        IrNode(label, j.asBoolean.map(IrBooleanNode)).withPath(pathToParent)
+        IrNode(label, j.asBoolean.map(IrBooleanNode.apply)).withPath(pathToParent)
 
       case j: Json if j.isString =>
-        IrNode(label, j.asString.map(IrStringNode)).withPath(pathToParent)
+        IrNode(label, j.asString.map(IrStringNode.apply)).withPath(pathToParent)
 
       case _ =>
         IrNode(label, IrNullNode).withPath(pathToParent)

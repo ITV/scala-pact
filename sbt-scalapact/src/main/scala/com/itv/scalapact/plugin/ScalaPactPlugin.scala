@@ -239,7 +239,7 @@ object ScalaPactPlugin extends AutoPlugin {
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   def pactTestTask: Def.Initialize[Task[Unit]] =
-    pactPackTask.dependsOn((test in Test).dependsOn((compile in Compile).dependsOn(clean in Compile)))
+    pactPackTask.dependsOn((Test / test).dependsOn((Compile / compile).dependsOn(Compile / clean)))
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   def pactPublishTask: Def.Initialize[InputTask[Unit]] = Def.inputTask {

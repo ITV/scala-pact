@@ -1,5 +1,6 @@
 lazy val scalaVersion212: String = "2.12.14"
 lazy val scalaVersion213: String = "2.13.6"
+lazy val scalaVersion3: String   = "3.0.1"
 lazy val supportedScalaVersions  = List(scalaVersion212, scalaVersion213)
 
 ThisBuild / scalaVersion := scalaVersion212
@@ -19,6 +20,12 @@ lazy val commonSettings = Seq(
 
 lazy val scala212OnlySettings = Seq(
   crossScalaVersions := Seq(scalaVersion212)
+)
+
+lazy val scala3Settings = Seq(
+  crossScalaVersions += scalaVersion3,
+  scalacOptions -= "-Xfatal-warnings",
+  scalacOptions ++= Seq("-source:3.0-migration", "-rewrite")
 )
 
 lazy val mockSettings = Seq(
@@ -66,15 +73,17 @@ lazy val shared =
       buildInfoPackage := "com.itv.scalapact.shared"
     )
     .settings(commonSettings: _*)
+    .settings(scala3Settings: _*)
     .settings(publishSettings: _*)
     .settings(
       name := "scalapact-shared",
-      libraryDependencies ++= Seq("org.scala-lang.modules" %% "scala-xml" % "1.2.0")
+      libraryDependencies ++= Seq("org.scala-lang.modules" %% "scala-xml" % "2.0.1")
     )
 
 lazy val core =
   (project in file("scalapact-core"))
     .settings(commonSettings: _*)
+    .settings(scala3Settings: _*)
     .settings(publishSettings: _*)
     .settings(
       name := "scalapact-core"
@@ -100,6 +109,7 @@ lazy val http4s023 =
   (project in file("scalapact-http4s-0-23"))
     .settings(commonSettings: _*)
     .settings(publishSettings: _*)
+    .settings(scala3Settings: _*)
     .settings(
       name := "scalapact-http4s-0-23",
       libraryDependencies ++= Seq(
@@ -114,6 +124,7 @@ lazy val http4s023 =
 lazy val testShared =
   (project in file("scalapact-test-shared"))
     .settings(commonSettings: _*)
+    .settings(scala3Settings: _*)
     .settings(
       name := "scalapact-test-shared",
       skip in publish := true
@@ -151,6 +162,7 @@ lazy val circe13 =
 lazy val circe14 =
   (project in file("scalapact-circe-0-14"))
     .settings(commonSettings: _*)
+    .settings(scala3Settings: _*)
     .settings(publishSettings: _*)
     .settings(
       name := "scalapact-circe-0-14",
@@ -202,6 +214,7 @@ lazy val pluginNoDeps =
 lazy val framework =
   (project in file("scalapact-scalatest"))
     .settings(commonSettings: _*)
+    .settings(scala3Settings: _*)
     .settings(publishSettings: _*)
     .settings(
       name := "scalapact-scalatest",
@@ -214,6 +227,7 @@ lazy val framework =
 lazy val frameworkWithDeps =
   (project in file("scalapact-scalatest-suite"))
     .settings(commonSettings: _*)
+    .settings(scala3Settings: _*)
     .settings(publishSettings: _*)
     .settings(
       name := "scalapact-scalatest-suite",
@@ -259,7 +273,7 @@ lazy val testsWithDeps =
       libraryDependencies ++= Seq(
         "org.scalaj"            %% "scalaj-http"   % "2.4.2"  % "test",
         "org.json4s"            %% "json4s-native" % "3.6.11" % "test",
-        "com.github.tomakehurst" % "wiremock"      % "2.27.2"   % "test",
+        "com.github.tomakehurst" % "wiremock"      % "2.27.2" % "test",
         "fr.hmil"               %% "roshttp"       % "2.1.0"  % "test",
         "io.argonaut"           %% "argonaut"      % "6.2.5"
       ),
