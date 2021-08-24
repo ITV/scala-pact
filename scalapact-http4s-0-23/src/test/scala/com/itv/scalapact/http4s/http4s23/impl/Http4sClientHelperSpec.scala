@@ -7,9 +7,11 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import com.itv.scalapact.http4s23.impl.Http4sClientHelper
 import com.itv.scalapact.shared.http.{HttpMethod, SimpleRequest}
-import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class Http4sClientHelperSpec extends FunSpec with Matchers with BeforeAndAfterAll {
+class Http4sClientHelperSpec extends AnyFunSpec with Matchers with BeforeAndAfterAll {
 
   private val wireMockServer = new WireMockServer(wireMockConfig().port(0))
 

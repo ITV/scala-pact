@@ -2,9 +2,11 @@ package com.itv.scalapact.argonaut62
 
 import argonaut.JsonParser.parse
 import com.itv.scalapact.test.PactFileExamples
-import org.scalatest.{FunSpec, Matchers, OptionValues}
+import org.scalatest.OptionValues
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class ScalaPactReaderWriterSpec extends FunSpec with Matchers with OptionValues {
+class ScalaPactReaderWriterSpec extends AnyFunSpec with Matchers with OptionValues {
 
   val pactReader = new PactReader
   val pactWriter = new PactWriter

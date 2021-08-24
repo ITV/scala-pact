@@ -2,8 +2,6 @@ addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.4")
 
 addSbtPlugin("com.jsuereth" % "sbt-pgp" % "2.1.1")
 
-addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.4.13")
-
 addSbtPlugin("com.lightbend.paradox" % "sbt-paradox" % "0.4.2")
 
 resolvers += "jgit-repo" at "https://download.eclipse.org/jgit/maven"

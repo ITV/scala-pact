@@ -1,4 +1,4 @@
-lazy val scalaVersion212: String = "2.12.13"
+lazy val scalaVersion212: String = "2.12.14"
 lazy val scalaVersion213: String = "2.13.6"
 lazy val supportedScalaVersions  = List(scalaVersion212, scalaVersion213)
 
@@ -7,27 +7,8 @@ ThisBuild / scalaVersion := scalaVersion212
 lazy val commonSettings = Seq(
   organization := "com.itv",
   crossScalaVersions := supportedScalaVersions,
-  scalacOptions -= "-Xfatal-warnings",
   libraryDependencies ++= Seq(
-    "org.scalatest" %% "scalatest" % "3.0.9" % "test"
-  ),
-  wartremoverWarnings in (Compile, compile) ++= Warts.allBut(
-    Wart.Any,
-    Wart.Overloading,
-    Wart.FinalCaseClass,
-    Wart.Nothing,
-    Wart.ImplicitParameter,
-    Wart.NonUnitStatements,
-    Wart.Throw,
-    Wart.Equals,
-    Wart.Recursion,
-    Wart.LeakingSealed,
-    Wart.Null,
-    Wart.Var,
-    Wart.StringPlusAny,
-    Wart.PlatformDefault,
-    Wart.ListUnapply,
-    Wart.GlobalExecutionContext
+    "org.scalatest" %% "scalatest" % "3.2.9" % "test"
   ),
   parallelExecution in Test := false,
 //  javaOptions in Test ++= Seq(

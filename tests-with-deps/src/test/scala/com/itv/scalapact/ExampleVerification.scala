@@ -5,11 +5,13 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import com.itv.scalapact.ScalaPactVerify._
-import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
+import org.scalatest.BeforeAndAfterAll
 
 import scala.concurrent.duration._
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class ExampleVerification extends FunSpec with Matchers with BeforeAndAfterAll {
+class ExampleVerification extends AnyFunSpec with Matchers with BeforeAndAfterAll {
 
   import com.itv.scalapact.json._
   import com.itv.scalapact.http._

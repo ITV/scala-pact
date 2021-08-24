@@ -2,11 +2,12 @@ package com.itv.scalapact.shared.matchir
 
 import com.itv.scalapact.shared.MatchingRule
 import com.itv.scalapact.shared.matchir.IrNodeEqualityResult.{IrNodesEqual, IrNodesNotEqual}
-import org.scalatest.{FunSpec, Matchers}
 
 import scala.xml.Elem
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class XmlEqualitySpec extends FunSpec with Matchers {
+class XmlEqualitySpec extends AnyFunSpec with Matchers {
 
   implicit class ElemOps(val elem: Elem) {
     def toNode = MatchIr.fromXml(elem)

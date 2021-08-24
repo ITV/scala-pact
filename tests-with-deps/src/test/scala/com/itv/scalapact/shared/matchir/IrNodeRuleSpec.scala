@@ -6,11 +6,12 @@ import com.itv.scalapact.shared.matchir.IrNodeEqualityResult.{IrNodesEqual, IrNo
 import com.itv.scalapact.shared.matchir.IrNodePath.IrNodePathEmpty
 import com.itv.scalapact.shared.matchir.IrNodeRule.{IrNodeMinArrayLengthRule, IrNodeRegexRule, IrNodeTypeRule}
 import com.itv.scalapact.shared.utils.PactLogger
-import org.scalatest.{FunSpec, Matchers}
 
 import scala.language.postfixOps
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class IrNodeRuleSpec extends FunSpec with Matchers {
+class IrNodeRuleSpec extends AnyFunSpec with Matchers {
 
   def check(res: IrNodeEqualityResult): Unit =
     res match {

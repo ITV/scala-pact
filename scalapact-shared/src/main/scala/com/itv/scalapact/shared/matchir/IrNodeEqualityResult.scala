@@ -198,7 +198,7 @@ object IrNodeEqualityResult {
 
         case a :: as =>
           e.isEqualTo(a, strict, rules, bePermissive) match {
-            case success @ IrNodesEqual =>
+            case success: IrNodesEqual.type =>
               success
 
             case failure @ IrNodesNotEqual(_) =>

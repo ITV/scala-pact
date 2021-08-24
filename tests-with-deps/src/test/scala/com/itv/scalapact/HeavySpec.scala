@@ -1,10 +1,11 @@
 package com.itv.scalapact
 
-import org.scalatest.{FunSpec, Matchers}
 
 import ScalaPactForger._
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class HeavySpec extends FunSpec with Matchers {
+class HeavySpec extends AnyFunSpec with Matchers {
 
   import com.itv.scalapact.json._
   import com.itv.scalapact.http._
