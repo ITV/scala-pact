@@ -18,7 +18,7 @@ class JsonEqualitySpec extends AnyFunSpec with Matchers {
   def check(res: IrNodeEqualityResult): Unit =
     res match {
       case _: IrNodesEqual.type => ()
-      case e: IrNodesNotEqual => fail(e.renderDifferences)
+      case e: IrNodesNotEqual   => fail(e.renderDifferences)
     }
 
   describe("Equal json objects") {
