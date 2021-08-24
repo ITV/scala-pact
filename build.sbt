@@ -88,10 +88,10 @@ lazy val http4s021 =
     .settings(
       name := "scalapact-http4s-0-21",
       libraryDependencies ++= Seq(
-        "org.http4s"            %% "http4s-blaze-server" % "0.21.18" exclude ("org.scala-lang.modules", "scala-xml"),
-        "org.http4s"            %% "http4s-blaze-client" % "0.21.18" exclude ("org.scala-lang.modules", "scala-xml"),
-        "org.http4s"            %% "http4s-dsl"          % "0.21.18",
-        "com.github.tomakehurst" % "wiremock"            % "2.25.1" % "test"
+        "org.http4s"            %% "http4s-blaze-server" % "0.21.26" exclude ("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"            %% "http4s-blaze-client" % "0.21.26" exclude ("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"            %% "http4s-dsl"          % "0.21.26",
+        "com.github.tomakehurst" % "wiremock"            % "2.27.2" % "test"
       )
     )
     .dependsOn(shared)
@@ -106,7 +106,7 @@ lazy val http4s023 =
         "org.http4s"            %% "http4s-blaze-server" % "0.23.1" exclude ("org.scala-lang.modules", "scala-xml"),
         "org.http4s"            %% "http4s-blaze-client" % "0.23.1" exclude ("org.scala-lang.modules", "scala-xml"),
         "org.http4s"            %% "http4s-dsl"          % "0.23.1",
-        "com.github.tomakehurst" % "wiremock"            % "2.25.1" % "test"
+        "com.github.tomakehurst" % "wiremock"            % "2.27.2" % "test"
       )
     )
     .dependsOn(shared)
@@ -233,7 +233,7 @@ lazy val standalone =
       publish := {},
       assemblyJarName in assembly := "pactstubber.jar",
       libraryDependencies ++= Seq(
-        "ch.qos.logback" % "logback-classic" % "1.2.3"
+        "ch.qos.logback" % "logback-classic" % "1.2.5"
       ),
       skip in publish := true
     )
@@ -259,7 +259,7 @@ lazy val testsWithDeps =
       libraryDependencies ++= Seq(
         "org.scalaj"            %% "scalaj-http"   % "2.4.2"  % "test",
         "org.json4s"            %% "json4s-native" % "3.6.11" % "test",
-        "com.github.tomakehurst" % "wiremock"      % "1.56"   % "test",
+        "com.github.tomakehurst" % "wiremock"      % "2.27.2"   % "test",
         "fr.hmil"               %% "roshttp"       % "2.1.0"  % "test",
         "io.argonaut"           %% "argonaut"      % "6.2.5"
       ),
