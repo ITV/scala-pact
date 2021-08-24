@@ -23,9 +23,7 @@ lazy val scala212OnlySettings = Seq(
 )
 
 lazy val scala3Settings = Seq(
-  crossScalaVersions += scalaVersion3,
-  scalacOptions -= "-Xfatal-warnings",
-  scalacOptions ++= Seq("-source:3.0-migration", "-rewrite")
+  crossScalaVersions += scalaVersion3
 )
 
 lazy val mockSettings = Seq(
