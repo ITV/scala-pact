@@ -55,7 +55,7 @@ object InteractionMatchers {
 
         case x :: xs =>
           matchSingleRequest(strict, x.request.matchingRules, x.request, actual) match {
-            case success if success == MatchOutcomeSuccess =>
+            case success: MatchOutcomeSuccess.type =>
               Option(OutcomeAndInteraction(success, x))
 
             case failure: MatchOutcomeFailed =>
@@ -127,7 +127,7 @@ object InteractionMatchers {
 
         case x :: xs =>
           matchSingleResponse(strict, x.response.matchingRules, x.response, actual) match {
-            case success if success == MatchOutcomeSuccess =>
+            case success: MatchOutcomeSuccess.type =>
               Option(OutcomeAndInteraction(success, x))
 
             case failure: MatchOutcomeFailed =>
