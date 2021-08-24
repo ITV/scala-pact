@@ -22,14 +22,14 @@ trait ScalaPactVerifyDsl {
       new ScalaPactVerifyProviderStates(sourceType)
 
     class ScalaPactVerifyProviderStates(sourceType: PactSourceType) {
-      def setupProviderState(`given`: String)(setupProviderState: SetupProviderState): ScalaPactVerifyRunner =
-        ScalaPactVerifyRunner(sourceType, `given`, setupProviderState)
+      def setupProviderState(provided: String)(setupProviderState: SetupProviderState): ScalaPactVerifyRunner =
+        ScalaPactVerifyRunner(sourceType, provided, setupProviderState)
       def noSetupRequired: ScalaPactVerifyRunner = new ScalaPactVerifyRunner(sourceType, None, None)
     }
 
     class ScalaPactVerifyRunner(
         sourceType: PactSourceType,
-        `given`: Option[String],
+        provided: Option[String],
         setupProviderState: Option[SetupProviderState]
     ) {
       def runStrictVerificationAgainst(
@@ -155,7 +155,7 @@ trait ScalaPactVerifyDsl {
       ): Unit = {
 
         val providerStateFunc: SetupProviderState =
-          `given`
+          provided
             .flatMap(_ => setupProviderState)
             .getOrElse(_ => ProviderStateResult(true))
 
@@ -278,9 +278,9 @@ trait ScalaPactVerifyDsl {
     object ScalaPactVerifyRunner {
       def apply(
           sourceType: PactSourceType,
-          `given`: String,
+          provided: String,
           setupProviderState: SetupProviderState
-      ): ScalaPactVerifyRunner = new ScalaPactVerifyRunner(sourceType, Some(`given`), Some(setupProviderState))
+      ): ScalaPactVerifyRunner = new ScalaPactVerifyRunner(sourceType, Some(provided), Some(setupProviderState))
     }
 
   }

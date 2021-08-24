@@ -9,11 +9,11 @@ class ScalaPactInteraction(
     request: ScalaPactRequest,
     response: ScalaPactResponse
 ) {
-  def givenThat(state: String): ScalaPactInteraction =
+  def provided(state: String): ScalaPactInteraction =
     new ScalaPactInteraction(description, Option(state), sslContextName, request, response)
 
-  @deprecated("use givenThat - given is a keyword in Scala 3", "4.0.0")
-  def `given`(state: String): ScalaPactInteraction = givenThat(state)
+  @deprecated("use provided - given is a keyword in Scala 3", "4.0.0")
+  def `given`(state: String): ScalaPactInteraction = provided(state)
 
   def withSsl(sslContextName: String): ScalaPactInteraction =
     new ScalaPactInteraction(description, providerState, Some(sslContextName), request, response)
