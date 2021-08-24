@@ -55,10 +55,10 @@ object InteractionMatchers {
 
         case x :: xs =>
           matchSingleRequest(strict, x.request.matchingRules, x.request, actual) match {
-            case success @ MatchOutcomeSuccess =>
+            case success if success == MatchOutcomeSuccess =>
               Option(OutcomeAndInteraction(success, x))
 
-            case failure @ MatchOutcomeFailed(_, _) =>
+            case failure: MatchOutcomeFailed =>
               rec(strict, xs, actual, (failure, x) :: fails)
           }
       }
@@ -127,10 +127,10 @@ object InteractionMatchers {
 
         case x :: xs =>
           matchSingleResponse(strict, x.response.matchingRules, x.response, actual) match {
-            case success @ MatchOutcomeSuccess =>
+            case success if success == MatchOutcomeSuccess =>
               Option(OutcomeAndInteraction(success, x))
 
-            case failure @ MatchOutcomeFailed(_, _) =>
+            case failure: MatchOutcomeFailed =>
               rec(strict, xs, actual, (failure, x) :: fails)
           }
       }
