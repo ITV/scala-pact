@@ -220,7 +220,7 @@ class ExampleSpec extends AnyFunSpec with Matchers {
         .addInteraction(
           interaction
             .description("Fetching a specific ID")
-            .given("Resource with ID 1234 exists")
+            .givenThat("Resource with ID 1234 exists")
             .uponReceiving(endPoint)
             .willRespondWith(200, "ID: 1234 Exists")
         )
