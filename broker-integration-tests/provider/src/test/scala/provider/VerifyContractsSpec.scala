@@ -1,13 +1,16 @@
 package provider
 
-import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
+import cats.effect.unsafe.implicits.global
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 import com.itv.scalapact.PactVerifySuite
 import com.itv.scalapact.shared.{BrokerPublishData, ConsumerVersionSelector, PactBrokerAuthorization, PendingPactSettings}
 import scalaj.http._
 
 import scala.concurrent.duration._
 
-class VerifyContractsSpec extends FunSpec with Matchers with BeforeAndAfterAll with PactVerifySuite {
+class VerifyContractsSpec extends AnyFunSpec with Matchers with BeforeAndAfterAll with PactVerifySuite {
   val serverAllocated =
     AlternateStartupApproach.serverResource.allocated.unsafeRunSync()
 
