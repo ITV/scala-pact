@@ -30,6 +30,10 @@ lazy val mockSettings = Seq(
   libraryDependencies += "org.scalamock" %% "scalamock" % "4.0.0" % Test
 )
 
+// not sure why it's needed but was bringing in the old version
+val scalaXmlVersion =
+  Def.setting(if (scalaVersion.value.startsWith("2.12")) "1.3.0" else "2.0.1")
+
 lazy val publishSettings = Seq(
   publishTo := {
     val nexus = "https://oss.sonatype.org/"
@@ -75,7 +79,7 @@ lazy val shared =
     .settings(publishSettings: _*)
     .settings(
       name := "scalapact-shared",
-      libraryDependencies ++= Seq("org.scala-lang.modules" %% "scala-xml" % "2.0.1")
+      libraryDependencies ++= Seq("org.scala-lang.modules" %% "scala-xml" % scalaXmlVersion.value)
     )
 
 lazy val core =
