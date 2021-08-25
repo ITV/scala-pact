@@ -30,9 +30,13 @@ lazy val mockSettings = Seq(
   libraryDependencies += "org.scalamock" %% "scalamock" % "4.0.0" % Test
 )
 
-// not sure why it's needed but was bringing in the old version
+// Everything blows up if the plugin uses scala-xml 2.x
 val scalaXmlVersion =
-  Def.setting(if (scalaVersion.value.startsWith("2.12")) "1.3.0" else "2.0.1")
+  Def.setting(
+    if (scalaVersion.value.startsWith("2.12")) "1.3.0"
+    else
+      "2.0.1"
+  )
 
 lazy val publishSettings = Seq(
   publishTo := {
@@ -268,16 +272,17 @@ lazy val pactSpec =
     .dependsOn(core)
     .dependsOn(argonaut62)
 
+// TODO: replace roshttp so we can run this on newer scala versions
 lazy val testsWithDeps =
   (project in file("tests-with-deps"))
     .settings(commonSettings: _*)
     .settings(
       libraryDependencies ++= Seq(
         "org.scalaj"            %% "scalaj-http"   % "2.4.2"  % "test",
-        "org.json4s"            %% "json4s-native" % "3.6.11" % "test",
+        "org.json4s"            %% "json4s-native" % "4.0.2"  % "test",
         "com.github.tomakehurst" % "wiremock"      % "2.27.2" % "test",
         "fr.hmil"               %% "roshttp"       % "2.1.0"  % "test",
-        "io.argonaut"           %% "argonaut"      % "6.2.5"
+        "io.argonaut"           %% "argonaut"      % "6.3.6"
       ),
       skip in publish := true
     )

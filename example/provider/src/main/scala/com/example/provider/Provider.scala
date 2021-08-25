@@ -12,18 +12,18 @@ import org.http4s.headers.`Content-Type`
 
 import scala.io.Source
 import scala.util.Random
-import org.http4s.util.CaseInsensitiveString
+import org.typelevel.ci._
 
 object Provider {
 
   val service = HttpRoutes.of[IO] {
     case request @ GET -> Root / "results" =>
-      val pactHeader = request.headers.get(CaseInsensitiveString("Pact")).map(_.value).getOrElse("")
-      Ok(ResultResponse(3, loadPeople)).map(_.putHeaders(Header("Pact", pactHeader)))
+      val pactHeader = request.headers.get(ci"Pact").map(_.head.value).getOrElse("")
+      Ok(ResultResponse(3, loadPeople)).map(_.putHeaders(Header.Raw(ci"Pact", pactHeader)))
 
     case request @ GET -> Root / "auth_token" =>
-      val acceptHeader = request.headers.get(CaseInsensitiveString("Accept")).map(_.value)
-      val nameHeader   = request.headers.get(CaseInsensitiveString("Name")).map(_.value)
+      val acceptHeader = request.headers.get(ci"Accept").map(_.head.value)
+      val nameHeader   = request.headers.get(ci"Name").map(_.head.value)
 
       (acceptHeader, nameHeader) match {
         case (Some(_), Some(_)) =>

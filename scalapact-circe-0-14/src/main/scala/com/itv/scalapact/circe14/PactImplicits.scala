@@ -114,8 +114,9 @@ object PactImplicits {
   }
 
   implicit val embeddedPactForVerificationDecoder: Decoder[PactForVerification] = deriveDecoder
-  implicit val embeddedPactsForVerificationDecoder: Decoder[EmbeddedPactsForVerification] =
-    Decoder.decodeList[PactForVerification].map(EmbeddedPactsForVerification.apply)
+  implicit val embeddedPactsForVerificationDecoder: Decoder[EmbeddedPactsForVerification] = Decoder.instance { cur =>
+    cur.get[List[PactForVerification]]("pacts").map(EmbeddedPactsForVerification.apply)
+  }
 
   implicit val pendingStateNoticeDecoder: Decoder[Notice] = Decoder.instance { cur =>
     lazy val pattern = "after_verification:success_(true|false)_published_(true|false)".r
