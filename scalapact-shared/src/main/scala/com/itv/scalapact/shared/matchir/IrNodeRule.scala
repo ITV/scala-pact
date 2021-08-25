@@ -228,10 +228,6 @@ final case class IrNodeMatchingRules(rules: List[IrNodeRule], withTracing: RuleP
           RuleProcessTracing.log("Checking min... (does nothing on primitives)")
           RuleProcessTracing.log(s"  ...n/a")
           None
-
-        case _ =>
-          RuleProcessTracing.log("Checking failed, unexpected condition met.")
-          None
       }
       .collect { case Some(s) => s }
   }

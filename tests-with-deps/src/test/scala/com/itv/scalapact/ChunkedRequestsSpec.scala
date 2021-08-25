@@ -1,7 +1,6 @@
 package com.itv.scalapact
 
 import com.itv.scalapact.ScalaPactForger._
-import org.scalatest.{FunSpec, Matchers}
 import fr.hmil.roshttp.{BackendConfig, HttpRequest}
 import monix.execution.Scheduler.Implicits.global
 import fr.hmil.roshttp.body.{BulkBodyPart, PlainTextBody}
@@ -11,10 +10,12 @@ import fr.hmil.roshttp.response.SimpleHttpResponse
 
 import scala.concurrent.duration._
 import scala.concurrent.Await
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
 /** Strict and non-strict pacts cannot be mixed.
   */
-class ChunkedRequestsSpec extends FunSpec with Matchers {
+class ChunkedRequestsSpec extends AnyFunSpec with Matchers {
 
   import com.itv.scalapact.json._
   import com.itv.scalapact.http._

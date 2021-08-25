@@ -10,7 +10,7 @@ import scala.util.{Failure, Success, Try}
 
 object PactImplicits {
 
-  implicit val pactActorDecoder: Codec[PactActor] = deriveCodec
+  implicit val pactActorDecoder: Codec[PactActor] = Codec.forProduct1("name")(PactActor.apply)(_.name)
 
   implicit val matchingRuleDecoder: Codec[MatchingRule] = deriveCodec
 
@@ -77,7 +77,8 @@ object PactImplicits {
 
   implicit val linkValueDecoder: Codec[LinkValues] = deriveCodec
 
-  implicit val versionMetaDataDecoder: Codec[VersionMetaData] = deriveCodec
+  implicit val versionMetaDataDecoder: Codec[VersionMetaData] =
+    Codec.forProduct1("version")(VersionMetaData.apply)(_.version)
 
   implicit val pactMetaDataDecoder: Codec[PactMetaData] = deriveCodec
 
@@ -109,11 +110,13 @@ object PactImplicits {
   }
 
   implicit val halIndexDecoder: Decoder[HALIndex] = Decoder.instance { cur =>
-    cur.downField("_links").downField("curies").delete.as[Links].map(HALIndex)
+    cur.downField("_links").downField("curies").delete.as[Links].map(HALIndex.apply)
   }
 
-  implicit val embeddedPactsForVerificationDecoder: Decoder[EmbeddedPactsForVerification] = deriveDecoder
-  implicit val embeddedPactForVerificationDecoder: Decoder[PactForVerification]           = deriveDecoder
+  implicit val embeddedPactForVerificationDecoder: Decoder[PactForVerification] = deriveDecoder
+  implicit val embeddedPactsForVerificationDecoder: Decoder[EmbeddedPactsForVerification] = Decoder.instance { cur =>
+    cur.get[List[PactForVerification]]("pacts").map(EmbeddedPactsForVerification.apply)
+  }
 
   implicit val pendingStateNoticeDecoder: Decoder[Notice] = Decoder.instance { cur =>
     lazy val pattern = "after_verification:success_(true|false)_published_(true|false)".r

@@ -5,9 +5,10 @@ import com.itv.scalapact.http4s21.impl.ScalaPactHttpClient
 import com.itv.scalapact.shared._
 import com.itv.scalapact.shared.http.{SimpleRequest, SimpleResponse}
 import org.http4s.client.Client
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class ScalaPactHttpClientSpec extends FunSpec with Matchers {
+class ScalaPactHttpClientSpec extends AnyFunSpec with Matchers {
 
   describe("Making an interaction request") {
 

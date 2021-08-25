@@ -1,8 +1,9 @@
 package com.itv.scalapactcore.common
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class PactBrokerAddressValidationSpec extends FunSpec with Matchers {
+class PactBrokerAddressValidationSpec extends AnyFunSpec with Matchers {
 
   describe("Validating pact broker urls") {
 

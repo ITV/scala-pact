@@ -7,8 +7,8 @@ import org.http4s._
 import org.http4s.dsl.io._
 import org.http4s.implicits._
 import org.http4s.circe._
-import org.http4s.util.CaseInsensitiveString
 import io.circe.{Json, parser}
+import org.typelevel.ci._
 
 import scala.io.Source
 
@@ -22,7 +22,7 @@ object Provider {
   }.orNotFound
 
   def makeResponse(request: Request[IO]): IO[Response[IO]] = {
-    val pactHeader = request.headers.get(CaseInsensitiveString("Pact")).map(_.value).getOrElse("")
+    val pactHeader = request.headers.get(ci"Pact").map(_.head.value).getOrElse("")
 
     val body = {
       val source = Source.fromFile(new File("../consumer/master-expected.json"))
@@ -30,7 +30,7 @@ object Provider {
       source.close()
       parser.parse(b).getOrElse(Json.obj())
     }
-    Ok(body).map(_.putHeaders(Header("Pact", pactHeader)))
+    Ok(body).map(_.putHeaders(Header.Raw(ci"Pact", pactHeader)))
   }
 
 }

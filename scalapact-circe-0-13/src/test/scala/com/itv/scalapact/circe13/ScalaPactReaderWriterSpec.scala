@@ -1,10 +1,12 @@
 package com.itv.scalapact.circe13
 
 import io.circe.parser._
-import org.scalatest.{FunSpec, OptionValues, Matchers}
+import org.scalatest.OptionValues
 import com.itv.scalapact.test.PactFileExamples
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class ScalaPactReaderWriterSpec extends FunSpec with Matchers with OptionValues {
+class ScalaPactReaderWriterSpec extends AnyFunSpec with Matchers with OptionValues {
 
   val pactReader = new PactReader
   val pactWriter = new PactWriter

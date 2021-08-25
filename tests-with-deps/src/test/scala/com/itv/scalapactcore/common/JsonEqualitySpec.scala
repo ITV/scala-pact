@@ -5,21 +5,20 @@ import Argonaut._
 import com.itv.scalapact.circe14.JsonConversionFunctions
 import com.itv.scalapact.shared.matchir.IrNodeEqualityResult.{IrNodesEqual, IrNodesNotEqual}
 import com.itv.scalapact.shared.matchir._
-import org.scalatest.{FunSpec, Matchers}
 
 import scala.language.implicitConversions
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class JsonEqualitySpec extends FunSpec with Matchers {
+class JsonEqualitySpec extends AnyFunSpec with Matchers {
 
   implicit def elemToNode(json: Json): IrNode =
     MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(json.toString()).get
 
   def check(res: IrNodeEqualityResult): Unit =
     res match {
-      case p @ IrNodesEqual =>
-        p shouldEqual IrNodesEqual
-        ()
-      case e: IrNodesNotEqual => fail(e.renderDifferences)
+      case _: IrNodesEqual.type => ()
+      case e: IrNodesNotEqual   => fail(e.renderDifferences)
     }
 
   describe("Equal json objects") {

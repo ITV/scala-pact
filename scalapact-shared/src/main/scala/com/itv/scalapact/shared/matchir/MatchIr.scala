@@ -29,13 +29,13 @@ object MatchIr {
 
         case (k, v) if v.matches(isNumericValueRegex) =>
           safeStringToDouble(v)
-            .map(IrNumberNode)
+            .map(IrNumberNode.apply)
             .map(vv => IrNodeAttributes(Map(k -> IrNodeAttribute(vv, pathToParent <@ k))))
             .getOrElse(IrNodeAttributes.empty)
 
         case (k, v) if v.matches(isBooleanValueRegex) =>
           safeStringToBoolean(v)
-            .map(IrBooleanNode)
+            .map(IrBooleanNode.apply)
             .map(vv => IrNodeAttributes(Map(k -> IrNodeAttribute(vv, pathToParent <@ k))))
             .getOrElse(IrNodeAttributes.empty)
 
@@ -49,8 +49,8 @@ object MatchIr {
     nodes match {
       case Nil if value == null                      => Option(IrNullNode)
       case Nil if value.isEmpty                      => None
-      case Nil if value.matches(isNumericValueRegex) => safeStringToDouble(value).map(IrNumberNode)
-      case Nil if value.matches(isBooleanValueRegex) => safeStringToBoolean(value).map(IrBooleanNode)
+      case Nil if value.matches(isNumericValueRegex) => safeStringToDouble(value).map(IrNumberNode.apply)
+      case Nil if value.matches(isBooleanValueRegex) => safeStringToBoolean(value).map(IrBooleanNode.apply)
       case Nil                                       => Option(IrStringNode(value))
       case _                                         => None
     }

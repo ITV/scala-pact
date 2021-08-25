@@ -3,13 +3,16 @@ package com.itv.scalapact.shared.matchir
 import com.itv.scalapact.circe14.JsonConversionFunctions
 import com.itv.scalapact.shared.matchir.IrNodeEqualityResult.{IrNodesEqual, IrNodesNotEqual}
 import com.itv.scalapact.shared.matchir.IrNodePath.IrNodePathEmpty
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class MatchIrSpec extends FunSpec with Matchers {
+// scalafmt can't handle this
+// format: off
+class MatchIrSpec extends AnyFunSpec with Matchers {
 
   def check(res: IrNodeEqualityResult): Unit =
     res match {
-      case p @ IrNodesEqual =>
+      case p : IrNodesEqual.type =>
         p shouldEqual IrNodesEqual
         ()
       case e: IrNodesNotEqual => fail(e.renderDifferences)
@@ -349,6 +352,7 @@ class MatchIrSpec extends FunSpec with Matchers {
             ).withPath(IrNodePathEmpty <~ "riverbank" <~ "flowers").markAsArray
           ).withPath(IrNodePathEmpty <~ "riverbank")
         ).withPath(IrNodePathEmpty)
+        // format: on
 
 //      check(MatchIr.fromJSON(json).get =<>= expected)
       (expected =<>= MatchIr.fromJSON(JsonConversionFunctions.fromJSON)(json).get).isEqual shouldEqual false

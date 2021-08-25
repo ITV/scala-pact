@@ -37,7 +37,7 @@ object Http4sClientHelper {
       request <- Http4sRequestResponseFactory.buildRequest(request)
       _       <- IO(PactLogger.message(s"cURL for request: ${request.asCurl()}"))
       response <- httpClient.use { c =>
-        c.run(request).use { r: Response[IO] =>
+        c.run(request).use { (r: Response[IO]) =>
           r.bodyText.compile.toVector
             .map(_.mkString)
             .map { b =>

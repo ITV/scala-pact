@@ -10,11 +10,12 @@ import com.itv.scalapactcore.common.matching.MethodMatching._
 import com.itv.scalapactcore.common.matching.PathMatching._
 import com.itv.scalapactcore.common.matching.StatusMatching._
 import com.itv.scalapactcore.common.matching.{InteractionMatchers, MatchOutcomeFailed, MatchOutcomeSuccess}
-import org.scalatest.{FunSpec, Matchers}
 
 import scala.language.implicitConversions
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class InteractionMatchersSpec extends FunSpec with Matchers {
+class InteractionMatchersSpec extends AnyFunSpec with Matchers {
 
   implicit def toOption[A](thing: A): Option[A] = Option(thing)
 
@@ -116,7 +117,7 @@ class InteractionMatchersSpec extends FunSpec with Matchers {
       )
 
       matchHeaders(None, expected, received) match {
-        case s @ MatchOutcomeSuccess =>
+        case s: MatchOutcomeSuccess.type =>
           s.isSuccess shouldEqual true
 
         case f: MatchOutcomeFailed =>

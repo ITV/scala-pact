@@ -4,9 +4,10 @@ import com.itv.scalapact.ScalaPactForger._
 import com.itv.scalapact.model.ScalaPactMatchingRule.ScalaPactMatchingRuleArrayMinLength
 import com.itv.scalapact.model._
 import com.itv.scalapact.shared.MatchingRule
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class ScalaPactContractWriterSpec extends FunSpec with Matchers {
+class ScalaPactContractWriterSpec extends AnyFunSpec with Matchers {
   describe("Retrieving pact from description") {
     it("should produce pact with match: type for a minimum array rule") {
       val matchingRulesWithMinArray = List(ScalaPactMatchingRuleArrayMinLength("root", 10))

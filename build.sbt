@@ -1,74 +1,6 @@
-lazy val compilerOptions212 = Seq(
-  "-Xfuture",                         // Turn on future language features.
-  "-Xlint:by-name-right-associative", // By-name parameter of right associative operator.
-  "-Xlint:unsound-match",             // Pattern match may not be typesafe.
-  "-Yno-adapted-args",                // Do not adapt an argument list (either by inserting () or creating a tuple) to match the receiver.
-  "-Ywarn-dead-code",                 // Warn when dead code is identified.
-  "-Ywarn-extra-implicit",            // Warn when more than one implicit parameter section is defined.
-  "-Ywarn-infer-any",                 // Warn when a type argument is inferred to be `Any`.
-  "-Ywarn-nullary-override",          // Warn when non-nullary `def f()' overrides nullary `def f'.
-  "-Ywarn-nullary-unit",              // Warn when nullary methods return Unit.
-  "-Ywarn-numeric-widen",             // Warn when numerics are widened.
-  "-Ywarn-unused:implicits",          // Warn if an implicit parameter is unused.
-  "-Ywarn-unused:imports",            // Warn if an import selector is not referenced.
-  "-Ywarn-unused:locals",             // Warn if a local definition is unused.
-  "-Ywarn-unused:params",             // Warn if a value parameter is unused.
-  "-Ywarn-unused:patvars",            // Warn if a variable bound in a pattern is unused.
-  "-Ywarn-unused:privates",           // Warn if a private member is unused.
-  "-Ywarn-value-discard",             // Warn when non-Unit expression results are unused.
-  "-Ypartial-unification"             // Enable partial unification in type constructor inference
-)
-
-lazy val compilerOptions213 = Seq(
-  "-Xlint:adapted-args", // Warn if an argument list is modified to match the receiver.
-  "-Xlint:inaccessible", // Warn about inaccessible types in method signatures.
-  "-Xlint:infer-any",    // Warn when a type argument is inferred to be Any.
-  "-Xlint:nullary-unit", // Warn when nullary methods return Unit.
-  "-Xlint:unused",       // Enable -Ywarn-unused:imports,privates,locals,implicits.
-  "-Wdead-code",         // Warn when dead code is identified.
-  "-Wextra-implicit",    // Warn when more than one implicit parameter section is defined.
-  "-Wnumeric-widen",     // Warn when numerics are widened.
-  "-Wunused:patvars",    // Warn if a variable bound in a pattern is unused.
-  "-Wvalue-discard"      // Warn when non-Unit expression results are unused.
-)
-
-lazy val compilerOptionsAll = Seq(
-  "-deprecation", // Emit warning and location for usages of deprecated APIs.
-  "-encoding",
-  "utf-8",                         // Specify character encoding used by source files.
-  "-explaintypes",                 // Explain type errors in more detail.
-  "-feature",                      // Emit warning and location for usages of features that should be imported explicitly.
-  "-language:existentials",        // Existential types (besides wildcard types) can be written and inferred
-  "-language:experimental.macros", // Allow macro definition (besides implementation and application)
-  "-language:higherKinds",         // Allow higher-kinded types
-  "-unchecked",                    // Enable additional warnings where generated code depends on assumptions.
-  "-Xcheckinit",                   // Wrap field accessors to throw an exception on uninitialized access.
-  "-Xfatal-warnings",              // Fail the compilation if there are any warnings.
-  "-Xlint:adapted-args",           // Warn if an argument list is modified to match the receiver.
-  "-Xlint:constant",               // Evaluation of a constant arithmetic expression results in an error.
-  "-Xlint:delayedinit-select",     // Selecting member of DelayedInit.
-  "-Xlint:doc-detached",           // A Scaladoc comment appears to be detached from its element.
-  "-Xlint:inaccessible",           // Warn about inaccessible types in method signatures.
-  "-Xlint:infer-any",              // Warn when a type argument is inferred to be `Any`.
-  "-Xlint:missing-interpolator",   // A string literal appears to be missing an interpolator id.
-  "-Xlint:nullary-unit",           // Warn when nullary methods return Unit.
-  "-Xlint:option-implicit",        // Option.apply used implicit view.
-  "-Xlint:package-object-classes", // Class or object defined in package object.
-  "-Xlint:poly-implicit-overload", // Parameterized overloaded implicit methods are not visible as view bounds.
-  "-Xlint:private-shadow",         // A private field (or class parameter) shadows a superclass field.
-  "-Xlint:stars-align",            // Pattern sequence wildcard must align with sequence component.
-  "-Xlint:type-parameter-shadow"   // A local type parameter shadows a type already in scope.
-)
-
-def compilerOptionsVersion(scalaVersion: String) =
-  compilerOptionsAll ++ (CrossVersion.partialVersion(scalaVersion) match {
-    case Some((2L, 12L)) => compilerOptions212
-    case Some((2L, 13L)) => compilerOptions213
-    case _               => Nil
-  })
-
-lazy val scalaVersion212: String = "2.12.13"
+lazy val scalaVersion212: String = "2.12.14"
 lazy val scalaVersion213: String = "2.13.6"
+lazy val scalaVersion3: String   = "3.0.1"
 lazy val supportedScalaVersions  = List(scalaVersion212, scalaVersion213)
 
 ThisBuild / scalaVersion := scalaVersion212
@@ -76,27 +8,8 @@ ThisBuild / scalaVersion := scalaVersion212
 lazy val commonSettings = Seq(
   organization := "com.itv",
   crossScalaVersions := supportedScalaVersions,
-  scalacOptions ++= compilerOptionsVersion(scalaVersion.value),
   libraryDependencies ++= Seq(
-    "org.scalatest" %% "scalatest" % "3.0.9" % "test"
-  ),
-  wartremoverWarnings in (Compile, compile) ++= Warts.allBut(
-    Wart.Any,
-    Wart.Overloading,
-    Wart.FinalCaseClass,
-    Wart.Nothing,
-    Wart.ImplicitParameter,
-    Wart.NonUnitStatements,
-    Wart.Throw,
-    Wart.Equals,
-    Wart.Recursion,
-    Wart.LeakingSealed,
-    Wart.Null,
-    Wart.Var,
-    Wart.StringPlusAny,
-    Wart.PlatformDefault,
-    Wart.ListUnapply,
-    Wart.GlobalExecutionContext
+    "org.scalatest" %% "scalatest" % "3.2.9" % "test"
   ),
   parallelExecution in Test := false,
 //  javaOptions in Test ++= Seq(
@@ -109,9 +22,21 @@ lazy val scala212OnlySettings = Seq(
   crossScalaVersions := Seq(scalaVersion212)
 )
 
+lazy val scala3Settings = Seq(
+  crossScalaVersions += scalaVersion3
+)
+
 lazy val mockSettings = Seq(
   libraryDependencies += "org.scalamock" %% "scalamock" % "4.0.0" % Test
 )
+
+// Everything blows up if the plugin uses scala-xml 2.x
+val scalaXmlVersion =
+  Def.setting(
+    if (scalaVersion.value.startsWith("2.12")) "1.3.0"
+    else
+      "2.0.1"
+  )
 
 lazy val publishSettings = Seq(
   publishTo := {
@@ -154,15 +79,17 @@ lazy val shared =
       buildInfoPackage := "com.itv.scalapact.shared"
     )
     .settings(commonSettings: _*)
+    .settings(scala3Settings: _*)
     .settings(publishSettings: _*)
     .settings(
       name := "scalapact-shared",
-      libraryDependencies ++= Seq("org.scala-lang.modules" %% "scala-xml" % "1.2.0")
+      libraryDependencies ++= Seq("org.scala-lang.modules" %% "scala-xml" % scalaXmlVersion.value)
     )
 
 lazy val core =
   (project in file("scalapact-core"))
     .settings(commonSettings: _*)
+    .settings(scala3Settings: _*)
     .settings(publishSettings: _*)
     .settings(
       name := "scalapact-core"
@@ -176,10 +103,10 @@ lazy val http4s021 =
     .settings(
       name := "scalapact-http4s-0-21",
       libraryDependencies ++= Seq(
-        "org.http4s"            %% "http4s-blaze-server" % "0.21.18" exclude ("org.scala-lang.modules", "scala-xml"),
-        "org.http4s"            %% "http4s-blaze-client" % "0.21.18" exclude ("org.scala-lang.modules", "scala-xml"),
-        "org.http4s"            %% "http4s-dsl"          % "0.21.18",
-        "com.github.tomakehurst" % "wiremock"            % "2.25.1" % "test"
+        "org.http4s"            %% "http4s-blaze-server" % "0.21.26" exclude ("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"            %% "http4s-blaze-client" % "0.21.26" exclude ("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"            %% "http4s-dsl"          % "0.21.26",
+        "com.github.tomakehurst" % "wiremock"            % "2.27.2" % "test"
       )
     )
     .dependsOn(shared)
@@ -188,13 +115,14 @@ lazy val http4s023 =
   (project in file("scalapact-http4s-0-23"))
     .settings(commonSettings: _*)
     .settings(publishSettings: _*)
+    .settings(scala3Settings: _*)
     .settings(
       name := "scalapact-http4s-0-23",
       libraryDependencies ++= Seq(
         "org.http4s"            %% "http4s-blaze-server" % "0.23.1" exclude ("org.scala-lang.modules", "scala-xml"),
         "org.http4s"            %% "http4s-blaze-client" % "0.23.1" exclude ("org.scala-lang.modules", "scala-xml"),
         "org.http4s"            %% "http4s-dsl"          % "0.23.1",
-        "com.github.tomakehurst" % "wiremock"            % "2.25.1" % "test"
+        "com.github.tomakehurst" % "wiremock"            % "2.27.2" % "test"
       )
     )
     .dependsOn(shared)
@@ -202,6 +130,7 @@ lazy val http4s023 =
 lazy val testShared =
   (project in file("scalapact-test-shared"))
     .settings(commonSettings: _*)
+    .settings(scala3Settings: _*)
     .settings(
       name := "scalapact-test-shared",
       skip in publish := true
@@ -239,6 +168,7 @@ lazy val circe13 =
 lazy val circe14 =
   (project in file("scalapact-circe-0-14"))
     .settings(commonSettings: _*)
+    .settings(scala3Settings: _*)
     .settings(publishSettings: _*)
     .settings(
       name := "scalapact-circe-0-14",
@@ -290,6 +220,7 @@ lazy val pluginNoDeps =
 lazy val framework =
   (project in file("scalapact-scalatest"))
     .settings(commonSettings: _*)
+    .settings(scala3Settings: _*)
     .settings(publishSettings: _*)
     .settings(
       name := "scalapact-scalatest",
@@ -302,6 +233,7 @@ lazy val framework =
 lazy val frameworkWithDeps =
   (project in file("scalapact-scalatest-suite"))
     .settings(commonSettings: _*)
+    .settings(scala3Settings: _*)
     .settings(publishSettings: _*)
     .settings(
       name := "scalapact-scalatest-suite",
@@ -321,7 +253,7 @@ lazy val standalone =
       publish := {},
       assemblyJarName in assembly := "pactstubber.jar",
       libraryDependencies ++= Seq(
-        "ch.qos.logback" % "logback-classic" % "1.2.3"
+        "ch.qos.logback" % "logback-classic" % "1.2.5"
       ),
       skip in publish := true
     )
@@ -340,16 +272,17 @@ lazy val pactSpec =
     .dependsOn(core)
     .dependsOn(argonaut62)
 
+// TODO: replace roshttp so we can run this on newer scala versions
 lazy val testsWithDeps =
   (project in file("tests-with-deps"))
     .settings(commonSettings: _*)
     .settings(
       libraryDependencies ++= Seq(
         "org.scalaj"            %% "scalaj-http"   % "2.4.2"  % "test",
-        "org.json4s"            %% "json4s-native" % "3.6.11" % "test",
-        "com.github.tomakehurst" % "wiremock"      % "1.56"   % "test",
+        "org.json4s"            %% "json4s-native" % "4.0.2"  % "test",
+        "com.github.tomakehurst" % "wiremock"      % "2.27.2" % "test",
         "fr.hmil"               %% "roshttp"       % "2.1.0"  % "test",
-        "io.argonaut"           %% "argonaut"      % "6.2.5"
+        "io.argonaut"           %% "argonaut"      % "6.3.6"
       ),
       skip in publish := true
     )

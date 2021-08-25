@@ -2,9 +2,10 @@ package com.itv.scalapact.shared.utils
 
 import java.time.{OffsetDateTime, ZoneOffset}
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class HelpersSpec extends FunSpec with Matchers {
+class HelpersSpec extends AnyFunSpec with Matchers {
 
   describe("Pairing things") {
 

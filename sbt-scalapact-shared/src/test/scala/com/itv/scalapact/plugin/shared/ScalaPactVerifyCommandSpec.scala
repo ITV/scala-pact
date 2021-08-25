@@ -2,9 +2,10 @@ package com.itv.scalapact.plugin.shared
 
 import com.itv.scalapact.shared.ProviderStateResult
 import com.itv.scalapact.shared.ProviderStateResult.SetupProviderState
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class ScalaPactVerifyCommandSpec extends FunSpec with Matchers {
+class ScalaPactVerifyCommandSpec extends AnyFunSpec with Matchers {
 
   describe("Mergeing the providerStates and providerStateMatcher") {
 

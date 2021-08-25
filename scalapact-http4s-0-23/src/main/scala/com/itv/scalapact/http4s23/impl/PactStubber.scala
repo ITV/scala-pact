@@ -44,17 +44,16 @@ class PactStubber extends IPactStubber {
           this
 
         case None =>
-          instance = Some(
-            PortAndShutdownTask.tupled(
-              blazeServerBuilder(
-                scalaPactSettings,
-                interactionManager,
-                connectionPoolSize,
-                sslContextName,
-                instance.map(_.port)
-              ).resource.map(_.address.getPort).allocated.unsafeRunSync()
-            )
-          )
+          instance = Some {
+            val (port, shutdown) = blazeServerBuilder(
+              scalaPactSettings,
+              interactionManager,
+              connectionPoolSize,
+              sslContextName,
+              instance.map(_.port)
+            ).resource.map(_.address.getPort).allocated.unsafeRunSync()
+            PortAndShutdownTask(port, shutdown)
+          }
           this
       }
     }
