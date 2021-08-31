@@ -16,8 +16,8 @@ class SingletonStubProviderClientSpec extends FunSpec with Matchers with BeforeA
   import com.itv.scalapact.ScalaPactForger._
 
   // Import the json and http libraries specified in the build.sbt file
-  import com.itv.scalapact.circe13._
-  import com.itv.scalapact.http4s21._
+  import com.itv.scalapact.circe14._
+  import com.itv.scalapact.http4s23._
 
   implicit val formats: DefaultFormats.type = DefaultFormats
 

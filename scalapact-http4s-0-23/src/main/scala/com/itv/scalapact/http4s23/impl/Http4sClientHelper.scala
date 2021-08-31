@@ -6,6 +6,7 @@ import com.itv.scalapact.shared.utils.PactLogger
 import org.http4s._
 import org.http4s.blaze.client.BlazeClientBuilder
 import org.http4s.client.Client
+import org.http4s.client.middleware.{Retry, RetryPolicy}
 import org.http4s.headers.`User-Agent`
 
 import scala.concurrent.ExecutionContext
@@ -14,7 +15,7 @@ import scala.concurrent.duration._
 object Http4sClientHelper {
 
   def defaultClient: Resource[IO, Client[IO]] =
-    buildPooledBlazeHttpClient(1, Duration(5, SECONDS), None)
+    buildPooledBlazeHttpClient(1, 5.seconds, None)
 
   def buildPooledBlazeHttpClient(maxTotalConnections: Int, clientTimeout: Duration, sslContextName: Option[String])(
       implicit sslContextMap: SslContextMap
@@ -29,7 +30,14 @@ object Http4sClientHelper {
       s"Creating http4s client: connections $maxTotalConnections, timeout $clientTimeout, sslContextName: $sslContextName, sslContextMap: $sslContextMap"
     )
 
-    sslContext.fold(builder)(s => builder.withSslContext(s)).resource
+    sslContext.fold(builder)(s => builder.withSslContext(s)).resource.map {
+      Retry(
+        RetryPolicy(
+          RetryPolicy.exponentialBackoff(30.seconds, 5),
+          RetryPolicy.defaultRetriable
+        )
+      )
+    }
   }
 
   def doRequest(request: SimpleRequest, httpClient: Resource[IO, Client[IO]]): IO[SimpleResponse] =
