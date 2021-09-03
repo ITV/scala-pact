@@ -64,7 +64,7 @@ addSbtPlugin("com.itv" % "sbt-scalapact" % "4.0.0")
 
 Both the import and the plugin come pre-packaged with the latest JSON and Http libraries (http4s 0.21.x, and circe 0.13.x). 
 
-In your consumer test suites, have the test class extend `PactForgerSuite`, in you provider test suites, have the test class extend `PactVerifySuite`. 
+In your consumer test suites, have the test class extend `PactForgerSuite`. In your provider test suites, have the test class extend `PactVerifySuite`. 
 
 #### Without mix-ins
 If your project needs more control over the dependencies used by scala-pact, add the following lines to your `build.sbt` file to setup the test framework:
