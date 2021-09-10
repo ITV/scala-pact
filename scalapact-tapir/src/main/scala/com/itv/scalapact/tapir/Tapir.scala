@@ -1,22 +1,27 @@
 package com.itv.scalapact.tapir
 
-import cats.implicits.{catsSyntaxOptionId, toFunctorOps}
+import cats.implicits.{catsSyntaxOption, catsSyntaxParallelTraverse_, toFunctorOps}
 import cats.instances.list._
 import cats.instances.option._
 import cats.syntax.foldable._
+import cats.syntax.either._
 import com.itv.scalapact.shared.Interaction
 import io.circe.{Json, parser}
 import sttp.tapir.apispec.{ReferenceOr, Schema, SchemaType}
 import sttp.tapir.openapi.{Components, OpenAPI}
+import cats.data.EitherNel
 
 import scala.util.matching.Regex
 object Tapir {
 
-  private def findSchema(schema: ReferenceOr[Schema], components: Components): Option[Schema] =
+
+
+  private def findSchema(schema: ReferenceOr[Schema], components: Components): Either[String, Schema] =
     schema match {
-      case Left(reference) => components.schemas.get(reference.$ref.split('/').last).flatMap(findSchema(_, components))
-      case Right(schema)   => schema.some
+      case Left(reference) => components.schemas.get(reference.$ref.split('/').last).toRight(s"no reference $reference").flatMap(findSchema(_, components))
+      case Right(schema)   => schema.asRight
     }
+
   private def pathPatternToRegex(pathPattern: String): Regex =
     pathPattern
       .split('/')
@@ -24,18 +29,22 @@ object Tapir {
       .mkString("\\/")
       .r
 
-  private def verifyJson(json: Json, referenceOrSchema: ReferenceOr[Schema], components: Components): Option[Unit] =
+
+  private def mismatch(schemaName: String, schemaType: String, json: Json): String = s"$schemaName was a $schemaType, while a ${json.name}, $json was expected by the pact"
+
+  private def verifyJson(json: Json, referenceOrSchema: ReferenceOr[Schema], components: Components): EitherNel[String, Unit] = {
     for {
-      schema <- findSchema(referenceOrSchema, components)
-      typ    <- schema.`type`
-      _ = typ match {
-        case SchemaType.Boolean => json.isBoolean
+      schema <- findSchema(referenceOrSchema, components).toEitherNel
+      schemaName = schema.title.getOrElse("unnamed")
+      typ    <- schema.`type`.toRightNel(s"$schemaName had no type")
+      _ <- typ match {
+        case SchemaType.Boolean => json.asBoolean.toRightNel(mismatch(schemaName, "boolean", json))
         case SchemaType.Object =>
           for {
-            jsonObject <- json.asObject
-            _ <- jsonObject.toList.traverse_ { case (key, value) =>
+            jsonObject <- json.asObject.toRightNel(mismatch(schemaName, "object", json))
+            _ <- jsonObject.toList.parTraverse_ { case (key, value) =>
               for {
-                propertySchemaOrRef <- schema.properties.get(key)
+                propertySchemaOrRef <- schema.properties.get(key).toRightNel(s"key $key was not in the schema")
                 validateProperty    <- verifyJson(value, propertySchemaOrRef, components)
               } yield validateProperty
             }
@@ -43,17 +52,22 @@ object Tapir {
 
         case SchemaType.Array =>
           for {
-            jsonArray  <- json.asArray
-            itemSchema <- schema.items
-            _          <- jsonArray.traverse_(verifyJson(_, itemSchema, components))
+            jsonArray  <- json.asArray.toRightNel(mismatch(schemaName, "array", json))
+            itemSchema <- schema.items.toRightNel(s"$schemaName had no items field for array")
+            _          <- jsonArray.parTraverse_(verifyJson(_, itemSchema, components))
           } yield ()
-        case SchemaType.Number  => json.asNumber.void
-        case SchemaType.String  => json.asString.void
-        case SchemaType.Integer => json.asNumber.void
+        case SchemaType.Number  => json.asNumber.toRightNel(mismatch(schemaName, "number", json))
+        case SchemaType.String  => json.asString.toRightNel(mismatch(schemaName, "number", json))
+        case SchemaType.Integer  => json.asNumber.toRightNel(mismatch(schemaName, "number", json)).flatMap(_.toBigInt.toRightNel(s"$schemaName was an integer while a float $json was expected by the pact"))
       }
     } yield ()
+  }
 
-  def verifyPact(interaction: Interaction, openApi: OpenAPI): Boolean =
+  sealed trait OpenApiPactError
+  case class NoResponsesExistedForMethod(method: String) extends OpenApiPactError
+  case class NoResponsesCouldProducePact(errors: NonEm)
+
+  def verifyPact(interaction: Interaction, openApi: OpenAPI): EitherNel[(), Unit] =
     interaction.response.body match {
       case Some(body)
           if BodyMatching.hasJsonHeader(interaction.response.headers) || BodyMatching.stringIsProbablyJson(body) =>
@@ -81,7 +95,7 @@ object Tapir {
           .collect { case Right(response) => response }
           .flatMap(_.content.values)
           .flatMap(_.schema.toList)
-          .exists(verifyJson(parsedBody, _, components).isDefined)).getOrElse(false)
+          .exists(verifyJson(parsedBody, _, components).isDefined))
       case None => false
     }
 
