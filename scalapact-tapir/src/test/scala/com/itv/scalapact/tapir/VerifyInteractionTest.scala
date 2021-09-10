@@ -23,7 +23,7 @@ class VerifyInteractionTest extends AnyFreeSpec with Matchers with ScalaCheckDri
       None,
       "My Interaction",
       InteractionRequest("GET".some, "/path/to/cat/Oscar".some, None, None, None, None),
-      InteractionResponse(None, None, body.some, None)
+      InteractionResponse(Some(StatusCode.Created.code), None, body.some, None)
     )
 
   "a" in { final case class Cat(paws: Int, name: String)
