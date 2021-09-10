@@ -2,9 +2,10 @@ package com.itv.scalapact.argonaut62
 
 import com.itv.scalapact.shared._
 import com.itv.scalapact.test.PactFileExamples
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class RubyJsonHelperSpec extends FunSpec with Matchers {
+class RubyJsonHelperSpec extends AnyFunSpec with Matchers {
 
   describe("Handling ruby json") {
 

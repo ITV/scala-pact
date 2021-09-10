@@ -9,13 +9,15 @@ import com.itv.scalapact.shared.http.{
   SimpleResponse
 }
 import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
-import org.scalatest.{BeforeAndAfter, FunSpec, Matchers}
+import org.scalatest.BeforeAndAfter
 
 import java.net.URLEncoder
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration.Duration
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class PactBrokerClientSpec extends FunSpec with Matchers with BeforeAndAfter {
+class PactBrokerClientSpec extends AnyFunSpec with Matchers with BeforeAndAfter {
 
   private val simpleInteraction = Interaction(
     providerState = None,

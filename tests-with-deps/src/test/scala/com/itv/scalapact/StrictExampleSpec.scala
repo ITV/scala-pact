@@ -1,11 +1,12 @@
 package com.itv.scalapact
 
 import com.itv.scalapact.ScalaPactForger._
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
 /** Strict and non-strict pacts cannot be mixed.
   */
-class StrictExampleSpec extends FunSpec with Matchers {
+class StrictExampleSpec extends AnyFunSpec with Matchers {
 
   import com.itv.scalapact.json._
   import com.itv.scalapact.http._

@@ -9,13 +9,14 @@ import com.itv.scalapact.shared.http.SslContextMap
 import org.json4s.DefaultFormats
 import org.json4s.native.JsonParser._
 import org.json4s.native.Serialization._
-import org.scalatest.{FunSpec, Matchers}
 
 import scala.language.implicitConversions
 import scala.xml.XML
 import scalaj.http.{Http, HttpRequest}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class ExampleSpec extends FunSpec with Matchers {
+class ExampleSpec extends AnyFunSpec with Matchers {
 
   import com.itv.scalapact.json._
   import com.itv.scalapact.http._
@@ -219,7 +220,7 @@ class ExampleSpec extends FunSpec with Matchers {
         .addInteraction(
           interaction
             .description("Fetching a specific ID")
-            .given("Resource with ID 1234 exists")
+            .provided("Resource with ID 1234 exists")
             .uponReceiving(endPoint)
             .willRespondWith(200, "ID: 1234 Exists")
         )

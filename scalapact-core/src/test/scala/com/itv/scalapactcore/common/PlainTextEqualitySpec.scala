@@ -1,9 +1,10 @@
 package com.itv.scalapactcore.common
 
 import com.itv.scalapactcore.common.matching.PlainTextEquality
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class PlainTextEqualitySpec extends FunSpec with Matchers {
+class PlainTextEqualitySpec extends AnyFunSpec with Matchers {
 
   describe("checking for plain text equality") {
 

@@ -2,11 +2,12 @@ package com.itv.scalapactcore.common
 
 import com.itv.scalapact.json._
 import com.itv.scalapact.shared.matchir.IrNodeMatchingRules
-import org.scalatest.{FunSpec, Matchers}
 
 import scala.language.implicitConversions
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class BodyMatchersSpec extends FunSpec with Matchers {
+class BodyMatchersSpec extends AnyFunSpec with Matchers {
 
   implicit def toOption[A](thing: A): Option[A] = Option(thing)
 

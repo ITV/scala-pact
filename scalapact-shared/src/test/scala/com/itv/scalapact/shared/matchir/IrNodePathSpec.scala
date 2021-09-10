@@ -7,11 +7,12 @@ import com.itv.scalapact.shared.matchir.IrNodePath.{
   IrNodePathTextElement
 }
 import com.itv.scalapact.shared.matchir.PactPathParseResult.{PactPathParseFailure, PactPathParseSuccess}
-import org.scalatest.{FunSpec, Matchers}
 
 import scala.language.postfixOps
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class IrNodePathSpec extends FunSpec with Matchers {
+class IrNodePathSpec extends AnyFunSpec with Matchers {
 
   describe("Build IrNodePath's") {
 

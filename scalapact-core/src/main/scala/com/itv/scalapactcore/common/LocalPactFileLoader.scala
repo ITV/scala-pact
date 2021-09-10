@@ -50,10 +50,6 @@ object LocalPactFileLoader {
           case x :: xs =>
             PactLogger.warn(("Ignoring non-JSON file: " + x.getName).yellow)
             rec(xs, acc)
-
-          case _ =>
-            PactLogger.error(("Aborting, problem reading the pact files at location: " + file.getCanonicalPath).red)
-            Nil
         }
 
       try rec(List(file), Nil)

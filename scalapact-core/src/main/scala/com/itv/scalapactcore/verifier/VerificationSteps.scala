@@ -76,7 +76,7 @@ object VerificationSteps {
       interactionRequest: InteractionRequest
   ): Either[String, InteractionResponse] = {
     val baseUrl = s"${arguments.giveProtocol}://" + arguments.giveHost + ":" + arguments.givePort.toString
-    val finalRequest =
+    val finalRequest: InteractionRequest =
       try maybeProviderState match {
         case Some(ps) =>
           PactLogger.message("--------------------".yellow.bold)
@@ -111,19 +111,16 @@ object VerificationSteps {
           throw t
       }
 
-    try InteractionRequest.unapply(finalRequest) match {
-      case Some((Some(_), Some(_), _, _, _, _)) =>
-        client.doInteractionRequest(baseUrl, finalRequest.withoutSslContextHeader) match {
-          case Left(e) =>
-            PactLogger.error(s"Error in response: ${e.getMessage}".red)
-            Left(e.getMessage)
-          case Right(r) =>
-            Right(r)
-        }
-
-      case _ => Left("Invalid request was missing either method or path: " + interactionRequest.renderAsString)
-
-    } catch {
+    try if (finalRequest.method.isDefined && finalRequest.path.isDefined) {
+      client.doInteractionRequest(baseUrl, finalRequest.withoutSslContextHeader) match {
+        case Left(e) =>
+          PactLogger.error(s"Error in response: ${e.getMessage}".red)
+          Left(e.getMessage)
+        case Right(r) =>
+          Right(r)
+      }
+    } else Left("Invalid request was missing either method or path: " + interactionRequest.renderAsString)
+    catch {
       case e: Throwable =>
         Left(e.getMessage)
     }

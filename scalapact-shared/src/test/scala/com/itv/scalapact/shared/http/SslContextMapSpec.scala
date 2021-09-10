@@ -4,9 +4,10 @@ import com.itv.scalapact.shared.http.SslContextMap.SslContextNotFoundException
 import javax.net.ssl.SSLContext
 
 //import org.scalatest.easymock.EasyMockSugar
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class SslContextMapSpec extends FunSpec with Matchers {
+class SslContextMapSpec extends AnyFunSpec with Matchers {
 
   describe("SslContextMap.apply method") {
 

@@ -3,11 +3,12 @@ package consumer
 import java.io.File
 
 import com.itv.scalapact.PactForgerSuite
-import org.scalatest.{FunSpecLike, Matchers}
+import org.scalatest.funspec.AnyFunSpecLike
+import org.scalatest.matchers.should.Matchers
 
 import scala.io.{BufferedSource, Source}
 
-class ProviderClientSpec extends PactForgerSuite with FunSpecLike with Matchers {
+class ProviderClientSpec extends PactForgerSuite with AnyFunSpecLike with Matchers {
 
   val CONSUMER = "scala-pact-integration-test-consumer"
   val PROVIDER = "scala-pact-integration-test-provider"
