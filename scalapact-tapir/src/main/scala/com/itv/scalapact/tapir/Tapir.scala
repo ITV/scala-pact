@@ -8,7 +8,8 @@ import com.itv.scalapact.shared.{Interaction, InteractionResponse}
 import io.circe.{Json, ParsingFailure, parser}
 import sttp.tapir.apispec.SchemaType.SchemaType
 import sttp.tapir.apispec.{Reference, ReferenceOr, Schema, SchemaType}
-import sttp.tapir.openapi.{Components, OpenAPI, ResponsesCodeKey, ResponsesKey}
+import sttp.tapir.openapi.{Components, ResponsesCodeKey, ResponsesKey}
+import Resolution._
 
 import scala.util.matching.Regex
 object Tapir {
@@ -18,22 +19,24 @@ object Tapir {
   }
   final case class NoReferenceFoundToSchema(reference: Reference) extends OpenApiPactError
   final case class NoSchemaType(schema: Schema)                   extends OpenApiPactError
-  final case class NoItemSchema(schema: Schema)                   extends OpenApiPactError
-  final case class MismatchedJsonShape(schema: Schema, schemaType: SchemaType, json: Json) extends OpenApiPactError {
+  final case object NoJsonSchema                   extends OpenApiPactError
+  final case class NoItemSchema(schema: ResolvedSchema)                   extends OpenApiPactError
+  final case class MismatchedJsonShape(schema: ResolvedSchema, schemaType: SchemaType, json: Json) extends OpenApiPactError {
     override def message: String =
       s"Open API Schema ${schema.title.getOrElse("[Untitled]")} was a $schemaType., while a ${json.name}, $json was expected by the pact"
   }
   final case class UnexpectedObjectField(fieldName: String) extends OpenApiPactError {
     override def message: String = s"Field $fieldName required in the PACT response was not in the schema"
   }
-  final case class NonIntegerNumber(schema: Schema, json: Json) extends OpenApiPactError {
+  final case class NonIntegerNumber(schema: ResolvedSchema, json: Json) extends OpenApiPactError {
     override def message = s"Open API Schema ${schema.title.getOrElse("[Untitled]")} was an integer while a float $json was expected by the pact"
   }
-  final case class MissingResponseCode(interactionResponse: InteractionResponse)
+  final case class MissingResponseCode(interactionResponse: InteractionResponse) extends OpenApiPactError
 
   final case class NoResponsesExistedForMethod(method: String) extends OpenApiPactError
+  final case class NoResponsesExistedForResponseCode(key: ResponsesCodeKey) extends OpenApiPactError
   final case class InvalidJsonResponse(unmatchedSchemas: Map[ResponsesKey, NonEmptyList[OpenApiPactError]]) extends OpenApiPactError
-  case object  NoMatchingPath extends OpenApiPactError
+  case object NoMatchingPath extends OpenApiPactError
   final case class InvalidPactJson(parsingFailure: ParsingFailure) extends OpenApiPactError
   case object SchemaNotFound extends OpenApiPactError
 
@@ -54,47 +57,38 @@ object Tapir {
       .mkString("\\/")
       .r
 
-  private def mismatch(schemaName: String, schemaType: String, json: Json): String =
-    s"$schemaName was a $schemaType, while a ${json.name}, $json was expected by the pact"
 
-  private def verifyJson(
-      json: Json,
-      referenceOrSchema: ReferenceOr[Schema],
-      components: Components
-  ): EitherNel[OpenApiPactError, Unit] =
+  def verifyJson(json: Json, schema: ResolvedSchema): EitherNel[OpenApiPactError, Unit] = 
     for {
-      schema <- findSchema(referenceOrSchema, components).toEitherNel
-      schemaName = schema.title.getOrElse("unnamed")
-      typ <- schema.`type`.toRightNel[OpenApiPactError](NoSchemaType(schema))
-      _ <- typ match {
-        case SchemaType.Boolean => json.asBoolean.toRightNel(MismatchedJsonShape(schema, typ, json))
-        case SchemaType.Object =>
+      _ <- schema.`type` match {
+        case typ @ SchemaType.Boolean => json.asBoolean.toRightNel(MismatchedJsonShape(schema, typ, json))
+        case t@ SchemaType.Object =>
           for {
-            jsonObject <- json.asObject.toRightNel(MismatchedJsonShape(schema, typ, json))
+            jsonObject <- json.asObject.toRightNel(MismatchedJsonShape(schema, t, json))
             _ <- jsonObject.toList.parTraverse_ { case (key, value) =>
               for {
                 propertySchemaOrRef <- schema.properties.get(key).toRightNel(UnexpectedObjectField(key))
-                validateProperty    <- verifyJson(value, propertySchemaOrRef, components)
+                validateProperty    <- verifyJson(value, propertySchemaOrRef)
               } yield validateProperty
             }
           } yield ()
 
-        case SchemaType.Array =>
+        case typ @ SchemaType.Array =>
           for {
             jsonArray  <- json.asArray.toRightNel(MismatchedJsonShape(schema, typ, json))
             itemSchema <- schema.items.toRightNel(NoItemSchema(schema))
-            _          <- jsonArray.parTraverse_(verifyJson(_, itemSchema, components))
+            _          <- jsonArray.parTraverse_(verifyJson(_, itemSchema))
           } yield ()
-        case SchemaType.Number => json.asNumber.toRightNel(MismatchedJsonShape(schema, typ, json))
-        case SchemaType.String => json.asString.toRightNel(MismatchedJsonShape(schema, typ, json))
-        case SchemaType.Integer =>
+        case typ @ SchemaType.Number => json.asNumber.toRightNel(MismatchedJsonShape(schema, typ, json))
+        case typ @ SchemaType.String => json.asString.toRightNel(MismatchedJsonShape(schema, typ, json))
+        case typ @ SchemaType.Integer =>
           json.asNumber
             .toRightNel(MismatchedJsonShape(schema, typ, json))
             .flatMap(_.toBigInt.toRightNel(NonIntegerNumber(schema, json)))
       }
     } yield ()
 
-  def verifyPact(interaction: Interaction, openApi: OpenAPI) =
+  def verifyPact(interaction: Interaction, openApi: Resolution.ResolvedOpenApi) =
     interaction.response.body match {
       case Some(body)
           if BodyMatching.hasJsonHeader(interaction.response.headers) || BodyMatching.stringIsProbablyJson(body) =>
@@ -118,14 +112,12 @@ object Tapir {
             case _ => None
           }).toRightNel[OpenApiPactError](NoMatchingPath)
           parsedBody <- parser.parse(body).leftMap[OpenApiPactError](InvalidPactJson).toEitherNel
-          components <- openApi.components.toRightNel[OpenApiPactError](SchemaNotFound)
           pactResponseCode <- interaction.response.status.toRightNel[OpenApiPactError](MissingResponseCode(interaction.response))
-        } yield
-          operation.responses.get(ResponsesCodeKey(pactResponseCode))
-          .collect { case Right(response) => response }
-          .flatMap(_.content.values)
-          .flatMap(_.schema.toList)
-          .map(verifyJson(parsedBody, _, components))
+          responseKey = ResponsesCodeKey(pactResponseCode)
+          response <- operation.responses.get(responseKey).toRightNel[OpenApiPactError](NoResponsesExistedForResponseCode(responseKey))
+          mediaType <- response.content.get("/application/json").toRightNel[OpenApiPactError](NoJsonSchema)
+          _ <- verifyJson(parsedBody, mediaType.schema)
+        } yield ())
       case None => false
     }
 

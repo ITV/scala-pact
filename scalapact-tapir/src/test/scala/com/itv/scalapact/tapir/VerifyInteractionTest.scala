@@ -15,6 +15,7 @@ import sttp.tapir.docs.openapi.OpenAPIDocsInterpreter
 import sttp.tapir.generic.auto._
 import sttp.tapir.json.circe.jsonBody
 import sttp.tapir.openapi.OpenAPI
+
 class VerifyInteractionTest extends AnyFreeSpec with Matchers with ScalaCheckDrivenPropertyChecks {
   val body = """{ "paws": 4, "name": "Oscar"}"""
   val interaction =
@@ -25,8 +26,7 @@ class VerifyInteractionTest extends AnyFreeSpec with Matchers with ScalaCheckDri
       InteractionResponse(None, None, body.some, None)
     )
 
-  "a" in {
-    final case class Cat(paws: Int, name: String)
+  "a" in { final case class Cat(paws: Int, name: String)
     sealed trait Error
     final case class NewCat(cat: Cat, dateOfBirth: String)
     case object NoCat                        extends Error
@@ -51,7 +51,7 @@ class VerifyInteractionTest extends AnyFreeSpec with Matchers with ScalaCheckDri
 
     val openApi: OpenAPI = OpenAPIDocsInterpreter.toOpenAPI(List(endp), "title", "1.0")
 
-    assert(Tapir.verifyPact(interaction, openApi))
+    Tapir.verifyPact(interaction, Resolution.resolvedOpenApi(openApi).right.get) shouldBe a[Right[_,_]]
   }
 
 }
