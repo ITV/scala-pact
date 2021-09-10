@@ -65,9 +65,9 @@ object Tapir {
 
   sealed trait OpenApiPactError
   case class NoResponsesExistedForMethod(method: String) extends OpenApiPactError
-  case class NoResponsesCouldProducePact(errors: NonEm)
+  case class ErrorsForEveryResponseType() extends OpenApiPactError
 
-  def verifyPact(interaction: Interaction, openApi: OpenAPI): EitherNel[(), Unit] =
+  def verifyPact(interaction: Interaction, openApi: OpenAPI): Either[OpenApiPactError, Unit] =
     interaction.response.body match {
       case Some(body)
           if BodyMatching.hasJsonHeader(interaction.response.headers) || BodyMatching.stringIsProbablyJson(body) =>
