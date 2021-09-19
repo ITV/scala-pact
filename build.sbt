@@ -111,6 +111,22 @@ lazy val http4s021 =
     )
     .dependsOn(shared)
 
+lazy val http4s022 =
+  (project in file("scalapact-http4s-0-22"))
+    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
+    .settings(
+      name := "scalapact-http4s-0-22",
+      libraryDependencies ++= Seq(
+        "org.http4s"            %% "http4s-blaze-server" % "0.22.4" exclude ("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"            %% "http4s-blaze-client" % "0.22.4" exclude ("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"            %% "http4s-dsl"          % "0.22.4",
+        "com.github.tomakehurst" % "wiremock"            % "2.27.2" % "test"
+      )
+    )
+    .dependsOn(shared)
+
+
 lazy val http4s023 =
   (project in file("scalapact-http4s-0-23"))
     .settings(commonSettings: _*)
@@ -314,7 +330,7 @@ lazy val scalaPactProject =
       crossScalaVersions := Nil
     )
     .aggregate(shared, core, pluginShared, plugin, pluginNoDeps, framework, testShared)
-    .aggregate(http4s021, http4s023)
+    .aggregate(http4s021, http4s022, http4s023)
     .aggregate(argonaut62, circe13, circe14)
     .aggregate(standalone, frameworkWithDeps)
     .aggregate(docs)
