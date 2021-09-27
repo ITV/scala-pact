@@ -10,7 +10,7 @@ package object impl {
   }
 
   implicit class MapOps(val values: Map[String, String]) extends AnyVal {
-    def toHttp4sHeaders: Headers = Headers(values.map { case (k, v) => Header.Raw(CIString(k),v) }.toList)
+    def toHttp4sHeaders: Headers = Headers(values.map { case (k, v) => Header.Raw(CIString(k), v) }.toList)
   }
 
 }
