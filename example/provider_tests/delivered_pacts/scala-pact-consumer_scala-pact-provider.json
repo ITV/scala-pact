@@ -120,7 +120,7 @@
       "version" : "2.0.0"
     },
     "scala-pact" : {
-      "version" : "4.0.0-SNAPSHOT"
+      "version" : "4.0.1-SNAPSHOT"
     }
   }
 }
