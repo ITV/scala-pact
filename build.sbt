@@ -68,6 +68,12 @@ lazy val publishSettings = Seq(
           <organization>ITV</organization>
           <organizationUrl>http://www.itv.com</organizationUrl>
         </developer>
+        <developer>
+          <id>jbwheatley</id>
+          <name>Jack Wheatley</name>
+          <organization>ITV</organization>
+          <organizationUrl>http://www.itv.com</organizationUrl>
+        </developer>
       </developers>
 )
 
@@ -125,7 +131,6 @@ lazy val http4s022 =
       )
     )
     .dependsOn(shared)
-
 
 lazy val http4s023 =
   (project in file("scalapact-http4s-0-23"))
