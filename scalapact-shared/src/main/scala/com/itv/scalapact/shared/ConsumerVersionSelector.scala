@@ -12,6 +12,8 @@ consumerVersionSelectors.latest: true. If the latest flag is omitted, all the pa
 consumerVersionSelectors.consumer: allows a selector to only be applied to a certain consumer.
 This is used when there is an API that has multiple consumers, one of which is a deployed service, and one of which is a mobile consumer.
 The deployed service only needs the latest production pact verified, where as the mobile consumer may want all the production pacts verified.
+
+See here for other selectors: https://github.com/pact-foundation/pact_broker/blob/master/lib/pact_broker/doc/views/provider-pacts-for-verification.markdown
  */
 
 final case class ConsumerVersionSelector(
