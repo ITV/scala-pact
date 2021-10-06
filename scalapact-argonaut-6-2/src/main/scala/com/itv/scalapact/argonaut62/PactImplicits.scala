@@ -194,10 +194,14 @@ object PactImplicits {
   implicit lazy val consumerVersionSelectorEncodeJson: EncodeJson[ConsumerVersionSelector] =
     EncodeJson[ConsumerVersionSelector] { vs =>
       Json.obj(
-        "tag"         -> vs.tag.asJson,
-        "fallbackTag" -> vs.fallbackTag.asJson,
-        "consumer"    -> vs.consumer.asJson,
-        "latest"      -> vs.latest.asJson
+        "tag"                -> vs.tag.asJson,
+        "fallbackTag"        -> vs.fallbackTag.asJson,
+        "consumer"           -> vs.consumer.asJson,
+        "latest"             -> vs.latest.asJson,
+        "deployedOrReleased" -> vs.deployedOrReleased.asJson,
+        "deployed"           -> vs.deployed.asJson,
+        "released"           -> vs.released.asJson,
+        "environment"        -> vs.environment.asJson
       )
     }
 

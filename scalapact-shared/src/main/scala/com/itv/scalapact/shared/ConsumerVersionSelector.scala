@@ -18,11 +18,23 @@ final case class ConsumerVersionSelector(
     tag: String,
     fallbackTag: Option[String],
     consumer: Option[String],
-    latest: Option[Boolean]
-) //TODO check whether this can be non-optional
+    latest: Option[Boolean],
+    deployedOrReleased: Option[Boolean],
+    deployed: Option[Boolean],
+    released: Option[Boolean],
+    environment: Option[String]
+) {
+  def withFallbackTag(tag: String): ConsumerVersionSelector          = copy(fallbackTag = Some(tag))
+  def withConsumer(consumer: String): ConsumerVersionSelector        = copy(consumer = Some(consumer))
+  def withLatest(latest: Boolean): ConsumerVersionSelector           = copy(latest = if (latest) Some(latest) else None)
+  def withDeployedOrReleased(dOrR: Boolean): ConsumerVersionSelector = copy(deployedOrReleased = Some(dOrR))
+  def withDeployed(deployed: Boolean): ConsumerVersionSelector       = copy(deployed = Some(deployed))
+  def withReleased(released: Boolean): ConsumerVersionSelector       = copy(released = Some(released))
+  def withEnvironment(env: String): ConsumerVersionSelector          = copy(environment = Some(env))
+}
 
 object ConsumerVersionSelector {
-  def apply(tag: String): ConsumerVersionSelector = ConsumerVersionSelector(tag, None, None, None)
+  def apply(tag: String): ConsumerVersionSelector = ConsumerVersionSelector(tag, latest = false)
   def apply(tag: String, latest: Boolean): ConsumerVersionSelector =
-    ConsumerVersionSelector(tag, None, None, if (latest) Some(latest) else None)
+    ConsumerVersionSelector(tag, None, None, if (latest) Some(latest) else None, None, None, None, None)
 }
