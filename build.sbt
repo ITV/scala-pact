@@ -11,11 +11,11 @@ lazy val commonSettings = Seq(
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.2.9" % "test"
   ),
-  parallelExecution in Test := false,
+  Test / parallelExecution := false,
 //  javaOptions in Test ++= Seq(
 //    "-XX:+UnlockCommercialFeatures", "-XX:+FlightRecorder"
 //  ),
-  test in assembly := {}
+  assembly / test := {}
 )
 
 lazy val scala212OnlySettings = Seq(
@@ -27,7 +27,7 @@ lazy val scala3Settings = Seq(
 )
 
 lazy val mockSettings = Seq(
-  libraryDependencies += "org.scalamock" %% "scalamock" % "4.0.0" % Test
+  libraryDependencies += "org.scalamock" %% "scalamock" % "5.1.0" % Test
 )
 
 // Everything blows up if the plugin uses scala-xml 2.x
@@ -48,7 +48,7 @@ lazy val publishSettings = Seq(
   },
   publishTo := sonatypePublishToBundle.value,
   publishMavenStyle := true,
-  publishArtifact in Test := false,
+  Test / publishArtifact := false,
   pomIncludeRepository := { _ =>
     false
   },
@@ -154,7 +154,7 @@ lazy val testShared =
     .settings(scala3Settings: _*)
     .settings(
       name := "scalapact-test-shared",
-      skip in publish := true
+      publish / skip := true
     )
     .dependsOn(shared)
 
@@ -245,7 +245,7 @@ lazy val framework =
     .settings(publishSettings: _*)
     .settings(
       name := "scalapact-scalatest",
-      mappings in (Compile, packageBin) ~= {
+      Compile / packageBin / mappings ~= {
         _.filterNot { case (_, fileName) => fileName == "logback.xml" || fileName == "log4j.properties" }
       }
     )
@@ -258,7 +258,7 @@ lazy val frameworkWithDeps =
     .settings(publishSettings: _*)
     .settings(
       name := "scalapact-scalatest-suite",
-      mappings in (Compile, packageBin) ~= {
+      Compile / packageBin / mappings ~= {
         _.filterNot { case (_, fileName) => fileName == "logback.xml" || fileName == "log4j.properties" }
       }
     )
@@ -272,11 +272,11 @@ lazy val standalone =
     .settings(
       name := "scalapact-standalone-stubber",
       publish := {},
-      assemblyJarName in assembly := "pactstubber.jar",
+      assembly / assemblyJarName := "pactstubber.jar",
       libraryDependencies ++= Seq(
         "ch.qos.logback" % "logback-classic" % "1.2.6"
       ),
-      skip in publish := true
+      publish / skip := true
     )
     .dependsOn(core)
     .dependsOn(circe13)
@@ -287,7 +287,7 @@ lazy val pactSpec =
     .settings(commonSettings: _*)
     .settings(
       name := "pact-spec-tests",
-      skip in publish := true
+      publish / skip := true
     )
     .settings(scala212OnlySettings)
     .dependsOn(core)
@@ -303,9 +303,9 @@ lazy val testsWithDeps =
         "org.json4s"            %% "json4s-native" % "4.0.2"  % "test",
         "com.github.tomakehurst" % "wiremock"      % "2.27.2" % "test",
         "fr.hmil"               %% "roshttp"       % "2.1.0"  % "test",
-        "io.argonaut"           %% "argonaut"      % "6.3.6"
+        "io.argonaut"           %% "argonaut"      % "6.3.7"
       ),
-      skip in publish := true
+      publish / skip := true
     )
     .settings(scala212OnlySettings)
     .dependsOn(framework)
@@ -322,8 +322,8 @@ lazy val docs =
       paradoxTheme := Some(builtinParadoxTheme("generic")),
       name := "scalapact-docs",
       git.remoteRepo := "git@github.com:ITV/scala-pact.git",
-      sourceDirectory in Paradox := sourceDirectory.value / "main" / "paradox",
-      skip in publish := true
+      Paradox / sourceDirectory := sourceDirectory.value / "main" / "paradox",
+      publish / skip := true
     )
     .settings(scala212OnlySettings)
 
@@ -331,7 +331,7 @@ lazy val scalaPactProject =
   (project in file("."))
     .settings(commonSettings: _*)
     .settings(
-      skip in publish := true,
+      publish / skip := true,
       crossScalaVersions := Nil
     )
     .aggregate(shared, core, pluginShared, plugin, pluginNoDeps, framework, testShared)

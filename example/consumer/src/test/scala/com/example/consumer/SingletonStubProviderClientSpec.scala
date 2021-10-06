@@ -4,10 +4,12 @@ import com.itv.scalapact.{ScalaPactMockConfig, ScalaPactMockServer}
 import com.itv.scalapact.model.ScalaPactDescription
 import org.json4s.DefaultFormats
 import org.json4s.native.Serialization._
-import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
 /** Stands up the stub service with all stubs prior to running tests and shuts it down afterwards. */
-class SingletonStubProviderClientSpec extends FunSpec with Matchers with BeforeAndAfterAll {
+class SingletonStubProviderClientSpec extends AnyFunSpec with Matchers with BeforeAndAfterAll {
 
   // The import contains two things:
   // 1. The consumer test DSL/Builder

@@ -2,10 +2,11 @@ package com.example.consumer
 
 import org.json4s.DefaultFormats
 import org.json4s.native.Serialization._
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
 /** Stands up a stub service per test case. */
-class StubPerTestProviderClientSpec extends FunSpec with Matchers {
+class StubPerTestProviderClientSpec extends AnyFunSpec with Matchers {
 
   // The import contains two things:
   // 1. The consumer test DSL/Builder

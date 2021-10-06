@@ -6,7 +6,7 @@ name := "consumer"
 
 organization := "com.example"
 
-scalaVersion := "2.13.3"
+scalaVersion := "2.13.6"
 
 enablePlugins(ScalaPactPlugin)
 
@@ -21,9 +21,9 @@ libraryDependencies ++= {
     "com.itv"       %% "scalapact-http4s-0-23" % pactVersion % "test",
     "com.itv"       %% "scalapact-scalatest"   % pactVersion % "test",
     "org.scalaj"    %% "scalaj-http"           % "2.4.2",
-    "org.slf4j"      % "slf4j-simple"          % "1.6.4",
-    "org.json4s"    %% "json4s-native"         % "3.6.9",
-    "org.scalatest" %% "scalatest"             % "3.0.8"     % "test"
+    "org.slf4j"      % "slf4j-simple"          % "1.7.32",
+    "org.json4s"    %% "json4s-native"         % "4.0.2",
+    "org.scalatest" %% "scalatest"             % "3.2.9"     % "test"
   )
 }
 
