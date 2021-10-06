@@ -53,7 +53,7 @@ enablePlugins(ScalaPactPlugin)
         
 libraryDependencies ++= Seq(
   "com.itv"       %% "scalapact-scalatest-suite"   % "4.2.0" % "test",
-  "org.scalatest" %% "scalatest"                   % "3.0.5"  % "test"
+  "org.scalatest" %% "scalatest"                   % "3.2.9"  % "test"
 )
 ```
 
@@ -78,7 +78,7 @@ libraryDependencies ++= Seq(
   "com.itv"       %% "scalapact-circe-0-13"   % "4.2.0" % "test",
   "com.itv"       %% "scalapact-http4s-0-21"  % "4.2.0" % "test",
   "com.itv"       %% "scalapact-scalatest"    % "4.2.0" % "test",
-  "org.scalatest" %% "scalatest"              % "3.0.5" % "test"
+  "org.scalatest" %% "scalatest"              % "3.2.9" % "test"
 )
 ```
 

@@ -109,9 +109,9 @@ lazy val http4s021 =
     .settings(
       name := "scalapact-http4s-0-21",
       libraryDependencies ++= Seq(
-        "org.http4s"            %% "http4s-blaze-server" % "0.21.26" exclude ("org.scala-lang.modules", "scala-xml"),
-        "org.http4s"            %% "http4s-blaze-client" % "0.21.26" exclude ("org.scala-lang.modules", "scala-xml"),
-        "org.http4s"            %% "http4s-dsl"          % "0.21.26",
+        "org.http4s"            %% "http4s-blaze-server" % "0.21.29" exclude ("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"            %% "http4s-blaze-client" % "0.21.29" exclude ("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"            %% "http4s-dsl"          % "0.21.29",
         "com.github.tomakehurst" % "wiremock"            % "2.27.2" % "test"
       )
     )
@@ -124,9 +124,9 @@ lazy val http4s022 =
     .settings(
       name := "scalapact-http4s-0-22",
       libraryDependencies ++= Seq(
-        "org.http4s"            %% "http4s-blaze-server" % "0.22.4" exclude ("org.scala-lang.modules", "scala-xml"),
-        "org.http4s"            %% "http4s-blaze-client" % "0.22.4" exclude ("org.scala-lang.modules", "scala-xml"),
-        "org.http4s"            %% "http4s-dsl"          % "0.22.4",
+        "org.http4s"            %% "http4s-blaze-server" % "0.22.5" exclude ("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"            %% "http4s-blaze-client" % "0.22.5" exclude ("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"            %% "http4s-dsl"          % "0.22.5",
         "com.github.tomakehurst" % "wiremock"            % "2.27.2" % "test"
       )
     )
@@ -140,9 +140,9 @@ lazy val http4s023 =
     .settings(
       name := "scalapact-http4s-0-23",
       libraryDependencies ++= Seq(
-        "org.http4s"            %% "http4s-blaze-server" % "0.23.1" exclude ("org.scala-lang.modules", "scala-xml"),
-        "org.http4s"            %% "http4s-blaze-client" % "0.23.1" exclude ("org.scala-lang.modules", "scala-xml"),
-        "org.http4s"            %% "http4s-dsl"          % "0.23.1",
+        "org.http4s"            %% "http4s-blaze-server" % "0.23.4" exclude ("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"            %% "http4s-blaze-client" % "0.23.4" exclude ("org.scala-lang.modules", "scala-xml"),
+        "org.http4s"            %% "http4s-dsl"          % "0.23.4",
         "com.github.tomakehurst" % "wiremock"            % "2.27.2" % "test"
       )
     )
@@ -274,7 +274,7 @@ lazy val standalone =
       publish := {},
       assemblyJarName in assembly := "pactstubber.jar",
       libraryDependencies ++= Seq(
-        "ch.qos.logback" % "logback-classic" % "1.2.5"
+        "ch.qos.logback" % "logback-classic" % "1.2.6"
       ),
       skip in publish := true
     )
