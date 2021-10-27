@@ -2,7 +2,7 @@ package com.itv.scalapact.circe14
 
 import com.itv.scalapact.shared.Notice._
 import com.itv.scalapact.shared._
-import io.circe.{Codec, Decoder, DecodingFailure, Encoder, Json, parser}
+import io.circe.{ACursor, Codec, Decoder, DecodingFailure, Encoder, HCursor, Json, parser}
 import io.circe.generic.semiauto.{deriveCodec, deriveDecoder, deriveEncoder}
 import io.circe.syntax._
 
@@ -82,19 +82,19 @@ object PactImplicits {
 
   implicit val pactMetaDataDecoder: Codec[PactMetaData] = deriveCodec
 
+  private def sanitizeLinks(cursor: HCursor): ACursor = {
+    val links: ACursor = cursor.downField("_links").downField("curies").delete
+    if (links.keys.exists(_.toList.contains("pb:consumer-versions"))) links.downField("pb:consumer-versions").delete
+    else links
+  }
+
   implicit val scalaPactDecoder: Decoder[Pact] = Decoder.instance { cur =>
     for {
       provider     <- cur.get[PactActor]("provider")
       consumer     <- cur.get[PactActor]("consumer")
       interactions <- cur.get[List[Interaction]]("interactions")
-      _links <- cur
-        .downField("_links")
-        .downField("curies")
-        .delete
-        .downField("pb:consumer-versions")
-        .delete
-        .as[Option[Links]]
-      metadata <- cur.get[Option[PactMetaData]]("metadata")
+      _links       <- sanitizeLinks(cur).as[Option[Links]]
+      metadata     <- cur.get[Option[PactMetaData]]("metadata")
     } yield Pact(provider, consumer, interactions, _links, metadata)
   }
 
@@ -116,14 +116,7 @@ object PactImplicits {
   }
 
   implicit val halIndexDecoder: Decoder[HALIndex] = Decoder.instance { cur =>
-    cur
-      .downField("_links")
-      .downField("curies")
-      .delete
-      .downField("pb:consumer-versions")
-      .delete
-      .as[Links]
-      .map(HALIndex.apply)
+    sanitizeLinks(cur).as[Links].map(HALIndex.apply)
   }
 
   implicit val embeddedPactForVerificationDecoder: Decoder[PactForVerification] = deriveDecoder
