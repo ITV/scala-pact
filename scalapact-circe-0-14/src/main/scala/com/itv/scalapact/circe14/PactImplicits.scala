@@ -78,7 +78,7 @@ object PactImplicits {
 
   implicit val linkDecoder: Decoder[Link] = {
     implicit val linkValues: Decoder[LinkValues] = deriveDecoder[LinkValues]
-    val linkList: Decoder[LinkList]              = Decoder.decodeList[LinkValues].map(LinkList)
+    val linkList: Decoder[LinkList]              = Decoder.decodeList[LinkValues].map(LinkList.apply)
     linkValues.widen[Link].or(linkList.widen[Link])
   }
 
