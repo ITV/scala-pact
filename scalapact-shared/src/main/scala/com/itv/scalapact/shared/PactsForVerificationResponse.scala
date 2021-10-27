@@ -37,7 +37,10 @@ final case class PactsForVerificationResponse(_embedded: EmbeddedPactsForVerific
 final case class EmbeddedPactsForVerification(pacts: List[PactForVerification]) extends AnyVal
 
 final case class PactForVerification(verificationProperties: VerificationProperties, _links: Links) {
-  def href: Option[String] = _links.get("self").map(_.href)
+  def href: Option[String] = _links.get("self").flatMap {
+    case LinkValues(_, _, href, _) => Some(href)
+    case _: LinkList               => None
+  }
 }
 
 final case class VerificationProperties(pending: Boolean, notices: List[Notice])

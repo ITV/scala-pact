@@ -1,15 +1,14 @@
 package com.itv.scalapactcore.common
 
-import java.net.URLEncoder
-
-import com.itv.scalapact.shared.utils.ColourOutput._
 import com.itv.scalapact.shared._
 import com.itv.scalapact.shared.http._
 import com.itv.scalapact.shared.json.{IPactReader, IPactWriter}
+import com.itv.scalapact.shared.utils.ColourOutput._
 import com.itv.scalapact.shared.utils.{Helpers, PactLogger}
 import com.itv.scalapactcore.common.PactBrokerHelpers._
 import com.itv.scalapactcore.publisher.{PublishFailed, PublishResult, PublishSuccess}
 
+import java.net.URLEncoder
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.util.Left
 
@@ -105,7 +104,11 @@ class PactBrokerClient(implicit
       val templateUrl = brokerClient.doRequest(request) match {
         case Right(resp) if resp.is2xx =>
           resp.body.map(pactReader.jsonStringToHALIndex).flatMap {
-            case Right(index) => index._links.get("pb:provider-pacts-for-verification").map(_.href)
+            case Right(index) =>
+              index._links.get("pb:provider-pacts-for-verification").flatMap {
+                case LinkValues(_, _, href, _) => Some(href)
+                case _: LinkList               => None
+              }
             case Left(_) =>
               PactLogger.error(s"HAL index missing from Pact Broker response".red)
               throw new Exception("HAL index missing from Pact Broker response")
@@ -210,7 +213,10 @@ class PactBrokerClient(implicit
     pactVerifyResults.foreach { result =>
       val publishedVerificationTags = result.pact._links
         .flatMap(_.get("pb:provider"))
-        .map(_.href)
+        .flatMap {
+          case LinkValues(_, _, href, _) => Some(href)
+          case _: LinkList               => None
+        }
         .map { providerUrl =>
           publishVerificationResultTags(
             httpClient,
@@ -226,7 +232,10 @@ class PactBrokerClient(implicit
         }
 
       if (publishedVerificationTags) {
-        result.pact._links.flatMap(_.get("pb:publish-verification-results")).map(_.href) match {
+        result.pact._links.flatMap(_.get("pb:publish-verification-results")).flatMap {
+          case LinkValues(_, _, href, _) => Some(href)
+          case _: LinkList               => None
+        } match {
           case Some(link) =>
             val success = !result.results.exists(_.result.isLeft)
             val request = SimpleRequest(

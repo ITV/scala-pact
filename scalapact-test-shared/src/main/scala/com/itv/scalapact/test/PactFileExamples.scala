@@ -190,7 +190,7 @@ object PactFileExamples {
     )
   )
 
-  val _links: Map[String, LinkValues] = Map(
+  val _links: Map[String, Link] = Map(
     "self" -> LinkValues(
       title = Option("Pact"),
       name = Option("Pact between consumer (v1.0.0) and provider"),
@@ -214,6 +214,26 @@ object PactFileExamples {
       name = None,
       href = "http://localhost/pacts/provider/provider-service/consumer/consumer-service/latest/{tag}",
       templated = Option(true)
+    ),
+    "pb:consumer-versions" -> LinkList(
+      List(
+        LinkValues(
+          title = Option("Consumer version"),
+          name = Option("1.2.3"),
+          href = "http://localhost/pacticipants/consumer/versions/1.2.3",
+          templated = None
+        )
+      )
+    ),
+    "curies" -> LinkList(
+      List(
+        LinkValues(
+          title = None,
+          name = Option("pb"),
+          href = "http://localhost/doc/{rel}",
+          templated = Option(true)
+        )
+      )
     )
   )
 
@@ -504,6 +524,13 @@ object PactFileExamples {
                                  |      "href": "http://localhost/pacts/provider/provider-service/consumer/consumer-service/latest/{tag}",
                                  |      "templated": true
                                  |    },
+                                 |    "pb:consumer-versions": [
+                                 |      {
+                                 |        "title": "Consumer version",
+                                 |        "name": "1.2.3",
+                                 |        "href": "http://localhost/pacticipants/consumer/versions/1.2.3"
+                                 |      }
+                                 |    ],
                                  |    "curies": [
                                  |      {
                                  |        "name": "pb",
