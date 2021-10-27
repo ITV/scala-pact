@@ -86,8 +86,14 @@ object PactImplicits {
       provider     <- cur.get[PactActor]("provider")
       consumer     <- cur.get[PactActor]("consumer")
       interactions <- cur.get[List[Interaction]]("interactions")
-      _links       <- cur.downField("_links").downField("curies").delete.downField("pb:consumer-versions").delete.as[Option[Links]]
-      metadata     <- cur.get[Option[PactMetaData]]("metadata")
+      _links <- cur
+        .downField("_links")
+        .downField("curies")
+        .delete
+        .downField("pb:consumer-versions")
+        .delete
+        .as[Option[Links]]
+      metadata <- cur.get[Option[PactMetaData]]("metadata")
     } yield Pact(provider, consumer, interactions, _links, metadata)
   }
 
