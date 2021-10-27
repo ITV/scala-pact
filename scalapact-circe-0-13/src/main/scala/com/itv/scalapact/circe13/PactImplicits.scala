@@ -2,9 +2,10 @@ package com.itv.scalapact.circe13
 
 import com.itv.scalapact.shared.Notice._
 import com.itv.scalapact.shared._
-import io.circe.{ACursor, Codec, Decoder, DecodingFailure, Encoder, HCursor, Json, parser}
 import io.circe.generic.semiauto.{deriveCodec, deriveDecoder, deriveEncoder}
 import io.circe.syntax._
+import io.circe._
+import cats.syntax.functor._
 
 import scala.util.{Failure, Success, Try}
 
@@ -75,24 +76,31 @@ object PactImplicits {
 
   implicit val interactionEncoder: Encoder[Interaction] = deriveEncoder
 
-  implicit val linkValueDecoder: Codec[LinkValues] = deriveCodec
+  implicit val linkDecoder: Decoder[Link] = {
+    implicit val linkValues: Decoder[LinkValues] = deriveDecoder[LinkValues]
+    val linkList: Decoder[LinkList]              = Decoder.decodeList[LinkValues].map(LinkList)
+    linkValues.widen[Link].or(linkList.widen[Link])
+  }
+
+  implicit val linkEncoder: Encoder[Link] = {
+    implicit val linkValues: Encoder[LinkValues] = deriveEncoder[LinkValues]
+    val linkList: Encoder[LinkList]              = Encoder.encodeList[LinkValues].contramap(_.links)
+    Encoder.instance {
+      case l: LinkValues => linkValues(l)
+      case l: LinkList   => linkList(l)
+    }
+  }
 
   implicit val versionMetaDataDecoder: Codec[VersionMetaData] = deriveCodec
 
   implicit val pactMetaDataDecoder: Codec[PactMetaData] = deriveCodec
-
-  private def sanitizeLinks(cursor: HCursor): ACursor = {
-    val links: ACursor = cursor.downField("_links").downField("curies").delete
-    if (links.keys.exists(_.toList.contains("pb:consumer-versions"))) links.downField("pb:consumer-versions").delete
-    else links
-  }
 
   implicit val scalaPactDecoder: Decoder[Pact] = Decoder.instance { cur =>
     for {
       provider     <- cur.get[PactActor]("provider")
       consumer     <- cur.get[PactActor]("consumer")
       interactions <- cur.get[List[Interaction]]("interactions")
-      _links       <- sanitizeLinks(cur).as[Option[Links]]
+      _links       <- cur.downField("_links").as[Option[Links]]
       metadata     <- cur.get[Option[PactMetaData]]("metadata")
     } yield Pact(provider, consumer, interactions, _links, metadata)
   }
@@ -110,12 +118,12 @@ object PactImplicits {
   implicit val jvmPactEncoder: Encoder[JvmPact] = Encoder.instance { jvmPact =>
     io.circe.parser.parse(jvmPact.rawContents) match {
       case Right(value) => value
-      case Left(error)  => throw new Exception(s"Generated pact is not valid json: ${error}")
+      case Left(error)  => throw new Exception(s"Generated pact is not valid json: $error")
     }
   }
 
   implicit val halIndexDecoder: Decoder[HALIndex] = Decoder.instance { cur =>
-    sanitizeLinks(cur).as[Links].map(HALIndex)
+    cur.downField("_links").as[Links].map(HALIndex.apply)
   }
 
   implicit val embeddedPactsForVerificationDecoder: Decoder[EmbeddedPactsForVerification] = deriveDecoder

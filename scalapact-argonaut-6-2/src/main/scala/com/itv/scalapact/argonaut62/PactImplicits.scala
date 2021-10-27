@@ -1,12 +1,11 @@
 package com.itv.scalapact.argonaut62
 
-import java.time.format.DateTimeFormatter
-
 import argonaut.Argonaut._
-import argonaut.{Parse, _}
+import argonaut._
 import com.itv.scalapact.shared.Notice._
 import com.itv.scalapact.shared._
 
+import java.time.format.DateTimeFormatter
 import scala.util.{Failure, Success, Try}
 
 object PactImplicits {
@@ -18,12 +17,40 @@ object PactImplicits {
     "templated"
   )
 
+  implicit lazy val linkDecodeJson: DecodeJson[Link] = {
+    implicit val linkValues: DecodeJson[LinkValues] = jdecode4L(LinkValues.apply)(
+      "title",
+      "name",
+      "href",
+      "templated"
+    )
+    val linkList: DecodeJson[LinkList] = DecodeJson.ListDecodeJson[LinkValues].map(LinkList)
+    linkValues.widen[Link]() ||| linkList.widen[Link]()
+  }
+
+  implicit lazy val linkEncodeJson: EncodeJson[Link] = {
+    implicit val linkValues: EncodeJson[LinkValues] = jencode4L { (l: LinkValues) =>
+      (l.title, l.name, l.href, l.templated)
+    }(
+      "title",
+      "name",
+      "href",
+      "templated"
+    )
+    val linkList: EncodeJson[LinkList] = EncodeJson.ListEncodeJson[LinkValues].contramap(_.links)
+    EncodeJson {
+      case l: LinkValues =>
+        linkValues.encode(l)
+      case l: LinkList => linkList.encode(l)
+    }
+  }
+
   implicit lazy val scalaPactDecodeJson: DecodeJson[Pact] = DecodeJson[Pact] { cur =>
     for {
       provider     <- cur.get[PactActor]("provider")
       consumer     <- cur.get[PactActor]("consumer")
       interactions <- cur.get[List[Interaction]]("interactions")
-      _links       <- cur.downField("_links").downField("curies").delete.as[Option[Links]]
+      _links       <- cur.downField("_links").as[Option[Links]]
       metadata     <- cur.get[Option[PactMetaData]]("metadata")
     } yield Pact(provider, consumer, interactions, _links, metadata)
   }
@@ -49,7 +76,7 @@ object PactImplicits {
   implicit val jvmPactEncoder: EncodeJson[JvmPact] = EncodeJson { jvmPact =>
     Parse.parse(jvmPact.rawContents) match {
       case Right(value) => value
-      case Left(error)  => throw new Exception(s"Generated pact is not valid json: ${error}")
+      case Left(error)  => throw new Exception(s"Generated pact is not valid json: $error")
     }
   }
 
@@ -147,7 +174,7 @@ object PactImplicits {
   }
 
   implicit lazy val halIndexDecoder: DecodeJson[HALIndex] =
-    DecodeJson[HALIndex](_.downField("_links").downField("curies").delete.as[Links].map(HALIndex))
+    DecodeJson[HALIndex](_.downField("_links").as[Links].map(HALIndex))
 
   implicit val pendingStateNoticeDecoder: DecodeJson[Notice] = DecodeJson[Notice] { cur =>
     lazy val pattern = "after_verification:success_(true|false)_published_(true|false)".r

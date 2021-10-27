@@ -1,5 +1,5 @@
 package com.itv.scalapact
 
 package object shared {
-  type Links = Map[String, LinkValues]
+  type Links = Map[String, Link]
 }
