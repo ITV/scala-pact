@@ -33,12 +33,13 @@ private[scalapact] object ScalaPactMock {
     val interactionManager: InteractionManager = new InteractionManager
 
     val protocol   = pactDescription.serverSslContextName.fold("http")(_ => "https")
-    val host       = "localhost"
+    val host       = pactDescription.options.host
+    val serverPort = pactDescription.options.port
     val outputPath = pactDescription.options.outputPath
     val scalaPactSettings = ScalaPactSettings(
       protocol = Option(protocol),
       host = Option(host),
-      port = Option(0), // `0` means "use any available port".
+      port = Option(serverPort),
       localPactFilePath = None,
       strictMode = Option(strict),
       clientTimeout = None,
