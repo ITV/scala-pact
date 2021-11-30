@@ -8,11 +8,11 @@ If you are just starting out on your pact journey in scala, we recommend checkin
 
 ## Latest version is 4.4.0
 
-Scala-Pact currently only supports [v2 of the pact specification](https://github.com/pact-foundation/pact-specification/tree/version-2). Support for v3 is a future goal of the project. 
+Scala-Pact currently only supports [v2 of the pact specification](https://github.com/pact-foundation/pact-specification/tree/version-2). To use pacts with v3+ of the pact specification, use `pact4s` instead. This project will not support versions beyond v2. 
 
 ### Scala-Pact >= 3.0.x 
 
-Before this version, the project versioning did not follow semantic versioning. From this point onwards, the version format will be `major.minor.patch`, and it should be noted that the `3` in the version number does *not* correspond to the version supporting v3 of the pact spec (for the time-being, at least).
+Before this version, the project versioning did not follow semantic versioning. From this point onwards, the version format will be `major.minor.patch`, and it should be noted that the `3` in the version number does *not* correspond to the version supporting v3 of the pact spec.
 
 Scala-Pact now has two branches based on SBT requirements. 
 
