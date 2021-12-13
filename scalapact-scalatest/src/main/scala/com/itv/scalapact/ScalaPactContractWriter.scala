@@ -2,11 +2,12 @@ package com.itv.scalapact
 
 import java.io.{File, PrintWriter}
 import java.nio.charset.StandardCharsets
-
 import com.itv.scalapact.model.ScalaPactMatchingRule._
 import com.itv.scalapact.model.{ScalaPactDescriptionFinal, ScalaPactInteractionFinal, ScalaPactMatchingRule}
 import com.itv.scalapact.shared._
 import com.itv.scalapact.shared.json.IPactWriter
+
+import java.nio.file.Paths
 
 private[scalapact] object ScalaPactContractWriter {
   def writePactContracts(outputPath: String)(implicit pactWriter: IPactWriter): ScalaPactDescriptionFinal => Unit =
@@ -29,10 +30,13 @@ private[scalapact] object ScalaPactContractWriter {
         .map("%02x".format(_))
         .mkString
 
-      val relativePath = outputPath + "/" + simplifyName(pactDescription.consumer) + "_" + simplifyName(
-        pactDescription.provider
-      ) + "_" + sha1 + "_tmp.json"
-      val file = new File(relativePath)
+      val path = Paths.get(
+        // #212: ensure a consistent path is used between projects and sub-projects
+        dirFile.getAbsolutePath,
+        simplifyName(pactDescription.consumer) + "_" +
+          simplifyName(pactDescription.provider) + "_" + sha1 + "_tmp.json"
+      )
+      val file = new File(path.toUri)
 
       if (file.exists()) {
         file.delete()
@@ -40,7 +44,7 @@ private[scalapact] object ScalaPactContractWriter {
 
       file.createNewFile()
 
-      new PrintWriter(relativePath) {
+      new PrintWriter(file) {
         write(producePactJson(pactDescription))
         close()
       }
