@@ -4,7 +4,7 @@ organization := "com.example"
 
 name := "provider_pacts-for-verification"
 
-scalaVersion := "2.13.6"
+scalaVersion := "2.13.8"
 
 enablePlugins(ScalaPactPlugin)
 

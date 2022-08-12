@@ -20,7 +20,7 @@ addSbtPlugin("com.dwijnand" % "sbt-travisci" % "1.2.0")
 
 addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.13")
 
-addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.4.3")
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.4.6")
 
-addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat" % "0.1.20")
-addSbtPlugin("ch.epfl.scala"             % "sbt-scalafix" % "0.9.30")
+addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat" % "0.3.1")
+addSbtPlugin("ch.epfl.scala"             % "sbt-scalafix" % "0.10.1")

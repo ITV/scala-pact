@@ -1,6 +1,6 @@
-lazy val scalaVersion212: String = "2.12.14"
-lazy val scalaVersion213: String = "2.13.6"
-lazy val scalaVersion3: String   = "3.0.1"
+lazy val scalaVersion212: String = "2.12.16"
+lazy val scalaVersion213: String = "2.13.8"
+lazy val scalaVersion3: String   = "3.1.3"
 lazy val supportedScalaVersions  = List(scalaVersion212, scalaVersion213)
 
 ThisBuild / scalaVersion := scalaVersion212

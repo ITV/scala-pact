@@ -8,7 +8,7 @@ PACT_FILE="consumer/target/pacts/$PACT_NAME"
 if [ ! -f $PACT_FILE ]
   then
     echo "Expected pact file did not exist: $PACT_FILE"
-    echo "Have you run 'sbt pact-test' in the consumer project?"
+    echo "Have you run 'sbt pactTest' in the consumer project?"
     exit 1
 fi
 
