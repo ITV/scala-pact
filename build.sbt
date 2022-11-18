@@ -30,13 +30,7 @@ lazy val mockSettings = Seq(
   libraryDependencies += "org.scalamock" %% "scalamock" % "5.1.0" % Test
 )
 
-// Everything blows up if the plugin uses scala-xml 2.x
-val scalaXmlVersion =
-  Def.setting(
-    if (scalaVersion.value.startsWith("2.12")) "1.3.0"
-    else
-      "2.0.1"
-  )
+val scalaXmlVersion = "2.1.0"
 
 lazy val publishSettings = Seq(
   publishTo := {
@@ -89,7 +83,7 @@ lazy val shared =
     .settings(publishSettings: _*)
     .settings(
       name := "scalapact-shared",
-      libraryDependencies ++= Seq("org.scala-lang.modules" %% "scala-xml" % scalaXmlVersion.value)
+      libraryDependencies ++= Seq("org.scala-lang.modules" %% "scala-xml" % scalaXmlVersion)
     )
 
 lazy val core =
