@@ -30,7 +30,6 @@ lazy val mockSettings = Seq(
   libraryDependencies += "org.scalamock" %% "scalamock" % "5.1.0" % Test
 )
 
-// Everything blows up if the plugin uses scala-xml 2.x
 val scalaXmlVersion = "2.1.0"
 
 lazy val publishSettings = Seq(
