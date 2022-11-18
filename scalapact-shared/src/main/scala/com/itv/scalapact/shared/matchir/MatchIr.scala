@@ -8,10 +8,15 @@ import com.itv.scalapact.shared.utils.Helpers.{
   safeStringToDouble
 }
 
+import javax.xml.parsers.SAXParserFactory
 import scala.util.Try
-import scala.xml.{Elem, Node, XML}
+import scala.xml.factory.XMLLoader
+import scala.xml.{Elem, Node}
 
 object MatchIr {
+
+  private val XML: XMLLoader[Elem] = createXMLParser()
+
   def fromXmlString(xmlString: String): Option[IrNode] =
     Try(XML.loadString(xmlString)).toOption.map(fromXml)
 
@@ -20,6 +25,13 @@ object MatchIr {
 
   def fromJSON(fromJson: String => Option[IrNode])(jsonString: String): Option[IrNode] =
     fromJson(jsonString)
+
+  private def createXMLParser(): XMLLoader[Elem] = {
+    val sAXParserFactory = SAXParserFactory.newInstance()
+    sAXParserFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false);
+    val saxParser = sAXParserFactory.newSAXParser()
+    xml.XML.withSAXParser(saxParser)
+  }
 
   private def convertAttributes(attributes: Map[String, String], pathToParent: IrNodePath): IrNodeAttributes =
     attributes.toList.reverse
