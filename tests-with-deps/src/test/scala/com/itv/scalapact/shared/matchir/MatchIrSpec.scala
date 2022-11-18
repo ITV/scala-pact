@@ -97,6 +97,28 @@ class MatchIrSpec extends AnyFunSpec with Matchers {
 
     }
 
+    it("should be able to convert xml with a document type definition") {
+      val xml: String =
+        """<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE animals [<!ELEMENT animals (alligator)*><!ELEMENT alligator (#PCDATA)><!ATTLIST alligator name CDATA #REQUIRED>]><animals><alligator name="Mary"/></animals>""".stripMargin
+
+      val ir: IrNode =
+        IrNode(
+          "animals",
+          IrNode("alligator")
+            .withAttributes(
+              IrNodeAttributes(
+                Map(
+                  "name" -> IrNodeAttribute(IrStringNode("Mary"), IrNodePathEmpty <~ "animals" <~ "alligator" <@ "name")
+                )
+              )
+            )
+            .withPath(IrNodePathEmpty <~ "animals" <~ "alligator")
+            .markAsXml
+        ).withPath(IrNodePathEmpty <~ "animals").markAsXml
+
+      check(MatchIr.fromXmlString(xml).get =<>= ir)
+    }
+
     it("should be able to convert one node with content") {
 
       val xml: String = <fish>haddock</fish>.toString()
