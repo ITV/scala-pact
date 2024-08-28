@@ -1,0 +1,31 @@
+name: release
+concurrency: release
+on:
+  pull_request:
+    branches: ['**']
+  push:
+    branches: [master]
+    tags: [v*]
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 8
+          cache: sbt
+
+      - name: Lint
+        run: sbt scalafmtCheckAll scalafmtSbtCheck 
+
+      - name: Test
+        run: sbt +test
