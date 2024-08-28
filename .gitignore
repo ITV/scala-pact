@@ -54,3 +54,6 @@ tags
 
 # stub media file archive
 test-video-assets*
+
+.direnv
+.envrc
